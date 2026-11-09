@@ -1,0 +1,28 @@
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/cuSPARSE/spsv_csr/sample.cpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/check.hpp:24:107: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   24 | struct Stream {hipStream_t p;Stream(){CHECK(hipStreamCreateWithFlags(&p,hipStreamNonBlocking));}~Stream(){hipStreamDestroy(p);}};
+      |                                                                                                           ^~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/check.hpp:20:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   20 |  ~Device(){if(p)hipFree(p);}
+      |                 ^~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/cuSPARSE/spsv_csr/sample.cpp:11:14: note: in instantiation of member function 'sample::Device<int>::~Device' requested here
+   11 |  Device<int> dr(rp),di(ci);Device<float> da(av);hipsparseSpMatDescr_t a;
+      |              ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/cuSPARSE/spsv_csr/sample.cpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/check.hpp:20:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   20 |  ~Device(){if(p)hipFree(p);}
+      |                 ^~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/cuSPARSE/spsv_csr/sample.cpp:11:42: note: in instantiation of member function 'sample::Device<float>::~Device' requested here
+   11 |  Device<int> dr(rp),di(ci);Device<float> da(av);hipsparseSpMatDescr_t a;
+      |                                          ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/cuSPARSE/spsv_csr/sample.cpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/check.hpp:20:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   20 |  ~Device(){if(p)hipFree(p);}
+      |                 ^~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/cuSPARSE/spsv_csr/sample.cpp:18:158: note: in instantiation of member function 'sample::Device<unsigned char>::~Device' requested here
+   18 |  CHECK(hipsparseSpSV_bufferSize(h,HIPSPARSE_OPERATION_NON_TRANSPOSE,&alpha,a,xd,yd,HIP_R_32F,HIPSPARSE_SPSV_ALG_DEFAULT,solve,&bytes));Device<unsigned char> work(bytes);
+      |                                                                                                                                                              ^
+4 warnings generated.
+ld.lld: error: unable to find library -lhipsparse
+ld.lld: error: unable to find library -lamdhip64
+clang++: error: linker command failed with exit code 1 (use -v to see invocation)

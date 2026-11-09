@@ -1,0 +1,24 @@
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuTENSOR/contraction_jit.cu:27:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuTENSOR/utils.cuh:177:9: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  177 |         hipEventDestroy(start_);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuTENSOR/utils.cuh:178:9: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  178 |         hipEventDestroy(stop_);
+      |         ^~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuTENSOR/contraction_jit.cu:43:48: error: use of undeclared identifier 'CUTENSOR_COMPUTE_DESC_3XTF32'; did you mean 'HIPTENSOR_COMPUTE_DESC_32F'?
+   43 |     hiptensorComputeDescriptor_t descCompute = CUTENSOR_COMPUTE_DESC_3XTF32;
+      |                                                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                                HIPTENSOR_COMPUTE_DESC_32F
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/project-sdk/include/hiptensor/hiptensor_types.h:103:5: note: 'HIPTENSOR_COMPUTE_DESC_32F' declared here
+  103 |     HIPTENSOR_COMPUTE_DESC_32F = (1U << 2U),
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuTENSOR/contraction_jit.cu:213:34: error: use of undeclared identifier 'CUTENSOR_ALGO_GETT'
+  213 |     const hiptensorAlgo_t algo = CUTENSOR_ALGO_GETT;
+      |                                  ^~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuTENSOR/contraction_jit.cu:271:47: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  271 |     auto guardStream = finally( [&stream]() { hipStreamDestroy(stream); } );
+      |                                               ^~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuTENSOR/contraction_jit.cu:351:49: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  351 |     auto guardWorkJit = finally( [&workJit]() { hipFree(workJit); } );
+      |                                                 ^~~~~~~~~~~~~~~~
+4 warnings and 2 errors generated.

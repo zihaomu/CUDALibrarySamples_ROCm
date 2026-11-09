@@ -1,0 +1,83 @@
+{
+  "sample_id": "cuRAND/Host/mrg32k3a::curand_mrg32k3a_poisson_example.cpp",
+  "status": "PASSED",
+  "build_return_code": 0,
+  "cases": [
+    {
+      "case": "host-and-device-n10-run0",
+      "passed": true,
+      "return_code": 0
+    },
+    {
+      "case": "host-and-device-n10-run1",
+      "passed": true,
+      "return_code": 0
+    },
+    {
+      "case": "host-and-device-n98304-run2",
+      "passed": true,
+      "return_code": 0
+    },
+    {
+      "case": "same-seed-or-offset-repeat-host-and-device",
+      "passed": true
+    },
+    {
+      "case": "analytic-poisson-moments-host",
+      "passed": true,
+      "observed": {
+        "rng_observation": true,
+        "n": 98304,
+        "mean": 10.006927490234375,
+        "variance": 9.983543725373844,
+        "log_mean": 2.2480486698940054,
+        "log_variance": 0.12079730762805074,
+        "finite": true,
+        "positive": false,
+        "integer": true,
+        "min": 0,
+        "max": 27,
+        "hash": "13000817940717769588"
+      },
+      "parameters": {
+        "lambda": 10.0
+      }
+    },
+    {
+      "case": "analytic-poisson-moments-device",
+      "passed": true,
+      "observed": {
+        "rng_observation": true,
+        "n": 98304,
+        "mean": 10.006927490234375,
+        "variance": 9.983543725373844,
+        "log_mean": 2.2480486698940054,
+        "log_variance": 0.12079730762805074,
+        "finite": true,
+        "positive": false,
+        "integer": true,
+        "min": 0,
+        "max": 27,
+        "hash": "13000817940717769588"
+      },
+      "parameters": {
+        "lambda": 10.0
+      }
+    }
+  ],
+  "evidence": "artifacts/20261109T085047.464207Z/rng-validation/cuRAND_Host_mrg32k3a_curand_mrg32k3a_poisson_example.cpp",
+  "original_port_sha256": "a8baa9814d13d0036e5e52d888aad87b64df393652262c4d9c1f53d7af28f21a",
+  "validation_source_sha256": "0a67ce4637720c50e38ed99d28f3a0df7cdbf1057b8cbb55bcde793b6079e1aa",
+  "environment": {
+    "devices": [
+      {
+        "logical_id": 0,
+        "pci_bdf": "0000:03:00.0",
+        "physical_id": 0
+      }
+    ],
+    "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+    "rocm_release": "10.1.0"
+  },
+  "oracle": "Analytic distribution moments; same seed/offset repeat separately for host and GPU, original per-source n and n=98304. Sequences are library-specific."
+}

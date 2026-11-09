@@ -1,0 +1,80 @@
+[
+  {
+    "id": "cuFFT/3d_mgpu_c2c::3d_mgpu_c2c_example.cpp",
+    "status": "PASSED",
+    "relative_l2": 1.5957800769683672e-07,
+    "threshold": 1e-05,
+    "max_abs_error": 0.32502514123916626,
+    "semantic_elements": 16777216,
+    "oracle": "NumPy/pocketfft full 256^3 C2C transform",
+    "input_sha256": "5be74936d115608f86cda12f903a142e6c21baf46d8ba8f12993a1daef2914bf",
+    "output_sha256": "67b2c57f197db301fe68eb121d30f276da81d315054f851bd0caec317c96fbad",
+    "implementation_sha256": "efa2ba0f937f08f6db08f04c8cb01dae61d6c551f729e2c4f9878aa3a2776205",
+    "original_sha256": "b43182f7f1c95e7fa3c0dfdc0161e19b3203266760076dc83202ff440dd1d4cf",
+    "devices": [
+      {
+        "logical_id": 0,
+        "pci_bdf": "0000:23:00.0",
+        "physical_id": 1
+      },
+      {
+        "logical_id": 1,
+        "pci_bdf": "0000:e3:00.0",
+        "physical_id": 7
+      }
+    ],
+    "evidence": "migration/reports/evidence/20261109T091608.933062Z/original-rocm/cuFFT_3d_mgpu_c2c_3d_mgpu_c2c_example.cpp"
+  },
+  {
+    "id": "cuFFT/3d_mgpu_r2c_c2r::3d_mgpu_r2c_c2r_example.cpp",
+    "status": "PASSED",
+    "relative_l2": 2.399042588663825e-07,
+    "threshold": 1e-05,
+    "max_abs_error": 26.0,
+    "semantic_elements": 16777216,
+    "oracle": "Analytic R2C -> spectrum*2 -> unnormalized C2R = input*2*N, original padded layout; padding is excluded from semantic elements",
+    "input_sha256": "21a06b6f11740d5434041e646adb776841216a309317d812dc0eae7698021f0c",
+    "output_sha256": "f92a65d800436703b7400b65915785d3e861a325d87ab264c27b1c4d5775aefc",
+    "implementation_sha256": "f5000867e20eea9be5f3bef8bbf6015e7d99f64a7472bf4840386f013aa02846",
+    "original_sha256": "fadd2dd2807a11ca138ea47c1f4f798c394ac8966916f2ef395bb004e4a386f2",
+    "devices": [
+      {
+        "logical_id": 0,
+        "pci_bdf": "0000:23:00.0",
+        "physical_id": 1
+      },
+      {
+        "logical_id": 1,
+        "pci_bdf": "0000:e3:00.0",
+        "physical_id": 7
+      }
+    ],
+    "evidence": "migration/reports/evidence/20261109T091608.933062Z/original-rocm/cuFFT_3d_mgpu_r2c_c2r_3d_mgpu_r2c_c2r_example.cpp"
+  },
+  {
+    "id": "cuFFT/lto_callback_window_1d/src::r2c_c2r_legacy_callback_example.cu",
+    "status": "PASSED",
+    "relative_l2": 2.746302811829082e-07,
+    "threshold": 1e-05,
+    "max_abs_error": 0.0078125,
+    "semantic_elements": 272240,
+    "oracle": "Independent CPU rfft, frequency truncation at bin32, irfft*328 on all 830 signals",
+    "input_sha256": "9876c01e1cad40c9c23174287fcec9debe09cc0fce62748a7c1ee6e69457053b",
+    "output_sha256": "577b792017fe9b83c674e459a0490fa98079860c2aa1c72fe50ee5e64038d69c",
+    "implementation_sha256": "ccfb3e1bb99e4195d864bcfd0abc51d135c4db41ae0a96d0637382845eba99c8",
+    "original_sha256": "e29fb3de6af3ad2f91cb6edf97983985e04eafceb7668873dacd5cf6cf87a29a",
+    "devices": [
+      {
+        "logical_id": 0,
+        "pci_bdf": "0000:03:00.0",
+        "physical_id": 0
+      },
+      {
+        "logical_id": 1,
+        "pci_bdf": "0000:23:00.0",
+        "physical_id": 1
+      }
+    ],
+    "evidence": "migration/reports/evidence/20261109T090451.232153Z/original-rocm/cuFFT_lto_callback_window_1d_src_r2c_c2r_legacy_callback_example.cu"
+  }
+]

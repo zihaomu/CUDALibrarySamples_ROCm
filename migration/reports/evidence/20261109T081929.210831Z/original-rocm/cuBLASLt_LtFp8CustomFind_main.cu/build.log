@@ -1,0 +1,142 @@
+Warning: HIP version file: "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/share/hip/version" not found.  Cannot give HIP version information.
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtFp8CustomFind/main.cu:22:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common/LtMatmulCustomFind.h:26:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common/helpers.h:30:
+In file included from /opt/rocm/core-10.1/include/hip/hip_fp4.h:13:
+In file included from /opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp4.h:19:
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_ocp_host.hpp:812:22: warning: missing 'typename' prior to dependent type name '__hip_internal::conditional<in_float, OutType, InType>::type' is a C++20 extension [-Wc++20-extensions]
+  812 |   using other_type = __hip_internal::conditional<in_float, OutType, InType>::type;
+      |                      ^
+      |                      typename 
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_ocp_host.hpp:853:22: warning: missing 'typename' prior to dependent type name '__hip_internal::conditional<in_float, OutType, InType>::type' is a C++20 extension [-Wc++20-extensions]
+  853 |   using other_type = __hip_internal::conditional<in_float, OutType, InType>::type;
+      |                      ^
+      |                      typename 
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtFp8CustomFind/main.cu:22:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common/LtMatmulCustomFind.h:26:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common/helpers.h:81:22: error: use of undeclared identifier 'CUBLASLT_MATMUL_MATRIX_SCALE_PER_BATCH_SCALAR_32F'; did you mean 'HIPBLASLT_MATMUL_MATRIX_SCALE_SCALAR_32F'?
+   81 |         scaleMode == CUBLASLT_MATMUL_MATRIX_SCALE_PER_BATCH_SCALAR_32F)
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                      HIPBLASLT_MATMUL_MATRIX_SCALE_SCALAR_32F
+/opt/rocm/core-10.1/include/hipblaslt/hipblaslt.h:200:5: note: 'HIPBLASLT_MATMUL_MATRIX_SCALE_SCALAR_32F' declared here
+  200 |     HIPBLASLT_MATMUL_MATRIX_SCALE_SCALAR_32F = 0,    /**<Scaling factors are single-precision scalars applied to the whole tensors (this mode is the default for ``fp8``). */
+      |     ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtFp8CustomFind/main.cu:22:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common/LtMatmulCustomFind.h:26:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common/helpers.h:789:58: error: ambiguous conversion for functional-style cast from 'size_t' (aka 'unsigned long') to '__hip_bfloat16'
+  789 |     for (size_t i = 0; i < Chost.size(); i++) Chost[i] = __hip_bfloat16(i % 5);
+      |                                                          ^~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_bf16.h:181:24: note: candidate constructor
+  181 |   __BF16_HOST_DEVICE__ __hip_bfloat16(unsigned int val) : __x_bf16(static_cast<__bf16>(val)) {}
+      |                        ^
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_bf16.h:184:24: note: candidate constructor
+  184 |   __BF16_HOST_DEVICE__ __hip_bfloat16(int val) : __x_bf16(static_cast<__bf16>(val)) {}
+      |                        ^
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_bf16.h:187:24: note: candidate constructor
+  187 |   __BF16_HOST_DEVICE__ __hip_bfloat16(unsigned short val) : __x_bf16(static_cast<__bf16>(val)) {}
+      |                        ^
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_bf16.h:190:24: note: candidate constructor
+  190 |   __BF16_HOST_DEVICE__ __hip_bfloat16(short val) : __x_bf16(static_cast<__bf16>(val)) {}
+      |                        ^
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_bf16.h:193:24: note: candidate constructor
+  193 |   __BF16_HOST_DEVICE__ __hip_bfloat16(const double val) : __x_bf16(static_cast<__bf16>(val)) {}
+      |                        ^
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_bf16.h:196:24: note: candidate constructor
+  196 |   __BF16_HOST_DEVICE__ __hip_bfloat16(const float val) : __x_bf16(static_cast<__bf16>(val)) {}
+      |                        ^
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_bf16.h:202:24: note: candidate constructor
+  202 |   __BF16_HOST_DEVICE__ __hip_bfloat16(const __bf16 val) : __x_bf16(val) {}
+      |                        ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtFp8CustomFind/main.cu:22:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common/LtMatmulCustomFind.h:26:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common/helpers.h:797:58: error: ambiguous conversion for functional-style cast from 'size_t' (aka 'unsigned long') to '__hip_bfloat16'
+  797 |     for (size_t i = 0; i < Chost.size(); i++) Chost[i] = __hip_bfloat16(i % 5);
+      |                                                          ^~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_bf16.h:181:24: note: candidate constructor
+  181 |   __BF16_HOST_DEVICE__ __hip_bfloat16(unsigned int val) : __x_bf16(static_cast<__bf16>(val)) {}
+      |                        ^
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_bf16.h:184:24: note: candidate constructor
+  184 |   __BF16_HOST_DEVICE__ __hip_bfloat16(int val) : __x_bf16(static_cast<__bf16>(val)) {}
+      |                        ^
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_bf16.h:187:24: note: candidate constructor
+  187 |   __BF16_HOST_DEVICE__ __hip_bfloat16(unsigned short val) : __x_bf16(static_cast<__bf16>(val)) {}
+      |                        ^
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_bf16.h:190:24: note: candidate constructor
+  190 |   __BF16_HOST_DEVICE__ __hip_bfloat16(short val) : __x_bf16(static_cast<__bf16>(val)) {}
+      |                        ^
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_bf16.h:193:24: note: candidate constructor
+  193 |   __BF16_HOST_DEVICE__ __hip_bfloat16(const double val) : __x_bf16(static_cast<__bf16>(val)) {}
+      |                        ^
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_bf16.h:196:24: note: candidate constructor
+  196 |   __BF16_HOST_DEVICE__ __hip_bfloat16(const float val) : __x_bf16(static_cast<__bf16>(val)) {}
+      |                        ^
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_bf16.h:202:24: note: candidate constructor
+  202 |   __BF16_HOST_DEVICE__ __hip_bfloat16(const __bf16 val) : __x_bf16(val) {}
+      |                        ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtFp8CustomFind/main.cu:22:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common/LtMatmulCustomFind.h:26:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common/helpers.h:801:26: error: unknown type name 'cublasLtMatmulTile_t'
+  801 | const char *tileToString(cublasLtMatmulTile_t tile);
+      |                          ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtFp8CustomFind/main.cu:22:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common/LtMatmulCustomFind.h:34:5: error: unknown type name 'hipblasMath_t'; did you mean 'hipblasStatus_t'?
+   34 |     hipblasMath_t mathMode;
+      |     ^~~~~~~~~~~~~
+      |     hipblasStatus_t
+/opt/rocm/core-10.1/include/hipblas-common/hipblas-common.h:51:3: note: 'hipblasStatus_t' declared here
+   51 | } hipblasStatus_t;
+      |   ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtFp8CustomFind/main.cu:22:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common/LtMatmulCustomFind.h:35:5: error: unknown type name 'cublasLtReductionScheme_t'
+   35 |     cublasLtReductionScheme_t reductionScheme;
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common/LtMatmulCustomFind.h:42:5: error: unknown type name 'cublasLtMatmulTile_t'
+   42 |     cublasLtMatmulTile_t tile;
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common/LtMatmulCustomFind.h:46:54: error: use of undeclared identifier 'CUBLASLT_ALGO_CONFIG_ID'
+   46 |     cublasLtMatmulAlgoConfigGetAttribute(matmulAlgo, CUBLASLT_ALGO_CONFIG_ID, &algoId, sizeof(algoId), NULL);
+      |                                                      ^~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common/LtMatmulCustomFind.h:47:54: error: use of undeclared identifier 'CUBLASLT_ALGO_CONFIG_TILE_ID'
+   47 |     cublasLtMatmulAlgoConfigGetAttribute(matmulAlgo, CUBLASLT_ALGO_CONFIG_TILE_ID, &tile, sizeof(tile), NULL);
+      |                                                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common/LtMatmulCustomFind.h:48:54: error: use of undeclared identifier 'CUBLASLT_ALGO_CONFIG_SPLITK_NUM'
+   48 |     cublasLtMatmulAlgoConfigGetAttribute(matmulAlgo, CUBLASLT_ALGO_CONFIG_SPLITK_NUM, &numSplitsK, sizeof(numSplitsK),
+      |                                                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common/LtMatmulCustomFind.h:50:54: error: use of undeclared identifier 'CUBLASLT_ALGO_CONFIG_REDUCTION_SCHEME'
+   50 |     cublasLtMatmulAlgoConfigGetAttribute(matmulAlgo, CUBLASLT_ALGO_CONFIG_REDUCTION_SCHEME, &reductionScheme,
+      |                                                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common/LtMatmulCustomFind.h:52:54: error: use of undeclared identifier 'CUBLASLT_ALGO_CONFIG_CTA_SWIZZLING'
+   52 |     cublasLtMatmulAlgoConfigGetAttribute(matmulAlgo, CUBLASLT_ALGO_CONFIG_CTA_SWIZZLING, &swizzle, sizeof(swizzle),
+      |                                                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common/LtMatmulCustomFind.h:54:54: error: use of undeclared identifier 'CUBLASLT_ALGO_CONFIG_CUSTOM_OPTION'
+   54 |     cublasLtMatmulAlgoConfigGetAttribute(matmulAlgo, CUBLASLT_ALGO_CONFIG_CUSTOM_OPTION, &customOption,
+      |                                                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common/LtMatmulCustomFind.h:56:54: error: use of undeclared identifier 'CUBLASLT_ALGO_CONFIG_STAGES_ID'
+   56 |     cublasLtMatmulAlgoConfigGetAttribute(matmulAlgo, CUBLASLT_ALGO_CONFIG_STAGES_ID, &stages, sizeof(stages), NULL);
+      |                                                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common/LtMatmulCustomFind.h:93:9: error: use of undeclared identifier 'cublasLtMatmulAlgoCheck'
+   93 |         cublasLtMatmulAlgoCheck(ltHandle, operationDesc, Adesc, Bdesc, Cdesc, Ddesc, &algo, &heurResult);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common/LtMatmulCustomFind.h:189:23: error: use of undeclared identifier 'cublasLtMatmulAlgoGetIds'
+  189 |     checkCublasStatus(cublasLtMatmulAlgoGetIds(ltHandle, computeType, scaleType, Atype, Btype, Ctype, Dtype, ALGO_IDS,
+      |                       ^~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common/LtMatmulCustomFind.h:193:21: error: no matching function for call to 'hipEventCreate'
+  193 |     checkCudaStatus(hipEventCreate(&startEvent, hipEventBlockingSync));
+      |                     ^~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hip/hip_runtime_api.h:3608:12: note: candidate function not viable: requires single argument 'event', but 2 arguments were provided
+ 3608 | hipError_t hipEventCreate(hipEvent_t* event);
+      |            ^              ~~~~~~~~~~~~~~~~~
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtFp8CustomFind/main.cu:22:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common/LtMatmulCustomFind.h:194:21: error: no matching function for call to 'hipEventCreate'
+  194 |     checkCudaStatus(hipEventCreate(&stopEvent, hipEventBlockingSync));
+      |                     ^~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hip/hip_runtime_api.h:3608:12: note: candidate function not viable: requires single argument 'event', but 2 arguments were provided
+ 3608 | hipError_t hipEventCreate(hipEvent_t* event);
+      |            ^              ~~~~~~~~~~~~~~~~~
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtFp8CustomFind/main.cu:22:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common/LtMatmulCustomFind.h:199:68: error: use of undeclared identifier 'cudaDevAttrClusterLaunch'
+  199 |     checkCudaStatus(hipDeviceGetAttribute(&clusterLaunchSupported, cudaDevAttrClusterLaunch, device));
+      |                                                                    ^~~~~~~~~~~~~~~~~~~~~~~~
+fatal error: too many errors emitted, stopping now [-ferror-limit=]
+2 warnings and 20 errors generated when compiling for gfx1201.
+failed to execute:/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib/llvm/bin/clang++  --offload-arch=gfx1201 --driver-mode=g++ --hip-link  -std=c++17 -O2 -D__HIP_PLATFORM_AMD__ --rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --rocm-device-lib-path=/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode -x hip /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtFp8CustomFind/main.cu -o "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/20261109T081929.210831Z/original-rocm/cuBLASLt_LtFp8CustomFind_main.cu/sample" -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtFp8CustomFind -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/utils -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common -I/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/include -I/opt/rocm/core-10.1/include -I/opt/rocm/core-10.1/include/hipblas -I/opt/rocm/core-10.1/include/hipblaslt -I/opt/rocm/core-10.1/include/hipsparse -I/opt/rocm/core-10.1/include/hipsolver -I/opt/rocm/core-10.1/include/hipfft -I/opt/rocm/core-10.1/include/hiprand -I/opt/rocm/core-10.1/include/hipsparselt -L/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib -Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib -Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib -lhipblaslt -lamdhip64

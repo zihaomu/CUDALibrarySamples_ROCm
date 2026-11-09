@@ -1,0 +1,70 @@
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSPARSE/cg/cg_example.c(319): warning #177-D: variable "base" was declared but never referenced
+      int base = 0;
+          ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSPARSE/cg/cg_example.c: In function ‘int main(int, char**)’:
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSPARSE/cg/cg_example.c:424:15: warning: ‘csric02Info_t’ is deprecated: The type will be removed in the next major release [-Wdeprecated-declarations]
+  424 |     csric02Info_t      infoM        = NULL;
+      |               ^~~~~
+/usr/local/cuda-13.4/include/cusparse.h:230:22: note: declared here
+  230 | struct csric02Info* csric02Info_t CUSPARSE_DEPRECATED_TYPE;
+      |                      ^~~~~~~~~~~~~
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSPARSE/cg/cg_example.c:433:54: warning: ‘cusparseStatus_t cusparseCreateCsric02Info(csric02Info**)’ is deprecated: The routine will be removed in the next major release [-Wdeprecated-declarations]
+  433 |     CHECK_CUSPARSE( cusparseCreateCsric02Info(&infoM) )
+      |                             ~~~~~~~~~~~~~~~~~~~~~~~~~^~      
+/usr/local/cuda-13.4/include/cusparse.h:434:1: note: declared here
+  434 | cusparseCreateCsric02Info(csric02Info_t* info);
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSPARSE/cg/cg_example.c:435:56: warning: ‘cusparseStatus_t cusparseDcsric02_bufferSize(cusparseHandle_t, int, int, cusparseMatDescr_t, double*, const int*, const int*, csric02Info_t, int*)’ is deprecated: The routine will be removed in the next major release [-Wdeprecated-declarations]
+  435 |     CHECK_CUSPARSE( cusparseDcsric02_bufferSize(
+      |                             ~~~~~~~~~~~~~~~~~~~~       ^                                                                                        
+/usr/local/cuda-13.4/include/cusparse.h:1964:1: note: declared here
+ 1964 | cusparseDcsric02_bufferSize(cusparseHandle_t         handle,
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSPARSE/cg/cg_example.c:439:54: warning: ‘cusparseStatus_t cusparseDcsric02_analysis(cusparseHandle_t, int, int, cusparseMatDescr_t, const double*, const int*, const int*, csric02Info_t, cusparseSolvePolicy_t, void*)’ is deprecated: The routine will be removed in the next major release [-Wdeprecated-declarations]
+  439 |     CHECK_CUSPARSE( cusparseDcsric02_analysis(
+      |                             ~~~~~~~~~~~~~~~~~~       ^                                                                                                                     
+/usr/local/cuda-13.4/include/cusparse.h:2061:1: note: declared here
+ 2061 | cusparseDcsric02_analysis(cusparseHandle_t         handle,
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSPARSE/cg/cg_example.c:444:55: warning: ‘cusparseStatus_t cusparseXcsric02_zeroPivot(cusparseHandle_t, csric02Info_t, int*)’ is deprecated: The routine will be removed in the next major release [-Wdeprecated-declarations]
+  444 |     CHECK_CUSPARSE( cusparseXcsric02_zeroPivot(cusparseHandle, infoM,
+      |                             ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~                          
+/usr/local/cuda-13.4/include/cusparse.h:1946:1: note: declared here
+ 1946 | cusparseXcsric02_zeroPivot(cusparseHandle_t handle,
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSPARSE/cg/cg_example.c:447:45: warning: ‘cusparseStatus_t cusparseDcsric02(cusparseHandle_t, int, int, cusparseMatDescr_t, double*, const int*, const int*, csric02Info_t, cusparseSolvePolicy_t, void*)’ is deprecated: The routine will be removed in the next major release [-Wdeprecated-declarations]
+  447 |     CHECK_CUSPARSE( cusparseDcsric02(
+      |                             ~~~~~~~~~       ^                                                                                                                     
+/usr/local/cuda-13.4/include/cusparse.h:2113:1: note: declared here
+ 2113 | cusparseDcsric02(cusparseHandle_t         handle,
+      | ^~~~~~~~~~~~~~~~
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSPARSE/cg/cg_example.c:453:55: warning: ‘cusparseStatus_t cusparseXcsric02_zeroPivot(cusparseHandle_t, csric02Info_t, int*)’ is deprecated: The routine will be removed in the next major release [-Wdeprecated-declarations]
+  453 |     CHECK_CUSPARSE( cusparseXcsric02_zeroPivot(cusparseHandle, infoM,
+      |                             ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~                         
+/usr/local/cuda-13.4/include/cusparse.h:1946:1: note: declared here
+ 1946 | cusparseXcsric02_zeroPivot(cusparseHandle_t handle,
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSPARSE/cg/cg_example.c:456:55: warning: ‘cusparseStatus_t cusparseDestroyCsric02Info(csric02Info_t)’ is deprecated: The routine will be removed in the next major release [-Wdeprecated-declarations]
+  456 |     CHECK_CUSPARSE( cusparseDestroyCsric02Info(infoM) )
+      |                             ~~~~~~~~~~~~~~~~~~~~~~~~~~^      
+/usr/local/cuda-13.4/include/cusparse.h:438:1: note: declared here
+  438 | cusparseDestroyCsric02Info(csric02Info_t info);
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/bin/ld: /tmp/tmpxft_001f9b16_00000000-11_cg_example.o: in function `gpu_CG(cublasContext*, cusparseContext*, int, cusparseSpMatDescr*, cusparseSpMatDescr*, VecStruct, VecStruct, VecStruct, VecStruct, VecStruct, VecStruct, VecStruct, void*, int, double)':
+tmpxft_001f9b16_00000000-6_cg_example.cudafe1.cpp:(.text+0x5f4): undefined reference to `cublasDnrm2_v2'
+/usr/bin/ld: tmpxft_001f9b16_00000000-6_cg_example.cudafe1.cpp:(.text+0x661): undefined reference to `cublasDdot_v2'
+/usr/bin/ld: tmpxft_001f9b16_00000000-6_cg_example.cudafe1.cpp:(.text+0x731): undefined reference to `cublasDdot_v2'
+/usr/bin/ld: tmpxft_001f9b16_00000000-6_cg_example.cudafe1.cpp:(.text+0x7d6): undefined reference to `cublasDaxpy_v2'
+/usr/bin/ld: tmpxft_001f9b16_00000000-6_cg_example.cudafe1.cpp:(.text+0x822): undefined reference to `cublasDaxpy_v2'
+/usr/bin/ld: tmpxft_001f9b16_00000000-6_cg_example.cudafe1.cpp:(.text+0x848): undefined reference to `cublasDnrm2_v2'
+/usr/bin/ld: tmpxft_001f9b16_00000000-6_cg_example.cudafe1.cpp:(.text+0x957): undefined reference to `cublasDdot_v2'
+/usr/bin/ld: tmpxft_001f9b16_00000000-6_cg_example.cudafe1.cpp:(.text+0x9e4): undefined reference to `cublasDscal_v2'
+/usr/bin/ld: tmpxft_001f9b16_00000000-6_cg_example.cudafe1.cpp:(.text+0xa0f): undefined reference to `cublasDaxpy_v2'
+/usr/bin/ld: tmpxft_001f9b16_00000000-6_cg_example.cudafe1.cpp:(.text+0xac1): undefined reference to `cublasDnrm2_v2'
+/usr/bin/ld: /tmp/tmpxft_001f9b16_00000000-11_cg_example.o: in function `main':
+tmpxft_001f9b16_00000000-6_cg_example.cudafe1.cpp:(.text.startup+0x328): undefined reference to `cublasCreate_v2'
+/usr/bin/ld: tmpxft_001f9b16_00000000-6_cg_example.cudafe1.cpp:(.text.startup+0xa1f): undefined reference to `cublasDestroy_v2'
+collect2: error: ld returned 1 exit status

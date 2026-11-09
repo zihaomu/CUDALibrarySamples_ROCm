@@ -1,0 +1,226 @@
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:24:
+In file included from /opt/rocm/core-10.1/include/hipsparselt/hipsparselt.h:81:
+In file included from /opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/include/hip/hip_fp8.h:14:
+/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/include/hip/amd_detail/amd_hip_fp8.h:887:23: error: type '_Float16' cannot be narrowed to 'unsigned short' in initializer list [-Wc++11-narrowing]
+  887 |     return __half_raw{internal::cast_from_f8<_Float16, true>(x, wm, we)};
+      |                       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/include/hip/amd_detail/amd_hip_fp8.h:887:23: note: insert an explicit cast to silence this issue
+  887 |     return __half_raw{internal::cast_from_f8<_Float16, true>(x, wm, we)};
+      |                       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                       static_cast<unsigned short>(                     )
+/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/include/hip/amd_detail/amd_hip_fp8.h:891:23: error: type '_Float16' cannot be narrowed to 'unsigned short' in initializer list [-Wc++11-narrowing]
+  891 |     return __half_raw{internal::cast_from_f8<_Float16, false>(x, wm, we)};
+      |                       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/include/hip/amd_detail/amd_hip_fp8.h:891:23: note: insert an explicit cast to silence this issue
+  891 |     return __half_raw{internal::cast_from_f8<_Float16, false>(x, wm, we)};
+      |                       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                       static_cast<unsigned short>(                      )
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:95:55: error: use of undeclared identifier 'CUSPARSE_COMPUTE_32F'; did you mean 'HIPSPARSELT_COMPUTE_32F'?
+   95 |     static constexpr hipsparseLtComputetype_t value = CUSPARSE_COMPUTE_32F;
+      |                                                       ^~~~~~~~~~~~~~~~~~~~
+      |                                                       HIPSPARSELT_COMPUTE_32F
+/opt/rocm/core-10.1/include/hipsparselt/hipsparselt.h:195:4: note: 'HIPSPARSELT_COMPUTE_32F' declared here
+  195 |    HIPSPARSELT_COMPUTE_32F,         /**< 32-bit floating-point precision. HIP backend only. */
+      |    ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:259:5: error: use of undeclared identifier 'cusparseLtGetErrorString'; did you mean 'hipsparseGetErrorString'?
+  259 |     CHECK_CUSPARSE( hipsparseLtInit(&handle) )
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:118:26: note: expanded from macro 'CHECK_CUSPARSE'
+  118 |                __LINE__, cusparseLtGetErrorString(status), status);            \
+      |                          ^~~~~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hipsparse/hipsparse-auxiliary.h:78:13: note: 'hipsparseGetErrorString' declared here
+   78 | const char* hipsparseGetErrorString(hipsparseStatus_t status);
+      |             ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:261:5: error: use of undeclared identifier 'cusparseLtGetErrorString'; did you mean 'hipsparseGetErrorString'?
+  261 |     CHECK_CUSPARSE( hipsparseLtStructuredDescriptorInit(
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  262 |                                             &handle, &matA, num_A_rows,
+      |                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  263 |                                             num_A_cols, lda, alignment,
+      |                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  264 |                                             type_AB, order,
+      |                                             ~~~~~~~~~~~~~~~
+  265 |                                             HIPSPARSELT_SPARSITY_50_PERCENT) )
+      |                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:118:26: note: expanded from macro 'CHECK_CUSPARSE'
+  118 |                __LINE__, cusparseLtGetErrorString(status), status);            \
+      |                          ^~~~~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hipsparse/hipsparse-auxiliary.h:78:13: note: 'hipsparseGetErrorString' declared here
+   78 | const char* hipsparseGetErrorString(hipsparseStatus_t status);
+      |             ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:266:5: error: use of undeclared identifier 'cusparseLtGetErrorString'; did you mean 'hipsparseGetErrorString'?
+  266 |     CHECK_CUSPARSE( hipsparseLtDenseDescriptorInit(
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  267 |                                             &handle, &matB, num_B_rows,
+      |                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  268 |                                             num_B_cols, ldb, alignment,
+      |                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  269 |                                             type_AB, order) )
+      |                                             ~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:118:26: note: expanded from macro 'CHECK_CUSPARSE'
+  118 |                __LINE__, cusparseLtGetErrorString(status), status);            \
+      |                          ^~~~~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hipsparse/hipsparse-auxiliary.h:78:13: note: 'hipsparseGetErrorString' declared here
+   78 | const char* hipsparseGetErrorString(hipsparseStatus_t status);
+      |             ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:270:5: error: use of undeclared identifier 'cusparseLtGetErrorString'; did you mean 'hipsparseGetErrorString'?
+  270 |     CHECK_CUSPARSE( hipsparseLtDenseDescriptorInit(
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  271 |                                             &handle, &matC, num_C_rows,
+      |                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  272 |                                             num_C_cols, ldc, alignment,
+      |                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  273 |                                             type_C, order) )
+      |                                             ~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:118:26: note: expanded from macro 'CHECK_CUSPARSE'
+  118 |                __LINE__, cusparseLtGetErrorString(status), status);            \
+      |                          ^~~~~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hipsparse/hipsparse-auxiliary.h:78:13: note: 'hipsparseGetErrorString' declared here
+   78 | const char* hipsparseGetErrorString(hipsparseStatus_t status);
+      |             ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:276:21: error: use of undeclared identifier 'cusparseLtMatDescSetAttribute'; did you mean 'hipsparseLtMatDescSetAttribute'?
+  276 |     CHECK_CUSPARSE( cusparseLtMatDescSetAttribute(&handle, &matA,
+      |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                     hipsparseLtMatDescSetAttribute
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:115:33: note: expanded from macro 'CHECK_CUSPARSE'
+  115 |     hipsparseStatus_t status = (func);                                          \
+      |                                 ^~~~
+/opt/rocm/core-10.1/include/hipsparselt/hipsparselt.h:491:19: note: 'hipsparseLtMatDescSetAttribute' declared here
+  491 | hipsparseStatus_t hipsparseLtMatDescSetAttribute(const hipsparseLtHandle_t*    handle,
+      |                   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:276:5: error: use of undeclared identifier 'cusparseLtGetErrorString'; did you mean 'hipsparseGetErrorString'?
+  276 |     CHECK_CUSPARSE( cusparseLtMatDescSetAttribute(&handle, &matA,
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  277 |                                             HIPSPARSELT_MAT_NUM_BATCHES,
+      |                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  278 |                                             &num_batches, sizeof(num_batches)) )
+      |                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:118:26: note: expanded from macro 'CHECK_CUSPARSE'
+  118 |                __LINE__, cusparseLtGetErrorString(status), status);            \
+      |                          ^~~~~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hipsparse/hipsparse-auxiliary.h:78:13: note: 'hipsparseGetErrorString' declared here
+   78 | const char* hipsparseGetErrorString(hipsparseStatus_t status);
+      |             ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:279:21: error: use of undeclared identifier 'cusparseLtMatDescSetAttribute'; did you mean 'hipsparseLtMatDescSetAttribute'?
+  279 |     CHECK_CUSPARSE( cusparseLtMatDescSetAttribute(&handle, &matB,
+      |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                     hipsparseLtMatDescSetAttribute
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:115:33: note: expanded from macro 'CHECK_CUSPARSE'
+  115 |     hipsparseStatus_t status = (func);                                          \
+      |                                 ^~~~
+/opt/rocm/core-10.1/include/hipsparselt/hipsparselt.h:491:19: note: 'hipsparseLtMatDescSetAttribute' declared here
+  491 | hipsparseStatus_t hipsparseLtMatDescSetAttribute(const hipsparseLtHandle_t*    handle,
+      |                   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:279:5: error: use of undeclared identifier 'cusparseLtGetErrorString'; did you mean 'hipsparseGetErrorString'?
+  279 |     CHECK_CUSPARSE( cusparseLtMatDescSetAttribute(&handle, &matB,
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  280 |                                             HIPSPARSELT_MAT_NUM_BATCHES,
+      |                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  281 |                                             &num_batches, sizeof(num_batches)) )
+      |                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:118:26: note: expanded from macro 'CHECK_CUSPARSE'
+  118 |                __LINE__, cusparseLtGetErrorString(status), status);            \
+      |                          ^~~~~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hipsparse/hipsparse-auxiliary.h:78:13: note: 'hipsparseGetErrorString' declared here
+   78 | const char* hipsparseGetErrorString(hipsparseStatus_t status);
+      |             ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:282:21: error: use of undeclared identifier 'cusparseLtMatDescSetAttribute'; did you mean 'hipsparseLtMatDescSetAttribute'?
+  282 |     CHECK_CUSPARSE( cusparseLtMatDescSetAttribute(&handle, &matC,
+      |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                     hipsparseLtMatDescSetAttribute
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:115:33: note: expanded from macro 'CHECK_CUSPARSE'
+  115 |     hipsparseStatus_t status = (func);                                          \
+      |                                 ^~~~
+/opt/rocm/core-10.1/include/hipsparselt/hipsparselt.h:491:19: note: 'hipsparseLtMatDescSetAttribute' declared here
+  491 | hipsparseStatus_t hipsparseLtMatDescSetAttribute(const hipsparseLtHandle_t*    handle,
+      |                   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:282:5: error: use of undeclared identifier 'cusparseLtGetErrorString'; did you mean 'hipsparseGetErrorString'?
+  282 |     CHECK_CUSPARSE( cusparseLtMatDescSetAttribute(&handle, &matC,
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  283 |                                             HIPSPARSELT_MAT_NUM_BATCHES,
+      |                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  284 |                                             &num_batches, sizeof(num_batches)) )
+      |                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:118:26: note: expanded from macro 'CHECK_CUSPARSE'
+  118 |                __LINE__, cusparseLtGetErrorString(status), status);            \
+      |                          ^~~~~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hipsparse/hipsparse-auxiliary.h:78:13: note: 'hipsparseGetErrorString' declared here
+   78 | const char* hipsparseGetErrorString(hipsparseStatus_t status);
+      |             ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:289:22: error: use of undeclared identifier 'cusparseLtMatDescSetAttribute'; did you mean 'hipsparseLtMatDescSetAttribute'?
+  289 |     CHECK_CUSPARSE(  cusparseLtMatDescSetAttribute(&handle, &matA,
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                      hipsparseLtMatDescSetAttribute
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:115:33: note: expanded from macro 'CHECK_CUSPARSE'
+  115 |     hipsparseStatus_t status = (func);                                          \
+      |                                 ^~~~
+/opt/rocm/core-10.1/include/hipsparselt/hipsparselt.h:491:19: note: 'hipsparseLtMatDescSetAttribute' declared here
+  491 | hipsparseStatus_t hipsparseLtMatDescSetAttribute(const hipsparseLtHandle_t*    handle,
+      |                   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:289:5: error: use of undeclared identifier 'cusparseLtGetErrorString'; did you mean 'hipsparseGetErrorString'?
+  289 |     CHECK_CUSPARSE(  cusparseLtMatDescSetAttribute(&handle, &matA,
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  290 |                                                 HIPSPARSELT_MAT_BATCH_STRIDE,
+      |                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  291 |                                                 &batch_strideA,
+      |                                                 ~~~~~~~~~~~~~~~
+  292 |                                                 sizeof(batch_strideA)) )
+      |                                                 ~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:118:26: note: expanded from macro 'CHECK_CUSPARSE'
+  118 |                __LINE__, cusparseLtGetErrorString(status), status);            \
+      |                          ^~~~~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hipsparse/hipsparse-auxiliary.h:78:13: note: 'hipsparseGetErrorString' declared here
+   78 | const char* hipsparseGetErrorString(hipsparseStatus_t status);
+      |             ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:293:22: error: use of undeclared identifier 'cusparseLtMatDescSetAttribute'; did you mean 'hipsparseLtMatDescSetAttribute'?
+  293 |     CHECK_CUSPARSE(  cusparseLtMatDescSetAttribute(&handle, &matB,
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                      hipsparseLtMatDescSetAttribute
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:115:33: note: expanded from macro 'CHECK_CUSPARSE'
+  115 |     hipsparseStatus_t status = (func);                                          \
+      |                                 ^~~~
+/opt/rocm/core-10.1/include/hipsparselt/hipsparselt.h:491:19: note: 'hipsparseLtMatDescSetAttribute' declared here
+  491 | hipsparseStatus_t hipsparseLtMatDescSetAttribute(const hipsparseLtHandle_t*    handle,
+      |                   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:293:5: error: use of undeclared identifier 'cusparseLtGetErrorString'; did you mean 'hipsparseGetErrorString'?
+  293 |     CHECK_CUSPARSE(  cusparseLtMatDescSetAttribute(&handle, &matB,
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  294 |                                                 HIPSPARSELT_MAT_BATCH_STRIDE,
+      |                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  295 |                                                 &batch_strideB,
+      |                                                 ~~~~~~~~~~~~~~~
+  296 |                                                 sizeof(batch_strideB)) )
+      |                                                 ~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:118:26: note: expanded from macro 'CHECK_CUSPARSE'
+  118 |                __LINE__, cusparseLtGetErrorString(status), status);            \
+      |                          ^~~~~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hipsparse/hipsparse-auxiliary.h:78:13: note: 'hipsparseGetErrorString' declared here
+   78 | const char* hipsparseGetErrorString(hipsparseStatus_t status);
+      |             ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:297:22: error: use of undeclared identifier 'cusparseLtMatDescSetAttribute'; did you mean 'hipsparseLtMatDescSetAttribute'?
+  297 |     CHECK_CUSPARSE(  cusparseLtMatDescSetAttribute(&handle, &matC,
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                      hipsparseLtMatDescSetAttribute
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:115:33: note: expanded from macro 'CHECK_CUSPARSE'
+  115 |     hipsparseStatus_t status = (func);                                          \
+      |                                 ^~~~
+/opt/rocm/core-10.1/include/hipsparselt/hipsparselt.h:491:19: note: 'hipsparseLtMatDescSetAttribute' declared here
+  491 | hipsparseStatus_t hipsparseLtMatDescSetAttribute(const hipsparseLtHandle_t*    handle,
+      |                   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:297:5: error: use of undeclared identifier 'cusparseLtGetErrorString'; did you mean 'hipsparseGetErrorString'?
+  297 |     CHECK_CUSPARSE(  cusparseLtMatDescSetAttribute(&handle, &matC,
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  298 |                                                 HIPSPARSELT_MAT_BATCH_STRIDE,
+      |                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  299 |                                                 &batch_strideC,
+      |                                                 ~~~~~~~~~~~~~~~
+  300 |                                                 sizeof(batch_strideC)) )
+      |                                                 ~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp:118:26: note: expanded from macro 'CHECK_CUSPARSE'
+  118 |                __LINE__, cusparseLtGetErrorString(status), status);            \
+      |                          ^~~~~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hipsparse/hipsparse-auxiliary.h:78:13: note: 'hipsparseGetErrorString' declared here
+   78 | const char* hipsparseGetErrorString(hipsparseStatus_t status);
+      |             ^
+fatal error: too many errors emitted, stopping now [-ferror-limit=]
+20 errors generated.

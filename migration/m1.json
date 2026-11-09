@@ -1,0 +1,356 @@
+[
+  {
+    "name": "cuBLAS_Extensions_GemmEx",
+    "path": "cuBLAS/Extensions/GemmEx",
+    "upstream_source": "cuBLAS/Extensions/GemmEx/cublas_GemmEx_example.cu",
+    "libraries": [
+      "hipblas"
+    ],
+    "cuda_libraries": [
+      "cublas"
+    ],
+    "display_library": "hipBLAS",
+    "backend_library": "rocBLAS",
+    "required_cases": [
+      "transpose0_beta0.000000",
+      "transpose0_beta0.500000",
+      "transpose1_beta0.000000",
+      "transpose1_beta0.500000",
+      "original_profile"
+    ],
+    "original_profile_covered": true
+  },
+  {
+    "name": "cuBLAS_Level-1_axpy",
+    "path": "cuBLAS/Level-1/axpy",
+    "upstream_source": "cuBLAS/Level-1/axpy/cublas_axpy_example.cu",
+    "libraries": [
+      "hipblas"
+    ],
+    "cuda_libraries": [
+      "cublas"
+    ],
+    "display_library": "hipBLAS",
+    "backend_library": "rocBLAS",
+    "required_cases": [
+      "n4_stride1",
+      "n4_stride2",
+      "n17_stride1",
+      "n17_stride2",
+      "original_profile"
+    ],
+    "original_profile_covered": true
+  },
+  {
+    "name": "cuBLAS_Level-1_dot",
+    "path": "cuBLAS/Level-1/dot",
+    "upstream_source": "cuBLAS/Level-1/dot/cublas_dot_example.cu",
+    "libraries": [
+      "hipblas"
+    ],
+    "cuda_libraries": [
+      "cublas"
+    ],
+    "display_library": "hipBLAS",
+    "backend_library": "rocBLAS",
+    "required_cases": [
+      "n4_stride1_mode0",
+      "n4_stride1_mode1",
+      "n4_stride2_mode0",
+      "n4_stride2_mode1",
+      "n17_stride1_mode0",
+      "n17_stride1_mode1",
+      "n17_stride2_mode0",
+      "n17_stride2_mode1",
+      "original_profile"
+    ],
+    "original_profile_covered": true
+  },
+  {
+    "name": "cuBLAS_Level-2_gemv",
+    "path": "cuBLAS/Level-2/gemv",
+    "upstream_source": "cuBLAS/Level-2/gemv/cublas_gemv_example.cu",
+    "libraries": [
+      "hipblas"
+    ],
+    "cuda_libraries": [
+      "cublas"
+    ],
+    "display_library": "hipBLAS",
+    "backend_library": "rocBLAS",
+    "required_cases": [
+      "transpose0_beta0.000000",
+      "transpose0_beta0.500000",
+      "transpose1_beta0.000000",
+      "transpose1_beta0.500000",
+      "original_profile"
+    ],
+    "original_profile_covered": true
+  },
+  {
+    "name": "cuBLAS_Level-3_gemm",
+    "path": "cuBLAS/Level-3/gemm",
+    "upstream_source": "cuBLAS/Level-3/gemm/cublas_gemm_example.cu",
+    "libraries": [
+      "hipblas"
+    ],
+    "cuda_libraries": [
+      "cublas"
+    ],
+    "display_library": "hipBLAS",
+    "backend_library": "rocBLAS",
+    "required_cases": [
+      "transpose0_beta0.000000",
+      "transpose0_beta0.500000",
+      "transpose1_beta0.000000",
+      "transpose1_beta0.500000",
+      "original_profile"
+    ],
+    "original_profile_covered": true
+  },
+  {
+    "name": "cuBLAS_Level-3_gemmStridedBatched",
+    "path": "cuBLAS/Level-3/gemmStridedBatched",
+    "upstream_source": "cuBLAS/Level-3/gemmStridedBatched/cublas_gemmStridedBatched_example.cu",
+    "libraries": [
+      "hipblas"
+    ],
+    "cuda_libraries": [
+      "cublas"
+    ],
+    "display_library": "hipBLAS",
+    "backend_library": "rocBLAS",
+    "required_cases": [
+      "transpose0_beta0.000000",
+      "transpose0_beta0.500000",
+      "transpose1_beta0.000000",
+      "transpose1_beta0.500000",
+      "original_profile"
+    ],
+    "original_profile_covered": true
+  },
+  {
+    "name": "cuBLASLt_LtSgemm",
+    "path": "cuBLASLt/LtSgemm",
+    "upstream_source": "cuBLASLt/LtSgemm/main.cpp",
+    "libraries": [
+      "hipblaslt"
+    ],
+    "cuda_libraries": [
+      "cublasLt"
+    ],
+    "display_library": "hipBLASLt",
+    "backend_library": "hipBLASLt native",
+    "required_cases": [
+      "transpose0_beta0.000000",
+      "transpose0_beta0.500000",
+      "transpose1_beta0.000000",
+      "transpose1_beta0.500000",
+      "original_profile"
+    ],
+    "original_profile_covered": true
+  },
+  {
+    "name": "cuFFT_1d_c2c",
+    "path": "cuFFT/1d_c2c",
+    "upstream_source": "cuFFT/1d_c2c/1d_c2c_example.cpp",
+    "libraries": [
+      "hipfft"
+    ],
+    "cuda_libraries": [
+      "cufft"
+    ],
+    "display_library": "hipFFT",
+    "backend_library": "rocFFT",
+    "required_cases": [
+      "forward_n8",
+      "roundtrip_n8",
+      "forward_n15",
+      "roundtrip_n15",
+      "original_forward",
+      "original_profile"
+    ],
+    "gpu_scaling": true,
+    "original_profile_covered": true
+  },
+  {
+    "name": "cuFFT_1d_r2c_c2r",
+    "path": "cuFFT/1d_r2c_c2r",
+    "upstream_source": "cuFFT/1d_r2c_c2r/1d_r2c_c2r_example.cpp",
+    "libraries": [
+      "hipfft"
+    ],
+    "cuda_libraries": [
+      "cufft"
+    ],
+    "display_library": "hipFFT",
+    "backend_library": "rocFFT",
+    "required_cases": [
+      "forward_n8",
+      "roundtrip_n8",
+      "forward_n15",
+      "roundtrip_n15",
+      "original_forward",
+      "original_profile"
+    ],
+    "gpu_scaling": true,
+    "original_profile_covered": true
+  },
+  {
+    "name": "cuRAND_Host_philox_normal",
+    "path": "cuRAND/Host/philox/normal",
+    "upstream_source": "cuRAND/Host/philox/curand_philox_normal_example.cpp",
+    "libraries": [
+      "hiprand"
+    ],
+    "cuda_libraries": [
+      "curand"
+    ],
+    "display_library": "hipRAND",
+    "backend_library": "rocRAND",
+    "required_cases": [
+      "host0_offset0",
+      "host0_offset16",
+      "host1_offset0",
+      "host1_offset16",
+      "original_profile"
+    ],
+    "original_profile_covered": true
+  },
+  {
+    "name": "cuRAND_Host_philox_uniform",
+    "path": "cuRAND/Host/philox/uniform",
+    "upstream_source": "cuRAND/Host/philox/curand_philox_uniform_example.cpp",
+    "libraries": [
+      "hiprand"
+    ],
+    "cuda_libraries": [
+      "curand"
+    ],
+    "display_library": "hipRAND",
+    "backend_library": "rocRAND",
+    "required_cases": [
+      "host0_offset0",
+      "host0_offset16",
+      "host1_offset0",
+      "host1_offset16",
+      "original_profile"
+    ],
+    "original_profile_covered": true
+  },
+  {
+    "name": "cuSOLVER_getrf",
+    "path": "cuSOLVER/getrf",
+    "upstream_source": "cuSOLVER/getrf/cusolver_getrf_example.cu",
+    "libraries": [
+      "hipsolver"
+    ],
+    "cuda_libraries": [
+      "cusolver"
+    ],
+    "display_library": "hipSOLVER",
+    "backend_library": "rocSOLVER",
+    "required_cases": [
+      "factorization_pivot0",
+      "pivot0",
+      "residual_pivot0",
+      "factorization_pivot1",
+      "pivot1",
+      "residual_pivot1"
+    ],
+    "original_profile_covered": true
+  },
+  {
+    "name": "cuSOLVER_potrfBatched",
+    "path": "cuSOLVER/potrfBatched",
+    "upstream_source": "cuSOLVER/potrfBatched/cusolver_potrfBatched_example.cu",
+    "libraries": [
+      "hipsolver"
+    ],
+    "cuda_libraries": [
+      "cusolver"
+    ],
+    "display_library": "hipSOLVER",
+    "backend_library": "rocSOLVER",
+    "required_cases": [
+      "uplolower",
+      "residual_uplolower",
+      "uploupper",
+      "residual_uploupper",
+      "original_non_spd_info",
+      "original_profile",
+      "original_factorization"
+    ],
+    "original_profile_covered": true
+  },
+  {
+    "name": "cuSPARSE_spmm_csr",
+    "path": "cuSPARSE/spmm_csr",
+    "upstream_source": "cuSPARSE/spmm_csr/spmm_csr_example.c",
+    "libraries": [
+      "hipsparse"
+    ],
+    "cuda_libraries": [
+      "cusparse"
+    ],
+    "display_library": "hipSPARSE",
+    "backend_library": "rocSPARSE",
+    "required_cases": [
+      "base0_beta0.000000",
+      "base0_beta0.500000",
+      "base1_beta0.000000",
+      "base1_beta0.500000",
+      "original_profile",
+      "empty_base0_beta0.000000",
+      "empty_base0_beta0.500000",
+      "empty_base1_beta0.000000",
+      "empty_base1_beta0.500000"
+    ],
+    "original_profile_covered": true
+  },
+  {
+    "name": "cuSPARSE_spmv_csr",
+    "path": "cuSPARSE/spmv_csr",
+    "upstream_source": "cuSPARSE/spmv_csr/spmv_csr_example.c",
+    "libraries": [
+      "hipsparse"
+    ],
+    "cuda_libraries": [
+      "cusparse"
+    ],
+    "display_library": "hipSPARSE",
+    "backend_library": "rocSPARSE",
+    "required_cases": [
+      "base0_beta0.000000",
+      "base0_beta0.500000",
+      "base1_beta0.000000",
+      "base1_beta0.500000",
+      "original_profile",
+      "empty_base0_beta0.000000",
+      "empty_base0_beta0.500000",
+      "empty_base1_beta0.000000",
+      "empty_base1_beta0.500000"
+    ],
+    "selection_reason": "hipSPARSE 与原生 rocSPARSE v2 均通过；兼容层更接近原样例，保留为默认实现；原生 v2 源码作为已验证替代路线",
+    "original_profile_covered": true
+  },
+  {
+    "name": "cuSPARSE_spsv_csr",
+    "path": "cuSPARSE/spsv_csr",
+    "upstream_source": "cuSPARSE/spsv_csr/spsv_csr_example.c",
+    "libraries": [
+      "hipsparse"
+    ],
+    "cuda_libraries": [
+      "cusparse"
+    ],
+    "display_library": "hipSPARSE",
+    "backend_library": "rocSPARSE",
+    "required_cases": [
+      "base0",
+      "base1",
+      "original_profile"
+    ],
+    "original_profile_covered": true
+  }
+]

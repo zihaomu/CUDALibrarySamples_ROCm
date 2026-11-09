@@ -1,0 +1,598 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2025-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+#include "hip/hip_runtime.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <math.h>
+
+#include <mpi.h>
+
+#include <cusolverMp.h>
+
+#include "helpers.h"
+
+static void generate_diagonal_dominant_symmetric_matrix(int64_t n, double* A, int64_t lda)
+{
+    /* set A[0:n, 0:n] = 0 */
+    for (int64_t j = 0; j < n; j++)
+    {
+        double sum = 0;
+        for (int64_t i = 0; i < n; i++)
+        {
+            if (i < j)
+            {
+                A[i + j * lda] = A[j + i * lda];
+            }
+            else
+            {
+                A[i + j * lda] = (double)(rand()) / RAND_MAX;
+            }
+            sum += A[i + j * lda];
+        }
+
+        A[j + j * lda] = 2 * sum;
+    }
+}
+
+/* Print matrix */
+static void print_host_matrix(int64_t m, int64_t n, double* A, int64_t lda, const char* msg)
+{
+    printf("print_host_matrix : %s\n", msg);
+
+    for (int64_t i = 0; i < m; i++)
+    {
+        for (int64_t j = 0; j < n; j++)
+        {
+            printf("%.2lf  ", A[i + j * lda]);
+        }
+        printf("\n");
+    }
+}
+
+int main(int argc, char* argv[])
+{
+    Options opts = { .m           = 1,
+                     .n           = 128,
+                     .nrhs        = 1,
+                     .mbA         = 32,
+                     .nbA         = 32,
+                     .mbB         = 32,
+                     .nbB         = 32,
+                     .mbQ         = 32,
+                     .nbQ         = 32,
+                     .ia          = 1,
+                     .ja          = 1,
+                     .ib          = 1,
+                     .jb          = 1,
+                     .iq          = 1,
+                     .jq          = 1,
+                     .p           = 2,
+                     .q           = 1,
+                     .grid_layout = 'C',
+                     .verbose     = false };
+
+    parse(&opts, argc, argv);
+    validate(&opts);
+
+    int sample_ok = 1;
+
+    /* Initialize MPI library */
+    MPI_Init(NULL, NULL);
+
+    char jobz = 'V';
+
+    /* Define dimensions, block sizes and offsets of A and B matrices */
+    const int64_t n = opts.n;
+
+    /* Offsets of A and B matrices (base-1) */
+    const int64_t ia = opts.ia;
+    const int64_t ja = opts.ja;
+    const int64_t iq = opts.iq;
+    const int64_t jq = opts.jq;
+
+    /* Tile sizes */
+    const int64_t mbA = opts.mbA;
+    const int64_t nbA = opts.nbA;
+    const int64_t mbQ = opts.mbQ;
+    const int64_t nbQ = opts.nbQ;
+
+    /* Define grid of processors */
+    const int nprow = opts.p;
+    const int npcol = opts.q;
+
+    /* Convert grid layout to cusolverMp grid mapping */
+    const cusolverMpGridMapping_t gridLayout =
+            (opts.grid_layout == 'C' || opts.grid_layout == 'c' ? CUSOLVERMP_GRID_MAPPING_COL_MAJOR
+                                                                : CUSOLVERMP_GRID_MAPPING_ROW_MAJOR);
+
+    /* Current implementation only allows RSRC,CSRC=(0,0) */
+    const uint32_t rsrca = 0;
+    const uint32_t csrca = 0;
+    const uint32_t rsrcq = 0;
+    const uint32_t csrcq = 0;
+
+    /* Get MPI rank id and communicator size. */
+    int commSize, rank;
+    MPI_Comm_size(MPI_COMM_WORLD, &commSize);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    if (rank == 0) print(&opts);
+
+    /*
+     * Initialize device context for this process
+     */
+    int         localRank = getLocalRank();
+    hipError_t cudaStat  = hipSetDevice(localRank);
+    SAMPLE_ASSERT(cudaStat == hipSuccess);
+    cudaStat = hipFree(0);
+    SAMPLE_ASSERT(cudaStat == hipSuccess);
+
+    /* Error codes */
+    hipsolverStatus_t cusolverStat = HIPSOLVER_STATUS_SUCCESS;
+    ncclResult_t     ncclStat     = ncclSuccess;
+
+    /* Create communicator */
+    ncclComm_t ncclComm = createNcclComm(commSize, rank);
+
+    /* Create local stream */
+    hipStream_t stream = NULL;
+    cudaStat            = hipStreamCreate(&stream);
+    SAMPLE_ASSERT(cudaStat == hipSuccess);
+
+    /* Initialize cusolverMp library handle */
+    cusolverMpHandle_t handle = NULL;
+    cusolverStat              = cusolverMpCreate(&handle, localRank, stream);
+    SAMPLE_ASSERT(cusolverStat == HIPSOLVER_STATUS_SUCCESS);
+
+    /* cusolverMp grids */
+    cusolverMpGrid_t gridA = NULL;
+    cusolverMpGrid_t gridQ = NULL;
+
+    /* cusolverMp matrix descriptors */
+    cusolverMpMatrixDescriptor_t descA = NULL;
+    cusolverMpMatrixDescriptor_t descQ = NULL;
+
+    /* Distributed matrices */
+    void* d_A = NULL;
+    void* d_D = NULL;
+    void* d_Q = NULL;
+
+    /* Distributed device workspace */
+    void* d_syevdWork = NULL;
+
+    /* Distributed host workspace */
+    void* h_syevdWork = NULL;
+
+    /* size of workspace on device */
+    size_t syevdWorkspaceInBytesOnDevice = 0;
+
+    /* size of workspace on host */
+    size_t syevdWorkspaceInBytesOnHost = 0;
+
+    /* error codes from cusolverMp (device) */
+    int* d_syevdInfo = NULL;
+
+    /* error codes from cusolverMp (host) */
+    int h_syevdInfo = 0;
+
+    /* =========================================== */
+    /*          Create inputs on master rank       */
+    /* =========================================== */
+
+    /* Single process per device */
+    SAMPLE_ASSERT((nprow * npcol) == commSize);
+
+    /* =========================================== */
+    /*          Create inputs on master rank       */
+    /* =========================================== */
+
+    const int64_t lda   = (ia - 1) + n;
+    const int64_t colsA = (ja - 1) + n;
+    const int64_t ldq   = (iq - 1) + n;
+    const int64_t colsQ = (jq - 1) + n;
+
+    double* h_A = NULL;
+    double* h_Q = NULL;
+    double* h_D = NULL;
+
+    if (rank == 0)
+    {
+        /* allocate host workspace */
+        h_A = (double*)malloc(lda * colsA * sizeof(double));
+        h_Q = (double*)malloc(ldq * colsQ * sizeof(double));
+        h_D = (double*)malloc(n * 1 * sizeof(double));
+
+        /* reset host workspace */
+        memset(h_A, 0xFF, lda * colsA * sizeof(double));
+        memset(h_Q, 0xFF, ldq * colsQ * sizeof(double));
+        memset(h_D, 0xFF, n * 1 * sizeof(double));
+
+        double* _A = &h_A[(ia - 1) + (ja - 1) * lda];
+
+        /* Set A[ia:ia+n, ja:ja+n] = diagonal dominant lower triangular matrix */
+        generate_diagonal_dominant_symmetric_matrix(n, _A, lda);
+
+        /* print input matrices */
+        if (opts.verbose)
+        {
+            print_host_matrix(lda, colsA, h_A, lda, "Input matrix A");
+        }
+    }
+
+    /* compute process grid index */
+    int myRowRank, myColRank;
+    if (gridLayout == CUSOLVERMP_GRID_MAPPING_COL_MAJOR)
+    {
+        myRowRank = rank % nprow;
+        myColRank = rank / nprow;
+    }
+    else
+    {
+        myRowRank = rank / npcol;
+        myColRank = rank % npcol;
+    }
+
+    /* compute the load leading dimension of the device buffers */
+    const int64_t llda       = cusolverMpNUMROC(lda, mbA, myRowRank, rsrca, nprow);
+    const int64_t localColsA = cusolverMpNUMROC(colsA, nbA, myColRank, csrca, npcol);
+
+    const int64_t lldq       = cusolverMpNUMROC(ldq, mbQ, myRowRank, rsrcq, nprow);
+    const int64_t localColsQ = cusolverMpNUMROC(colsQ, nbQ, myColRank, csrcq, npcol);
+
+    /* Allocate global d_A */
+    cudaStat = hipMalloc((void**)&d_A, llda * localColsA * sizeof(double));
+    SAMPLE_ASSERT(cudaStat == hipSuccess);
+
+    /* Allocate global d_B */
+    cudaStat = hipMalloc((void**)&d_Q, lldq * localColsQ * sizeof(double));
+    SAMPLE_ASSERT(cudaStat == hipSuccess);
+
+    /* Allocate global d_D */
+    cudaStat = hipMalloc((void**)&d_D, n * 1 * sizeof(double));
+    SAMPLE_ASSERT(cudaStat == hipSuccess);
+
+    /* =========================================== */
+    /*          CREATE GRID DESCRIPTORS            */
+    /* =========================================== */
+    cusolverStat = cusolverMpCreateDeviceGrid(handle, &gridA, ncclComm, nprow, npcol, gridLayout);
+    SAMPLE_ASSERT(cusolverStat == HIPSOLVER_STATUS_SUCCESS);
+
+    cusolverStat = cusolverMpCreateDeviceGrid(handle, &gridQ, ncclComm, nprow, npcol, gridLayout);
+    SAMPLE_ASSERT(cusolverStat == HIPSOLVER_STATUS_SUCCESS);
+
+    /* =========================================== */
+    /*        CREATE MATRIX DESCRIPTORS            */
+    /* =========================================== */
+    cusolverStat = cusolverMpCreateMatrixDesc(&descA, gridA, HIP_R_64F, lda, colsA, mbA, nbA, rsrca, csrca, llda);
+
+    SAMPLE_ASSERT(cusolverStat == HIPSOLVER_STATUS_SUCCESS);
+
+    cusolverStat = cusolverMpCreateMatrixDesc(&descQ, gridQ, HIP_R_64F, ldq, colsQ, mbQ, nbQ, rsrcq, csrcq, lldq);
+    SAMPLE_ASSERT(cusolverStat == HIPSOLVER_STATUS_SUCCESS);
+
+    /* =========================================== */
+    /*             ALLOCATE D_INFO                 */
+    /* =========================================== */
+
+    cudaStat = hipMalloc((void**)&d_syevdInfo, sizeof(int));
+    SAMPLE_ASSERT(cudaStat == hipSuccess);
+
+    /* =========================================== */
+    /*                RESET D_INFO                 */
+    /* =========================================== */
+
+    cudaStat = hipMemset(d_syevdInfo, 0, sizeof(int));
+    SAMPLE_ASSERT(cudaStat == hipSuccess);
+
+    /* =========================================== */
+    /*     QUERY WORKSPACE SIZE FOR MP ROUTINES    */
+    /* =========================================== */
+
+    cusolverStat = cusolverMpSyevd_bufferSize(handle,
+                                              &jobz,
+                                              HIPBLAS_FILL_MODE_LOWER,
+                                              n,
+                                              d_A,
+                                              ia,
+                                              ja,
+                                              descA,
+                                              d_D,
+                                              d_Q,
+                                              iq,
+                                              jq,
+                                              descQ,
+                                              HIP_R_64F,
+                                              &syevdWorkspaceInBytesOnDevice,
+                                              &syevdWorkspaceInBytesOnHost);
+    SAMPLE_ASSERT(cusolverStat == HIPSOLVER_STATUS_SUCCESS);
+
+    /* =========================================== */
+    /*         ALLOCATE Psyevd WORKSPACE            */
+    /* =========================================== */
+
+    /* To achieve better performance, allocate the device workspace with
+     * cusolverMpMalloc or — as here — with ncclMemAlloc + cusolverMpBufferRegister.
+     * Plain cudaMalloc is also accepted. */
+    /* cusolverMp bufferSize queries return this rank's requirement, while
+     * registration (like cusolverMpMalloc) is collective and requires the
+     * same size on every grid rank — register the grid-wide maximum. */
+    MPI_Allreduce(MPI_IN_PLACE, &syevdWorkspaceInBytesOnDevice, 1, MPI_UNSIGNED_LONG, MPI_MAX, MPI_COMM_WORLD);
+
+    int syevdWorkRegistered = 0;
+    if (syevdWorkspaceInBytesOnDevice > 0)
+    {
+        ncclStat = ncclMemAlloc((void**)&d_syevdWork, syevdWorkspaceInBytesOnDevice);
+        SAMPLE_ASSERT(ncclStat == ncclSuccess);
+
+        /* No kernels may be in flight during NCCL window registration. */
+        cudaStat = hipStreamSynchronize(stream);
+        SAMPLE_ASSERT(cudaStat == hipSuccess);
+
+        cusolverStat = cusolverMpBufferRegister(gridA, d_syevdWork, syevdWorkspaceInBytesOnDevice);
+        if (cusolverStat == HIPSOLVER_STATUS_SUCCESS)
+        {
+            syevdWorkRegistered = 1;
+        }
+        else if (rank == 0)
+        {
+            fprintf(stderr,
+                    "Warning: failed to register workspace memory with cusolverMp (status %d); "
+                    "continuing without workspace registration.\n",
+                    (int)cusolverStat);
+        }
+    }
+
+    if (syevdWorkspaceInBytesOnHost > 0)
+    {
+        h_syevdWork = (void*)malloc(syevdWorkspaceInBytesOnHost);
+        SAMPLE_ASSERT(h_syevdWork != NULL);
+    }
+
+    /* =========================================== */
+    /*      SCATTER MATRICES A AND B FROM MASTER   */
+    /* =========================================== */
+    cusolverStat = cusolverMpMatrixScatterH2D(handle,
+                                              lda,
+                                              colsA,
+                                              (void*)d_A,
+                                              1,
+                                              1,
+                                              descA,
+                                              0, /* root rank */
+                                              (void*)h_A,
+                                              lda);
+    SAMPLE_ASSERT(cusolverStat == HIPSOLVER_STATUS_SUCCESS);
+
+    cusolverStat = cusolverMpMatrixScatterH2D(handle,
+                                              ldq,
+                                              colsQ,
+                                              (void*)d_Q,
+                                              1,
+                                              1,
+                                              descQ,
+                                              0, /* root rank */
+                                              (void*)h_Q,
+                                              ldq);
+    SAMPLE_ASSERT(cusolverStat == HIPSOLVER_STATUS_SUCCESS);
+
+    /* sync wait for data to arrive to device */
+    cudaStat = hipStreamSynchronize(stream);
+    SAMPLE_ASSERT(cudaStat == hipSuccess);
+
+    /* =========================================== */
+    /*                   CALL psyevd               */
+    /* =========================================== */
+
+    cusolverStat = cusolverMpSyevd(handle,
+                                   &jobz,
+                                   HIPBLAS_FILL_MODE_LOWER,
+                                   n,
+                                   d_A,
+                                   ia,
+                                   ja,
+                                   descA,
+                                   d_D,
+                                   d_Q,
+                                   iq,
+                                   jq,
+                                   descQ,
+                                   HIP_R_64F,
+                                   d_syevdWork,
+                                   syevdWorkspaceInBytesOnDevice,
+                                   h_syevdWork,
+                                   syevdWorkspaceInBytesOnHost,
+                                   d_syevdInfo);
+    SAMPLE_ASSERT(cusolverStat == HIPSOLVER_STATUS_SUCCESS);
+
+    /* sync after cusolverMpsyevd */
+    cudaStat = hipStreamSynchronize(stream);
+    SAMPLE_ASSERT(cudaStat == hipSuccess);
+
+    /* copy d_syevdInfo to host */
+    cudaStat = hipMemcpyAsync(&h_syevdInfo, d_syevdInfo, sizeof(int), hipMemcpyDeviceToHost, stream);
+    SAMPLE_ASSERT(cudaStat == hipSuccess);
+
+    /* wait for d_syevdInfo copy */
+    cudaStat = hipStreamSynchronize(stream);
+    SAMPLE_ASSERT(cudaStat == hipSuccess);
+
+    /* check return value of cusolverMpsyevd */
+    SAMPLE_ASSERT(h_syevdInfo == 0);
+
+    /* =========================================== */
+    /*      GATHER MATRICES A AND Q FROM MASTER    */
+    /* =========================================== */
+
+    /* Copy solution to h_Q */
+    cusolverStat = cusolverMpMatrixGatherD2H(handle,
+                                             ldq,
+                                             colsQ,
+                                             (void*)d_Q,
+                                             1,
+                                             1,
+                                             descQ,
+                                             0, /* master rank, destination */
+                                             (void*)h_Q,
+                                             ldq);
+    SAMPLE_ASSERT(cusolverStat == HIPSOLVER_STATUS_SUCCESS);
+
+    /* sync wait for data to arrive to host */
+    cudaStat = hipStreamSynchronize(stream);
+    SAMPLE_ASSERT(cudaStat == hipSuccess);
+
+    /* =========================================== */
+    /*        CLEAN UP HOST WORKSPACE ON MASTER    */
+    /* =========================================== */
+    if (rank == 0)
+    {
+        if (h_A)
+        {
+            free(h_A);
+            h_A = NULL;
+        }
+
+        if (h_Q)
+        {
+            free(h_Q);
+            h_Q = NULL;
+        }
+
+        if (h_D)
+        {
+            free(h_D);
+            h_D = NULL;
+        }
+    }
+
+    /* =========================================== */
+    /*           DESTROY MATRIX DESCRIPTORS        */
+    /* =========================================== */
+
+    cusolverStat = cusolverMpDestroyMatrixDesc(descA);
+    SAMPLE_ASSERT(cusolverStat == HIPSOLVER_STATUS_SUCCESS);
+
+    cusolverStat = cusolverMpDestroyMatrixDesc(descQ);
+    SAMPLE_ASSERT(cusolverStat == HIPSOLVER_STATUS_SUCCESS);
+
+    if (d_syevdWork)
+    {
+        /* Deregistration is collective and requires quiescent grid streams
+         * (see cusolverMpBufferRegister). */
+        cudaStat = hipStreamSynchronize(stream);
+        SAMPLE_ASSERT(cudaStat == hipSuccess);
+
+        /* Deregister before freeing; the buffer comes from ncclMemAlloc.
+         * Must run before the grid is destroyed: the registration lives in
+         * the grid's window registry. */
+        if (syevdWorkRegistered)
+        {
+            cusolverStat = cusolverMpBufferDeregister(gridA, d_syevdWork);
+            SAMPLE_ASSERT(cusolverStat == HIPSOLVER_STATUS_SUCCESS);
+        }
+        ncclStat = ncclMemFree(d_syevdWork);
+        SAMPLE_ASSERT(ncclStat == ncclSuccess);
+        d_syevdWork = NULL;
+    }
+
+    /* =========================================== */
+    /*             DESTROY MATRIX GRIDS            */
+    /* =========================================== */
+
+    cusolverStat = cusolverMpDestroyGrid(gridA);
+    SAMPLE_ASSERT(cusolverStat == HIPSOLVER_STATUS_SUCCESS);
+
+    cusolverStat = cusolverMpDestroyGrid(gridQ);
+    SAMPLE_ASSERT(cusolverStat == HIPSOLVER_STATUS_SUCCESS);
+
+    /* =========================================== */
+    /*          DEALLOCATE DEVICE WORKSPACE        */
+    /* =========================================== */
+
+    if (d_A)
+    {
+        cudaStat = hipFree(d_A);
+        SAMPLE_ASSERT(cudaStat == hipSuccess);
+        d_A = NULL;
+    }
+
+    if (d_Q)
+    {
+        cudaStat = hipFree(d_Q);
+        SAMPLE_ASSERT(cudaStat == hipSuccess);
+        d_Q = NULL;
+    }
+
+    if (d_D)
+    {
+        cudaStat = hipFree(d_D);
+        SAMPLE_ASSERT(cudaStat == hipSuccess);
+        d_D = NULL;
+    }
+
+    if (d_syevdInfo)
+    {
+        cudaStat = hipFree(d_syevdInfo);
+        SAMPLE_ASSERT(cudaStat == hipSuccess);
+        d_syevdInfo = NULL;
+    }
+
+    /* =========================================== */
+    /*         DEALLOCATE HOST WORKSPACE           */
+    /* =========================================== */
+    if (h_syevdWork)
+    {
+        free(h_syevdWork);
+        h_syevdWork = NULL;
+    }
+
+    /* =========================================== */
+    /*                      CLEANUP                */
+    /* =========================================== */
+
+    /* Destroy cusolverMp handle */
+    cusolverStat = cusolverMpDestroy(handle);
+    SAMPLE_ASSERT(cusolverStat == HIPSOLVER_STATUS_SUCCESS);
+
+    /* sync before ncclCommDestroy */
+    cudaStat = hipStreamSynchronize(stream);
+    SAMPLE_ASSERT(cudaStat == hipSuccess);
+
+    /* destroy nccl communicator */
+    ncclStat = ncclCommDestroy(ncclComm);
+    SAMPLE_ASSERT(ncclStat == ncclSuccess);
+
+    /* destroy user stream */
+    cudaStat = hipStreamDestroy(stream);
+    SAMPLE_ASSERT(cudaStat == hipSuccess);
+
+    /* MPI barrier before MPI_Finalize */
+    MPI_Barrier(MPI_COMM_WORLD);
+    sample_ok = sample_all_ranks_succeeded(sample_ok);
+
+    /* Finalize MPI environment */
+    MPI_Finalize();
+
+    if (rank == 0)
+    {
+        printf("%s\n", sample_ok ? "[SUCCEEDED]" : "[FAILED]");
+    }
+
+    return sample_ok ? 0 : 1;
+}

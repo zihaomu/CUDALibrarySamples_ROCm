@@ -1,0 +1,174 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+#pragma once
+
+#include <hip/hip_runtime.h>
+#include <hipblas.h>
+#include <cstdlib>
+#include <iostream>
+
+#ifndef DEBUG_PRINT
+#ifdef DEBUG_PRINTS
+#define DEBUG_PRINT(x) std::cout << x
+#else
+#define DEBUG_PRINT(x)
+#endif
+#endif
+
+// Helper function to check CUDA errors.
+static void checkCudaError(hipError_t error, const char *msg) {
+    if (error != hipSuccess) {
+        DEBUG_PRINT("CUDA error: " << msg << " - " << hipGetErrorString(error) << std::endl);
+        exit(EXIT_FAILURE);
+    }
+}
+
+// Helper function to check cuBLAS errors.
+static void checkCublasError(hipblasStatus_t status, const char *msg) {
+    if (status != HIPBLAS_STATUS_SUCCESS) {
+        DEBUG_PRINT("cuBLAS error: " << msg << std::endl);
+        exit(EXIT_FAILURE);
+    }
+}
+
+inline hipblasHandle_t getCublasHandle() {
+    static hipblasHandle_t handle{};
+    static bool initialized = false;
+    if (!initialized) {
+      checkCublasError(hipblasCreate(&handle), "Failed to create cuBLAS handle");
+      std::atexit([]{ (void)hipblasDestroy(handle); });
+      initialized = true;
+    }
+    return handle;
+}
+
+// Allocate A, B, and C on the device.
+template <typename T>
+static inline void allocateMatricesOnDevice(
+    int n, int lda, int ldb, int ldc, T *&d_A, T *&d_B, T *&d_C,
+    size_t &size_A, size_t &size_B, size_t &size_C) {
+    size_A = n * lda * sizeof(T);
+    size_B = n * ldb * sizeof(T);
+    size_C = n * ldc * sizeof(T);
+
+    checkCudaError(hipMalloc(&d_A, size_A), "Failed to allocate device memory for A");
+    checkCudaError(hipMalloc(&d_B, size_B), "Failed to allocate device memory for B");
+    checkCudaError(hipMalloc(&d_C, size_C), "Failed to allocate device memory for C");
+}
+
+// Compute C := A * B with cuBLAS.
+template<typename T>
+void cublas_native_gemm(int n, const T *A, int lda, const T *B, int ldb, T *C, int ldc) {
+    DEBUG_PRINT("Using cuBLAS algorithm (no emulation)" << std::endl);
+
+    hipblasHandle_t handle = getCublasHandle();
+
+    // Allocate device memory.
+    T *d_A = nullptr, *d_B = nullptr, *d_C = nullptr;
+    size_t size_A = 0, size_B = 0, size_C = 0;
+    allocateMatricesOnDevice<T>(n, lda, ldb, ldc, d_A, d_B, d_C, size_A, size_B, size_C);
+
+    // Copy input matrices to device.
+    checkCudaError(hipMemcpy(d_A, A, size_A, hipMemcpyHostToDevice), "Failed to copy A to device");
+    checkCudaError(hipMemcpy(d_B, B, size_B, hipMemcpyHostToDevice), "Failed to copy B to device");
+
+    // Compute C := A * B.
+    const T alpha = T(1.0);
+    const T beta = T(0.0);
+
+    hipDataType dtype = std::is_same_v<T, std::complex<double>> ? HIP_C_64F : HIP_R_64F;
+    checkCublasError(hipblasGemmEx(handle,
+        HIPBLAS_OP_N, HIPBLAS_OP_N,
+        n, n, n,
+        reinterpret_cast<const void*>(&alpha),
+        (const void*)d_A, dtype, lda,
+        (const void*)d_B, dtype, ldb,
+        reinterpret_cast<const void*>(&beta),
+        (void*)d_C, dtype, ldc,
+        HIPBLAS_COMPUTE_64F,
+        HIPBLAS_GEMM_DEFAULT),
+      "Failed to execute hipblasGemmEx");
+
+    // Copy result back to host.
+    checkCudaError(hipMemcpy(C, d_C, size_C, hipMemcpyDeviceToHost), "Failed to copy result back to host");
+
+    // Clean up.
+    checkCudaError(hipFree(d_A), "Failed to free device memory for A");
+    checkCudaError(hipFree(d_B), "Failed to free device memory for B");
+    checkCudaError(hipFree(d_C), "Failed to free device memory for C");
+}
+
+// Compute C := A * B with cuBLAS.
+template<typename T>
+void cublas_emulated_gemm(int n, const T *A, int lda, const T *B, int ldb, T *C, int ldc) {
+
+    DEBUG_PRINT("Using cuBLAS algorithm (emulation)" << std::endl);
+
+    hipblasHandle_t handle = getCublasHandle();
+
+    // Detailed examples of how to configure emulated DGEMM can be found in
+    // the example Emulation/dgemm_dynamic and Emulation/dgemm_fixed.
+
+    cudaEmulationStrategy_t strategy = CUDA_EMULATION_STRATEGY_EAGER;
+    cudaEmulationSpecialValuesSupport svHandling = CUDA_EMULATION_SPECIAL_VALUES_SUPPORT_DEFAULT;
+    int maxMantissaBitCount = 200;
+
+    checkCublasError(cublasSetFixedPointEmulationMaxMantissaBitCount(handle, maxMantissaBitCount),
+        "Failed to set the number of mantissa bits");
+
+    checkCublasError(cublasSetEmulationStrategy(handle, strategy),
+            "Failed to set the emulation strategy");
+
+    checkCublasError(cublasSetEmulationSpecialValuesSupport(handle, svHandling),
+        "Failed to set the value handling");
+
+    // Allocate device memory.
+    T *d_A = nullptr, *d_B = nullptr, *d_C = nullptr;
+    size_t size_A = 0, size_B = 0, size_C = 0;
+    allocateMatricesOnDevice<T>(n, lda, ldb, ldc, d_A, d_B, d_C, size_A, size_B, size_C);
+
+    // Copy input matrices to device.
+    checkCudaError(hipMemcpy(d_A, A, size_A, hipMemcpyHostToDevice), "Failed to copy A to device");
+    checkCudaError(hipMemcpy(d_B, B, size_B, hipMemcpyHostToDevice), "Failed to copy B to device");
+
+    // Compute C := A * B.
+    const T alpha = T(1.0);
+    const T beta = T(0.0);
+
+    hipDataType dtype = std::is_same_v<T, std::complex<double>> ? HIP_C_64F : HIP_R_64F;
+    checkCublasError(hipblasGemmEx(handle,
+        HIPBLAS_OP_N, HIPBLAS_OP_N,
+        n, n, n,
+        reinterpret_cast<const void*>(&alpha),
+        (const void*)d_A, dtype, lda,
+        (const void*)d_B, dtype, ldb,
+        reinterpret_cast<const void*>(&beta),
+        (void*)d_C, dtype, ldc,
+        CUBLAS_COMPUTE_64F_EMULATED_FIXEDPOINT,
+        HIPBLAS_GEMM_DEFAULT),
+      "Failed to execute hipblasGemmEx");
+
+    // Copy result back to host.
+    checkCudaError(hipMemcpy(C, d_C, size_C, hipMemcpyDeviceToHost), "Failed to copy result back to host");
+
+    // Clean up.
+    checkCudaError(hipFree(d_A), "Failed to free device memory for A");
+    checkCudaError(hipFree(d_B), "Failed to free device memory for B");
+    checkCudaError(hipFree(d_C), "Failed to free device memory for C");
+}

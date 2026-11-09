@@ -1,0 +1,41 @@
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/Xtrtri/cusolver_Xtrtri_example.cu:26:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/utils/cusolver_utils.h:372:1: error: unknown type name 'cusolverIRSRefinement_t'
+  372 | cusolverIRSRefinement_t get_cusolver_refinement_solver(std::string solver_string) {
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/utils/cusolver_utils.h:374:16: error: use of undeclared identifier 'CUSOLVER_IRS_REFINE_NONE'
+  374 |         return CUSOLVER_IRS_REFINE_NONE;
+      |                ^~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/utils/cusolver_utils.h:376:16: error: use of undeclared identifier 'CUSOLVER_IRS_REFINE_CLASSICAL'
+  376 |         return CUSOLVER_IRS_REFINE_CLASSICAL;
+      |                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/utils/cusolver_utils.h:378:16: error: use of undeclared identifier 'CUSOLVER_IRS_REFINE_GMRES'
+  378 |         return CUSOLVER_IRS_REFINE_GMRES;
+      |                ^~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/utils/cusolver_utils.h:380:16: error: use of undeclared identifier 'CUSOLVER_IRS_REFINE_CLASSICAL_GMRES'
+  380 |         return CUSOLVER_IRS_REFINE_CLASSICAL_GMRES;
+      |                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/utils/cusolver_utils.h:382:16: error: use of undeclared identifier 'CUSOLVER_IRS_REFINE_GMRES_GMRES'
+  382 |         return CUSOLVER_IRS_REFINE_GMRES_GMRES;
+      |                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/utils/cusolver_utils.h:386:12: error: use of undeclared identifier 'CUSOLVER_IRS_REFINE_NOT_SET'
+  386 |     return CUSOLVER_IRS_REFINE_NOT_SET;
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/Xtrtri/cusolver_Xtrtri_example.cu:38:24: error: use of undeclared identifier 'cusolverDnXtrtri_bufferSize'
+   38 |         CUSOLVER_CHECK(cusolverDnXtrtri_bufferSize(handle, uplo, diag, n, traits<T>::cuda_data_type,
+      |                        ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/Xtrtri/cusolver_Xtrtri_example.cu:159:5: note: in instantiation of function template specialization 'trtri<double>' requested here
+  159 |     trtri(handle, n, d_A_inv, lda, uplo, diag, d_info);
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/Xtrtri/cusolver_Xtrtri_example.cu:55:24: error: use of undeclared identifier 'cusolverDnXtrtri'
+   55 |         CUSOLVER_CHECK(cusolverDnXtrtri(handle, uplo, diag, n, traits<T>::cuda_data_type, d_A, lda,
+      |                        ^~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/Xtrtri/cusolver_Xtrtri_example.cu:85:18: error: no matching function for call to 'hipblasGemmEx'
+   85 |     CUBLAS_CHECK(hipblasGemmEx(handle, HIPBLAS_OP_N, HIPBLAS_OP_N, n, n, n,
+      |                  ^~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/Xtrtri/cusolver_Xtrtri_example.cu:174:5: note: in instantiation of function template specialization 'residual_check<double>' requested here
+  174 |     residual_check(n, d_A, d_A_inv, lda, eps);
+      |     ^
+/opt/rocm/core-10.1/include/hipblas/hipblas.h:23902:32: note: candidate function not viable: no known conversion from 'const hipDataType' (aka 'const enum hipDataType') to 'hipblasComputeType_t' for 18th argument
+ 23902 | HIPBLAS_EXPORT hipblasStatus_t hipblasGemmEx(hipblasHandle_t      handle,
+       |                                ^
+10 errors generated.

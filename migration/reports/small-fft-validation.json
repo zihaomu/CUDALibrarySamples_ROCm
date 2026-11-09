@@ -1,0 +1,42 @@
+[
+  {
+    "id": "cuFFT/2d_c2r_r2c::2d_c2r_r2c_example.cpp",
+    "status": "PASSED",
+    "checks": [
+      {
+        "case": "padded-layout-normalized-c2r-full-cpu",
+        "passed": true,
+        "max_abs_error": 0.0
+      },
+      {
+        "case": "r2c-roundtrip-full-cpu",
+        "passed": true,
+        "max_abs_error": 0.0
+      }
+    ],
+    "oracle": "NumPy irfftn/rfftn; all 16 real /12 complex values, explicit padded in-place strides",
+    "input_identity": "dbe38923217d97c31a4f5b6a5ad07c1c5b4102c50bd2fd625b13e4a8ee6f8a2a",
+    "evidence": "migration/reports/evidence/20261109T093236.589333Z/original-rocm/cuFFT_2d_c2r_r2c_2d_c2r_r2c_example.cpp",
+    "implementation_sha256": "aa22d188fe30dd25bb81f58cbd02d16259c5023cde77b687e2701f709f25d74d"
+  },
+  {
+    "id": "cuFFT/3d_c2c::3d_c2c_example.cpp",
+    "status": "PASSED",
+    "checks": [
+      {
+        "case": "original-3d-forward-all-values-cpu",
+        "passed": true,
+        "max_abs_error": 0.0
+      },
+      {
+        "case": "original-3d-gpu-normalization-roundtrip",
+        "passed": true,
+        "max_abs_error": 0.0
+      }
+    ],
+    "oracle": "NumPy FFTN, original n=2^3 batch2 input i-i*j, every printed value checked at original 6-decimal output precision",
+    "input_identity": "source-defined deterministic i-i*j",
+    "evidence": "migration/reports/evidence/20261109T090451.232153Z/original-rocm/cuFFT_3d_c2c_3d_c2c_example.cpp",
+    "implementation_sha256": "cb635a520c63f0726237e2890fc1e792b6c7244619ce5fcf3e6ab844328e949a"
+  }
+]

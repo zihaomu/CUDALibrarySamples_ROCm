@@ -1,0 +1,36 @@
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSPARSE/spmm_csr_op/spmm_csr_op_example.c: In function ‘int main()’:
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSPARSE/spmm_csr_op/spmm_csr_op_example.c:187:22: warning: ‘cusparseSpMMOpPlan_t’ is deprecated: The type will be removed in the next major release [-Wdeprecated-declarations]
+  187 |     cusparseSpMMOpPlan_t plan;
+      |                      ^~~~
+/usr/local/cuda-13.4/include/cusparse.h:6234:29: note: declared here
+ 6234 |     cusparseSpMMOpPlan_t CUSPARSE_DEPRECATED_TYPE;
+      |                             ^~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSPARSE/spmm_csr_op/spmm_csr_op_example.c:218:54: warning: ‘cusparseStatus_t cusparseSpMMOp_createPlan(cusparseHandle_t, cusparseSpMMOpPlan**, cusparseOperation_t, cusparseOperation_t, cusparseConstSpMatDescr_t, cusparseConstDnMatDescr_t, cusparseDnMatDescr_t, cudaDataType, cusparseSpMMOpAlg_t, const void*, size_t, const void*, size_t, const void*, size_t, size_t*)’ is deprecated: The routine will be removed in the next major release [-Wdeprecated-declarations]
+  218 |     CHECK_CUSPARSE(
+      |                                                      ^                                                                                                                                                                                                                                                                                          
+/usr/local/cuda-13.4/include/cusparse.h:6242:1: note: declared here
+ 6242 | cusparseSpMMOp_createPlan(cusparseHandle_t          handle,
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSPARSE/spmm_csr_op/spmm_csr_op_example.c:234:43: warning: ‘cusparseStatus_t cusparseSpMMOp(cusparseSpMMOpPlan_t, void*)’ is deprecated: The routine will be removed in the next major release [-Wdeprecated-declarations]
+  234 |     CHECK_CUSPARSE( cusparseSpMMOp(plan, dBuffer) )
+      |                             ~~~~~~~~~~~~~~^~~~~~~~~      
+/usr/local/cuda-13.4/include/cusparse.h:6261:1: note: declared here
+ 6261 | cusparseSpMMOp(cusparseSpMMOpPlan_t plan,
+      | ^~~~~~~~~~~~~~
+/usr/bin/ld: /tmp/tmpxft_001f9e7a_00000000-11_spmm_csr_op_example.o: in function `nvrtc_compile(int, char const*, char const**, int, char**, unsigned long*)':
+tmpxft_001f9e7a_00000000-6_spmm_csr_op_example.cudafe1.cpp:(.text+0x78): undefined reference to `nvrtcCreateProgram'
+/usr/bin/ld: tmpxft_001f9e7a_00000000-6_spmm_csr_op_example.cudafe1.cpp:(.text+0x114): undefined reference to `nvrtcCompileProgram'
+/usr/bin/ld: tmpxft_001f9e7a_00000000-6_spmm_csr_op_example.cudafe1.cpp:(.text+0x13e): undefined reference to `nvrtcGetProgramLogSize'
+/usr/bin/ld: tmpxft_001f9e7a_00000000-6_spmm_csr_op_example.cudafe1.cpp:(.text+0x162): undefined reference to `nvrtcGetProgramLog'
+/usr/bin/ld: tmpxft_001f9e7a_00000000-6_spmm_csr_op_example.cudafe1.cpp:(.text+0x1a1): undefined reference to `nvrtcDestroyProgram'
+/usr/bin/ld: tmpxft_001f9e7a_00000000-6_spmm_csr_op_example.cudafe1.cpp:(.text+0x1b2): undefined reference to `nvrtcGetErrorString'
+/usr/bin/ld: tmpxft_001f9e7a_00000000-6_spmm_csr_op_example.cudafe1.cpp:(.text+0x1e9): undefined reference to `nvrtcGetLTOIRSize'
+/usr/bin/ld: tmpxft_001f9e7a_00000000-6_spmm_csr_op_example.cudafe1.cpp:(.text+0x20d): undefined reference to `nvrtcGetLTOIR'
+/usr/bin/ld: tmpxft_001f9e7a_00000000-6_spmm_csr_op_example.cudafe1.cpp:(.text+0x21b): undefined reference to `nvrtcDestroyProgram'
+/usr/bin/ld: tmpxft_001f9e7a_00000000-6_spmm_csr_op_example.cudafe1.cpp:(.text+0x270): undefined reference to `nvrtcGetErrorString'
+/usr/bin/ld: tmpxft_001f9e7a_00000000-6_spmm_csr_op_example.cudafe1.cpp:(.text+0x287): undefined reference to `nvrtcGetErrorString'
+/usr/bin/ld: tmpxft_001f9e7a_00000000-6_spmm_csr_op_example.cudafe1.cpp:(.text+0x29e): undefined reference to `nvrtcGetErrorString'
+/usr/bin/ld: tmpxft_001f9e7a_00000000-6_spmm_csr_op_example.cudafe1.cpp:(.text+0x2ba): undefined reference to `nvrtcGetErrorString'
+/usr/bin/ld: tmpxft_001f9e7a_00000000-6_spmm_csr_op_example.cudafe1.cpp:(.text+0x2d1): undefined reference to `nvrtcGetErrorString'
+/usr/bin/ld: /tmp/tmpxft_001f9e7a_00000000-11_spmm_csr_op_example.o:tmpxft_001f9e7a_00000000-6_spmm_csr_op_example.cudafe1.cpp:(.text+0x2eb): more undefined references to `nvrtcGetErrorString' follow
+collect2: error: ld returned 1 exit status

@@ -1,0 +1,147 @@
+{
+  "status": "BLOCKED",
+  "reason": "GPU occupied by unrelated workloads; idle/memory gate failed. Raw observations are not qualified performance comparisons.",
+  "scope": "6 GEMM profiles only, FP32/FP64 n256/1024/2048. GPU event timing around GEMM, allocation/transfer/init excluded, >=1s warmup then 3x100 iterations. Independent sampled long-double CPU reference.",
+  "rocm_evidence": "migration/reports/evidence/20261109T090320.996902Z/performance-rocm",
+  "cuda_evidence": "migration/reports/evidence/20261109T090112.327552Z/performance-cuda",
+  "qualification_evidence": [
+    "migration/reports/performance-idle-gate.log",
+    "migration/environments/benchmark-amd-final-before.json",
+    "migration/environments/benchmark-amd-final-after.json"
+  ],
+  "retry_condition": "An allowed unreserved AMD GPU must satisfy >=90% free memory and <=2% busy, then remain uncontended throughout both matched runs; retain power/frequency/topology snapshots.",
+  "profiles": [
+    {
+      "dtype": "fp32",
+      "n": 256,
+      "rocm_raw_median_ms": 0.061799999326467514,
+      "cuda_raw_median_ms": 0.01033599954098463,
+      "qualified_speed_ratio": null,
+      "status": "BLOCKED",
+      "rocm_groups_ms": [
+        0.06203899905085564,
+        0.06259900331497192,
+        0.059918999671936035
+      ],
+      "cuda_groups_ms": [
+        0.01033599954098463,
+        0.010304000228643417,
+        0.01033599954098463
+      ],
+      "correctness_reference_error": {
+        "rocm": 3.358235711736768e-07,
+        "cuda": 4.719502186834035e-07
+      }
+    },
+    {
+      "dtype": "fp64",
+      "n": 256,
+      "rocm_raw_median_ms": 0.19659799337387085,
+      "cuda_raw_median_ms": 0.059328000992536545,
+      "qualified_speed_ratio": null,
+      "status": "BLOCKED",
+      "rocm_groups_ms": [
+        0.19923900067806244,
+        0.19359800219535828,
+        0.19659799337387085
+      ],
+      "cuda_groups_ms": [
+        0.059328000992536545,
+        0.059328000992536545,
+        0.059328000992536545
+      ],
+      "correctness_reference_error": {
+        "rocm": 1.1102230246251565e-15,
+        "cuda": 8.881784197001252e-16
+      }
+    },
+    {
+      "dtype": "fp32",
+      "n": 1024,
+      "rocm_raw_median_ms": 0.19923800230026245,
+      "cuda_raw_median_ms": 0.05603199824690819,
+      "qualified_speed_ratio": null,
+      "status": "BLOCKED",
+      "rocm_groups_ms": [
+        0.200997993350029,
+        0.19923800230026245,
+        0.19683800637722015
+      ],
+      "cuda_groups_ms": [
+        0.05711999908089638,
+        0.056063998490571976,
+        0.055135998874902725
+      ],
+      "correctness_reference_error": {
+        "rocm": 3.5794498565167032e-06,
+        "cuda": 1.422208572687822e-06
+      }
+    },
+    {
+      "dtype": "fp64",
+      "n": 1024,
+      "rocm_raw_median_ms": 3.1762518882751465,
+      "cuda_raw_median_ms": 1.4830080270767212,
+      "qualified_speed_ratio": null,
+      "status": "BLOCKED",
+      "rocm_groups_ms": [
+        3.1832919120788574,
+        3.1751720905303955,
+        3.1688919067382812
+      ],
+      "cuda_groups_ms": [
+        1.4830399751663208,
+        1.4830080270767212,
+        1.4829440116882324
+      ],
+      "correctness_reference_error": {
+        "rocm": 5.329070518200751e-15,
+        "cuda": 4.440892098500626e-15
+      }
+    },
+    {
+      "dtype": "fp32",
+      "n": 2048,
+      "rocm_raw_median_ms": 1.3592280149459839,
+      "cuda_raw_median_ms": 0.3498559892177582,
+      "qualified_speed_ratio": null,
+      "status": "BLOCKED",
+      "rocm_groups_ms": [
+        1.3688279390335083,
+        1.3686280250549316,
+        1.3515479564666748
+      ],
+      "cuda_groups_ms": [
+        0.35811200737953186,
+        0.3489919900894165,
+        0.34467199444770813
+      ],
+      "correctness_reference_error": {
+        "rocm": 6.075374328062821e-06,
+        "cuda": 1.9953313543652484e-06
+      }
+    },
+    {
+      "dtype": "fp64",
+      "n": 2048,
+      "rocm_raw_median_ms": 21.580249786376953,
+      "cuda_raw_median_ms": 11.760031700134277,
+      "qualified_speed_ratio": null,
+      "status": "BLOCKED",
+      "rocm_groups_ms": [
+        22.59716033935547,
+        21.51993179321289,
+        21.501131057739258
+      ],
+      "cuda_groups_ms": [
+        11.75984001159668,
+        11.760224342346191,
+        11.760224342346191
+      ],
+      "correctness_reference_error": {
+        "rocm": 1.4210854715202004e-14,
+        "cuda": 1.2434497875801753e-14
+      }
+    }
+  ]
+}

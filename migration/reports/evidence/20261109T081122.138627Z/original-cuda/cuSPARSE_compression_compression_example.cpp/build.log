@@ -1,0 +1,59 @@
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSPARSE/compression/compression_example.cpp: In function ‘float benchmark(int64_t, int64_t, void*, void*, void*)’:
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSPARSE/compression/compression_example.cpp:168:42: warning: ‘cusparseStatus_t cusparseAxpby(cusparseHandle_t, const void*, cusparseConstSpVecDescr_t, const void*, cusparseDnVecDescr_t)’ is deprecated: The routine will be removed in the next major release [-Wdeprecated-declarations]
+  168 |     CHECK_CUSPARSE( cusparseAxpby(handle, &alpha, vecX, &beta, vecY) )
+      |                             ~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~      
+/usr/local/cuda-13.4/include/cusparse.h:5574:1: note: declared here
+ 5574 | cusparseAxpby(cusparseHandle_t          handle,
+      | ^~~~~~~~~~~~~
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSPARSE/compression/compression_example.cpp:179:14: warning: ‘cusparseStatus_t cusparseAxpby(cusparseHandle_t, const void*, cusparseConstSpVecDescr_t, const void*, cusparseDnVecDescr_t)’ is deprecated: The routine will be removed in the next major release [-Wdeprecated-declarations]
+  179 |         cusparseAxpby(handle, &alpha, vecX, &beta, vecY);
+      |         ~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/local/cuda-13.4/include/cusparse.h:5574:1: note: declared here
+ 5574 | cusparseAxpby(cusparseHandle_t          handle,
+      | ^~~~~~~~~~~~~
+/usr/bin/ld: /tmp/tmpxft_001f9b4a_00000000-11_compression_example.o: in function `main':
+tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text.startup+0x89): undefined reference to `cuDeviceGetAttribute'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text.startup+0xae): undefined reference to `cuDeviceGetAttribute'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text.startup+0x33b): undefined reference to `cuGetErrorString'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text.startup+0x373): undefined reference to `cuGetErrorString'
+/usr/bin/ld: /tmp/tmpxft_001f9b4a_00000000-11_compression_example.o: in function `drvMemory<int>::drvMemory(long, int const*)':
+tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIiEC2ElPKi[_ZN9drvMemoryIiEC5ElPKi]+0x79): undefined reference to `cuMemGetAllocationGranularity'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIiEC2ElPKi[_ZN9drvMemoryIiEC5ElPKi]+0xb4): undefined reference to `cuMemAddressReserve'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIiEC2ElPKi[_ZN9drvMemoryIiEC5ElPKi]+0xd0): undefined reference to `cuMemCreate'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIiEC2ElPKi[_ZN9drvMemoryIiEC5ElPKi]+0xf1): undefined reference to `cuMemMap'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIiEC2ElPKi[_ZN9drvMemoryIiEC5ElPKi]+0x107): undefined reference to `cuMemGetAllocationPropertiesFromHandle'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIiEC2ElPKi[_ZN9drvMemoryIiEC5ElPKi]+0x13c): undefined reference to `cuMemSetAccess'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIiEC2ElPKi[_ZN9drvMemoryIiEC5ElPKi]+0x192): undefined reference to `cuGetErrorString'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIiEC2ElPKi[_ZN9drvMemoryIiEC5ElPKi]+0x1e8): undefined reference to `cuGetErrorString'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIiEC2ElPKi[_ZN9drvMemoryIiEC5ElPKi]+0x203): undefined reference to `cuGetErrorString'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIiEC2ElPKi[_ZN9drvMemoryIiEC5ElPKi]+0x21e): undefined reference to `cuGetErrorString'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIiEC2ElPKi[_ZN9drvMemoryIiEC5ElPKi]+0x23c): undefined reference to `cuGetErrorString'
+/usr/bin/ld: /tmp/tmpxft_001f9b4a_00000000-11_compression_example.o:tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIiEC2ElPKi[_ZN9drvMemoryIiEC5ElPKi]+0x25a): more undefined references to `cuGetErrorString' follow
+/usr/bin/ld: /tmp/tmpxft_001f9b4a_00000000-11_compression_example.o: in function `drvMemory<int>::~drvMemory()':
+tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIiED2Ev[_ZN9drvMemoryIiED5Ev]+0x2b): undefined reference to `cuMemUnmap'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIiED2Ev[_ZN9drvMemoryIiED5Ev]+0x3b): undefined reference to `cuMemAddressFree'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIiED2Ev[_ZN9drvMemoryIiED5Ev]+0x49): undefined reference to `cuMemRelease'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIiED2Ev[_ZN9drvMemoryIiED5Ev]+0x75): undefined reference to `cuGetErrorString'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIiED2Ev[_ZN9drvMemoryIiED5Ev]+0xad): undefined reference to `cuGetErrorString'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIiED2Ev[_ZN9drvMemoryIiED5Ev]+0xc5): undefined reference to `cuGetErrorString'
+/usr/bin/ld: /tmp/tmpxft_001f9b4a_00000000-11_compression_example.o: in function `drvMemory<float>::drvMemory(long, float const*)':
+tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIfEC2ElPKf[_ZN9drvMemoryIfEC5ElPKf]+0x79): undefined reference to `cuMemGetAllocationGranularity'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIfEC2ElPKf[_ZN9drvMemoryIfEC5ElPKf]+0xb4): undefined reference to `cuMemAddressReserve'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIfEC2ElPKf[_ZN9drvMemoryIfEC5ElPKf]+0xd0): undefined reference to `cuMemCreate'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIfEC2ElPKf[_ZN9drvMemoryIfEC5ElPKf]+0xf1): undefined reference to `cuMemMap'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIfEC2ElPKf[_ZN9drvMemoryIfEC5ElPKf]+0x107): undefined reference to `cuMemGetAllocationPropertiesFromHandle'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIfEC2ElPKf[_ZN9drvMemoryIfEC5ElPKf]+0x13c): undefined reference to `cuMemSetAccess'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIfEC2ElPKf[_ZN9drvMemoryIfEC5ElPKf]+0x192): undefined reference to `cuGetErrorString'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIfEC2ElPKf[_ZN9drvMemoryIfEC5ElPKf]+0x1e8): undefined reference to `cuGetErrorString'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIfEC2ElPKf[_ZN9drvMemoryIfEC5ElPKf]+0x203): undefined reference to `cuGetErrorString'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIfEC2ElPKf[_ZN9drvMemoryIfEC5ElPKf]+0x21e): undefined reference to `cuGetErrorString'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIfEC2ElPKf[_ZN9drvMemoryIfEC5ElPKf]+0x23c): undefined reference to `cuGetErrorString'
+/usr/bin/ld: /tmp/tmpxft_001f9b4a_00000000-11_compression_example.o:tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIfEC2ElPKf[_ZN9drvMemoryIfEC5ElPKf]+0x25a): more undefined references to `cuGetErrorString' follow
+/usr/bin/ld: /tmp/tmpxft_001f9b4a_00000000-11_compression_example.o: in function `drvMemory<float>::~drvMemory()':
+tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIfED2Ev[_ZN9drvMemoryIfED5Ev]+0x2b): undefined reference to `cuMemUnmap'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIfED2Ev[_ZN9drvMemoryIfED5Ev]+0x3b): undefined reference to `cuMemAddressFree'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIfED2Ev[_ZN9drvMemoryIfED5Ev]+0x49): undefined reference to `cuMemRelease'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIfED2Ev[_ZN9drvMemoryIfED5Ev]+0x75): undefined reference to `cuGetErrorString'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIfED2Ev[_ZN9drvMemoryIfED5Ev]+0xad): undefined reference to `cuGetErrorString'
+/usr/bin/ld: tmpxft_001f9b4a_00000000-6_compression_example.cudafe1.cpp:(.text._ZN9drvMemoryIfED2Ev[_ZN9drvMemoryIfED5Ev]+0xc5): undefined reference to `cuGetErrorString'
+collect2: error: ld returned 1 exit status

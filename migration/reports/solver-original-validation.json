@@ -1,0 +1,323 @@
+[
+  {
+    "id": "cuSOLVER/Xgeev::cusolver_Xgeev_example1.cu",
+    "status": "PENDING",
+    "evidence": "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_Xgeev_cusolver_Xgeev_example1.cu",
+    "checks": [],
+    "reason": "specialized oracle not implemented for Xgeev"
+  },
+  {
+    "id": "cuSOLVER/Xgeev::cusolver_Xgeev_example2.cu",
+    "status": "PENDING",
+    "evidence": "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_Xgeev_cusolver_Xgeev_example2.cu",
+    "checks": [],
+    "reason": "specialized oracle not implemented for Xgeev"
+  },
+  {
+    "id": "cuSOLVER/Xgeev::cusolver_Xgeev_example3.cu",
+    "status": "PENDING",
+    "evidence": "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_Xgeev_cusolver_Xgeev_example3.cu",
+    "checks": [],
+    "reason": "specialized oracle not implemented for Xgeev"
+  },
+  {
+    "id": "cuSOLVER/Xgeqrf::cusolver_Xgeqrf_example.cu",
+    "status": "PENDING",
+    "evidence": "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_Xgeqrf_cusolver_Xgeqrf_example.cu",
+    "checks": [],
+    "reason": "specialized oracle not implemented for Xgeqrf"
+  },
+  {
+    "id": "cuSOLVER/Xpotrf::cusolver_Xpotrf_example.cu",
+    "status": "PENDING",
+    "evidence": "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_Xpotrf_cusolver_Xpotrf_example.cu",
+    "checks": [],
+    "reason": "specialized oracle not implemented for Xpotrf"
+  },
+  {
+    "id": "cuSOLVER/Xsyevd::cusolver_Xsyevd_example.cu",
+    "status": "PASSED",
+    "evidence": "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_Xsyevd_cusolver_Xsyevd_example.cu",
+    "checks": [
+      {
+        "check": "eigenvalues-cpu",
+        "passed": true,
+        "error_frobenius": 0.0,
+        "bound": 5.385164807134504e-10
+      },
+      {
+        "check": "eigen-residual",
+        "passed": true,
+        "error_frobenius": 4.440892098500626e-16,
+        "bound": 5.385164807134505e-10
+      },
+      {
+        "check": "orthogonality",
+        "passed": true,
+        "error_frobenius": 3.197625428141064e-16,
+        "bound": 1.7320508075688773e-10
+      }
+    ],
+    "source_sha256": "473985d99e0f7010ee0fc1ffc0e7f768468e3d190362b8eac40b03408528a409",
+    "implementation_sha256": "dea8b9f4f6a8ff7c4db103c7e4617475b6258c7ed7b248430c26664ce77445f3",
+    "oracle": "Independent NumPy/SciPy CPU factorization; GPU output checked for finiteness, reconstruction/residual and orthogonality",
+    "scope": "Original fixed teaching matrix; no sign/phase-sensitive raw eigenvector comparison"
+  },
+  {
+    "id": "cuSOLVER/gesvd::cusolver_gesvd_example.cu",
+    "status": "PASSED",
+    "evidence": "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_gesvd_cusolver_gesvd_example.cu",
+    "checks": [
+      {
+        "check": "singular-values-cpu",
+        "passed": true,
+        "error_frobenius": 8.881784197001252e-16,
+        "bound": 7.141428428542852e-10
+      },
+      {
+        "check": "reconstruction",
+        "passed": true,
+        "error_frobenius": 3.7022234168422464e-15,
+        "bound": 7.14142842854285e-10
+      },
+      {
+        "check": "U-orthogonality",
+        "passed": true,
+        "error_frobenius": 7.426264998183239e-16,
+        "bound": 1.7320508075688773e-10
+      },
+      {
+        "check": "VT-orthogonality",
+        "passed": true,
+        "error_frobenius": 3.1492424736710053e-16,
+        "bound": 1.4142135623730953e-10
+      }
+    ],
+    "source_sha256": "f5a4170b877ad24a2fc6cea61f657e668b9177c8cfa27727584dec5e76437c2c",
+    "implementation_sha256": "a0c841f37d58641fa14529f09a72d0dd8e052995d432ea9133f3d6a5d739f390",
+    "oracle": "Independent NumPy/SciPy CPU factorization; GPU output checked for finiteness, reconstruction/residual and orthogonality",
+    "scope": "Original fixed teaching matrix; no sign/phase-sensitive raw eigenvector comparison"
+  },
+  {
+    "id": "cuSOLVER/gesvdaStridedBatched::cusolver_gesvdaStridedBatched_example.cu",
+    "status": "PENDING",
+    "evidence": "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
+    "checks": [],
+    "reason": "specialized oracle not implemented for gesvdaStridedBatched"
+  },
+  {
+    "id": "cuSOLVER/gesvdj::cusolver_gesvdj_example.cu",
+    "status": "PASSED",
+    "evidence": "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_gesvdj_cusolver_gesvdj_example.cu",
+    "checks": [
+      {
+        "check": "singular-values-cpu",
+        "passed": true,
+        "error_frobenius": 6.661338147750939e-16,
+        "bound": 7.141428428542852e-10
+      },
+      {
+        "check": "reconstruction",
+        "passed": true,
+        "error_frobenius": 1.2755491433176288e-15,
+        "bound": 7.14142842854285e-10
+      },
+      {
+        "check": "U-orthogonality",
+        "passed": true,
+        "error_frobenius": 3.2243532869491377e-16,
+        "bound": 1.4142135623730953e-10
+      },
+      {
+        "check": "V-orthogonality",
+        "passed": true,
+        "error_frobenius": 2.1006194932886552e-18,
+        "bound": 1.4142135623730953e-10
+      }
+    ],
+    "source_sha256": "0a497fd41f0c5e7314e56f688dc6a7b6da907e15bcad50ab546c702c88342f2a",
+    "implementation_sha256": "8f5febb5a3127e656f448f7d77cc0c58959674b1c6889f472033d354e89e08cc",
+    "oracle": "Independent NumPy/SciPy CPU factorization; GPU output checked for finiteness, reconstruction/residual and orthogonality",
+    "scope": "Original fixed teaching matrix; no sign/phase-sensitive raw eigenvector comparison"
+  },
+  {
+    "id": "cuSOLVER/gesvdjBatched::cusolver_gesvdjBatched_example.cu",
+    "status": "PENDING",
+    "evidence": "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_gesvdjBatched_cusolver_gesvdjBatched_example.cu",
+    "checks": [],
+    "reason": "specialized oracle not implemented for gesvdjBatched"
+  },
+  {
+    "id": "cuSOLVER/orgqr::cusolver_orgqr_example.cu",
+    "status": "PASSED",
+    "evidence": "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_orgqr_cusolver_orgqr_example.cu",
+    "checks": [
+      {
+        "check": "orthogonality",
+        "passed": true,
+        "error_frobenius": 2.276629934331937e-16,
+        "bound": 1.4142135623730953e-10
+      },
+      {
+        "check": "QR-reconstruction",
+        "passed": true,
+        "error_frobenius": 1.2755491433176288e-15,
+        "bound": 7.14142842854285e-10
+      },
+      {
+        "check": "R-upper-triangular",
+        "passed": true,
+        "error_frobenius": 2.220446049250313e-16,
+        "bound": 1e-10
+      }
+    ],
+    "source_sha256": "fdb7131a43d137196a4806da6f455e8c5fae2c0b4d8e6c58085404f618089c62",
+    "implementation_sha256": "4d5f8b65530f2c8f79dcdc774633e7b952eb87af8c1ef58e077d82b8ef33051f",
+    "oracle": "Independent NumPy/SciPy CPU factorization; GPU output checked for finiteness, reconstruction/residual and orthogonality",
+    "scope": "Original fixed teaching matrix; no sign/phase-sensitive raw eigenvector comparison"
+  },
+  {
+    "id": "cuSOLVER/potrfBatched::cusolver_potrfBatched_example.cu",
+    "status": "PENDING",
+    "evidence": "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_potrfBatched_cusolver_potrfBatched_example.cu",
+    "checks": [],
+    "reason": "'A'"
+  },
+  {
+    "id": "cuSOLVER/syevd::cusolver_syevd_example.cu",
+    "status": "PASSED",
+    "evidence": "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_syevd_cusolver_syevd_example.cu",
+    "checks": [
+      {
+        "check": "eigenvalues-cpu",
+        "passed": true,
+        "error_frobenius": 0.0,
+        "bound": 5.385164807134504e-10
+      },
+      {
+        "check": "eigen-residual",
+        "passed": true,
+        "error_frobenius": 4.440892098500626e-16,
+        "bound": 5.385164807134505e-10
+      },
+      {
+        "check": "orthogonality",
+        "passed": true,
+        "error_frobenius": 3.197625428141064e-16,
+        "bound": 1.7320508075688773e-10
+      }
+    ],
+    "source_sha256": "ccb432aca2542d6ef0581c604771280070362a976892bb59d6c79131c7d8ce8f",
+    "implementation_sha256": "66852e6e9a12093542f153b9fa883f3e390bca1daefe21a7183cdab226f658f0",
+    "oracle": "Independent NumPy/SciPy CPU factorization; GPU output checked for finiteness, reconstruction/residual and orthogonality",
+    "scope": "Original fixed teaching matrix; no sign/phase-sensitive raw eigenvector comparison"
+  },
+  {
+    "id": "cuSOLVER/syevdx::cusolver_syevdx_example.cu",
+    "status": "PENDING",
+    "evidence": "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_syevdx_cusolver_syevdx_example.cu",
+    "checks": [],
+    "reason": "specialized oracle not implemented for syevdx"
+  },
+  {
+    "id": "cuSOLVER/syevj::cusolver_syevj_example.cu",
+    "status": "PASSED",
+    "evidence": "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_syevj_cusolver_syevj_example.cu",
+    "checks": [
+      {
+        "check": "eigenvalues-cpu",
+        "passed": true,
+        "error_frobenius": 9.930136612989092e-16,
+        "bound": 5.385164807134504e-10
+      },
+      {
+        "check": "eigen-residual",
+        "passed": true,
+        "error_frobenius": 7.691850745534255e-16,
+        "bound": 5.385164807134505e-10
+      },
+      {
+        "check": "orthogonality",
+        "passed": true,
+        "error_frobenius": 3.197625428141064e-16,
+        "bound": 1.7320508075688773e-10
+      }
+    ],
+    "source_sha256": "4d539e62c74157d6fb8cb9a65a1ed5da0821289a94606b4887203243f84a8941",
+    "implementation_sha256": "b10d35db94ded23d3b18e16d25adba3c13b7b83be7a683983d64b43511f4b54c",
+    "oracle": "Independent NumPy/SciPy CPU factorization; GPU output checked for finiteness, reconstruction/residual and orthogonality",
+    "scope": "Original fixed teaching matrix; no sign/phase-sensitive raw eigenvector comparison"
+  },
+  {
+    "id": "cuSOLVER/syevjBatched::cusolver_syevjBatched_example.cu",
+    "status": "PENDING",
+    "evidence": "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_syevjBatched_cusolver_syevjBatched_example.cu",
+    "checks": [],
+    "reason": "specialized oracle not implemented for syevjBatched"
+  },
+  {
+    "id": "cuSOLVER/sygvd::cusolver_sygvd_example.cu",
+    "status": "PASSED",
+    "evidence": "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_sygvd_cusolver_sygvd_example.cu",
+    "checks": [
+      {
+        "check": "eigenvalues-cpu",
+        "passed": true,
+        "error_frobenius": 2.7755575615628914e-16,
+        "bound": 1e-10
+      },
+      {
+        "check": "generalized-eigen-residual",
+        "passed": true,
+        "error_frobenius": 6.676139134108996e-16,
+        "bound": 1.8880428708991072e-10
+      },
+      {
+        "check": "B-orthogonality",
+        "passed": true,
+        "error_frobenius": 7.007648414759521e-16,
+        "bound": 1.7320508075688773e-10
+      }
+    ],
+    "source_sha256": "2b13dee8e24df09ea9dcf442ffc7e8faba0cbb9946feb37b6309f86d2c000ae9",
+    "implementation_sha256": "7f5e0dcccffc30929087c39fdd8ab882ff2c1c5a2c01b0dd6b44475dc547fcaf",
+    "oracle": "Independent NumPy/SciPy CPU factorization; GPU output checked for finiteness, reconstruction/residual and orthogonality",
+    "scope": "Original fixed teaching matrix; no sign/phase-sensitive raw eigenvector comparison"
+  },
+  {
+    "id": "cuSOLVER/sygvdx::cusolver_sygvdx_example.cu",
+    "status": "PENDING",
+    "evidence": "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_sygvdx_cusolver_sygvdx_example.cu",
+    "checks": [],
+    "reason": "specialized oracle not implemented for sygvdx"
+  },
+  {
+    "id": "cuSOLVER/sygvj::cusolver_sygvj_example.cu",
+    "status": "PASSED",
+    "evidence": "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_sygvj_cusolver_sygvj_example.cu",
+    "checks": [
+      {
+        "check": "eigenvalues-cpu",
+        "passed": true,
+        "error_frobenius": 5.003707553108401e-16,
+        "bound": 1e-10
+      },
+      {
+        "check": "generalized-eigen-residual",
+        "passed": true,
+        "error_frobenius": 8.813214774254467e-16,
+        "bound": 1.888042870899108e-10
+      },
+      {
+        "check": "B-orthogonality",
+        "passed": true,
+        "error_frobenius": 4.863080379612117e-16,
+        "bound": 1.7320508075688773e-10
+      }
+    ],
+    "source_sha256": "9d96723414cf8480f12e1417c7b3074bc89d25fbe18eda4b8e06bf00721ecd37",
+    "implementation_sha256": "cc4b2961c3cac056108a2cb9f520096529e48abd37d7d5cf721d8771af6d36a2",
+    "oracle": "Independent NumPy/SciPy CPU factorization; GPU output checked for finiteness, reconstruction/residual and orthogonality",
+    "scope": "Original fixed teaching matrix; no sign/phase-sensitive raw eigenvector comparison"
+  }
+]

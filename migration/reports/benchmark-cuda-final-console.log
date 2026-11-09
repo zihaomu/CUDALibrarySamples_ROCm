@@ -1,0 +1,132 @@
+{
+  "status": "PASSED",
+  "return_code": 0,
+  "evidence": "artifacts/20261109T090112.327552Z/performance-cuda",
+  "environment": {
+    "devices": "0, NVIDIA GeForce RTX 5090, GPU-5864d26e-25e9-041f-2901-2745fccf5e30, 615.71.09\n1, NVIDIA GeForce RTX 5090, GPU-17390cc0-bf3c-53e3-170c-21eb949de43b, 615.71.09\n",
+    "rocm_release": null,
+    "image_id": null,
+    "source_sha256": "33c401f587aa17a9c714a791737f32541d5982d823366bb40b32f90bd43bc8c7",
+    "common_header_sha256": "38c544361b43b13a62b282213e79536feeadb8d29c1d72a3630e97e5bca3b29f",
+    "visible_devices": "1",
+    "precision": "AMD rocBLAS default FP32/FP64; CUDA pedantic FP32/FP64",
+    "timing_scope": "GPU event around GEMM; allocation, transfers and initialization excluded; default library workspace",
+    "power_frequency": "not controlled; device metric snapshots retained separately"
+  },
+  "profiles": [
+    {
+      "benchmark": "gemm",
+      "dtype": "fp32",
+      "n": 256,
+      "warmup": 153120,
+      "minimum_warmup_ms": 1000,
+      "groups": 3,
+      "iterations_per_group": 100,
+      "gpu_median_ms": 0.01033599954098463,
+      "gpu_p95_ms": 0.010367999784648418,
+      "wall_mean_ms": 0.014584106666666666,
+      "tflops": 3.2463654692464825,
+      "max_reference_error": 4.719502186834035e-07,
+      "group_medians_ms": [
+        0.01033599954098463,
+        0.010304000228643417,
+        0.01033599954098463
+      ]
+    },
+    {
+      "benchmark": "gemm",
+      "dtype": "fp64",
+      "n": 256,
+      "warmup": 18304,
+      "minimum_warmup_ms": 1000,
+      "groups": 3,
+      "iterations_per_group": 100,
+      "gpu_median_ms": 0.059328000992536545,
+      "gpu_p95_ms": 0.06038400158286095,
+      "wall_mean_ms": 0.06393028666666666,
+      "tflops": 0.5655749635694137,
+      "max_reference_error": 8.881784197001252e-16,
+      "group_medians_ms": [
+        0.059328000992536545,
+        0.059328000992536545,
+        0.059328000992536545
+      ]
+    },
+    {
+      "benchmark": "gemm",
+      "dtype": "fp32",
+      "n": 1024,
+      "warmup": 18336,
+      "minimum_warmup_ms": 1000,
+      "groups": 3,
+      "iterations_per_group": 100,
+      "gpu_median_ms": 0.05603199824690819,
+      "gpu_p95_ms": 0.05788800120353699,
+      "wall_mean_ms": 0.06060522,
+      "tflops": 38.32602290100366,
+      "max_reference_error": 1.422208572687822e-06,
+      "group_medians_ms": [
+        0.05711999908089638,
+        0.056063998490571976,
+        0.055135998874902725
+      ]
+    },
+    {
+      "benchmark": "gemm",
+      "dtype": "fp64",
+      "n": 1024,
+      "warmup": 704,
+      "minimum_warmup_ms": 1000,
+      "groups": 3,
+      "iterations_per_group": 100,
+      "gpu_median_ms": 1.4830080270767212,
+      "gpu_p95_ms": 1.487712025642395,
+      "wall_mean_ms": 1.4886631366666665,
+      "tflops": 1.4480593555741443,
+      "max_reference_error": 4.440892098500626e-15,
+      "group_medians_ms": [
+        1.4830399751663208,
+        1.4830080270767212,
+        1.4829440116882324
+      ]
+    },
+    {
+      "benchmark": "gemm",
+      "dtype": "fp32",
+      "n": 2048,
+      "warmup": 3008,
+      "minimum_warmup_ms": 1000,
+      "groups": 3,
+      "iterations_per_group": 100,
+      "gpu_median_ms": 0.3498559892177582,
+      "gpu_p95_ms": 0.36111998558044434,
+      "wall_mean_ms": 0.35552261999999996,
+      "tflops": 49.10554546289864,
+      "max_reference_error": 1.9953313543652484e-06,
+      "group_medians_ms": [
+        0.35811200737953186,
+        0.3489919900894165,
+        0.34467199444770813
+      ]
+    },
+    {
+      "benchmark": "gemm",
+      "dtype": "fp64",
+      "n": 2048,
+      "warmup": 96,
+      "minimum_warmup_ms": 1000,
+      "groups": 3,
+      "iterations_per_group": 100,
+      "gpu_median_ms": 11.760031700134277,
+      "gpu_p95_ms": 11.764863967895508,
+      "wall_mean_ms": 11.76876963,
+      "tflops": 1.4608692920278301,
+      "max_reference_error": 1.2434497875801753e-14,
+      "group_medians_ms": [
+        11.75984001159668,
+        11.760224342346191,
+        11.760224342346191
+      ]
+    }
+  ]
+}

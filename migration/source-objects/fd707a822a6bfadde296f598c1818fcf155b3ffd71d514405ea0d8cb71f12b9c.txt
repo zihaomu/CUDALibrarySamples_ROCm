@@ -1,0 +1,186 @@
+#include "observe.hpp"
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2020 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+#include <cassert>
+#include <cstdio>
+#include <cstdlib>
+#include <vector>
+
+#include <hip/hip_runtime.h>
+#include <hipsolver.h>
+
+#include "cusolver_utils.h"
+
+int main(int argc, char *argv[]) {
+    hipsolverHandle_t cusolverH = NULL;
+    hipStream_t stream = NULL;
+
+    const hipblasFillMode_t uplo = HIPBLAS_FILL_MODE_LOWER;
+    const int batchSize = 2;
+    const int nrhs = 1;
+    const int m = 3;
+    const int lda = m;
+    const int ldb = m;
+    /*
+     *      | 1     2     3 |
+     * A0 = | 2     5     5 | = L0 * L0**T
+     *      | 3     5    12 |
+     *
+     *            | 1.0000         0         0 |
+     * where L0 = | 2.0000    1.0000         0 |
+     *            | 3.0000   -1.0000    1.4142 |
+     *
+     *      | 1     2     3 |
+     * A1 = | 2     4     5 | is not s.p.d., failed at row 2
+     *      | 3     5    12 |
+     *
+     */
+
+    const std::vector<double> A0 = {1.0, 2.0, 3.0, 2.0, 5.0, 5.0, 3.0, 5.0, 12.0};
+    const std::vector<double> A1 = {1.0, 2.0, 3.0, 2.0, 4.0, 5.0, 3.0, 5.0, 12.0};
+    const std::vector<double> B0 = {1.0, 1.0, 1.0};
+    std::vector<double> X0(m, 0);             /* X0 = A0\B0 */
+    std::vector<int> infoArray(batchSize, 0); /* host copy of error info */
+
+    std::vector<double> L0(lda * m); /* cholesky factor of A0 */
+
+    std::vector<double *> Aarray(batchSize, nullptr);
+    std::vector<double *> Barray(batchSize, nullptr);
+
+    double **d_Aarray = nullptr;
+    double **d_Barray = nullptr;
+    int *d_infoArray = nullptr;
+
+    std::printf("A0 = (matlab base-1)\n");
+    print_matrix(m, m, A0.data(), lda);
+    std::printf("=====\n");
+
+    std::printf("A1 = (matlab base-1)\n");
+    print_matrix(m, m, A1.data(), lda);
+    std::printf("=====\n");
+
+    std::printf("B0 = (matlab base-1)\n");
+    print_matrix(m, 1, B0.data(), ldb);
+    std::printf("=====\n");
+
+    /* step 1: create hipsolver handle, bind a stream */
+    CUSOLVER_CHECK(hipsolverDnCreate(&cusolverH));
+
+    CUDA_CHECK(hipStreamCreateWithFlags(&stream, hipStreamNonBlocking));
+    CUSOLVER_CHECK(hipsolverSetStream(cusolverH, stream));
+
+    /* step 2: copy A to device */
+    for (int j = 0; j < batchSize; j++) {
+        CUDA_CHECK(hipMalloc(reinterpret_cast<void **>(&Aarray[j]), sizeof(double) * lda * m));
+        CUDA_CHECK(hipMalloc(reinterpret_cast<void **>(&Barray[j]), sizeof(double) * ldb * nrhs));
+    }
+    CUDA_CHECK(hipMalloc(reinterpret_cast<void **>(&d_infoArray), sizeof(int) * infoArray.size()));
+
+    CUDA_CHECK(hipMalloc(reinterpret_cast<void **>(&d_Aarray), sizeof(double *) * Aarray.size()));
+    CUDA_CHECK(hipMalloc(reinterpret_cast<void **>(&d_Barray), sizeof(double *) * Barray.size()));
+
+    CUDA_CHECK(hipMemcpyAsync(Aarray[0], A0.data(), sizeof(double) * A0.size(),
+                               hipMemcpyHostToDevice, stream));
+    CUDA_CHECK(hipMemcpyAsync(Aarray[1], A1.data(), sizeof(double) * A1.size(),
+                               hipMemcpyHostToDevice, stream));
+
+    CUDA_CHECK(
+        hipMemcpyAsync(Barray[0], B0.data(), sizeof(double) * B0.size(), hipMemcpyHostToDevice, stream));
+    CUDA_CHECK(
+        hipMemcpyAsync(Barray[1], B0.data(), sizeof(double) * B0.size(), hipMemcpyHostToDevice, stream));
+
+    CUDA_CHECK(hipMemcpyAsync(d_Aarray, Aarray.data(), sizeof(double) * Aarray.size(),
+                               hipMemcpyHostToDevice, stream));
+    CUDA_CHECK(hipMemcpyAsync(d_Barray, Barray.data(), sizeof(double) * Barray.size(),
+                               hipMemcpyHostToDevice, stream));
+
+    /* step 3: Cholesky factorization */
+    CUSOLVER_CHECK(
+        hipsolverDnDpotrfBatched(cusolverH, uplo, m, d_Aarray, lda, d_infoArray, batchSize));
+
+    CUDA_CHECK(hipMemcpyAsync(infoArray.data(), d_infoArray, sizeof(int) * infoArray.size(),
+                               hipMemcpyDeviceToHost, stream));
+    CUDA_CHECK(hipMemcpyAsync(L0.data(), Aarray[0], sizeof(double) * lda * m,
+                               hipMemcpyDeviceToHost, stream));
+
+    CUDA_CHECK(hipStreamSynchronize(stream));
+
+    for (int j = 0; j < batchSize; j++) {
+        std::printf("info[%d] = %d\n", j, infoArray[j]);
+    }
+
+    assert(0 == infoArray[0]);
+    /* A1 is singular */
+    assert(2 == infoArray[1]);
+
+    std::printf("L = (matlab base-1), upper triangle is don't care \n");
+    print_matrix(m, m, L0.data(), lda);
+    std::printf("=====\n");
+
+    /*
+     * step 4: solve A0*X0 = B0
+     *        | 1 |        | 10.5 |
+     *   B0 = | 1 |,  X0 = | -2.5 |
+     *        | 1 |        | -1.5 |
+     */
+    CUSOLVER_CHECK(hipsolverDnDpotrsBatched(cusolverH, uplo, m, nrhs, /* only support rhs = 1*/
+                                           d_Aarray, lda, d_Barray, ldb, d_infoArray, batchSize));
+
+    CUDA_CHECK(hipMemcpyAsync(infoArray.data(), d_infoArray, sizeof(int), hipMemcpyDeviceToHost,
+                               stream));
+    CUDA_CHECK(
+        hipMemcpyAsync(X0.data(), Barray[0], sizeof(double) * X0.size(), hipMemcpyDeviceToHost, stream));
+
+    CUDA_CHECK(hipStreamSynchronize(stream));
+
+    std::printf("after potrsBatched: infoArray[0] = %d\n", infoArray[0]);
+    if (0 > infoArray[0]) {
+        std::printf("%d-th parameter is wrong \n", -infoArray[0]);
+        exit(1);
+    }
+
+    std::printf("X0 = (matlab base-1)\n");
+    print_matrix(m, 1, X0.data(), ldb);
+    std::printf("=====\n");
+
+    
+// MIGRATION_OBSERVE_ORIGINAL: host buffers after GPU synchronization.
+migration_observer::emit("A0",A0.data(),A0.size());
+migration_observer::emit("A1",A1.data(),A1.size());
+migration_observer::emit("B0",B0.data(),B0.size());
+migration_observer::emit("X0",X0.data(),X0.size());
+migration_observer::emit("infoArray",infoArray.data(),infoArray.size());
+migration_observer::emit("L0",L0.data(),L0.size());
+/* free resources */
+    CUDA_CHECK(hipFree(d_Aarray));
+    CUDA_CHECK(hipFree(d_Barray));
+    CUDA_CHECK(hipFree(d_infoArray));
+    for (int j = 0; j < batchSize; j++) {
+        CUDA_CHECK(hipFree(Aarray[j]));
+        CUDA_CHECK(hipFree(Barray[j]));
+    }
+
+    CUSOLVER_CHECK(hipsolverDnDestroy(cusolverH));
+
+    CUDA_CHECK(hipStreamDestroy(stream));
+
+    CUDA_CHECK(hipDeviceReset());
+
+    return EXIT_SUCCESS;
+}

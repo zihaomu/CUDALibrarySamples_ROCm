@@ -1,0 +1,15 @@
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLAS/Extensions/GemmBatchedEx/cublas_GemmBatchedEx_example.cu:126:18: error: no matching function for call to 'hipblasGemmBatchedEx'
+  126 |     CUBLAS_CHECK(hipblasGemmBatchedEx(cublasH, transa, transb, m, n, k, &alpha, (void **)d_A_array,
+      |                  ^~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hipblas/hipblas.h:24078:32: note: candidate function not viable: no known conversion from 'void **' to 'const void **' for 8th argument
+ 24078 | HIPBLAS_EXPORT hipblasStatus_t hipblasGemmBatchedEx(hipblasHandle_t      handle,
+       |                                ^
+ 24079 |                                                     hipblasOperation_t   transA,
+ 24080 |                                                     hipblasOperation_t   transB,
+ 24081 |                                                     int                  m,
+ 24082 |                                                     int                  n,
+ 24083 |                                                     int                  k,
+ 24084 |                                                     const void*          alpha,
+ 24085 |                                                     const void*          A[],
+       |                                                     ~~~~~~~~~~~~~~~~~~~~~~~~
+1 error generated.

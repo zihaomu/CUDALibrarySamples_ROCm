@@ -1,0 +1,32 @@
+{
+  "cxx_shim": [
+    "amdclang++",
+    "-O2",
+    "-std=c++17",
+    "-shared",
+    "-fPIC",
+    "-D__HIP_PLATFORM_AMD__",
+    "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/cuDSS/common/fortran_shim.cpp",
+    "-I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common",
+    "-I/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/include",
+    "-I/opt/rocm/core-10.1/include",
+    "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib/librocsolver.so.0",
+    "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib/librocblas.so.5",
+    "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamdhip64.so.7",
+    "-Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib",
+    "-Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib",
+    "-o",
+    "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/20261109T095656.683154Z/fortran-sparse/libmigration_sparse_chol.so"
+  ],
+  "fortran": [
+    "/opt/rocm/core-10.1/lib/llvm/bin/flang",
+    "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/cuDSS/fortran/simple/sample.f90",
+    "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/20261109T095656.683154Z/fortran-sparse/libmigration_sparse_chol.so",
+    "-Wl,-rpath,/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/20261109T095656.683154Z/fortran-sparse",
+    "-o",
+    "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/20261109T095656.683154Z/fortran-sparse/sample"
+  ],
+  "run": [
+    "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/20261109T095656.683154Z/fortran-sparse/sample"
+  ]
+}

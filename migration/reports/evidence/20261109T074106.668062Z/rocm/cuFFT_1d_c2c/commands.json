@@ -1,0 +1,23 @@
+{
+  "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+  "build": [
+    "/opt/venv/bin/hipcc",
+    "-std=c++17",
+    "-O2",
+    "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/cuFFT/1d_c2c/sample.cpp",
+    "-o",
+    "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/20261109T074106.668062Z/rocm/cuFFT_1d_c2c/cuFFT_1d_c2c",
+    "-I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common",
+    "-I/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/include",
+    "-I/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/include",
+    "-L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib",
+    "-Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib",
+    "-lhipfft",
+    "-lamdhip64",
+    "--offload-arch=gfx1201"
+  ],
+  "run": [
+    "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/20261109T074106.668062Z/rocm/cuFFT_1d_c2c/cuFFT_1d_c2c"
+  ],
+  "MIGRATION_FIXTURE": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/tests/fixtures/m1-input.f64"
+}

@@ -1,0 +1,12 @@
+{"profile": "rocm10-foundation-r9700-v1", "passed": true, "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03", "output": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-environment-reports/4e06c5737f48431dab63f6132fe0ab28.json"}
+Traceback (most recent call last):
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/tools/migration/bulk_run.py", line 75, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/tools/migration/bulk_run.py", line 35, in main
+    identity['devices']=allowed_devices()
+                        ~~~~~~~~~~~~~~~^^
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/tools/migration/device_guard.py", line 28, in allowed_devices
+    if physical==3 or physical in reserved:raise RuntimeError(f'physical GPU{physical} at {pci} is excluded/reserved')
+                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: physical GPU2 at 0000:43:00.0 is excluded/reserved

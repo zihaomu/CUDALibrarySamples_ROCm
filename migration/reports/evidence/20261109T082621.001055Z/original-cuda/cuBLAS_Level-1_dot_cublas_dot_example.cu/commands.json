@@ -1,0 +1,25 @@
+{
+  "cwd": "/home/zihaomu/cuda_samples_on_rocm_compare",
+  "build": [
+    "/usr/local/cuda-13.4/bin/nvcc",
+    "-x",
+    "cu",
+    "-std=c++17",
+    "-O2",
+    "-arch=sm_120",
+    "/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuBLAS/Level-1/dot/cublas_dot_example.cu",
+    "-o",
+    "/home/zihaomu/cuda_samples_on_rocm_compare/artifacts/20261109T082621.001055Z/original-cuda/cuBLAS_Level-1_dot_cublas_dot_example.cu/sample",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuBLAS/Level-1/dot",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/cuBLAS/utils",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/cuBLASLt/Common",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/rocm/common",
+    "-I/usr/local/cuda-13.4/include",
+    "-L/usr/local/cuda-13.4/lib64",
+    "-Xlinker=-rpath=/usr/local/cuda-13.4/lib64",
+    "-lcublas"
+  ],
+  "run": [
+    "/home/zihaomu/cuda_samples_on_rocm_compare/artifacts/20261109T082621.001055Z/original-cuda/cuBLAS_Level-1_dot_cublas_dot_example.cu/sample"
+  ]
+}

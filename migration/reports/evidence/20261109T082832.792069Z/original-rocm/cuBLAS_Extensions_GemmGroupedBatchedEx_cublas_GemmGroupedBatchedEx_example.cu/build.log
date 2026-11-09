@@ -1,0 +1,37 @@
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLAS/Extensions/GemmGroupedBatchedEx/cublas_GemmGroupedBatchedEx_example.cu:155:18: error: no matching function for call to 'hipblasGemmGroupedBatchedEx'
+  155 |     CUBLAS_CHECK(hipblasGemmGroupedBatchedEx(
+      |                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hipblas/hipblas.h:24264:32: note: candidate function not viable: requires 24 arguments, but 20 were provided
+ 24264 | HIPBLAS_EXPORT hipblasStatus_t hipblasGemmGroupedBatchedEx(hipblasHandle_t           handle,
+       |                                ^                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 24265 |                                                            const hipblasOperation_t* transA_array,
+       |                                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 24266 |                                                            const hipblasOperation_t* transB_array,
+       |                                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 24267 |                                                            const int*                m_array,
+       |                                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 24268 |                                                            const int*                n_array,
+       |                                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 24269 |                                                            const int*                k_array,
+       |                                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 24270 |                                                            const void*               alpha_array,
+       |                                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 24271 |                                                            const void* const         Aarray[],
+       |                                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 24272 |                                                            hipDataType               aType,
+       |                                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 24273 |                                                            const int*                lda_array,
+       |                                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 24274 |                                                            const void* const         Barray[],
+       |                                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 24275 |                                                            hipDataType               bType,
+       |                                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 24276 |                                                            const int*                ldb_array,
+       |                                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 24277 |                                                            const void*               beta_array,
+       |                                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 24278 |                                                            const void* const         Carray[],
+       |                                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 24279 |                                                            hipDataType               cType,
+       |                                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1 error generated.

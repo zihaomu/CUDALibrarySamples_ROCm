@@ -1,0 +1,12 @@
+clang++: warning: treating 'c' input as 'c++' when in C++ mode, this behavior is deprecated [-Wdeprecated]
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSE/sddmm_bsr/sddmm_bsr_example.c:161:21: error: use of undeclared identifier 'cusparseCreateBsr'; did you mean 'hipsparseCreateBsr'?
+  161 |     CHECK_CUSPARSE( cusparseCreateBsr(&matC, C_num_brows, C_num_bcols,
+      |                     ^~~~~~~~~~~~~~~~~
+      |                     hipsparseCreateBsr
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSE/sddmm_bsr/sddmm_bsr_example.c:36:33: note: expanded from macro 'CHECK_CUSPARSE'
+   36 |     hipsparseStatus_t status = (func);                                          \
+      |                                 ^~~~
+/opt/rocm/core-10.1/include/hipsparse/hipsparse-generic-auxiliary.h:405:19: note: 'hipsparseCreateBsr' declared here
+  405 | hipsparseStatus_t hipsparseCreateBsr(hipsparseSpMatDescr_t* spMatDescr,
+      |                   ^
+1 error generated.

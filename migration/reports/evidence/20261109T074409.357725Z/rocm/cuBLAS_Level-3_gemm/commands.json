@@ -1,0 +1,25 @@
+{
+  "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+  "build": [
+    "/opt/venv/bin/amdclang++",
+    "-std=c++17",
+    "-O2",
+    "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/cuBLAS/Level-3/gemm/sample.cpp",
+    "-o",
+    "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/20261109T074409.357725Z/rocm/cuBLAS_Level-3_gemm/cuBLAS_Level-3_gemm",
+    "-I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common",
+    "-I/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/include",
+    "-I/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/include",
+    "-I/opt/rocm/core-10.1/include",
+    "-L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib",
+    "-Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib",
+    "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib/libhipblas.so.3",
+    "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamdhip64.so.7",
+    "-D__HIP_PLATFORM_AMD__",
+    "-Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib"
+  ],
+  "run": [
+    "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/20261109T074409.357725Z/rocm/cuBLAS_Level-3_gemm/cuBLAS_Level-3_gemm"
+  ],
+  "MIGRATION_FIXTURE": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/tests/fixtures/m1-input.f64"
+}

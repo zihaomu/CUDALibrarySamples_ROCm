@@ -1,0 +1,14 @@
+{
+  "sample_id": "cuDSS/fortran/residual::residual.f90",
+  "scope": "language_frontend_and_binding_attempt",
+  "status": "FAILED",
+  "level": "L1",
+  "return_code": 1,
+  "reason_code": "BINDING_OR_FRONTEND_MIGRATION_REQUIRED",
+  "reason": "Fortran 原始入口使用 iso_c_binding, iso_fortran_env, cudautils, cudss；当前 flang 编译失败，CUDA/cuDSS/cuFFT/NVFortran module 和 device 语法需用经验证的 ISO_C_BINDING 与 AMD API 重写。C ABI 探针另记，不代表该例已实现。 日志：ibraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/fortran/residual/residual.f90:140:15: error: No explicit type declared for 'cudssdestroy'     statusDSS = cudssDestroy(h)                 ^^^^^^^^^^^^ /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/fortran/residual/residual.f90:141:12: error: No explicit type declared for 'cudastreamdestroy'     status = cudaStreamDestroy(stream)              ^^^^^^^^^^^^^^^^^ ",
+  "implementation": "rocm/ported/cuDSS/fortran/residual/residual.f90",
+  "implementation_sha256": "cb03b13ee54b19390fe25d6a3983585a6e0ef2ceeb1ef753257471bac9ae5fce",
+  "source_sha256": "cb03b13ee54b19390fe25d6a3983585a6e0ef2ceeb1ef753257471bac9ae5fce",
+  "evidence": "artifacts/20261109T084354.110802Z/languages/cuDSS_fortran_residual_residual.f90",
+  "environment": "artifacts/20261109T084354.110802Z/languages/environment.json"
+}

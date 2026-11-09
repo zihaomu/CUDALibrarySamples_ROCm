@@ -1,0 +1,733 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2020-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+#include "hip/hip_runtime.h"
+#include "batchedLabelMarkersAndCompression.h"
+
+// Note:  If you want to view these images we HIGHLY recommend using imagej which is free on the internet and works on most platforms 
+//        because it is one of the few image viewing apps that can display 32 bit integer image data.  While it normalizes the data
+//        to floating point values for viewing it still provides a good representation of the relative brightness of each label value.  
+//        Note that label compression output results in smaller differences between label values making it visually more difficult to detect
+//        differences in labeled regions.  If you have an editor that can display hex values you can see what the exact values of
+//        each label is, every 4 bytes represents 1 32 bit integer label value.
+//
+//        The files read and written by this sample app use RAW image format, that is, only the image data itself exists in the files
+//        with no image format information.   When viewing RAW files with imagej just enter the image size and bit depth values that
+//        are part of the file name when requested by imagej.
+//
+//        This sample app works in 2 stages, first it processes all of the images individually then it processes them all again in 1 batch
+//        using the Batch_Advanced versions of the NPP batch functions which allow each image to have it's own ROI.  The 2 stages are completely
+//        separable but in this sample the second stage takes advantage of some of the data that has already been initialized.
+//
+//        Note that there is a small amount of variability in the number of unique label markers generated from one run to the next by the UF algorithm.
+//
+//        Performance of ALL NPP image batch functions is limited by the maximum ROI height in the list of images.
+
+
+#define NUMBER_OF_IMAGES 5
+
+    Npp8u  * pInputImageDev[NUMBER_OF_IMAGES];
+    Npp8u  * pInputImageHost[NUMBER_OF_IMAGES];
+    Npp8u  * pUFCompressedLabelsScratchBufferDev[NUMBER_OF_IMAGES];
+    Npp32u * pUFLabelDev[NUMBER_OF_IMAGES];
+    Npp32u * pUFLabelHost[NUMBER_OF_IMAGES];
+    NppiImageDescriptor  * pUFBatchSrcImageListDev = 0;
+    NppiImageDescriptor  * pUFBatchSrcDstImageListDev = 0;
+    NppiImageDescriptor  * pUFBatchSrcImageListHost = 0;
+    NppiImageDescriptor  * pUFBatchSrcDstImageListHost = 0;
+    NppiBufferDescriptor * pUFBatchSrcDstScratchBufferListDev = 0; // from nppi_filtering_functions.h
+    NppiBufferDescriptor * pUFBatchSrcDstScratchBufferListHost = 0;
+    Npp32u * pUFBatchPerImageCompressedCountListDev = 0;
+    Npp32u * pUFBatchPerImageCompressedCountListHost = 0;
+
+NppStreamContext * pWorkspaceCtx = 0; // Stream context that owns the NPP workspace (see nppworkspace.h)
+
+void tearDown() // Clean up and tear down
+{
+#if NPP_HAS_WORKSPACE
+    if (pWorkspaceCtx != 0)
+    {
+        nppiWorkspaceDestroy(pWorkspaceCtx);
+        pWorkspaceCtx = 0;
+    }
+#endif
+    if (pUFBatchPerImageCompressedCountListDev != 0)
+        hipFree(pUFBatchPerImageCompressedCountListDev);
+    if (pUFBatchSrcDstScratchBufferListDev != 0)
+        hipFree(pUFBatchSrcDstScratchBufferListDev);
+    if (pUFBatchSrcDstImageListDev != 0)
+        hipFree(pUFBatchSrcDstImageListDev);
+    if (pUFBatchSrcImageListDev != 0)
+        hipFree(pUFBatchSrcImageListDev);
+    if (pUFBatchPerImageCompressedCountListHost != 0)
+        free(pUFBatchPerImageCompressedCountListHost);
+    if (pUFBatchSrcDstScratchBufferListHost != 0)
+        free(pUFBatchSrcDstScratchBufferListHost);
+    if (pUFBatchSrcDstImageListHost != 0)
+        free(pUFBatchSrcDstImageListHost);
+    if (pUFBatchSrcImageListHost != 0)
+        free(pUFBatchSrcImageListHost);
+
+    for (int j = 0; j < NUMBER_OF_IMAGES; j++)
+    {
+        if (pUFCompressedLabelsScratchBufferDev[j] != 0)
+            hipFree(pUFCompressedLabelsScratchBufferDev[j]);
+        if (pUFLabelDev[j] != 0)
+            hipFree(pUFLabelDev[j]);
+        if (pInputImageDev[j] != 0)
+            hipFree(pInputImageDev[j]);
+        if (pUFLabelHost[j] != 0)
+            free(pUFLabelHost[j]);
+        if (pInputImageHost[j] != 0)
+            free(pInputImageHost[j]);
+    }
+}
+
+const std::string & Path = std::string("../images/");
+
+const std::string & InputFile0 = Path + std::string("lena_512x512_8u.raw");
+const std::string & InputFile1 = Path + std::string("CT_skull_512x512_8u.raw");
+const std::string & InputFile2 = Path + std::string("PCB_METAL_509x335_8u.raw");
+const std::string & InputFile3 = Path + std::string("PCB2_1024x683_8u.raw");
+const std::string & InputFile4 = Path + std::string("PCB_1280x720_8u.raw");
+
+const std::string & LabelMarkersOutputFile0 = Path + std::string("Lena_LabelMarkersUF_8Way_512x512_32u.raw");
+const std::string & LabelMarkersOutputFile1 = Path + std::string("CT_skull_LabelMarkersUF_8Way_512x512_32u.raw");
+const std::string & LabelMarkersOutputFile2 = Path + std::string("PCB_METAL_LabelMarkersUF_8Way_509x335_32u.raw");
+const std::string & LabelMarkersOutputFile3 = Path + std::string("PCB2_LabelMarkersUF_8Way_1024x683_32u.raw");
+const std::string & LabelMarkersOutputFile4 = Path + std::string("PCB_LabelMarkersUF_8Way_1280x720_32u.raw");
+
+const std::string & CompressedMarkerLabelsOutputFile0 = Path + std::string("Lena_CompressedMarkerLabelsUF_8Way_512x512_32u.raw");
+const std::string & CompressedMarkerLabelsOutputFile1 = Path + std::string("CT_skull_CompressedMarkerLabelsUF_8Way_512x512_32u.raw");
+const std::string & CompressedMarkerLabelsOutputFile2 = Path + std::string("PCB_METAL_CompressedMarkerLabelsUF_8Way_509x335_32u.raw");
+const std::string & CompressedMarkerLabelsOutputFile3 = Path + std::string("PCB2_CompressedMarkerLabelsUF_8Way_1024x683_32u.raw");
+const std::string & CompressedMarkerLabelsOutputFile4 = Path + std::string("PCB_CompressedMarkerLabelsUF_8Way_1280x720_32u.raw");
+
+const std::string & LabelMarkersBatchOutputFile0 = Path + std::string("Lena_LabelMarkersUFBatch_8Way_512x512_32u.raw");
+const std::string & LabelMarkersBatchOutputFile1 = Path + std::string("CT_skull_LabelMarkersUFBatch_8Way_512x512_32u.raw");
+const std::string & LabelMarkersBatchOutputFile2 = Path + std::string("PCB_METAL_LabelMarkersUFBatch_8Way_509x335_32u.raw");
+const std::string & LabelMarkersBatchOutputFile3 = Path + std::string("PCB2_LabelMarkersUFBatch_8Way_1024x683_32u.raw");
+const std::string & LabelMarkersBatchOutputFile4 = Path + std::string("PCB_LabelMarkersUFBatch_8Way_1280x720_32u.raw");
+
+const std::string & CompressedMarkerLabelsBatchOutputFile0 = Path + std::string("Lena_CompressedMarkerLabelsUFBatch_8Way_512x512_32u.raw");
+const std::string & CompressedMarkerLabelsBatchOutputFile1 = Path + std::string("CT_skull_CompressedMarkerLabelsUFBatch_8Way_512x512_32u.raw");
+const std::string & CompressedMarkerLabelsBatchOutputFile2 = Path + std::string("PCB_METAL_CompressedMarkerLabelsUFBatch_8Way_509x335_32u.raw");
+const std::string & CompressedMarkerLabelsBatchOutputFile3 = Path + std::string("PCB2_CompressedMarkerLabelsUFBatch_8Way_1024x683_32u.raw");
+const std::string & CompressedMarkerLabelsBatchOutputFile4 = Path + std::string("PCB_CompressedMarkerLabelsUFBatch_8Way_1280x720_32u.raw");
+
+int 
+loadRaw8BitImage(Npp8u * pImage, int nWidth, int nHeight, int nImage)
+{
+    FILE * bmpFile;
+    size_t nSize;
+
+    if (nImage == 0)
+    {
+        if (nWidth != 512 || nHeight != 512) 
+            return -1;
+        fopen_s(&bmpFile, InputFile0.c_str(), "rb");
+    }
+    else if (nImage == 1)
+    {
+        if (nWidth != 512 || nHeight != 512) 
+            return -1;
+        fopen_s(&bmpFile, InputFile1.c_str(), "rb");
+    }
+    else if (nImage == 2)
+    {
+        if (nWidth != 509 || nHeight != 335) 
+            return -1;
+        fopen_s(&bmpFile, InputFile2.c_str(), "rb");
+    }
+    else if (nImage == 3)
+    {
+        if (nWidth != 1024 || nHeight != 683) 
+            return -1;
+        fopen_s(&bmpFile, InputFile3.c_str(), "rb");
+    }
+    else if (nImage == 4)
+    {
+        if (nWidth != 1280 || nHeight != 720) 
+            return -1;
+        fopen_s(&bmpFile, InputFile4.c_str(), "rb");
+    }
+    else
+    {
+        printf ("Input file load failed.\n");
+        return -1;
+    }
+
+    if (bmpFile == NULL) 
+        return -1;
+    nSize = fread(pImage, 1, nWidth * nHeight, bmpFile);
+    if (nSize < nWidth * nHeight)
+    {
+        fclose(bmpFile);        
+        return -1;
+    }
+    fclose(bmpFile);
+
+    printf ("Input file load succeeded.\n");
+
+    return 0;
+}
+
+// *****************************************************************************
+// main batched image region connected label marker and compression function
+// -----------------------------------------------------------------------------
+int main(int argc, const char *argv[])
+{
+
+    int pidx;
+
+    if ((pidx = findParamIndex(argv, argc, "-h")) != -1 ||
+    (pidx = findParamIndex(argv, argc, "--help")) != -1) {
+        std::cout << "Usage: " << argv[0]
+          << "[-b number-of-batch]\n";
+        std::cout << "Parameters: " << std::endl;
+        std::cout << "\tnumber-of-batch\t:\tUse number of batch to process [default 5]" << std::endl;
+        return EXIT_SUCCESS;
+    }
+
+    image_labelmarker_params_t params;
+
+    params.numofbatch = 5;
+    if ((pidx = findParamIndex(argv, argc, "-b")) != -1) {
+    params.numofbatch = std::atoi(argv[pidx + 1]);
+    }
+
+    int      aCompressLabelsScratchBufferSize[NUMBER_OF_IMAGES];
+
+    int nCompressedLabelCount = 0;
+    hipError_t hipError_t;
+    NppStatus nppStatus;
+    NppStreamContext nppStreamCtx = {}; // zero-initialize so hWorkspace (formerly nReserved0) is 0 unless a workspace is created below
+    FILE * bmpFile;
+
+    for (int j = 0; j < params.numofbatch; j++)
+    {
+        pInputImageDev[j] = 0;
+        pInputImageHost[j] = 0;
+        pUFCompressedLabelsScratchBufferDev[j] = 0;
+        pUFLabelDev[j] = 0;
+        pUFLabelHost[j] = 0;
+    }
+
+    nppStreamCtx.hStream = 0; // The NULL stream by default, set this to whatever your stream ID is if not the NULL stream.
+
+    hipError_t = hipGetDevice(&nppStreamCtx.nCudaDeviceId);
+    if (hipError_t != hipSuccess)
+    {
+        printf("CUDA error: no devices supporting CUDA.\n");
+        return NPP_NOT_SUFFICIENT_COMPUTE_CAPABILITY;
+    }
+
+    const NppLibraryVersion *libVer   = nppGetLibVersion();
+
+    printf("NPP Library Version %d.%d.%d\n", libVer->major, libVer->minor, libVer->build);
+
+    int driverVersion, runtimeVersion;
+    hipDriverGetVersion(&driverVersion);
+    hipRuntimeGetVersion(&runtimeVersion);
+
+    printf("CUDA Driver  Version: %d.%d\n", driverVersion/1000, (driverVersion%100)/10);
+    printf("CUDA Runtime Version: %d.%d\n\n", runtimeVersion/1000, (runtimeVersion%100)/10);
+
+    hipError_t = hipDeviceGetAttribute(&nppStreamCtx.nCudaDevAttrComputeCapabilityMajor, 
+                                       hipDeviceAttributeComputeCapabilityMajor, 
+                                       nppStreamCtx.nCudaDeviceId);
+    if (hipError_t != hipSuccess)
+        return NPP_NOT_SUFFICIENT_COMPUTE_CAPABILITY;
+
+    hipError_t = hipDeviceGetAttribute(&nppStreamCtx.nCudaDevAttrComputeCapabilityMinor, 
+                                       hipDeviceAttributeComputeCapabilityMinor, 
+                                       nppStreamCtx.nCudaDeviceId);
+    if (hipError_t != hipSuccess)
+        return NPP_NOT_SUFFICIENT_COMPUTE_CAPABILITY;
+
+    hipError_t = hipStreamGetFlags(nppStreamCtx.hStream, &nppStreamCtx.nStreamFlags);
+
+    hipDeviceProp_t oDeviceProperties;
+
+    hipError_t = hipGetDeviceProperties(&oDeviceProperties, nppStreamCtx.nCudaDeviceId);
+
+    nppStreamCtx.nMultiProcessorCount = oDeviceProperties.multiProcessorCount;
+    nppStreamCtx.nMaxThreadsPerMultiProcessor = oDeviceProperties.maxThreadsPerMultiProcessor;
+    nppStreamCtx.nMaxThreadsPerBlock = oDeviceProperties.maxThreadsPerBlock;
+    nppStreamCtx.nSharedMemPerBlock = oDeviceProperties.sharedMemPerBlock;
+
+    // Attach an NPP workspace to the stream context.  The workspace owns a single high-water-mark device scratch buffer
+    // that grows on demand, so the per-image label generation below passes a NULL scratch buffer pointer and does not
+    // need to call nppiLabelMarkersUFGetBufferSize_32u_C1R() / cudaMalloc() / cudaFree() for each image size.
+#if NPP_HAS_WORKSPACE
+    nppStatus = nppiWorkspaceCreate(&nppStreamCtx);
+    if (nppStatus != NPP_SUCCESS)
+    {
+        printf("nppiWorkspaceCreate failed: %d\n", (int)nppStatus);
+        return nppStatus;
+    }
+    pWorkspaceCtx = &nppStreamCtx;
+#endif
+
+    NppiSize oSizeROI[NUMBER_OF_IMAGES];
+
+    for (int nImage = 0; nImage < params.numofbatch; nImage++)
+    {
+        if (nImage == 0)
+        {
+            oSizeROI[nImage].width = 512;
+            oSizeROI[nImage].height = 512;
+        }
+        else if (nImage == 1)
+        {
+            oSizeROI[nImage].width = 512;
+            oSizeROI[nImage].height = 512;
+        }
+        else if (nImage == 2)
+        {
+            oSizeROI[nImage].width = 509;
+            oSizeROI[nImage].height = 335;
+        }
+        else if (nImage == 3)
+        {
+            oSizeROI[nImage].width = 1024;
+            oSizeROI[nImage].height = 683;
+        }
+        else if (nImage == 4)
+        {
+            oSizeROI[nImage].width = 1280;
+            oSizeROI[nImage].height = 720;
+        }
+
+        // NOTE: While using cudaMallocPitch() to allocate device memory for NPP can significantly improve the performance of many NPP functions, 
+        // for UF function label markers generation or compression DO NOT USE cudaMallocPitch().  Doing so could result in incorrect output.
+
+        hipError_t = hipMalloc ((void**)&pInputImageDev[nImage], oSizeROI[nImage].width * sizeof(Npp8u) * oSizeROI[nImage].height);
+        if (hipError_t != hipSuccess)
+            return NPP_MEMORY_ALLOCATION_ERR;
+
+        // For images processed with UF label markers functions ROI width and height for label markers generation output AND marker compression functions MUST be the same AND 
+        // line pitch MUST be equal to ROI.width * sizeof(Npp32u).  Also the image pointer used for label markers generation output must start at the same position in the image
+        // as it does in the marker compression function.  Also note that actual input image size and ROI do not necessarily need to be related other than ROI being less than
+        // or equal to image size and image starting position does not necessarily have to be at pixel 0 in the input image.
+
+        hipError_t = hipMalloc ((void**)&pUFLabelDev[nImage], oSizeROI[nImage].width * sizeof(Npp32u) * oSizeROI[nImage].height);
+        if (hipError_t != hipSuccess)
+            return NPP_MEMORY_ALLOCATION_ERR;
+
+        pInputImageHost[nImage] = reinterpret_cast<Npp8u *>(malloc(oSizeROI[nImage].width * sizeof(Npp8u) * oSizeROI[nImage].height));
+        pUFLabelHost[nImage] = reinterpret_cast<Npp32u *>(malloc(oSizeROI[nImage].width * sizeof(Npp32u) * oSizeROI[nImage].height));
+
+        // Use UF functions throughout this sample.
+
+        // One at a time image processing
+
+        if (loadRaw8BitImage(pInputImageHost[nImage], oSizeROI[nImage].width * sizeof(Npp8u), oSizeROI[nImage].height, nImage) == 0)
+        {
+            hipError_t = hipMemcpy2DAsync(pInputImageDev[nImage], oSizeROI[nImage].width * sizeof(Npp8u), pInputImageHost[nImage], 
+                                                          oSizeROI[nImage].width * sizeof(Npp8u), oSizeROI[nImage].width * sizeof(Npp8u), oSizeROI[nImage].height, 
+                                                          hipMemcpyHostToDevice, nppStreamCtx.hStream);
+
+            // Without an NPP workspace the label generation scratch buffer is allocated here for each image.
+            Npp8u * pLabelScratchDev = NULL;
+#if !NPP_HAS_WORKSPACE
+            int nLabelScratchSize = 0;
+            nppStatus = nppiLabelMarkersUFGetBufferSize_32u_C1R(oSizeROI[nImage], &nLabelScratchSize);
+            if (nppStatus != NPP_SUCCESS)
+                return nppStatus;
+            hipError_t = hipMalloc ((void **)&pLabelScratchDev, nLabelScratchSize > 0 ? nLabelScratchSize : 1);
+            if (hipError_t != hipSuccess)
+                return NPP_MEMORY_ALLOCATION_ERR;
+#endif
+
+            nppStatus = nppiLabelMarkersUF_8u32u_C1R_Ctx(pInputImageDev[nImage],
+                                                         oSizeROI[nImage].width * sizeof(Npp8u),
+                                                         pUFLabelDev[nImage],
+                                                         oSizeROI[nImage].width * sizeof(Npp32u),
+                                                         oSizeROI[nImage],
+                                                         nppiNormInf,
+                                                         pLabelScratchDev, // NULL: the scratch buffer is taken from the workspace in nppStreamCtx
+                                                         nppStreamCtx); 
+
+            hipFree(pLabelScratchDev); // no-op for NULL; synchronizes with the labeling above
+
+            if (nppStatus != NPP_SUCCESS)  
+            {
+                if (nImage == 0)
+                    printf("Lena_LabelMarkersUF_8Way_512x512_32u failed.\n");
+                else if (nImage == 1)
+                    printf("CT_skull_LabelMarkersUF_8Way_512x512_32u failed.\n");
+                else if (nImage == 2)
+                    printf("PCB_METAL_LabelMarkersUF_8Way_509x335_32u failed.\n");
+                else if (nImage == 3)
+                    printf("PCB2_LabelMarkersUF_8Way_1024x683_32u failed.\n");
+                else if (nImage == 4)
+                    printf("PCB_LabelMarkersUF_8Way_1280x720_32u failed.\n");
+                tearDown();
+                return -1;
+            }
+
+            hipError_t = hipMemcpy2DAsync(pUFLabelHost[nImage], oSizeROI[nImage].width * sizeof(Npp32u), 
+                                          pUFLabelDev[nImage], oSizeROI[nImage].width * sizeof(Npp32u), oSizeROI[nImage].width * sizeof(Npp32u), oSizeROI[nImage].height,
+                                          hipMemcpyDeviceToHost, nppStreamCtx.hStream);
+
+            // Wait host image read backs to complete, not necessary if no need to synchronize
+            if ((hipError_t = hipStreamSynchronize(nppStreamCtx.hStream)) != hipSuccess) 
+            {
+                printf ("Post label generation hipStreamSynchronize failed\n");
+                tearDown();
+                return -1;
+            }
+
+            if (nImage == 0)
+                fopen_s(&bmpFile, LabelMarkersOutputFile0.c_str(), "wb");
+            else if (nImage == 1)
+                fopen_s(&bmpFile, LabelMarkersOutputFile1.c_str(), "wb");
+            else if (nImage == 2)
+                fopen_s(&bmpFile, LabelMarkersOutputFile2.c_str(), "wb");
+            else if (nImage == 3)
+                fopen_s(&bmpFile, LabelMarkersOutputFile3.c_str(), "wb");
+            else if (nImage == 4)
+                fopen_s(&bmpFile, LabelMarkersOutputFile4.c_str(), "wb");
+
+            if (bmpFile == NULL) 
+                return -1;
+            size_t nSize = 0;
+            for (int j = 0; j < oSizeROI[nImage].height; j++)
+            {
+                nSize += fwrite(&pUFLabelHost[nImage][j * oSizeROI[nImage].width], sizeof(Npp32u), oSizeROI[nImage].width, bmpFile);
+            }
+            fclose(bmpFile);
+
+            nppStatus = nppiCompressMarkerLabelsGetBufferSize_32u_C1R(oSizeROI[nImage].width * oSizeROI[nImage].height, &aCompressLabelsScratchBufferSize[nImage]);
+            if (nppStatus != NPP_NO_ERROR)
+                return nppStatus;
+
+            nCompressedLabelCount = 0;
+
+            // Try the NPP workspace first (NULL scratch buffer). Libraries without workspace support for this
+            // function return NPP_NULL_POINTER_ERROR, in which case allocate the scratch buffer and call again.
+            nppStatus = nppiCompressMarkerLabelsUF_32u_C1IR_Ctx(pUFLabelDev[nImage], oSizeROI[nImage].width * sizeof(Npp32u), oSizeROI[nImage], 
+                                                            oSizeROI[nImage].width * oSizeROI[nImage].height, &nCompressedLabelCount, 
+                                                            NULL, nppStreamCtx);
+
+            if (nppStatus == NPP_NULL_POINTER_ERROR)
+            {
+                hipError_t = hipMalloc ((void **)&pUFCompressedLabelsScratchBufferDev[nImage], aCompressLabelsScratchBufferSize[nImage] > 0 ? aCompressLabelsScratchBufferSize[nImage] : 1); // at least 1 byte: NPP rejects a null buffer
+                if (hipError_t != hipSuccess)
+                    return NPP_MEMORY_ALLOCATION_ERR;
+
+                nppStatus = nppiCompressMarkerLabelsUF_32u_C1IR_Ctx(pUFLabelDev[nImage], oSizeROI[nImage].width * sizeof(Npp32u), oSizeROI[nImage], 
+                                                                oSizeROI[nImage].width * oSizeROI[nImage].height, &nCompressedLabelCount, 
+                                                                pUFCompressedLabelsScratchBufferDev[nImage], nppStreamCtx);
+            }
+
+            if (nppStatus != NPP_SUCCESS)  
+            {
+                if (nImage == 0)
+                    printf("Lena_CompressedLabelMarkersUF_8Way_512x512_32u failed.\n");
+                else if (nImage == 1)
+                    printf("CT_Skull_CompressedLabelMarkersUF_8Way_512x512_32u failed.\n");
+                else if (nImage == 2)
+                    printf("PCB_METAL_CompressedLabelMarkersUF_8Way_509x335_32u failed.\n");
+                else if (nImage == 3)
+                    printf("PCB2_CompressedLabelMarkersUF_8Way_1024x683_32u failed.\n");
+                else if (nImage == 4)
+                    printf("PCB_CompressedLabelMarkersUF_8Way_1280x720_32u failed.\n");
+                tearDown();
+                return -1;
+            }
+
+            hipError_t = hipMemcpy2DAsync(pUFLabelHost[nImage], oSizeROI[nImage].width * sizeof(Npp32u), 
+                                          pUFLabelDev[nImage], oSizeROI[nImage].width * sizeof(Npp32u), oSizeROI[nImage].width * sizeof(Npp32u), oSizeROI[nImage].height,
+                                          hipMemcpyDeviceToHost, nppStreamCtx.hStream);
+
+            // Wait for host image read backs to finish, not necessary if no need to synchronize
+            if ((hipError_t = hipStreamSynchronize(nppStreamCtx.hStream)) != hipSuccess || nCompressedLabelCount == 0) 
+            {
+                printf ("Post label compression hipStreamSynchronize failed\n");
+                tearDown();
+                return -1;
+            }
+
+            if (nImage == 0)
+                fopen_s(&bmpFile, CompressedMarkerLabelsOutputFile0.c_str(), "wb");
+            else if (nImage == 1)
+                fopen_s(&bmpFile, CompressedMarkerLabelsOutputFile1.c_str(), "wb");
+            else if (nImage == 2)
+                fopen_s(&bmpFile, CompressedMarkerLabelsOutputFile2.c_str(), "wb");
+            else if (nImage == 3)
+                fopen_s(&bmpFile, CompressedMarkerLabelsOutputFile3.c_str(), "wb");
+            else if (nImage == 4)
+                fopen_s(&bmpFile, CompressedMarkerLabelsOutputFile4.c_str(), "wb");
+
+            if (bmpFile == NULL) 
+                return -1;
+            nSize = 0;
+            for (int j = 0; j < oSizeROI[nImage].height; j++)
+            {
+                nSize += fwrite(&pUFLabelHost[nImage][j * oSizeROI[nImage].width], sizeof(Npp32u), oSizeROI[nImage].width, bmpFile);
+            }
+            fclose(bmpFile);
+
+            if (nImage == 0)
+                printf("Lena_CompressedMarkerLabelsUF_8Way_512x512_32u succeeded, compressed label count is %d.\n", nCompressedLabelCount);
+            else if (nImage == 1)
+                printf("CT_Skull_CompressedMarkerLabelsUF_8Way_512x512_32u succeeded, compressed label count is %d.\n", nCompressedLabelCount);
+            else if (nImage == 2)
+                printf("PCB_METAL_CompressedMarkerLabelsUF_8Way_509x335_32u succeeded, compressed label count is %d.\n", nCompressedLabelCount);
+            else if (nImage == 3)
+                printf("PCB2_CompressedMarkerLabelsUF_8Way_1024x683_32u succeeded, compressed label count is %d.\n", nCompressedLabelCount);
+            else if (nImage == 4)
+                printf("PCB_CompressedMarkerLabelsUF_8Way_1280x720_32u succeeded, compressed label count is %d.\n", nCompressedLabelCount);
+        }
+    }
+
+    // Batch image processing
+
+    // We want to allocate scratch buffers more efficiently for batch processing so first we free up the scratch buffers for image 0 and reallocate them.
+    // This is not required but helps cudaMalloc to work more efficiently.
+
+    hipFree(pUFCompressedLabelsScratchBufferDev[0]);
+
+    int nTotalBatchedUFCompressLabelsScratchBufferDevSize = 0;
+
+    for (int k = 0; k < NUMBER_OF_IMAGES; k++)
+        nTotalBatchedUFCompressLabelsScratchBufferDevSize += aCompressLabelsScratchBufferSize[k];
+
+    hipError_t = hipMalloc ((void **)&pUFCompressedLabelsScratchBufferDev[0], nTotalBatchedUFCompressLabelsScratchBufferDevSize > 0 ? nTotalBatchedUFCompressLabelsScratchBufferDevSize : 1);
+    if (hipError_t != hipSuccess)
+        return NPP_MEMORY_ALLOCATION_ERR;
+
+    // Now allocate batch lists
+
+    int nBatchImageListBytes = NUMBER_OF_IMAGES * sizeof(NppiImageDescriptor);
+
+    hipError_t = hipMalloc ((void**)&pUFBatchSrcImageListDev, nBatchImageListBytes);
+    if (hipError_t != hipSuccess)
+        return NPP_MEMORY_ALLOCATION_ERR;
+
+    hipError_t = hipMalloc ((void**)&pUFBatchSrcDstImageListDev, nBatchImageListBytes);
+    if (hipError_t != hipSuccess)
+        return NPP_MEMORY_ALLOCATION_ERR;
+
+    pUFBatchSrcImageListHost = reinterpret_cast<NppiImageDescriptor *>(malloc(nBatchImageListBytes));
+    pUFBatchSrcDstImageListHost = reinterpret_cast<NppiImageDescriptor *>(malloc(nBatchImageListBytes));
+
+    NppiSize oMaxROISize = {0, 0};
+
+    for (int nImage = 0; nImage < NUMBER_OF_IMAGES; nImage++)
+    {
+        pUFBatchSrcImageListHost[nImage].pData = pInputImageDev[nImage];
+        pUFBatchSrcImageListHost[nImage].nStep = oSizeROI[nImage].width * sizeof(Npp8u);
+        // src image oSize parameter is ignored in these NPP functions
+        pUFBatchSrcDstImageListHost[nImage].pData = pUFLabelDev[nImage];
+        pUFBatchSrcDstImageListHost[nImage].nStep = oSizeROI[nImage].width * sizeof(Npp32u);
+        pUFBatchSrcDstImageListHost[nImage].oSize = oSizeROI[nImage];
+        if (oSizeROI[nImage].width > oMaxROISize.width)
+            oMaxROISize.width = oSizeROI[nImage].width;
+        if (oSizeROI[nImage].height > oMaxROISize.height)
+            oMaxROISize.height = oSizeROI[nImage].height;
+    }
+
+    // Copy label generation batch lists from CPU to GPU
+    hipError_t = hipMemcpyAsync(pUFBatchSrcImageListDev, pUFBatchSrcImageListHost, nBatchImageListBytes, hipMemcpyHostToDevice, nppStreamCtx.hStream);
+    if (hipError_t != hipSuccess)
+        return NPP_MEMCPY_ERROR;
+
+    hipError_t = hipMemcpyAsync(pUFBatchSrcDstImageListDev, pUFBatchSrcDstImageListHost, nBatchImageListBytes, hipMemcpyHostToDevice, nppStreamCtx.hStream);
+    if (hipError_t != hipSuccess)
+        return NPP_MEMCPY_ERROR;
+
+    // We use 8-way neighbor search throughout this example
+    nppStatus = nppiLabelMarkersUFBatch_8u32u_C1R_Advanced_Ctx(pUFBatchSrcImageListDev, pUFBatchSrcDstImageListDev, 
+                                                               NUMBER_OF_IMAGES, oMaxROISize, nppiNormInf, nppStreamCtx);
+
+    if (nppStatus != NPP_SUCCESS)  
+    {
+        printf("LabelMarkersUFBatch_8Way_8u32u failed.\n");
+        tearDown();
+        return -1;
+    }
+
+    // Now read back generated device images to the host
+
+    for (int nImage = 0; nImage < NUMBER_OF_IMAGES; nImage++)
+    {
+        hipError_t = hipMemcpy2DAsync(pUFLabelHost[nImage], oSizeROI[nImage].width * sizeof(Npp32u), 
+                                      pUFLabelDev[nImage], oSizeROI[nImage].width * sizeof(Npp32u), oSizeROI[nImage].width * sizeof(Npp32u), oSizeROI[nImage].height,
+                                      hipMemcpyDeviceToHost, nppStreamCtx.hStream);
+    }
+
+    // Wait for host image read backs to complete, not necessary if no need to synchronize
+    if ((hipError_t = hipStreamSynchronize(nppStreamCtx.hStream)) != hipSuccess) 
+    {
+        printf ("Post label generation hipStreamSynchronize failed\n");
+        tearDown();
+        return -1;
+    }
+
+    // Save output to files
+    for (int nImage = 0; nImage < params.numofbatch; nImage++)
+    {
+        if (nImage == 0)
+            fopen_s(&bmpFile, LabelMarkersBatchOutputFile0.c_str(), "wb");
+        else if (nImage == 1)
+            fopen_s(&bmpFile, LabelMarkersBatchOutputFile1.c_str(), "wb");
+        else if (nImage == 2)
+            fopen_s(&bmpFile, LabelMarkersBatchOutputFile2.c_str(), "wb");
+        else if (nImage == 3)
+            fopen_s(&bmpFile, LabelMarkersBatchOutputFile3.c_str(), "wb");
+        else if (nImage == 4)
+            fopen_s(&bmpFile, LabelMarkersBatchOutputFile4.c_str(), "wb");
+
+        if (bmpFile == NULL) 
+            return -1;
+        size_t nSize = 0;
+        for (int j = 0; j < oSizeROI[nImage].height; j++)
+        {
+            nSize += fwrite(&pUFLabelHost[nImage][j * oSizeROI[nImage].width], sizeof(Npp32u), oSizeROI[nImage].width, bmpFile);
+        }
+        fclose(bmpFile);
+    }
+
+
+    // Now allocate scratch buffer memory for batched label compression
+    hipError_t = hipMalloc ((void**)&pUFBatchSrcDstScratchBufferListDev, NUMBER_OF_IMAGES * sizeof(NppiBufferDescriptor));
+    if (hipError_t != hipSuccess)
+        return NPP_MEMORY_ALLOCATION_ERR;
+
+    hipError_t = hipMalloc ((void**)&pUFBatchPerImageCompressedCountListDev, NUMBER_OF_IMAGES * sizeof(Npp32u));
+    if (hipError_t != hipSuccess)
+        return NPP_MEMORY_ALLOCATION_ERR;
+
+    // Allocate host side scratch buffer point and size list and initialize with device scratch buffer pointers 
+    pUFBatchSrcDstScratchBufferListHost = reinterpret_cast<NppiBufferDescriptor *>(malloc(NUMBER_OF_IMAGES * sizeof(NppiBufferDescriptor)));
+
+    pUFBatchPerImageCompressedCountListHost = reinterpret_cast<Npp32u *>(malloc(NUMBER_OF_IMAGES * sizeof(Npp32u)));
+
+    // Start buffer pointer at beginning of full per image buffer list sized pUFCompressedLabelsScratchBufferDev[0]
+    Npp32u * pCurUFCompressedLabelsScratchBufferDev = reinterpret_cast<Npp32u *>(pUFCompressedLabelsScratchBufferDev[0]);
+
+    int nMaxUFCompressedLabelsScratchBufferSize = 0;
+
+    for (int nImage = 0; nImage < NUMBER_OF_IMAGES; nImage++)
+    {
+        // This particular function works on in-place data and SrcDst image batch list has already been initialized in batched label generation function setup
+
+        //  Initialize each per image buffer descriptor
+        pUFBatchSrcDstScratchBufferListHost[nImage].pData = reinterpret_cast<void *>(pCurUFCompressedLabelsScratchBufferDev);
+        pUFBatchSrcDstScratchBufferListHost[nImage].nBufferSize = aCompressLabelsScratchBufferSize[nImage];
+
+        if (aCompressLabelsScratchBufferSize[nImage] > nMaxUFCompressedLabelsScratchBufferSize)
+            nMaxUFCompressedLabelsScratchBufferSize = aCompressLabelsScratchBufferSize[nImage];
+
+        // Offset buffer pointer to next per image buffer
+        Npp8u * pTempBuffer =  reinterpret_cast<Npp8u *>(pCurUFCompressedLabelsScratchBufferDev);
+        pTempBuffer += aCompressLabelsScratchBufferSize[nImage];
+        pCurUFCompressedLabelsScratchBufferDev = reinterpret_cast<Npp32u *>((void *)(pTempBuffer));
+    }
+
+    // Copy compression batch scratch buffer list from CPU to GPU
+    hipError_t = hipMemcpyAsync(pUFBatchSrcDstScratchBufferListDev, pUFBatchSrcDstScratchBufferListHost, NUMBER_OF_IMAGES * sizeof(NppiBufferDescriptor), hipMemcpyHostToDevice, nppStreamCtx.hStream);
+    if (hipError_t != hipSuccess)
+        return NPP_MEMCPY_ERROR;
+
+    nppStatus = nppiCompressMarkerLabelsUFBatch_32u_C1IR_Advanced_Ctx(pUFBatchSrcDstImageListDev, pUFBatchSrcDstScratchBufferListDev, pUFBatchPerImageCompressedCountListDev,
+                                                                      NUMBER_OF_IMAGES, oMaxROISize, nMaxUFCompressedLabelsScratchBufferSize, nppStreamCtx);
+    if (nppStatus != NPP_SUCCESS)  
+    {
+        printf("BatchCompressedLabelMarkersUF_8Way_32u failed.\n");
+        tearDown();
+        return -1;
+    }
+
+    // Copy output compressed label images back to host
+    for (int nImage = 0; nImage < NUMBER_OF_IMAGES; nImage++)
+    {
+        hipError_t = hipMemcpy2DAsync(pUFLabelHost[nImage], oSizeROI[nImage].width * sizeof(Npp32u), 
+                                      pUFLabelDev[nImage], oSizeROI[nImage].width * sizeof(Npp32u), oSizeROI[nImage].width * sizeof(Npp32u), oSizeROI[nImage].height,
+                                      hipMemcpyDeviceToHost, nppStreamCtx.hStream);
+    }
+
+    // Wait for host image read backs to complete, not necessary if no need to synchronize
+    if ((hipError_t = hipStreamSynchronize(nppStreamCtx.hStream)) != hipSuccess) 
+    {
+        printf ("Post label compression hipStreamSynchronize failed\n");
+        tearDown();
+        return -1;
+    }
+
+    // Save compressed label images into files
+    for (int nImage = 0; nImage < NUMBER_OF_IMAGES; nImage++)
+    {
+        if (nImage == 0)
+            fopen_s(&bmpFile, CompressedMarkerLabelsBatchOutputFile0.c_str(), "wb");
+        else if (nImage == 1)
+            fopen_s(&bmpFile, CompressedMarkerLabelsBatchOutputFile1.c_str(), "wb");
+        else if (nImage == 2)
+            fopen_s(&bmpFile, CompressedMarkerLabelsBatchOutputFile2.c_str(), "wb");
+        else if (nImage == 3)
+            fopen_s(&bmpFile, CompressedMarkerLabelsBatchOutputFile3.c_str(), "wb");
+        else if (nImage == 4)
+            fopen_s(&bmpFile, CompressedMarkerLabelsBatchOutputFile4.c_str(), "wb");
+
+        if (bmpFile == NULL) 
+            return -1;
+        size_t nSize = 0;
+        for (int j = 0; j < oSizeROI[nImage].height; j++)
+        {
+            nSize += fwrite(&pUFLabelHost[nImage][j * oSizeROI[nImage].width], sizeof(Npp32u), oSizeROI[nImage].width, bmpFile);
+        }
+        fclose(bmpFile);
+    }
+
+    // Read back per image compressed label count.
+    hipError_t = hipMemcpyAsync(pUFBatchPerImageCompressedCountListHost, pUFBatchPerImageCompressedCountListDev, 
+                                NUMBER_OF_IMAGES * sizeof(Npp32u), hipMemcpyDeviceToHost, nppStreamCtx.hStream);
+    if (hipError_t != hipSuccess)
+    {
+        tearDown();
+        return NPP_MEMCPY_ERROR;
+    }
+
+    // Wait for host read back to complete
+    hipError_t = hipStreamSynchronize(nppStreamCtx.hStream);
+
+    printf("\n\n");
+
+    for (int nImage = 0; nImage < NUMBER_OF_IMAGES; nImage++)
+    {
+        if (nImage == 0)
+            printf("Lena_CompressedMarkerLabelsUFBatch_8Way_512x512_32u succeeded, compressed label count is %d.\n", pUFBatchPerImageCompressedCountListHost[nImage]);
+        else if (nImage == 1)
+            printf("CT_Skull_CompressedMarkerLabelsUFBatch_8Way_512x512_32u succeeded, compressed label count is %d.\n", pUFBatchPerImageCompressedCountListHost[nImage]);
+        else if (nImage == 2)
+            printf("PCB_METAL_CompressedMarkerLabelsUFBatch_8Way_509x335_32u succeeded, compressed label count is %d.\n", pUFBatchPerImageCompressedCountListHost[nImage]);
+        else if (nImage == 3)
+            printf("PCB2_CompressedMarkerLabelsUFBatch_8Way_1024x683_32u succeeded, compressed label count is %d.\n", pUFBatchPerImageCompressedCountListHost[nImage]);
+        else if (nImage == 4)
+            printf("PCB_CompressedMarkerLabelsUFBatch_8Way_1280x720_32u succeeded, compressed label count is %d.\n", pUFBatchPerImageCompressedCountListHost[nImage]);
+    }
+
+
+    tearDown();
+
+    return 0;
+}
+

@@ -1,0 +1,150 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2020-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+#include "watershedSegmentation.h"
+#include <npp.h>
+#if __has_include(<nppworkspace.h>)
+#include <nppworkspace.h>
+#define NPP_HAS_WORKSPACE 1 // NPP 13.2.0.58 (CTK 13.4 and later)
+#else
+#define NPP_HAS_WORKSPACE 0 // older NPP: the application allocates the scratch buffers
+#endif
+#include <hip/hip_runtime.h>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <cstdlib>
+
+#define NUM_IMAGES 5
+
+Npp8u *d_input[NUM_IMAGES], *h_input[NUM_IMAGES];
+Npp8u *d_segments[NUM_IMAGES], *h_segments[NUM_IMAGES];
+Npp32u *d_labels[NUM_IMAGES], *h_labels[NUM_IMAGES];
+
+const std::string base_path = "../images/";
+const std::string input_files[] = {
+    "Lena_512x512_8u_Gray.raw",
+    "CT_skull_512x512_8u_Gray.raw",
+    "Rocks_512x512_8u_Gray.raw",
+    "coins_500x383_8u_Gray.raw",
+    "coins_overlay_500x569_8u_Gray.raw"
+};
+
+void cleanup() {
+    for (int i = 0; i < NUM_IMAGES; ++i) {
+        hipFree(d_input[i]);
+        hipFree(d_segments[i]);
+        hipFree(d_labels[i]);
+        free(h_input[i]);
+        free(h_segments[i]);
+        free(h_labels[i]);
+    }
+}
+
+bool loadRaw(const std::string &file, Npp8u *buffer, int width, int height) {
+    FILE *fp = fopen((base_path + file).c_str(), "rb");
+    if (!fp) return false;
+    size_t size = fread(buffer, 1, width * height, fp);
+    fclose(fp);
+    return size == width * height;
+}
+
+int main(int argc, char **argv) {
+    NppStreamContext ctx = {};
+    hipGetDevice(&ctx.nCudaDeviceId);
+    hipStreamCreate(&ctx.hStream);
+
+    // Attach an NPP workspace: one high-water-mark scratch buffer shared by every image below.  It grows only when an
+    // image needs more scratch than any previous one, so there is no per-image GetBufferSize/cudaMalloc/cudaFree.
+#if NPP_HAS_WORKSPACE
+    if (nppiWorkspaceCreate(&ctx) != NPP_SUCCESS) {
+        std::cerr << "nppiWorkspaceCreate failed\n";
+        return -1;
+    }
+#endif
+
+    NppiSize rois[NUM_IMAGES] = {{512,512}, {512,512}, {512,512}, {500,383}, {500,569}};
+
+    for (int i = 0; i < NUM_IMAGES; ++i) {
+        int size = rois[i].width * rois[i].height;
+
+        hipMalloc(&d_input[i], size);
+        hipMalloc(&d_segments[i], size);
+        hipMalloc(&d_labels[i], size * sizeof(Npp32u));
+
+        h_input[i] = (Npp8u*)malloc(size);
+        h_segments[i] = (Npp8u*)malloc(size);
+        h_labels[i] = (Npp32u*)malloc(size * sizeof(Npp32u));
+
+        if (!loadRaw(input_files[i], h_input[i], rois[i].width, rois[i].height)) {
+            std::cerr << "Failed to load " << input_files[i] << "\n";
+            cleanup();
+            return -1;
+        }
+
+        hipMemcpy2D(d_input[i], rois[i].width, h_input[i], rois[i].width,
+                     rois[i].width, rois[i].height, hipMemcpyHostToDevice);
+        hipMemcpy(d_segments[i], d_input[i], size, hipMemcpyDeviceToDevice);
+
+        // Without an NPP workspace the scratch buffer is allocated here for each image.
+        Npp8u *d_scratch = NULL;
+#if !NPP_HAS_WORKSPACE
+        size_t scratch_size = 0;
+        NppStatus bufStatus = nppiSegmentWatershedGetBufferSize_8u_C1R(rois[i], &scratch_size);
+        if (bufStatus != NPP_SUCCESS) {
+            std::cerr << "nppiSegmentWatershedGetBufferSize_8u_C1R failed: " << (int)bufStatus << "\n";
+            cleanup();
+            hipStreamDestroy(ctx.hStream);
+            return -1;
+        }
+        hipError_t mallocStatus = hipMalloc(&d_scratch, scratch_size > 0 ? scratch_size : 1);
+        if (mallocStatus != hipSuccess) {
+            std::cerr << "hipMalloc of the scratch buffer failed: " << hipGetErrorString(mallocStatus) << "\n";
+            cleanup();
+            hipStreamDestroy(ctx.hStream);
+            return -1;
+        }
+#endif
+
+        nppiSegmentWatershed_8u_C1IR_Ctx(d_segments[i], rois[i].width,
+                                         d_labels[i], rois[i].width * sizeof(Npp32u),
+                                         nppiNormInf, NPP_WATERSHED_SEGMENT_BOUNDARIES_NONE,
+                                         rois[i], d_scratch /* NULL: scratch from workspace */, ctx);
+        hipFree(d_scratch);
+
+        hipMemcpy(h_segments[i], d_segments[i], size, hipMemcpyDeviceToHost);
+        hipMemcpy(h_labels[i], d_labels[i], size * sizeof(Npp32u), hipMemcpyDeviceToHost);
+
+        std::string out_seg = base_path + "Segmented_" + input_files[i];
+        FILE *fseg = fopen(out_seg.c_str(), "wb");
+        fwrite(h_segments[i], 1, size, fseg); fclose(fseg);
+
+        std::string out_label = base_path + "Labels_" + input_files[i];
+        FILE *flab = fopen(out_label.c_str(), "wb");
+        fwrite(h_labels[i], sizeof(Npp32u), size, flab); fclose(flab);
+
+        std::cout << "Processed " << input_files[i] << "\n";
+    }
+
+    cleanup();
+#if NPP_HAS_WORKSPACE
+    nppiWorkspaceDestroy(&ctx);
+#endif
+    hipStreamDestroy(ctx.hStream);
+    return 0;
+}

@@ -1,0 +1,14 @@
+{
+  "sample_id": "cuDSS/nvfortran/sparse_matrix_helpers::sparse_matrix_helpers.cuf",
+  "scope": "language_frontend_and_binding_attempt",
+  "status": "FAILED",
+  "level": "L1",
+  "return_code": 1,
+  "reason_code": "BINDING_OR_FRONTEND_MIGRATION_REQUIRED",
+  "reason": "Fortran 原始入口使用 iso_fortran_env, iso_c_binding, cudafor, cudss；当前 flang 编译失败，CUDA/cuDSS/cuFFT/NVFortran module 和 device 语法需用经验证的 ISO_C_BINDING 与 AMD API 重写。C ABI 探针另记，不代表该例已实现。 日志：helpers.cuf:109:8: error: No explicit type declared for 'cudssmatrixdestroy'     st = cudssMatrixDestroy(A); st = cudssDestroy(handle)          ^^^^^^^^^^^^^^^^^^ /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/nvfortran/sparse_matrix_helpers/sparse_matrix_helpers.cuf:109:36: error: No explicit type declared for 'cudssdestroy'     st = cudssMatrixDestroy(A); st = cudssDestroy(handle)                                      ^^^^^^^^^^^^ ",
+  "implementation": "rocm/ported/cuDSS/nvfortran/sparse_matrix_helpers/sparse_matrix_helpers.cuf",
+  "implementation_sha256": "b43ee60fe823851ca7fe271048ec3ffdc0e57a9bbd564acd02dd349a6c367713",
+  "source_sha256": "b43ee60fe823851ca7fe271048ec3ffdc0e57a9bbd564acd02dd349a6c367713",
+  "evidence": "artifacts/20261109T084354.110802Z/languages/cuDSS_nvfortran_sparse_matrix_helpers_sparse_matrix_helpers.cuf",
+  "environment": "artifacts/20261109T084354.110802Z/languages/environment.json"
+}

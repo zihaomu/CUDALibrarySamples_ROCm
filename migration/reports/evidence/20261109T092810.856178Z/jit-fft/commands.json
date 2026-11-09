@@ -1,0 +1,34 @@
+{
+  "host": [
+    "amdclang++",
+    "-std=c++17",
+    "-O2",
+    "-D__HIP_PLATFORM_AMD__",
+    "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/cuFFT/lto_callback_window_1d/sample_jit.cpp",
+    "-I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common",
+    "-I/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/include",
+    "-I/opt/rocm/core-10.1/include",
+    "-L/opt/rocm/core-10.1/lib",
+    "-L/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib",
+    "-lhipfft",
+    "-lhiprtc",
+    "-lamdhip64",
+    "-Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib",
+    "-Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib",
+    "-o",
+    "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/20261109T092810.856178Z/jit-fft/sample"
+  ],
+  "aot_bitcode": [
+    "hipcc",
+    "--rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay",
+    "--hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay",
+    "--rocm-device-lib-path=/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode",
+    "--offload-arch=amdgcnspirv",
+    "--offload-device-only",
+    "-c",
+    "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/cuFFT/lto_callback_window_1d/window_callback.hip",
+    "-I/opt/rocm/core-10.1/include",
+    "-o",
+    "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/20261109T092810.856178Z/jit-fft/callback.spv"
+  ]
+}

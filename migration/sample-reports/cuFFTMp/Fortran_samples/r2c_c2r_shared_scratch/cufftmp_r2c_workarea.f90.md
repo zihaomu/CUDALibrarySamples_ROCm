@@ -1,0 +1,35 @@
+# cuFFTMp/Fortran_samples/r2c_c2r_shared_scratch::cufftmp_r2c_workarea.f90
+
+**FAILED / L0**
+
+Fortran 原始入口使用 iso_c_binding, nvshmem, cufftXt, cufft, openacc, mpi, cufft_required；当前 flang 编译失败，CUDA/cuDSS/cuFFT/NVFortran module 和 device 语法需用经验证的 ISO_C_BINDING 与 AMD API 重写。C ABI 探针另记，不代表该例已实现。 日志：cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/r2c_c2r_shared_scratch/cufftmp_r2c_workarea.f90:342:5: in the context: specification construct       real, dimension(:,:,:), device, pointer :: u_d       ^ /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/r2c_c2r_shared_scratch/cufftmp_r2c_workarea.f90:336:5: in the context: specification part       implicit none       ^
+
+| 字段 | 当前记录 |
+| --- | --- |
+| 原始入口 | [cuFFTMp/Fortran_samples/r2c_c2r_shared_scratch/cufftmp_r2c_workarea.f90](../../../../../cuFFTMp/Fortran_samples/r2c_c2r_shared_scratch/cufftmp_r2c_workarea.f90) |
+| 实际库 / 后端 | — / — |
+| 候选路线 | hipFFT, rocFFT, GPU-aware MPI |
+| 代码 | 无实现 |
+| required cases | 0/2 |
+| CUDA baseline / comparison | BLOCKED / BLOCKED |
+| 性能 | NOT_RUN |
+| 原始源码 SHA256 | `d3a313ff9a27dc8b389f140daa9aff15cdfbc59ae6ab5c8e3cc33fe81544dabe` |
+
+编译/运行返回 0 仅对应 L3；通过独立参考检查后才记 L4。失败的候选库不列为已使用库。
+
+必需用例：`original-functional-contract`, `independent-numerical-or-semantic-reference`。
+
+实现方式：`UNIMPLEMENTED_BINDING`。
+
+恢复/扩展条件：实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。
+
+CUDA 对照限制：CUDA 原始 SDK、绑定或输入前置条件未满足，见该例 CUDA 基线证据。
+
+## 复现与证据
+
+从仓库根目录，先核对物理 GPU 占用。HIP ordinal 与物理编号不同；项目 guard 根据 PCI 地址拒绝 GPU3 和被预约的卡。
+
+具体命令见该入口证据目录中的 `commands.json`，运行环境见同批 `environment.json`。批量入口：`tools/migration/bulk_run.py --families <family>`；特殊驱动见专项报告。
+
+- [migration/reports/evidence/20261109T084354.110802Z/languages/cuFFTMp_Fortran_samples_r2c_c2r_shared_scratch_cufftmp_r2c_workarea.f90](../../../../reports/evidence/20261109T084354.110802Z/languages/cuFFTMp_Fortran_samples_r2c_c2r_shared_scratch_cufftmp_r2c_workarea.f90)
+- [migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuFFTMp_Fortran_samples_r2c_c2r_shared_scratch_cufftmp_r2c_workarea.f90](../../../../reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuFFTMp_Fortran_samples_r2c_c2r_shared_scratch_cufftmp_r2c_workarea.f90)

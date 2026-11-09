@@ -1,0 +1,9 @@
+{"profile": "rocm10-foundation-r9700-v1", "passed": true, "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03", "output": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-environment-reports/690e07afc298403d9ba6ab0885eb7cf0.json"}
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import sys;sys.path.insert(0,"tools/migration");from device_guard import allowed_devices;print(allowed_devices(require_idle=True))
+                                                                                                   ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/tools/migration/device_guard.py", line 32, in allowed_devices
+    if rc or free.value<.9*total.value or busy is None or busy>2:raise RuntimeError(f'physical GPU{physical} is occupied; free={free.value}/{total.value}, busy={busy}; timing is unqualified')
+                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: physical GPU7 is occupied; free=14082375680/34208743424, busy=3; timing is unqualified

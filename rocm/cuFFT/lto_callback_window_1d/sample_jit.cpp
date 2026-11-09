@@ -1,0 +1,15 @@
+// SPDX-License-Identifier: Apache-2.0
+// AMD SPIR-V callback, built by HIP compiler or HIPRTC; no NVIDIA LTOIR.
+#include "check.hpp"
+#include "binary_observe.hpp"
+#include <hip/hiprtc.h>
+#include <hipfft/hipfftXt.h>
+#include <random>
+using namespace sample;
+struct callback_params{unsigned window_size;unsigned signal_size;};
+int main(int argc,char**argv){return run([&]{if(argc!=3)throw std::runtime_error("mode runtime|bitcode and callback source|bitcode path required");std::vector<char>bitcode;std::ifstream f(argv[2],std::ios::binary);std::string text((std::istreambuf_iterator<char>(f)),{});if(text.empty())throw std::runtime_error("empty callback source/bitcode");if(std::string(argv[1])=="runtime"){
+ hiprtcProgram prog;CHECK(hiprtcCreateProgram(&prog,text.c_str(),"window_callback.hip",0,nullptr,nullptr));const char* options[]={"--gpu-architecture=amdgcnspirv","-std=c++17","-I/opt/rocm/core-10.1/include","-I/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/include"};auto status=hiprtcCompileProgram(prog,4,options);size_t len=0;CHECK(hiprtcGetProgramLogSize(prog,&len));std::string log(len,'\0');if(len)CHECK(hiprtcGetProgramLog(prog,log.data()));if(status!=HIPRTC_SUCCESS)throw std::runtime_error("HIPRTC compilation failed: "+log);size_t bytes=0;CHECK(hiprtcGetBitcodeSize(prog,&bytes));bitcode.resize(bytes);CHECK(hiprtcGetBitcode(prog,bitcode.data()));CHECK(hiprtcDestroyProgram(&prog));}
+ else bitcode.assign(text.begin(),text.end());
+ constexpr int batches=830,n=328,padded=330;std::vector<float>input(batches*padded),output(input.size());std::mt19937 gen(0);std::uniform_real_distribution<>ad(0,20),fd(0,500);for(int b=0;b<batches;++b){float amplitudes[12],frequencies[12];for(int k=0;k<12;++k){amplitudes[k]=ad(gen);frequencies[k]=fd(gen);}float time=0;for(int i=0;i<n;++i){for(int k=0;k<12;++k)input[b*padded+i]+=amplitudes[k]*sin(2.*3.14159265358979323846*frequencies[k]*time);time+=1e-3f;}}
+ Device<float>data(input);Device<callback_params>params(std::vector<callback_params>{{32,165}});void* cbdata=params.p;hipfftHandle forward,inverse;CHECK(hipfftCreate(&forward));CHECK(hipfftCreate(&inverse));CHECK(hipfftXtSetJITCallback(inverse,"windowing_callback",bitcode.data(),bitcode.size(),HIPFFT_CB_LD_COMPLEX,&cbdata));size_t workspace;CHECK(hipfftMakePlan1d(forward,n,HIPFFT_R2C,batches,&workspace));CHECK(hipfftMakePlan1d(inverse,n,HIPFFT_C2R,batches,&workspace));CHECK(hipfftExecR2C(forward,data.p,reinterpret_cast<hipfftComplex*>(data.p)));CHECK(hipfftExecC2R(inverse,reinterpret_cast<hipfftComplex*>(data.p),data.p));CHECK(hipDeviceSynchronize());output=data.get();for(float v:output)if(!std::isfinite(v))throw std::runtime_error("nonfinite JIT callback output");migration_binary::emit("input.bin",input.data(),input.size()*sizeof(float));migration_binary::emit("output.bin",output.data(),output.size()*sizeof(float));CHECK(hipfftDestroy(forward));CHECK(hipfftDestroy(inverse));std::cout<<"{\"stage\":\"callback-executed\",\"mode\":\""<<argv[1]<<"\",\"bitcode_bytes\":"<<bitcode.size()<<"}"<<std::endl;
+});}

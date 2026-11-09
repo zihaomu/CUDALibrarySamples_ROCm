@@ -1,0 +1,643 @@
+[  5%] Building HIP object src/CMakeFiles/hipcomp.dir/HipUtils.cu.o
+[  5%] Building HIP object src/CMakeFiles/hipcomp.dir/BitPackGPU.cu.o
+[  7%] Building HIP object src/CMakeFiles/hipcomp.dir/DeltaGPU.cu.o
+[ 10%] Building HIP object src/CMakeFiles/hipcomp.dir/RunLengthEncodeGPU.cu.o
+[ 12%] Building HIP object src/CMakeFiles/hipcomp.dir/helpers.cu.o
+[ 15%] Building HIP object src/CMakeFiles/hipcomp.dir/highlevel/BitcompManager.cu.o
+[ 17%] Building HIP object src/CMakeFiles/hipcomp.dir/highlevel/CascadedHlifKernels.cu.o
+[ 20%] Building HIP object src/CMakeFiles/hipcomp.dir/highlevel/DeflateHlifKernels.cu.o
+[ 22%] Building HIP object src/CMakeFiles/hipcomp.dir/highlevel/GzipHlifKernels.cu.o
+[ 25%] Building HIP object src/CMakeFiles/hipcomp.dir/highlevel/LZ4HlifKernels.cu.o
+[ 27%] Building HIP object src/CMakeFiles/hipcomp.dir/highlevel/SnappyHlifKernels.cu.o
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/highlevel/SnappyHlifKernels.cu:55:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/../src/snappy/decompression.cuh:42:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/../src/snappy/decompression_decode.cuh:194:16: warning: argument to '#pragma unroll' should not be in parentheses in CUDA C/C++ [-Wcuda-compat]
+  194 | #pragma unroll(1) // We don't want unrolling here
+      |                ^
+[ 30%] Building HIP object src/CMakeFiles/hipcomp.dir/highlevel/ZstdHlifKernels.cu.o
+1 warning generated when compiling for gfx1201.
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/highlevel/SnappyHlifKernels.cu:55:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/../src/snappy/decompression.cuh:42:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/../src/snappy/decompression_decode.cuh:194:16: warning: argument to '#pragma unroll' should not be in parentheses in CUDA C/C++ [-Wcuda-compat]
+  194 | #pragma unroll(1) // We don't want unrolling here
+      |                ^
+1 warning generated when compiling for host.
+[ 32%] Building HIP object src/CMakeFiles/hipcomp.dir/lowlevel/BitcompBatch.cu.o
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'signed char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<signed char, signed char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<signed char, signed char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:127:61: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  127 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, int8_t, func,              \
+      |                                                             ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:95:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+   95 |       func<int8_t, second_type>(__VA_ARGS__);                                  \
+      |       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'signed char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<unsigned char, signed char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<unsigned char, signed char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:127:61: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  127 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, int8_t, func,              \
+      |                                                             ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:98:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+   98 |       func<uint8_t, second_type>(__VA_ARGS__);                                 \
+      |       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'signed char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<short, signed char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<short, signed char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:127:61: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  127 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, int8_t, func,              \
+      |                                                             ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:101:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+  101 |       func<int16_t, second_type>(__VA_ARGS__);                                 \
+      |       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'signed char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<unsigned short, signed char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<unsigned short, signed char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:127:61: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  127 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, int8_t, func,              \
+      |                                                             ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:104:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+  104 |       func<uint16_t, second_type>(__VA_ARGS__);                                \
+      |       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'signed char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<int, signed char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<int, signed char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:127:61: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  127 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, int8_t, func,              \
+      |                                                             ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:107:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+  107 |       func<int32_t, second_type>(__VA_ARGS__);                                 \
+      |       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'signed char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<unsigned int, signed char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<unsigned int, signed char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:127:61: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  127 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, int8_t, func,              \
+      |                                                             ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:110:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+  110 |       func<uint32_t, second_type>(__VA_ARGS__);                                \
+      |       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'signed char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<long, signed char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<long, signed char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:127:61: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  127 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, int8_t, func,              \
+      |                                                             ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:113:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+  113 |       func<int64_t, second_type>(__VA_ARGS__);                                 \
+      |       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'signed char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<unsigned long, signed char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<unsigned long, signed char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:127:61: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  127 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, int8_t, func,              \
+      |                                                             ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:116:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+  116 |       func<uint64_t, second_type>(__VA_ARGS__);                                \
+      |       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'unsigned char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<signed char, unsigned char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<signed char, unsigned char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:131:62: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  131 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, uint8_t, func,             \
+      |                                                              ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:95:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+   95 |       func<int8_t, second_type>(__VA_ARGS__);                                  \
+      |       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'unsigned char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<unsigned char, unsigned char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<unsigned char, unsigned char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:131:62: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  131 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, uint8_t, func,             \
+      |                                                              ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:98:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+   98 |       func<uint8_t, second_type>(__VA_ARGS__);                                 \
+      |       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'unsigned char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<short, unsigned char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<short, unsigned char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:131:62: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  131 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, uint8_t, func,             \
+      |                                                              ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:101:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+  101 |       func<int16_t, second_type>(__VA_ARGS__);                                 \
+      |       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'unsigned char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<unsigned short, unsigned char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<unsigned short, unsigned char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:131:62: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  131 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, uint8_t, func,             \
+      |                                                              ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:104:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+  104 |       func<uint16_t, second_type>(__VA_ARGS__);                                \
+      |       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'unsigned char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<int, unsigned char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<int, unsigned char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:131:62: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  131 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, uint8_t, func,             \
+      |                                                              ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:107:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+  107 |       func<int32_t, second_type>(__VA_ARGS__);                                 \
+      |       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'unsigned char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<unsigned int, unsigned char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<unsigned int, unsigned char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:131:62: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  131 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, uint8_t, func,             \
+      |                                                              ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:110:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+  110 |       func<uint32_t, second_type>(__VA_ARGS__);                                \
+      |       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'unsigned char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<long, unsigned char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<long, unsigned char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:131:62: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  131 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, uint8_t, func,             \
+      |                                                              ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:113:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+  113 |       func<int64_t, second_type>(__VA_ARGS__);                                 \
+      |       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'unsigned char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<unsigned long, unsigned char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<unsigned long, unsigned char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:131:62: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  131 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, uint8_t, func,             \
+      |                                                              ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:116:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+  116 |       func<uint64_t, second_type>(__VA_ARGS__);                                \
+      |       ^
+[ 35%] Building HIP object src/CMakeFiles/hipcomp.dir/lowlevel/CascadedBatch.cu.o
+[ 37%] Building HIP object src/CMakeFiles/hipcomp.dir/lowlevel/DeflateBatchKernels.cu.o
+[ 40%] Building HIP object src/CMakeFiles/hipcomp.dir/lowlevel/LZ4CompressionKernels.cu.o
+[ 42%] Building HIP object src/CMakeFiles/hipcomp.dir/lowlevel/SnappyBatchKernels.cu.o
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/lowlevel/SnappyBatchKernels.cu:54:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/../src/snappy/decompression.cuh:42:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/../src/snappy/decompression_decode.cuh:194:16: warning: argument to '#pragma unroll' should not be in parentheses in CUDA C/C++ [-Wcuda-compat]
+  194 | #pragma unroll(1) // We don't want unrolling here
+      |                ^
+1 warning generated when compiling for gfx1201.
+[ 45%] Building HIP object src/CMakeFiles/hipcomp.dir/lowlevel/ZstdBatchKernels.cu.o
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/lowlevel/SnappyBatchKernels.cu:54:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/../src/snappy/decompression.cuh:42:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/../src/snappy/decompression_decode.cuh:194:16: warning: argument to '#pragma unroll' should not be in parentheses in CUDA C/C++ [-Wcuda-compat]
+  194 | #pragma unroll(1) // We don't want unrolling here
+      |                ^
+1 warning generated when compiling for host.
+[ 47%] Building HIP object src/CMakeFiles/hipcomp.dir/lowlevel/gdeflateKernels.cu.o
+[ 50%] Building CXX object src/CMakeFiles/hipcomp.dir/Check.cpp.o
+[ 52%] Building CXX object src/CMakeFiles/hipcomp.dir/TempSpaceBroker.cpp.o
+[ 55%] Building CXX object src/CMakeFiles/hipcomp.dir/highlevel/ANSManager.cpp.o
+[ 57%] Building CXX object src/CMakeFiles/hipcomp.dir/highlevel/CascadedManager.cpp.o
+[ 60%] Building CXX object src/CMakeFiles/hipcomp.dir/highlevel/CompressionConfigs.cpp.o
+[ 62%] Building CXX object src/CMakeFiles/hipcomp.dir/highlevel/DeflateManager.cpp.o
+[ 65%] Building CXX object src/CMakeFiles/hipcomp.dir/highlevel/GdeflateManager.cpp.o
+[ 67%] Building CXX object src/CMakeFiles/hipcomp.dir/highlevel/GzipManager.cpp.o
+[ 70%] Building CXX object src/CMakeFiles/hipcomp.dir/highlevel/LZ4Manager.cpp.o
+[ 72%] Building CXX object src/CMakeFiles/hipcomp.dir/highlevel/SnappyManager.cpp.o
+[ 75%] Building CXX object src/CMakeFiles/hipcomp.dir/highlevel/ZstdManager.cpp.o
+[ 77%] Building CXX object src/CMakeFiles/hipcomp.dir/highlevel/hipcompManagerFactory.cpp.o
+[ 80%] Building CXX object src/CMakeFiles/hipcomp.dir/hipcomp_api.cpp.o
+[ 82%] Building CXX object src/CMakeFiles/hipcomp.dir/lowlevel/DeflateBatch.cpp.o
+[ 85%] Building CXX object src/CMakeFiles/hipcomp.dir/lowlevel/GzipBatch.cpp.o
+[ 87%] Building CXX object src/CMakeFiles/hipcomp.dir/lowlevel/LZ4Batch.cpp.o
+[ 90%] Building CXX object src/CMakeFiles/hipcomp.dir/lowlevel/SnappyBatch.cpp.o
+[ 92%] Building CXX object src/CMakeFiles/hipcomp.dir/lowlevel/ZstdBatch.cpp.o
+[ 95%] Building CXX object src/CMakeFiles/hipcomp.dir/lowlevel/ansBatch.cpp.o
+[ 97%] Building CXX object src/CMakeFiles/hipcomp.dir/lowlevel/gdeflateBatch.cpp.o
+16 warnings generated when compiling for gfx1201.
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'signed char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<signed char, signed char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<signed char, signed char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:127:61: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  127 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, int8_t, func,              \
+      |                                                             ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:95:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+   95 |       func<int8_t, second_type>(__VA_ARGS__);                                  \
+      |       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'signed char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<unsigned char, signed char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<unsigned char, signed char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:127:61: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  127 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, int8_t, func,              \
+      |                                                             ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:98:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+   98 |       func<uint8_t, second_type>(__VA_ARGS__);                                 \
+      |       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'signed char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<short, signed char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<short, signed char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:127:61: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  127 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, int8_t, func,              \
+      |                                                             ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:101:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+  101 |       func<int16_t, second_type>(__VA_ARGS__);                                 \
+      |       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'signed char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<unsigned short, signed char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<unsigned short, signed char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:127:61: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  127 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, int8_t, func,              \
+      |                                                             ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:104:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+  104 |       func<uint16_t, second_type>(__VA_ARGS__);                                \
+      |       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'signed char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<int, signed char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<int, signed char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:127:61: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  127 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, int8_t, func,              \
+      |                                                             ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:107:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+  107 |       func<int32_t, second_type>(__VA_ARGS__);                                 \
+      |       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'signed char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<unsigned int, signed char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<unsigned int, signed char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:127:61: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  127 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, int8_t, func,              \
+      |                                                             ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:110:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+  110 |       func<uint32_t, second_type>(__VA_ARGS__);                                \
+      |       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'signed char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<long, signed char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<long, signed char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:127:61: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  127 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, int8_t, func,              \
+      |                                                             ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:113:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+  113 |       func<int64_t, second_type>(__VA_ARGS__);                                 \
+      |       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'signed char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<unsigned long, signed char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<unsigned long, signed char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:127:61: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  127 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, int8_t, func,              \
+      |                                                             ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:116:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+  116 |       func<uint64_t, second_type>(__VA_ARGS__);                                \
+      |       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'unsigned char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<signed char, unsigned char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<signed char, unsigned char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:131:62: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  131 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, uint8_t, func,             \
+      |                                                              ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:95:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+   95 |       func<int8_t, second_type>(__VA_ARGS__);                                  \
+      |       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'unsigned char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<unsigned char, unsigned char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<unsigned char, unsigned char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:131:62: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  131 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, uint8_t, func,             \
+      |                                                              ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:98:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+   98 |       func<uint8_t, second_type>(__VA_ARGS__);                                 \
+      |       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'unsigned char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<short, unsigned char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<short, unsigned char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:131:62: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  131 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, uint8_t, func,             \
+      |                                                              ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:101:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+  101 |       func<int16_t, second_type>(__VA_ARGS__);                                 \
+      |       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'unsigned char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<unsigned short, unsigned char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<unsigned short, unsigned char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:131:62: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  131 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, uint8_t, func,             \
+      |                                                              ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:104:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+  104 |       func<uint16_t, second_type>(__VA_ARGS__);                                \
+      |       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'unsigned char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<int, unsigned char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<int, unsigned char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:131:62: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  131 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, uint8_t, func,             \
+      |                                                              ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:107:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+  107 |       func<int32_t, second_type>(__VA_ARGS__);                                 \
+      |       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'unsigned char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<unsigned int, unsigned char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<unsigned int, unsigned char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:131:62: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  131 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, uint8_t, func,             \
+      |                                                              ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:110:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+  110 |       func<uint32_t, second_type>(__VA_ARGS__);                                \
+      |       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'unsigned char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<long, unsigned char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<long, unsigned char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:131:62: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  131 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, uint8_t, func,             \
+      |                                                              ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:113:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+  113 |       func<int64_t, second_type>(__VA_ARGS__);                                 \
+      |       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:311:39: warning: implicit conversion from 'int' to 'unsigned char' changes value from 1024 to 0 [-Wconstant-conversion]
+  309 |       runBuffer[numCompacted] = ((blockIdx.x + 1) * TILE_SIZE >= num)
+      |                               ~
+  310 |                                     ? ((num - 1) % TILE_SIZE) + 1
+  311 |                                     : TILE_SIZE;
+      |                                       ^~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:520:3: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::rleReduceKernel<unsigned long, unsigned char, 128, 1024>' requested here
+  520 |   rleReduceKernel<VALUE, COUNT, BLOCK_SIZE, GLOBAL_TILE_SIZE>
+      |   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/RunLengthEncodeGPU.cu:554:49: note: in instantiation of function template specialization 'hipcomp::(anonymous namespace)::compressDownstreamInternal<unsigned long, unsigned char>' requested here
+  554 |   HIPCOMP_TYPE_TWO_SWITCH(valueType, countType, compressDownstreamInternal,
+      |                                                 ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:131:62: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH'
+  131 |       HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY(type1_var, uint8_t, func,             \
+      |                                                              ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/src/type_macros.h:116:7: note: expanded from macro 'HIPCOMP_TYPE_TWO_SWITCH_FIRST_ONLY'
+  116 |       func<uint64_t, second_type>(__VA_ARGS__);                                \
+      |       ^
+16 warnings generated when compiling for host.
+[100%] Linking HIP shared library ../lib/libhipcomp.so
+[100%] Built target hipcomp

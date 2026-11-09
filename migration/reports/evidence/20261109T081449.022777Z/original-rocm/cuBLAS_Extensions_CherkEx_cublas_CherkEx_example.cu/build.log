@@ -1,0 +1,33 @@
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLAS/Extensions/CherkEx/cublas_CherkEx_example.cu:74:18: error: no matching function for call to 'hipblasHerkEx'
+   74 |     CUBLAS_CHECK(hipblasHerkEx(cublasH, uplo, trans, n, k, &alpha, d_A,
+      |                  ^~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hipblas/hipblas.h:24860:32: note: candidate function not viable: requires 14 arguments, but 13 were provided
+ 24860 | HIPBLAS_EXPORT hipblasStatus_t hipblasHerkEx(hipblasHandle_t    handle,
+       |                                ^             ~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 24861 |                                              hipblasFillMode_t  uplo,
+       |                                              ~~~~~~~~~~~~~~~~~~~~~~~~
+ 24862 |                                              hipblasOperation_t transA,
+       |                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 24863 |                                              int                n,
+       |                                              ~~~~~~~~~~~~~~~~~~~~~
+ 24864 |                                              int                k,
+       |                                              ~~~~~~~~~~~~~~~~~~~~~
+ 24865 |                                              const void*        alpha,
+       |                                              ~~~~~~~~~~~~~~~~~~~~~~~~~
+ 24866 |                                              const void*        A,
+       |                                              ~~~~~~~~~~~~~~~~~~~~~
+ 24867 |                                              hipDataType        aType,
+       |                                              ~~~~~~~~~~~~~~~~~~~~~~~~~
+ 24868 |                                              int                lda,
+       |                                              ~~~~~~~~~~~~~~~~~~~~~~~
+ 24869 |                                              const void*        beta,
+       |                                              ~~~~~~~~~~~~~~~~~~~~~~~~
+ 24870 |                                              void*              C,
+       |                                              ~~~~~~~~~~~~~~~~~~~~~
+ 24871 |                                              hipDataType        cType,
+       |                                              ~~~~~~~~~~~~~~~~~~~~~~~~~
+ 24872 |                                              int                ldc,
+       |                                              ~~~~~~~~~~~~~~~~~~~~~~~
+ 24873 |                                              hipDataType        computeType);
+       |                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1 error generated.

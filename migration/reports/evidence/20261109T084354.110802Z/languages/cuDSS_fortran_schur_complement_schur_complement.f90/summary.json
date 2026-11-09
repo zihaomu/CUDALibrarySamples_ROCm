@@ -1,0 +1,14 @@
+{
+  "sample_id": "cuDSS/fortran/schur_complement::schur_complement.f90",
+  "scope": "language_frontend_and_binding_attempt",
+  "status": "FAILED",
+  "level": "L1",
+  "return_code": 1,
+  "reason_code": "BINDING_OR_FRONTEND_MIGRATION_REQUIRED",
+  "reason": "Fortran 原始入口使用 iso_fortran_env, iso_c_binding, cudautils, cudss；当前 flang 编译失败，CUDA/cuDSS/cuFFT/NVFortran module 和 device 语法需用经验证的 ISO_C_BINDING 与 AMD API 重写。C ABI 探针另记，不代表该例已实现。 日志：ported/cuDSS/fortran/schur_complement/schur_complement.f90:189:15: error: No explicit type declared for 'cudafree'        status = cudaFree(schur_dev)                 ^^^^^^^^ /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/fortran/schur_complement/schur_complement.f90:190:20: error: No explicit type declared for 'cudasuccess'        if (status /= cudaSuccess) print *, 'cudaFree(schur_dev): ', status                      ^^^^^^^^^^^ ",
+  "implementation": "rocm/ported/cuDSS/fortran/schur_complement/schur_complement.f90",
+  "implementation_sha256": "170b06105d5b5fadc1d3d751a6fde7a5f12ac8e1eb6956c4315962bcf75da3b0",
+  "source_sha256": "170b06105d5b5fadc1d3d751a6fde7a5f12ac8e1eb6956c4315962bcf75da3b0",
+  "evidence": "artifacts/20261109T084354.110802Z/languages/cuDSS_fortran_schur_complement_schur_complement.f90",
+  "environment": "artifacts/20261109T084354.110802Z/languages/environment.json"
+}

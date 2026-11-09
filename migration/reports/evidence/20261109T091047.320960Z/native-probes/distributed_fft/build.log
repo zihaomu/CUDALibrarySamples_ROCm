@@ -1,0 +1,53 @@
+Warning: HIP version file: "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/share/hip/version" not found.  Cannot give HIP version information.
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/probes/distributed_fft.hip:8:166: error: no matching function for call to 'cosf'
+    8 | __global__ void merge(const hipfftComplex* all,hipfftComplex* out,int rank){int k=threadIdx.x;if(k>=128)return;float angle=-2*3.14159265358979323846f*k/256;float co=cosf(angle),si=sinf(angle);auto e=all[k],o=all[128+k];float sign=rank? -1.f:1.f;out[k]={e.x+sign*(co*o.x-si*o.y),e.y+sign*(co*o.y+si*o.x)};}
+      |                                                                                                                                                                      ^~~~
+/usr/include/x86_64-linux-gnu/bits/mathcalls.h:62:1: note: candidate function not viable: call to __host__ function from __global__ function
+   62 | __MATHCALL_VEC (cos,, (_Mdouble_ __x));
+      | ^
+/usr/include/math.h:280:3: note: expanded from macro '__MATHCALL_VEC'
+  280 |   __MATHCALL (function, suffix, args)
+      |   ^
+/usr/include/math.h:287:3: note: expanded from macro '__MATHCALL'
+  287 |   __MATHDECL (_Mdouble_,function,suffix, args)
+      |   ^
+/usr/include/math.h:289:3: note: expanded from macro '__MATHDECL'
+  289 |   __MATHDECL_1(type, function,suffix, args); \
+      |   ^
+note: (skipping 1 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)
+/usr/include/math.h:297:15: note: expanded from macro '__MATHDECL_1_IMPL'
+  297 |   extern type __MATH_PRECNAME(function,suffix) args __THROW
+      |               ^
+/usr/include/math.h:326:34: note: expanded from macro '__MATH_PRECNAME'
+  326 | # define __MATH_PRECNAME(name,r) name##f##r
+      |                                  ^
+<scratch space>:22:1: note: expanded from here
+   22 | cosf
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/probes/distributed_fft.hip:8:181: error: no matching function for call to 'sinf'
+    8 | __global__ void merge(const hipfftComplex* all,hipfftComplex* out,int rank){int k=threadIdx.x;if(k>=128)return;float angle=-2*3.14159265358979323846f*k/256;float co=cosf(angle),si=sinf(angle);auto e=all[k],o=all[128+k];float sign=rank? -1.f:1.f;out[k]={e.x+sign*(co*o.x-si*o.y),e.y+sign*(co*o.y+si*o.x)};}
+      |                                                                                                                                                                                     ^~~~
+/usr/include/x86_64-linux-gnu/bits/mathcalls.h:64:1: note: candidate function not viable: call to __host__ function from __global__ function
+   64 | __MATHCALL_VEC (sin,, (_Mdouble_ __x));
+      | ^
+/usr/include/math.h:280:3: note: expanded from macro '__MATHCALL_VEC'
+  280 |   __MATHCALL (function, suffix, args)
+      |   ^
+/usr/include/math.h:287:3: note: expanded from macro '__MATHCALL'
+  287 |   __MATHDECL (_Mdouble_,function,suffix, args)
+      |   ^
+/usr/include/math.h:289:3: note: expanded from macro '__MATHDECL'
+  289 |   __MATHDECL_1(type, function,suffix, args); \
+      |   ^
+note: (skipping 1 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)
+/usr/include/math.h:297:15: note: expanded from macro '__MATHDECL_1_IMPL'
+  297 |   extern type __MATH_PRECNAME(function,suffix) args __THROW
+      |               ^
+/usr/include/math.h:326:34: note: expanded from macro '__MATH_PRECNAME'
+  326 | # define __MATH_PRECNAME(name,r) name##f##r
+      |                                  ^
+<scratch space>:27:1: note: expanded from here
+   27 | sinf
+      | ^
+2 errors generated when compiling for gfx1201.
+failed to execute:/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib/llvm/bin/clang++  --offload-arch=gfx1201 --driver-mode=g++ --hip-link  --rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --rocm-device-lib-path=/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode -std=c++17 -O2 -D__HIP_PLATFORM_AMD__ -x hip /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/probes/distributed_fft.hip -o "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/20261109T091047.320960Z/native-probes/distributed_fft/probe" -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common -I/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/include -I/opt/rocm/core-10.1/include -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/include -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/project-sdk/include -L/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/hipcomp/lib -L/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/project-sdk/lib -L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib -L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib -L/opt/rocm/core-10.1/lib -Wl,-rpath,/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/hipcomp/lib -Wl,-rpath,/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/project-sdk/lib -Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib -Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib -Wl,-rpath,/opt/rocm/core-10.1/lib -lhipfft -lrccl -lamdhip64

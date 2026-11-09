@@ -1,0 +1,2 @@
+include("/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/migration/reports/upstream-support/hipsparselt_supported_architectures.cmake")
+hipsparselt_validate_gpu_targets("gfx1201")

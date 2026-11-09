@@ -1,0 +1,40 @@
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLAS/Extensions/CsyrkEx/cublas_CsyrkEx_example.cu:26:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLAS/utils/cublas_utils.h:350:41: error: unknown type name 'cudaEmulationMantissaControl'
+  350 |                                         cudaEmulationMantissaControl mantissaControl, int maxMantissaBitCount) {
+      |                                         ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLAS/utils/cublas_utils.h:371:28: error: use of undeclared identifier 'CUDA_EMULATION_MANTISSA_CONTROL_DYNAMIC'
+  371 |     if (mantissaControl == CUDA_EMULATION_MANTISSA_CONTROL_DYNAMIC) {
+      |                            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLAS/Extensions/CsyrkEx/cublas_CsyrkEx_example.cu:75:18: error: no matching function for call to 'hipblasSyrkEx'
+   75 |     CUBLAS_CHECK(hipblasSyrkEx(cublasH, uplo, trans, n, k, &alpha, d_A,
+      |                  ^~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hipblas/hipblas.h:24640:32: note: candidate function not viable: requires 14 arguments, but 13 were provided
+ 24640 | HIPBLAS_EXPORT hipblasStatus_t hipblasSyrkEx(hipblasHandle_t    handle,
+       |                                ^             ~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 24641 |                                              hipblasFillMode_t  uplo,
+       |                                              ~~~~~~~~~~~~~~~~~~~~~~~~
+ 24642 |                                              hipblasOperation_t transA,
+       |                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 24643 |                                              int                n,
+       |                                              ~~~~~~~~~~~~~~~~~~~~~
+ 24644 |                                              int                k,
+       |                                              ~~~~~~~~~~~~~~~~~~~~~
+ 24645 |                                              const void*        alpha,
+       |                                              ~~~~~~~~~~~~~~~~~~~~~~~~~
+ 24646 |                                              const void*        A,
+       |                                              ~~~~~~~~~~~~~~~~~~~~~
+ 24647 |                                              hipDataType        aType,
+       |                                              ~~~~~~~~~~~~~~~~~~~~~~~~~
+ 24648 |                                              int                lda,
+       |                                              ~~~~~~~~~~~~~~~~~~~~~~~
+ 24649 |                                              const void*        beta,
+       |                                              ~~~~~~~~~~~~~~~~~~~~~~~~
+ 24650 |                                              void*              C,
+       |                                              ~~~~~~~~~~~~~~~~~~~~~
+ 24651 |                                              hipDataType        cType,
+       |                                              ~~~~~~~~~~~~~~~~~~~~~~~~~
+ 24652 |                                              int                ldc,
+       |                                              ~~~~~~~~~~~~~~~~~~~~~~~
+ 24653 |                                              hipDataType        computeType);
+       |                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+3 errors generated.

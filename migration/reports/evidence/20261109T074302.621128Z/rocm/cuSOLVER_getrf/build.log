@@ -1,0 +1,21 @@
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/cuSOLVER/getrf/sample.cpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/check.hpp:24:107: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   24 | struct Stream {hipStream_t p;Stream(){CHECK(hipStreamCreateWithFlags(&p,hipStreamNonBlocking));}~Stream(){hipStreamDestroy(p);}};
+      |                                                                                                           ^~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/check.hpp:20:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   20 |  ~Device(){if(p)hipFree(p);}
+      |                 ^~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/cuSOLVER/getrf/sample.cpp:9:77: note: in instantiation of member function 'sample::Device<double>::~Device' requested here
+    9 |  int n=3;std::vector<double>a={1,4,7,2,5,8,3,6,10},b={1,2,3};Device<double> da(a),db(b);Device<int> piv(n),info(1);int worksize=0;
+      |                                                                             ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/cuSOLVER/getrf/sample.cpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/check.hpp:20:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   20 |  ~Device(){if(p)hipFree(p);}
+      |                 ^~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/cuSOLVER/getrf/sample.cpp:9:101: note: in instantiation of member function 'sample::Device<int>::~Device' requested here
+    9 |  int n=3;std::vector<double>a={1,4,7,2,5,8,3,6,10},b={1,2,3};Device<double> da(a),db(b);Device<int> piv(n),info(1);int worksize=0;
+      |                                                                                                     ^
+3 warnings generated.
+ld.lld: error: unable to find library -lhipsolver
+ld.lld: error: unable to find library -lamdhip64
+clang++: error: linker command failed with exit code 1 (use -v to see invocation)

@@ -1,0 +1,103 @@
+error: Semantic errors in /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:4:9: error: Cannot parse module file for module 'cudafor': Source file 'cudafor.mod' was not found
+      use cudafor
+          ^^^^^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:5:9: error: Cannot parse module file for module 'cufftxt': Source file 'cufftxt.mod' was not found
+      use cufftXt
+          ^^^^^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:6:9: error: Cannot parse module file for module 'cufft': Source file 'cufft.mod' was not found
+      use cufft
+          ^^^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:7:9: error: Cannot parse module file for module 'mpi': Source file 'mpi.mod' was not found
+      use mpi
+          ^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:8:9: error: Cannot parse module file for module 'nvshmem': Source file 'nvshmem.mod' was not found
+      use nvshmem
+          ^^^^^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:19:18: error: No explicit type declared for 'cuda_stream_kind'
+      integer(kind=cuda_stream_kind) :: stream
+                   ^^^^^^^^^^^^^^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:20:10: error: Derived type 'c_devptr' not found
+      type(c_devptr)  :: workArea, dst, src
+           ^^^^^^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:20:24: error: No explicit type declared for 'workarea'
+      type(c_devptr)  :: workArea, dst, src
+                         ^^^^^^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:20:34: error: No explicit type declared for 'dst'
+      type(c_devptr)  :: workArea, dst, src
+                                   ^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:20:39: error: No explicit type declared for 'src'
+      type(c_devptr)  :: workArea, dst, src
+                                        ^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:30:24: error: No explicit type declared for 'mpi_comm_world'
+      call mpi_comm_size(MPI_COMM_WORLD,size,ierr)
+                         ^^^^^^^^^^^^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:31:24: error: No explicit type declared for 'mpi_comm_world'
+      call mpi_comm_rank(MPI_COMM_WORLD,rank,ierr)
+                         ^^^^^^^^^^^^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:33:20: error: No explicit type declared for 'cudagetdevicecount'
+      call checkCuda(cudaGetDeviceCount(ndevices))
+                     ^^^^^^^^^^^^^^^^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:34:20: error: No explicit type declared for 'cudasetdevice'
+      call checkCuda(cudaSetDevice(mod(rank, ndevices)))
+                     ^^^^^^^^^^^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:109:21: error: No explicit type declared for 'cufftmpcreatereshape'
+      call checkCufft(cufftMpCreateReshape(reshapeHandle))
+                      ^^^^^^^^^^^^^^^^^^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:110:21: error: No explicit type declared for 'cufftmpattachreshapecomm'
+      call checkCufft(cufftMpAttachReshapeComm(reshapeHandle, CUFFT_COMM_MPI, MPI_COMM_WORLD), 'cufftMpAttachReshapeComm error')
+                      ^^^^^^^^^^^^^^^^^^^^^^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:110:61: error: No explicit type declared for 'cufft_comm_mpi'
+      call checkCufft(cufftMpAttachReshapeComm(reshapeHandle, CUFFT_COMM_MPI, MPI_COMM_WORLD), 'cufftMpAttachReshapeComm error')
+                                                              ^^^^^^^^^^^^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:110:77: error: No explicit type declared for 'mpi_comm_world'
+      call checkCufft(cufftMpAttachReshapeComm(reshapeHandle, CUFFT_COMM_MPI, MPI_COMM_WORLD), 'cufftMpAttachReshapeComm error')
+                                                                              ^^^^^^^^^^^^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:112:20: error: No explicit type declared for 'cudastreamcreate'
+      call checkCuda(cudaStreamCreate(stream))
+                     ^^^^^^^^^^^^^^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:115:21: error: No explicit type declared for 'cufftmpmakereshape'
+      call checkCufft(cufftMpMakeReshape(reshapeHandle, elementSize, 3, input_boxes(rank)%lower, input_boxes(rank)%upper, &
+                      ^^^^^^^^^^^^^^^^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:120:21: error: No explicit type declared for 'cufftmpgetreshapesize'
+      call checkCufft(cufftMpGetReshapeSize(reshapeHandle, worksize), 'cufftMpGetReshapeSize error')
+                      ^^^^^^^^^^^^^^^^^^^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:124:11: error: No explicit type declared for 'nvshmem_malloc'
+      src = nvshmem_malloc(dataSize)
+            ^^^^^^^^^^^^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:126:20: error: No explicit type declared for 'cudamemcpy'
+      call checkCuda(cudaMemcpy(src, c_loc(src_host), dataSize, cudaMemcpyHostToDevice))
+                     ^^^^^^^^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:126:42: error: C_LOC() argument must be a data pointer or target
+      call checkCuda(cudaMemcpy(src, c_loc(src_host), dataSize, cudaMemcpyHostToDevice))
+                                           ^^^^^^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:126:63: error: No explicit type declared for 'cudamemcpyhosttodevice'
+      call checkCuda(cudaMemcpy(src, c_loc(src_host), dataSize, cudaMemcpyHostToDevice))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:129:21: error: No explicit type declared for 'cufftmpexecreshapeasync'
+      call checkCufft(cufftMpExecReshapeAsync(reshapeHandle, dst, src, workArea, stream), 'cufftMpExecReshapeAsync error')
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:132:20: error: No explicit type declared for 'cudastreamsynchronize'
+      call checkCuda(cudaStreamSynchronize(stream), 'cudaStreamSynchroize error')
+                     ^^^^^^^^^^^^^^^^^^^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:135:37: error: C_LOC() argument must be a data pointer or target
+      call checkCuda(cudaMemcpy(c_loc(dst_host), dst, dataSize, cudaMemcpyDeviceToHost), 'cudaMemcpy error')
+                                      ^^^^^^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:135:63: error: No explicit type declared for 'cudamemcpydevicetohost'
+      call checkCuda(cudaMemcpy(c_loc(dst_host), dst, dataSize, cudaMemcpyDeviceToHost), 'cudaMemcpy error')
+                                                                ^^^^^^^^^^^^^^^^^^^^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:139:21: error: No explicit type declared for 'cufftmpdestroyreshape'
+      call checkCufft(cufftMpDestroyReshape(reshapeHandle))
+                      ^^^^^^^^^^^^^^^^^^^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:140:20: error: No explicit type declared for 'cudastreamdestroy'
+      call checkCuda(cudaStreamDestroy(stream))
+                     ^^^^^^^^^^^^^^^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:166:22: error: No explicit type declared for 'cudasuccess'
+          if (istat /= cudaSuccess) then
+                       ^^^^^^^^^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:168:24: error: No explicit type declared for 'cudageterrorstring'
+              write(*,*) cudaGetErrorString(istat)
+                         ^^^^^^^^^^^^^^^^^^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:177:22: error: No explicit type declared for 'cufft_success'
+          if (istat /= CUFFT_SUCCESS) then
+                       ^^^^^^^^^^^^^

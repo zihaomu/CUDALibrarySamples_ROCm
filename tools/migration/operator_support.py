@@ -1,0 +1,72 @@
+#!/usr/bin/env python3
+"""Deduplicate qualified sample profiles into explicitly scoped operator families."""
+import collections,json,pathlib,re
+from catalog import ROOT,CANDIDATES
+
+def operator_name(sample):
+ family=sample['family'];path=pathlib.PurePosixPath(sample['source']);kind=path.parent.name.lower()
+ if family=='cuBLAS':
+  if 'dotc' in path.name.lower():return 'dotc'
+  if kind.startswith(('cherk','csyrk')):kind=kind[1:]
+  kind=re.sub(r'(stridedbatched|groupedbatched|batched|autotuning|3m|ex)$','',kind)
+  return re.sub(r'(stridedbatched|groupedbatched|batched|3m)$','',kind)
+ if family=='cuBLASLt':return 'GEMM'
+ if family=='cuDSS':return '稀疏 SPD 直接求解'
+ if family=='cuFFT':
+  if 'callback' in sample['source']:return 'FFT 窗口过滤 callback'
+  return 'R2C/C2R 实数 FFT' if 'r2c' in sample['source'] or 'c2r' in sample['source'] else 'C2C 复数 FFT'
+ if family=='cuPQC':return 'SHA3-256' if 'sha3' in path.name else 'SHA-256'
+ if family=='cuRAND':return re.search(r'_(lognormal|normal|uniform|poisson)_example',path.name)[1]
+ if family=='cuSOLVER':
+  if kind in {'syevd','xsyevd','syevj'}:return '对称特征分解'
+  if kind in {'sygvd','sygvj'}:return '广义对称特征分解'
+  if kind in {'gesvd','gesvdj'}:return 'SVD'
+  return {'getrf':'LU 分解/求解','orgqr':'QR 的 Q 生成','potrfbatched':'Cholesky 分解'}[kind]
+ if family=='cuSPARSE':
+  if kind.startswith('dense2sparse'):return 'dense2sparse'
+  if kind.startswith('sparse2dense'):return 'sparse2dense'
+  return kind.split('_')[0]
+ if family=='cuTENSOR':return '张量 contraction'
+ raise ValueError('Qualified family needs an explicit operator grouping: '+family)
+
+SCOPES={
+ 'cuBLAS':'通过的固定教学输入；M1 部分算子另含非整齐尺寸、转置、beta、stride 和混合精度 case。batch/Ex/emulation 的成功与失败在样例层分别列出。',
+ 'cuBLASLt':'3 个 profile：FP32 SGEMM、HSH FP16 input/output + FP32 compute 的 pointer-array 与 strided batch。',
+ 'cuDSS':'原始 FP64 5×5 SPD/CSR：C++、Fortran、CUDA Fortran 改写共 3 入口；CPU 稀疏符号分析 + GPU CSRRF 数值分解/求解。',
+ 'cuFFT':'10 个 profile：原始单卡/双卡 C2C、实数正逆变换和 legacy/离线 SPIR-V/HIPRTC callback。1D 多卡使用 hipFFT + RCCL + HIP。',
+ 'cuPQC':'SHA-256 单线程与 SHA3-256 的 32-lane 协作 GPU kernel；各 14 输入与 hashlib 精确一致，PQC 其它算法未实现。',
+ 'cuRAND':'4 种分布 × 9 个 generator = 36 个 profile；原始参数、库内重复性和解析分布矩通过，跨库不要求逐位同序列。',
+ 'cuSOLVER':'原始固定教学矩阵的 10 个 profile；检查 status/info、特征值/奇异值、重构/残差与正交性。',
+ 'cuSPARSE':'22 个 profile，包含 CSR/COO/SELL/blocked-ELL 等已登记格式与 batched 变体；不推及尚未通过的其它格式/custom API。',
+ 'cuTENSOR':'1 个 FP32 4D contraction profile，rocBLAS + HIP 排列；原始 extents 全量有限值/32 点 CPU 抽样，小尺寸全量 CPU 检查。'}
+
+def summarize(cat):
+ families={};total_operators=0
+ for family in CANDIDATES:
+  samples=[s for s in cat['samples'] if s['family']==family];groups=collections.defaultdict(list)
+  for s in samples:
+   if s['status']=='PASSED':groups[operator_name(s)].append(s)
+  operations=[{'name':name,'sample_ids':[s['id'] for s in rows],'sample_reports':['migration/sample-reports/'+s['source']+'.md' for s in rows],'source_profiles':len(rows)} for name,rows in sorted(groups.items())];counts=collections.Counter(s['status'] for s in samples);total_operators+=len(operations)
+  families[family]={'verified_operator_family_count':len(operations),'verified_operators':operations,'sample_count':len(samples),'sample_outcomes':dict(counts),'validation_scope':SCOPES.get(family,'尚无通过整例验收的算子族。'),'failure_reason_counts':dict(collections.Counter(s['reason_code'] for s in samples if s['status'] not in {'PASSED','PARTIAL'}))}
+ return {'schema_version':1,'counting_rule':'Operator/functional families are deduplicated within each module; dtypes, sizes, language, batch, storage formats and algorithm variants do not create extra operators. At least one explicitly scoped PASSED source profile is required. Cross-module totals may include the same mathematical operation implemented through different library interfaces.','qualification_rule':'A verified family proves only its linked PASSED source profiles/required cases, not every API configuration. PARTIAL examples and capability probes are excluded.','verified_operator_families':total_operators,'modules_with_verified_operators':sum(bool(v['verified_operator_family_count']) for v in families.values()),'passed_source_profiles':sum(s['status']=='PASSED' for s in cat['samples']),'modules':families}
+
+def render_overview(report,prefix=''):
+ text='## 已验收算子与验证范围\n\n'
+ text+=f'**{report["modules_with_verified_operators"]} 个模块已有整例通过，覆盖 {report["verified_operator_families"]} 个按模块去重的算子/功能族，对应 {report["passed_source_profiles"]} 个通过的样例入口。**\n\n'
+ text+='计数按数学算子或原例核心功能归并；同模块的精度、尺寸、语言、batch、存储格式和算法变体不重复增加算子数。例如 cuRAND 是 4 种分布、36 个 generator/distribution profile；cuDSS simple 的 3 种语言入口算 1 个功能族。跨模块总数保留不同库接口的实现，GEMM 可分别出现在 cuBLAS 与 cuBLASLt。每个族至少有一个通过独立验收的样例，支持范围限于下表和逐例 required cases。\n\n'
+ text+='| 模块 | 已验收算子/功能族数 | 已验收算子/功能 | 通过样例 | 验证范围 |\n| --- | ---: | --- | ---: | --- |\n'
+ for family,row in report['modules'].items():
+  if not row['verified_operator_family_count']:continue
+  names='、'.join('`'+v['name']+'`' for v in row['verified_operators']);text+=f'| [{family}]({prefix}{family}/README.md) | {row["verified_operator_family_count"]} | {names} | {row["sample_outcomes"].get("PASSED",0)} | {row["validation_scope"]} |\n'
+ text+='\n以下仅有子集/能力探针，**不计入上述整例支持数**：\n\n| 模块 | 已验证子集 | 原始样例尚缺什么 |\n| --- | --- | --- |\n'
+ text+='| nvCOMP | hipCOMP LZ4 单 chunk，128/32768/65536 字节 GPU byte-exact 往返 | 现代 status/options、完整 batch/manager 与其它 codec；1 PARTIAL、0 PASSED |\n'
+ text+='| nvJPEG | rocJPEG hardware backend：64×64 baseline JPEG → RGB，CPU libjpeg 最大像素差 2 | 全部原始输入/格式、CLI、batch、多实例、ROI、编码；1 PARTIAL、0 PASSED |\n'
+ text+='| NPP | RPP HIP U8 c1/c3、32×24 identity resize 探针 | 原始 Canny、distance transform、label/watershed 等算子未实现；0 PASSED |\n'
+ text+=f'\n逐个算子族与样例的可追溯映射见 [operator-support.json]({prefix}migration/reports/operator-support.json)；失败仍按具体入口和原因保留。\n\n'
+ return text
+
+def write_reports(cat):
+ report=summarize(cat);p=ROOT/'migration/reports';(p/'operator-support.json').write_text(json.dumps(report,indent=2,ensure_ascii=False)+'\n');(p/'operator-support.md').write_text(('# 算子支持与统计口径\n\n'+render_overview(report,'../../')).rstrip()+'\n');return report
+
+if __name__=='__main__':
+ report=write_reports(json.loads((ROOT/'migration/samples.yaml').read_text()));print(report['verified_operator_families'],'operator families;',report['modules_with_verified_operators'],'modules;',report['passed_source_profiles'],'profiles')

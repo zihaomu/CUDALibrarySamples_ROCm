@@ -1,0 +1,26 @@
+{
+  "cwd": "/home/zihaomu/cuda_samples_on_rocm_compare",
+  "build": [
+    "/usr/local/cuda-13.4/bin/nvcc",
+    "-x",
+    "cu",
+    "-std=c++17",
+    "-O2",
+    "-arch=sm_120",
+    "/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuSOLVER/MgGetrf/cusolver_MgGetrf_example.cu",
+    "-o",
+    "/home/zihaomu/cuda_samples_on_rocm_compare/artifacts/20261109T100720.422147Z/original-cuda/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu/sample",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuSOLVER/MgGetrf",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuSOLVER/utils",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuBLASLt/Common",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/rocm/common",
+    "-I/usr/local/cuda-13.4/include",
+    "-L/usr/local/cuda-13.4/lib64",
+    "-Xlinker=-rpath=/usr/local/cuda-13.4/lib64",
+    "-lcusolver",
+    "-lcublas"
+  ],
+  "run": [
+    "/home/zihaomu/cuda_samples_on_rocm_compare/artifacts/20261109T100720.422147Z/original-cuda/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu/sample"
+  ]
+}

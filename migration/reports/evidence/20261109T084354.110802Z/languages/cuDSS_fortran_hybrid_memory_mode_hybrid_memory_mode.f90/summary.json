@@ -1,0 +1,14 @@
+{
+  "sample_id": "cuDSS/fortran/hybrid_memory_mode::hybrid_memory_mode.f90",
+  "scope": "language_frontend_and_binding_attempt",
+  "status": "FAILED",
+  "level": "L1",
+  "return_code": 1,
+  "reason_code": "BINDING_OR_FRONTEND_MIGRATION_REQUIRED",
+  "reason": "Fortran 原始入口使用 iso_c_binding, cudautils, cudss, cudssutils, validation；当前 flang 编译失败，CUDA/cuDSS/cuFFT/NVFortran module 和 device 语法需用经验证的 ISO_C_BINDING 与 AMD API 重写。C ABI 探针另记，不代表该例已实现。 日志：an/hybrid_memory_mode/hybrid_memory_mode.f90:211:12: error: No explicit type declared for 'cudastreamdestroy'     status = cudaStreamDestroy(stream)              ^^^^^^^^^^^^^^^^^ /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/fortran/hybrid_memory_mode/hybrid_memory_mode.f90:212:17: error: No explicit type declared for 'cudasuccess'     if (status /= cudaSuccess) print *, 'cudaStreamDestroy: ', status                   ^^^^^^^^^^^ ",
+  "implementation": "rocm/ported/cuDSS/fortran/hybrid_memory_mode/hybrid_memory_mode.f90",
+  "implementation_sha256": "0ca33e6840e698c9bea0b554e86454febaa868f9d263303135f693c39e12d3c2",
+  "source_sha256": "0ca33e6840e698c9bea0b554e86454febaa868f9d263303135f693c39e12d3c2",
+  "evidence": "artifacts/20261109T084354.110802Z/languages/cuDSS_fortran_hybrid_memory_mode_hybrid_memory_mode.f90",
+  "environment": "artifacts/20261109T084354.110802Z/languages/environment.json"
+}

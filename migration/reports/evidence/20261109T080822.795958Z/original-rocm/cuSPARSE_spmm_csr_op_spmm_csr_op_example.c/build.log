@@ -1,0 +1,22 @@
+Warning: HIP version file: "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/share/hip/version" not found.  Cannot give HIP version information.
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSE/spmm_csr_op/spmm_csr_op_example.c:101:18: error: use of undeclared identifier 'nvrtcGetLTOIRSize'
+  101 |     CHECK_NVRTC( nvrtcGetLTOIRSize(prog, nvvm_buffer_size) )
+      |                  ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSE/spmm_csr_op/spmm_csr_op_example.c:103:18: error: use of undeclared identifier 'nvrtcGetLTOIR'
+  103 |     CHECK_NVRTC( nvrtcGetLTOIR(prog, *nvvm_buffer) )
+      |                  ^~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSE/spmm_csr_op/spmm_csr_op_example.c:188:5: error: unknown type name 'cusparseSpMMOpPlan_t'
+  188 |     cusparseSpMMOpPlan_t plan;
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSE/spmm_csr_op/spmm_csr_op_example.c:224:35: error: use of undeclared identifier 'CUSPARSE_SPMM_OP_ALG_DEFAULT'; did you mean 'HIPSPARSE_SPMM_ALG_DEFAULT'?
+  224 |                                   CUSPARSE_SPMM_OP_ALG_DEFAULT,
+      |                                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                   HIPSPARSE_SPMM_ALG_DEFAULT
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSE/spmm_csr_op/spmm_csr_op_example.c:37:33: note: expanded from macro 'CHECK_CUSPARSE'
+   37 |     hipsparseStatus_t status = (func);                                          \
+      |                                 ^~~~
+/opt/rocm/core-10.1/include/hipsparse/hipsparse-generic-types.h:407:5: note: 'HIPSPARSE_SPMM_ALG_DEFAULT' declared here
+  407 |     HIPSPARSE_SPMM_ALG_DEFAULT      = 0, /**< Default algorithm */
+      |     ^
+4 errors generated when compiling for gfx1201.
+failed to execute:/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib/llvm/bin/clang++  --offload-arch=gfx1201 --driver-mode=g++ --hip-link  -std=c++17 -O2 -D__HIP_PLATFORM_AMD__ --rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --rocm-device-lib-path=/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode -x hip /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSE/spmm_csr_op/spmm_csr_op_example.c -o "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/20261109T080822.795958Z/original-rocm/cuSPARSE_spmm_csr_op_spmm_csr_op_example.c/sample" -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSE/spmm_csr_op -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSE/utils -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common -I/opt/rocm/core-10.1/include -I/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/include -I/opt/rocm/core-10.1/include/hipblas -I/opt/rocm/core-10.1/include/hipblaslt -I/opt/rocm/core-10.1/include/hipsparse -I/opt/rocm/core-10.1/include/hipsolver -I/opt/rocm/core-10.1/include/hipfft -I/opt/rocm/core-10.1/include/hiprand -I/opt/rocm/core-10.1/include/hipsparselt -L/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib -Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib -Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib -lhipsparse -lamdhip64

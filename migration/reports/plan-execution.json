@@ -1,0 +1,101 @@
+{
+  "execution_status": "COMPLETE_WITH_RECORDED_FAILURES_AND_EXTERNAL_BLOCKS",
+  "functional_migration_status": "PARTIAL",
+  "upstream_commit": "8b0573b11d183d9b3a36cd2955aa31c16cc61b95",
+  "entrypoints": 639,
+  "outcomes": {
+    "FAILED": 464,
+    "PASSED": 141,
+    "PARTIAL": 31,
+    "UNSUPPORTED": 2,
+    "BLOCKED": 1
+  },
+  "passed_fraction": 0.22065727699530516,
+  "M0": {
+    "execution": "EXECUTED",
+    "source_files": 866,
+    "build_definitions": 477,
+    "declarations": 863,
+    "classified_unresolved_expressions": 53,
+    "scope": "Static graph audit, not all proprietary SDK configuration variants generated/executed"
+  },
+  "milestones": {
+    "M1": {
+      "execution": "EXECUTED",
+      "entrypoints": 16,
+      "outcomes": {
+        "PASSED": 16
+      }
+    },
+    "M2": {
+      "execution": "EXECUTED",
+      "entrypoints": 205,
+      "outcomes": {
+        "FAILED": 64,
+        "PASSED": 116,
+        "PARTIAL": 25
+      }
+    },
+    "M3": {
+      "execution": "EXECUTED",
+      "entrypoints": 79,
+      "outcomes": {
+        "FAILED": 69,
+        "UNSUPPORTED": 2,
+        "PASSED": 1,
+        "PARTIAL": 6,
+        "BLOCKED": 1
+      }
+    },
+    "M4": {
+      "execution": "EXECUTED",
+      "entrypoints": 58,
+      "outcomes": {
+        "FAILED": 55,
+        "PASSED": 3
+      }
+    },
+    "M5": {
+      "execution": "EXECUTED",
+      "entrypoints": 281,
+      "outcomes": {
+        "FAILED": 276,
+        "PASSED": 5
+      }
+    }
+  },
+  "cuda_original_cpp_attempts": 563,
+  "cuda_language_prerequisite_checks": 76,
+  "m1": {
+    "samples": 16,
+    "required_cases": 95,
+    "comparison": "PASSED",
+    "ctest": "16/16 PASSED"
+  },
+  "additional_comparisons": {
+    "profiles": 54,
+    "status": "PASSED",
+    "scope": "36 RNG, 2 custom SHA, 3 callback, 3 actual two-GPU FFT, 2 HSH Lt, 8 solver; overlaps entrypoint PASSED count"
+  },
+  "performance": {
+    "profiles": 6,
+    "status": "BLOCKED",
+    "reason": "No qualifying idle allowed AMD GPU; contended raw timings retained, qualified speed ratios omitted"
+  },
+  "evidence": {
+    "catalog": "migration/samples.yaml",
+    "library_choices": "migration/reports/ecosystem-decisions.md",
+    "source_identity": "migration/source-tree.json",
+    "validation": "migration/reports/final-validation.json",
+    "per_sample": "migration/sample-reports",
+    "performance": "migration/reports/performance-comparison.md"
+  },
+  "limits": [
+    "464 entries remain FAILED drafts or frontend/binding attempts; AMD algorithms/API rewrites are not implemented for all families.",
+    "31 PARTIAL entries have unvalidated original features or missing independent oracles.",
+    "2 UNSUPPORTED results apply only to locked hipSPARSELt/gfx1201; 1 BLOCKED Python test lacks GPU executable prerequisites.",
+    "CUDA baseline builds/inputs/SDKs have individual failures or prerequisite blocks; a GPU execution return code alone is not a numerical comparison.",
+    "No multi-node MPI environment was established; basic RCCL probes do not qualify original distributed Mp examples.",
+    "All PASSED labels apply only to explicitly registered original profiles/required cases, not whole-library compatibility."
+  ]
+}

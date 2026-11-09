@@ -1,0 +1,16 @@
+#!/usr/bin/env python3
+"""Build/run an actual Fortran -> C ABI -> sparse rocSOLVER GPU solve."""
+import datetime,fcntl,json,os,pathlib
+from catalog import ROOT
+from device_guard import allowed_devices
+from run import command,digest
+stamp=datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%S.%fZ');d=ROOT/'artifacts'/stamp/'fortran-sparse';d.mkdir(parents=True);env=os.environ.copy();core=pathlib.Path('/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core');libs=core.parent/'_rocm_sdk_libraries';identity={'devices':allowed_devices(),'image_id':env.get('DEEPINFER_IMAGE_ID'),'rocm_release':env.get('DEEPINFER_ROCM_RELEASE')};(d/'environment.json').write_text(json.dumps(identity,indent=2)+'\n');shim=ROOT/'rocm/cuDSS/common/fortran_shim.cpp';source=ROOT/'rocm/cuDSS/fortran/simple/sample.f90';library=d/'libmigration_sparse_chol.so';binary=d/'sample';build=['amdclang++','-O2','-std=c++17','-shared','-fPIC','-D__HIP_PLATFORM_AMD__',str(shim),'-I'+str(ROOT/'rocm/common'),'-I'+str(core/'include'),'-I/opt/rocm/core-10.1/include',str(next((libs/'lib').glob('librocsolver.so*'))),str(next((libs/'lib').glob('librocblas.so*'))),str(next((core/'lib').glob('libamdhip64.so*'))),'-Wl,-rpath,'+str(libs/'lib'),'-Wl,-rpath,'+str(core/'lib'),'-o',str(library)];fort=['/opt/rocm/core-10.1/lib/llvm/bin/flang',str(source),str(library),'-Wl,-rpath,'+str(d),'-o',str(binary)];(d/'commands.json').write_text(json.dumps({'cxx_shim':build,'fortran':fort,'run':[str(binary)]},indent=2)+'\n');rc=command(build,ROOT,d/'cxx-build.log',env,120)
+if rc==0:rc=command(fort,ROOT,d/'fortran-build.log',env,60)
+if rc==0:rc=command([str(binary)],ROOT,d/'run.log',env,60)
+r={'status':'PASSED' if rc==0 else 'FAILED','return_code':rc,'implementation':'rocm/cuDSS/fortran/simple/sample.f90','implementation_sha256':digest(source),'shim_sha256':digest(shim),'algorithm_sha256':digest(ROOT/'rocm/cuDSS/common/sparse_chol.hpp'),'environment':identity,'evidence':str(d.relative_to(ROOT)),'scope':'Original 1-based SPD 5x5 matrix and RHS; CPU sparse symbolic analysis, native GPU sparse numerical factorization/solve, standard ISO_C_BINDING'};(d/'summary.json').write_text(json.dumps(r,indent=2)+'\n');(ROOT/'migration/reports/fortran-sparse.json').write_text(json.dumps(r,indent=2)+'\n');print(json.dumps(r),flush=True)
+if rc==0:
+ with (ROOT/'migration/.state.lock').open('w') as lock:
+  fcntl.flock(lock,fcntl.LOCK_EX);p=ROOT/'migration/samples.yaml';cat=json.loads(p.read_text())
+  for src in ['cuDSS/fortran/simple/simple.f90','cuDSS/nvfortran/simple/simple.cuf']:
+   s=next(s for s in cat['samples'] if s['source']==src);s.update(status='PASSED',level='L4',implementation=r['implementation'],actual_library='rocSOLVER + rocBLAS via ISO_C_BINDING/C ABI',backend_library='GPU CSRRF sparse Cholesky; CPU sparse symbolic graph',required_cases=['original-one-based-spd-fortran-solution','original-one-based-spd-fortran-residual'],passed_cases=['original-one-based-spd-fortran-solution','original-one-based-spd-fortran-residual'],reason_code='VALIDATED_ORIGINAL_PROFILE',reason='原始 one-based 5×5 SPD 输入与 RHS 以标准 Fortran/ISO_C_BINDING 改写；CPU 稀疏符号分析、rocSOLVER CSRRF GPU 数值分解与求解，解及 CSR 残差通过。CUDA Fortran vendor module/device 语法由 C ABI 取代，未降低精度。');s['attempts'].append(r);s['evidence'].append(r['evidence'])
+  p.write_text(json.dumps(cat,indent=2,ensure_ascii=False)+'\n')

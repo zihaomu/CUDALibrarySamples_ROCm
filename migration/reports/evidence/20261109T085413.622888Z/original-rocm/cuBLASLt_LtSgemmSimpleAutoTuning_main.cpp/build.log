@@ -1,0 +1,77 @@
+Warning: HIP version file: "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/share/hip/version" not found.  Cannot give HIP version information.
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmSimpleAutoTuning/main.cpp:23:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common/helpers.h:30:
+In file included from /opt/rocm/core-10.1/include/hip/hip_fp4.h:13:
+In file included from /opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp4.h:19:
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_ocp_host.hpp:812:22: warning: missing 'typename' prior to dependent type name '__hip_internal::conditional<in_float, OutType, InType>::type' is a C++20 extension [-Wc++20-extensions]
+  812 |   using other_type = __hip_internal::conditional<in_float, OutType, InType>::type;
+      |                      ^
+      |                      typename 
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_ocp_host.hpp:853:22: warning: missing 'typename' prior to dependent type name '__hip_internal::conditional<in_float, OutType, InType>::type' is a C++20 extension [-Wc++20-extensions]
+  853 |   using other_type = __hip_internal::conditional<in_float, OutType, InType>::type;
+      |                      ^
+      |                      typename 
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmSimpleAutoTuning/main.cpp:23:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common/helpers.h:800:26: error: unknown type name 'cublasLtMatmulTile_t'
+  800 | const char *tileToString(cublasLtMatmulTile_t tile);
+      |                          ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmSimpleAutoTuning/main.cpp:29:53: error: use of undeclared identifier 'CUBLASLT_ALGO_CONFIG_ID'
+   29 |         cublasLtMatmulAlgoConfigGetAttribute(&algo, CUBLASLT_ALGO_CONFIG_ID, &algoId, sizeof(algoId), NULL));
+      |                                                     ^~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmSimpleAutoTuning/main.cpp:31:53: error: use of undeclared identifier 'CUBLASLT_ALGO_CONFIG_TILE_ID'
+   31 |         cublasLtMatmulAlgoConfigGetAttribute(&algo, CUBLASLT_ALGO_CONFIG_TILE_ID, &tile, sizeof(tile), NULL));
+      |                                                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmSimpleAutoTuning/main.cpp:32:67: error: use of undeclared identifier 'CUBLASLT_ALGO_CONFIG_SPLITK_NUM'
+   32 |     checkCublasStatus(cublasLtMatmulAlgoConfigGetAttribute(&algo, CUBLASLT_ALGO_CONFIG_SPLITK_NUM, &numSplitsK,
+      |                                                                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmSimpleAutoTuning/main.cpp:34:67: error: use of undeclared identifier 'CUBLASLT_ALGO_CONFIG_REDUCTION_SCHEME'
+   34 |     checkCublasStatus(cublasLtMatmulAlgoConfigGetAttribute(&algo, CUBLASLT_ALGO_CONFIG_REDUCTION_SCHEME,
+      |                                                                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmSimpleAutoTuning/main.cpp:36:67: error: use of undeclared identifier 'CUBLASLT_ALGO_CONFIG_CTA_SWIZZLING'
+   36 |     checkCublasStatus(cublasLtMatmulAlgoConfigGetAttribute(&algo, CUBLASLT_ALGO_CONFIG_CTA_SWIZZLING, &swizzle,
+      |                                                                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmSimpleAutoTuning/main.cpp:38:67: error: use of undeclared identifier 'CUBLASLT_ALGO_CONFIG_CUSTOM_OPTION'
+   38 |     checkCublasStatus(cublasLtMatmulAlgoConfigGetAttribute(&algo, CUBLASLT_ALGO_CONFIG_CUSTOM_OPTION, &customOption,
+      |                                                                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmSimpleAutoTuning/main.cpp:20:
+In file included from /opt/rocm/core-10.1/include/hipblaslt/hipblaslt.h:65:
+In file included from /opt/rocm/core-10.1/include/hipblaslt/hipblaslt-types.h:37:
+In file included from /opt/rocm/core-10.1/include/hip/hip_fp8.h:14:
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1033:12: warning: implicit conversion from 'int' to 'float' changes value from 2147483647 to 2147483648 [-Wimplicit-const-int-float-conversion]
+ 1033 |   if (f >= __hip_internal::numeric_limits<T_int>::max()) {
+      |         ~~ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1223:24: note: in instantiation of function template specialization 'hip_detail::internal_cvt_e8m0_to_int_type<int>' requested here
+ 1223 |     return hip_detail::internal_cvt_e8m0_to_int_type<int>(__x);
+      |                        ^
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1033:12: warning: implicit conversion from 'long' to 'float' changes value from 9223372036854775807 to 9223372036854775808 [-Wimplicit-const-int-float-conversion]
+ 1033 |   if (f >= __hip_internal::numeric_limits<T_int>::max()) {
+      |         ~~ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1226:24: note: in instantiation of function template specialization 'hip_detail::internal_cvt_e8m0_to_int_type<long>' requested here
+ 1226 |     return hip_detail::internal_cvt_e8m0_to_int_type<long int>(__x);
+      |                        ^
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1033:12: warning: implicit conversion from 'long long' to 'float' changes value from 9223372036854775807 to 9223372036854775808 [-Wimplicit-const-int-float-conversion]
+ 1033 |   if (f >= __hip_internal::numeric_limits<T_int>::max()) {
+      |         ~~ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1229:24: note: in instantiation of function template specialization 'hip_detail::internal_cvt_e8m0_to_int_type<long long>' requested here
+ 1229 |     return hip_detail::internal_cvt_e8m0_to_int_type<long long int>(__x);
+      |                        ^
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1033:12: warning: implicit conversion from 'unsigned int' to 'float' changes value from 4294967295 to 4294967296 [-Wimplicit-const-int-float-conversion]
+ 1033 |   if (f >= __hip_internal::numeric_limits<T_int>::max()) {
+      |         ~~ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1241:24: note: in instantiation of function template specialization 'hip_detail::internal_cvt_e8m0_to_int_type<unsigned int>' requested here
+ 1241 |     return hip_detail::internal_cvt_e8m0_to_int_type<unsigned int>(__x);
+      |                        ^
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1033:12: warning: implicit conversion from 'unsigned long' to 'float' changes value from 18446744073709551615 to 18446744073709551616 [-Wimplicit-const-int-float-conversion]
+ 1033 |   if (f >= __hip_internal::numeric_limits<T_int>::max()) {
+      |         ~~ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1244:24: note: in instantiation of function template specialization 'hip_detail::internal_cvt_e8m0_to_int_type<unsigned long>' requested here
+ 1244 |     return hip_detail::internal_cvt_e8m0_to_int_type<unsigned long int>(__x);
+      |                        ^
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1033:12: warning: implicit conversion from 'unsigned long long' to 'float' changes value from 18446744073709551615 to 18446744073709551616 [-Wimplicit-const-int-float-conversion]
+ 1033 |   if (f >= __hip_internal::numeric_limits<T_int>::max()) {
+      |         ~~ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1247:24: note: in instantiation of function template specialization 'hip_detail::internal_cvt_e8m0_to_int_type<unsigned long long>' requested here
+ 1247 |     return hip_detail::internal_cvt_e8m0_to_int_type<unsigned long long int>(__x);
+      |                        ^
+8 warnings and 7 errors generated when compiling for gfx1201.
+failed to execute:/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib/llvm/bin/clang++  --offload-arch=gfx1201 --driver-mode=g++ --hip-link  -std=c++17 -O2 -D__HIP_PLATFORM_AMD__ --rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --rocm-device-lib-path=/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode -x hip /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmSimpleAutoTuning/main.cpp /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmSimpleAutoTuning/sample_cublasLt_LtSgemmSimpleAutoTuning.cu -o "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/20261109T085413.622888Z/original-rocm/cuBLASLt_LtSgemmSimpleAutoTuning_main.cpp/sample" -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmSimpleAutoTuning -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/utils -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common -I/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/include -I/opt/rocm/core-10.1/include -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/deps/hipCOMP-core/include -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/project-sdk/include -I/opt/rocm/core-10.1/include/hipblas -I/opt/rocm/core-10.1/include/hipblaslt -I/opt/rocm/core-10.1/include/hipsparse -I/opt/rocm/core-10.1/include/hipsolver -I/opt/rocm/core-10.1/include/hipfft -I/opt/rocm/core-10.1/include/hiprand -I/opt/rocm/core-10.1/include/hipsparselt -L/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib -L/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/hipcomp/lib -L/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/project-sdk/lib -Wl,-rpath,/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/hipcomp/lib -Wl,-rpath,/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/project-sdk/lib -Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib -Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib -lhipblaslt -lamdhip64

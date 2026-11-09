@@ -1,0 +1,79 @@
+{
+  "sample_id": "cuRAND/Host/scrambled_sobol32::curand_scrambled_sobol32_uniform_example.cpp",
+  "status": "FAILED",
+  "build_return_code": 0,
+  "cases": [
+    {
+      "case": "host-and-device-n12-run0",
+      "passed": false,
+      "return_code": 0
+    },
+    {
+      "case": "host-and-device-n12-run1",
+      "passed": false,
+      "return_code": 0
+    },
+    {
+      "case": "host-and-device-n98304-run2",
+      "passed": false,
+      "return_code": 0
+    },
+    {
+      "case": "same-seed-or-offset-repeat-host-and-device",
+      "passed": true
+    },
+    {
+      "case": "analytic-uniform-moments-host",
+      "passed": false,
+      "observed": {
+        "rng_observation": true,
+        "n": 10,
+        "mean": 0.4375745058292523,
+        "variance": 0.0781324561113359,
+        "log_mean": -3.025783685583837,
+        "log_variance": 41.13754466984993,
+        "finite": true,
+        "positive": true,
+        "integer": false,
+        "min": 2.3283064365386963e-10,
+        "max": 0.8751490116119385,
+        "hash": "4702187976940137240"
+      },
+      "parameters": {}
+    },
+    {
+      "case": "analytic-uniform-moments-device",
+      "passed": false,
+      "observed": {
+        "rng_observation": true,
+        "n": 10,
+        "mean": 0.4375745058292523,
+        "variance": 0.0781324561113359,
+        "log_mean": -3.025783685583837,
+        "log_variance": 41.13754466984993,
+        "finite": true,
+        "positive": true,
+        "integer": false,
+        "min": 2.3283064365386963e-10,
+        "max": 0.8751490116119385,
+        "hash": "4702187976940137240"
+      },
+      "parameters": {}
+    }
+  ],
+  "evidence": "artifacts/20261109T084900.390579Z/rng-validation/cuRAND_Host_scrambled_sobol32_curand_scrambled_sobol32_uniform_example.cpp",
+  "original_port_sha256": "4068514be14735f3bc55df76c6c678d3b81b26a05894d3d3738148530be5a6e9",
+  "validation_source_sha256": "28e526ed5cbb3b7a5d36a1e0aee9648f21e833911a7fb0d61c1943d149413757",
+  "environment": {
+    "devices": [
+      {
+        "logical_id": 0,
+        "pci_bdf": "0000:03:00.0",
+        "physical_id": 0
+      }
+    ],
+    "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+    "rocm_release": "10.1.0"
+  },
+  "oracle": "Analytic distribution moments; same seed/offset repeat separately for host and GPU, original n=12 and n=98304. Sequences are library-specific."
+}

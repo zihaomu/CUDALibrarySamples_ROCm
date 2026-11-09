@@ -1,0 +1,76 @@
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSPARSE/bicgstab/bicgstab_example.c(383): warning #177-D: variable "base" was declared but never referenced
+      int base = 0;
+          ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSPARSE/bicgstab/bicgstab_example.c: In function ‘int main(int, char**)’:
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSPARSE/bicgstab/bicgstab_example.c:512:16: warning: ‘csrilu02Info_t’ is deprecated: The type will be removed in the next major release [-Wdeprecated-declarations]
+  512 |     csrilu02Info_t infoM        = NULL;
+      |                ^~~~~
+/usr/local/cuda-13.4/include/cusparse.h:238:23: note: declared here
+  238 | struct csrilu02Info* csrilu02Info_t CUSPARSE_DEPRECATED_TYPE;
+      |                       ^~~~~~~~~~~~~~
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSPARSE/bicgstab/bicgstab_example.c:518:55: warning: ‘cusparseStatus_t cusparseCreateCsrilu02Info(csrilu02Info**)’ is deprecated: The routine will be removed in the next major release [-Wdeprecated-declarations]
+  518 |     CHECK_CUSPARSE( cusparseCreateCsrilu02Info(&infoM) )
+      |                             ~~~~~~~~~~~~~~~~~~~~~~~~~~^~      
+/usr/local/cuda-13.4/include/cusparse.h:450:1: note: declared here
+  450 | cusparseCreateCsrilu02Info(csrilu02Info_t* info);
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSPARSE/bicgstab/bicgstab_example.c:520:57: warning: ‘cusparseStatus_t cusparseDcsrilu02_bufferSize(cusparseHandle_t, int, int, cusparseMatDescr_t, double*, const int*, const int*, csrilu02Info_t, int*)’ is deprecated: The routine will be removed in the next major release [-Wdeprecated-declarations]
+  520 |     CHECK_CUSPARSE( cusparseDcsrilu02_bufferSize(
+      |                             ~~~~~~~~~~~~~~~~~~~~~       ^                                                                                       
+/usr/local/cuda-13.4/include/cusparse.h:1488:1: note: declared here
+ 1488 | cusparseDcsrilu02_bufferSize(cusparseHandle_t         handle,
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSPARSE/bicgstab/bicgstab_example.c:524:55: warning: ‘cusparseStatus_t cusparseDcsrilu02_analysis(cusparseHandle_t, int, int, cusparseMatDescr_t, const double*, const int*, const int*, csrilu02Info_t, cusparseSolvePolicy_t, void*)’ is deprecated: The routine will be removed in the next major release [-Wdeprecated-declarations]
+  524 |     CHECK_CUSPARSE( cusparseDcsrilu02_analysis(
+      |                             ~~~~~~~~~~~~~~~~~~~       ^                                                                                                                     
+/usr/local/cuda-13.4/include/cusparse.h:1585:1: note: declared here
+ 1585 | cusparseDcsrilu02_analysis(cusparseHandle_t         handle,
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSPARSE/bicgstab/bicgstab_example.c:529:56: warning: ‘cusparseStatus_t cusparseXcsrilu02_zeroPivot(cusparseHandle_t, csrilu02Info_t, int*)’ is deprecated: The routine will be removed in the next major release [-Wdeprecated-declarations]
+  529 |     CHECK_CUSPARSE( cusparseXcsrilu02_zeroPivot(cusparseHandle, infoM,
+      |                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~                          
+/usr/local/cuda-13.4/include/cusparse.h:1470:1: note: declared here
+ 1470 | cusparseXcsrilu02_zeroPivot(cusparseHandle_t handle,
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSPARSE/bicgstab/bicgstab_example.c:532:46: warning: ‘cusparseStatus_t cusparseDcsrilu02(cusparseHandle_t, int, int, cusparseMatDescr_t, double*, const int*, const int*, csrilu02Info_t, cusparseSolvePolicy_t, void*)’ is deprecated: The routine will be removed in the next major release [-Wdeprecated-declarations]
+  532 |     CHECK_CUSPARSE( cusparseDcsrilu02(
+      |                             ~~~~~~~~~~       ^                                                                                                                     
+/usr/local/cuda-13.4/include/cusparse.h:1637:1: note: declared here
+ 1637 | cusparseDcsrilu02(cusparseHandle_t         handle,
+      | ^~~~~~~~~~~~~~~~~
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSPARSE/bicgstab/bicgstab_example.c:538:56: warning: ‘cusparseStatus_t cusparseXcsrilu02_zeroPivot(cusparseHandle_t, csrilu02Info_t, int*)’ is deprecated: The routine will be removed in the next major release [-Wdeprecated-declarations]
+  538 |     CHECK_CUSPARSE( cusparseXcsrilu02_zeroPivot(cusparseHandle, infoM,
+      |                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~                         
+/usr/local/cuda-13.4/include/cusparse.h:1470:1: note: declared here
+ 1470 | cusparseXcsrilu02_zeroPivot(cusparseHandle_t handle,
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSPARSE/bicgstab/bicgstab_example.c:541:56: warning: ‘cusparseStatus_t cusparseDestroyCsrilu02Info(csrilu02Info_t)’ is deprecated: The routine will be removed in the next major release [-Wdeprecated-declarations]
+  541 |     CHECK_CUSPARSE( cusparseDestroyCsrilu02Info(infoM) )
+      |                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~^      
+/usr/local/cuda-13.4/include/cusparse.h:454:1: note: declared here
+  454 | cusparseDestroyCsrilu02Info(csrilu02Info_t info);
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/bin/ld: /tmp/tmpxft_001f9ae8_00000000-11_bicgstab_example.o: in function `gpu_BiCGStab(cublasContext*, cusparseContext*, int, cusparseSpMatDescr*, cusparseSpMatDescr*, cusparseSpMatDescr*, VecStruct, VecStruct, VecStruct, VecStruct, VecStruct, VecStruct, VecStruct, VecStruct, VecStruct, VecStruct, VecStruct, void*, int, double)':
+tmpxft_001f9ae8_00000000-6_bicgstab_example.cudafe1.cpp:(.text+0x5e8): undefined reference to `cublasDdot_v2'
+/usr/bin/ld: tmpxft_001f9ae8_00000000-6_bicgstab_example.cudafe1.cpp:(.text+0x65a): undefined reference to `cublasDnrm2_v2'
+/usr/bin/ld: tmpxft_001f9ae8_00000000-6_bicgstab_example.cudafe1.cpp:(.text+0x83f): undefined reference to `cublasDdot_v2'
+/usr/bin/ld: tmpxft_001f9ae8_00000000-6_bicgstab_example.cudafe1.cpp:(.text+0x8cb): undefined reference to `cublasDaxpy_v2'
+/usr/bin/ld: tmpxft_001f9ae8_00000000-6_bicgstab_example.cudafe1.cpp:(.text+0x938): undefined reference to `cublasDaxpy_v2'
+/usr/bin/ld: tmpxft_001f9ae8_00000000-6_bicgstab_example.cudafe1.cpp:(.text+0x95f): undefined reference to `cublasDnrm2_v2'
+/usr/bin/ld: tmpxft_001f9ae8_00000000-6_bicgstab_example.cudafe1.cpp:(.text+0xaa4): undefined reference to `cublasDdot_v2'
+/usr/bin/ld: tmpxft_001f9ae8_00000000-6_bicgstab_example.cudafe1.cpp:(.text+0xadb): undefined reference to `cublasDdot_v2'
+/usr/bin/ld: tmpxft_001f9ae8_00000000-6_bicgstab_example.cudafe1.cpp:(.text+0xb47): undefined reference to `cublasDaxpy_v2'
+/usr/bin/ld: tmpxft_001f9ae8_00000000-6_bicgstab_example.cudafe1.cpp:(.text+0xbc0): undefined reference to `cublasDaxpy_v2'
+/usr/bin/ld: tmpxft_001f9ae8_00000000-6_bicgstab_example.cudafe1.cpp:(.text+0xbe7): undefined reference to `cublasDnrm2_v2'
+/usr/bin/ld: tmpxft_001f9ae8_00000000-6_bicgstab_example.cudafe1.cpp:(.text+0xc87): undefined reference to `cublasDdot_v2'
+/usr/bin/ld: tmpxft_001f9ae8_00000000-6_bicgstab_example.cudafe1.cpp:(.text+0xd09): undefined reference to `cublasDaxpy_v2'
+/usr/bin/ld: tmpxft_001f9ae8_00000000-6_bicgstab_example.cudafe1.cpp:(.text+0xd2c): undefined reference to `cublasDscal_v2'
+/usr/bin/ld: tmpxft_001f9ae8_00000000-6_bicgstab_example.cudafe1.cpp:(.text+0xd58): undefined reference to `cublasDaxpy_v2'
+/usr/bin/ld: tmpxft_001f9ae8_00000000-6_bicgstab_example.cudafe1.cpp:(.text+0x1080): undefined reference to `cublasDnrm2_v2'
+/usr/bin/ld: /tmp/tmpxft_001f9ae8_00000000-11_bicgstab_example.o: in function `main':
+tmpxft_001f9ae8_00000000-6_bicgstab_example.cudafe1.cpp:(.text.startup+0x38f): undefined reference to `cublasCreate_v2'
+/usr/bin/ld: tmpxft_001f9ae8_00000000-6_bicgstab_example.cudafe1.cpp:(.text.startup+0xc33): undefined reference to `cublasDestroy_v2'
+collect2: error: ld returned 1 exit status

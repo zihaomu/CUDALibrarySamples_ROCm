@@ -1,0 +1,14 @@
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/cuBLAS/Level-2/gemv/sample.cpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/check.hpp:24:107: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   24 | struct Stream {hipStream_t p;Stream(){CHECK(hipStreamCreateWithFlags(&p,hipStreamNonBlocking));}~Stream(){hipStreamDestroy(p);}};
+      |                                                                                                           ^~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/check.hpp:20:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   20 |  ~Device(){if(p)hipFree(p);}
+      |                 ^~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/cuBLAS/Level-2/gemv/sample.cpp:12:17: note: in instantiation of member function 'sample::Device<double>::~Device' requested here
+   12 |  Device<double> da(a),dx(x),dy(y);CHECK(hipblasDgemv(h,tr?HIPBLAS_OP_T:HIPBLAS_OP_N,m,n,&alpha,da.p,ld,dx.p,1,&beta,dy.p,1));CHECK(hipStreamSynchronize(stream.p));
+      |                 ^
+2 warnings generated.
+ld.lld: error: unable to find library -lhipblas
+ld.lld: error: unable to find library -lamdhip64
+clang++: error: linker command failed with exit code 1 (use -v to see invocation)

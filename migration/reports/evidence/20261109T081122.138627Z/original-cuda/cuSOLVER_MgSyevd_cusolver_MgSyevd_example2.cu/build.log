@@ -1,0 +1,66 @@
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSOLVER/MgSyevd/cusolver_MgSyevd_example2.cu: In function ‘int main(int, char**)’:
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSOLVER/MgSyevd/cusolver_MgSyevd_example2.cu:75:46: warning: ‘cusolverStatus_t cusolverMgCreate(cusolverMgContext**)’ is deprecated [-Wdeprecated-declarations]
+   75 |     CUSOLVER_CHECK(cusolverMgCreate(&cusolverH));
+      |                              ~~~~~~~~~~~~~~~~^~~~        
+/usr/local/cuda-13.4/include/cusolverMg.h:125:1: note: declared here
+  125 |   cusolverStatus_t CUSOLVERAPI cusolverMgCreate(cusolverMgHandle_t *handle);
+      | ^ ~~~~~~~~~~~~~~
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSOLVER/MgSyevd/cusolver_MgSyevd_example2.cu:88:52: warning: ‘cusolverStatus_t cusolverMgDeviceSelect(cusolverMgHandle_t, int, int*)’ is deprecated [-Wdeprecated-declarations]
+   88 |     CUSOLVER_CHECK(cusolverMgDeviceSelect(cusolverH, nbGpus, deviceList.data()));
+      |                              ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        
+/usr/local/cuda-13.4/include/cusolverMg.h:131:1: note: declared here
+  131 |   cusolverStatus_t CUSOLVERAPI cusolverMgDeviceSelect(
+      | ^ ~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSOLVER/MgSyevd/cusolver_MgSyevd_example2.cu:107:56: warning: ‘cusolverStatus_t cusolverMgCreateDeviceGrid(void**, int32_t, int32_t, const int32_t*, cusolverMgGridMapping_t)’ is deprecated [-Wdeprecated-declarations]
+  107 |     CUSOLVER_CHECK(cusolverMgCreateDeviceGrid(&gridA, 1, nbGpus, deviceList.data(), mapping));
+      |                              ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~        
+/usr/local/cuda-13.4/include/cusolverMg.h:147:1: note: declared here
+  147 |   cusolverStatus_t CUSOLVERAPI cusolverMgCreateDeviceGrid(
+      | ^ ~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSOLVER/MgSyevd/cusolver_MgSyevd_example2.cu:110:56: warning: ‘cusolverStatus_t cusolverMgCreateMatrixDesc(void**, int64_t, int64_t, int64_t, int64_t, cudaDataType, cudaLibMgGrid_t)’ is deprecated [-Wdeprecated-declarations]
+  110 |     CUSOLVER_CHECK(cusolverMgCreateMatrixDesc(&descrA, N, /* number of rows of (global) A */
+      |                              ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                              
+/usr/local/cuda-13.4/include/cusolverMg.h:174:1: note: declared here
+  174 |   cusolverStatus_t CUSOLVERAPI cusolverMgCreateMatrixDesc(
+      | ^ ~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSOLVER/MgSyevd/cusolver_MgSyevd_example2.cu:143:56: warning: ‘cusolverStatus_t cusolverMgSyevd_bufferSize(cusolverMgHandle_t, cusolverEigMode_t, cublasFillMode_t, int, void**, int, int, cudaLibMgMatrixDesc_t, void*, cudaDataType, cudaDataType, int64_t*)’ is deprecated [-Wdeprecated-declarations]
+  143 |     CUSOLVER_CHECK(cusolverMgSyevd_bufferSize(
+      |                              ~~~~~~~~~~~~~~~~~         ^                                                                                                                                                                                                                                                   
+/usr/local/cuda-13.4/include/cusolverMg.h:193:1: note: declared here
+  193 |   cusolverStatus_t CUSOLVERAPI cusolverMgSyevd_bufferSize(
+      | ^ ~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSOLVER/MgSyevd/cusolver_MgSyevd_example2.cu:163:45: warning: ‘cusolverStatus_t cusolverMgSyevd(cusolverMgHandle_t, cusolverEigMode_t, cublasFillMode_t, int, void**, int, int, cudaLibMgMatrixDesc_t, void*, cudaDataType, cudaDataType, void**, int64_t, int*)’ is deprecated [-Wdeprecated-declarations]
+  163 |     CUSOLVER_CHECK(cusolverMgSyevd(
+      |                              ~~~~~~         ^                                                                                                                                                                                                                                                                                                           
+/usr/local/cuda-13.4/include/cusolverMg.h:208:1: note: declared here
+  208 |   cusolverStatus_t CUSOLVERAPI cusolverMgSyevd(
+      | ^ ~~~~~~~~~~~~~
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSOLVER/MgSyevd/cusolver_MgSyevd_example2.cu:218:57: warning: ‘cusolverStatus_t cusolverMgDestroyMatrixDesc(cudaLibMgMatrixDesc_t)’ is deprecated [-Wdeprecated-declarations]
+  218 |     CUSOLVER_CHECK(cusolverMgDestroyMatrixDesc(descrA));
+      |                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~^       
+/usr/local/cuda-13.4/include/cusolverMg.h:190:1: note: declared here
+  190 |     cusolverMgDestroyMatrixDesc(cudaLibMgMatrixDesc_t desc);
+      | ^   ~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSOLVER/MgSyevd/cusolver_MgSyevd_example2.cu:219:51: warning: ‘cusolverStatus_t cusolverMgDestroyGrid(cudaLibMgGrid_t)’ is deprecated [-Wdeprecated-declarations]
+  219 |     CUSOLVER_CHECK(cusolverMgDestroyGrid(gridA));
+      |                              ~~~~~~~~~~~~~~~~~~~~ ^      
+/usr/local/cuda-13.4/include/cusolverMg.h:160:1: note: declared here
+  160 |   cusolverStatus_t CUSOLVERAPI cusolverMgDestroyGrid(cudaLibMgGrid_t grid);
+      | ^ ~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/cuda_samples_on_rocm_compare/cuSOLVER/MgSyevd/cusolver_MgSyevd_example2.cu:220:47: warning: ‘cusolverStatus_t cusolverMgDestroy(cusolverMgHandle_t)’ is deprecated [-Wdeprecated-declarations]
+  220 |     CUSOLVER_CHECK(cusolverMgDestroy(cusolverH));
+      |                              ~~~~~~~~~~~~~~~~~^~~        
+/usr/local/cuda-13.4/include/cusolverMg.h:128:1: note: declared here
+  128 |   cusolverStatus_t CUSOLVERAPI cusolverMgDestroy(cusolverMgHandle_t handle);
+      | ^ ~~~~~~~~~~~~~~~
+/usr/bin/ld: /tmp/tmpxft_001f94aa_00000000-11_cusolver_MgSyevd_example2.o: in function `main':
+tmpxft_001f94aa_00000000-6_cusolver_MgSyevd_example2.cudafe1.cpp:(.text.startup+0x104): undefined reference to `cusolverMgCreate'
+/usr/bin/ld: tmpxft_001f94aa_00000000-6_cusolver_MgSyevd_example2.cudafe1.cpp:(.text.startup+0x234): undefined reference to `cusolverMgDeviceSelect'
+/usr/bin/ld: tmpxft_001f94aa_00000000-6_cusolver_MgSyevd_example2.cudafe1.cpp:(.text.startup+0x4c8): undefined reference to `cusolverMgCreateDeviceGrid'
+/usr/bin/ld: tmpxft_001f94aa_00000000-6_cusolver_MgSyevd_example2.cudafe1.cpp:(.text.startup+0x537): undefined reference to `cusolverMgCreateMatrixDesc'
+/usr/bin/ld: tmpxft_001f94aa_00000000-6_cusolver_MgSyevd_example2.cudafe1.cpp:(.text.startup+0x7ac): undefined reference to `cusolverMgSyevd_bufferSize'
+/usr/bin/ld: tmpxft_001f94aa_00000000-6_cusolver_MgSyevd_example2.cudafe1.cpp:(.text.startup+0xa67): undefined reference to `cusolverMgSyevd'
+/usr/bin/ld: tmpxft_001f94aa_00000000-6_cusolver_MgSyevd_example2.cudafe1.cpp:(.text.startup+0xf2a): undefined reference to `cusolverMgDestroyMatrixDesc'
+/usr/bin/ld: tmpxft_001f94aa_00000000-6_cusolver_MgSyevd_example2.cudafe1.cpp:(.text.startup+0x1068): undefined reference to `cusolverMgDestroyGrid'
+/usr/bin/ld: tmpxft_001f94aa_00000000-6_cusolver_MgSyevd_example2.cudafe1.cpp:(.text.startup+0x10c4): undefined reference to `cusolverMgDestroy'
+collect2: error: ld returned 1 exit status

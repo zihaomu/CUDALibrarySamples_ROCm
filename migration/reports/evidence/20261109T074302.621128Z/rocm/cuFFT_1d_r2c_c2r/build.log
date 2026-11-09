@@ -1,0 +1,21 @@
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/cuFFT/1d_r2c_c2r/sample.cpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/check.hpp:24:107: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   24 | struct Stream {hipStream_t p;Stream(){CHECK(hipStreamCreateWithFlags(&p,hipStreamNonBlocking));}~Stream(){hipStreamDestroy(p);}};
+      |                                                                                                           ^~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/check.hpp:20:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   20 |  ~Device(){if(p)hipFree(p);}
+      |                 ^~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/cuFFT/1d_r2c_c2r/sample.cpp:9:45: note: in instantiation of member function 'sample::Device<float>::~Device' requested here
+    9 |  auto x=input<float>(n*batch);Device<float> dx(x);int nf=n/2+1;Device<hipfftComplex> dy(nf*batch);
+      |                                             ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/cuFFT/1d_r2c_c2r/sample.cpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/check.hpp:20:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   20 |  ~Device(){if(p)hipFree(p);}
+      |                 ^~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/cuFFT/1d_r2c_c2r/sample.cpp:9:86: note: in instantiation of member function 'sample::Device<HIP_vector_type<float, 2>>::~Device' requested here
+    9 |  auto x=input<float>(n*batch);Device<float> dx(x);int nf=n/2+1;Device<hipfftComplex> dy(nf*batch);
+      |                                                                                      ^
+3 warnings generated.
+ld.lld: error: unable to find library -lhipfft
+ld.lld: error: unable to find library -lamdhip64
+clang++: error: linker command failed with exit code 1 (use -v to see invocation)

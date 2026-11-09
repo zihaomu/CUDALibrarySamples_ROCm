@@ -209,3 +209,25 @@ Outputs from csreigs2cuDSS_dcomplex:
    Compute eigenvalue count in box with cuDSS
    Number of eigenvalues = 2
 ```
+
+<!-- ROCM-MIGRATION:START -->
+## ROCm 迁移实时状态
+
+7 个独立源入口；PASSED 0，PARTIAL 0，FAILED 7，BLOCKED 0，UNSUPPORTED 0，NOT_STARTED 0，IN_PROGRESS 0。
+
+候选库：hipSOLVER, rocSOLVER (subset)。候选不等于已使用；基础探针成功也不等于整库迁移成功。
+
+原例对比两个 NVIDIA 稀疏直接求解 API；没有完成保持两条路线及对应配置语义的 AMD 改写。
+
+| 原始样例 / 逐例详情 | 实际库 / 后端 | 程度 / 状态 | 已覆盖 / 缺失功能与成功或失败原因 | CUDA baseline / 对照 | 证据 |
+| --- | --- | --- | --- | --- | --- |
+| [csreigs2cuDSS_dcomplex.cpp](csreigs2cuDSS_dcomplex.cpp) · [详情](../migration/sample-reports/cuSOLVERSp2cuDSS/csreigs2cuDSS_dcomplex.cpp.md) | 未验证使用库 | L1 / FAILED | build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVERSp2cuDSS/csreigs2cuDSS_dcomplex.cpp:31:10: fatal error: 'cudss.h' file not found | BLOCKED / BLOCKED | [记录](../migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuSOLVERSp2cuDSS_csreigs2cuDSS_dcomplex.cpp)；[记录](../migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSOLVERSp2cuDSS_csreigs2cuDSS_dcomplex.cpp) |
+| [csreigvsi2cuDSS_double.cpp](csreigvsi2cuDSS_double.cpp) · [详情](../migration/sample-reports/cuSOLVERSp2cuDSS/csreigvsi2cuDSS_double.cpp.md) | 未验证使用库 | L1 / FAILED | build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVERSp2cuDSS/csreigvsi2cuDSS_double.cpp:25:10: fatal error: 'cudss.h' file not found | BLOCKED / BLOCKED | [记录](../migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuSOLVERSp2cuDSS_csreigvsi2cuDSS_double.cpp)；[记录](../migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSOLVERSp2cuDSS_csreigvsi2cuDSS_double.cpp) |
+| [cuSolverRf2cuDSS_double.cpp](cuSolverRf2cuDSS_double.cpp) · [详情](../migration/sample-reports/cuSOLVERSp2cuDSS/cuSolverRf2cuDSS_double.cpp.md) | 未验证使用库 | L1 / FAILED | build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVERSp2cuDSS/utils.hpp:44:10: fatal error: 'cudss.h' file not found | BLOCKED / BLOCKED | [记录](../migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuSOLVERSp2cuDSS_cuSolverRf2cuDSS_double.cpp)；[记录](../migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSOLVERSp2cuDSS_cuSolverRf2cuDSS_double.cpp) |
+| [cuSolverSp2cuDSS_dcomplex.cpp](cuSolverSp2cuDSS_dcomplex.cpp) · [详情](../migration/sample-reports/cuSOLVERSp2cuDSS/cuSolverSp2cuDSS_dcomplex.cpp.md) | 未验证使用库 | L1 / FAILED | build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVERSp2cuDSS/utils.hpp:44:10: fatal error: 'cudss.h' file not found | BLOCKED / BLOCKED | [记录](../migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuSOLVERSp2cuDSS_cuSolverSp2cuDSS_dcomplex.cpp)；[记录](../migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSOLVERSp2cuDSS_cuSolverSp2cuDSS_dcomplex.cpp) |
+| [cuSolverSp2cuDSS_double.cpp](cuSolverSp2cuDSS_double.cpp) · [详情](../migration/sample-reports/cuSOLVERSp2cuDSS/cuSolverSp2cuDSS_double.cpp.md) | 未验证使用库 | L1 / FAILED | build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVERSp2cuDSS/utils.hpp:44:10: fatal error: 'cudss.h' file not found | BLOCKED / BLOCKED | [记录](../migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuSOLVERSp2cuDSS_cuSolverSp2cuDSS_double.cpp)；[记录](../migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSOLVERSp2cuDSS_cuSolverSp2cuDSS_double.cpp) |
+| [cuSolverSp2cuDSS_float.cpp](cuSolverSp2cuDSS_float.cpp) · [详情](../migration/sample-reports/cuSOLVERSp2cuDSS/cuSolverSp2cuDSS_float.cpp.md) | 未验证使用库 | L1 / FAILED | build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVERSp2cuDSS/utils.hpp:44:10: fatal error: 'cudss.h' file not found | BLOCKED / BLOCKED | [记录](../migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuSOLVERSp2cuDSS_cuSolverSp2cuDSS_float.cpp)；[记录](../migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSOLVERSp2cuDSS_cuSolverSp2cuDSS_float.cpp) |
+| [cuSolverSp2cuDSS_scomplex.cpp](cuSolverSp2cuDSS_scomplex.cpp) · [详情](../migration/sample-reports/cuSOLVERSp2cuDSS/cuSolverSp2cuDSS_scomplex.cpp.md) | 未验证使用库 | L1 / FAILED | build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVERSp2cuDSS/utils.hpp:44:10: fatal error: 'cudss.h' file not found | BLOCKED / BLOCKED | [记录](../migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuSOLVERSp2cuDSS_cuSolverSp2cuDSS_scomplex.cpp)；[记录](../migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSOLVERSp2cuDSS_cuSolverSp2cuDSS_scomplex.cpp) |
+
+生成来源：[migration/samples.yaml](../migration/samples.yaml)；执行 `python3 tools/migration/render.py` 更新。
+<!-- ROCM-MIGRATION:END -->

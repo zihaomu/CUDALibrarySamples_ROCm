@@ -1,0 +1,122 @@
+{
+  "cuBLAS": {
+    "reason": "常规运算用 hipBLAS/rocBLAS；Emulation、3m、部分 Ex/packed 转换等仍有接口/算法改写缺口。",
+    "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。"
+  },
+  "cuBLASLt": {
+    "reason": "FP32 与两种 HSH FP16 batch 路径验证通过；高级 scale/quantization、grouped/autotune 接口及 FP8 格式不能按名字强行等同。",
+    "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。"
+  },
+  "cuSPARSE": {
+    "reason": "CSR/COO/blocked ELL 等逐例验证；BSR SDDMM 返回未实现，部分新转换、workspace/custom operator 仍待 API/算法改写。",
+    "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。"
+  },
+  "cuSOLVER": {
+    "reason": "hipSOLVER/rocSOLVER 基础分解有独立数值验收；Mg、IRS、部分 64-bit/Jacobi/近似 API 或未覆盖的独立 oracle 保留失败/部分完成。",
+    "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。"
+  },
+  "cuFFT": {
+    "reason": "原始单卡、双卡、legacy/JIT callback 分别实现；1D Xt 不支持的单 batch 路径改用 hipFFT + RCCL + GPU 合并，JIT 使用 SPIR-V。",
+    "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。"
+  },
+  "cuRAND": {
+    "reason": "36 个 generator/distribution 的原始参数、重复性与解析分布矩均验证；MT19937 初始化需较长时限，跨库序列不要求相同。",
+    "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。"
+  },
+  "cuDSS": {
+    "reason": "simple 的 C++/Fortran 用 CPU 稀疏符号图 + rocSOLVER CSRRF GPU 数值分解/求解；高级 descriptor、Schur、分布式、allocator 等 API 尚未完整改写。",
+    "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。"
+  },
+  "cuSOLVERSp2cuDSS": {
+    "reason": "原例对比两个 NVIDIA 稀疏直接求解 API；没有完成保持两条路线及对应配置语义的 AMD 改写。",
+    "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。"
+  },
+  "cuSPARSELt": {
+    "reason": "hipSPARSELt 已编译并真实运行，gfx1201 kernel 数据缺失；锁定源码的支持架构列表也不接受 gfx1201，不能用 dense GEMM 代替结构化稀疏。",
+    "retry_condition": "使用有匹配 kernel bundle 的受支持 GPU，或新的 gfx1201 hipSPARSELt 实现/包；重新跑 prune/compress/matmul 与 CPU 参考。"
+  },
+  "cuTENSOR": {
+    "reason": "gfx1201 上 hipTensor 拒绝 FP32 contraction；基础 4D contraction 改用保持 FP32 的 rocBLAS + HIP 排列。其他原始运算仍逐例失败或待独立验收。",
+    "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。"
+  },
+  "cuTENSORMg": {
+    "reason": "单进程跨卡 tensor 分区/布局/通信 API 尚未实现；单卡 hipTensor 不等同 Mg。",
+    "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。"
+  },
+  "cuTENSORMp": {
+    "reason": "原始 MPI tensor 描述与分布式算法尚未改写；RCCL 基础可行性不等同原始 Mp profile。",
+    "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。"
+  },
+  "cuBLASMp": {
+    "reason": "已验证双卡 hipBLAS/RCCL 基础计算，但原始 MPI 进程网格、block-cyclic 数据分布、各精度和高级 profile 尚未实现。",
+    "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。"
+  },
+  "cuSOLVERMp": {
+    "reason": "分布式 LU/Cholesky/特征值等需要 MPI/通信及算法层改写；不能以单卡 hipSOLVER 作为成功。",
+    "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。"
+  },
+  "cuFFTMp": {
+    "reason": "MPI/Fortran/NVSHMEM 与原始 slab/pencil/reshape 分布接口仍有绑定和实现缺口；双卡 Xt 的成功范围单独报告。",
+    "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。"
+  },
+  "NPP": {
+    "reason": "RPP HIP 小型 resize 能力已探测；原始 Canny、distance transform、label/watershed 等特殊算子未完成等价实现，不能由 resize 推广。",
+    "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。"
+  },
+  "NPP+": {
+    "reason": "原始高级轮廓/距离/分割及 Python 绑定尚未改写；RPP/rocPRIM 只是候选组件。",
+    "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。"
+  },
+  "nvJPEG": {
+    "reason": "rocJPEG 硬件 baseline RGB decode 与 CPU libjpeg 对照通过；原例全部输入/多实例/ROI/编码与 resize-watermark 流程尚未覆盖。",
+    "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。"
+  },
+  "nvJPEG2000": {
+    "reason": "rocJPEG 的 JPEG decode 不能替代 JPEG2000；原始 GPU codec/多阶段/metadata 接口没有 AMD 实现，CPU OpenJPEG 不计成功。",
+    "retry_condition": "提供可在锁定 AMD 环境工作的 GPU JPEG2000 codec/实现，保留原例 bit depth、batch、输出与质量要求。"
+  },
+  "nvTIFF": {
+    "reason": "原始 TIFF GPU codec 与多页/GeoTIFF/options 等接口未改写；CPU TIFF 容器处理不能冒充 GPU codec。",
+    "retry_condition": "补 GPU TIFF codec 及容器/元数据桥接；分别验收 encode/decode/multi-image/GeoTIFF/options。"
+  },
+  "nvCOMP": {
+    "reason": "hipCOMP 已源码构建、LZ4 GPU 往返验证；现代 nvCOMP 状态/选项/manager/API 代际差异及各 codec 仍未覆盖全部原始 profile。",
+    "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。"
+  },
+  "nvMatmulHeuristics": {
+    "reason": "hipBLASLt heuristic 已在 M1 验证；原始配置格式/模型与搜索接口未完整迁移，Origami 仅为待验收候选。",
+    "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。"
+  },
+  "cuPQC": {
+    "reason": "SHA2/SHA3 使用自有 HIP 设备实现且独立摘要完全一致；ML-KEM/ML-DSA/Merkle/Poseidon2 仍需设备算法与 API 改写。",
+    "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。"
+  },
+  "cuEST": {
+    "reason": "原始 GPU 电子结构 context、积分/梯度、DF/XC/PCM 等 vendor SDK 尚无本项目 AMD 绑定/算法实现；hipBLAS 本身不提供这些高层算子。",
+    "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。"
+  },
+  "MathDx/cuBLASDx": {
+    "reason": "需要设备内可调用的 GEMM/TRSM、shared/register/pipeline/fusion 重写；rocWMMA/CK 是候选，host hipBLAS 不算 Dx 等价实现。",
+    "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。"
+  },
+  "MathDx/cuFFTDx": {
+    "reason": "需要设备内 FFT 与融合算法；host hipFFT/rocFFT 的成功不能替代这些 device-callable profile。",
+    "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。"
+  },
+  "MathDx/cuRANDDx": {
+    "reason": "rocRAND device API 是候选；原始 DSL、PCG/Philox rounds、subsequence/ordering 与设备端组合行为尚未逐例实现。",
+    "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。"
+  },
+  "MathDx/cuSolverDx": {
+    "reason": "原始线程/块级设备求解与融合需要自有 HIP/设备算法；host rocSOLVER 不作为成功替代。",
+    "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。"
+  },
+  "MathDx/libmathdx": {
+    "reason": "HIPRTC 已在 FFT JIT 路线验证，但不自带原始 libmathdx 的各设备算法生成器/描述 DSL，尚未等价改写。",
+    "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。"
+  },
+  "MathDx/nvCOMPDx": {
+    "reason": "hipCOMP 的 host API 不等于 device-callable nvCOMPDx；原始设备融合/CPU互通/ANS 等需要专门重写。",
+    "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。"
+  }
+}

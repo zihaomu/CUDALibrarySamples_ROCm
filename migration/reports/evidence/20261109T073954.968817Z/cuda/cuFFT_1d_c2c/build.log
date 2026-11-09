@@ -1,0 +1,8 @@
+In file included from /home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-validation/cuFFT/1d_c2c/sample.cpp:3:
+/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-validation/cuFFT/1d_c2c/sample.cpp: In lambda function:
+/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-validation/cuFFT/1d_c2c/sample.cpp:13:40: error: ‘CUFFT_BACKWARD’ was not declared in this scope; did you mean ‘CUFFT_FORWARD’?
+   13 |  CHECK(cufftExecC2C(backward,dx.p,dx.p,CUFFT_BACKWARD));CHECK(cudaStreamSynchronize(stream.p));y=dx.get();for(int i=0;i<n*batch;i++){flat[2*i]=y[i].x/n;flat[2*i+1]=y[i].y/n;}report("roundtrip_n"+std::to_string(n),flat,raw,2e-6,1e-5);
+      |                                        ^~~~~~~~~~~~~~
+/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-validation/common/check.hpp:14:40: note: in definition of macro ‘CHECK’
+   14 | #define CHECK(call) do { auto status_=(call); if (int(status_)!=0) throw std::runtime_error(std::string(#call)+" status="+std::to_string(int(status_))+" line="+std::to_string(__LINE__)); } while(0)
+      |                                        ^~~~

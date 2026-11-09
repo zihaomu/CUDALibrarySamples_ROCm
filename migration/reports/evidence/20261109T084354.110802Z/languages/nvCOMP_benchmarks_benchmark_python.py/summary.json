@@ -1,0 +1,14 @@
+{
+  "sample_id": "nvCOMP/benchmarks::benchmark_python.py",
+  "scope": "language_frontend_and_binding_attempt",
+  "status": "FAILED",
+  "level": "L1",
+  "return_code": 1,
+  "reason_code": "BINDING_OR_FRONTEND_MIGRATION_REQUIRED",
+  "reason": "Python 原始入口依赖 argparse, csv, os, statistics, sys, math, typing, functools, cupy, numpy, numpy.typing, nvidia.nvcomp；锁定 AMD 环境中的 import 资格检查未通过，尚无保留该例 API/算法的 AMD Python 改写。安装 CPU 包不能充作 GPU 迁移。 日志：ile \"/opt/python/cpython-3.13.13-linux-x86_64-gnu/lib/python3.13/importlib/__init__.py\", line 88, in import_module     return _bootstrap._gcd_import(name[level:], package, level)            ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^   File \"<frozen importlib._bootstrap>\", line 1395, in _gcd_import   File \"<frozen importlib._bootstrap>\", line 1360, in _find_and_load   File \"<frozen importlib._bootstrap>\", line 1324, in _find_and_load_unlocked ModuleNotFoundError: No module named 'cupy' ",
+  "implementation": "rocm/ported/nvCOMP/benchmarks/benchmark_python.py",
+  "implementation_sha256": "e33fed2fbb0a13e071309dfff0a1233b070d3e4a7c4b3c368a553604b4c1f35a",
+  "source_sha256": "e33fed2fbb0a13e071309dfff0a1233b070d3e4a7c4b3c368a553604b4c1f35a",
+  "evidence": "artifacts/20261109T084354.110802Z/languages/nvCOMP_benchmarks_benchmark_python.py",
+  "environment": "artifacts/20261109T084354.110802Z/languages/environment.json"
+}

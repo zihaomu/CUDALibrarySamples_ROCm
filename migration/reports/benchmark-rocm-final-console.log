@@ -1,0 +1,139 @@
+{"profile": "rocm10-foundation-r9700-v1", "passed": true, "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03", "output": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-environment-reports/8849c469a7bd461cb009e00c6393911c.json"}
+{
+  "status": "PASSED",
+  "return_code": 0,
+  "evidence": "artifacts/20261109T090320.996902Z/performance-rocm",
+  "environment": {
+    "devices": [
+      {
+        "logical_id": 0,
+        "pci_bdf": "0000:23:00.0",
+        "physical_id": 1
+      }
+    ],
+    "rocm_release": "10.1.0",
+    "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+    "source_sha256": "e6a02e2b59af562859b2890831a9d27f7c3d6eefe177c5e4b587afb4cc16ecfc",
+    "common_header_sha256": "b8c8195390ab0e10acb7b49c11fa93a8d541a49fe7e50657048e70fbad783b49",
+    "visible_devices": "3",
+    "precision": "AMD rocBLAS default FP32/FP64; CUDA pedantic FP32/FP64",
+    "timing_scope": "GPU event around GEMM; allocation, transfers and initialization excluded; default library workspace",
+    "power_frequency": "not controlled; device metric snapshots retained separately"
+  },
+  "profiles": [
+    {
+      "benchmark": "gemm",
+      "dtype": "fp32",
+      "n": 256,
+      "warmup": 17696,
+      "minimum_warmup_ms": 1000,
+      "groups": 3,
+      "iterations_per_group": 100,
+      "gpu_median_ms": 0.061799999326467514,
+      "gpu_p95_ms": 0.3299579918384552,
+      "wall_mean_ms": 0.11977652666666666,
+      "tflops": 0.54295198002744,
+      "max_reference_error": 3.358235711736768e-07,
+      "group_medians_ms": [
+        0.06203899905085564,
+        0.06259900331497192,
+        0.059918999671936035
+      ]
+    },
+    {
+      "benchmark": "gemm",
+      "dtype": "fp64",
+      "n": 256,
+      "warmup": 4224,
+      "minimum_warmup_ms": 1000,
+      "groups": 3,
+      "iterations_per_group": 100,
+      "gpu_median_ms": 0.19659799337387085,
+      "gpu_p95_ms": 0.37795600295066833,
+      "wall_mean_ms": 0.24319873,
+      "tflops": 0.17067535341619414,
+      "max_reference_error": 1.1102230246251565e-15,
+      "group_medians_ms": [
+        0.19923900067806244,
+        0.19359800219535828,
+        0.19659799337387085
+      ]
+    },
+    {
+      "benchmark": "gemm",
+      "dtype": "fp32",
+      "n": 1024,
+      "warmup": 4416,
+      "minimum_warmup_ms": 1000,
+      "groups": 3,
+      "iterations_per_group": 100,
+      "gpu_median_ms": 0.19923800230026245,
+      "gpu_p95_ms": 0.6209549903869629,
+      "wall_mean_ms": 0.27219482666666667,
+      "tflops": 10.778484140609008,
+      "max_reference_error": 3.5794498565167032e-06,
+      "group_medians_ms": [
+        0.200997993350029,
+        0.19923800230026245,
+        0.19683800637722015
+      ]
+    },
+    {
+      "benchmark": "gemm",
+      "dtype": "fp64",
+      "n": 1024,
+      "warmup": 288,
+      "minimum_warmup_ms": 1000,
+      "groups": 3,
+      "iterations_per_group": 100,
+      "gpu_median_ms": 3.1762518882751465,
+      "gpu_p95_ms": 3.889045000076294,
+      "wall_mean_ms": 3.2953837,
+      "tflops": 0.6761062168675118,
+      "max_reference_error": 5.329070518200751e-15,
+      "group_medians_ms": [
+        3.1832919120788574,
+        3.1751720905303955,
+        3.1688919067382812
+      ]
+    },
+    {
+      "benchmark": "gemm",
+      "dtype": "fp32",
+      "n": 2048,
+      "warmup": 736,
+      "minimum_warmup_ms": 1000,
+      "groups": 3,
+      "iterations_per_group": 100,
+      "gpu_median_ms": 1.3592280149459839,
+      "gpu_p95_ms": 1.5962669849395752,
+      "wall_mean_ms": 1.4444637,
+      "tflops": 12.639431350068762,
+      "max_reference_error": 6.075374328062821e-06,
+      "group_medians_ms": [
+        1.3688279390335083,
+        1.3686280250549316,
+        1.3515479564666748
+      ]
+    },
+    {
+      "benchmark": "gemm",
+      "dtype": "fp64",
+      "n": 2048,
+      "warmup": 64,
+      "minimum_warmup_ms": 1000,
+      "groups": 3,
+      "iterations_per_group": 100,
+      "gpu_median_ms": 21.580249786376953,
+      "gpu_p95_ms": 22.919876098632812,
+      "wall_mean_ms": 22.202449086666665,
+      "tflops": 0.7960922303524588,
+      "max_reference_error": 1.4210854715202004e-14,
+      "group_medians_ms": [
+        22.59716033935547,
+        21.51993179321289,
+        21.501131057739258
+      ]
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSE/spmv_symmetric_csr/spmv_symmetric_example.c:103:5: error: unknown type name 'cusparseSpMVDescr_t'; did you mean 'hipsparseSpSVDescr_t'?
+  103 |     cusparseSpMVDescr_t  spmvDescr = NULL;
+      |     ^~~~~~~~~~~~~~~~~~~
+      |     hipsparseSpSVDescr_t
+/opt/rocm/core-10.1/include/hipsparse/hipsparse-generic-types.h:183:36: note: 'hipsparseSpSVDescr_t' declared here
+  183 | typedef struct hipsparseSpSVDescr* hipsparseSpSVDescr_t;
+      |                                    ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSE/spmv_symmetric_csr/spmv_symmetric_example.c:112:5: error: unknown type name 'cusparseSymmetryType_t'
+  112 |     cusparseSymmetryType_t symmetry = CUSPARSE_SYMMETRIC;
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSE/spmv_symmetric_csr/spmv_symmetric_example.c:112:39: error: use of undeclared identifier 'CUSPARSE_SYMMETRIC'
+  112 |     cusparseSymmetryType_t symmetry = CUSPARSE_SYMMETRIC;
+      |                                       ^~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSE/spmv_symmetric_csr/spmv_symmetric_example.c:113:5: error: unknown type name 'cusparseSpMatStorage_t'
+  113 |     cusparseSpMatStorage_t storage  = CUSPARSE_STORE_LOWER;
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSE/spmv_symmetric_csr/spmv_symmetric_example.c:113:39: error: use of undeclared identifier 'CUSPARSE_STORE_LOWER'
+  113 |     cusparseSpMatStorage_t storage  = CUSPARSE_STORE_LOWER;
+      |                                       ^~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSE/spmv_symmetric_csr/spmv_symmetric_example.c:114:53: error: use of undeclared identifier 'CUSPARSE_SPMAT_SYMMETRY_TYPE'
+  114 |     CHECK_CUSPARSE(hipsparseSpMatSetAttribute(matA, CUSPARSE_SPMAT_SYMMETRY_TYPE,
+      |                                                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSE/spmv_symmetric_csr/spmv_symmetric_example.c:116:53: error: use of undeclared identifier 'CUSPARSE_SPMAT_STORAGE'
+  116 |     CHECK_CUSPARSE(hipsparseSpMatSetAttribute(matA, CUSPARSE_SPMAT_STORAGE,
+      |                                                     ^~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSE/spmv_symmetric_csr/spmv_symmetric_example.c:123:20: error: use of undeclared identifier 'cusparseSpMV_createDescr'; did you mean 'hipsparseSpSV_createDescr'?
+  123 |     CHECK_CUSPARSE(cusparseSpMV_createDescr(&spmvDescr))
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~
+      |                    hipsparseSpSV_createDescr
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSE/spmv_symmetric_csr/spmv_symmetric_example.c:39:37: note: expanded from macro 'CHECK_CUSPARSE'
+   39 |         hipsparseStatus_t status = (func);                                      \
+      |                                     ^~~~
+/opt/rocm/core-10.1/include/hipsparse/internal/generic/hipsparse_spsv.h:38:19: note: 'hipsparseSpSV_createDescr' declared here
+   38 | hipsparseStatus_t hipsparseSpSV_createDescr(hipsparseSpSVDescr_t* descr);
+      |                   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSE/spmv_symmetric_csr/spmv_symmetric_example.c:126:57: error: use of undeclared identifier 'CUSPARSE_PARAM_OP'
+  126 |     CHECK_CUSPARSE(cusparseSpMVDescrSetParam(spmvDescr, CUSPARSE_PARAM_OP,
+      |                                                         ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSE/spmv_symmetric_csr/spmv_symmetric_example.c:128:57: error: use of undeclared identifier 'CUSPARSE_PARAM_ALG'
+  128 |     CHECK_CUSPARSE(cusparseSpMVDescrSetParam(spmvDescr, CUSPARSE_PARAM_ALG,
+      |                                                         ^~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSE/spmv_symmetric_csr/spmv_symmetric_example.c:132:20: error: use of undeclared identifier 'cusparseSpMVGeneric_bufferSize'; did you mean 'hipsparseSpMV_bufferSize'?
+  132 |     CHECK_CUSPARSE(cusparseSpMVGeneric_bufferSize(handle, &alpha, matA, vecX,
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                    hipsparseSpMV_bufferSize
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSE/spmv_symmetric_csr/spmv_symmetric_example.c:39:37: note: expanded from macro 'CHECK_CUSPARSE'
+   39 |         hipsparseStatus_t status = (func);                                      \
+      |                                     ^~~~
+/opt/rocm/core-10.1/include/hipsparse/internal/generic/hipsparse_spmv.h:74:19: note: 'hipsparseSpMV_bufferSize' declared here
+   74 | hipsparseStatus_t hipsparseSpMV_bufferSize(hipsparseHandle_t           handle,
+      |                   ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSE/spmv_symmetric_csr/spmv_symmetric_example.c:132:59: error: cannot initialize a parameter of type 'hipsparseOperation_t' with an rvalue of type 'float *'
+  132 |     CHECK_CUSPARSE(cusparseSpMVGeneric_bufferSize(handle, &alpha, matA, vecX,
+      |                                                           ^~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSE/spmv_symmetric_csr/spmv_symmetric_example.c:39:37: note: expanded from macro 'CHECK_CUSPARSE'
+   39 |         hipsparseStatus_t status = (func);                                      \
+      |                                     ^~~~
+/opt/rocm/core-10.1/include/hipsparse/internal/generic/hipsparse_spmv.h:75:72: note: passing argument to parameter 'opA' here
+   75 |                                            hipsparseOperation_t        opA,
+      |                                                                        ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSE/spmv_symmetric_csr/spmv_symmetric_example.c:138:57: error: use of undeclared identifier 'CUSPARSE_PARAM_BUFFER'
+  138 |     CHECK_CUSPARSE(cusparseSpMVDescrSetParam(spmvDescr, CUSPARSE_PARAM_BUFFER,
+      |                                                         ^~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSE/spmv_symmetric_csr/spmv_symmetric_example.c:142:20: error: use of undeclared identifier 'cusparseSpMVGeneric_preprocess'
+  142 |     CHECK_CUSPARSE(cusparseSpMVGeneric_preprocess(
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSE/spmv_symmetric_csr/spmv_symmetric_example.c:146:20: error: use of undeclared identifier 'cusparseSpMVGeneric'
+  146 |     CHECK_CUSPARSE(cusparseSpMVGeneric(handle, &alpha, matA, vecX, &beta, vecY,
+      |                    ^~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSE/spmv_symmetric_csr/spmv_symmetric_example.c:165:20: error: use of undeclared identifier 'cusparseSpMV_destroyDescr'; did you mean 'hipsparseSpSV_destroyDescr'?
+  165 |     CHECK_CUSPARSE(cusparseSpMV_destroyDescr(spmvDescr))
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~
+      |                    hipsparseSpSV_destroyDescr
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSE/spmv_symmetric_csr/spmv_symmetric_example.c:39:37: note: expanded from macro 'CHECK_CUSPARSE'
+   39 |         hipsparseStatus_t status = (func);                                      \
+      |                                     ^~~~
+/opt/rocm/core-10.1/include/hipsparse/internal/generic/hipsparse_spsv.h:48:19: note: 'hipsparseSpSV_destroyDescr' declared here
+   48 | hipsparseStatus_t hipsparseSpSV_destroyDescr(hipsparseSpSVDescr_t descr);
+      |                   ^
+16 errors generated.

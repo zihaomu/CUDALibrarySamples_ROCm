@@ -1,0 +1,39 @@
+{
+  "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+  "build": [
+    "/opt/venv/bin/hipcc",
+    "-std=c++17",
+    "-O2",
+    "-D__HIP_PLATFORM_AMD__",
+    "--rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay",
+    "--hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay",
+    "--rocm-device-lib-path=/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode",
+    "--offload-arch=gfx1201",
+    "-x",
+    "hip",
+    "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtHSHgemmGroupedSimple/main.cpp",
+    "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtHSHgemmGroupedSimple/sample_cublasLt_LtHSHgemmGroupedSimple.cu",
+    "-o",
+    "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/20261109T081449.022777Z/original-rocm/cuBLASLt_LtHSHgemmGroupedSimple_main.cpp/sample",
+    "-I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtHSHgemmGroupedSimple",
+    "-I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/utils",
+    "-I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/Common",
+    "-I/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/include",
+    "-I/opt/rocm/core-10.1/include",
+    "-I/opt/rocm/core-10.1/include/hipblas",
+    "-I/opt/rocm/core-10.1/include/hipblaslt",
+    "-I/opt/rocm/core-10.1/include/hipsparse",
+    "-I/opt/rocm/core-10.1/include/hipsolver",
+    "-I/opt/rocm/core-10.1/include/hipfft",
+    "-I/opt/rocm/core-10.1/include/hiprand",
+    "-I/opt/rocm/core-10.1/include/hipsparselt",
+    "-L/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib",
+    "-Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib",
+    "-Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib",
+    "-lhipblaslt",
+    "-lamdhip64"
+  ],
+  "run": [
+    "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/20261109T081449.022777Z/original-rocm/cuBLASLt_LtHSHgemmGroupedSimple_main.cpp/sample"
+  ]
+}

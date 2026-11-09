@@ -118,3 +118,22 @@ All examples use these exit codes:
 ## API documentation
 
 [nvJPEG2000](https://docs.nvidia.com/cuda/nvjpeg2000/index.html)
+
+<!-- ROCM-MIGRATION:START -->
+## ROCm 迁移实时状态
+
+4 个独立源入口；PASSED 0，PARTIAL 0，FAILED 4，BLOCKED 0，UNSUPPORTED 0，NOT_STARTED 0，IN_PROGRESS 0。
+
+候选库：unresolved。候选不等于已使用；基础探针成功也不等于整库迁移成功。
+
+rocJPEG 的 JPEG decode 不能替代 JPEG2000；原始 GPU codec/多阶段/metadata 接口没有 AMD 实现，CPU OpenJPEG 不计成功。
+
+| 原始样例 / 逐例详情 | 实际库 / 后端 | 程度 / 状态 | 已覆盖 / 缺失功能与成功或失败原因 | CUDA baseline / 对照 | 证据 |
+| --- | --- | --- | --- | --- | --- |
+| [nvJPEG2000-Decoder-Pipelined/nvjpeg2k_dec_pipelined.cpp](nvJPEG2000-Decoder-Pipelined/nvjpeg2k_dec_pipelined.cpp) · [详情](../migration/sample-reports/nvJPEG2000/nvJPEG2000-Decoder-Pipelined/nvjpeg2k_dec_pipelined.cpp.md) | 未验证使用库 | L1 / FAILED | build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG2000/nvJPEG2000-Decoder-Pipelined/nvjpeg2k_dec_pipelined.h:53:10: fatal error: 'nvjpeg2k.h' file not found | BLOCKED / BLOCKED | [记录](../migration/reports/evidence/20261109T084256.329631Z/original-rocm/nvJPEG2000_nvJPEG2000-Decoder-Pipelined_nvjpeg2k_dec_pipelined.cpp)；[记录](../migration/reports/evidence/20261109T084857.451692Z/original-cuda/nvJPEG2000_nvJPEG2000-Decoder-Pipelined_nvjpeg2k_dec_pipelined.cpp) |
+| [nvJPEG2000-Decoder-Tile-Partial/nvjpeg2k_decode_tile_partial.cpp](nvJPEG2000-Decoder-Tile-Partial/nvjpeg2k_decode_tile_partial.cpp) · [详情](../migration/sample-reports/nvJPEG2000/nvJPEG2000-Decoder-Tile-Partial/nvjpeg2k_decode_tile_partial.cpp.md) | 未验证使用库 | L1 / FAILED | build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG2000/nvJPEG2000-Decoder-Tile-Partial/nvjpeg2k_decode_tile_partial.h:52:10: fatal error: 'nvjpeg2k.h' file not found | BLOCKED / BLOCKED | [记录](../migration/reports/evidence/20261109T084256.329631Z/original-rocm/nvJPEG2000_nvJPEG2000-Decoder-Tile-Partial_nvjpeg2k_decode_tile_partial.cpp)；[记录](../migration/reports/evidence/20261109T084857.451692Z/original-cuda/nvJPEG2000_nvJPEG2000-Decoder-Tile-Partial_nvjpeg2k_decode_tile_partial.cpp) |
+| [nvJPEG2000-Decoder/nvjpeg2k_decode.cpp](nvJPEG2000-Decoder/nvjpeg2k_decode.cpp) · [详情](../migration/sample-reports/nvJPEG2000/nvJPEG2000-Decoder/nvjpeg2k_decode.cpp.md) | 未验证使用库 | L1 / FAILED | build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG2000/nvJPEG2000-Decoder/nvjpeg2k_decode.h:52:10: fatal error: 'nvjpeg2k.h' file not found | BLOCKED / BLOCKED | [记录](../migration/reports/evidence/20261109T084256.329631Z/original-rocm/nvJPEG2000_nvJPEG2000-Decoder_nvjpeg2k_decode.cpp)；[记录](../migration/reports/evidence/20261109T084857.451692Z/original-cuda/nvJPEG2000_nvJPEG2000-Decoder_nvjpeg2k_decode.cpp) |
+| [nvJPEG2000-Encoder/nvjpeg2k_encode.cpp](nvJPEG2000-Encoder/nvjpeg2k_encode.cpp) · [详情](../migration/sample-reports/nvJPEG2000/nvJPEG2000-Encoder/nvjpeg2k_encode.cpp.md) | 未验证使用库 | L1 / FAILED | build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG2000/nvJPEG2000-Encoder/nvjpeg2k_encode.h:49:10: fatal error: 'nvjpeg2k.h' file not found | BLOCKED / BLOCKED | [记录](../migration/reports/evidence/20261109T084256.329631Z/original-rocm/nvJPEG2000_nvJPEG2000-Encoder_nvjpeg2k_encode.cpp)；[记录](../migration/reports/evidence/20261109T084857.451692Z/original-cuda/nvJPEG2000_nvJPEG2000-Encoder_nvjpeg2k_encode.cpp) |
+
+生成来源：[migration/samples.yaml](../migration/samples.yaml)；执行 `python3 tools/migration/render.py` 更新。
+<!-- ROCM-MIGRATION:END -->

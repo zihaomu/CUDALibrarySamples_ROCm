@@ -1,0 +1,246 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2020-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "hip/hip_runtime.h"
+#include "BatchData.h"
+#include "hipcomp.h"
+
+#include <lz4.h>
+#include <lz4hc.h>
+
+// Benchmark performance from the binary data file fname
+static void
+run_example(const std::vector<std::vector<char>> &data, size_t warmup_iteration_count, size_t total_iteration_count)
+{
+  assert(!data.empty());
+  if (warmup_iteration_count >= total_iteration_count)
+  {
+    throw std::runtime_error("ERROR: the total iteration count must be greater than the warmup iteration count");
+  }
+
+  size_t total_bytes = 0;
+  for (const std::vector<char> &part : data)
+  {
+    total_bytes += part.size();
+  }
+
+  std::cout << "----------" << std::endl;
+  std::cout << "files: " << data.size() << std::endl;
+  std::cout << "uncompressed (B): " << total_bytes << std::endl;
+
+  const size_t chunk_size = 1 << 16;
+
+  // Build up input batch on CPU
+  BatchDataCPU input_data_cpu(data, chunk_size);
+  const size_t chunk_count = input_data_cpu.size();
+  std::cout << "chunks: " << chunk_count << std::endl;
+
+  // compression
+
+  // Allocate and prepare output/compressed batch
+  BatchDataCPU compressed_data_cpu(LZ4_compressBound(chunk_size), chunk_count);
+
+  // loop over chunks on the CPU, compressing each one
+  for (size_t i = 0; i < chunk_count; ++i)
+  {
+    // could use LZ4_compress_default or LZ4_compress_fast instead
+    const int size = LZ4_compress_HC(
+      static_cast<const char *>(input_data_cpu.ptrs()[i]),
+      static_cast<char *>(compressed_data_cpu.ptrs()[i]),
+      static_cast<int>(input_data_cpu.sizes()[i]),
+      static_cast<int>(compressed_data_cpu.sizes()[i]),
+      12
+    );
+    if (size == 0)
+    {
+      throw std::runtime_error("LZ4 CPU failed to compress chunk " + std::to_string(i) + ".");
+    }
+
+    // set the actual compressed size
+    compressed_data_cpu.sizes()[i] = static_cast<size_t>(size);
+  }
+
+  // compute compression ratio
+  size_t *compressed_sizes_host = compressed_data_cpu.sizes();
+  size_t comp_bytes = 0;
+  for (size_t i = 0; i < chunk_count; ++i)
+  {
+    comp_bytes += compressed_sizes_host[i];
+  }
+
+  std::cout << "comp_size: " << comp_bytes << ", compressed ratio: " << std::fixed << std::setprecision(2)
+            << (double)total_bytes / comp_bytes << std::endl;
+
+  // Decompression options
+  nvcompBatchedLZ4DecompressOpts_t decompress_opts = nvcompBatchedLZ4DecompressDefaultOpts;
+
+  // Query decompression alignment requirements
+  nvcompAlignmentRequirements_t decompression_alignment_reqs{};
+  hipcompStatus_t status =
+    nvcompBatchedLZ4DecompressGetRequiredAlignments(decompress_opts, &decompression_alignment_reqs);
+  if (status != hipcompSuccess)
+  {
+    throw std::runtime_error("ERROR: nvcompBatchedLZ4DecompressGetRequiredAlignments() not successful");
+  }
+
+  // Copy compressed data to GPU
+  BatchData compressed_data(compressed_data_cpu, true, decompression_alignment_reqs.input);
+
+  // Allocate and build up decompression batch on GPU
+  BatchData decomp_data(input_data_cpu, false, decompression_alignment_reqs.output);
+
+  // Create CUDA stream
+  hipStream_t stream;
+  CUDA_CHECK(hipStreamCreate(&stream));
+
+  // CUDA events to measure decompression time
+  hipEvent_t start, end;
+  CUDA_CHECK(hipEventCreate(&start));
+  CUDA_CHECK(hipEventCreate(&end));
+
+  // LZ4 GPU decompression
+  size_t decomp_temp_bytes;
+  status = hipcompBatchedLZ4DecompressGetTempSize(
+    chunk_count,
+    chunk_size,
+    decompress_opts,
+    &decomp_temp_bytes,
+    chunk_count * chunk_size,
+    stream
+  );
+  if (status != hipcompSuccess)
+  {
+    throw std::runtime_error("hipcompBatchedLZ4DecompressGetTempSize() failed.");
+  }
+
+  void *d_decomp_temp;
+  CUDA_CHECK(cudaMallocSafe(&d_decomp_temp, decomp_temp_bytes));
+
+  size_t *d_decomp_sizes;
+  CUDA_CHECK(cudaMallocSafe(&d_decomp_sizes, chunk_count * sizeof(size_t)));
+
+  hipcompStatus_t *d_status_ptrs;
+  CUDA_CHECK(cudaMallocSafe(&d_status_ptrs, chunk_count * sizeof(hipcompStatus_t)));
+
+  CUDA_CHECK(hipStreamSynchronize(stream));
+
+  auto perform_decompression = [&]() {
+    if (hipcompBatchedLZ4DecompressAsync(
+          compressed_data.ptrs(),
+          compressed_data.sizes(),
+          decomp_data.sizes(),
+          d_decomp_sizes,
+          chunk_count,
+          d_decomp_temp,
+          decomp_temp_bytes,
+          decomp_data.ptrs(),
+          decompress_opts,
+          d_status_ptrs,
+          stream
+        ) != hipcompSuccess)
+    {
+      throw std::runtime_error("ERROR: hipcompBatchedLZ4DecompressAsync() not successful");
+    }
+  };
+
+  // Run warm-up decompression
+  for (size_t iter = 0; iter < warmup_iteration_count; ++iter)
+  {
+    perform_decompression();
+  }
+
+  // Re-run decompression to get throughput
+  CUDA_CHECK(hipEventRecord(start, stream));
+  for (size_t iter = warmup_iteration_count; iter < total_iteration_count; ++iter)
+  {
+    perform_decompression();
+  }
+  CUDA_CHECK(hipEventRecord(end, stream));
+  CUDA_CHECK(hipStreamSynchronize(stream));
+
+  // Validate decompressed data against input
+  if (!(input_data_cpu == decomp_data))
+  {
+    throw std::runtime_error("Failed to validate decompressed data");
+  }
+  else
+  {
+    std::cout << "decompression validated :)" << std::endl;
+  }
+
+  float ms;
+  CUDA_CHECK(hipEventElapsedTime(&ms, start, end));
+  ms /= total_iteration_count - warmup_iteration_count;
+
+  double decompression_throughput = ((double)total_bytes / ms) * 1e-6;
+  std::cout << "decompression throughput (GB/s): " << decompression_throughput << std::endl;
+
+  CUDA_CHECK(hipFree(d_decomp_temp));
+  CUDA_CHECK(hipFree(d_decomp_sizes));
+  CUDA_CHECK(hipFree(d_status_ptrs));
+
+  CUDA_CHECK(hipEventDestroy(start));
+  CUDA_CHECK(hipEventDestroy(end));
+  CUDA_CHECK(hipStreamDestroy(stream));
+}
+
+int main(int argc, char *argv[])
+{
+  std::vector<std::string> file_names;
+
+  size_t warmup_iteration_count = 2;
+  size_t total_iteration_count = 5;
+
+  do
+  {
+    if (argc < 3)
+    {
+      break;
+    }
+
+    int i = 1;
+    while (i < argc)
+    {
+      const char *current_argv = argv[i++];
+      if (strcmp(current_argv, "-f") == 0)
+      {
+        // parse until next `-` argument
+        while (i < argc && argv[i][0] != '-')
+        {
+          file_names.emplace_back(argv[i++]);
+        }
+      }
+      else
+      {
+        std::cerr << "Unknown argument: " << current_argv << std::endl;
+        return 1;
+      }
+    }
+  } while (0);
+
+  if (file_names.empty())
+  {
+    std::cerr << "Must specify at least one file via '-f <file>'." << std::endl;
+    return 1;
+  }
+
+  auto data = multi_file(file_names);
+
+  run_example(data, warmup_iteration_count, total_iteration_count);
+
+  return 0;
+}

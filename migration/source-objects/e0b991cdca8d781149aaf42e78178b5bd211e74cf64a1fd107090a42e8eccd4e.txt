@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+"""Audit scope, selected proof identities, generated documentation and environment gates."""
+import collections,datetime,hashlib,json,pathlib,re,subprocess,urllib.parse
+from catalog import ROOT,BASE,CANDIDATES
+from run import digest
+
+def main():
+ errors=[];checks={};cat=json.loads((ROOT/'migration/samples.yaml').read_text());samples=cat['samples'];counts=collections.Counter(s['status'] for s in samples);proofs={}
+ def require(ok,message):
+  if not ok:errors.append(message)
+ require(len(samples)==639 and len({s['id'] for s in samples})==639,'Expected 639 unique source entrypoints')
+ require(not counts['NOT_STARTED'] and not counts['IN_PROGRESS'],'Unfinished sample states remain')
+ require(len(cat['sources'])==866 and len(cat['build_definitions'])==477,'Upstream inventory denominator changed')
+ tracked=[r['path'] for r in cat['sources']+cat['build_definitions']];modified=subprocess.check_output(['git','diff','--name-only',BASE,'--']+tracked,cwd=ROOT,text=True).splitlines();require(not modified,'Original CUDA sources/builds modified: '+str(modified))
+ for r in cat['sources']:require(digest(ROOT/r['path'])==r['sha256'],'Upstream source identity changed: '+r['path'])
+ for s in samples:
+  require(bool(s['attempts']) and bool(s['evidence']) and bool(s['reason']),s['id']+' lacks attempted outcome/evidence/reason')
+  require(bool(s.get('retry_condition')) and bool(s['required_cases']),s['id']+' lacks retry condition/functional contract')
+  require(s['cuda_baseline']!='NOT_RUN' and s['cuda_comparison']!='NOT_RUN',s['id']+' lacks CUDA result or explicit comparison block')
+  for path in s['evidence']:require((ROOT/path).exists(),'Missing evidence '+path)
+  if s['status']=='PASSED':
+   require(s['level']=='L4' and set(s['passed_cases'])==set(s['required_cases']) and bool(s['actual_library']),s['id']+' invalid PASSED gates')
+   source=ROOT/s['implementation'];h=digest(source);records=[s.get('selected_validation',{}),s.get('original_profile_validation',{})]+list(reversed(s['attempts']));matches=[r for r in records if r.get('status')=='PASSED' and h in [r.get('implementation_sha256'),r.get('ported_sha256'),r.get('source_sha256'),r.get('original_port_sha256')]]
+   require(bool(matches),s['id']+' has no PASSED proof for current implementation')
+   if not matches:continue
+   proof=matches[0]
+   if s['milestone']=='M1':
+    matching=[r for r in matches if r.get('scope','').startswith('M1 extended')];require(bool(matching),s['id']+' missing current M1 proof')
+    if matching:proof=matching[0];require(proof.get('common_sha256')==digest(ROOT/'rocm/common/check.hpp'),s['id']+' stale M1 common header')
+   env=proof.get('environment',{});env=json.loads((ROOT/env).read_text()) if isinstance(env,str) and (ROOT/env).exists() else env
+   devices=proof.get('devices') or (env.get('devices') if isinstance(env,dict) else None) or s.get('original_port',{}).get('devices')
+   require(bool(devices),s['id']+' has no physical device proof')
+   if isinstance(devices,list):require(all(d['physical_id']!=3 for d in devices),s['id']+' selects excluded physical GPU3')
+   for name,sha in proof.get('dependencies',{}).items():require(digest(ROOT/name)==sha,s['id']+' stale dependency '+name)
+   if proof.get('algorithm_sha256'):require(proof['algorithm_sha256']==digest(ROOT/'rocm/cuDSS/common/sparse_chol.hpp'),s['id']+' stale sparse algorithm')
+   if proof.get('shim_sha256'):require(proof['shim_sha256']==digest(ROOT/'rocm/cuDSS/common/fortran_shim.cpp'),s['id']+' stale Fortran shim')
+   if proof.get('callback_sha256'):require(proof['callback_sha256']==digest(ROOT/'rocm/cuFFT/lto_callback_window_1d/window_callback.hip'),s['id']+' stale JIT callback')
+   proofs[s['id']]={'implementation':s['implementation'],'sha256':h,'evidence':proof.get('evidence'),'physical_devices':devices}
+  if s['level'] in {'L0','L1'}:require(not s['actual_library'],s['id']+' claims linked library before compilation')
+  if s['status']=='PARTIAL':require(set(s['passed_cases'])<set(s['required_cases']),s['id']+' partial state lacks explicit missing case')
+ require({s['family'] for s in samples}==set(CANDIDATES),'Missing family in inventory')
+ # Check only generated migration sections, preserving unrelated upstream links.
+ pages=list((ROOT/'migration/sample-reports').rglob('*.md'));require(len(pages)==639,'Expected 639 detail pages')
+ generated=[ROOT/'README.md']+[ROOT/family/'README.md' for family in CANDIDATES]+pages
+ link_count=0
+ for p in generated:
+  text=p.read_text()
+  if p==ROOT/'README.md':text=text.split('## 上游 CUDA Library Samples 说明')[0]
+  elif p not in pages:text=text.split('<!-- ROCM-MIGRATION:START -->')[-1].split('<!-- ROCM-MIGRATION:END -->')[0]
+  for target in re.findall(r'\]\(([^)]+)\)',text):
+   target=urllib.parse.unquote(target.split('#')[0])
+   if not target or '://' in target or target.startswith('mailto:'):continue
+   link_count+=1;require((p.parent/target).exists(),str(p.relative_to(ROOT))+' broken link '+target)
+ require((ROOT/'migration/design.md').read_bytes()==(ROOT.parent/'doc/cuda_samples_on_rocm_design.md').read_bytes(),'Design snapshot differs from canonical document')
+ m1=json.loads((ROOT/'migration/reports/m1-comparison.json').read_text());require(len(m1)==16 and all(r['status']=='PASSED' for r in m1) and sum(len(r['cases']) for r in m1)==95,'M1 16/95 comparison incomplete')
+ more=json.loads((ROOT/'migration/reports/additional-comparison.json').read_text());require(len(more)==54 and all(r['status']=='PASSED' for r in more),'Additional 54 comparisons incomplete')
+ ctest=(ROOT/'migration/reports/ctest-final.log').read_text();require('100% tests passed, 0 tests failed out of 16' in ctest,'Final 16 CTest checks not passed')
+ perf=json.loads((ROOT/'migration/reports/performance-comparison.json').read_text());require(perf['status']=='BLOCKED' and len(perf['profiles'])==6 and all(v['qualified_speed_ratio'] is None for v in perf['profiles']),'Performance ratio incorrectly qualified')
+ manifest=json.loads((ROOT/'migration/source-tree.json').read_text())
+ for name,r in manifest['files'].items():require((ROOT/name).exists() and digest(ROOT/name)==r['sha256'] and digest(ROOT/r['object'])==r['sha256'],'Source seal mismatch '+name)
+ for name,r in manifest['fixtures'].items():require(digest(ROOT/name)==r['sha256'],'Fixture seal mismatch '+name)
+ diff=subprocess.run(['git','diff','--check'],cwd=ROOT,text=True,capture_output=True);require(diff.returncode==0,'git diff --check: '+diff.stdout+diff.stderr)
+ checks.update(unique_entrypoints=len(samples),terminal_counts=dict(counts),families=len(CANDIDATES),upstream_sources_unchanged=len(cat['sources']),upstream_build_definitions_unchanged=len(cat['build_definitions']),current_qualified_proofs=len(proofs),detail_pages=len(pages),generated_relative_links=link_count,m1_samples=16,m1_required_cases=95,additional_comparisons=len(more),ctest_samples=16,performance_profiles=6,performance_qualification='BLOCKED',source_files_sealed=len(manifest['files']),source_tree_sha256=manifest['tree_sha256'])
+ report={'status':'PASSED' if not errors else 'FAILED','scope':'Consistency and proof integrity of the recorded execution outcomes; not a claim that failed/unimplemented samples were successfully migrated.','timestamp':datetime.datetime.now(datetime.timezone.utc).isoformat(),'checks':checks,'errors':errors,'qualified_implementations':proofs};(ROOT/'migration/reports/final-validation.json').write_text(json.dumps(report,indent=2,ensure_ascii=False)+'\n');print(json.dumps({'status':report['status'],'checks':checks,'errors':errors},indent=2,ensure_ascii=False));return int(bool(errors))
+if __name__=='__main__':raise SystemExit(main())

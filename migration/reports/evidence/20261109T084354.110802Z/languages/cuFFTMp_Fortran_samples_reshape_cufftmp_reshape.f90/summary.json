@@ -1,0 +1,14 @@
+{
+  "sample_id": "cuFFTMp/Fortran_samples/reshape::cufftmp_reshape.f90",
+  "scope": "language_frontend_and_binding_attempt",
+  "status": "FAILED",
+  "level": "L1",
+  "return_code": 1,
+  "reason_code": "BINDING_OR_FRONTEND_MIGRATION_REQUIRED",
+  "reason": "Fortran 原始入口使用 iso_c_binding, cudafor, cufftXt, cufft, mpi, nvshmem；当前 flang 编译失败，CUDA/cuDSS/cuFFT/NVFortran module 和 device 语法需用经验证的 ISO_C_BINDING 与 AMD API 重写。C ABI 探针另记，不代表该例已实现。 日志：tran_samples/reshape/cufftmp_reshape.f90:168:24: error: No explicit type declared for 'cudageterrorstring'               write(*,*) cudaGetErrorString(istat)                          ^^^^^^^^^^^^^^^^^^ /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90:177:22: error: No explicit type declared for 'cufft_success'           if (istat /= CUFFT_SUCCESS) then                        ^^^^^^^^^^^^^ ",
+  "implementation": "rocm/ported/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90",
+  "implementation_sha256": "ce0e6973e1b606d6cca9e755e74d2caa431bd005c6688cb5b42999a54a1bf450",
+  "source_sha256": "ce0e6973e1b606d6cca9e755e74d2caa431bd005c6688cb5b42999a54a1bf450",
+  "evidence": "artifacts/20261109T084354.110802Z/languages/cuFFTMp_Fortran_samples_reshape_cufftmp_reshape.f90",
+  "environment": "artifacts/20261109T084354.110802Z/languages/environment.json"
+}
