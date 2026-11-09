@@ -515,12 +515,13 @@ artifacts/<run-id>/<sample-id>/<backend>/<case-id>/
 | S39 稀疏 3 项与 BLAS 8 项收口 | 已完成 | 11 个原始入口及 31 个输入 case 经 AMD/独立 CPU/CUDA 三方验收通过。SpGEMM reuse 更改数值后重算；BLAS 覆盖并列索引、空输入、旋转 flags、正负 alpha。发现并保留原生 rocBLAS rotmg 重复缩放 H 错误证据；项目 GPU 修正路径通过极小/极大/非对称权重，未修改共享 SDK。 | 继续 tensor 4 项与 solver 2 项，补完整输出及重构/残差验收 |
 | S40 tensor 4 项与 solver 2 项收口 | 已完成 | 第二批 17/17、45 个输入 case 全部通过 AMD/独立 CPU/CUDA 三方验收；tensor 原始规模全部输出检查与小尺寸变化通过，solver QR/Cholesky 重构及残差通过。27 个 tensor 输入 buffer 按 seed 重建后 SHA256 全部一致。21 个故意损坏的数值/NaN 输出均被 oracle 拒绝。当前 158 PASSED / 14 PARTIAL，去重算子族 87。 | 更新 README 与阶段报告、归档全部证据、最终一致性检查并同步 fork |
 | S41 第二批最终一致性检查 | 已完成 | 17/17、45 cases 的 CPU/ROCm/CUDA 三方验收通过；158 个当前 PASSED 实现均有匹配源码证据，首页 87 算子/功能族、30 模块与 639 逐例页已核对；21 个损坏输出拒绝检查与 27 个输入精确重建通过。原 CUDA 源文件/构建定义均未修改，小型日志已归档。 | 提交第二批实现、文档与证据，推送 fork/main 并核对远端 |
+| S42 第二批 fork 发布验证 | 已完成 | 第二批主提交 c0ebdcb0d292d57204d91bbeb4cf3ff3022c505f 已推送 zihaomu/CUDALibrarySamples_ROCm/main；远端提交及首页 README blob 已核对。干净 checkout 检查通过，17/17、45 cases、87 算子族、158 成功样例的全部链接/证据有效。 | 发布验证记录随文档收尾提交同步，第二批执行结束 |
 
 ## 12. 当前实施快照（工具刷新）
 
 本节替代设计阶段的未开始快照。逐步过程保留在第 11 节；整例成功、部分功能、路线失败分别报告，不将执行过计划解释为所有功能均已迁移成功。
 
-更新时间：2026-11-09T12:20:34.877109+00:00。
+更新时间：2026-11-09T12:22:38.148632+00:00。
 
 清单为 **639 个独立可执行/脚本源入口**（563 C/C++、76 Fortran/Python），逐例均有实际尝试记录。当前：`PASSED` 158；`PARTIAL` 14；`FAILED` 464；`BLOCKED` 1；`UNSUPPORTED` 2；`NOT_STARTED` 0；`IN_PROGRESS` 0。
 
