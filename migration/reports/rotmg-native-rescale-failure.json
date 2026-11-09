@@ -1,0 +1,580 @@
+{
+  "sample_id": "cuBLAS/Level-1/rotmg::cublas_rotmg_example.cu",
+  "source": "cuBLAS/Level-1/rotmg/cublas_rotmg_example.cu",
+  "implementation": "rocm/ported/cuBLAS/Level-1/rotmg/cublas_rotmg_example.cu",
+  "implementation_sha256": "bcdb7a9d5e55531a4d3b2c7f565d11072d7f1c021504901ecce9e1e3adef437e",
+  "original_sha256": "84d945bea3eb5474acdbbb41450ecb8df6c13774a0e34a9f03be93e496afd0c6",
+  "build_return_code": 0,
+  "runs": [
+    {
+      "case": "original",
+      "return_code": 0,
+      "evidence": "migration/reports/evidence/20261109T115319.593333Z/batch2-rocm/cuBLAS_Level-1_rotmg_cublas_rotmg_example.cu/original"
+    },
+    {
+      "case": "zero",
+      "return_code": 0,
+      "evidence": "migration/reports/evidence/20261109T115319.593333Z/batch2-rocm/cuBLAS_Level-1_rotmg_cublas_rotmg_example.cu/zero"
+    },
+    {
+      "case": "negative",
+      "return_code": 0,
+      "evidence": "migration/reports/evidence/20261109T115319.593333Z/batch2-rocm/cuBLAS_Level-1_rotmg_cublas_rotmg_example.cu/negative"
+    },
+    {
+      "case": "rescale",
+      "return_code": 0,
+      "evidence": "migration/reports/evidence/20261109T115319.593333Z/batch2-rocm/cuBLAS_Level-1_rotmg_cublas_rotmg_example.cu/rescale"
+    }
+  ],
+  "evidence": "migration/reports/evidence/20261109T115319.593333Z/batch2-rocm/cuBLAS_Level-1_rotmg_cublas_rotmg_example.cu",
+  "environment": {
+    "backend": "rocm",
+    "devices": [
+      {
+        "logical_id": 0,
+        "pci_bdf": "0000:03:00.0",
+        "physical_id": 0
+      }
+    ],
+    "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+    "rocm_release": "10.1.0",
+    "visible_devices": "2"
+  },
+  "libraries": [
+    "hipblas"
+  ],
+  "status": "FAILED",
+  "level": "L3",
+  "cases": [
+    {
+      "status": "PASSED",
+      "checks": [
+        {
+          "check": "A",
+          "passed": true,
+          "max_abs_error": 0.0,
+          "atol": 1e-30,
+          "rtol": 1e-10
+        },
+        {
+          "check": "B",
+          "passed": true,
+          "max_abs_error": 0.0,
+          "atol": 1e-30,
+          "rtol": 1e-10
+        },
+        {
+          "check": "X",
+          "passed": true,
+          "max_abs_error": 0.0,
+          "atol": 1e-30,
+          "rtol": 1e-10
+        },
+        {
+          "check": "Y",
+          "passed": true,
+          "max_abs_error": 0.0,
+          "atol": 1e-30,
+          "rtol": 1e-10
+        },
+        {
+          "check": "active-param",
+          "passed": true,
+          "max_abs_error": 0.0,
+          "atol": 1e-30,
+          "rtol": 1e-10
+        }
+      ],
+      "input_sha256": "f9e6b9a15794af7a0033c396ffe7b4736e80bbbf575ff88bc75a51379c30046f",
+      "output_values": {
+        "A": [
+          3.100775193798449
+        ],
+        "B": [
+          0.6201550387596898
+        ],
+        "X": [
+          1.9350000000000003
+        ],
+        "Y": [
+          1.2
+        ],
+        "active-param": [
+          1.0,
+          0.35000000000000003,
+          1.7500000000000002
+        ]
+      },
+      "oracle": "Independent NumPy mathematics and CPU OpenBLAS rotation primitives; finite output and relevant residual/structural checks",
+      "case": "original"
+    },
+    {
+      "status": "PASSED",
+      "checks": [
+        {
+          "check": "A",
+          "passed": true,
+          "max_abs_error": 0.0,
+          "atol": 1e-30,
+          "rtol": 1e-10
+        },
+        {
+          "check": "B",
+          "passed": true,
+          "max_abs_error": 0.0,
+          "atol": 1e-30,
+          "rtol": 1e-10
+        },
+        {
+          "check": "X",
+          "passed": true,
+          "max_abs_error": 0.0,
+          "atol": 1e-30,
+          "rtol": 1e-10
+        },
+        {
+          "check": "Y",
+          "passed": true,
+          "max_abs_error": 0.0,
+          "atol": 1e-30,
+          "rtol": 1e-10
+        },
+        {
+          "check": "active-param",
+          "passed": true,
+          "max_abs_error": 0.0,
+          "atol": 1e-30,
+          "rtol": 1e-10
+        }
+      ],
+      "input_sha256": "4a7e9081b2e81cda0043f4e07d38ad1d109b13f1b0a3ae486f4b4e9e7273b4fa",
+      "output_values": {
+        "A": [
+          1.0
+        ],
+        "B": [
+          5.0
+        ],
+        "X": [
+          2.1
+        ],
+        "Y": [
+          0.0
+        ],
+        "active-param": [
+          -2.0
+        ]
+      },
+      "oracle": "Independent NumPy mathematics and CPU OpenBLAS rotation primitives; finite output and relevant residual/structural checks",
+      "case": "zero"
+    },
+    {
+      "status": "PASSED",
+      "checks": [
+        {
+          "check": "A",
+          "passed": true,
+          "max_abs_error": 0.0,
+          "atol": 1e-30,
+          "rtol": 1e-10
+        },
+        {
+          "check": "B",
+          "passed": true,
+          "max_abs_error": 0.0,
+          "atol": 1e-30,
+          "rtol": 1e-10
+        },
+        {
+          "check": "X",
+          "passed": true,
+          "max_abs_error": 0.0,
+          "atol": 1e-30,
+          "rtol": 1e-10
+        },
+        {
+          "check": "Y",
+          "passed": true,
+          "max_abs_error": 0.0,
+          "atol": 1e-30,
+          "rtol": 1e-10
+        },
+        {
+          "check": "active-param",
+          "passed": true,
+          "max_abs_error": 0.0,
+          "atol": 1e-30,
+          "rtol": 1e-10
+        }
+      ],
+      "input_sha256": "13b72e9413c8372c78ff490fd23cd467cccceb8c760ea29aa142c7c9afef84bd",
+      "output_values": {
+        "A": [
+          0.0
+        ],
+        "B": [
+          0.0
+        ],
+        "X": [
+          0.0
+        ],
+        "Y": [
+          1.2
+        ],
+        "active-param": [
+          -1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "oracle": "Independent NumPy mathematics and CPU OpenBLAS rotation primitives; finite output and relevant residual/structural checks",
+      "case": "negative"
+    },
+    {
+      "status": "FAILED",
+      "checks": [
+        {
+          "check": "A",
+          "passed": true,
+          "max_abs_error": 0.0,
+          "atol": 1e-30,
+          "rtol": 1e-10
+        },
+        {
+          "check": "B",
+          "passed": true,
+          "max_abs_error": 0.0,
+          "atol": 1e-30,
+          "rtol": 1e-10
+        },
+        {
+          "check": "X",
+          "passed": true,
+          "max_abs_error": 0.0,
+          "atol": 1e-30,
+          "rtol": 1e-10
+        },
+        {
+          "check": "Y",
+          "passed": true,
+          "max_abs_error": 0.0,
+          "atol": 1e-30,
+          "rtol": 1e-10
+        },
+        {
+          "check": "active-param",
+          "passed": false,
+          "max_abs_error": 0.9999999403953552,
+          "atol": 1e-30,
+          "rtol": 1e-10
+        }
+      ],
+      "input_sha256": "f02f885099ea569addf124735717125fade5f31bcfb9e39990e3c4557a624c76",
+      "output_values": {
+        "A": [
+          1.8764998447377066e-06
+        ],
+        "B": [
+          3.7529996894754133e-06
+        ],
+        "X": [
+          1.7881393432617188e-07
+        ],
+        "Y": [
+          1.0
+        ],
+        "active-param": [
+          -1.0,
+          5.960464477539063e-08,
+          -0.000244140625,
+          1.0,
+          5.960464477539063e-08
+        ]
+      },
+      "oracle": "Independent NumPy mathematics and CPU OpenBLAS rotation primitives; finite output and relevant residual/structural checks",
+      "case": "rescale"
+    }
+  ],
+  "cuda_comparison": "FAILED",
+  "cuda_cases": [
+    {
+      "case": "original",
+      "status": "PASSED",
+      "identical_input": true,
+      "cuda_cpu_checks": {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "A",
+            "passed": true,
+            "max_abs_error": 0.0,
+            "atol": 1e-30,
+            "rtol": 1e-10
+          },
+          {
+            "check": "B",
+            "passed": true,
+            "max_abs_error": 0.0,
+            "atol": 1e-30,
+            "rtol": 1e-10
+          },
+          {
+            "check": "X",
+            "passed": true,
+            "max_abs_error": 0.0,
+            "atol": 1e-30,
+            "rtol": 1e-10
+          },
+          {
+            "check": "Y",
+            "passed": true,
+            "max_abs_error": 0.0,
+            "atol": 1e-30,
+            "rtol": 1e-10
+          },
+          {
+            "check": "active-param",
+            "passed": true,
+            "max_abs_error": 0.0,
+            "atol": 1e-30,
+            "rtol": 1e-10
+          }
+        ],
+        "input_sha256": "f9e6b9a15794af7a0033c396ffe7b4736e80bbbf575ff88bc75a51379c30046f",
+        "output_values": {
+          "A": [
+            3.100775193798449
+          ],
+          "B": [
+            0.6201550387596898
+          ],
+          "X": [
+            1.9350000000000003
+          ],
+          "Y": [
+            1.2
+          ],
+          "active-param": [
+            1.0,
+            0.35000000000000003,
+            1.7500000000000002
+          ]
+        },
+        "oracle": "Independent NumPy mathematics and CPU OpenBLAS rotation primitives; finite output and relevant residual/structural checks"
+      }
+    },
+    {
+      "case": "zero",
+      "status": "PASSED",
+      "identical_input": true,
+      "cuda_cpu_checks": {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "A",
+            "passed": true,
+            "max_abs_error": 0.0,
+            "atol": 1e-30,
+            "rtol": 1e-10
+          },
+          {
+            "check": "B",
+            "passed": true,
+            "max_abs_error": 0.0,
+            "atol": 1e-30,
+            "rtol": 1e-10
+          },
+          {
+            "check": "X",
+            "passed": true,
+            "max_abs_error": 0.0,
+            "atol": 1e-30,
+            "rtol": 1e-10
+          },
+          {
+            "check": "Y",
+            "passed": true,
+            "max_abs_error": 0.0,
+            "atol": 1e-30,
+            "rtol": 1e-10
+          },
+          {
+            "check": "active-param",
+            "passed": true,
+            "max_abs_error": 0.0,
+            "atol": 1e-30,
+            "rtol": 1e-10
+          }
+        ],
+        "input_sha256": "4a7e9081b2e81cda0043f4e07d38ad1d109b13f1b0a3ae486f4b4e9e7273b4fa",
+        "output_values": {
+          "A": [
+            1.0
+          ],
+          "B": [
+            5.0
+          ],
+          "X": [
+            2.1
+          ],
+          "Y": [
+            0.0
+          ],
+          "active-param": [
+            -2.0
+          ]
+        },
+        "oracle": "Independent NumPy mathematics and CPU OpenBLAS rotation primitives; finite output and relevant residual/structural checks"
+      }
+    },
+    {
+      "case": "negative",
+      "status": "PASSED",
+      "identical_input": true,
+      "cuda_cpu_checks": {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "A",
+            "passed": true,
+            "max_abs_error": 0.0,
+            "atol": 1e-30,
+            "rtol": 1e-10
+          },
+          {
+            "check": "B",
+            "passed": true,
+            "max_abs_error": 0.0,
+            "atol": 1e-30,
+            "rtol": 1e-10
+          },
+          {
+            "check": "X",
+            "passed": true,
+            "max_abs_error": 0.0,
+            "atol": 1e-30,
+            "rtol": 1e-10
+          },
+          {
+            "check": "Y",
+            "passed": true,
+            "max_abs_error": 0.0,
+            "atol": 1e-30,
+            "rtol": 1e-10
+          },
+          {
+            "check": "active-param",
+            "passed": true,
+            "max_abs_error": 0.0,
+            "atol": 1e-30,
+            "rtol": 1e-10
+          }
+        ],
+        "input_sha256": "13b72e9413c8372c78ff490fd23cd467cccceb8c760ea29aa142c7c9afef84bd",
+        "output_values": {
+          "A": [
+            0.0
+          ],
+          "B": [
+            0.0
+          ],
+          "X": [
+            0.0
+          ],
+          "Y": [
+            1.2
+          ],
+          "active-param": [
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "oracle": "Independent NumPy mathematics and CPU OpenBLAS rotation primitives; finite output and relevant residual/structural checks"
+      }
+    },
+    {
+      "case": "rescale",
+      "status": "FAILED",
+      "identical_input": true,
+      "cuda_cpu_checks": {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "A",
+            "passed": true,
+            "max_abs_error": 0.0,
+            "atol": 1e-30,
+            "rtol": 1e-10
+          },
+          {
+            "check": "B",
+            "passed": true,
+            "max_abs_error": 0.0,
+            "atol": 1e-30,
+            "rtol": 1e-10
+          },
+          {
+            "check": "X",
+            "passed": true,
+            "max_abs_error": 0.0,
+            "atol": 1e-30,
+            "rtol": 1e-10
+          },
+          {
+            "check": "Y",
+            "passed": true,
+            "max_abs_error": 0.0,
+            "atol": 1e-30,
+            "rtol": 1e-10
+          },
+          {
+            "check": "active-param",
+            "passed": true,
+            "max_abs_error": 0.0,
+            "atol": 1e-30,
+            "rtol": 1e-10
+          }
+        ],
+        "input_sha256": "f02f885099ea569addf124735717125fade5f31bcfb9e39990e3c4557a624c76",
+        "output_values": {
+          "A": [
+            1.8764998447377066e-06
+          ],
+          "B": [
+            3.7529996894754133e-06
+          ],
+          "X": [
+            1.7881393432617188e-07
+          ],
+          "Y": [
+            1.0
+          ],
+          "active-param": [
+            -1.0,
+            5.960464477539063e-08,
+            -2.9802322387695312e-08,
+            5.960464477539063e-08,
+            5.960464477539063e-08
+          ]
+        },
+        "oracle": "Independent NumPy mathematics and CPU OpenBLAS rotation primitives; finite output and relevant residual/structural checks"
+      }
+    }
+  ],
+  "cuda_evidence": "migration/reports/evidence/20261109T115141.126114Z/batch2-cuda/cuBLAS_Level-1_rotmg_cublas_rotmg_example.cu",
+  "reference_library": {
+    "path": "build/python-reference/scipy.libs/libscipy_openblas-b75cc656.so",
+    "sha256": "fa75c980087c08189e30c0d8110aab96783e3664425ba5bf32a73d7345fc8d3d"
+  },
+  "validation_source_sha256": "952ac8009a7dc54e861d6e65f510a0564dc92defe9f95c70873a033821fd6b95",
+  "diagnosis": "Pinned rocBLAS scale loops reinitialize H when flag already -1; project GPU fix retains H while rescaling. CUDA and independent CPU agree.",
+  "native_source_object": "migration/source-objects/bcdb7a9d5e55531a4d3b2c7f565d11072d7f1c021504901ecce9e1e3adef437e.txt",
+  "backend_source": "migration/reports/upstream-support/rocblas-rotmg-kernels.cpp",
+  "selected_gpu_fix": "rocm/common/rotmg_scale_fix.hip"
+}

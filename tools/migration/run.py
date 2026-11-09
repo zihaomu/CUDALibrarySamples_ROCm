@@ -22,7 +22,7 @@ def command(args,cwd,log,env=None,timeout=180):
   env['ROCFFT_RTC_CACHE_PATH']=str(cache/'rocfft.sqlite')
  elif env.get('CUDA_VISIBLE_DEVICES'):
   path=ROOT/'build/cache/cuda13.4-sm120';path.mkdir(parents=True,exist_ok=True);env['CUDA_CACHE_PATH']=str(path)
- log.with_suffix('.environment.json').write_text(json.dumps({k:env[k] for k in ['DEEPINFER_IMAGE_ID','DEEPINFER_ROCM_RELEASE','HIP_VISIBLE_DEVICES','CUDA_VISIBLE_DEVICES','MIGRATION_FIXTURE','MIGRATION_INPUT_FIXTURE','MIGRATION_OUTPUT_DIR','AMD_COMGR_CACHE_DIR','ROCFFT_RTC_CACHE_PATH','CUDA_CACHE_PATH'] if k in env},indent=2)+'\n')
+ log.with_suffix('.environment.json').write_text(json.dumps({k:env[k] for k in ['DEEPINFER_IMAGE_ID','DEEPINFER_ROCM_RELEASE','HIP_VISIBLE_DEVICES','CUDA_VISIBLE_DEVICES','MIGRATION_FIXTURE','MIGRATION_CASE','MIGRATION_INPUT_FIXTURE','MIGRATION_INPUT_FIXTURE_DIR','MIGRATION_OUTPUT_DIR','AMD_COMGR_CACHE_DIR','ROCFFT_RTC_CACHE_PATH','CUDA_CACHE_PATH'] if k in env},indent=2)+'\n')
  try:
   r=subprocess.run(args,cwd=cwd,env=env,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,timeout=timeout);log.write_text(r.stdout);return r.returncode
  except subprocess.TimeoutExpired as e:

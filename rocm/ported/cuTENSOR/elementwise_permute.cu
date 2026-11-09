@@ -1,3 +1,4 @@
+#include "batch2_tensor_io.hpp"
 /*
  * SPDX-FileCopyrightText: Copyright (c) 2019-2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
@@ -62,6 +63,9 @@ try
     extent['c'] = 128;
     extent['n'] = 128;
 
+// MIGRATION_BATCH2_TENSOR: unchanged original profile is the default.
+const std::string migration_case=std::getenv("MIGRATION_CASE")?std::getenv("MIGRATION_CASE"):"original";
+if(migration_case!="original"){extent['h']=3;extent['w']=5;extent['c']=7;extent['n']=2;alpha=migration_case=="small-zero"?0.f:-.75f;}
     std::vector<int64_t> extentA;
     for (auto mode : modeA)
         extentA.push_back(extent[mode]);
@@ -99,6 +103,9 @@ try
      *******************/
 
     std::generate(A.get(),A.get()+elementsA, randomgen<floatTypeA>() );
+batch2_tensor::input("A",A.get(),elementsA);
+batch2_tensor::input("C",C.get(),elementsC);
+batch2_tensor::config(modeA,std::vector<int>{},modeC,extent,alpha,0.,0.);
     handle_error(hipMemcpy2DAsync(A_d.get(), sizeA, A.get(), sizeA, sizeA, 1, hipMemcpyHostToDevice, nullptr));
 
     /*************************
@@ -209,6 +216,10 @@ try
     transferedBytes /= 1e9;
     printf("cuTensor: %.2f GB/s\n", transferedBytes / minTimeCUTENSOR);
 
+handle_error(hipDeviceSynchronize());
+std::vector<float> migration_output(elementsC);
+handle_error(hipMemcpy(migration_output.data(),C_d.get(),sizeC,hipMemcpyDeviceToHost));
+batch2_tensor::snapshot("output",migration_output.data(),migration_output.size());
     return EXIT_SUCCESS;
 }
 catch ( std::exception &ex )

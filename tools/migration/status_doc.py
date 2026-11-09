@@ -41,6 +41,9 @@ python3 tools/migration/render.py
 专项原始 profile、native probes、Fortran/Python、分布检查和性能复现命令分别保存在逐例详情及证据 `commands.json`。CPU 参考依赖在 `build/python-reference`，native 依赖在 `build/`，不修改共享 foundation。小型日志已归档，最终源码/fixture 身份在 `migration/source-tree.json`，CUDA 观测副本可从内容对象恢复。全部批次的终态结果不等于全部 API 已迁移；失败与未实现能力保留在本次交付中。
 
 '''
+batch=r/'batch2-validation.json'
+if batch.exists():
+ rows=json.loads(batch.read_text());good=[x for x in rows if x['status']=='PASSED'];text+='第二批：'+str(len(good))+'/17 样例、'+str(sum(len(x['cases']) for x in good))+' 个输入 case 通过独立 CPU，CUDA 对照 '+str(sum(x['cuda_comparison']=='PASSED' for x in rows))+'/17。覆盖稀疏 3、BLAS 8、tensor 4、solver 2；tensor 保留原始规模，全部语义输出检查，加小尺寸/非零系数/零系数。27 个共享大/小输入 buffer 可按 seed=20261109 重建并逐文件核对 SHA256。原生 rotmg 重复缩放 H 错误由项目 HIP GPU 修正；原生失败与精确失败源码另存。详细见 `migration/reports/batch2.md` 与 `rotmg-scale-fix.md`。CUDA 侧 cuTENSOR 2.8.1 仅安装在项目 build overlay，单独锁定 library/wheel hash。\n\n'
 with DOC.with_suffix('.lock').open('w') as lock:
  fcntl.flock(lock,fcntl.LOCK_EX);body=DOC.read_text();start=body.index('## 12.');end=body.index('## 附录 A',start);body=body[:start]+text+body[end:];body=body.replace('HIP_VISIBLE_DEVICES=0 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh','HIP_VISIBLE_DEVICES=2 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh');DOC.write_text(body.rstrip()+'\n')
 print('Current design snapshot refreshed')

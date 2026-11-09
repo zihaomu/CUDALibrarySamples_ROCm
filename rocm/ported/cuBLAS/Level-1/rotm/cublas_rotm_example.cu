@@ -1,4 +1,7 @@
 #include "observe.hpp"
+#include <string>
+#include <cstdlib>
+#include "observe.hpp"
 /*
  * SPDX-FileCopyrightText: Copyright (c) 2020 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
@@ -29,6 +32,9 @@
 using data_type = double;
 
 int main(int argc, char *argv[]) {
+// MIGRATION_BATCH2: default is unchanged original input and mathematical GPU API.
+const std::string migration_case=std::getenv("MIGRATION_CASE")?std::getenv("MIGRATION_CASE"):"original";
+
     hipblasHandle_t cublasH = NULL;
     hipStream_t stream = NULL;
 
@@ -58,6 +64,10 @@ int main(int argc, char *argv[]) {
     print_vector(param.size(), param.data());
     printf("=====\n");
 
+if(migration_case=="flag-minus2")param[0]=-2;if(migration_case=="flag-minus1")param[0]=-1;if(migration_case=="flag-zero")param[0]=0;
+migration_observer::emit("input_A",A.data(),A.size());
+migration_observer::emit("input_B",B.data(),B.size());
+migration_observer::emit("input_param",param.data(),param.size());
     /* step 1: create hipblas handle, bind a stream */
     CUBLAS_CHECK(hipblasCreate(&cublasH));
 
@@ -104,6 +114,9 @@ migration_observer::emit("B",B.data(),B.size());
 migration_observer::emit("param",param.data(),param.size());
 
 // MIGRATION_OBSERVE_SCALARS
+migration_observer::emit("A",A.data(),A.size());
+migration_observer::emit("B",B.data(),B.size());
+migration_observer::emit("param",param.data(),param.size());
 /* free resources */
     CUDA_CHECK(hipFree(d_A));
     CUDA_CHECK(hipFree(d_B));

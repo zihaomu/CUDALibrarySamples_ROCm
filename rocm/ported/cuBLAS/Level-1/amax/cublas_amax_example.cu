@@ -1,4 +1,7 @@
 #include "observe.hpp"
+#include <string>
+#include <cstdlib>
+#include "observe.hpp"
 /*
  * SPDX-FileCopyrightText: Copyright (c) 2020 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
@@ -29,6 +32,9 @@
 using data_type = double;
 
 int main(int argc, char *argv[]) {
+// MIGRATION_BATCH2: default is unchanged original input and mathematical GPU API.
+const std::string migration_case=std::getenv("MIGRATION_CASE")?std::getenv("MIGRATION_CASE"):"original";
+
     hipblasHandle_t cublasH = NULL;
     hipStream_t stream = NULL;
 
@@ -36,7 +42,7 @@ int main(int argc, char *argv[]) {
      *   A = | 1.0 2.0 3.0 4.0 |
      */
 
-    const std::vector<data_type> A = {1.0, 2.0, 3.0, 4.0};
+    std::vector<data_type> A = {1.0, 2.0, 3.0, 4.0};
     const int incx = 1;
 
     int result = 0.0;
@@ -47,6 +53,8 @@ int main(int argc, char *argv[]) {
     print_vector(A.size(), A.data());
     printf("=====\n");
 
+if(migration_case=="ties"){A={-4,4,1,-1};}
+migration_observer::emit("input_A",A.data(),A.size());
     /* step 1: create hipblas handle, bind a stream */
     CUBLAS_CHECK(hipblasCreate(&cublasH));
 
@@ -60,7 +68,7 @@ int main(int argc, char *argv[]) {
                                stream));
 
     /* step 3: compute */
-    CUBLAS_CHECK(hipblasIdamax(cublasH, A.size(), d_A, incx, &result));
+    CUBLAS_CHECK(hipblasIdamax(cublasH, migration_case=="empty"?0:A.size(), d_A, incx, &result));
 
     CUDA_CHECK(hipStreamSynchronize(stream));
 
@@ -77,6 +85,7 @@ int main(int argc, char *argv[]) {
 migration_observer::emit("A",A.data(),A.size());
 
 // MIGRATION_OBSERVE_SCALARS
+migration_observer::emit("result",&result,1);
 /* free resources */
     CUDA_CHECK(hipFree(d_A));
 

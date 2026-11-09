@@ -511,14 +511,18 @@ artifacts/<run-id>/<sample-id>/<backend>/<case-id>/
 | S35 全量执行交付与最终检查 | 已完成 | M0–M5 均已执行并保留失败/部分完成；141 个 PASSED 的当前源码均有匹配正确性证据；原始 866 源文件与 477 构建定义未修改。639 逐例页、30 库级表与根 README 已生成，6781 个生成链接核对通过，M1 16/95、CTest 16/16 和新增 54 对照均通过。小型证据及最终源码内容对象归档完成，6 个 GEMM 性能对照因 GPU 竞争明确 BLOCKED。 | 执行阶段结束；未迁移功能与外部阻塞按逐例报告保留，不计为成功 |
 | S36 fork 首页支持文档 | 已完成 | 首页新增 30 模块支持矩阵，按模块去重为 75 个已验收算子/功能族（9 模块、141 个通过样例）；列出全部算子名称、验证范围，以及编译/API、语言绑定、运行、超时、缺独立参考、功能子集、硬件版本缺口和前置条件的逐类原因。fork 已核实为 zihaomu/CUDALibrarySamples_ROCm，目标默认分支 main。 | 核对归档与可提交文件，提交全部 ROCm 实现/证据/文档并推送 fork |
 | S37 fork 发布验证 | 已完成 | 全部 ROCm 实现、逐例证据和首页详细文档已推送 zihaomu/CUDALibrarySamples_ROCm/main，发布提交 82496755ea474d7ae622cd5bc3264653d507d780；GitHub 远端提交与 README blob hash 已核对一致。干净 checkout 验证通过，首页 30 模块、75 已验收算子/功能族、141 通过样例均可追溯。 | 附入发布验证记录并同步推送文档收尾提交 |
+| S38 第二批 17 项启动 | 已完成 | 按用户指定顺序：SpVV/SpGEMM/reuse 3 项、BLAS 8 项、tensor 4 项、solver 2 项。预先登记 original 与边界/参数变化 cases；AMD 物理 GPU0 空闲，HIP ordinal2，经 ROCm10.1 guard 校验。源码保持原始数学 API，补结果观测与显式输入 case。 | 先运行并独立验收稀疏 3 项和 BLAS 8 项 |
+| S39 稀疏 3 项与 BLAS 8 项收口 | 已完成 | 11 个原始入口及 31 个输入 case 经 AMD/独立 CPU/CUDA 三方验收通过。SpGEMM reuse 更改数值后重算；BLAS 覆盖并列索引、空输入、旋转 flags、正负 alpha。发现并保留原生 rocBLAS rotmg 重复缩放 H 错误证据；项目 GPU 修正路径通过极小/极大/非对称权重，未修改共享 SDK。 | 继续 tensor 4 项与 solver 2 项，补完整输出及重构/残差验收 |
+| S40 tensor 4 项与 solver 2 项收口 | 已完成 | 第二批 17/17、45 个输入 case 全部通过 AMD/独立 CPU/CUDA 三方验收；tensor 原始规模全部输出检查与小尺寸变化通过，solver QR/Cholesky 重构及残差通过。27 个 tensor 输入 buffer 按 seed 重建后 SHA256 全部一致。21 个故意损坏的数值/NaN 输出均被 oracle 拒绝。当前 158 PASSED / 14 PARTIAL，去重算子族 87。 | 更新 README 与阶段报告、归档全部证据、最终一致性检查并同步 fork |
+| S41 第二批最终一致性检查 | 已完成 | 17/17、45 cases 的 CPU/ROCm/CUDA 三方验收通过；158 个当前 PASSED 实现均有匹配源码证据，首页 87 算子/功能族、30 模块与 639 逐例页已核对；21 个损坏输出拒绝检查与 27 个输入精确重建通过。原 CUDA 源文件/构建定义均未修改，小型日志已归档。 | 提交第二批实现、文档与证据，推送 fork/main 并核对远端 |
 
 ## 12. 当前实施快照（工具刷新）
 
 本节替代设计阶段的未开始快照。逐步过程保留在第 11 节；整例成功、部分功能、路线失败分别报告，不将执行过计划解释为所有功能均已迁移成功。
 
-更新时间：2026-11-09T11:29:52.461191+00:00。
+更新时间：2026-11-09T12:20:34.877109+00:00。
 
-清单为 **639 个独立可执行/脚本源入口**（563 C/C++、76 Fortran/Python），逐例均有实际尝试记录。当前：`PASSED` 141；`PARTIAL` 31；`FAILED` 464；`BLOCKED` 1；`UNSUPPORTED` 2；`NOT_STARTED` 0；`IN_PROGRESS` 0。
+清单为 **639 个独立可执行/脚本源入口**（563 C/C++、76 Fortran/Python），逐例均有实际尝试记录。当前：`PASSED` 158；`PARTIAL` 14；`FAILED` 464；`BLOCKED` 1；`UNSUPPORTED` 2；`NOT_STARTED` 0；`IN_PROGRESS` 0。
 
 M0 静态审计覆盖全部 477 个构建定义和 866 个源文件，记录 863 个声明、682 个源文件构建绑定；53 个 SDK/测试生成输入/条件变体表达式逐项归类，不重复膨胀入口数量。这不是全部 SDK 条件配置均已生成运行的声明。
 
@@ -549,6 +553,8 @@ python3 tools/migration/render.py
 **性能结果为 BLOCKED**：已执行 6 个 FP32/FP64 GEMM profile，但 AMD 卡存在其它任务，实际空闲 gate 失败。不报告合格速度比；原始计时、三组统计、CPU 误差与恢复条件在 `migration/reports/performance-comparison.md/json`。
 
 专项原始 profile、native probes、Fortran/Python、分布检查和性能复现命令分别保存在逐例详情及证据 `commands.json`。CPU 参考依赖在 `build/python-reference`，native 依赖在 `build/`，不修改共享 foundation。小型日志已归档，最终源码/fixture 身份在 `migration/source-tree.json`，CUDA 观测副本可从内容对象恢复。全部批次的终态结果不等于全部 API 已迁移；失败与未实现能力保留在本次交付中。
+
+第二批：17/17 样例、45 个输入 case 通过独立 CPU，CUDA 对照 17/17。覆盖稀疏 3、BLAS 8、tensor 4、solver 2；tensor 保留原始规模，全部语义输出检查，加小尺寸/非零系数/零系数。27 个共享大/小输入 buffer 可按 seed=20261109 重建并逐文件核对 SHA256。原生 rotmg 重复缩放 H 错误由项目 HIP GPU 修正；原生失败与精确失败源码另存。详细见 `migration/reports/batch2.md` 与 `rotmg-scale-fix.md`。CUDA 侧 cuTENSOR 2.8.1 仅安装在项目 build overlay，单独锁定 library/wheel hash。
 
 ## 附录 A：按目录核对的初始范围
 

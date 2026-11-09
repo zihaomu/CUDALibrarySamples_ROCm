@@ -23,7 +23,7 @@ def render():
   if s.get('original_port'):
    a=s['original_port'];lines+=['## 原始 API 自动移植稿最近一次尝试','', '该记录与上表选定的手写/替代实现分别保留。','',safe(a.get('reason')),'', '尝试库：'+safe(', '.join(a.get('attempted_libraries',[])))+'；实现 hash：`'+a.get('implementation_sha256','')+'`。','']
   lines+=['## 复现与证据','', '从仓库根目录，先核对物理 GPU 占用。HIP ordinal 与物理编号不同；项目 guard 根据 PCI 地址拒绝 GPU3 和被预约的卡。','']
-  if s.get('reproduce'):lines+=['在已锁定并通过 guard 的 ROCm 10.1.0 容器中（多 GPU 用例须暴露两个允许的设备）：','', '```bash',s['reproduce'],'```','']
+  if s.get('reproduce'):lines+=[('在仓库根目录运行：GPU 构建/执行由 launcher 进入锁定容器，CPU 验收在宿主 Python3.12；先按第二批报告同步 CUDA 证据。' if s.get('reason_code')=='VALIDATED_BATCH2' else '在已锁定并通过 guard 的 ROCm 10.1.0 容器中（多 GPU 用例须暴露两个允许的设备）：'),'', '```bash',s['reproduce'],'```','']
   elif s.get('implementation','') and not s['implementation'].startswith('rocm/ported/') and s['implementation'].endswith('sample.cpp') and s['family']!='cuDSS':
    f=str(pathlib.Path(s['implementation']).parent.relative_to('rocm'));lines+=['```bash','HIP_VISIBLE_DEVICES=2 tools/migration/run_rocm.sh --filter '+f,'```','']
   else:lines+=['具体命令见该入口证据目录中的 `commands.json`，运行环境见同批 `environment.json`。批量入口：`tools/migration/bulk_run.py --families <family>`；特殊驱动见专项报告。','']
@@ -58,6 +58,8 @@ def render():
  intro+='`PASSED` 只表示该行明确登记的原始功能和必需用例通过，不能推及整库、其它精度/规模或性能。`PARTIAL` 包括已运行但尚无独立数值验收的端口；`FAILED` 保留真实失败日志和重试条件。不存在“HIPIFY 退出成功即迁移成功”的统计。\n\n'
  intro+='专项证据：[M1 双端数值对照](migration/reports/m1-comparison.json)、[BLAS 三方对照](migration/reports/blas-three-way.json)、[稀疏 expected 检查](migration/reports/sparse-original-validation.json)、[新增双端数值/分布对照](migration/reports/additional-comparison.json)、[AMD 生态探针](migration/reports/native-probes.json)、[选型与缺口](migration/reports/ecosystem-decisions.md)、[最终一致性检查](migration/reports/final-validation.json)。**M0–M5 已逐批执行并记录结果；按逐例登记范围的成功率为 '+f'{100*counts["PASSED"]/len(cat["samples"]):.2f}%'+ '，失败/部分完成仍在分母。**\n\n'
  intro+='性能仅选择 6 个 GEMM profile；AMD GPU 有其它任务，空闲资格检查失败，因此 [性能报告](migration/reports/performance-comparison.md) 标为 BLOCKED，仅保留原始计时，不发布合格速度比。\n\n'
+ if (ROOT/'migration/reports/batch2-validation.json').exists():
+  batch=json.loads((ROOT/'migration/reports/batch2-validation.json').read_text());qualified=[r for r in batch if r['status']=='PASSED'];intro+='**第二批已收口：'+str(len(qualified))+'/17 个样例、'+str(sum(len(r['cases']) for r in qualified))+' 个输入 case。** [详细验收报告](migration/reports/batch2.md) 包含稀疏 3 项、BLAS 8 项、tensor 4 项与 solver 2 项的 CPU/CUDA 对照、原始规模与边界检查。`rotmg` 的原生缩放错误及项目 GPU 修正[单独记录](migration/reports/rotmg-scale-fix.md)；大张量 fixture 支持按 seed 和 SHA256 完整重建。\n\n'
  intro+=render_overview(operators)
  intro+='## 模块支持矩阵\n\n下表覆盖全部 30 个库级模块。“已验收算子族”按上文口径去重；“通过/总入口”是原始 sample 数，二者分别统计。部分完成、失败、明确不支持、前置条件阻塞分别列出；每个模块链接包含全部原始样例的实际库、代码、逐例原因和证据。候选库不计为实际使用库。\n\n| 模块 | 实际/候选 AMD 路线 | 已验收算子族 | 通过/总入口 | 部分 | 失败 | 不支持 | 阻塞 | 当前范围及未通过原因 |\n| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |\n'
  for family in CANDIDATES:
@@ -76,7 +78,7 @@ def render():
   ('FAILED','BINDING_OR_FRONTEND_MIGRATION_REQUIRED','Fortran/Python 的 NVIDIA module、CUDA Fortran device 语法或 Python vendor 绑定尚未改写；前端/import 尝试失败。','[语言资格记录](migration/reports/languages.json)；需补 AMD C ABI/ISO_C_BINDING 或真实 GPU Python 绑定。'),
   ('FAILED','RUNTIME_ERROR','已编译但执行失败：包括原始 Xgetrf 路径、BSR SDDMM、SELL SpSV，以及 tensor cache/einsum/padding 场景；具体参数/架构/实现原因见逐例日志。','[原始 profile 尝试](migration/reports/original-rocm-latest.json)；修复失败调用，重新做独立数值检查。'),
   ('FAILED','TIMEOUT','cuTENSOR trinary contraction 在记录的时限内未结束，未获得合格结果。','[逐例报告](migration/sample-reports/cuTENSOR/contraction_trinary.cu.md)；定位执行/规模问题后重跑。'),
-  ('PARTIAL','INDEPENDENT_VALIDATION_PENDING','原始输入已在 AMD 上执行，但尚缺专用独立数值/语义 oracle；包括部分 BLAS batch、solver、SpGEMM/graph 与 tensor 运算。','逐例 required cases 保留缺项；补 CPU/数学参考和边界检查，返回 0 不能代替验收。'),
+  ('PARTIAL','INDEPENDENT_VALIDATION_PENDING','原始输入已在 AMD 上执行，但尚缺专用独立数值/语义 oracle；剩余为部分 solver、CG/BiCGSTAB、五对角批量求解和 graph capture 场景。','逐例 required cases 保留缺项；补 CPU/数学参考和边界检查，返回 0 不能代替验收。'),
   ('PARTIAL','SEMANTIC_GAP','LZ4 和 JPEG 仅完成上述子集，尚未保留完整原样例的 API、输入和执行流程。','[能力探针](migration/reports/native-probes.json)、[JPEG 像素对照](migration/reports/rocjpeg-cpu.json)；补完整原始功能。'),
   ('UNSUPPORTED','HW_UNSUPPORTED','锁定 ROCm 10.1.0 hipSPARSELt/gfx1201 缺 Tensile kernel bundle；实际运行报错且固定源码的架构 gate 拒绝该目标。','[实测与源码证据](cuSPARSELt/README.md)；需匹配 kernel bundle、新实现或受支持 GPU，不能以 dense GEMM 替代。'),
   ('BLOCKED','ENV_MISSING_DEP','nvJPEG Python 测试的 imports 已通过，但 AMD decoder 可执行文件/完整 CLI 测试前置条件尚未实现。','[逐例报告](migration/sample-reports/nvJPEG/nvJPEG-Decoder/tests/test_decoder.py.md)；补 GPU 可执行文件后执行原始测试。')]:

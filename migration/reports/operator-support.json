@@ -2,13 +2,33 @@
   "schema_version": 1,
   "counting_rule": "Operator/functional families are deduplicated within each module; dtypes, sizes, language, batch, storage formats and algorithm variants do not create extra operators. At least one explicitly scoped PASSED source profile is required. Cross-module totals may include the same mathematical operation implemented through different library interfaces.",
   "qualification_rule": "A verified family proves only its linked PASSED source profiles/required cases, not every API configuration. PARTIAL examples and capability probes are excluded.",
-  "verified_operator_families": 75,
+  "verified_operator_families": 87,
   "modules_with_verified_operators": 9,
-  "passed_source_profiles": 141,
+  "passed_source_profiles": 158,
   "modules": {
     "cuBLAS": {
-      "verified_operator_family_count": 45,
+      "verified_operator_family_count": 50,
       "verified_operators": [
+        {
+          "name": "amax",
+          "sample_ids": [
+            "cuBLAS/Level-1/amax::cublas_amax_example.cu"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuBLAS/Level-1/amax/cublas_amax_example.cu.md"
+          ],
+          "source_profiles": 1
+        },
+        {
+          "name": "amin",
+          "sample_ids": [
+            "cuBLAS/Level-1/amin::cublas_amin_example.cu"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuBLAS/Level-1/amin/cublas_amin_example.cu.md"
+          ],
+          "source_profiles": 1
+        },
         {
           "name": "asum",
           "sample_ids": [
@@ -101,15 +121,19 @@
             "cuBLAS/Extensions/GemmEx::cublas_GemmEx_example.cu",
             "cuBLAS/Extensions/GemmStridedBatchedEx::cublas_GemmStridedBatchedEx_example.cu",
             "cuBLAS/Level-3/gemm::cublas_gemm_example.cu",
+            "cuBLAS/Level-3/gemmBatched::cublas_gemmBatched_example.cu",
+            "cuBLAS/Level-3/gemmGroupedBatched::cublas_gemmGroupedBatched_example.cu",
             "cuBLAS/Level-3/gemmStridedBatched::cublas_gemmStridedBatched_example.cu"
           ],
           "sample_reports": [
             "migration/sample-reports/cuBLAS/Extensions/GemmEx/cublas_GemmEx_example.cu.md",
             "migration/sample-reports/cuBLAS/Extensions/GemmStridedBatchedEx/cublas_GemmStridedBatchedEx_example.cu.md",
             "migration/sample-reports/cuBLAS/Level-3/gemm/cublas_gemm_example.cu.md",
+            "migration/sample-reports/cuBLAS/Level-3/gemmBatched/cublas_gemmBatched_example.cu.md",
+            "migration/sample-reports/cuBLAS/Level-3/gemmGroupedBatched/cublas_gemmGroupedBatched_example.cu.md",
             "migration/sample-reports/cuBLAS/Level-3/gemmStridedBatched/cublas_gemmStridedBatched_example.cu.md"
           ],
-          "source_profiles": 4
+          "source_profiles": 6
         },
         {
           "name": "gemv",
@@ -264,6 +288,36 @@
             "migration/sample-reports/cuBLAS/Level-1/rot/cublas_rot_example.cu.md"
           ],
           "source_profiles": 2
+        },
+        {
+          "name": "rotg",
+          "sample_ids": [
+            "cuBLAS/Level-1/rotg::cublas_rotg_example.cu"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuBLAS/Level-1/rotg/cublas_rotg_example.cu.md"
+          ],
+          "source_profiles": 1
+        },
+        {
+          "name": "rotm",
+          "sample_ids": [
+            "cuBLAS/Level-1/rotm::cublas_rotm_example.cu"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuBLAS/Level-1/rotm/cublas_rotm_example.cu.md"
+          ],
+          "source_profiles": 1
+        },
+        {
+          "name": "rotmg",
+          "sample_ids": [
+            "cuBLAS/Level-1/rotmg::cublas_rotmg_example.cu"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuBLAS/Level-1/rotmg/cublas_rotmg_example.cu.md"
+          ],
+          "source_profiles": 1
         },
         {
           "name": "sbmv",
@@ -460,12 +514,14 @@
         {
           "name": "trsm",
           "sample_ids": [
-            "cuBLAS/Level-3/trsm::cublas_trsm_example.cu"
+            "cuBLAS/Level-3/trsm::cublas_trsm_example.cu",
+            "cuBLAS/Level-3/trsmBatched::cublas_trsmBatched_example.cu"
           ],
           "sample_reports": [
-            "migration/sample-reports/cuBLAS/Level-3/trsm/cublas_trsm_example.cu.md"
+            "migration/sample-reports/cuBLAS/Level-3/trsm/cublas_trsm_example.cu.md",
+            "migration/sample-reports/cuBLAS/Level-3/trsmBatched/cublas_trsmBatched_example.cu.md"
           ],
-          "source_profiles": 1
+          "source_profiles": 2
         },
         {
           "name": "trsv",
@@ -481,10 +537,9 @@
       "sample_count": 82,
       "sample_outcomes": {
         "FAILED": 20,
-        "PASSED": 54,
-        "PARTIAL": 8
+        "PASSED": 62
       },
-      "validation_scope": "通过的固定教学输入；M1 部分算子另含非整齐尺寸、转置、beta、stride 和混合精度 case。batch/Ex/emulation 的成功与失败在样例层分别列出。",
+      "validation_scope": "固定教学输入与所列扩展 cases；第二批含并列/空索引、旋转 flags、batch/grouped 和正负 alpha；rotmg 极端缩放使用明确登记的 HIP 修正。其它精度/API 仍逐例管理。",
       "failure_reason_counts": {
         "BUILD_ERROR": 20
       }
@@ -789,17 +844,19 @@
       "failure_reason_counts": {}
     },
     "cuSOLVER": {
-      "verified_operator_family_count": 6,
+      "verified_operator_family_count": 7,
       "verified_operators": [
         {
           "name": "Cholesky 分解",
           "sample_ids": [
+            "cuSOLVER/Xpotrf::cusolver_Xpotrf_example.cu",
             "cuSOLVER/potrfBatched::cusolver_potrfBatched_example.cu"
           ],
           "sample_reports": [
+            "migration/sample-reports/cuSOLVER/Xpotrf/cusolver_Xpotrf_example.cu.md",
             "migration/sample-reports/cuSOLVER/potrfBatched/cusolver_potrfBatched_example.cu.md"
           ],
-          "source_profiles": 1
+          "source_profiles": 2
         },
         {
           "name": "LU 分解/求解",
@@ -808,6 +865,16 @@
           ],
           "sample_reports": [
             "migration/sample-reports/cuSOLVER/getrf/cusolver_getrf_example.cu.md"
+          ],
+          "source_profiles": 1
+        },
+        {
+          "name": "QR 分解",
+          "sample_ids": [
+            "cuSOLVER/Xgeqrf::cusolver_Xgeqrf_example.cu"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuSOLVER/Xgeqrf/cusolver_Xgeqrf_example.cu.md"
           ],
           "source_profiles": 1
         },
@@ -863,10 +930,10 @@
       "sample_count": 39,
       "sample_outcomes": {
         "FAILED": 19,
-        "PARTIAL": 10,
-        "PASSED": 10
+        "PARTIAL": 8,
+        "PASSED": 12
       },
-      "validation_scope": "原始固定教学矩阵的 10 个 profile；检查 status/info、特征值/奇异值、重构/残差与正交性。",
+      "validation_scope": "原始固定教学矩阵；检查 status/info、特征值/奇异值、QR/Cholesky 重构、求解残差与正交性。",
       "failure_reason_counts": {
         "BUILD_ERROR": 18,
         "RUNTIME_ERROR": 1
@@ -897,7 +964,7 @@
       }
     },
     "cuSPARSE": {
-      "verified_operator_family_count": 12,
+      "verified_operator_family_count": 14,
       "verified_operators": [
         {
           "name": "axpby",
@@ -984,6 +1051,18 @@
           "source_profiles": 1
         },
         {
+          "name": "spgemm",
+          "sample_ids": [
+            "cuSPARSE/spgemm::spgemm_example.c",
+            "cuSPARSE/spgemm_reuse::spgemm_reuse_example.c"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuSPARSE/spgemm/spgemm_example.c.md",
+            "migration/sample-reports/cuSPARSE/spgemm_reuse/spgemm_reuse_example.c.md"
+          ],
+          "source_profiles": 2
+        },
+        {
           "name": "spmm",
           "sample_ids": [
             "cuSPARSE/spmm_blockedell::spmm_blockedell_example.cpp",
@@ -1038,15 +1117,25 @@
             "migration/sample-reports/cuSPARSE/spsv_csr/spsv_csr_example.c.md"
           ],
           "source_profiles": 2
+        },
+        {
+          "name": "spvv",
+          "sample_ids": [
+            "cuSPARSE/spvv::spvv_example.c"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuSPARSE/spvv/spvv_example.c.md"
+          ],
+          "source_profiles": 1
         }
       ],
       "sample_count": 37,
       "sample_outcomes": {
-        "PASSED": 22,
-        "PARTIAL": 7,
+        "PASSED": 25,
+        "PARTIAL": 4,
         "FAILED": 8
       },
-      "validation_scope": "22 个 profile，包含 CSR/COO/SELL/blocked-ELL 等已登记格式与 batched 变体；不推及尚未通过的其它格式/custom API。",
+      "validation_scope": "CSR/COO/SELL/blocked-ELL 等已登记格式与 batched 变体；第二批 SpVV/SpGEMM/reuse 包含数值变化、CSR 结构与独立 CPU 数学检查。",
       "failure_reason_counts": {
         "BUILD_ERROR": 6,
         "RUNTIME_ERROR": 2
@@ -1065,8 +1154,28 @@
       }
     },
     "cuTENSOR": {
-      "verified_operator_family_count": 1,
+      "verified_operator_family_count": 5,
       "verified_operators": [
+        {
+          "name": "三元逐元素运算",
+          "sample_ids": [
+            "cuTENSOR::elementwise_trinary.cu"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuTENSOR/elementwise_trinary.cu.md"
+          ],
+          "source_profiles": 1
+        },
+        {
+          "name": "二元逐元素运算",
+          "sample_ids": [
+            "cuTENSOR::elementwise_binary.cu"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuTENSOR/elementwise_binary.cu.md"
+          ],
+          "source_profiles": 1
+        },
         {
           "name": "张量 contraction",
           "sample_ids": [
@@ -1076,15 +1185,34 @@
             "migration/sample-reports/cuTENSOR/contraction.cu.md"
           ],
           "source_profiles": 1
+        },
+        {
+          "name": "张量 permutation",
+          "sample_ids": [
+            "cuTENSOR::elementwise_permute.cu"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuTENSOR/elementwise_permute.cu.md"
+          ],
+          "source_profiles": 1
+        },
+        {
+          "name": "张量 reduction",
+          "sample_ids": [
+            "cuTENSOR::reduction.cu"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuTENSOR/reduction.cu.md"
+          ],
+          "source_profiles": 1
         }
       ],
       "sample_count": 13,
       "sample_outcomes": {
         "FAILED": 8,
-        "PASSED": 1,
-        "PARTIAL": 4
+        "PASSED": 5
       },
-      "validation_scope": "1 个 FP32 4D contraction profile，rocBLAS + HIP 排列；原始 extents 全量有限值/32 点 CPU 抽样，小尺寸全量 CPU 检查。",
+      "validation_scope": "FP32：contraction 用 rocBLAS + HIP；其它已通过的逐元素/permutation/reduction 使用 hipTensor。逐例记录原始 extents 与扩展小尺寸、全部输出 CPU 检查；contraction 的原始规模另为抽样验收。",
       "failure_reason_counts": {
         "BINDING_OR_FRONTEND_MIGRATION_REQUIRED": 2,
         "BUILD_ERROR": 2,

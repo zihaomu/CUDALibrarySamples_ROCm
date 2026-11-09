@@ -1,0 +1,361 @@
+{
+  "dtype": "float32",
+  "endianness": "little",
+  "recipe": "uint32 index + seed + ASCII(buffer)*0x9e3779b9; xor>>16, multiply0x7feb352d, xor>>15, multiply0x846ca68b, xor>>16; high24 bits / 2^24. See regenerate_batch2_fixtures.py; matches actual captured inputs.",
+  "fixtures": [
+    {
+      "source": "cuTENSOR/elementwise_binary.cu",
+      "case": "original",
+      "configuration": {
+        "alpha": 1.100000023841858,
+        "beta": 0,
+        "gamma": 1.2000000476837158,
+        "modeA": "cba",
+        "modeB": "",
+        "modeC": "abc",
+        "fixture_seed": 20261109,
+        "extents": {
+          "c": 300,
+          "b": 200,
+          "a": 400
+        }
+      },
+      "inputs": {
+        "input_C.bin": {
+          "sha256": "ee05e4ac8b0a22b52e75494932108b462c0a050d258dd626140082232bde2445",
+          "bytes": 96000000
+        },
+        "input_A.bin": {
+          "sha256": "f4e12814da289dc6a06c6d6708990f4334a890d6cccf848600ec9640b1d67a9a",
+          "bytes": 96000000
+        }
+      }
+    },
+    {
+      "source": "cuTENSOR/elementwise_binary.cu",
+      "case": "small-nonzero",
+      "configuration": {
+        "alpha": -0.75,
+        "beta": 0,
+        "gamma": 1.25,
+        "modeA": "cba",
+        "modeB": "",
+        "modeC": "abc",
+        "fixture_seed": 20261109,
+        "extents": {
+          "c": 7,
+          "b": 3,
+          "a": 5
+        }
+      },
+      "inputs": {
+        "input_C.bin": {
+          "sha256": "9f110621425c635508fa6c1b152531d202dbc3ba9b83e8bd09c9a55cd9cdbbb6",
+          "bytes": 420
+        },
+        "input_A.bin": {
+          "sha256": "42b73decd6da015254511315ce3a368c2bf0e377f45de499a5ba44169933ba2b",
+          "bytes": 420
+        }
+      }
+    },
+    {
+      "source": "cuTENSOR/elementwise_binary.cu",
+      "case": "small-zero",
+      "configuration": {
+        "alpha": 0,
+        "beta": 0,
+        "gamma": 0.25,
+        "modeA": "cba",
+        "modeB": "",
+        "modeC": "abc",
+        "fixture_seed": 20261109,
+        "extents": {
+          "c": 7,
+          "b": 3,
+          "a": 5
+        }
+      },
+      "inputs": {
+        "input_C.bin": {
+          "sha256": "9f110621425c635508fa6c1b152531d202dbc3ba9b83e8bd09c9a55cd9cdbbb6",
+          "bytes": 420
+        },
+        "input_A.bin": {
+          "sha256": "42b73decd6da015254511315ce3a368c2bf0e377f45de499a5ba44169933ba2b",
+          "bytes": 420
+        }
+      }
+    },
+    {
+      "source": "cuTENSOR/elementwise_permute.cu",
+      "case": "original",
+      "configuration": {
+        "alpha": 1,
+        "beta": 0,
+        "gamma": 0,
+        "modeA": "whcn",
+        "modeB": "",
+        "modeC": "cwhn",
+        "fixture_seed": 20261109,
+        "extents": {
+          "n": 128,
+          "c": 128,
+          "w": 32,
+          "h": 128
+        }
+      },
+      "inputs": {
+        "input_C.bin": {
+          "sha256": "b3718d1e25d321148b53dcf386f52406c419dbe32d1008eb1e852d40e7f0547e",
+          "bytes": 268435456
+        },
+        "input_A.bin": {
+          "sha256": "e027df68bbd25daa7191ce1d884427f39117fc6133c129cd15de74425a09fdbd",
+          "bytes": 268435456
+        }
+      }
+    },
+    {
+      "source": "cuTENSOR/elementwise_permute.cu",
+      "case": "small-nonzero",
+      "configuration": {
+        "alpha": -0.75,
+        "beta": 0,
+        "gamma": 0,
+        "modeA": "whcn",
+        "modeB": "",
+        "modeC": "cwhn",
+        "fixture_seed": 20261109,
+        "extents": {
+          "n": 2,
+          "c": 7,
+          "w": 5,
+          "h": 3
+        }
+      },
+      "inputs": {
+        "input_C.bin": {
+          "sha256": "e6ae6aadb8d7f3171b2ff84b6690f93d3b32994ab61d15ff4d07a48cb3dc1f28",
+          "bytes": 840
+        },
+        "input_A.bin": {
+          "sha256": "4aacd06908b6e9a0ca35ef24fa813d6ec7adf1d1e859ee5d662811f8f94e04ac",
+          "bytes": 840
+        }
+      }
+    },
+    {
+      "source": "cuTENSOR/elementwise_permute.cu",
+      "case": "small-zero",
+      "configuration": {
+        "alpha": 0,
+        "beta": 0,
+        "gamma": 0,
+        "modeA": "whcn",
+        "modeB": "",
+        "modeC": "cwhn",
+        "fixture_seed": 20261109,
+        "extents": {
+          "n": 2,
+          "c": 7,
+          "w": 5,
+          "h": 3
+        }
+      },
+      "inputs": {
+        "input_C.bin": {
+          "sha256": "e6ae6aadb8d7f3171b2ff84b6690f93d3b32994ab61d15ff4d07a48cb3dc1f28",
+          "bytes": 840
+        },
+        "input_A.bin": {
+          "sha256": "4aacd06908b6e9a0ca35ef24fa813d6ec7adf1d1e859ee5d662811f8f94e04ac",
+          "bytes": 840
+        }
+      }
+    },
+    {
+      "source": "cuTENSOR/elementwise_trinary.cu",
+      "case": "original",
+      "configuration": {
+        "alpha": 1.100000023841858,
+        "beta": 1.2999999523162842,
+        "gamma": 1.2000000476837158,
+        "modeA": "cba",
+        "modeB": "cab",
+        "modeC": "abc",
+        "fixture_seed": 20261109,
+        "extents": {
+          "c": 300,
+          "b": 200,
+          "a": 400
+        }
+      },
+      "inputs": {
+        "input_B.bin": {
+          "sha256": "3e0fb0566147a6c891a9f84429535403da9e370db30ac720b9ab0b40d001e8c9",
+          "bytes": 96000000
+        },
+        "input_C.bin": {
+          "sha256": "ee05e4ac8b0a22b52e75494932108b462c0a050d258dd626140082232bde2445",
+          "bytes": 96000000
+        },
+        "input_A.bin": {
+          "sha256": "f4e12814da289dc6a06c6d6708990f4334a890d6cccf848600ec9640b1d67a9a",
+          "bytes": 96000000
+        }
+      }
+    },
+    {
+      "source": "cuTENSOR/elementwise_trinary.cu",
+      "case": "small-nonzero",
+      "configuration": {
+        "alpha": -0.75,
+        "beta": 0.5,
+        "gamma": 1.25,
+        "modeA": "cba",
+        "modeB": "cab",
+        "modeC": "abc",
+        "fixture_seed": 20261109,
+        "extents": {
+          "c": 7,
+          "b": 3,
+          "a": 5
+        }
+      },
+      "inputs": {
+        "input_B.bin": {
+          "sha256": "a6c6f81e43c79fe2858a86c75cf7656cfddafc8cb6e443dc0ead12b8459b5b2e",
+          "bytes": 420
+        },
+        "input_C.bin": {
+          "sha256": "9f110621425c635508fa6c1b152531d202dbc3ba9b83e8bd09c9a55cd9cdbbb6",
+          "bytes": 420
+        },
+        "input_A.bin": {
+          "sha256": "42b73decd6da015254511315ce3a368c2bf0e377f45de499a5ba44169933ba2b",
+          "bytes": 420
+        }
+      }
+    },
+    {
+      "source": "cuTENSOR/elementwise_trinary.cu",
+      "case": "small-zero",
+      "configuration": {
+        "alpha": 0,
+        "beta": -0.5,
+        "gamma": 0.25,
+        "modeA": "cba",
+        "modeB": "cab",
+        "modeC": "abc",
+        "fixture_seed": 20261109,
+        "extents": {
+          "c": 7,
+          "b": 3,
+          "a": 5
+        }
+      },
+      "inputs": {
+        "input_B.bin": {
+          "sha256": "a6c6f81e43c79fe2858a86c75cf7656cfddafc8cb6e443dc0ead12b8459b5b2e",
+          "bytes": 420
+        },
+        "input_C.bin": {
+          "sha256": "9f110621425c635508fa6c1b152531d202dbc3ba9b83e8bd09c9a55cd9cdbbb6",
+          "bytes": 420
+        },
+        "input_A.bin": {
+          "sha256": "42b73decd6da015254511315ce3a368c2bf0e377f45de499a5ba44169933ba2b",
+          "bytes": 420
+        }
+      }
+    },
+    {
+      "source": "cuTENSOR/reduction.cu",
+      "case": "original",
+      "configuration": {
+        "alpha": 1.100000023841858,
+        "beta": 0,
+        "gamma": 0,
+        "modeA": "mhkv",
+        "modeB": "",
+        "modeC": "mv",
+        "fixture_seed": 20261109,
+        "extents": {
+          "k": 64,
+          "h": 256,
+          "v": 64,
+          "m": 196
+        }
+      },
+      "inputs": {
+        "input_C.bin": {
+          "sha256": "f3fa214e4d3537131f1f0aed94b2b926a2f8ce411a4b3eb21e525bf25aeeec42",
+          "bytes": 50176
+        },
+        "input_A.bin": {
+          "sha256": "c671beba69a434b89b13443493edf8852953edd1f23a3219a8ca06efdc964797",
+          "bytes": 822083584
+        }
+      }
+    },
+    {
+      "source": "cuTENSOR/reduction.cu",
+      "case": "small-nonzero",
+      "configuration": {
+        "alpha": -0.75,
+        "beta": 0.5,
+        "gamma": 0,
+        "modeA": "mhkv",
+        "modeB": "",
+        "modeC": "mv",
+        "fixture_seed": 20261109,
+        "extents": {
+          "k": 2,
+          "h": 7,
+          "v": 3,
+          "m": 5
+        }
+      },
+      "inputs": {
+        "input_C.bin": {
+          "sha256": "c7b976462489bf6c1a412eee35b3ef81dd32a904d2bbfe72ebcb2ec9407c6f7a",
+          "bytes": 60
+        },
+        "input_A.bin": {
+          "sha256": "4aacd06908b6e9a0ca35ef24fa813d6ec7adf1d1e859ee5d662811f8f94e04ac",
+          "bytes": 840
+        }
+      }
+    },
+    {
+      "source": "cuTENSOR/reduction.cu",
+      "case": "small-zero",
+      "configuration": {
+        "alpha": 0,
+        "beta": -0.5,
+        "gamma": 0,
+        "modeA": "mhkv",
+        "modeB": "",
+        "modeC": "mv",
+        "fixture_seed": 20261109,
+        "extents": {
+          "k": 2,
+          "h": 7,
+          "v": 3,
+          "m": 5
+        }
+      },
+      "inputs": {
+        "input_C.bin": {
+          "sha256": "c7b976462489bf6c1a412eee35b3ef81dd32a904d2bbfe72ebcb2ec9407c6f7a",
+          "bytes": 60
+        },
+        "input_A.bin": {
+          "sha256": "4aacd06908b6e9a0ca35ef24fa813d6ec7adf1d1e859ee5d662811f8f94e04ac",
+          "bytes": 840
+        }
+      }
+    }
+  ]
+}

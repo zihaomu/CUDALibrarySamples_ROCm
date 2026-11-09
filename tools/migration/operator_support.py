@@ -21,24 +21,24 @@ def operator_name(sample):
   if kind in {'syevd','xsyevd','syevj'}:return '对称特征分解'
   if kind in {'sygvd','sygvj'}:return '广义对称特征分解'
   if kind in {'gesvd','gesvdj'}:return 'SVD'
-  return {'getrf':'LU 分解/求解','orgqr':'QR 的 Q 生成','potrfbatched':'Cholesky 分解'}[kind]
+  return {'getrf':'LU 分解/求解','orgqr':'QR 的 Q 生成','xgeqrf':'QR 分解','xpotrf':'Cholesky 分解','potrfbatched':'Cholesky 分解'}[kind]
  if family=='cuSPARSE':
   if kind.startswith('dense2sparse'):return 'dense2sparse'
   if kind.startswith('sparse2dense'):return 'sparse2dense'
   return kind.split('_')[0]
- if family=='cuTENSOR':return '张量 contraction'
+ if family=='cuTENSOR':return {'contraction':'张量 contraction','elementwise_binary':'二元逐元素运算','elementwise_trinary':'三元逐元素运算','elementwise_permute':'张量 permutation','reduction':'张量 reduction'}[path.stem]
  raise ValueError('Qualified family needs an explicit operator grouping: '+family)
 
 SCOPES={
- 'cuBLAS':'通过的固定教学输入；M1 部分算子另含非整齐尺寸、转置、beta、stride 和混合精度 case。batch/Ex/emulation 的成功与失败在样例层分别列出。',
+ 'cuBLAS':'固定教学输入与所列扩展 cases；第二批含并列/空索引、旋转 flags、batch/grouped 和正负 alpha；rotmg 极端缩放使用明确登记的 HIP 修正。其它精度/API 仍逐例管理。',
  'cuBLASLt':'3 个 profile：FP32 SGEMM、HSH FP16 input/output + FP32 compute 的 pointer-array 与 strided batch。',
  'cuDSS':'原始 FP64 5×5 SPD/CSR：C++、Fortran、CUDA Fortran 改写共 3 入口；CPU 稀疏符号分析 + GPU CSRRF 数值分解/求解。',
  'cuFFT':'10 个 profile：原始单卡/双卡 C2C、实数正逆变换和 legacy/离线 SPIR-V/HIPRTC callback。1D 多卡使用 hipFFT + RCCL + HIP。',
  'cuPQC':'SHA-256 单线程与 SHA3-256 的 32-lane 协作 GPU kernel；各 14 输入与 hashlib 精确一致，PQC 其它算法未实现。',
  'cuRAND':'4 种分布 × 9 个 generator = 36 个 profile；原始参数、库内重复性和解析分布矩通过，跨库不要求逐位同序列。',
- 'cuSOLVER':'原始固定教学矩阵的 10 个 profile；检查 status/info、特征值/奇异值、重构/残差与正交性。',
- 'cuSPARSE':'22 个 profile，包含 CSR/COO/SELL/blocked-ELL 等已登记格式与 batched 变体；不推及尚未通过的其它格式/custom API。',
- 'cuTENSOR':'1 个 FP32 4D contraction profile，rocBLAS + HIP 排列；原始 extents 全量有限值/32 点 CPU 抽样，小尺寸全量 CPU 检查。'}
+ 'cuSOLVER':'原始固定教学矩阵；检查 status/info、特征值/奇异值、QR/Cholesky 重构、求解残差与正交性。',
+ 'cuSPARSE':'CSR/COO/SELL/blocked-ELL 等已登记格式与 batched 变体；第二批 SpVV/SpGEMM/reuse 包含数值变化、CSR 结构与独立 CPU 数学检查。',
+ 'cuTENSOR':'FP32：contraction 用 rocBLAS + HIP；其它已通过的逐元素/permutation/reduction 使用 hipTensor。逐例记录原始 extents 与扩展小尺寸、全部输出 CPU 检查；contraction 的原始规模另为抽样验收。'}
 
 def summarize(cat):
  families={};total_operators=0

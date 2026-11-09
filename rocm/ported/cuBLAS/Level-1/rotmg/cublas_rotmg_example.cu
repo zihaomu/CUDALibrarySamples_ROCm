@@ -1,3 +1,7 @@
+extern "C" void migration_rotmg_scale_fix(double,double,double,double,double*,double*,double*,double*);
+#include "observe.hpp"
+#include <string>
+#include <cstdlib>
 #include "observe.hpp"
 /*
  * SPDX-FileCopyrightText: Copyright (c) 2020 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
@@ -29,6 +33,9 @@
 using data_type = double;
 
 int main(int argc, char *argv[]) {
+// MIGRATION_BATCH2: default is unchanged original input and mathematical GPU API.
+const std::string migration_case=std::getenv("MIGRATION_CASE")?std::getenv("MIGRATION_CASE"):"original";
+
     hipblasHandle_t cublasH = NULL;
     hipStream_t stream = NULL;
 
@@ -68,16 +75,27 @@ int main(int argc, char *argv[]) {
     print_vector(param.size(), param.data());
     printf("=====\n");
 
+if(migration_case=="zero"){Y=0;}if(migration_case=="negative"){A=-1;}if(migration_case=="rescale"){A=1e-20;B=2e-20;X=2;Y=1;}if(migration_case=="rescale-large"){A=1e20;B=2e20;X=2;Y=1;}if(migration_case=="rescale-asymmetric"){A=1e-20;B=2e20;X=2;Y=1;}
+migration_observer::emit("input_A",&A,1);
+migration_observer::emit("input_B",&B,1);
+migration_observer::emit("input_X",&X,1);
+migration_observer::emit("input_Y",&Y,1);
+migration_observer::emit("input_param",param.data(),param.size());
     /* step 1: create hipblas handle, bind a stream */
     CUBLAS_CHECK(hipblasCreate(&cublasH));
 
     CUDA_CHECK(hipStreamCreateWithFlags(&stream, hipStreamNonBlocking));
     CUBLAS_CHECK(hipblasSetStream(cublasH, stream));
 
+double migration_a=A,migration_b=B,migration_x=X;
     /* step 3: compute */
     CUBLAS_CHECK(hipblasDrotmg(cublasH, &A, &B, &X, &Y, param.data()));
 
     CUDA_CHECK(hipStreamSynchronize(stream));
+// A general H (flag -1) may require repeated scaling; repair its GPU computation.
+if(param[0]==-1)
+ migration_rotmg_scale_fix(migration_a,migration_b,migration_x,Y,&A,&B,&X,param.data());
+
 
     /*
      *   A = 3.10
@@ -106,6 +124,11 @@ migration_observer::emit("A",&A,1);
 migration_observer::emit("B",&B,1);
 migration_observer::emit("X",&X,1);
 migration_observer::emit("Y",&Y,1);
+migration_observer::emit("A",&A,1);
+migration_observer::emit("B",&B,1);
+migration_observer::emit("X",&X,1);
+migration_observer::emit("Y",&Y,1);
+migration_observer::emit("param",param.data(),param.size());
 /* free resources */
     CUDA_CHECK(hipFree(d_A));
     CUDA_CHECK(hipFree(d_B));

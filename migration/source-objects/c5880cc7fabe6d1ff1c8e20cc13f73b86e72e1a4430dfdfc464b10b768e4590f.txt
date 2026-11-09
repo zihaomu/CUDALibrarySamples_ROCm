@@ -1,0 +1,110 @@
+#!/usr/bin/env python3
+"""Independent CPU qualification and same-input CUDA comparison for batch 2."""
+import argparse,collections,ctypes,fcntl,hashlib,json,pathlib
+from catalog import ROOT
+from batch2_spec import GROUPS
+from run import digest,evidence_directory
+from validate_blas import np,observed,literals
+
+cpu_lib_path=next((ROOT/'build/python-reference/scipy.libs').glob('*openblas*'));cpu_lib=ctypes.CDLL(str(cpu_lib_path));D=ctypes.c_double
+def json_scalar(value):
+ if isinstance(value,np.generic):return value.item()
+ raise TypeError('Non-scalar JSON value: '+type(value).__name__)
+def rotation(name,values,param=None):
+ args=[D(v) for v in values];p=(D*5)(*param) if param is not None else None;fn=getattr(cpu_lib,'scipy_'+name+'_');fn.restype=None;fn(*[ctypes.byref(v) for v in args],*([p] if p is not None else []));return [v.value for v in args],np.array(p) if p is not None else None
+
+def validate(source,case,d):
+ o=observed(d/'run.log');kind=pathlib.PurePosixPath(source).parent.name;checks=[];outputs={}
+ def check(name,actual,expected,atol=1e-10,rtol=1e-10):
+  actual=np.asarray(actual,dtype=float);expected=np.asarray(expected,dtype=float);yes=actual.shape==expected.shape and np.isfinite(actual).all() and np.isfinite(expected).all() and np.allclose(actual,expected,atol=atol,rtol=rtol);error=float(np.max(abs(actual-expected))) if actual.shape==expected.shape and actual.size else 0.;checks.append({'check':name,'passed':bool(yes),'max_abs_error':error,'atol':atol,'rtol':rtol});outputs[name]=actual.ravel().tolist()
+ if source.startswith('cuSOLVER/'):
+  log=(d/'run.log').read_text()
+  if 'info = 0' not in log:raise ValueError('Missing successful solver info')
+ if source.startswith('cuSPARSE/'):
+  if kind=='spvv':idx=o['input_X_indices'].astype(int);expected=np.dot(o['input_X'],o['input_Y'][idx]);check('result',o['result'],[expected],1e-5,1e-5)
+  else:
+   def dense(letter):
+    ptr=o['input_h'+letter+'_csrOffsets'].astype(int);col=o['input_h'+letter+'_columns'].astype(int);val=o['input_h'+letter+'_values'];m=np.zeros((len(ptr)-1,4))
+    for row in range(len(ptr)-1):m[row,col[ptr[row]:ptr[row+1]]]=val[ptr[row]:ptr[row+1]]
+    return m
+   expected=dense('A')@dense('B');ptr=o['hC_csrOffsets_tmp'].astype(int);col=o['hC_columns_tmp'].astype(int);values=o['hC_values_tmp'];valid=bool(len(ptr)==5 and ptr[0]==0 and ptr[-1]==len(values)==len(col) and np.all(np.diff(ptr)>=0) and np.all((col>=0)&(col<4)))
+   if not valid:raise ValueError('Invalid CSR structure')
+   actual=np.zeros((4,4))
+   for row in range(4):
+    ids=col[ptr[row]:ptr[row+1]]
+    if len(set(ids))!=len(ids):raise ValueError('Unexpected duplicate output columns')
+    actual[row,ids]=values[ptr[row]:ptr[row+1]]
+   scale=-.5 if kind=='spgemm' and case=='changed-values' else 2. if kind=='spgemm_reuse' and case=='changed-values' else 1.;check('CSR-product',actual,expected*scale,1e-5,1e-5);check('CSR-nnz',[len(values)],[np.count_nonzero(expected)])
+   if kind=='spgemm_reuse':check('first-compute-values',o['first_values'],expected[expected!=0],1e-5,1e-5)
+ elif source.startswith('cuBLAS/'):
+  if kind in ['amax','amin']:
+   x=o['input_A'];index=0 if case=='empty' else int((np.argmax if kind=='amax' else np.argmin)(abs(x)))+1;check('result',o['result'],[index],0,0)
+  elif kind=='rotg':
+   values,_=rotation('drotg',[o['input_A'][0],o['input_B'][0],0.,0.])
+   for name,ref in zip(['A','B','c','s'],values):check(name,o[name],[ref])
+   a,b=o['input_A'][0],o['input_B'][0];check('rotation-annihilates-second',[o['c'][0]*b-o['s'][0]*a],[0.]);check('unit-rotation',[o['c'][0]**2+o['s'][0]**2],[1.])
+  elif kind=='rotmg':
+   state,p=rotation('drotmg',[o['input_'+n][0] for n in ['A','B','X','Y']],o['input_param']);flag=int(p[0]);ids={-2:[0],-1:[0,1,2,3,4],0:[0,2,3],1:[0,1,4]}[flag]
+   for name,ref in zip(['A','B','X','Y'],state):check(name,o[name],[ref],1e-30,1e-10)
+   check('active-param',o['param'][ids],p[ids],1e-30,1e-10)
+  elif kind=='rotm':
+   x=o['input_A'];y=o['input_B'];p=o['input_param'];flag=int(p[0]);h={-2:np.eye(2),-1:np.array([[p[1],p[3]],[p[2],p[4]]]),0:np.array([[1,p[3]],[p[2],1]]),1:np.array([[p[1],1],[-1,p[4]]])}[flag];expected=h@np.stack([x,y]);check('A',o['A'],expected[0]);check('B',o['B'],expected[1])
+  else:
+   alpha=-.5 if case=='negative-alpha' else 1.;indices=sorted(int(k.split('_')[-1]) for k in o if k.startswith('input_A_'))
+   for i in indices:
+    n=3 if kind=='gemmGroupedBatched' and i==2 else 2;A=o['input_A_'+str(i)].reshape(n,n,order='F');B=o['input_B_'+str(i)].reshape(n,n,order='F')
+    if kind=='trsmBatched':A=np.triu(A);actual=o['B_'+str(i)].reshape(n,n,order='F');check('batch'+str(i),actual,np.linalg.solve(A,alpha*B));check('batch'+str(i)+'-residual',A@actual,alpha*B)
+    else:check('batch'+str(i),o['C_'+str(i)].reshape(n,n,order='F'),alpha*A@B)
+ elif source.startswith('cuSOLVER/'):
+  from solver_reference import validate as solver_validate
+  more,_=solver_validate(source,d/'run.log');checks+=more
+ elif source.startswith('cuTENSOR/'):
+  from tensor_reference import validate as tensor_validate
+  return tensor_validate(source,case,d)
+ else:raise ValueError(source)
+ inputs={k:v.tolist() for k,v in o.items() if k.startswith('input_')}
+ if source.startswith('cuSOLVER/'):
+  _,literal=literals((ROOT/source).read_text());inputs={'upstream-literal-'+name:literal[name].tolist() for name in ['A','B']}
+ identity=hashlib.sha256(json.dumps(inputs,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+ return {'status':'PASSED' if checks and all(c['passed'] for c in checks) else 'FAILED','checks':checks,'input_sha256':identity,'output_values':outputs,'oracle':'Independent NumPy mathematics and CPU OpenBLAS rotation primitives; finite output and relevant residual/structural checks'}
+
+def main():
+ p=argparse.ArgumentParser();p.add_argument('groups',nargs='+',choices=list(GROUPS));p.add_argument('--qualify',action='store_true');a=p.parse_args();amd={r['source']:r for r in json.loads((ROOT/'migration/reports/batch2-rocm.json').read_text())};cp=ROOT/'migration/reports/batch2-cuda.json';cuda={r['source']:r for r in json.loads(cp.read_text())} if cp.exists() else {};results=[]
+ for group in a.groups:
+  for source,cases in GROUPS[group].items():
+   r=amd.get(source);r_cuda=cuda.get(source);checks=[];comparisons=[]
+   if not r:continue
+   for case in cases:
+    def one(run):
+     if not run or run['build_return_code']!=0:raise ValueError('Build missing/failed')
+     c=next(x for x in run['runs'] if x['case']==case)
+     if c['return_code']!=0:raise ValueError('Run failed: '+str(c['return_code']))
+     return validate(source,case,evidence_directory(c['evidence']))
+    try:v=one(r)
+    except Exception as e:v={'status':'FAILED','reason':str(e)}
+    v['case']=case;checks.append(v)
+    try:
+     cv=one(r_cuda);same=v.get('input_sha256')==cv.get('input_sha256');yes=v['status']==cv['status']=='PASSED' and same
+     # For solver factors use independent phase-invariant CPU checks on both.
+     for name,vals in v.get('output_values',{}).items():yes=bool(yes and name in cv['output_values'] and np.allclose(vals,cv['output_values'][name],atol=2e-5 if group=='tensor' else 1e-10,rtol=2e-5 if group=='tensor' else 1e-10))
+     if group=='tensor' and same:
+      ar=next(x for x in r['runs'] if x['case']==case);cr=next(x for x in r_cuda['runs'] if x['case']==case);av=np.memmap(evidence_directory(ar['evidence'])/'output.bin',np.float32,mode='r');bv=np.memmap(evidence_directory(cr['evidence'])/'output.bin',np.float32,mode='r');yes=bool(yes and av.shape==bv.shape and np.allclose(av,bv,atol=2e-5,rtol=2e-5))
+     comparisons.append({'case':case,'status':'PASSED' if yes else 'FAILED','identical_input':same,'cuda_cpu_checks':cv})
+    except Exception as e:comparisons.append({'case':case,'status':'BLOCKED','reason':str(e)})
+   passed=r['build_return_code']==0 and len(checks)==len(cases) and all(v['status']=='PASSED' for v in checks);comparison='PASSED' if all(v['status']=='PASSED' for v in comparisons) else 'BLOCKED' if any(v['status']=='BLOCKED' for v in comparisons) else 'FAILED';record=dict(r,status='PASSED' if passed else 'FAILED',level='L4' if passed else 'L3' if r['build_return_code']==0 else 'L1',cases=checks,cuda_comparison=comparison,cuda_cases=comparisons,cuda_evidence=r_cuda.get('evidence') if r_cuda else None,reference_library={'path':str(cpu_lib_path.relative_to(ROOT)),'sha256':digest(cpu_lib_path)},validation_source_sha256=digest(pathlib.Path(__file__)))
+   if '/rotmg/' in source:record['dependencies']={'rocm/common/rotmg_scale_fix.hip':digest(ROOT/'rocm/common/rotmg_scale_fix.hip')}
+   if group=='tensor':record['dependencies']={'rocm/common/batch2_tensor_io.hpp':digest(ROOT/'rocm/common/batch2_tensor_io.hpp'),'rocm/ported/cuTENSOR/utils.cuh':digest(ROOT/'rocm/ported/cuTENSOR/utils.cuh')}
+   results.append(record);print(source,record['status'],'CUDA',comparison,[(c['case'],c.get('reason')) for c in checks if c['status']!='PASSED'],flush=True)
+ if a.qualify:
+  with (ROOT/'migration/.state.lock').open('w') as lock:
+   fcntl.flock(lock,fcntl.LOCK_EX);p=ROOT/'migration/samples.yaml';cat=json.loads(p.read_text())
+   for r in results:
+    s=next(s for s in cat['samples'] if s['source']==r['source']);assert digest(ROOT/r['implementation'])==r['implementation_sha256'];s['attempts'].append(r);s['evidence']+=list(dict.fromkeys([r['evidence'],'migration/reports/batch2-validation.json']+([r['cuda_evidence']] if r['cuda_evidence'] else [])))
+    if r['status']=='PASSED':
+     labels=['batch2/'+v['case'] for v in r['cases']];lib={'cuSPARSE':('hipSPARSE','rocSPARSE'),'cuBLAS':('hipBLAS','rocBLAS'),'cuSOLVER':('hipSOLVER + hipBLAS','rocSOLVER/rocBLAS'),'cuTENSOR':('hipTensor','hipTensor')}[s['family']];s.update(status='PASSED',level='L4',implementation=r['implementation'],actual_library=lib[0],backend_library=lib[1],required_cases=labels,passed_cases=labels,reason_code='VALIDATED_BATCH2',reason='使用 '+lib[0]+' / '+lib[1]+' 保留原始 profile 与数学 API；'+str(len(labels))+' 个预登记输入 case 均通过独立 CPU 数值/结构/残差检查。'+('同输入 CUDA 与 CPU 三方对照通过。' if r['cuda_comparison']=='PASSED' else 'CUDA 对照受前置条件限制，未计为通过。'),cuda_comparison=r['cuda_comparison'],selected_validation=r,reproduce='HIP_VISIBLE_DEVICES=2 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh python tools/migration/batch2_run.py '+next(g for g,m in GROUPS.items() if s['source'] in m)+'\npython3 tools/migration/batch2_validate.py '+next(g for g,m in GROUPS.items() if s['source'] in m)+' --qualify');s['cuda_baseline']='PASSED' if r['cuda_comparison']=='PASSED' else s['cuda_baseline'];s.pop('cuda_comparison_reason',None)
+     if '/rotmg/' in s['source']:s.update(actual_library='hipBLAS + HIP scale fix',equivalence='HYBRID_HIP',reason=s['reason']+'原生重复缩放的 H 参数错误由项目 GPU kernel 修正；原生失败证据单独保留。');s['evidence'].append('migration/reports/rotmg-native-rescale-failure.json')
+     if r['cuda_comparison']=='PASSED':s['cuda_baseline_reason']='Original CUDA mathematical calls and the same registered inputs independently passed CPU numerical checks.'
+    s['evidence']=list(dict.fromkeys(s['evidence']))
+   p.write_text(json.dumps(cat,indent=2,ensure_ascii=False,default=json_scalar)+'\n')
+ report=ROOT/'migration/reports/batch2-validation.json';old=json.loads(report.read_text()) if report.exists() else [];merged={r['source']:r for r in old};merged.update({r['source']:r for r in results});report.write_text(json.dumps(list(merged.values()),indent=2,ensure_ascii=False,default=json_scalar)+'\n')
+if __name__=='__main__':main()

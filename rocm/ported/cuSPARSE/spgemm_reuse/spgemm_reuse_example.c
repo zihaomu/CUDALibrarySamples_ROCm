@@ -1,3 +1,6 @@
+#include "observe.hpp"
+#include <string>
+#include <cstdlib>
 /*
  * SPDX-FileCopyrightText: Copyright (c) 1993-2022 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
@@ -42,6 +45,9 @@
 }
 
 int main(void) {
+// MIGRATION_BATCH2: default is unchanged original input and mathematical GPU API.
+const std::string migration_case=std::getenv("MIGRATION_CASE")?std::getenv("MIGRATION_CASE"):"original";
+
     // Host problem definition
     #define   A_NUM_ROWS 4   // C compatibility
     const int A_num_rows = 4;
@@ -71,6 +77,13 @@ int main(void) {
     hipsparseOperation_t opB         = HIPSPARSE_OPERATION_NON_TRANSPOSE;
     hipDataType        computeType = HIP_R_32F;
     //--------------------------------------------------------------------------
+migration_observer::emit("alpha",&alpha,1);
+migration_observer::emit("input_hA_csrOffsets",hA_csrOffsets,sizeof(hA_csrOffsets)/sizeof(hA_csrOffsets[0]));
+migration_observer::emit("input_hA_columns",hA_columns,sizeof(hA_columns)/sizeof(hA_columns[0]));
+migration_observer::emit("input_hA_values",hA_values,sizeof(hA_values)/sizeof(hA_values[0]));
+migration_observer::emit("input_hB_csrOffsets",hB_csrOffsets,sizeof(hB_csrOffsets)/sizeof(hB_csrOffsets[0]));
+migration_observer::emit("input_hB_columns",hB_columns,sizeof(hB_columns)/sizeof(hB_columns[0]));
+migration_observer::emit("input_hB_values",hB_values,sizeof(hB_values)/sizeof(hB_values[0]));
     // Device memory management: Allocate and copy A, B
     int   *dA_csrOffsets, *dA_columns, *dB_csrOffsets, *dB_columns,
           *dC_csrOffsets, *dC_columns;
@@ -206,6 +219,9 @@ int main(void) {
                                     matC, computeType, HIPSPARSE_SPGEMM_DEFAULT,
                                     spgemmDesc)
     )
+float migration_first[C_NUM_NNZ];CHECK_CUDA(hipMemcpy(migration_first,dC_values,sizeof(migration_first),hipMemcpyDeviceToHost))
+migration_observer::emit("first_values",migration_first,C_NUM_NNZ);
+if(migration_case=="changed-values"){for(auto& x:hA_values)x*=2;for(auto& x:hC_values)x*=2;}
     // update dA_values, dB_values
     CHECK_CUDA( hipMemcpy(dA_values, hA_values,
                            A_nnz * sizeof(float), hipMemcpyHostToDevice) )
@@ -226,6 +242,7 @@ int main(void) {
     CHECK_CUSPARSE( hipsparseDestroySpMat(matC) )
     CHECK_CUSPARSE( hipsparseDestroy(handle) )
     //--------------------------------------------------------------------------
+if(C_nnz!=C_NUM_NNZ)return EXIT_FAILURE;
     // device result check
     int   hC_csrOffsets_tmp[A_NUM_ROWS + 1];
     int   hC_columns_tmp[C_NUM_NNZ];
@@ -237,6 +254,9 @@ int main(void) {
                            hipMemcpyDeviceToHost) )
     CHECK_CUDA( hipMemcpy(hC_values_tmp, dC_values, C_nnz * sizeof(float),
                            hipMemcpyDeviceToHost) )
+migration_observer::emit("hC_csrOffsets_tmp",hC_csrOffsets_tmp,sizeof(hC_csrOffsets_tmp)/sizeof(hC_csrOffsets_tmp[0]));
+migration_observer::emit("hC_columns_tmp",hC_columns_tmp,sizeof(hC_columns_tmp)/sizeof(hC_columns_tmp[0]));
+migration_observer::emit("hC_values_tmp",hC_values_tmp,sizeof(hC_values_tmp)/sizeof(hC_values_tmp[0]));
     int correct = 1;
     for (int i = 0; i < A_num_rows + 1; i++) {
         if (hC_csrOffsets_tmp[i] != hC_csrOffsets[i]) {

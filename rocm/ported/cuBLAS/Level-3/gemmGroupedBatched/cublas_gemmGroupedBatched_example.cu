@@ -1,4 +1,7 @@
 #include "observe.hpp"
+#include <string>
+#include <cstdlib>
+#include "observe.hpp"
 /*
  * SPDX-FileCopyrightText: Copyright (c) 2023 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
@@ -30,6 +33,9 @@
 using data_type = double;
 
 int main(int argc, char *argv[]) {
+// MIGRATION_BATCH2: default is unchanged original input and mathematical GPU API.
+const std::string migration_case=std::getenv("MIGRATION_CASE")?std::getenv("MIGRATION_CASE"):"original";
+
     hipblasHandle_t cublasH = NULL;
     hipStream_t stream = NULL;
 
@@ -75,7 +81,7 @@ int main(int argc, char *argv[]) {
         {NaN, NaN, NaN, NaN},
         {NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN}};
 
-    const data_type alpha_array[group_count] = {1.0, 1.0};
+    const data_type alpha_array[group_count] = {migration_case=="negative-alpha"?-0.5:1.0,migration_case=="negative-alpha"?-0.5:1.0};
     const data_type beta_array[group_count] = {0.0, 0.0};
 
     data_type **d_A_array = nullptr;
@@ -109,6 +115,8 @@ int main(int argc, char *argv[]) {
         printf("\n");
     }
 
+for(size_t i=0;i<A_array.size();++i)migration_observer::emit(("input_A_"+std::to_string(i)).c_str(),A_array[i].data(),A_array[i].size());
+for(size_t i=0;i<B_array.size();++i)migration_observer::emit(("input_B_"+std::to_string(i)).c_str(),B_array[i].data(),B_array[i].size());
     /* step 1: create hipblas handle, bind a stream */
     CUBLAS_CHECK(hipblasCreate(&cublasH));
 
@@ -191,6 +199,7 @@ int main(int argc, char *argv[]) {
 
 // MIGRATION_OBSERVE_SCALARS
 migration_observer::emit("NaN",&NaN,1);
+for(size_t i=0;i<C_array.size();++i)migration_observer::emit(("C_"+std::to_string(i)).c_str(),C_array[i].data(),C_array[i].size());
 /* free resources */
     CUDA_CHECK(hipFree(d_A_array));
     CUDA_CHECK(hipFree(d_B_array));

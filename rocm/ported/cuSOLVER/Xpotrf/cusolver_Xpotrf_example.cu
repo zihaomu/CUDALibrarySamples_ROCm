@@ -1,4 +1,7 @@
 #include "observe.hpp"
+#include <string>
+#include <cstdlib>
+#include "observe.hpp"
 /*
  * SPDX-FileCopyrightText: Copyright (c) 2020 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
@@ -27,6 +30,9 @@
 #include "cusolver_utils.h"
 
 int main(int argc, char *argv[]) {
+// MIGRATION_BATCH2: default is unchanged original input and mathematical GPU API.
+const std::string migration_case=std::getenv("MIGRATION_CASE")?std::getenv("MIGRATION_CASE"):"original";
+
     hipsolverHandle_t cusolverH = NULL;
     hipStream_t stream = NULL;
     hipsolverDnParams_t params = NULL;

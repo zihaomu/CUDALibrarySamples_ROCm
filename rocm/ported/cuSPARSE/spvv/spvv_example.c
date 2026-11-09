@@ -1,3 +1,6 @@
+#include "observe.hpp"
+#include <string>
+#include <cstdlib>
 /*
  * SPDX-FileCopyrightText: Copyright (c) 1993-2022 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
@@ -42,6 +45,9 @@
 }
 
 int main(void) {
+// MIGRATION_BATCH2: default is unchanged original input and mathematical GPU API.
+const std::string migration_case=std::getenv("MIGRATION_CASE")?std::getenv("MIGRATION_CASE"):"original";
+
     // Host problem definition
     int   size         = 8;
     int   nnz          = 4;
@@ -52,6 +58,10 @@ int main(void) {
     float result       = { 56.0f };
     float tmp_result;
     //--------------------------------------------------------------------------
+if(migration_case=="changed-values"){for(auto& x:hX_values)x*=-0.5f;result*=-0.5f;}
+migration_observer::emit("input_X_indices",hX_indices,nnz);
+migration_observer::emit("input_X",hX_values,nnz);
+migration_observer::emit("input_Y",hY,size);
     // Device memory management
     int   *dX_indices;
     float *dY, *dX_values;
@@ -95,6 +105,7 @@ int main(void) {
     CHECK_CUSPARSE( hipsparseDestroyDnVec(vecY) )
     CHECK_CUSPARSE( hipsparseDestroy(handle) )
     //--------------------------------------------------------------------------
+migration_observer::emit("result",&tmp_result,1);
     // device result check
     if (tmp_result == result)
         printf("spvv_example test PASSED\n");

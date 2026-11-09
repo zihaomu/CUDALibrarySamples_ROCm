@@ -1,32 +1,35 @@
 {
   "status": "PASSED",
   "scope": "Consistency and proof integrity of the recorded execution outcomes; not a claim that failed/unimplemented samples were successfully migrated.",
-  "timestamp": "2026-11-09T11:29:53.199424+00:00",
+  "timestamp": "2026-11-09T12:20:36.140261+00:00",
   "checks": {
     "unique_entrypoints": 639,
     "terminal_counts": {
       "FAILED": 464,
-      "PASSED": 141,
-      "PARTIAL": 31,
+      "PASSED": 158,
+      "PARTIAL": 14,
       "UNSUPPORTED": 2,
       "BLOCKED": 1
     },
     "families": 30,
-    "verified_operator_families": 75,
+    "verified_operator_families": 87,
     "modules_with_verified_operators": 9,
     "upstream_sources_unchanged": 866,
     "upstream_build_definitions_unchanged": 477,
-    "current_qualified_proofs": 141,
+    "current_qualified_proofs": 158,
     "detail_pages": 639,
-    "generated_relative_links": 6797,
+    "generated_relative_links": 6854,
     "m1_samples": 16,
     "m1_required_cases": 95,
     "additional_comparisons": 54,
+    "batch2_samples": 17,
+    "batch2_cases": 45,
+    "batch2_corrupted_outputs_rejected": 21,
     "ctest_samples": 16,
     "performance_profiles": 6,
     "performance_qualification": "BLOCKED",
-    "source_files_sealed": 1064,
-    "source_tree_sha256": "0bc909a51efe7a1fd68bd8349c67bde3887b3a6111295bb530490e0d32d9f051"
+    "source_files_sealed": 1085,
+    "source_tree_sha256": "c0bcaa723c3f1f2753a7a11957237572d0af64b1f14d042d15369b1d19777161"
   },
   "errors": [],
   "qualified_implementations": {
@@ -150,6 +153,30 @@
         }
       ]
     },
+    "cuBLAS/Level-1/amax::cublas_amax_example.cu": {
+      "implementation": "rocm/ported/cuBLAS/Level-1/amax/cublas_amax_example.cu",
+      "sha256": "132e15707315077e57a3780aaec2909a6dcbc31527b061b282fb480c1848b41d",
+      "evidence": "migration/reports/evidence/20261109T115606.688272Z/batch2-rocm/cuBLAS_Level-1_amax_cublas_amax_example.cu",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
+    "cuBLAS/Level-1/amin::cublas_amin_example.cu": {
+      "implementation": "rocm/ported/cuBLAS/Level-1/amin/cublas_amin_example.cu",
+      "sha256": "ca7afe6fc2ad932df7a0dd8216f6cdf734eb668cf61547b06db4ed7d6c222f3d",
+      "evidence": "migration/reports/evidence/20261109T115606.688272Z/batch2-rocm/cuBLAS_Level-1_amin_cublas_amin_example.cu",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
     "cuBLAS/Level-1/asum::cublas_asum_example.cu": {
       "implementation": "rocm/ported/cuBLAS/Level-1/asum/cublas_asum_example.cu",
       "sha256": "0a140657156a7708bffeeed4a03f4d9b5a85e9e198b35b49a281ee0e6c95591c",
@@ -226,6 +253,42 @@
       "implementation": "rocm/ported/cuBLAS/Level-1/rot/cublas_rot_example.cu",
       "sha256": "5049fe80d52e29d36e65cb7850058e8e77da5af7583180eaf190657d698542af",
       "evidence": null,
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
+    "cuBLAS/Level-1/rotg::cublas_rotg_example.cu": {
+      "implementation": "rocm/ported/cuBLAS/Level-1/rotg/cublas_rotg_example.cu",
+      "sha256": "bb1b54a1cd8f0e2a88e5c02d462bdda358788bb8b26dddd477f9b73087882462",
+      "evidence": "migration/reports/evidence/20261109T115319.593333Z/batch2-rocm/cuBLAS_Level-1_rotg_cublas_rotg_example.cu",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
+    "cuBLAS/Level-1/rotm::cublas_rotm_example.cu": {
+      "implementation": "rocm/ported/cuBLAS/Level-1/rotm/cublas_rotm_example.cu",
+      "sha256": "411adae5fc781888949cd893c65ee39ee4e39d6ef80eb8cd508be99978128ae2",
+      "evidence": "migration/reports/evidence/20261109T115319.593333Z/batch2-rocm/cuBLAS_Level-1_rotm_cublas_rotm_example.cu",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
+    "cuBLAS/Level-1/rotmg::cublas_rotmg_example.cu": {
+      "implementation": "rocm/ported/cuBLAS/Level-1/rotmg/cublas_rotmg_example.cu",
+      "sha256": "e5701cf9d905382f047f89419d67f7a80ef10e60ee681cc94736c0cbe21008d5",
+      "evidence": "migration/reports/evidence/20261109T120619.802852Z/batch2-rocm/cuBLAS_Level-1_rotmg_cublas_rotmg_example.cu",
       "physical_devices": [
         {
           "logical_id": 0,
@@ -546,6 +609,30 @@
         }
       ]
     },
+    "cuBLAS/Level-3/gemmBatched::cublas_gemmBatched_example.cu": {
+      "implementation": "rocm/ported/cuBLAS/Level-3/gemmBatched/cublas_gemmBatched_example.cu",
+      "sha256": "fff6cb23e071db213a6c92b325a67f3af60a2df3919aba08800b36c012527c0b",
+      "evidence": "migration/reports/evidence/20261109T115319.593333Z/batch2-rocm/cuBLAS_Level-3_gemmBatched_cublas_gemmBatched_example.cu",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
+    "cuBLAS/Level-3/gemmGroupedBatched::cublas_gemmGroupedBatched_example.cu": {
+      "implementation": "rocm/ported/cuBLAS/Level-3/gemmGroupedBatched/cublas_gemmGroupedBatched_example.cu",
+      "sha256": "1d15b15641f46c65e7f9646fdadd2a12808fa4c4c321b2b4acf0b0263342faa2",
+      "evidence": "migration/reports/evidence/20261109T115319.593333Z/batch2-rocm/cuBLAS_Level-3_gemmGroupedBatched_cublas_gemmGroupedBatched_example.cu",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
     "cuBLAS/Level-3/gemmStridedBatched::cublas_gemmStridedBatched_example.cu": {
       "implementation": "rocm/cuBLAS/Level-3/gemmStridedBatched/sample.cpp",
       "sha256": "878553f6368203d2de63df4d17facf415d60eb750fe974128b0611dc80faf58f",
@@ -670,6 +757,18 @@
       "implementation": "rocm/ported/cuBLAS/Level-3/trsm/cublas_trsm_example.cu",
       "sha256": "cd4a91116c1fba1285b6c3b4d016a41c2bd8e9fb5a0ad9937f2109267cfea838",
       "evidence": null,
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
+    "cuBLAS/Level-3/trsmBatched::cublas_trsmBatched_example.cu": {
+      "implementation": "rocm/ported/cuBLAS/Level-3/trsmBatched/cublas_trsmBatched_example.cu",
+      "sha256": "4377a51b696601014ae01ef83a5e5c6a4ac2f6dc74a59edf82da90963fe27fda",
+      "evidence": "migration/reports/evidence/20261109T115319.593333Z/batch2-rocm/cuBLAS_Level-3_trsmBatched_cublas_trsmBatched_example.cu",
       "physical_devices": [
         {
           "logical_id": 0,
@@ -1351,6 +1450,30 @@
         }
       ]
     },
+    "cuSOLVER/Xgeqrf::cusolver_Xgeqrf_example.cu": {
+      "implementation": "rocm/ported/cuSOLVER/Xgeqrf/cusolver_Xgeqrf_example.cu",
+      "sha256": "e56cccdf4789a3790d0f055fce9089b71281a622adeb4a35baca146dd8b7b85a",
+      "evidence": "migration/reports/evidence/20261109T120230.358799Z/batch2-rocm/cuSOLVER_Xgeqrf_cusolver_Xgeqrf_example.cu",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
+    "cuSOLVER/Xpotrf::cusolver_Xpotrf_example.cu": {
+      "implementation": "rocm/ported/cuSOLVER/Xpotrf/cusolver_Xpotrf_example.cu",
+      "sha256": "c91a678bb65cc000e9addd8251f657e60042bed53f28ee2150882428abc73256",
+      "evidence": "migration/reports/evidence/20261109T120230.358799Z/batch2-rocm/cuSOLVER_Xpotrf_cusolver_Xpotrf_example.cu",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
     "cuSOLVER/Xsyevd::cusolver_Xsyevd_example.cu": {
       "implementation": "rocm/ported/cuSOLVER/Xsyevd/cusolver_Xsyevd_example.cu",
       "sha256": "dea8b9f4f6a8ff7c4db103c7e4617475b6258c7ed7b248430c26664ce77445f3",
@@ -1591,6 +1714,30 @@
         }
       ]
     },
+    "cuSPARSE/spgemm::spgemm_example.c": {
+      "implementation": "rocm/ported/cuSPARSE/spgemm/spgemm_example.c",
+      "sha256": "6fa289667ac059dc809e0d6cd81ef3bfd5a0738cd266914da2e317e8321193f2",
+      "evidence": "migration/reports/evidence/20261109T115319.593333Z/batch2-rocm/cuSPARSE_spgemm_spgemm_example.c",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
+    "cuSPARSE/spgemm_reuse::spgemm_reuse_example.c": {
+      "implementation": "rocm/ported/cuSPARSE/spgemm_reuse/spgemm_reuse_example.c",
+      "sha256": "3fdc6b19404590d7fc8c1d1736e3215ad49299ad3963860a4cf11f09963bf93d",
+      "evidence": "migration/reports/evidence/20261109T115319.593333Z/batch2-rocm/cuSPARSE_spgemm_reuse_spgemm_reuse_example.c",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
     "cuSPARSE/spmm_blockedell::spmm_blockedell_example.cpp": {
       "implementation": "rocm/ported/cuSPARSE/spmm_blockedell/spmm_blockedell_example.cpp",
       "sha256": "d5788dbdfeba2f46270c8b09f5b6af6df956f121cd21b43ee4b45f2d819fd059",
@@ -1735,6 +1882,18 @@
         }
       ]
     },
+    "cuSPARSE/spvv::spvv_example.c": {
+      "implementation": "rocm/ported/cuSPARSE/spvv/spvv_example.c",
+      "sha256": "db306d523f94bc1f1191ce9063319c7d26652f2f7bafd661c08b3a3b3fabc233",
+      "evidence": "migration/reports/evidence/20261109T115319.593333Z/batch2-rocm/cuSPARSE_spvv_spvv_example.c",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
     "cuTENSOR::contraction.cu": {
       "implementation": "rocm/probes/tensor_rocblas.hip",
       "sha256": "7c94e8b6ddb26fe62d502c9f5f3a7f5cde3513c638ad39528dcf49d3de5dbee7",
@@ -1744,6 +1903,54 @@
           "logical_id": 0,
           "pci_bdf": "0000:e3:00.0",
           "physical_id": 7
+        }
+      ]
+    },
+    "cuTENSOR::elementwise_binary.cu": {
+      "implementation": "rocm/ported/cuTENSOR/elementwise_binary.cu",
+      "sha256": "6eae891e0dfb609f19e85c823d59ccbf35ddbd9b0a58aeb50b32774e1eda4086",
+      "evidence": "migration/reports/evidence/20261109T120640.677903Z/batch2-rocm/cuTENSOR_elementwise_binary.cu",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
+    "cuTENSOR::elementwise_permute.cu": {
+      "implementation": "rocm/ported/cuTENSOR/elementwise_permute.cu",
+      "sha256": "d4f957bc63ae451e93323f9b8feb06b3f07813d5eb922bd772c950aabf55c0bc",
+      "evidence": "migration/reports/evidence/20261109T120640.677903Z/batch2-rocm/cuTENSOR_elementwise_permute.cu",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
+    "cuTENSOR::elementwise_trinary.cu": {
+      "implementation": "rocm/ported/cuTENSOR/elementwise_trinary.cu",
+      "sha256": "03dfedfab9c8736b9cf7175f30b8646698bedd79e25f6ae3041fa4a433844967",
+      "evidence": "migration/reports/evidence/20261109T120640.677903Z/batch2-rocm/cuTENSOR_elementwise_trinary.cu",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
+    "cuTENSOR::reduction.cu": {
+      "implementation": "rocm/ported/cuTENSOR/reduction.cu",
+      "sha256": "8bf134a71342ed866292b11c6d59912982e43ea5918b840923562a8f1754a2e2",
+      "evidence": "migration/reports/evidence/20261109T120640.677903Z/batch2-rocm/cuTENSOR_reduction.cu",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
         }
       ]
     }

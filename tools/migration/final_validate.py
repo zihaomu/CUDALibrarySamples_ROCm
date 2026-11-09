@@ -4,6 +4,7 @@ import collections,datetime,hashlib,json,pathlib,re,subprocess,urllib.parse
 from catalog import ROOT,BASE,CANDIDATES
 from run import digest
 from operator_support import summarize
+from batch2_spec import ALL
 
 def main():
  errors=[];checks={};cat=json.loads((ROOT/'migration/samples.yaml').read_text());samples=cat['samples'];counts=collections.Counter(s['status'] for s in samples);proofs={}
@@ -71,6 +72,11 @@ def main():
  if canonical.exists():require((ROOT/'migration/design.md').read_bytes()==canonical.read_bytes(),'Design snapshot differs from canonical document')
  m1=json.loads((ROOT/'migration/reports/m1-comparison.json').read_text());require(len(m1)==16 and all(r['status']=='PASSED' for r in m1) and sum(len(r['cases']) for r in m1)==95,'M1 16/95 comparison incomplete')
  more=json.loads((ROOT/'migration/reports/additional-comparison.json').read_text());require(len(more)==54 and all(r['status']=='PASSED' for r in more),'Additional 54 comparisons incomplete')
+ batch=json.loads((ROOT/'migration/reports/batch2-validation.json').read_text());require(len(batch)==len(ALL) and {r['source'] for r in batch}==set(ALL),'Batch2 sample scope incomplete')
+ for r in batch:
+  require(r['status']==r['cuda_comparison']=='PASSED' and {c['case'] for c in r['cases']}==set(ALL[r['source']]) and all(c['status']=='PASSED' for c in r['cases']) and all(c['status']=='PASSED' and c['identical_input'] for c in r['cuda_cases']),'Batch2 qualification incomplete '+r['source'])
+ negative=json.loads((ROOT/'migration/reports/batch2-negative-checks.json').read_text());require(negative['status']=='PASSED' and len(negative['checks'])==21 and all(c['rejected'] for c in negative['checks']),'Negative numerical gates incomplete')
+ require('Regenerated and hash-verified 27 input buffers' in (ROOT/'migration/reports/batch2-fixture-replay.log').read_text(),'Tensor fixture regeneration not verified')
  ctest=(ROOT/'migration/reports/ctest-final.log').read_text();require('100% tests passed, 0 tests failed out of 16' in ctest,'Final 16 CTest checks not passed')
  perf=json.loads((ROOT/'migration/reports/performance-comparison.json').read_text());require(perf['status']=='BLOCKED' and len(perf['profiles'])==6 and all(v['qualified_speed_ratio'] is None for v in perf['profiles']),'Performance ratio incorrectly qualified')
  manifest=json.loads((ROOT/'migration/source-tree.json').read_text())
@@ -79,6 +85,6 @@ def main():
  for name,r in manifest['fixtures'].items():require(digest(ROOT/name)==r['sha256'],'Fixture seal mismatch '+name)
  diff=subprocess.run(['git','diff','--check'],cwd=ROOT,text=True,capture_output=True);require(diff.returncode==0,'git diff --check: '+diff.stdout+diff.stderr)
  staged=subprocess.run(['git','diff','--cached','--check'],cwd=ROOT,text=True,capture_output=True);require(staged.returncode==0,'git diff --cached --check: '+staged.stdout+staged.stderr)
- checks.update(unique_entrypoints=len(samples),terminal_counts=dict(counts),families=len(CANDIDATES),verified_operator_families=operators['verified_operator_families'],modules_with_verified_operators=operators['modules_with_verified_operators'],upstream_sources_unchanged=len(cat['sources']),upstream_build_definitions_unchanged=len(cat['build_definitions']),current_qualified_proofs=len(proofs),detail_pages=len(pages),generated_relative_links=link_count,m1_samples=16,m1_required_cases=95,additional_comparisons=len(more),ctest_samples=16,performance_profiles=6,performance_qualification='BLOCKED',source_files_sealed=len(manifest['files']),source_tree_sha256=manifest['tree_sha256'])
+ checks.update(unique_entrypoints=len(samples),terminal_counts=dict(counts),families=len(CANDIDATES),verified_operator_families=operators['verified_operator_families'],modules_with_verified_operators=operators['modules_with_verified_operators'],upstream_sources_unchanged=len(cat['sources']),upstream_build_definitions_unchanged=len(cat['build_definitions']),current_qualified_proofs=len(proofs),detail_pages=len(pages),generated_relative_links=link_count,m1_samples=16,m1_required_cases=95,additional_comparisons=len(more),batch2_samples=len(batch),batch2_cases=sum(len(r['cases']) for r in batch),batch2_corrupted_outputs_rejected=len(negative['checks']),ctest_samples=16,performance_profiles=6,performance_qualification='BLOCKED',source_files_sealed=len(manifest['files']),source_tree_sha256=manifest['tree_sha256'])
  report={'status':'PASSED' if not errors else 'FAILED','scope':'Consistency and proof integrity of the recorded execution outcomes; not a claim that failed/unimplemented samples were successfully migrated.','timestamp':datetime.datetime.now(datetime.timezone.utc).isoformat(),'checks':checks,'errors':errors,'qualified_implementations':proofs};(ROOT/'migration/reports/final-validation.json').write_text(json.dumps(report,indent=2,ensure_ascii=False)+'\n');print(json.dumps({'status':report['status'],'checks':checks,'errors':errors},indent=2,ensure_ascii=False));return int(bool(errors))
 if __name__=='__main__':raise SystemExit(main())

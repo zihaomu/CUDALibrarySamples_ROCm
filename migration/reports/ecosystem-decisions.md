@@ -4,16 +4,16 @@
 
 | 子项目 | 已执行结果与失败边界 | 恢复条件 |
 | --- | --- | --- |
-| cuBLAS | 常规运算用 hipBLAS/rocBLAS；Emulation、3m、部分 Ex/packed 转换等仍有接口/算法改写缺口。 | 实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。 |
+| cuBLAS | 常规运算与第二批索引/旋转/batch 已验收；rotmg 原生重复缩放错误由项目 HIP GPU 修正。Emulation、3m、部分 Ex/packed 转换仍有接口/算法改写缺口。 | 实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。 |
 | cuBLASLt | FP32 与两种 HSH FP16 batch 路径验证通过；高级 scale/quantization、grouped/autotune 接口及 FP8 格式不能按名字强行等同。 | 实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。 |
-| cuSPARSE | CSR/COO/blocked ELL 等逐例验证；BSR SDDMM 返回未实现，部分新转换、workspace/custom operator 仍待 API/算法改写。 | 实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。 |
-| cuSOLVER | hipSOLVER/rocSOLVER 基础分解有独立数值验收；Mg、IRS、部分 64-bit/Jacobi/近似 API 或未覆盖的独立 oracle 保留失败/部分完成。 | 实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。 |
+| cuSPARSE | CSR/COO/blocked ELL 及 SpVV/SpGEMM/reuse 数值变化已验收；CG/BiCGSTAB/graph 等缺独立检查，BSR SDDMM 与部分新转换/custom operator 路线仍失败。 | 实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。 |
+| cuSOLVER | 基础分解及第二批 Xgeqrf/Xpotrf 重构、残差已验收；Mg、IRS、其余 64-bit/Jacobi/近似 API 或专用 oracle 缺口仍失败/部分完成。 | 实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。 |
 | cuFFT | 原始单卡、双卡、legacy/JIT callback 分别实现；1D Xt 不支持的单 batch 路径改用 hipFFT + RCCL + GPU 合并，JIT 使用 SPIR-V。 | 实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。 |
 | cuRAND | 36 个 generator/distribution 的原始参数、重复性与解析分布矩均验证；MT19937 初始化需较长时限，跨库序列不要求相同。 | 实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。 |
 | cuDSS | simple 的 C++/Fortran 用 CPU 稀疏符号图 + rocSOLVER CSRRF GPU 数值分解/求解；高级 descriptor、Schur、分布式、allocator 等 API 尚未完整改写。 | 实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。 |
 | cuSOLVERSp2cuDSS | 原例对比两个 NVIDIA 稀疏直接求解 API；没有完成保持两条路线及对应配置语义的 AMD 改写。 | 实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。 |
 | cuSPARSELt | hipSPARSELt 已编译并真实运行，gfx1201 kernel 数据缺失；锁定源码的支持架构列表也不接受 gfx1201，不能用 dense GEMM 代替结构化稀疏。 | 使用有匹配 kernel bundle 的受支持 GPU，或新的 gfx1201 hipSPARSELt 实现/包；重新跑 prune/compress/matmul 与 CPU 参考。 |
-| cuTENSOR | gfx1201 上 hipTensor 拒绝 FP32 contraction；基础 4D contraction 改用保持 FP32 的 rocBLAS + HIP 排列。其他原始运算仍逐例失败或待独立验收。 | 实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。 |
+| cuTENSOR | hipTensor 的 binary/trinary、permutation、reduction 原始 extents 与小尺寸全部输出通过 CPU/CUDA；FP32 contraction 架构 gate 缺口由 rocBLAS + HIP 排列补足；其它高级/绑定场景仍失败。 | 实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。 |
 | cuTENSORMg | 单进程跨卡 tensor 分区/布局/通信 API 尚未实现；单卡 hipTensor 不等同 Mg。 | 实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。 |
 | cuTENSORMp | 原始 MPI tensor 描述与分布式算法尚未改写；RCCL 基础可行性不等同原始 Mp profile。 | 实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。 |
 | cuBLASMp | 已验证双卡 hipBLAS/RCCL 基础计算，但原始 MPI 进程网格、block-cyclic 数据分布、各精度和高级 profile 尚未实现。 | 实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。 |

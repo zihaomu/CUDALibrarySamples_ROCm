@@ -14,6 +14,13 @@ def validate(source,log):
   if kind.startswith('syg'):
    B=v['B'].reshape((lda,n),order='F');check('eigenvalues',W,eigh(A,B,eigvals_only=True));check('residual',A@V,B@V@np.diag(W));check('B-orthogonality',V.T@B@V,np.eye(n))
   else:check('eigenvalues',W,np.linalg.eigvalsh(A));check('residual',A@V,V@np.diag(W));check('orthogonality',V.T@V,np.eye(n))
+ elif kind=='Xgeqrf':
+  packed=o['A'].reshape((lda,n),order='F')[:m,:];tau=o['tau'];Q=np.eye(m)
+  for j,t in enumerate(tau):
+   u=np.zeros(m);u[j]=1;u[j+1:]=packed[j+1:,j];Q=Q@(np.eye(m)-t*np.outer(u,u))
+  R=np.triu(packed);check('QR-reconstruction',Q@R,A);check('Q-orthogonality',Q.T@Q,np.eye(m))
+ elif kind=='Xpotrf':
+  L=np.tril(o['L'].reshape((lda,n),order='F')[:m,:]);X=o['X'].reshape((n,-1),order='F');B=v['B'].reshape((m,-1),order='F');check('Cholesky-reconstruction',L@L.T,A);check('solve-residual',A@X,B)
  elif kind=='orgqr':
   Q=o['Q'].reshape((lda,n),order='F')[:m,:];check('orthogonality',Q.T@Q,np.eye(n));R=Q.T@A;check('QR-reconstruction',Q@R,A);check('R-upper',np.tril(R,-1),np.zeros_like(R))
  elif kind=='gesvdj':
