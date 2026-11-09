@@ -4,7 +4,7 @@
 
 对照 NVIDIA CUDA Library Samples，逐例选择 AMD/ROCm 生态中适合的库并实现。每例公开实际使用库、实现程度、正确性结果、CUDA 对照及失败原因。保留 CUDA 原始源码作为参考；AMD 实验固定 ROCm 10.1.0 / Radeon AI PRO R9700（gfx1201），CUDA 对照使用双 RTX 5090 机器。
 
-[模块支持矩阵](#模块支持矩阵) · [已验收算子](#已验收算子与验证范围) · [未通过的具体原因](#未通过和不支持的具体原因) · [设计与实施日志](migration/design.md) · [执行交付报告](migration/reports/plan-execution.md) · [逐例清单](migration/samples.yaml) · [环境锁](migration/environments/project.lock.json)
+[支持方式与详细日志总表](migration/reports/support-log-index.md) · [模块支持矩阵](#模块支持矩阵) · [已验收算子](#已验收算子与验证范围) · [未通过的具体原因](#未通过和不支持的具体原因) · [设计与实施日志](migration/design.md) · [执行交付报告](migration/reports/plan-execution.md) · [逐例清单](migration/samples.yaml) · [环境锁](migration/environments/project.lock.json)
 
 ## 当前结果
 
@@ -97,7 +97,7 @@ PASSED: 166；PARTIAL: 6；FAILED: 464；BLOCKED: 1；UNSUPPORTED: 2；NOT_START
 | FAILED / `BINDING_OR_FRONTEND_MIGRATION_REQUIRED` | 73 | Fortran/Python 的 NVIDIA module、CUDA Fortran device 语法或 Python vendor 绑定尚未改写；前端/import 尝试失败。 | [语言资格记录](migration/reports/languages.json)；需补 AMD C ABI/ISO_C_BINDING 或真实 GPU Python 绑定。 |
 | FAILED / `RUNTIME_ERROR` | 6 | 已编译但执行失败：包括原始 Xgetrf 路径、BSR SDDMM、SELL SpSV，以及 tensor cache/einsum/padding 场景；具体参数/架构/实现原因见逐例日志。 | [原始 profile 尝试](migration/reports/original-rocm-latest.json)；修复失败调用，重新做独立数值检查。 |
 | FAILED / `TIMEOUT` | 1 | cuTENSOR trinary contraction 在记录的时限内未结束，未获得合格结果。 | [逐例报告](migration/sample-reports/cuTENSOR/contraction_trinary.cu.md)；定位执行/规模问题后重跑。 |
-| PARTIAL / `INDEPENDENT_VALIDATION_PENDING` | 4 | 原始输入已在 AMD 上执行，但尚缺专用独立数值/语义 oracle；剩余为部分 solver、CG/BiCGSTAB、五对角批量求解和 graph capture 场景。 | 逐例 required cases 保留缺项；补 CPU/数学参考和边界检查，返回 0 不能代替验收。 |
+| PARTIAL / `INDEPENDENT_VALIDATION_PENDING` | 4 | 剩余为 Xgeev 三例与 gesvdaStridedBatched：需排除 CPU 兼容执行，或确认近似算法和 residual norm 语义，并补齐对应独立验收。第三批稀疏与图捕获已通过。 | 逐例 required cases 保留缺项；补 CPU/数学参考和边界检查，返回 0 不能代替验收。 |
 | PARTIAL / `SEMANTIC_GAP` | 2 | LZ4 和 JPEG 仅完成上述子集，尚未保留完整原样例的 API、输入和执行流程。 | [能力探针](migration/reports/native-probes.json)、[JPEG 像素对照](migration/reports/rocjpeg-cpu.json)；补完整原始功能。 |
 | UNSUPPORTED / `HW_UNSUPPORTED` | 2 | 锁定 ROCm 10.1.0 hipSPARSELt/gfx1201 缺 Tensile kernel bundle；实际运行报错且固定源码的架构 gate 拒绝该目标。 | [实测与源码证据](cuSPARSELt/README.md)；需匹配 kernel bundle、新实现或受支持 GPU，不能以 dense GEMM 替代。 |
 | BLOCKED / `ENV_MISSING_DEP` | 1 | nvJPEG Python 测试的 imports 已通过，但 AMD decoder 可执行文件/完整 CLI 测试前置条件尚未实现。 | [逐例报告](migration/sample-reports/nvJPEG/nvJPEG-Decoder/tests/test_decoder.py.md)；补 GPU 可执行文件后执行原始测试。 |
