@@ -522,12 +522,13 @@ artifacts/<run-id>/<sample-id>/<backend>/<case-id>/
 | S46 | 已完成 | solver4项14/14输入三方通过：gesvdjBatched逐batch奇异值/重构/完整U和V正交性，含秩亏；syevjBatched未排序原例、排序与扰动，保持W/V配对；syevdx/sygvdx索引、值域、全量、空区间，只观察meig个结果并检查普通/B正交性。AMD在物理GPU2执行。 | 执行SpVV真实Graph Capture和三次输入变化replay，检查非空图及GPU kernel节点。 |
 | S47 | 已完成 | Graph Capture的3/3输入三方通过：原规模65536元素、1000次SpVV捕获2000个GPU kernel节点；每case三次实际replay，修改Y后结果变化，零输入回零。切换device pointer mode，修正原例未初始化输入与未验输出。24/24有限值/NaN/特征配对/meig/空图/无kernel/假replay反向检查均拒绝；36/36稀疏输入buffer重建或固定fixture hash核对通过。 | 更新首页、逐例矩阵、可复现实验报告与最终完整性检查，然后推送fork。 |
 | S48 | 已完成 | 第三批交付完整性检查通过：639入口终态、166份当前源码验收证明、30模块矩阵、639详情页、6883个生成相对链接、866源文件与477构建定义保持原样；8/26三方、24反向与36输入身份均通过，历史M1/第二批证明无回归。当前166 PASSED、6 PARTIAL、464 FAILED、2 UNSUPPORTED、1 BLOCKED，算子/功能族91。 | 提交第三批实现与证据，干净检出离线复核，推送fork并验证远端README。 |
+| S49 | 已完成 | 第三批实现提交c9f83141已推送zihaomu/CUDALibrarySamples_ROCm main；无build产物/CPU依赖/外部doc的干净检出离线复核通过166份源码证明，远端main SHA和GitHub首页README blob均与本地匹配。报告、逐例库/范围/缺口和8/26验收已发布。 | 同步发布验证记录与设计快照，确认最终远端与工作区干净。 |
 
 ## 12. 当前实施快照（工具刷新）
 
 本节替代设计阶段的未开始快照。逐步过程保留在第 11 节；整例成功、部分功能、路线失败分别报告，不将执行过计划解释为所有功能均已迁移成功。
 
-更新时间：2026-11-09T14:07:51.562091+00:00。
+更新时间：2026-11-09T14:09:04.037614+00:00。
 
 清单为 **639 个独立可执行/脚本源入口**（563 C/C++、76 Fortran/Python），逐例均有实际尝试记录。当前：`PASSED` 166；`PARTIAL` 6；`FAILED` 464；`BLOCKED` 1；`UNSUPPORTED` 2；`NOT_STARTED` 0；`IN_PROGRESS` 0。
 
