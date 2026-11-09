@@ -44,6 +44,9 @@ python3 tools/migration/render.py
 batch=r/'batch2-validation.json'
 if batch.exists():
  rows=json.loads(batch.read_text());good=[x for x in rows if x['status']=='PASSED'];text+='第二批：'+str(len(good))+'/17 样例、'+str(sum(len(x['cases']) for x in good))+' 个输入 case 通过独立 CPU，CUDA 对照 '+str(sum(x['cuda_comparison']=='PASSED' for x in rows))+'/17。覆盖稀疏 3、BLAS 8、tensor 4、solver 2；tensor 保留原始规模，全部语义输出检查，加小尺寸/非零系数/零系数。27 个共享大/小输入 buffer 可按 seed=20261109 重建并逐文件核对 SHA256。原生 rotmg 重复缩放 H 错误由项目 HIP GPU 修正；原生失败与精确失败源码另存。详细见 `migration/reports/batch2.md` 与 `rotmg-scale-fix.md`。CUDA 侧 cuTENSOR 2.8.1 仅安装在项目 build overlay，单独锁定 library/wheel hash。\n\n'
+batch=r/'batch3-validation.json'
+if batch.exists():
+ rows=json.loads(batch.read_text());good=[x for x in rows if x['status']==x['cuda_comparison']=='PASSED'];text+='第三批：'+str(len(good))+'/8 样例、'+str(sum(len(x['cases']) for x in good))+' 个输入 case 三方通过。稀疏3项 → solver4项 → Graph Capture1项依次完成。CG/BiCGSTAB 保留原始700×700网格，独立CSR/CPU求解/真实残差/收敛检查；BiCG变体共享捕获RHS消除生成顺序造成的末位差异，36个输入buffer可重建或按固定fixture核对hash。solver按batch和实际meig检查，含秩亏、未排序配对及索引/值域/全量/空区间。原规模SpVV图含2000个GPU kernel节点，三次输入变化replay通过；24个数值/图语义反向检查全部拒绝。AMD稀疏用物理GPU0，之后该卡被预约，guard阻止启动，solver/graph改用HIP ordinal1→物理GPU2。报告：`migration/reports/batch3.md`。\n\n'
 with DOC.with_suffix('.lock').open('w') as lock:
  fcntl.flock(lock,fcntl.LOCK_EX);body=DOC.read_text();start=body.index('## 12.');end=body.index('## 附录 A',start);body=body[:start]+text+body[end:];body=body.replace('HIP_VISIBLE_DEVICES=0 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh','HIP_VISIBLE_DEVICES=2 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh');DOC.write_text(body.rstrip()+'\n')
 print('Current design snapshot refreshed')

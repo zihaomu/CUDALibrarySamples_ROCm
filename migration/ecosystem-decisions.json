@@ -8,11 +8,11 @@
     "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。"
   },
   "cuSPARSE": {
-    "reason": "CSR/COO/blocked ELL 及 SpVV/SpGEMM/reuse 数值变化已验收；CG/BiCGSTAB/graph 等缺独立检查，BSR SDDMM 与部分新转换/custom operator 路线仍失败。",
+    "reason": "CSR/COO/blocked ELL、SpVV/SpGEMM/reuse、CG/BiCGSTAB、gpsvInterleavedBatch 与真实 SpVV Graph Capture/Replay 已通过独立 CPU 和 CUDA 验收。BSR SDDMM、部分新转换/custom operator 与其它原始入口仍失败，不能推及整个库。",
     "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。"
   },
   "cuSOLVER": {
-    "reason": "基础分解及第二批 Xgeqrf/Xpotrf 重构、残差已验收；Mg、IRS、其余 64-bit/Jacobi/近似 API 或专用 oracle 缺口仍失败/部分完成。",
+    "reason": "基础分解、Xgeqrf/Xpotrf、gesvdjBatched、syevjBatched、syevdx/sygvdx 已验收；后四项检查逐batch重构/配对、meig与选区。Xgeev三例仍需排除CPU兼容路径，gesvdaStridedBatched仍需确认近似算法与残差语义，保留PARTIAL；Mg、IRS等其它入口缺AMD改写或oracle。",
     "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。"
   },
   "cuFFT": {

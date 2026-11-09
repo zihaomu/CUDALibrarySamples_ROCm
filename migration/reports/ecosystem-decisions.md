@@ -6,8 +6,8 @@
 | --- | --- | --- |
 | cuBLAS | 常规运算与第二批索引/旋转/batch 已验收；rotmg 原生重复缩放错误由项目 HIP GPU 修正。Emulation、3m、部分 Ex/packed 转换仍有接口/算法改写缺口。 | 实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。 |
 | cuBLASLt | FP32 与两种 HSH FP16 batch 路径验证通过；高级 scale/quantization、grouped/autotune 接口及 FP8 格式不能按名字强行等同。 | 实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。 |
-| cuSPARSE | CSR/COO/blocked ELL 及 SpVV/SpGEMM/reuse 数值变化已验收；CG/BiCGSTAB/graph 等缺独立检查，BSR SDDMM 与部分新转换/custom operator 路线仍失败。 | 实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。 |
-| cuSOLVER | 基础分解及第二批 Xgeqrf/Xpotrf 重构、残差已验收；Mg、IRS、其余 64-bit/Jacobi/近似 API 或专用 oracle 缺口仍失败/部分完成。 | 实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。 |
+| cuSPARSE | CSR/COO/blocked ELL、SpVV/SpGEMM/reuse、CG/BiCGSTAB、gpsvInterleavedBatch 与真实 SpVV Graph Capture/Replay 已通过独立 CPU 和 CUDA 验收。BSR SDDMM、部分新转换/custom operator 与其它原始入口仍失败，不能推及整个库。 | 实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。 |
+| cuSOLVER | 基础分解、Xgeqrf/Xpotrf、gesvdjBatched、syevjBatched、syevdx/sygvdx 已验收；后四项检查逐batch重构/配对、meig与选区。Xgeev三例仍需排除CPU兼容路径，gesvdaStridedBatched仍需确认近似算法与残差语义，保留PARTIAL；Mg、IRS等其它入口缺AMD改写或oracle。 | 实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。 |
 | cuFFT | 原始单卡、双卡、legacy/JIT callback 分别实现；1D Xt 不支持的单 batch 路径改用 hipFFT + RCCL + GPU 合并，JIT 使用 SPIR-V。 | 实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。 |
 | cuRAND | 36 个 generator/distribution 的原始参数、重复性与解析分布矩均验证；MT19937 初始化需较长时限，跨库序列不要求相同。 | 实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。 |
 | cuDSS | simple 的 C++/Fortran 用 CPU 稀疏符号图 + rocSOLVER CSRRF GPU 数值分解/求解；高级 descriptor、Schur、分布式、allocator 等 API 尚未完整改写。 | 实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。 |
@@ -43,4 +43,4 @@
 - [AMD JIT callback 编译说明](https://rocm.docs.amd.com/projects/rocFFT/en/develop/how-to/load-store-callbacks.html)：本项目验证实际 ROCm 10.1 API 与 SPIR-V；文档 develop 分支本身不是运行成功证据。
 - [hipCOMP 固定源码](https://github.com/ROCm/hipCOMP-core/tree/03df9f7369211ee15d370817165224c73fdc9a46)：保留项目构建日志和 library hash，范围仅限实际测试 codec。
 
-GPU 资源限制：部分正确性检查与其他任务共用卡，数值结果逐项验收；性能必须通过独占/空闲资格。当前 GPU0/1/4/5 有大任务，GPU2/6 被预约，GPU3 排除计算，GPU7 也有任务。6 个 GEMM 原始计时保留为竞争条件下观察，不发布合格速度比。
+GPU 资源限制：部分正确性检查与其他任务共用卡，数值结果逐项验收；性能必须通过独占/空闲资格。资格依据各批 evidence 的动态占用和预约记录；第三批启动时用物理GPU0，后因其它任务预约改用物理GPU2，GPU3 始终排除。6 个 GEMM 原始计时保留为竞争条件下观察，不发布合格速度比。

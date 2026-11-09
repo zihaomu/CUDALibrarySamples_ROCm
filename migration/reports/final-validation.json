@@ -1,24 +1,24 @@
 {
   "status": "PASSED",
   "scope": "Consistency and proof integrity of the recorded execution outcomes; not a claim that failed/unimplemented samples were successfully migrated.",
-  "timestamp": "2026-11-09T12:22:38.911190+00:00",
+  "timestamp": "2026-11-09T14:07:52.414376+00:00",
   "checks": {
     "unique_entrypoints": 639,
     "terminal_counts": {
       "FAILED": 464,
-      "PASSED": 158,
-      "PARTIAL": 14,
+      "PASSED": 166,
+      "PARTIAL": 6,
       "UNSUPPORTED": 2,
       "BLOCKED": 1
     },
     "families": 30,
-    "verified_operator_families": 87,
+    "verified_operator_families": 91,
     "modules_with_verified_operators": 9,
     "upstream_sources_unchanged": 866,
     "upstream_build_definitions_unchanged": 477,
-    "current_qualified_proofs": 158,
+    "current_qualified_proofs": 166,
     "detail_pages": 639,
-    "generated_relative_links": 6854,
+    "generated_relative_links": 6883,
     "m1_samples": 16,
     "m1_required_cases": 95,
     "additional_comparisons": 54,
@@ -28,8 +28,12 @@
     "ctest_samples": 16,
     "performance_profiles": 6,
     "performance_qualification": "BLOCKED",
-    "source_files_sealed": 1085,
-    "source_tree_sha256": "c0bcaa723c3f1f2753a7a11957237572d0af64b1f14d042d15369b1d19777161"
+    "source_files_sealed": 1101,
+    "source_tree_sha256": "66738ee5f06563feb6b39c6d188c77e0fc8590346ff5f9fde3bdfc8af1080c9b",
+    "batch3_samples": 8,
+    "batch3_cases": 26,
+    "batch3_corruptions_rejected": 24,
+    "batch3_input_buffers_verified": 36
   },
   "errors": [],
   "qualified_implementations": {
@@ -1510,6 +1514,18 @@
         }
       ]
     },
+    "cuSOLVER/gesvdjBatched::cusolver_gesvdjBatched_example.cu": {
+      "implementation": "rocm/ported/cuSOLVER/gesvdjBatched/cusolver_gesvdjBatched_example.cu",
+      "sha256": "4c03433d37e8c08b014d2e165d2bb38ce4a48f08c86c26fedd1e1beb172c1d27",
+      "evidence": "migration/reports/evidence/20261109T140152.327246Z/batch3-rocm/cuSOLVER_gesvdjBatched_cusolver_gesvdjBatched_example.cu",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:43:00.0",
+          "physical_id": 2
+        }
+      ]
+    },
     "cuSOLVER/getrf::cusolver_getrf_example.cu": {
       "implementation": "rocm/cuSOLVER/getrf/sample.cpp",
       "sha256": "123f27737a7557e040a2849ad7e93134361a83d513dec78e6eea93f5aa2ec054",
@@ -1558,6 +1574,18 @@
         }
       ]
     },
+    "cuSOLVER/syevdx::cusolver_syevdx_example.cu": {
+      "implementation": "rocm/ported/cuSOLVER/syevdx/cusolver_syevdx_example.cu",
+      "sha256": "7b09e7fc79487c2ea88c710317ee010c0af22c4fc51c6ddddb56cc861bebd716",
+      "evidence": "migration/reports/evidence/20261109T140152.327246Z/batch3-rocm/cuSOLVER_syevdx_cusolver_syevdx_example.cu",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:43:00.0",
+          "physical_id": 2
+        }
+      ]
+    },
     "cuSOLVER/syevj::cusolver_syevj_example.cu": {
       "implementation": "rocm/ported/cuSOLVER/syevj/cusolver_syevj_example.cu",
       "sha256": "b10d35db94ded23d3b18e16d25adba3c13b7b83be7a683983d64b43511f4b54c",
@@ -1570,6 +1598,18 @@
         }
       ]
     },
+    "cuSOLVER/syevjBatched::cusolver_syevjBatched_example.cu": {
+      "implementation": "rocm/ported/cuSOLVER/syevjBatched/cusolver_syevjBatched_example.cu",
+      "sha256": "760fc8e9d5484764ded39107265e2013dd08ba179a47cb4b491144f5b50c1830",
+      "evidence": "migration/reports/evidence/20261109T140152.327246Z/batch3-rocm/cuSOLVER_syevjBatched_cusolver_syevjBatched_example.cu",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:43:00.0",
+          "physical_id": 2
+        }
+      ]
+    },
     "cuSOLVER/sygvd::cusolver_sygvd_example.cu": {
       "implementation": "rocm/ported/cuSOLVER/sygvd/cusolver_sygvd_example.cu",
       "sha256": "7f5e0dcccffc30929087c39fdd8ab882ff2c1c5a2c01b0dd6b44475dc547fcaf",
@@ -1579,6 +1619,18 @@
           "logical_id": 0,
           "pci_bdf": "0000:23:00.0",
           "physical_id": 1
+        }
+      ]
+    },
+    "cuSOLVER/sygvdx::cusolver_sygvdx_example.cu": {
+      "implementation": "rocm/ported/cuSOLVER/sygvdx/cusolver_sygvdx_example.cu",
+      "sha256": "29d0ccfa121739df21a2c2307bb3f3f6ae4ac097a608c90889cb61acba8774e2",
+      "evidence": "migration/reports/evidence/20261109T140152.327246Z/batch3-rocm/cuSOLVER_sygvdx_cusolver_sygvdx_example.cu",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:43:00.0",
+          "physical_id": 2
         }
       ]
     },
@@ -1603,6 +1655,30 @@
           "logical_id": 0,
           "pci_bdf": "0000:23:00.0",
           "physical_id": 1
+        }
+      ]
+    },
+    "cuSPARSE/bicgstab::bicgstab_example.c": {
+      "implementation": "rocm/ported/cuSPARSE/bicgstab/bicgstab_example.c",
+      "sha256": "d5d100e07a829080f2aeb7b420c429ac7326254e4be9f51faba1e2523b698fe5",
+      "evidence": "migration/reports/evidence/20261109T140002.910290Z/batch3-rocm/cuSPARSE_bicgstab_bicgstab_example.c",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
+    "cuSPARSE/cg::cg_example.c": {
+      "implementation": "rocm/ported/cuSPARSE/cg/cg_example.c",
+      "sha256": "7feb8a68fef22e1493c4c6baa1f493c5303445f1af32c3a3b188b91a677fb5a4",
+      "evidence": "migration/reports/evidence/20261109T140002.910290Z/batch3-rocm/cuSPARSE_cg_cg_example.c",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
         }
       ]
     },
@@ -1651,6 +1727,30 @@
           "logical_id": 0,
           "pci_bdf": "0000:23:00.0",
           "physical_id": 1
+        }
+      ]
+    },
+    "cuSPARSE/gpsvInterleavedBatch::gpsvInterleavedBatch_example.c": {
+      "implementation": "rocm/ported/cuSPARSE/gpsvInterleavedBatch/gpsvInterleavedBatch_example.c",
+      "sha256": "7bb5372a11cd0d33b9e9db9bdeb9d3312e43d945d2726ab291a65197af3f0a97",
+      "evidence": "migration/reports/evidence/20261109T135624.134389Z/batch3-rocm/cuSPARSE_gpsvInterleavedBatch_gpsvInterleavedBatch_example.c",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
+    "cuSPARSE/graph_capture::graph_capture_example.c": {
+      "implementation": "rocm/ported/cuSPARSE/graph_capture/graph_capture_example.c",
+      "sha256": "1089082d367b9b7893739a912e42581a178941e4e81c3de97f303a09889f9cca",
+      "evidence": "migration/reports/evidence/20261109T140254.599681Z/batch3-rocm/cuSPARSE_graph_capture_graph_capture_example.c",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:43:00.0",
+          "physical_id": 2
         }
       ]
     },

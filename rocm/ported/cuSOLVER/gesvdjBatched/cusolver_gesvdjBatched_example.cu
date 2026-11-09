@@ -1,4 +1,9 @@
 #include "observe.hpp"
+#include "binary_observe.hpp"
+#include <string>
+#include <vector>
+#include <cstdlib>
+#include "observe.hpp"
 /*
  * SPDX-FileCopyrightText: Copyright (c) 2020 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
@@ -27,6 +32,9 @@
 #include "cusolver_utils.h"
 
 int main(int argc, char *argv[]) {
+// MIGRATION_BATCH3: preserve original GPU mathematical calls.
+const std::string migration_case=std::getenv("MIGRATION_CASE")?std::getenv("MIGRATION_CASE"):"original";
+
     hipsolverHandle_t cusolverH = NULL;
     hipStream_t stream = NULL;
     hipsolverGesvdjInfo_t gesvdj_params = NULL;
@@ -137,6 +145,9 @@ int main(int argc, char *argv[]) {
     CUSOLVER_CHECK(hipsolverDnXgesvdjSetSortEig(gesvdj_params, sort_svd));
 
     /* step 3: copy A to device */
+if(migration_case=="perturbed")for(size_t i=0;i<A.size();++i)A[i]+=double(int(i%5)-2)/8.;
+if(migration_case=="rank-deficient")for(int b=0;b<batchSize;++b)for(int i=0;i<m;++i)A[b*lda*n+lda+i]=2*A[b*lda*n+i];
+migration_observer::emit("input_A",A.data(),A.size());
     CUDA_CHECK(hipMalloc(reinterpret_cast<void **>(&d_A), sizeof(double) * A.size()));
     CUDA_CHECK(hipMalloc(reinterpret_cast<void **>(&d_U), sizeof(double) * U.size()));
     CUDA_CHECK(hipMalloc(reinterpret_cast<void **>(&d_V), sizeof(double) * V.size()));

@@ -18,11 +18,12 @@ def operator_name(sample):
  if family=='cuPQC':return 'SHA3-256' if 'sha3' in path.name else 'SHA-256'
  if family=='cuRAND':return re.search(r'_(lognormal|normal|uniform|poisson)_example',path.name)[1]
  if family=='cuSOLVER':
-  if kind in {'syevd','xsyevd','syevj'}:return '对称特征分解'
-  if kind in {'sygvd','sygvj'}:return '广义对称特征分解'
-  if kind in {'gesvd','gesvdj'}:return 'SVD'
+  if kind in {'syevd','xsyevd','syevj','syevjbatched','syevdx'}:return '对称特征分解'
+  if kind in {'sygvd','sygvj','sygvdx'}:return '广义对称特征分解'
+  if kind in {'gesvd','gesvdj','gesvdjbatched'}:return 'SVD'
   return {'getrf':'LU 分解/求解','orgqr':'QR 的 Q 生成','xgeqrf':'QR 分解','xpotrf':'Cholesky 分解','potrfbatched':'Cholesky 分解'}[kind]
  if family=='cuSPARSE':
+  if kind=='graph_capture':return 'SpVV Graph Capture/Replay'
   if kind.startswith('dense2sparse'):return 'dense2sparse'
   if kind.startswith('sparse2dense'):return 'sparse2dense'
   return kind.split('_')[0]
@@ -36,8 +37,8 @@ SCOPES={
  'cuFFT':'10 个 profile：原始单卡/双卡 C2C、实数正逆变换和 legacy/离线 SPIR-V/HIPRTC callback。1D 多卡使用 hipFFT + RCCL + HIP。',
  'cuPQC':'SHA-256 单线程与 SHA3-256 的 32-lane 协作 GPU kernel；各 14 输入与 hashlib 精确一致，PQC 其它算法未实现。',
  'cuRAND':'4 种分布 × 9 个 generator = 36 个 profile；原始参数、库内重复性和解析分布矩通过，跨库不要求逐位同序列。',
- 'cuSOLVER':'原始固定教学矩阵；检查 status/info、特征值/奇异值、QR/Cholesky 重构、求解残差与正交性。',
- 'cuSPARSE':'CSR/COO/SELL/blocked-ELL 等已登记格式与 batched 变体；第二批 SpVV/SpGEMM/reuse 包含数值变化、CSR 结构与独立 CPU 数学检查。',
+ 'cuSOLVER':'原始固定教学矩阵；检查 status/info、特征值/奇异值、重构、求解残差与正交性。第三批覆盖 batched SVD/未排序特征对、索引/值域/全量/空区间与实际 meig。',
+ 'cuSPARSE':'CSR/COO/SELL/blocked-ELL 等已登记格式与 batched 变体；SpVV/SpGEMM/reuse 数值变化与 CSR 结构；第三批 CG/BiCGSTAB 的独立求解、残差/收敛，gpsv 的逐 batch interleaved 布局，以及真实 GPU 图捕获/输入变化 replay。',
  'cuTENSOR':'FP32：contraction 用 rocBLAS + HIP；其它已通过的逐元素/permutation/reduction 使用 hipTensor。逐例记录原始 extents 与扩展小尺寸、全部输出 CPU 检查；contraction 的原始规模另为抽样验收。'}
 
 def summarize(cat):

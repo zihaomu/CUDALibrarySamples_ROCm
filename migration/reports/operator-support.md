@@ -2,7 +2,7 @@
 
 ## 已验收算子与验证范围
 
-**9 个模块已有整例通过，覆盖 87 个按模块去重的算子/功能族，对应 158 个通过的样例入口。**
+**9 个模块已有整例通过，覆盖 91 个按模块去重的算子/功能族，对应 166 个通过的样例入口。**
 
 计数按数学算子或原例核心功能归并；同模块的精度、尺寸、语言、batch、存储格式和算法变体不重复增加算子数。例如 cuRAND 是 4 种分布、36 个 generator/distribution profile；cuDSS simple 的 3 种语言入口算 1 个功能族。跨模块总数保留不同库接口的实现，GEMM 可分别出现在 cuBLAS 与 cuBLASLt。每个族至少有一个通过独立验收的样例，支持范围限于下表和逐例 required cases。
 
@@ -14,8 +14,8 @@
 | [cuFFT](../../cuFFT/README.md) | 3 | `C2C 复数 FFT`、`FFT 窗口过滤 callback`、`R2C/C2R 实数 FFT` | 10 | 10 个 profile：原始单卡/双卡 C2C、实数正逆变换和 legacy/离线 SPIR-V/HIPRTC callback。1D 多卡使用 hipFFT + RCCL + HIP。 |
 | [cuPQC](../../cuPQC/README.md) | 2 | `SHA-256`、`SHA3-256` | 2 | SHA-256 单线程与 SHA3-256 的 32-lane 协作 GPU kernel；各 14 输入与 hashlib 精确一致，PQC 其它算法未实现。 |
 | [cuRAND](../../cuRAND/README.md) | 4 | `lognormal`、`normal`、`poisson`、`uniform` | 36 | 4 种分布 × 9 个 generator = 36 个 profile；原始参数、库内重复性和解析分布矩通过，跨库不要求逐位同序列。 |
-| [cuSOLVER](../../cuSOLVER/README.md) | 7 | `Cholesky 分解`、`LU 分解/求解`、`QR 分解`、`QR 的 Q 生成`、`SVD`、`对称特征分解`、`广义对称特征分解` | 12 | 原始固定教学矩阵；检查 status/info、特征值/奇异值、QR/Cholesky 重构、求解残差与正交性。 |
-| [cuSPARSE](../../cuSPARSE/README.md) | 14 | `axpby`、`coosort`、`dense2sparse`、`gather`、`rot`、`scatter`、`sddmm`、`sparse2dense`、`spgemm`、`spmm`、`spmv`、`spsm`、`spsv`、`spvv` | 25 | CSR/COO/SELL/blocked-ELL 等已登记格式与 batched 变体；第二批 SpVV/SpGEMM/reuse 包含数值变化、CSR 结构与独立 CPU 数学检查。 |
+| [cuSOLVER](../../cuSOLVER/README.md) | 7 | `Cholesky 分解`、`LU 分解/求解`、`QR 分解`、`QR 的 Q 生成`、`SVD`、`对称特征分解`、`广义对称特征分解` | 16 | 原始固定教学矩阵；检查 status/info、特征值/奇异值、重构、求解残差与正交性。第三批覆盖 batched SVD/未排序特征对、索引/值域/全量/空区间与实际 meig。 |
+| [cuSPARSE](../../cuSPARSE/README.md) | 18 | `SpVV Graph Capture/Replay`、`axpby`、`bicgstab`、`cg`、`coosort`、`dense2sparse`、`gather`、`gpsvinterleavedbatch`、`rot`、`scatter`、`sddmm`、`sparse2dense`、`spgemm`、`spmm`、`spmv`、`spsm`、`spsv`、`spvv` | 29 | CSR/COO/SELL/blocked-ELL 等已登记格式与 batched 变体；SpVV/SpGEMM/reuse 数值变化与 CSR 结构；第三批 CG/BiCGSTAB 的独立求解、残差/收敛，gpsv 的逐 batch interleaved 布局，以及真实 GPU 图捕获/输入变化 replay。 |
 | [cuTENSOR](../../cuTENSOR/README.md) | 5 | `三元逐元素运算`、`二元逐元素运算`、`张量 contraction`、`张量 permutation`、`张量 reduction` | 5 | FP32：contraction 用 rocBLAS + HIP；其它已通过的逐元素/permutation/reduction 使用 hipTensor。逐例记录原始 extents 与扩展小尺寸、全部输出 CPU 检查；contraction 的原始规模另为抽样验收。 |
 
 以下仅有子集/能力探针，**不计入上述整例支持数**：

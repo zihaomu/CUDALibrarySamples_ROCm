@@ -1,3 +1,8 @@
+#include "observe.hpp"
+#include "binary_observe.hpp"
+#include <string>
+#include <vector>
+#include <cstdlib>
 /*
  * SPDX-FileCopyrightText: Copyright (c) 1993-2022 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
@@ -80,6 +85,9 @@ void residual_eval(int    n,
 }
 
 int main(void) {
+// MIGRATION_BATCH3: preserve original GPU mathematical calls.
+const std::string migration_case=std::getenv("MIGRATION_CASE")?std::getenv("MIGRATION_CASE"):"original";
+
     int n         = 4;
     int batchSize = 2;
     int full_size = n * batchSize;
@@ -103,6 +111,14 @@ int main(void) {
     float h_B[] = {1, 2, 3, 4, 5, 6, 7, 8};
     float h_X[] = {0, 0, 0, 0, 0, 0, 0, 0};
     //--------------------------------------------------------------------------
+if(migration_case=="changed-rhs")for(int i=0;i<full_size;++i)h_B[i]=(i%2?-1.f:1.f)*(i+0.5f);
+if(migration_case=="diagonal-dominant")for(int i=0;i<full_size;++i){h_M[i]=100.f+i;h_B[i]=float(i-3);}
+migration_observer::emit("input_S",h_S,full_size);
+migration_observer::emit("input_L",h_L,full_size);
+migration_observer::emit("input_M",h_M,full_size);
+migration_observer::emit("input_U",h_U,full_size);
+migration_observer::emit("input_W",h_W,full_size);
+migration_observer::emit("input_B",h_B,full_size);
     // step 1: allocate device memory
     float *d_S0, *d_L0, *d_M0, *d_U0, *d_W0;
     float  *d_S,  *d_L,  *d_M, *d_U,   *d_W;
@@ -218,11 +234,26 @@ int main(void) {
 
     CHECK_CUDA( hipMalloc((void**) &d_buffer, bufferSize) )
     //--------------------------------------------------------------------------
+std::vector<float> migration_interleaved(full_size);
+CHECK_CUDA(hipMemcpy(migration_interleaved.data(),d_S,full_size*sizeof(float),hipMemcpyDeviceToHost))
+migration_observer::emit("interleaved_S",migration_interleaved.data(),full_size);
+CHECK_CUDA(hipMemcpy(migration_interleaved.data(),d_L,full_size*sizeof(float),hipMemcpyDeviceToHost))
+migration_observer::emit("interleaved_L",migration_interleaved.data(),full_size);
+CHECK_CUDA(hipMemcpy(migration_interleaved.data(),d_M,full_size*sizeof(float),hipMemcpyDeviceToHost))
+migration_observer::emit("interleaved_M",migration_interleaved.data(),full_size);
+CHECK_CUDA(hipMemcpy(migration_interleaved.data(),d_U,full_size*sizeof(float),hipMemcpyDeviceToHost))
+migration_observer::emit("interleaved_U",migration_interleaved.data(),full_size);
+CHECK_CUDA(hipMemcpy(migration_interleaved.data(),d_W,full_size*sizeof(float),hipMemcpyDeviceToHost))
+migration_observer::emit("interleaved_W",migration_interleaved.data(),full_size);
+CHECK_CUDA(hipMemcpy(migration_interleaved.data(),d_X,full_size*sizeof(float),hipMemcpyDeviceToHost))
+migration_observer::emit("interleaved_X",migration_interleaved.data(),full_size);
     // step 6: solve Aj*xj = bj
     CHECK_CUSPARSE( hipsparseSgpsvInterleavedBatch(
                         cusparseHandle, algo, n, d_S, d_L, d_M, d_U, d_W, d_X,
                         batchSize, d_buffer) )
     //--------------------------------------------------------------------------
+CHECK_CUDA(hipMemcpy(migration_interleaved.data(),d_X,full_size*sizeof(float),hipMemcpyDeviceToHost))
+migration_observer::emit("solution_interleaved",migration_interleaved.data(),full_size);
     // step 7: convert h_X back to aggregate format
     // h_B = transpose(h_X)
     CHECK_CUBLAS( hipblasSgeam(cublasHandle, HIPBLAS_OP_T, HIPBLAS_OP_T,
@@ -241,6 +272,7 @@ int main(void) {
     CHECK_CUDA( hipMemcpy(h_X, d_B, full_size * sizeof(float),
                            hipMemcpyDeviceToHost));
     //--------------------------------------------------------------------------
+migration_observer::emit("solution",h_X,full_size);
     // step 9: Check results
     printf("==== x1 = inv(A1)*b1 \n");
     for (int j = 0; j < n; j++)

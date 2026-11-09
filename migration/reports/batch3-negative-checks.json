@@ -1,0 +1,289 @@
+{
+  "status": "PASSED",
+  "checks": [
+    {
+      "source": "cuSPARSE/cg/cg_example.c",
+      "case": "small-varied",
+      "mutation": "finite-corruption",
+      "rejected": true,
+      "failed_checks": [
+        "reported-final-residual",
+        "true-residual-converged",
+        "GPU-vs-CPU-solution",
+        "manufactured-solution"
+      ],
+      "evidence": "migration/reports/evidence/20261109T140713.832812Z/batch3-negative/cg-finite-corruption",
+      "log_sha256": "f510e852745a0df67002b52857defa7c587669ffd3a9ec8ec45cf3ef7b5ecb6f"
+    },
+    {
+      "source": "cuSPARSE/cg/cg_example.c",
+      "case": "small-varied",
+      "mutation": "NaN",
+      "rejected": true,
+      "failed_checks": [
+        "reported-final-residual",
+        "true-residual-converged",
+        "GPU-vs-CPU-solution",
+        "manufactured-solution"
+      ],
+      "evidence": "migration/reports/evidence/20261109T140713.832812Z/batch3-negative/cg-NaN",
+      "log_sha256": "f510e852745a0df67002b52857defa7c587669ffd3a9ec8ec45cf3ef7b5ecb6f"
+    },
+    {
+      "source": "cuSPARSE/bicgstab/bicgstab_example.c",
+      "case": "small-varied",
+      "mutation": "finite-corruption",
+      "rejected": true,
+      "failed_checks": [
+        "reported-final-residual",
+        "true-residual-converged",
+        "GPU-vs-CPU-solution",
+        "manufactured-solution"
+      ],
+      "evidence": "migration/reports/evidence/20261109T140713.832812Z/batch3-negative/bicgstab-finite-corruption",
+      "log_sha256": "ec41ecc2c6e98794390bd336a94c658e6d69b72b3175fe2c52dcd23b3f6fd1dc"
+    },
+    {
+      "source": "cuSPARSE/bicgstab/bicgstab_example.c",
+      "case": "small-varied",
+      "mutation": "NaN",
+      "rejected": true,
+      "failed_checks": [
+        "reported-final-residual",
+        "true-residual-converged",
+        "GPU-vs-CPU-solution",
+        "manufactured-solution"
+      ],
+      "evidence": "migration/reports/evidence/20261109T140713.832812Z/batch3-negative/bicgstab-NaN",
+      "log_sha256": "ec41ecc2c6e98794390bd336a94c658e6d69b72b3175fe2c52dcd23b3f6fd1dc"
+    },
+    {
+      "source": "cuSPARSE/gpsvInterleavedBatch/gpsvInterleavedBatch_example.c",
+      "case": "original",
+      "mutation": "finite-corruption",
+      "rejected": true,
+      "failed_checks": [
+        "output-interleaved-layout"
+      ],
+      "evidence": "migration/reports/evidence/20261109T140713.832812Z/batch3-negative/gpsvInterleavedBatch-finite-corruption",
+      "log_sha256": "45d3906f57fdc2d6a9b14aab326366e6bfad69e206bc04e6d2be6730030b9af3"
+    },
+    {
+      "source": "cuSPARSE/gpsvInterleavedBatch/gpsvInterleavedBatch_example.c",
+      "case": "original",
+      "mutation": "NaN",
+      "rejected": true,
+      "failed_checks": [
+        "ufunc 'isfinite' not supported for the input types, and the inputs could not be safely coerced to any supported types according to the casting rule ''safe''"
+      ],
+      "evidence": "migration/reports/evidence/20261109T140713.832812Z/batch3-negative/gpsvInterleavedBatch-NaN",
+      "log_sha256": "e197e5e6cc3ab5b967e448f448f0b57bbc58d47ff14f87cc730266f97f484546"
+    },
+    {
+      "source": "cuSOLVER/gesvdjBatched/cusolver_gesvdjBatched_example.cu",
+      "case": "original",
+      "mutation": "finite-corruption",
+      "rejected": true,
+      "failed_checks": [
+        "batch0-SVD-reconstruction",
+        "batch0-U-orthogonality"
+      ],
+      "evidence": "migration/reports/evidence/20261109T140713.832812Z/batch3-negative/gesvdjBatched-finite-corruption",
+      "log_sha256": "536fde1c47a78ddf069b9bdc613a7340bb2477aef3a54df7cf436585c5ce17f4"
+    },
+    {
+      "source": "cuSOLVER/gesvdjBatched/cusolver_gesvdjBatched_example.cu",
+      "case": "original",
+      "mutation": "NaN",
+      "rejected": true,
+      "failed_checks": [
+        "unsupported operand type(s) for *: 'NoneType' and 'float'"
+      ],
+      "evidence": "migration/reports/evidence/20261109T140713.832812Z/batch3-negative/gesvdjBatched-NaN",
+      "log_sha256": "54330dbabe2a924d1ad9da158fed8e11e79591292a55e1a48473840d54d743bc"
+    },
+    {
+      "source": "cuSOLVER/syevjBatched/cusolver_syevjBatched_example.cu",
+      "case": "original",
+      "mutation": "finite-corruption",
+      "rejected": true,
+      "failed_checks": [
+        "batch0-paired-eigen-residual",
+        "batch0-orthogonality"
+      ],
+      "evidence": "migration/reports/evidence/20261109T140713.832812Z/batch3-negative/syevjBatched-finite-corruption",
+      "log_sha256": "71cb9d134691d1b7d76d707b7b1c9520c98c011cbec898db23612f6b136b4b1c"
+    },
+    {
+      "source": "cuSOLVER/syevjBatched/cusolver_syevjBatched_example.cu",
+      "case": "original",
+      "mutation": "NaN",
+      "rejected": true,
+      "failed_checks": [
+        "unsupported operand type(s) for *: 'int' and 'NoneType'"
+      ],
+      "evidence": "migration/reports/evidence/20261109T140713.832812Z/batch3-negative/syevjBatched-NaN",
+      "log_sha256": "75420d4f5f8f4ca5fe4ad45681b231d867ec7d13aebdb3b747c51b01ab254c1b"
+    },
+    {
+      "source": "cuSOLVER/syevjBatched/cusolver_syevjBatched_example.cu",
+      "case": "original",
+      "mutation": "unpaired-W",
+      "rejected": true,
+      "failed_checks": [
+        "batch0-paired-eigen-residual"
+      ],
+      "evidence": "migration/reports/evidence/20261109T140713.832812Z/batch3-negative/syevjBatched-unpaired-W",
+      "log_sha256": "49daa907426df4c10c0c122793665df70ddeea25fe9b160f038482d83e3a2dae"
+    },
+    {
+      "source": "cuSOLVER/syevdx/cusolver_syevdx_example.cu",
+      "case": "original",
+      "mutation": "finite-corruption",
+      "rejected": true,
+      "failed_checks": [
+        "paired-eigen-residual",
+        "orthogonality"
+      ],
+      "evidence": "migration/reports/evidence/20261109T140713.832812Z/batch3-negative/syevdx-finite-corruption",
+      "log_sha256": "d8d4af77c08940193acc68b3bb9f0acee04f5c0730ca04ed9a75d3b2379425c4"
+    },
+    {
+      "source": "cuSOLVER/syevdx/cusolver_syevdx_example.cu",
+      "case": "original",
+      "mutation": "NaN",
+      "rejected": true,
+      "failed_checks": [
+        "unsupported operand type(s) for *: 'float' and 'NoneType'"
+      ],
+      "evidence": "migration/reports/evidence/20261109T140713.832812Z/batch3-negative/syevdx-NaN",
+      "log_sha256": "918dcf1f849e6573da6259d874a9a1fd259773317a299b254cd59a87c5f3f9f0"
+    },
+    {
+      "source": "cuSOLVER/syevdx/cusolver_syevdx_example.cu",
+      "case": "original",
+      "mutation": "wrong-meig",
+      "rejected": true,
+      "failed_checks": [
+        "cannot reshape array of size 6 into shape (3,3)"
+      ],
+      "evidence": "migration/reports/evidence/20261109T140713.832812Z/batch3-negative/syevdx-wrong-meig",
+      "log_sha256": "fd6aeaa95f7e79a0e3947a209bd2f87ab3aaa6d3c1881bfed30b1e771b18031b"
+    },
+    {
+      "source": "cuSOLVER/sygvdx/cusolver_sygvdx_example.cu",
+      "case": "original",
+      "mutation": "finite-corruption",
+      "rejected": true,
+      "failed_checks": [
+        "paired-eigen-residual",
+        "B-orthogonality"
+      ],
+      "evidence": "migration/reports/evidence/20261109T140713.832812Z/batch3-negative/sygvdx-finite-corruption",
+      "log_sha256": "ad5d372b3b6076359018b165af80243c8885a8990a48e2ea7266d61d362de01b"
+    },
+    {
+      "source": "cuSOLVER/sygvdx/cusolver_sygvdx_example.cu",
+      "case": "original",
+      "mutation": "NaN",
+      "rejected": true,
+      "failed_checks": [
+        "unsupported operand type(s) for *: 'float' and 'NoneType'"
+      ],
+      "evidence": "migration/reports/evidence/20261109T140713.832812Z/batch3-negative/sygvdx-NaN",
+      "log_sha256": "fdbc82fcfc89f2103f4b35b70ed03f167eb5a08b3496613a2636ca78f5dacce4"
+    },
+    {
+      "source": "cuSOLVER/sygvdx/cusolver_sygvdx_example.cu",
+      "case": "original",
+      "mutation": "wrong-meig",
+      "rejected": true,
+      "failed_checks": [
+        "cannot reshape array of size 6 into shape (3,3)"
+      ],
+      "evidence": "migration/reports/evidence/20261109T140713.832812Z/batch3-negative/sygvdx-wrong-meig",
+      "log_sha256": "a8e76d5ac4661b71b818d602469aa8151d8ec08a43d73d13e2692519ccc88bc4"
+    },
+    {
+      "source": "cuSPARSE/graph_capture/graph_capture_example.c",
+      "case": "sparse-small",
+      "mutation": "finite-corruption",
+      "rejected": true,
+      "failed_checks": [
+        "replay-dot-0"
+      ],
+      "evidence": "migration/reports/evidence/20261109T140713.832812Z/batch3-negative/graph_capture-finite-corruption",
+      "log_sha256": "a9674129da4464f657f5002b615b04dd00e558437854730114aa74d478eb045f"
+    },
+    {
+      "source": "cuSPARSE/graph_capture/graph_capture_example.c",
+      "case": "sparse-small",
+      "mutation": "NaN",
+      "rejected": true,
+      "failed_checks": [
+        "ufunc 'isfinite' not supported for the input types, and the inputs could not be safely coerced to any supported types according to the casting rule ''safe''"
+      ],
+      "evidence": "migration/reports/evidence/20261109T140713.832812Z/batch3-negative/graph_capture-NaN",
+      "log_sha256": "667220939274f17674e6da4e7b1210d50b6ed730cced1e6b7b8be62035ade592"
+    },
+    {
+      "source": "cuSPARSE/graph_capture/graph_capture_example.c",
+      "case": "sparse-small",
+      "mutation": "empty-graph",
+      "rejected": true,
+      "failed_checks": [
+        "graph-nonempty"
+      ],
+      "evidence": "migration/reports/evidence/20261109T140713.832812Z/batch3-negative/graph_capture-empty-graph",
+      "log_sha256": "501af6dae6d48aca32acfe209316104650a4687da9e3300e0225b19133279a27"
+    },
+    {
+      "source": "cuSPARSE/graph_capture/graph_capture_example.c",
+      "case": "sparse-small",
+      "mutation": "no-kernel-nodes",
+      "rejected": true,
+      "failed_checks": [
+        "captured-GPU-kernels"
+      ],
+      "evidence": "migration/reports/evidence/20261109T140713.832812Z/batch3-negative/graph_capture-no-kernel-nodes",
+      "log_sha256": "8fa900f8e330e7ddb5bcba97e2cad4c2cc5956731b3d7f36a9b2c0ebfb7672f3"
+    },
+    {
+      "source": "cuSPARSE/graph_capture/graph_capture_example.c",
+      "case": "sparse-small",
+      "mutation": "zero-captured-calls",
+      "rejected": true,
+      "failed_checks": [
+        "original-capture-workload"
+      ],
+      "evidence": "migration/reports/evidence/20261109T140713.832812Z/batch3-negative/graph_capture-zero-captured-calls",
+      "log_sha256": "a39191174dc5ccce67e607128f8186f58c0e4470278315bacbca72648902151f"
+    },
+    {
+      "source": "cuSPARSE/graph_capture/graph_capture_example.c",
+      "case": "sparse-small",
+      "mutation": "stale-replays",
+      "rejected": true,
+      "failed_checks": [
+        "replay-dot-0",
+        "replay-dot-1",
+        "replay-dot-2",
+        "changed-input-changes-output",
+        "zero-input-replay"
+      ],
+      "evidence": "migration/reports/evidence/20261109T140713.832812Z/batch3-negative/graph_capture-stale-replays",
+      "log_sha256": "1e30735ef061b2e8ef8f2e71f3cdc75ec2765223c5cdeefa44a9d2352c57b47c"
+    },
+    {
+      "source": "cuSPARSE/graph_capture/graph_capture_example.c",
+      "case": "sparse-small",
+      "mutation": "single-replay",
+      "rejected": true,
+      "failed_checks": [
+        "three-actual-replays"
+      ],
+      "evidence": "migration/reports/evidence/20261109T140713.832812Z/batch3-negative/graph_capture-single-replay",
+      "log_sha256": "491ba3572ce75671dbcc1daf904dd4c809516e1f8c7ba740087856e190932f3d"
+    }
+  ]
+}

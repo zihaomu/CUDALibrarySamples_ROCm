@@ -1,4 +1,9 @@
 #include "observe.hpp"
+#include "binary_observe.hpp"
+#include <string>
+#include <vector>
+#include <cstdlib>
+#include "observe.hpp"
 /*
  * SPDX-FileCopyrightText: Copyright (c) 2020 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
@@ -27,6 +32,9 @@
 #include "cusolver_utils.h"
 
 int main(int argc, char *argv[]) {
+// MIGRATION_BATCH3: preserve original GPU mathematical calls.
+const std::string migration_case=std::getenv("MIGRATION_CASE")?std::getenv("MIGRATION_CASE"):"original";
+
     hipsolverHandle_t cusolverH = NULL;
     hipStream_t stream = NULL;
     hipsolverSyevjInfo_t syevj_params = NULL;
@@ -67,7 +75,7 @@ int main(int argc, char *argv[]) {
     /* configuration of syevj  */
     const double tol = 1.e-7;
     const int max_sweeps = 15;
-    const int sort_eig = 0;                                  /* don't sort eigenvalues */
+    const int sort_eig = migration_case=="sorted"?1:0;                                  /* don't sort eigenvalues */
     const hipsolverEigMode_t jobz = HIPSOLVER_EIG_MODE_VECTOR; /* compute eigenvectors */
     const hipblasFillMode_t uplo = HIPBLAS_FILL_MODE_LOWER;
 
@@ -135,6 +143,8 @@ int main(int argc, char *argv[]) {
     CUSOLVER_CHECK(hipsolverDnXsyevjSetSortEig(syevj_params, sort_eig));
 
     /* step 3: copy A to device */
+if(migration_case=="perturbed")for(int b=0;b<batchSize;++b){for(int i=0;i<m;++i)A[b*m*m+i*m+i]+=0.125*(b+i+1);A[b*m*m+2]=A[b*m*m+6]=0.375;}
+migration_observer::emit("input_A",A.data(),A.size());
     CUDA_CHECK(hipMalloc(reinterpret_cast<void **>(&d_A), sizeof(double) * A.size()));
     CUDA_CHECK(hipMalloc(reinterpret_cast<void **>(&d_W), sizeof(double) * W.size()));
     CUDA_CHECK(hipMalloc(reinterpret_cast<void **>(&d_info), sizeof(int) * info.size()));

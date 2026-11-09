@@ -1,3 +1,8 @@
+#include "observe.hpp"
+#include "binary_observe.hpp"
+#include <string>
+#include <vector>
+#include <cstdlib>
 /*
  * SPDX-FileCopyrightText: Copyright (c) 1993-2022 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
@@ -71,7 +76,8 @@ void make_test_matrix(int * n_out,
                       int **row_offsets_out, 
                       int **columns_out, 
                       double **values_out) {
-    int grid = 700; // grid resolution
+    const char* mc=std::getenv("MIGRATION_CASE");
+    int grid = mc && std::string(mc)=="small-varied"?23:mc && std::string(mc)=="nonzero-initial"?31:700; // grid resolution
 
     int n = grid * grid;
     *n_out = n;
@@ -205,11 +211,15 @@ int gpu_BiCGStab(hipblasHandle_t       cublasHandle,
     double nrm_R;
     CHECK_CUBLAS( hipblasDnrm2(cublasHandle, m, d_R0.ptr, 1, &nrm_R) )
     double threshold = tolerance * nrm_R;
+migration_observer::emit("initial_residual",&nrm_R,1);
+migration_observer::emit("threshold",&threshold,1);
+int migration_iterations=0;
     printf("  Initial Residual: Norm %e' threshold %e\n", nrm_R, threshold);
     //--------------------------------------------------------------------------
     // ### 2 ### repeat until convergence based on max iterations and
     //           and relative residual
     for (int i = 1; i <= maxIterations; i++) {
+        ++migration_iterations;
         printf("  Iteration = %d; Error Norm = %e\n", i, nrm_R);
         //----------------------------------------------------------------------
         // ### 4, 7 ### P_i = R_i
@@ -362,6 +372,9 @@ int gpu_BiCGStab(hipblasHandle_t       cublasHandle,
     // check ||R||
     CHECK_CUBLAS( hipblasDnrm2(cublasHandle, m, d_R.ptr, 1, &nrm_R) )
     printf("Final error norm = %e\n", nrm_R);
+migration_observer::emit("final_residual",&nrm_R,1);
+migration_observer::emit("iterations",&migration_iterations,1);
+
     //--------------------------------------------------------------------------
     CHECK_CUSPARSE( hipsparseSpSV_destroyDescr(spsvDescrL) )
     CHECK_CUSPARSE( hipsparseSpSV_destroyDescr(spsvDescrU) )
@@ -374,6 +387,9 @@ int gpu_BiCGStab(hipblasHandle_t       cublasHandle,
 //==============================================================================
 
 int main(int argc, char** argv) {
+// MIGRATION_BATCH3: preserve original GPU mathematical calls.
+const std::string migration_case=std::getenv("MIGRATION_CASE")?std::getenv("MIGRATION_CASE"):"original";
+
     const int    maxIterations = 100;
     const double tolerance     = 0.0000000001;
     if (argc != 1) {
@@ -392,8 +408,14 @@ int main(int argc, char** argv) {
 
     printf("Testing BiCGStab\n");
     for (int i = 0; i < m; i++)
-        h_X[i] = 1.0;
+        h_X[i] = migration_case=="original"?1.0:1.0+double(i%17-8)/16.0;
     //--------------------------------------------------------------------------
+migration_binary::emit("input_rows.bin",h_A_rows,(m+1)*sizeof(int));
+migration_binary::emit("input_columns.bin",h_A_columns,nnz*sizeof(int));
+migration_binary::emit("input_values.bin",h_A_values,nnz*sizeof(double));
+migration_binary::emit("input_manufactured.bin",h_X,m*sizeof(double));
+migration_observer::emit("input_tolerance",&tolerance,1);
+migration_observer::emit("input_max_iterations",&maxIterations,1);
     // ### Device memory management ###
     int*    d_A_rows, *d_A_columns;
     double* d_A_values, *d_M_values;
@@ -506,7 +528,20 @@ int main(int argc, char** argv) {
                         &alpha, matA, d_X.vec, &beta, d_B.vec, HIP_R_64F,
                         HIPSPARSE_SPMV_ALG_DEFAULT, d_bufferMV) )
     // X0 = 0
-    CHECK_CUDA( hipMemset(d_X.ptr, 0x0, m * sizeof(double)) )
+std::vector<double> migration_rhs(m),migration_initial(m,0.0);
+CHECK_CUDA(hipMemcpy(migration_rhs.data(),d_B.ptr,m*sizeof(double),hipMemcpyDeviceToHost))
+migration_binary::emit("generated_rhs.bin",migration_rhs.data(),m*sizeof(double));
+if(const char* fixture=std::getenv("MIGRATION_INPUT_FIXTURE_DIR")){
+ std::ifstream f(std::string(fixture)+"/input_rhs.bin",std::ios::binary);
+ f.read(reinterpret_cast<char*>(migration_rhs.data()),m*sizeof(double));
+ if(!f || f.peek()!=std::ifstream::traits_type::eof())return EXIT_FAILURE;
+ CHECK_CUDA(hipMemcpy(d_B.ptr,migration_rhs.data(),m*sizeof(double),hipMemcpyHostToDevice))
+}
+if(migration_case=="nonzero-initial")for(int i=0;i<m;++i)migration_initial[i]=0.125+double(i%7)/64.;
+CHECK_CUDA(hipMemcpy(d_X.ptr,migration_initial.data(),m*sizeof(double),hipMemcpyHostToDevice))
+migration_binary::emit("input_rhs.bin",migration_rhs.data(),m*sizeof(double));
+migration_binary::emit("input_initial.bin",migration_initial.data(),m*sizeof(double));
+
     //--------------------------------------------------------------------------
     // Perform Incomplete-LU factorization of A (csrilu0) -> M_lower, M_upper
     csrilu02Info_t infoM        = NULL;
@@ -544,11 +579,14 @@ int main(int argc, char** argv) {
     //--------------------------------------------------------------------------
     // ### Run BiCGStab computation ###
     printf("BiCGStab loop:\n");
-    gpu_BiCGStab(cublasHandle, cusparseHandle, m,
+    if(gpu_BiCGStab(cublasHandle, cusparseHandle, m,
                  matA, matM_lower, matM_upper,
                  d_B, d_X, d_R0, d_R, d_P, d_P_aux, d_S, d_S_aux, d_V, d_T,
-                 d_tmp, d_bufferMV, maxIterations, tolerance);
+                 d_tmp, d_bufferMV, maxIterations, tolerance)!=EXIT_SUCCESS)return EXIT_FAILURE;
     //--------------------------------------------------------------------------
+std::vector<double> migration_solution(m);
+CHECK_CUDA(hipMemcpy(migration_solution.data(),d_X.ptr,m*sizeof(double),hipMemcpyDeviceToHost))
+migration_binary::emit("solution.bin",migration_solution.data(),m*sizeof(double));
     // ### Free resources ###
     CHECK_CUSPARSE( hipsparseDestroyDnVec(d_B.vec) )
     CHECK_CUSPARSE( hipsparseDestroyDnVec(d_X.vec) )

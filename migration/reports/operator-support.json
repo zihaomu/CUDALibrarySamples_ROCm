@@ -2,9 +2,9 @@
   "schema_version": 1,
   "counting_rule": "Operator/functional families are deduplicated within each module; dtypes, sizes, language, batch, storage formats and algorithm variants do not create extra operators. At least one explicitly scoped PASSED source profile is required. Cross-module totals may include the same mathematical operation implemented through different library interfaces.",
   "qualification_rule": "A verified family proves only its linked PASSED source profiles/required cases, not every API configuration. PARTIAL examples and capability probes are excluded.",
-  "verified_operator_families": 87,
+  "verified_operator_families": 91,
   "modules_with_verified_operators": 9,
-  "passed_source_profiles": 158,
+  "passed_source_profiles": 166,
   "modules": {
     "cuBLAS": {
       "verified_operator_family_count": 50,
@@ -892,48 +892,56 @@
           "name": "SVD",
           "sample_ids": [
             "cuSOLVER/gesvd::cusolver_gesvd_example.cu",
-            "cuSOLVER/gesvdj::cusolver_gesvdj_example.cu"
+            "cuSOLVER/gesvdj::cusolver_gesvdj_example.cu",
+            "cuSOLVER/gesvdjBatched::cusolver_gesvdjBatched_example.cu"
           ],
           "sample_reports": [
             "migration/sample-reports/cuSOLVER/gesvd/cusolver_gesvd_example.cu.md",
-            "migration/sample-reports/cuSOLVER/gesvdj/cusolver_gesvdj_example.cu.md"
+            "migration/sample-reports/cuSOLVER/gesvdj/cusolver_gesvdj_example.cu.md",
+            "migration/sample-reports/cuSOLVER/gesvdjBatched/cusolver_gesvdjBatched_example.cu.md"
           ],
-          "source_profiles": 2
+          "source_profiles": 3
         },
         {
           "name": "对称特征分解",
           "sample_ids": [
             "cuSOLVER/Xsyevd::cusolver_Xsyevd_example.cu",
             "cuSOLVER/syevd::cusolver_syevd_example.cu",
-            "cuSOLVER/syevj::cusolver_syevj_example.cu"
+            "cuSOLVER/syevdx::cusolver_syevdx_example.cu",
+            "cuSOLVER/syevj::cusolver_syevj_example.cu",
+            "cuSOLVER/syevjBatched::cusolver_syevjBatched_example.cu"
           ],
           "sample_reports": [
             "migration/sample-reports/cuSOLVER/Xsyevd/cusolver_Xsyevd_example.cu.md",
             "migration/sample-reports/cuSOLVER/syevd/cusolver_syevd_example.cu.md",
-            "migration/sample-reports/cuSOLVER/syevj/cusolver_syevj_example.cu.md"
+            "migration/sample-reports/cuSOLVER/syevdx/cusolver_syevdx_example.cu.md",
+            "migration/sample-reports/cuSOLVER/syevj/cusolver_syevj_example.cu.md",
+            "migration/sample-reports/cuSOLVER/syevjBatched/cusolver_syevjBatched_example.cu.md"
           ],
-          "source_profiles": 3
+          "source_profiles": 5
         },
         {
           "name": "广义对称特征分解",
           "sample_ids": [
             "cuSOLVER/sygvd::cusolver_sygvd_example.cu",
+            "cuSOLVER/sygvdx::cusolver_sygvdx_example.cu",
             "cuSOLVER/sygvj::cusolver_sygvj_example.cu"
           ],
           "sample_reports": [
             "migration/sample-reports/cuSOLVER/sygvd/cusolver_sygvd_example.cu.md",
+            "migration/sample-reports/cuSOLVER/sygvdx/cusolver_sygvdx_example.cu.md",
             "migration/sample-reports/cuSOLVER/sygvj/cusolver_sygvj_example.cu.md"
           ],
-          "source_profiles": 2
+          "source_profiles": 3
         }
       ],
       "sample_count": 39,
       "sample_outcomes": {
         "FAILED": 19,
-        "PARTIAL": 8,
-        "PASSED": 12
+        "PARTIAL": 4,
+        "PASSED": 16
       },
-      "validation_scope": "原始固定教学矩阵；检查 status/info、特征值/奇异值、QR/Cholesky 重构、求解残差与正交性。",
+      "validation_scope": "原始固定教学矩阵；检查 status/info、特征值/奇异值、重构、求解残差与正交性。第三批覆盖 batched SVD/未排序特征对、索引/值域/全量/空区间与实际 meig。",
       "failure_reason_counts": {
         "BUILD_ERROR": 18,
         "RUNTIME_ERROR": 1
@@ -964,8 +972,18 @@
       }
     },
     "cuSPARSE": {
-      "verified_operator_family_count": 14,
+      "verified_operator_family_count": 18,
       "verified_operators": [
+        {
+          "name": "SpVV Graph Capture/Replay",
+          "sample_ids": [
+            "cuSPARSE/graph_capture::graph_capture_example.c"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuSPARSE/graph_capture/graph_capture_example.c.md"
+          ],
+          "source_profiles": 1
+        },
         {
           "name": "axpby",
           "sample_ids": [
@@ -973,6 +991,26 @@
           ],
           "sample_reports": [
             "migration/sample-reports/cuSPARSE/axpby/axpby_example.c.md"
+          ],
+          "source_profiles": 1
+        },
+        {
+          "name": "bicgstab",
+          "sample_ids": [
+            "cuSPARSE/bicgstab::bicgstab_example.c"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuSPARSE/bicgstab/bicgstab_example.c.md"
+          ],
+          "source_profiles": 1
+        },
+        {
+          "name": "cg",
+          "sample_ids": [
+            "cuSPARSE/cg::cg_example.c"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuSPARSE/cg/cg_example.c.md"
           ],
           "source_profiles": 1
         },
@@ -1005,6 +1043,16 @@
           ],
           "sample_reports": [
             "migration/sample-reports/cuSPARSE/gather/gather_example.c.md"
+          ],
+          "source_profiles": 1
+        },
+        {
+          "name": "gpsvinterleavedbatch",
+          "sample_ids": [
+            "cuSPARSE/gpsvInterleavedBatch::gpsvInterleavedBatch_example.c"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuSPARSE/gpsvInterleavedBatch/gpsvInterleavedBatch_example.c.md"
           ],
           "source_profiles": 1
         },
@@ -1131,11 +1179,10 @@
       ],
       "sample_count": 37,
       "sample_outcomes": {
-        "PASSED": 25,
-        "PARTIAL": 4,
+        "PASSED": 29,
         "FAILED": 8
       },
-      "validation_scope": "CSR/COO/SELL/blocked-ELL 等已登记格式与 batched 变体；第二批 SpVV/SpGEMM/reuse 包含数值变化、CSR 结构与独立 CPU 数学检查。",
+      "validation_scope": "CSR/COO/SELL/blocked-ELL 等已登记格式与 batched 变体；SpVV/SpGEMM/reuse 数值变化与 CSR 结构；第三批 CG/BiCGSTAB 的独立求解、残差/收敛，gpsv 的逐 batch interleaved 布局，以及真实 GPU 图捕获/输入变化 replay。",
       "failure_reason_counts": {
         "BUILD_ERROR": 6,
         "RUNTIME_ERROR": 2

@@ -1,0 +1,147 @@
+#include "observe.hpp"
+#include <string>
+#include <vector>
+#include <cstdlib>
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 1993-2022 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <cuda_runtime_api.h> // cudaMalloc, cudaMemcpy, etc.
+#include <cusparse.h>         // cusparseSpVV
+#include <stdio.h>            // printf
+#include <stdlib.h>           // EXIT_FAILURE
+#include <stdint.h>           // int64_t
+
+#define CHECK_CUDA(func)                                                       \
+{                                                                              \
+    cudaError_t status = (func);                                               \
+    if (status != cudaSuccess) {                                               \
+        printf("CUDA API failed at line %d with error: %s (%d)\n",             \
+               __LINE__, cudaGetErrorString(status), status);                  \
+        return EXIT_FAILURE;                                                   \
+    }                                                                          \
+}
+
+#define CHECK_CUSPARSE(func)                                                   \
+{                                                                              \
+    cusparseStatus_t status = (func);                                          \
+    if (status != CUSPARSE_STATUS_SUCCESS) {                                   \
+        printf("CUSPARSE API failed at line %d with error: %s (%d)\n",         \
+               __LINE__, cusparseGetErrorString(status), status);              \
+        return EXIT_FAILURE;                                                   \
+    }                                                                          \
+}
+
+// Graph qualification body, appended to each backend's original licensed prefix.
+// MIGRATION_BATCH3: deterministic inputs and device-result stream capture.
+int main(void) {
+    const std::string migration_case=std::getenv("MIGRATION_CASE")?std::getenv("MIGRATION_CASE"):"original";
+    int64_t size=migration_case=="original"?65536:migration_case=="sparse-small"?37:32;
+    int64_t nnz=migration_case=="original"?65536:migration_case=="sparse-small"?17:16;
+    int capture_calls=migration_case=="original"?1000:7;
+    std::vector<int> indices(nnz);
+    std::vector<float> x(nnz),y(size);
+    for(int i=0;i<nnz;++i){
+        indices[i]=migration_case=="original"?i:2*i;
+        x[i]=migration_case=="cancellation"?(i%2?-1.f:1.f)*(1+i%3)/4.f:1.f+float(i%7)/8.f;
+    }
+    for(int i=0;i<size;++i)y[i]=float(i%11-5)/4.f;
+    migration_observer::emit("input_size",&size,1);
+    migration_observer::emit("input_indices",indices.data(),indices.size());
+    migration_observer::emit("input_X",x.data(),x.size());
+    int *d_indices=nullptr;
+    float *d_x=nullptr,*d_y=nullptr,*d_result=nullptr;
+    void* buffer=nullptr;
+    CHECK_CUDA(cudaMalloc((void**)&d_indices,nnz*sizeof(int)))
+    CHECK_CUDA(cudaMalloc((void**)&d_x,nnz*sizeof(float)))
+    CHECK_CUDA(cudaMalloc((void**)&d_y,size*sizeof(float)))
+    CHECK_CUDA(cudaMalloc((void**)&d_result,sizeof(float)))
+    CHECK_CUDA(cudaMemcpy(d_indices,indices.data(),nnz*sizeof(int),cudaMemcpyHostToDevice))
+    CHECK_CUDA(cudaMemcpy(d_x,x.data(),nnz*sizeof(float),cudaMemcpyHostToDevice))
+    CHECK_CUDA(cudaMemcpy(d_y,y.data(),size*sizeof(float),cudaMemcpyHostToDevice))
+    cusparseHandle_t handle;
+    cusparseSpVecDescr_t vecX;
+    cusparseDnVecDescr_t vecY;
+    CHECK_CUSPARSE(cusparseCreate(&handle))
+    // Host pointer mode may synchronize/copy results during capture. The graph
+    // must retain a device scalar, copied to the host only after actual replay.
+    CHECK_CUSPARSE(cusparseSetPointerMode(handle,CUSPARSE_POINTER_MODE_DEVICE))
+    CHECK_CUSPARSE(cusparseCreateSpVec(&vecX,size,nnz,d_indices,d_x,
+        CUSPARSE_INDEX_32I,CUSPARSE_INDEX_BASE_ZERO,CUDA_R_32F))
+    CHECK_CUSPARSE(cusparseCreateDnVec(&vecY,size,d_y,CUDA_R_32F))
+    size_t buffer_size=0;
+    CHECK_CUSPARSE(cusparseSpVV_bufferSize(handle,CUSPARSE_OPERATION_NON_TRANSPOSE,
+        vecX,vecY,d_result,CUDA_R_32F,&buffer_size))
+    CHECK_CUDA(cudaMalloc(&buffer,buffer_size))
+    for(int i=0;i<capture_calls;++i){
+        CHECK_CUSPARSE(cusparseSpVV(handle,CUSPARSE_OPERATION_NON_TRANSPOSE,
+            vecX,vecY,d_result,CUDA_R_32F,buffer))
+    }
+    float result;
+    CHECK_CUDA(cudaMemcpy(&result,d_result,sizeof(float),cudaMemcpyDeviceToHost))
+    migration_observer::emit("standard_result",&result,1);
+    cudaStream_t stream;
+    cudaGraph_t graph;
+    cudaGraphExec_t executable;
+    CHECK_CUDA(cudaStreamCreate(&stream))
+    CHECK_CUSPARSE(cusparseSetStream(handle,stream))
+    CHECK_CUDA(cudaStreamBeginCapture(stream,cudaStreamCaptureModeGlobal))
+    for(int i=0;i<capture_calls;++i){
+        CHECK_CUSPARSE(cusparseSpVV(handle,CUSPARSE_OPERATION_NON_TRANSPOSE,
+            vecX,vecY,d_result,CUDA_R_32F,buffer))
+    }
+    CHECK_CUDA(cudaStreamEndCapture(stream,&graph))
+    size_t node_count=0,kernel_count=0;
+    CHECK_CUDA(cudaGraphGetNodes(graph,nullptr,&node_count))
+    std::vector<cudaGraphNode_t> nodes(node_count);
+    CHECK_CUDA(cudaGraphGetNodes(graph,nodes.data(),&node_count))
+    for(auto node:nodes){
+        cudaGraphNodeType type;
+        CHECK_CUDA(cudaGraphNodeGetType(node,&type))
+        if(type==cudaGraphNodeTypeKernel)++kernel_count;
+    }
+    migration_observer::emit("graph_nodes",&node_count,1);
+    migration_observer::emit("graph_kernels",&kernel_count,1);
+    migration_observer::emit("capture_calls",&capture_calls,1);
+    if(!node_count || kernel_count<size_t(capture_calls))return EXIT_FAILURE;
+    CHECK_CUDA(cudaGraphInstantiateWithFlags(&executable,graph,0))
+    int replay_count=0;
+    for(int replay=0;replay<3;++replay){
+        if(replay==1)for(int i=0;i<size;++i)y[i]=2*y[i]+1.f+float(i%5)/8.f;
+        if(replay==2)for(auto& v:y)v=0;
+        migration_observer::emit(("input_Y_"+std::to_string(replay)).c_str(),y.data(),y.size());
+        // The input is updated outside capture, on the same stream as replay.
+        CHECK_CUDA(cudaMemcpyAsync(d_y,y.data(),size*sizeof(float),cudaMemcpyHostToDevice,stream))
+        CHECK_CUDA(cudaGraphLaunch(executable,stream))
+        CHECK_CUDA(cudaMemcpyAsync(&result,d_result,sizeof(float),cudaMemcpyDeviceToHost,stream))
+        CHECK_CUDA(cudaStreamSynchronize(stream))
+        ++replay_count;
+        migration_observer::emit(("replay_"+std::to_string(replay)).c_str(),&result,1);
+    }
+    migration_observer::emit("replay_count",&replay_count,1);
+    CHECK_CUDA(cudaGraphExecDestroy(executable))
+    CHECK_CUDA(cudaGraphDestroy(graph))
+    CHECK_CUDA(cudaStreamDestroy(stream))
+    CHECK_CUSPARSE(cusparseDestroySpVec(vecX))
+    CHECK_CUSPARSE(cusparseDestroyDnVec(vecY))
+    CHECK_CUSPARSE(cusparseDestroy(handle))
+    CHECK_CUDA(cudaFree(d_indices))
+    CHECK_CUDA(cudaFree(d_x))
+    CHECK_CUDA(cudaFree(d_y))
+    CHECK_CUDA(cudaFree(d_result))
+    CHECK_CUDA(cudaFree(buffer))
+    return EXIT_SUCCESS;
+}

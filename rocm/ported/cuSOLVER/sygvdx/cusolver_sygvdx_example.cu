@@ -1,4 +1,9 @@
 #include "observe.hpp"
+#include "binary_observe.hpp"
+#include <string>
+#include <vector>
+#include <cstdlib>
+#include "observe.hpp"
 /*
  * SPDX-FileCopyrightText: Copyright (c) 2020 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
@@ -28,6 +33,9 @@
 #include "cusolver_utils.h"
 
 int main(int argc, char *argv[]) {
+// MIGRATION_BATCH3: preserve original GPU mathematical calls.
+const std::string migration_case=std::getenv("MIGRATION_CASE")?std::getenv("MIGRATION_CASE"):"original";
+
     hipsolverHandle_t cusolverH = NULL;
     hipStream_t stream = NULL;
 
@@ -91,7 +99,11 @@ int main(int argc, char *argv[]) {
     // step 3: query working space of sygvd
     hipsolverEigType_t itype = HIPSOLVER_EIG_TYPE_1;     // A*x = (lambda)*B*x
     hipsolverEigMode_t jobz = HIPSOLVER_EIG_MODE_VECTOR; // compute eigenvalues and eigenvectors.
-    hipsolverEigRange_t range = HIPSOLVER_EIG_RANGE_I;   // eigenvalues/eigenvectors in the half-open
+    hipsolverEigRange_t range = HIPSOLVER_EIG_RANGE_I;
+if(migration_case=="value-range"){range=HIPSOLVER_EIG_RANGE_V;vl=0.2;vu=0.7;}
+if(migration_case=="all-range")range=HIPSOLVER_EIG_RANGE_ALL;
+if(migration_case=="empty-range"){range=HIPSOLVER_EIG_RANGE_V;vl=10.;vu=11.;}
+   // eigenvalues/eigenvectors in the half-open
                                                        // interval (vl,vu] will be found
     hipblasFillMode_t uplo = HIPBLAS_FILL_MODE_LOWER;
 
@@ -155,34 +167,23 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    std::printf("eigenvalue = (matlab base-1), ascending order\n");
-    int idx = 1;
-    for (auto const &i : W) {
-        std::printf("W[%i] = %E\n", idx, i);
-        idx++;
-    }
-
-    std::printf("V = (matlab base-1)\n");
-    print_matrix(m, m, V.data(), lda);
-    std::printf("=====\n");
-
-    std::printf("Eigenvalues found = %d\n", h_meig);
-
-    // step 4: check eigenvalues
-    double lambda_sup = 0;
-    for (int i = 0; i < m; i++) {
-        double error = fabs(lambda[i] - W[i]);
-        lambda_sup = (lambda_sup > error) ? lambda_sup : error;
-    }
-    std::printf("|lambda - W| = %E\n", lambda_sup);
-
-    
+    std::printf("Eigenvalues found = %d\n",h_meig);
+    for(int i=0;i<h_meig;++i)std::printf("W[%d] = %.17g\n",i,W[i]);
+    print_matrix(m,h_meig,V.data(),lda);
 // MIGRATION_OBSERVE_ORIGINAL: host buffers after GPU synchronization.
 migration_observer::emit("A",A.data(),A.size());
 migration_observer::emit("B",B.data(),B.size());
 migration_observer::emit("lambda",lambda.data(),lambda.size());
-migration_observer::emit("V",V.data(),V.size());
-migration_observer::emit("W",W.data(),W.size());
+migration_observer::emit("V",V.data(),m*h_meig);
+migration_observer::emit("W",W.data(),h_meig);
+migration_observer::emit("info",&info,1);
+migration_observer::emit("meig",&h_meig,1);
+migration_observer::emit("input_il",&il,1);
+migration_observer::emit("input_iu",&iu,1);
+migration_observer::emit("input_vl",&vl,1);
+migration_observer::emit("input_vu",&vu,1);
+migration_observer::emit("input_A",A.data(),A.size());
+migration_observer::emit("input_B",B.data(),B.size());
 /* free resources */
     CUDA_CHECK(hipFree(d_A));
     CUDA_CHECK(hipFree(d_B));
