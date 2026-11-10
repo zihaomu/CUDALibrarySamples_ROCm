@@ -1,0 +1,1 @@
+Test cpu-validation for nvCOMP/examples::nvcomp_crc32.cu, case empty-with-data. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T093728.421908Z-R4-rocm-d7e3c3c6ef.

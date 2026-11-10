@@ -1,0 +1,38 @@
+#!/usr/bin/env python3
+"""Run the original nvCOMP CRC32 sample, adding observation-only binary exports."""
+import json,shlex,shutil,tarfile
+from pathlib import Path
+from experiment import ROOT,Experiment,write,digest
+host='nvidia-5090x2';original=ROOT/'nvCOMP/examples/nvcomp_crc32.cu';sdk=ROOT/'build/cuda-sdk';e=Experiment('R4','nvCOMP/examples::nvcomp_crc32.cu','cuda-native-build',sources=[__file__,original]);src=e.path/'nvcomp_crc32.cu';text=original.read_text();marker='  // Validate CRC32 values computed on the GPU against reference values.'
+prefix='''#include <fstream>
+#include <cstdlib>
+template<class T>void crc_export(const char*name,const std::vector<T>&v){if(const char*p=std::getenv("REWRITE_OUTPUT")){std::ofstream f(std::string(p)+"/"+name+".bin",std::ios::binary);f.write(reinterpret_cast<const char*>(v.data()),v.size()*sizeof(T));}}
+'''
+capture='''  if(std::getenv("REWRITE_OUTPUT")){
+    std::vector<unsigned char> bytes(total_bytes);if(total_bytes)std::copy(input_data_cpu.data(),input_data_cpu.data()+total_bytes,bytes.begin());
+    std::vector<size_t> offsets(chunk_count),sizes(chunk_count);std::vector<uint32_t> values(chunk_count);size_t offset=0;
+    for(size_t i=0;i<chunk_count;++i){offsets[i]=offset;sizes[i]=input_data_cpu.sizes()[i];offset+=sizes[i];}
+    if(chunk_count)CUDA_CHECK(cudaMemcpy(values.data(),crc32_values.data().get(),chunk_count*sizeof(uint32_t),cudaMemcpyDeviceToHost));
+    crc_export("input",bytes);crc_export("offsets",offsets);crc_export("sizes",sizes);crc_export("crc32",values);
+    crc_export("trace",std::vector<int64_t>{int64_t(warmup_iteration_count),int64_t(total_iteration_count),int64_t(chunk_count),int64_t(total_iteration_count)*int64_t(chunk_count>0)});
+    float observed_ms=0;CUDA_CHECK(cudaEventElapsedTime(&observed_ms,start,end));crc_export("timing_ms",std::vector<float>{observed_ms/float(total_iteration_count-warmup_iteration_count)});
+  }
+'''
+if marker not in text:raise RuntimeError('original CRC sample marker changed')
+src.write_text(text.replace(marker,capture+marker).replace('#include "nvcomp.h"','#include "nvcomp.h"\n'+prefix));bundle=e.path/'source-sdk.tar.gz';libs=list((sdk/'lib').glob('libnvcomp*'));metadata={str(p.relative_to(sdk)):dict(sha256=digest(p),bytes=p.stat().st_size) for p in libs if p.is_file()};write(e.path/'sdk-identity.json',metadata)
+with tarfile.open(bundle,'w:gz') as archive:
+ archive.add(src,arcname='sample.cu');archive.add(sdk/'include',arcname='include')
+ for name in ['BatchData.h','BatchDataCPU.h','util.h']:archive.add(ROOT/'nvCOMP/examples'/name,arcname=name)
+ for lib in libs:
+  if lib.is_file():archive.add(lib.resolve(),arcname='lib/'+lib.name)
+remote='/tmp/'+e.id;steps=[(['ssh',host,shlex.join(['mkdir','-p',remote])],'prepare'),(['scp',str(bundle),host+':'+remote+'/source-sdk.tar.gz'],'upload'),(['ssh',host,shlex.join(['tar','-xzf',remote+'/source-sdk.tar.gz','-C',remote])],'unpack'),(['ssh',host,shlex.join(['/usr/local/cuda-13.4/bin/nvcc','-std=c++17','-O2','-arch=sm_120',remote+'/sample.cu','-I'+remote+'/include','-L'+remote+'/lib','-lnvcomp','-Xlinker=-rpath='+remote+'/lib','-o',remote+'/native'])],'build'),(['ssh',host,'nvidia-smi --query-gpu=index,name,uuid,driver_version --format=csv,noheader'],'device-identity')]
+rc=0
+for command,phase in steps:
+ rc=e.command(command,phase,timeout=240)
+ if rc:break
+build=dict(return_code=rc,experiment_id=e.id,remote=remote,original_sha256=digest(original),instrumented_sha256=digest(src),sdk=metadata,evidence=e.finish('EXECUTED' if rc==0 else 'NATIVE_BUILD_FAILED'));write(ROOT/'migration/reports/rewrite-crc32-native-build.json',build)
+if rc:raise SystemExit(rc)
+results={};cases=json.loads((ROOT/'migration/rewrite/extensions.json').read_text())['profiles'];cases=next(p['cases'] for p in cases if p['kind']=='crc32')
+for case in cases:
+ e=Experiment('R4','nvCOMP/examples::nvcomp_crc32.cu','cuda-native',case=case,sources=[__file__,original],parent=build['experiment_id']);src=e.path/'inputs';shutil.copytree(ROOT/'tests/fixtures/rewrite-extensions/crc32'/case,src);mh=digest(src/'manifest.json');manifest=json.loads((src/'manifest.json').read_text());out=e.path/'outputs';out.mkdir();where=remote+'/'+case;e.command(['ssh',host,shlex.join(['mkdir','-p',where+'/outputs'])],'prepare');e.command(['scp','-r',str(src)+'/.',host+':'+where],'upload-identical-files')
+ argv=[remote+'/native']+manifest['argv'];code='import subprocess,os;raise SystemExit(subprocess.run('+repr(argv)+',cwd='+repr(where)+',env=dict(os.environ,CUDA_VISIBLE_DEVICES="0",REWRITE_OUTPUT='+repr(where+'/outputs')+')).returncode)';rc=e.command(['ssh',host,shlex.join(['python3','-c',code])],'original-nvcomp-CRC32',timeout=180);copy=e.command(['scp','-r',host+':'+where+'/outputs/.',str(out)],'collect');write(out/'manifest.json',dict(files={p.name:dict(sha256=digest(p),bytes=p.stat().st_size) for p in out.iterdir() if p.is_file()}));r=dict(kind='crc32',case=case,return_code=rc or copy,input_manifest_sha256=mh,input_snapshot=str((e.path/'inputs').relative_to(ROOT)),experiment_id=e.id,output=str(out.relative_to(ROOT)),build=build);r['evidence']=e.finish('EXECUTED' if not r['return_code'] else 'NATIVE_HARNESS_NONZERO');results[case]=r;write(ROOT/'migration/reports/rewrite-crc32-cuda.json',results);print(case,r['return_code'],flush=True)

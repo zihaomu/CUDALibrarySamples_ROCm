@@ -12,11 +12,11 @@
 
 上游固定为 `8b0573b11d183d9b3a36cd2955aa31c16cc61b95`。静态审计覆盖 **866 个源文件、477 个构建定义、639 个独立可执行/脚本源入口**。链接辅助文件、外部 SDK binding、架构/静态链接/通信变体另存元数据，不重复计入入口分母；没有在所有专有 SDK 条件下展开并执行每个构建配置。
 
-PASSED: 221；PARTIAL: 22；FAILED: 394；BLOCKED: 0；UNSUPPORTED: 2；NOT_STARTED: 0；IN_PROGRESS: 0。
+PASSED: 220；PARTIAL: 24；FAILED: 393；BLOCKED: 0；UNSUPPORTED: 2；NOT_STARTED: 0；IN_PROGRESS: 0。
 
 `PASSED` 只表示该行明确登记的原始功能和必需用例通过，不能推及整库、其它精度/规模或性能。`PARTIAL` 包括数值子集已通过但原始功能/执行合同仍有缺口，或已运行尚缺独立验收的端口；`FAILED` 保留真实失败日志和重试条件。不存在“HIPIFY 退出成功即迁移成功”的统计。
 
-专项证据：[M1 双端数值对照](migration/reports/m1-comparison.json)、[BLAS 三方对照](migration/reports/blas-three-way.json)、[稀疏 expected 检查](migration/reports/sparse-original-validation.json)、[新增双端数值/分布对照](migration/reports/additional-comparison.json)、[AMD 生态探针](migration/reports/native-probes.json)、[选型与缺口](migration/reports/ecosystem-decisions.md)、[最终一致性检查](migration/reports/final-validation.json)。**M0–M5 已逐批执行并记录结果；按逐例登记范围的成功率为 34.59%，失败/部分完成仍在分母。**
+专项证据：[M1 双端数值对照](migration/reports/m1-comparison.json)、[BLAS 三方对照](migration/reports/blas-three-way.json)、[稀疏 expected 检查](migration/reports/sparse-original-validation.json)、[新增双端数值/分布对照](migration/reports/additional-comparison.json)、[AMD 生态探针](migration/reports/native-probes.json)、[选型与缺口](migration/reports/ecosystem-decisions.md)、[最终一致性检查](migration/reports/final-validation.json)。**M0–M5 已逐批执行并记录结果；按逐例登记范围的成功率为 34.43%，失败/部分完成仍在分母。**
 
 性能仅选择 6 个 GEMM profile；AMD GPU 有其它任务，空闲资格检查失败，因此 [性能报告](migration/reports/performance-comparison.md) 标为 BLOCKED，仅保留原始计时，不发布合格速度比。
 
@@ -44,7 +44,7 @@ PASSED: 221；PARTIAL: 22；FAILED: 394；BLOCKED: 0；UNSUPPORTED: 2；NOT_STAR
 
 ## 已验收算子与验证范围
 
-**17 个模块已有整例通过，覆盖 115 个按模块去重的算子/功能族，对应 221 个通过的样例入口。**
+**17 个模块已有整例通过，覆盖 114 个按模块去重的算子/功能族，对应 220 个通过的样例入口。**
 
 计数按数学算子或原例核心功能归并；同模块的精度、尺寸、语言、batch、存储格式和算法变体不重复增加算子数。例如 cuRAND 是 4 种分布、36 个 generator/distribution profile；cuDSS simple 的 3 种语言入口算 1 个功能族。跨模块总数保留不同库接口的实现，GEMM 可分别出现在 cuBLAS 与 cuBLASLt。每个族至少有一个通过独立验收的样例，支持范围限于下表和逐例 required cases。
 
@@ -53,7 +53,7 @@ PASSED: 221；PARTIAL: 22；FAILED: 394；BLOCKED: 0；UNSUPPORTED: 2；NOT_STAR
 | [cuBLAS](cuBLAS/README.md) | 52 | `amax`、`amin`、`asum`、`axpy`、`copy`、`dgmm`、`dot`、`dotc`、`gbmv`、`geam`、`gemm`、`gemv`、`ger`、`hbmv`、`hemm`、`hemv`、`her`、`her2`、`her2k`、`herk`、`herkx`、`hpmv`、`hpr`、`hpr2`、`nrm2`、`rot`、`rotg`、`rotm`、`rotmg`、`sbmv`、`scal`、`spmv`、`spr`、`spr2`、`swap`、`symm`、`symv`、`syr`、`syr2`、`syr2k`、`syrk`、`syrkx`、`tbmv`、`tbsv`、`tpmv`、`tpsv`、`tpttr`、`trmm`、`trmv`、`trsm`、`trsv`、`trttp` | 72 | 固定教学profile与所列扩展cases；含复杂rank-k类型化适配、HIP GPU packed转换、FP32分组batched及FP64项目策略调优。rotmg极端缩放使用HIP修正；调优/批量变体按同一数学族去重。 |
 | [cuBLASLt](cuBLASLt/README.md) | 1 | `GEMM` | 8 | 既有6个profile为FP32 SGEMM、HSH pointer-array/strided、grouped分发及custom-find/autotune。MOAT新资格分别登记FP16 planar负偏移转换/FP32 3M/FP16输出，以及真实COL32/COL4 packing + native INT8/INT32 GemmEx；按样例链接与资格状态限定范围。 |
 | [cuBLASMp](cuBLASMp/README.md) | 2 | `block-cyclic 重分布`、`分布式 GEADD` | 2 | 已登记FP64 GEADD与1024阶block-cyclic重分布/往返；双MPI进程和不同GPU实际通信。GEMM子矩阵与低精度collective/quantized scale模式等缺口保持PARTIAL，未覆盖多节点。 |
-| [cuDSS](cuDSS/README.md) | 2 | `稀疏直接求解`、`稀疏重排序分析` | 7 | FP64 CSR：原始simple三语言、异构/均匀batch、analysis-only、1000阶GENERAL/双RHS残差；CPU稀疏符号/matching + rocSOLVER CSRRF或项目HIP CSR pivot LU。get_set仅部分配置/查询验收；大例固定pivot、小例分量CSR fill，未外推任意大规模动态pivot。 |
+| [cuDSS](cuDSS/README.md) | 1 | `稀疏直接求解` | 6 | FP64 CSR：原始simple三语言、异构/均匀batch、analysis-only、1000阶GENERAL/双RHS残差；CPU稀疏符号/matching + rocSOLVER CSRRF或项目HIP CSR pivot LU。get_set仅部分配置/查询验收；大例固定pivot、小例分量CSR fill，未外推任意大规模动态pivot。 |
 | [cuFFT](cuFFT/README.md) | 3 | `C2C 复数 FFT`、`FFT 窗口过滤 callback`、`R2C/C2R 实数 FFT` | 10 | 10 个 profile：原始单卡/双卡 C2C、实数正逆变换和 legacy/离线 SPIR-V/HIPRTC callback。1D 多卡使用 hipFFT + RCCL + HIP。 |
 | [cuFFTMp](cuFFTMp/README.md) | 1 | `多进程 slab C2C FFT` | 1 | 双MPI rank，原始16³及不均匀17×13×9；hipFFT本地YZ/X FFT + RCCL Send/Recv + HIP pack/unpack/归一化，完整频域与逆变换输出。 |
 | [cuPQC](cuPQC/README.md) | 2 | `SHA-256`、`SHA3-256` | 2 | SHA-256 单线程与 SHA3-256 的 32-lane 协作 GPU kernel；各 14 输入与 hashlib 精确一致，PQC 其它算法未实现。 |
@@ -86,7 +86,7 @@ PASSED: 221；PARTIAL: 22；FAILED: 394；BLOCKED: 0；UNSUPPORTED: 2；NOT_STAR
 | [cuBLAS](cuBLAS/README.md) | HIP GPU packed conversion → HIP runtime; hipBLAS + HIP scale fix → rocBLAS; hipBLAS + project search/group dispatch → rocBLAS; hipBLAS → rocBLAS; hipBLAS/rocBLAS three real SGEMMs + HIP Hermitian triangle epilogue; hipBLAS/rocBLAS three real SGEMMs + HIP complex split/merge; hipBLAS/rocBLAS three real SGEMMs + HIP symmetric triangle epilogue | 52 | 72/82 | 0 | 10 | 0 | 0 | 常规运算与第二批索引/旋转/batch 已验收；rotmg 原生重复缩放错误由项目 HIP GPU 修正。Emulation、3m、部分 Ex/packed 转换仍有接口/算法改写缺口。 |
 | [cuBLASLt](cuBLASLt/README.md) | HIP COL32/COL4 packing/unpacking + native hipBLAS GemmEx INT8/INT32 → rocBLAS; HIP negative-offset FP16 planar conversion + hipBLAS/rocBLAS FP32 3M + HIP FP16 output; hipBLASLt; hipBLASLt + project search/group dispatch → hipBLASLt/rocBLAS; hipBLASLt → hipBLASLt native | 1 | 8/20 | 0 | 12 | 0 | 0 | FP32 与两种 HSH FP16 batch 路径验证通过；高级 scale/quantization、grouped/autotune 接口及 FP8 格式不能按名字强行等同。 |
 | [cuBLASMp](cuBLASMp/README.md) | MPI + RCCL AllGather + hipBLAS GemmEx FP16 inputs/FP32 accumulation + HIP FP16 quantization; MPI + RCCL AllReduce + HIP FP64 block-cyclic GEADD; MPI + RCCL AllReduce + HIP block-cyclic redistribution/roundtrip; MPI + RCCL AllReduce + hipBLAS GemmEx FP16 inputs/FP32 accumulation + HIP FP16 quantization; MPI + RCCL ReduceScatter + hipBLAS GemmEx FP16 inputs/FP32 accumulation + HIP FP16 quantization; MPI + RCCL distribution + hipBLAS FP32 local GEMM | 2 | 2/14 | 4 | 8 | 0 | 0 | B12原始FP64 GEADD与block-cyclic重分布/往返通过；MPI双rank使用不同GPU及真实RCCL。GEMM原始B子矩阵offset、FP16 collective舍入/FP8/FP4 scale和完整CLI保持PARTIAL；没有多节点资格。 |
-| [cuDSS](cuDSS/README.md) | CPU sparse symbolic/matching + rocSOLVER CSRRF LU / HIP CSR pivot LU and GPU query adapter → rocSOLVER/HIP runtime; rocSOLVER + rocBLAS via ISO_C_BINDING/C ABI → GPU CSRRF sparse Cholesky; CPU sparse symbolic graph; rocSOLVER CSRRF + rocBLAS → GPU sparse Cholesky; CPU sparse symbolic analysis | 2 | 7/59 | 1 | 51 | 0 | 0 | simple三语言及B11的异构/均匀batch、重排序analysis-only、1000阶GENERAL双RHS已验收：CPU sparse symbolic/matching + rocSOLVER CSRRF或HIP CSR pivot LU。get_set保留完整cuDSS超级面板/16字段内存/原顺序DIAG语义缺口；小例性能和大规模动态pivot、Schur/分布式/allocator等未资格化。 |
+| [cuDSS](cuDSS/README.md) | CPU sparse symbolic/matching + rocSOLVER CSRRF LU / HIP CSR pivot LU and GPU query adapter → rocSOLVER/HIP runtime; CPU sparse symbolic/min-degree analysis + HIP data preparation; numeric factor/solve missing → CPU analysis + HIP preparation; rocSOLVER + rocBLAS via ISO_C_BINDING/C ABI → GPU CSRRF sparse Cholesky; CPU sparse symbolic graph; rocSOLVER CSRRF + rocBLAS → GPU sparse Cholesky; CPU sparse symbolic analysis | 1 | 6/59 | 2 | 51 | 0 | 0 | simple三语言及B11的异构/均匀batch、重排序analysis-only、1000阶GENERAL双RHS已验收：CPU sparse symbolic/matching + rocSOLVER CSRRF或HIP CSR pivot LU。get_set保留完整cuDSS超级面板/16字段内存/原顺序DIAG语义缺口；小例性能和大规模动态pivot、Schur/分布式/allocator等未资格化。 |
 | [cuEST](cuEST/README.md) | 候选：unresolved | 0 | 0/51 | 0 | 51 | 0 | 0 | 原始 GPU 电子结构 context、积分/梯度、DF/XC/PCM 等 vendor SDK 尚无本项目 AMD 绑定/算法实现；hipBLAS 本身不提供这些高层算子。 |
 | [cuFFT](cuFFT/README.md) | hipFFT + RCCL + HIP → Two GPU radix decomposition and GPU merge; hipFFT → rocFFT; hipFFT/rocFFT JIT callbacks + HIP compiler SPIR-V → rocFFT SPIR-V JIT integration; hipFFT/rocFFT JIT callbacks + HIPRTC → rocFFT SPIR-V JIT integration | 3 | 10/10 | 0 | 0 | 0 | 0 | 原始单卡、双卡、legacy/JIT callback 分别实现；1D Xt 不支持的单 batch 路径改用 hipFFT + RCCL + GPU 合并，JIT 使用 SPIR-V。 |
 | [cuFFTMp](cuFFTMp/README.md) | MPI + hipFFT local YZ/X FFT + RCCL Send/Recv + HIP slab transpose/scale | 1 | 1/20 | 0 | 19 | 0 | 0 | B13 MPI双rank/不同GPU：原始16³和不均匀17×13×9经native hipFFT + GPU slab转换 + RCCL Send/Recv，频域和逆变换全量通过；其它分布/多节点未覆盖。 |
@@ -111,7 +111,7 @@ PASSED: 221；PARTIAL: 22；FAILED: 394；BLOCKED: 0；UNSUPPORTED: 2；NOT_STAR
 | [nvJPEG](nvJPEG/README.md) | rocJPEG + HIP layout/ROI/Lanczos/watermark + explicit libjpeg CPU fallback/encode → rocJPEG/HIP runtime + libjpeg-turbo | 0 | 0/7 | 6 | 1 | 0 | 0 | B10 六个入口的baseline硬件解码、9布局/缩放/RGB ROI/native batch/多实例、HIP Lanczos/水印与真实CLI/Python测试已验收。原始12张图中2张progressive明确CPU libjpeg fallback，锁定rocJPEG HYBRID返回-12；GPU progressive、部分原例调度/decoupled/backend控制未等价，6项仍PARTIAL；JPEG编码为CPU。 |
 | [nvJPEG2000](nvJPEG2000/README.md) | 候选：unresolved | 0 | 0/4 | 0 | 4 | 0 | 0 | rocJPEG 的 JPEG decode 不能替代 JPEG2000；原始 GPU codec/多阶段/metadata 接口没有 AMD 实现，CPU OpenJPEG 不计成功。 |
 | [nvTIFF](nvTIFF/README.md) | 候选：unresolved | 0 | 0/6 | 0 | 6 | 0 | 0 | 原始 TIFF GPU codec 与多页/GeoTIFF/options 等接口未改写；CPU TIFF 容器处理不能冒充 GPU codec。 |
-| [nvCOMP](nvCOMP/README.md) | hipCOMP LZ4/Snappy + CPU liblz4/Snappy + HIP checked stream/CRC manager adapter → hipCOMP/HIP runtime + independent CPU codecs | 2 | 6/32 | 2 | 24 | 0 | 0 | B9 LZ4/Snappy 6个原始例子通过：hipCOMP native batch/manager，CPU liblz4/Snappy阶段、跨厂商RAW block GPU互解及损坏流检查。2个benchmark仅codec/基础文件CLI通过，完整NVBENCH框架未移植；其它codec/高级API仍缺。 |
+| [nvCOMP](nvCOMP/README.md) | hipCOMP LZ4/Snappy + CPU liblz4/Snappy + HIP checked stream/CRC manager adapter → hipCOMP/HIP runtime + independent CPU codecs; project HIP IEEE/PKZIP CRC32; CPU file I/O and reference → HIP GPU CRC32 kernel | 2 | 6/32 | 3 | 23 | 0 | 0 | B9 LZ4/Snappy 6个原始例子通过：hipCOMP native batch/manager，CPU liblz4/Snappy阶段、跨厂商RAW block GPU互解及损坏流检查。2个benchmark仅codec/基础文件CLI通过，完整NVBENCH框架未移植；其它codec/高级API仍缺。 |
 | [nvMatmulHeuristics](nvMatmulHeuristics/README.md) | 候选：hipBLASLt heuristics (subset) | 0 | 0/7 | 0 | 7 | 0 | 0 | hipBLASLt heuristic 已在 M1 验证；原始配置格式/模型与搜索接口未完整迁移，Origami 仅为待验收候选。 |
 
 ## 未通过和不支持的具体原因
@@ -120,7 +120,7 @@ PASSED: 221；PARTIAL: 22；FAILED: 394；BLOCKED: 0；UNSUPPORTED: 2；NOT_STAR
 
 | 当前结论 | 入口数 | 具体原因 | 证据与恢复条件 |
 | --- | ---: | --- | --- |
-| FAILED / `BUILD_ERROR` | 321 | 自动移植稿未完成 API/枚举/类型/链接适配。例如 Lt grouped/scale/layout、FP4 观察代码、MathDx device DSL 和特殊 SDK 仍有编译缺口；不据此宣称硬件不支持。 | 各模块 README 列出首个有效编译错误；需完成保持原语义的 AMD 改写再验收。 |
+| FAILED / `BUILD_ERROR` | 320 | 自动移植稿未完成 API/枚举/类型/链接适配。例如 Lt grouped/scale/layout、FP4 观察代码、MathDx device DSL 和特殊 SDK 仍有编译缺口；不据此宣称硬件不支持。 | 各模块 README 列出首个有效编译错误；需完成保持原语义的 AMD 改写再验收。 |
 | FAILED / `BINDING_OR_FRONTEND_MIGRATION_REQUIRED` | 73 | Fortran/Python 的 NVIDIA module、CUDA Fortran device 语法或 Python vendor 绑定尚未改写；前端/import 尝试失败。 | [语言资格记录](migration/reports/languages.json)；需补 AMD C ABI/ISO_C_BINDING 或真实 GPU Python 绑定。 |
 | FAILED / `RUNTIME_ERROR` | 0 | 已编译但执行失败：包括原始 Xgetrf 路径、BSR SDDMM、SELL SpSV，以及 tensor cache/einsum/padding 场景；具体参数/架构/实现原因见逐例日志。 | [原始 profile 尝试](migration/reports/original-rocm-latest.json)；修复失败调用，重新做独立数值检查。 |
 | FAILED / `TIMEOUT` | 0 | cuTENSOR trinary contraction 在记录的时限内未结束，未获得合格结果。 | [逐例报告](migration/sample-reports/cuTENSOR/contraction_trinary.cu.md)；定位执行/规模问题后重跑。 |

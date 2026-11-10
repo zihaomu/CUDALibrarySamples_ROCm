@@ -37,6 +37,24 @@
       ],
       "contract": "Original FP32 3x2 two-batch SVD; rank selection, descending singular values, U/V rather than VT, strides and GPU residual norm; native full SVD plus GPU truncation is the explicit replacement algorithm",
       "threshold": "Singular values atol=2e-5 rtol=3e-4; reconstruction/optimal rank residual 5e-4; returned Frobenius residual compared with FP64 recomputation; padding exact"
+    },
+    {
+      "batch": "R4",
+      "kind": "crc32",
+      "source": "nvCOMP/examples/nvcomp_crc32.cu",
+      "sample_id": "nvCOMP/examples::nvcomp_crc32.cu",
+      "implementation": "rocm/ported/nvCOMP/examples/nvcomp_crc32.cu",
+      "cases": [
+        "original",
+        "changed-values",
+        "chunk-boundary",
+        "multi-file",
+        "empty-with-data",
+        "repeat",
+        "empty-only"
+      ],
+      "contract": "Original -f multi-file CLI, split each file into 65536-byte chunks, two warmups and five total iterations, GPU IEEE/PKZIP CRC32, exact per-chunk checks and GPU event timing; empty input API behavior compared separately",
+      "threshold": "Exact uint32 equality to independent zlib.crc32 and native nvCOMP CRC32; distinguish CRC32C"
     }
   ]
 }

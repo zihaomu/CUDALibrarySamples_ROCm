@@ -1,0 +1,24 @@
+// SPDX-License-Identifier: Apache-2.0
+#pragma once
+#include "rewrite_runtime.hpp"
+#include <iterator>
+#include <numeric>
+namespace rewrite {
+__global__ void crc32_ieee(const unsigned char*data,const size_t*offsets,const size_t*sizes,uint32_t*out,size_t chunks){
+ size_t id=size_t(blockIdx.x)*blockDim.x+threadIdx.x;if(id>=chunks)return;uint32_t crc=0xffffffffu;
+ for(size_t i=0;i<sizes[id];++i){crc^=data[offsets[id]+i];for(int bit=0;bit<8;++bit)crc=(crc>>1)^(0xedb88320u&uint32_t(-int(crc&1)));}out[id]=crc^0xffffffffu;
+}
+inline uint32_t host_crc32(const unsigned char*data,size_t size){uint32_t value=0xffffffffu;for(size_t i=0;i<size;++i){value^=data[i];for(int j=0;j<8;++j)value=(value>>1)^((value&1)?0xedb88320u:0);}return value^0xffffffffu;}
+inline int crc32_main(int argc,char**argv){try{
+ if(argc<3||std::string(argv[1])!="-f")throw std::runtime_error("Must specify at least one file via '-f <file>'");
+ std::vector<unsigned char>data;std::vector<size_t>offsets,sizes;constexpr size_t chunk_size=1<<16;
+ for(int f=2;f<argc;++f){std::ifstream file(argv[f],std::ios::binary);if(!file)throw std::runtime_error("Cannot read file "+std::string(argv[f]));std::vector<unsigned char>part((std::istreambuf_iterator<char>(file)),{});for(size_t p=0;p<part.size();p+=chunk_size){offsets.push_back(data.size()+p);sizes.push_back(std::min(chunk_size,part.size()-p));}data.insert(data.end(),part.begin(),part.end());}
+ identity();std::cout<<"files: "<<argc-2<<"\ntotal size (B): "<<data.size()<<"\nchunks: "<<sizes.size()<<'\n';Buffer<unsigned char>input(data);Buffer<size_t>off(offsets),lengths(sizes);Buffer<uint32_t>result(sizes.size());RW_RT(Stream_t) stream;RW_CHECK(RW_RT(StreamCreate)(&stream));RW_RT(Event_t) start,end;RW_CHECK(RW_RT(EventCreate)(&start));RW_CHECK(RW_RT(EventCreate)(&end));
+ auto calculate=[&](){if(!sizes.empty()){crc32_ieee<<<(sizes.size()+127)/128,128,0,stream>>>(input.p,off.p,lengths.p,result.p,sizes.size());RW_CHECK(RW_RT(GetLastError)());}};
+ for(int i=0;i<2;++i)calculate();RW_CHECK(RW_RT(EventRecord)(start,stream));for(int i=2;i<5;++i)calculate();RW_CHECK(RW_RT(EventRecord)(end,stream));RW_CHECK(RW_RT(EventSynchronize)(end));float ms=0;RW_CHECK(RW_RT(EventElapsedTime)(&ms,start,end));auto values=result.get();
+ for(size_t i=0;i<sizes.size();++i)if(values[i]!=host_crc32(data.data()+offsets[i],sizes[i]))throw std::runtime_error("CRC32 CPU validation failed");
+ std::cout<<"CRC32 values validated :)\nCRC32 throughput (GB/s): "<<(ms>0?double(data.size())/(ms/3)*1e-6:0)<<'\n';
+ if(std::getenv("REWRITE_OUTPUT")){emit("input",data);emit("offsets",offsets);emit("sizes",sizes);emit("crc32",values);emit("trace",std::vector<int64_t>{2,5,int64_t(sizes.size()),5*int64_t(!sizes.empty())});emit("timing_ms",std::vector<float>{ms/3});}
+ RW_CHECK(RW_RT(EventDestroy)(start));RW_CHECK(RW_RT(EventDestroy)(end));RW_CHECK(RW_RT(StreamDestroy)(stream));return 0;
+ }catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 1;}}
+}

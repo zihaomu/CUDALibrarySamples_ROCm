@@ -1,0 +1,1 @@
+Test cpu-validation for nvCOMP/examples::nvcomp_crc32.cu, case chunk-boundary. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T093607.518401Z-R4-cuda-native-98b60c26d7.

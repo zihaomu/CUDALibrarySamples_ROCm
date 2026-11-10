@@ -14,6 +14,12 @@
       "scope": "R3 NCC initial large-image trial 20261110T084340",
       "reason": "Small 32x24 NPP zero-variance behavior was initially generalized to the fixed 2048x1024 image. This made undefined constant patches dominate argmax. Original full-image native NPP observations supersede that assumption; no sample qualification used the early CPU-only policy. All failed HIP trials and the earlier oracle sources remain sealed.",
       "replacement": "rewrite-ncc-native-comparison.json"
+    },
+    {
+      "sample_id": "cuDSS/simple_reordering_phase::simple_reordering_phase.cpp",
+      "reason": "Historical B11 tests covered analysis/permutation metadata while the original subsequently factors and solves; those results remain historical subset evidence only.",
+      "evidence": "migration/reports/evidence/rewrite/R5/cuDSS_simple_reordering_phase__simple_reordering_phase.cpp/20261110T094452.257460Z-R5-host-contract-review-54565fa16d",
+      "action": "Current PASSED revoked to PARTIAL until full post-reordering solve is qualified; historical measurements unchanged"
     }
   ]
 }

@@ -1,0 +1,1 @@
+Test cpu-validation for nvCOMP/examples::nvcomp_crc32.cu, case original. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T093602.835634Z-R4-cuda-native-1c36cbf2f6.

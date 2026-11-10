@@ -286517,10 +286517,10 @@
         "rocSPARSE/HIP",
         "ISO_C_BINDING"
       ],
-      "actual_library": "CPU sparse symbolic/matching + rocSOLVER CSRRF LU / HIP CSR pivot LU and GPU query adapter",
-      "backend_library": "rocSOLVER/HIP runtime",
+      "actual_library": "CPU sparse symbolic/min-degree analysis + HIP data preparation; numeric factor/solve missing",
+      "backend_library": "CPU analysis + HIP preparation",
       "implementation": "rocm/ported/cuDSS/simple_reordering_phase/simple_reordering_phase.cpp",
-      "status": "PASSED",
+      "status": "PARTIAL",
       "level": "L4",
       "required_cases": [
         "batches9_11/original",
@@ -286530,7 +286530,8 @@
         "batches9_11/pivot-required",
         "batches9_11/singular-info",
         "batches9_11/indefinite",
-        "batches9_11/configuration"
+        "batches9_11/configuration",
+        "rewrite/full-factor-solve-after-isolated-reordering"
       ],
       "passed_cases": [
         "batches9_11/original",
@@ -286542,8 +286543,8 @@
         "batches9_11/indefinite",
         "batches9_11/configuration"
       ],
-      "reason_code": "VALIDATED_B9_B11",
-      "reason": "使用 CPU sparse symbolic/matching + rocSOLVER CSRRF LU / HIP CSR pivot LU and GPU query adapter；8 个预登记case通过独立CPU与同输入CUDA。保留原始规模、矩阵类别/CPU-GPU阶段分工；适配范围与实际GPU执行、status/返回长度及配置查询逐例记录。",
+      "reason_code": "ORIGINAL_POST_REORDERING_SOLVE_MISSING",
+      "reason": "历史B11仅验收分析/排列；原始例取回row/col permutation后继续数值分解与求解。当前端口在analysis_only分支提前返回，缺少原始后半阶段，已撤回整例资格，待R5共享稀疏适配补齐并重新验收。",
       "cuda_baseline": "PASSED",
       "cuda_comparison": "PASSED",
       "benchmark": "NOT_RUN",
@@ -286553,7 +286554,8 @@
         "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuDSS_simple_reordering_phase_simple_reordering_phase.cpp",
         "migration/reports/evidence/20261110T043650.167709Z/batches9_11-rocm/cuDSS_simple_reordering_phase_simple_reordering_phase.cpp",
         "migration/reports/batches9_11-validation.json",
-        "migration/reports/evidence/20261110T043816.470698Z/batches9_11-cuda/cuDSS_simple_reordering_phase_simple_reordering_phase.cpp"
+        "migration/reports/evidence/20261110T043816.470698Z/batches9_11-cuda/cuDSS_simple_reordering_phase_simple_reordering_phase.cpp",
+        "migration/reports/evidence/rewrite/R5/cuDSS_simple_reordering_phase__simple_reordering_phase.cpp/20261110T094452.257460Z-R5-host-contract-review-54565fa16d"
       ],
       "attempts": [
         {
@@ -289095,6 +289097,13 @@
           "current_cuda_source_proof": true,
           "current_source_proof": true,
           "contract_status": "PASSED"
+        },
+        {
+          "status": "PARTIAL",
+          "scope": "Original contract correction, not a new numeric pass",
+          "implementation": "rocm/ported/cuDSS/simple_reordering_phase/simple_reordering_phase.cpp",
+          "implementation_sha256": "a3dc4c03b8215a67bf5b00fd3080ec0284687f5dcad2dad31309feadf2c62b39",
+          "evidence": "migration/reports/evidence/rewrite/R5/cuDSS_simple_reordering_phase__simple_reordering_phase.cpp/20261110T094452.257460Z-R5-host-contract-review-54565fa16d"
         }
       ],
       "milestone": "M5",
@@ -601205,25 +601214,34 @@
       "candidate_libraries": [
         "hipCOMP"
       ],
-      "actual_library": null,
-      "backend_library": null,
+      "actual_library": "project HIP IEEE/PKZIP CRC32; CPU file I/O and reference",
+      "backend_library": "HIP GPU CRC32 kernel",
       "implementation": "rocm/ported/nvCOMP/examples/nvcomp_crc32.cu",
-      "status": "FAILED",
-      "level": "L1",
+      "status": "PARTIAL",
+      "level": "L3",
       "required_cases": [
-        "original-functional-contract",
-        "independent-numerical-or-semantic-reference"
+        "rewrite/R4/crc32/original",
+        "rewrite/R4/crc32/changed-values",
+        "rewrite/R4/crc32/chunk-boundary",
+        "rewrite/R4/crc32/multi-file",
+        "rewrite/R4/crc32/empty-with-data",
+        "rewrite/R4/crc32/repeat",
+        "rewrite/R4/crc32/empty-only",
+        "rewrite/R4/crc32/independent-review-and-qualification"
       ],
       "passed_cases": [],
-      "reason_code": "BUILD_ERROR",
-      "reason": "build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvCOMP/examples/nvcomp_crc32.cu:31:33: error: unknown type name 'nvcompCRC32Spec_t'；/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvCOMP/examples/nvcomp_crc32.cu:78:3: error: unknown type name 'nvcompCRC32KernelConf_t'",
+      "reason_code": "REWRITE_REVIEW_PENDING",
+      "reason": "HIP IEEE/PKZIP CRC32已编译与运行；已测非空文件/多chunk/多文件，原生nvCOMP零chunk会拒绝，HIP已补预检并重新验收中。独立资格尚未签发。",
       "cuda_baseline": "BLOCKED",
       "cuda_comparison": "BLOCKED",
       "benchmark": "NOT_RUN",
       "evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/nvCOMP_examples_nvcomp_crc32.cu",
         "migration/reports/evidence/20261109T084256.329631Z/original-rocm/nvCOMP_examples_nvcomp_crc32.cu",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/nvCOMP_examples_nvcomp_crc32.cu"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/nvCOMP_examples_nvcomp_crc32.cu",
+        "migration/reports/rewrite-crc32-rocm.json",
+        "migration/reports/rewrite-crc32-cuda.json",
+        "migration/reports/rewrite-crc32-native-build.json"
       ],
       "attempts": [
         {
@@ -601275,6 +601293,19 @@
             }
           ],
           "qualified_physical_devices": true
+        },
+        {
+          "status": "PARTIAL",
+          "scope": "MOAT R4 CRC32 candidate; qualification pending",
+          "implementation": "rocm/ported/nvCOMP/examples/nvcomp_crc32.cu",
+          "implementation_sha256": "4333e3c4c7687b4310f657daca201c92d5d066a470144555e5b0a72c200478b0",
+          "dependencies": {
+            "rocm/ported/nvCOMP/examples/nvcomp_crc32.cu": "4333e3c4c7687b4310f657daca201c92d5d066a470144555e5b0a72c200478b0",
+            "rocm/backends/codec/crc32.hpp": "47ee2ccdae2348f62d856b8f0d8ffdc571d07292355a49298e16efb4d3ea06ed",
+            "rocm/common/rewrite_runtime.hpp": "f2b97f13b7f4c89f24827e96ba82bb6d2d6d692f909e80625fc16e81ffe5572c"
+          },
+          "evidence": "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093549.703847Z-R4-rocm-build-585dedada3",
+          "environment": "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093549.703847Z-R4-rocm-build-585dedada3/backend.observed.json"
         }
       ],
       "milestone": "M3",
@@ -601331,7 +601362,7 @@
         ],
         "review_scope": "Original source is the authoritative dtype/layout/batch/API contract; qualified subset and deviations are explicit in reason and required_cases."
       },
-      "equivalence": "API_PORT",
+      "equivalence": "LIBRARY_REWRITE",
       "next_step": "按当前逐例错误和 retry_condition 改写/补齐，再运行原始 profile 与独立参考。",
       "original_cuda": {
         "sample_id": "nvCOMP/examples::nvcomp_crc32.cu",

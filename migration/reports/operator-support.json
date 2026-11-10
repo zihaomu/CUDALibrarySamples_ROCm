@@ -2,9 +2,9 @@
   "schema_version": 1,
   "counting_rule": "Operator/functional families are deduplicated within each module; dtypes, sizes, language, batch, storage formats and algorithm variants do not create extra operators. At least one explicitly scoped PASSED source profile is required. Cross-module totals may include the same mathematical operation implemented through different library interfaces.",
   "qualification_rule": "A verified family proves only its linked PASSED source profiles/required cases, not every API configuration. PARTIAL examples and capability probes are excluded.",
-  "verified_operator_families": 115,
+  "verified_operator_families": 114,
   "modules_with_verified_operators": 17,
-  "passed_source_profiles": 221,
+  "passed_source_profiles": 220,
   "modules": {
     "cuBLAS": {
       "verified_operator_family_count": 52,
@@ -654,7 +654,7 @@
       }
     },
     "cuDSS": {
-      "verified_operator_family_count": 2,
+      "verified_operator_family_count": 1,
       "verified_operators": [
         {
           "name": "稀疏直接求解",
@@ -675,23 +675,13 @@
             "migration/sample-reports/cuDSS/simple_uniform_batch/simple_uniform_batch.cpp.md"
           ],
           "source_profiles": 6
-        },
-        {
-          "name": "稀疏重排序分析",
-          "sample_ids": [
-            "cuDSS/simple_reordering_phase::simple_reordering_phase.cpp"
-          ],
-          "sample_reports": [
-            "migration/sample-reports/cuDSS/simple_reordering_phase/simple_reordering_phase.cpp.md"
-          ],
-          "source_profiles": 1
         }
       ],
       "sample_count": 59,
       "sample_outcomes": {
         "FAILED": 51,
-        "PASSED": 7,
-        "PARTIAL": 1
+        "PASSED": 6,
+        "PARTIAL": 2
       },
       "validation_scope": "FP64 CSR：原始simple三语言、异构/均匀batch、analysis-only、1000阶GENERAL/双RHS残差；CPU稀疏符号/matching + rocSOLVER CSRRF或项目HIP CSR pivot LU。get_set仅部分配置/查询验收；大例固定pivot、小例分量CSR fill，未外推任意大规模动态pivot。",
       "failure_reason_counts": {
@@ -1750,13 +1740,13 @@
       ],
       "sample_count": 32,
       "sample_outcomes": {
-        "FAILED": 24,
-        "PARTIAL": 2,
+        "FAILED": 23,
+        "PARTIAL": 3,
         "PASSED": 6
       },
       "validation_scope": "hipCOMP LZ4/Snappy原生批处理；CPU↔GPU与hipCOMP↔nvCOMP双向互解、逐chunk status/实际长度、空/边界/损坏流；LZ4 native manager/factory +项目CRC32C及100 raw buffers。完整NVBENCH框架仍单列PARTIAL。",
       "failure_reason_counts": {
-        "BUILD_ERROR": 23,
+        "BUILD_ERROR": 22,
         "BINDING_OR_FRONTEND_MIGRATION_REQUIRED": 1
       }
     },

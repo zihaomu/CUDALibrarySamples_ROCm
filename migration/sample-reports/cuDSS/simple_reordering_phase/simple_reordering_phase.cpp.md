@@ -1,23 +1,23 @@
 # cuDSS/simple_reordering_phase::simple_reordering_phase.cpp
 
-**PASSED / L4**
+**PARTIAL / L4**
 
-使用 CPU sparse symbolic/matching + rocSOLVER CSRRF LU / HIP CSR pivot LU and GPU query adapter；8 个预登记case通过独立CPU与同输入CUDA。保留原始规模、矩阵类别/CPU-GPU阶段分工；适配范围与实际GPU执行、status/返回长度及配置查询逐例记录。
+历史B11仅验收分析/排列；原始例取回row/col permutation后继续数值分解与求解。当前端口在analysis_only分支提前返回，缺少原始后半阶段，已撤回整例资格，待R5共享稀疏适配补齐并重新验收。
 
 | 字段 | 当前记录 |
 | --- | --- |
 | 原始入口 | [cuDSS/simple_reordering_phase/simple_reordering_phase.cpp](../../../../cuDSS/simple_reordering_phase/simple_reordering_phase.cpp) |
-| 实际库 / 后端 | CPU sparse symbolic/matching + rocSOLVER CSRRF LU / HIP CSR pivot LU and GPU query adapter / rocSOLVER/HIP runtime |
+| 实际库 / 后端 | CPU sparse symbolic/min-degree analysis + HIP data preparation; numeric factor/solve missing / CPU analysis + HIP preparation |
 | 候选路线 | rocSOLVER CSRRF, rocSPARSE/HIP, ISO_C_BINDING |
 | 代码 | [rocm/ported/cuDSS/simple_reordering_phase/simple_reordering_phase.cpp](../../../../rocm/ported/cuDSS/simple_reordering_phase/simple_reordering_phase.cpp) |
-| required cases | 8/8 |
+| required cases | 8/9 |
 | CUDA baseline / comparison | PASSED / PASSED |
 | 性能 | NOT_RUN |
 | 原始源码 SHA256 | `a108c459ce8211ef19b5694abe442c8d008b321e114fa8f89e1e29539eb9b7e5` |
 
 编译/运行返回 0 仅对应 L3；通过独立参考检查后才记 L4。失败的候选库不列为已使用库。
 
-必需用例：`batches9_11/original`, `batches9_11/changed-values`, `batches9_11/varied-pattern`, `batches9_11/reorder-natural`, `batches9_11/pivot-required`, `batches9_11/singular-info`, `batches9_11/indefinite`, `batches9_11/configuration`。
+必需用例：`batches9_11/original`, `batches9_11/changed-values`, `batches9_11/varied-pattern`, `batches9_11/reorder-natural`, `batches9_11/pivot-required`, `batches9_11/singular-info`, `batches9_11/indefinite`, `batches9_11/configuration`, `rewrite/full-factor-solve-after-isolated-reordering`。
 
 实现方式：`HYBRID_HIP`。
 
@@ -37,7 +37,7 @@ build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_mi
 
 从仓库根目录，先核对物理 GPU 占用。HIP ordinal 与物理编号不同；项目 guard 根据 PCI 地址拒绝 GPU3 和被预约的卡。
 
-在仓库根目录运行：GPU 构建/执行由 launcher 进入锁定容器，CPU 验收在宿主 Python3.12；先按对应批次报告同步 CUDA 证据。
+在已锁定并通过 guard 的 ROCm 10.1.0 容器中（多 GPU 用例须暴露两个允许的设备）：
 
 ```bash
 HIP_VISIBLE_DEVICES=2 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh python tools/migration/batches9_11_run.py b11
@@ -50,3 +50,4 @@ OPENBLAS_NUM_THREADS=1 python3 tools/migration/batches9_11_validate.py b11 --qua
 - [migration/reports/evidence/20261110T043650.167709Z/batches9_11-rocm/cuDSS_simple_reordering_phase_simple_reordering_phase.cpp](../../../reports/evidence/20261110T043650.167709Z/batches9_11-rocm/cuDSS_simple_reordering_phase_simple_reordering_phase.cpp)
 - [migration/reports/batches9_11-validation.json](../../../reports/batches9_11-validation.json)
 - [migration/reports/evidence/20261110T043816.470698Z/batches9_11-cuda/cuDSS_simple_reordering_phase_simple_reordering_phase.cpp](../../../reports/evidence/20261110T043816.470698Z/batches9_11-cuda/cuDSS_simple_reordering_phase_simple_reordering_phase.cpp)
+- [migration/reports/evidence/rewrite/R5/cuDSS_simple_reordering_phase__simple_reordering_phase.cpp/20261110T094452.257460Z-R5-host-contract-review-54565fa16d](../../../reports/evidence/rewrite/R5/cuDSS_simple_reordering_phase__simple_reordering_phase.cpp/20261110T094452.257460Z-R5-host-contract-review-54565fa16d)

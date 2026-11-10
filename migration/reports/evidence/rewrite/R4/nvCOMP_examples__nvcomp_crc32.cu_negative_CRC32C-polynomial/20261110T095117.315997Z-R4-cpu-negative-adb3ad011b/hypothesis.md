@@ -1,0 +1,1 @@
+Test cpu-negative for nvCOMP/examples::nvcomp_crc32.cu/negative/CRC32C-polynomial, case original. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T093723.156395Z-R4-rocm-83af637350.

@@ -1,0 +1,1 @@
+Test cpu-validation for CRC32/multi-file, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T093257.956194Z-R4-rocm-27b5607a75.

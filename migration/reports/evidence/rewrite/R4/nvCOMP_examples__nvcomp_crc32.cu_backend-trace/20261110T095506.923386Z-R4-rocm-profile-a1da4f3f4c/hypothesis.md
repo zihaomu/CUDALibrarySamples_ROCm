@@ -1,0 +1,1 @@
+Test rocm-profile for nvCOMP/examples::nvcomp_crc32.cu/backend-trace, case original. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T093549.703847Z-R4-rocm-build-585dedada3.

@@ -176,7 +176,7 @@ CUDALibrarySamples_ROCm/
 | R1 | 5 个 BLAS/Lt 重写 | 复数 3M、PlanarComplex、INT8 布局与计算 | 第 5 节逐例合同、预登记用例、独立三方验证和反向检查 | COMPLETED_SCOPED |
 | R2 | 3 个 MathDx 求解设备内重写 | partial-pivot LU、POSV、TRSM | 第 5 节原始 dtype/尺寸/执行位置通过，host API 替代检查通过 | COMPLETED_SCOPED |
 | R3 | 24 个 PARTIAL 收口 | 第 6 节逐例缺失合同、可收口实现或保留原因 | 每项有当前证据与下一步；仅完整等价项升级 PASSED | IN_PROGRESS |
-| R4 | 其它基础/高级算法扩展 | 稀疏 QR/IRS/SVD、低精度、图像、压缩、heuristics 等按探针拆批 | 一次只冻结一个可审查小批；完整原始合同和独立验收 | NOT_STARTED |
+| R4 | 其它基础/高级算法扩展 | 稀疏 QR/IRS/SVD、低精度、图像、压缩、heuristics 等按探针拆批 | 一次只冻结一个可审查小批；完整原始合同和独立验收 | IN_PROGRESS |
 | R5 | 语言绑定扩展 | 对 73 个前端失败入口逐一建立 C ABI / Fortran / Python 路线 | 先有已验收 GPU 核心，再通过原语言实际入口与数据/错误传播检查 | NOT_STARTED |
 | R6 | 长尾 SDK/设备算法研究 | cuEST、PQC、JPEG2000/TIFF、剩余 MathDx/分布式等分专题 | 每专题明确可实施路线、最小探针、成本和失败恢复条件 | NOT_STARTED |
 | R7 | 2:4 结构化稀疏替代 | 原生路线重探或真正的 HIP sparse 2:4 实现 | prune/compress/metadata/稀疏 matmul 与原例合同通过；原生失败记录保留 | NOT_STARTED |
@@ -534,10 +534,14 @@ CUDA 对照分成 `cuda_native` 与 `cuda_compatible_math`。原生 SDK 缺失�
 
 | 2026-11-10 | EXEC-12 | R3两个候选独立复审及复合资格完成，NCC与gesvdaStridedBatched升级PASSED；原24项中2整例收口、22缺口仍明确保留。支持219→221，功能族114→115；15输入/24注入/18实际运行边界与真实GPU solver trace均已归档 | 继续R4算法扩展、R5语言绑定、R6专题探针、R7真实2:4及R8总体验收；不把剩余22项写成完成 |
 
+| 2026-11-10 | EXEC-13 | R4首个批次实现IEEE/PKZIP CRC32 GPU kernel（明确区别CRC32C），保留-f多文件、65536-byte逐文件切chunk、2次warmup/5次总迭代及GPU event计时；6个非空场景已跑真实native nvCOMP和HIP。零chunk原生抛异常终止，最初HIP空操作成功的差异保留；已改为预检拒绝并重验 | CRC32全量CPU/zlib、负向、CLI、真实GPU trace与独立资格；R4其它方向及R5–R8待继续 |
+
+| 2026-11-10 | EXEC-14 | R5前端合同调查发现历史cuDSS C++ simple_reordering_phase原例还有后续factor/solve，而旧端口在analysis-only提前返回；已追加具体源码证据并撤回该1例整例资格至PARTIAL，历史测量不改写 | 作为Fortran重排绑定的共享核心前置项修复；当前通过221→220是合同更正，不是GPU数值回归 |
+
 PLAN-01 至 PLAN-03 是规划阶段记录，不代表实验结果。实施中的目录和 schema 按实际交付更新；未完成组件仍按待实现要求处理。
 
 <!-- MOAT_EXEC_PROGRESS:START -->
 
-最近更新：2026-11-10T09:29:50.492579+00:00。首批 AMD 51/51 已运行，独立 CPU 51/51 通过；CUDA 51/51 已运行，独立 CPU 51/51 通过。已签发首批整例资格 8/8。R3–R8仍待完成。
+最近更新：2026-11-10T09:44:56.064676+00:00。首批 AMD 51/51 已运行，独立 CPU 51/51 通过；CUDA 51/51 已运行，独立 CPU 51/51 通过。已签发首批整例资格 8/8。R3–R8仍待完成。
 
 <!-- MOAT_EXEC_PROGRESS:END -->

@@ -1,0 +1,1 @@
+Test host-contract-review for cuDSS/simple_reordering_phase::simple_reordering_phase.cpp, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: none.

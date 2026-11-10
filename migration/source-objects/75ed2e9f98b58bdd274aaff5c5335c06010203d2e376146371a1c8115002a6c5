@@ -1,0 +1,8 @@
+#!/usr/bin/env python3
+import json,shutil
+from experiment import ROOT,Experiment,write,digest
+from snapshot import capture
+build=json.loads((ROOT/'migration/reports/rewrite-extension-builds.json').read_text())['crc32'];observed=capture();cases=json.loads((ROOT/'migration/rewrite/extensions.json').read_text())['profiles'];cases=next(p['cases'] for p in cases if p['kind']=='crc32');results={}
+for case in cases:
+ src=ROOT/'tests/fixtures/rewrite-extensions/crc32'/case;manifest=json.loads((src/'manifest.json').read_text());mh=digest(src/'manifest.json');e=Experiment('R4','nvCOMP/examples::nvcomp_crc32.cu','rocm',case=case,sources=[__file__]+[ROOT/n for n in build['dependencies']],parent=build['experiment_id'],comparison_id='crc32/'+case+'/'+mh);shutil.copytree(src,e.path/'inputs');write(e.path/'backend.observed.json',observed);out=e.path/'outputs';out.mkdir();argv=[str(ROOT/build['binary'])]+manifest['argv']
+ rc=e.command(argv,'original-file-CLI',cwd=e.path/'inputs',env=dict(REWRITE_OUTPUT=str(out)));write(out/'manifest.json',dict(files={p.name:dict(sha256=digest(p),bytes=p.stat().st_size) for p in out.iterdir() if p.is_file()}));r=dict(kind='crc32',case=case,return_code=rc,output=str(out.relative_to(ROOT)),input_manifest_sha256=mh,input_snapshot=str((e.path/'inputs').relative_to(ROOT)),experiment_id=e.id,comparison_id=e.meta['comparison_id'],build=build);r['evidence']=e.finish('EXECUTED' if rc==0 else 'RUNTIME_ERROR');results[case]=r;write(ROOT/'migration/reports/rewrite-crc32-rocm.json',results);print(case,rc,flush=True)
