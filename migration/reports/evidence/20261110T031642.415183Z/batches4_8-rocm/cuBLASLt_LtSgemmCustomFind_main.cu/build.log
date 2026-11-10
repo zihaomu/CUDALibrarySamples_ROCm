@@ -1,0 +1,514 @@
+Warning: HIP version file: "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/share/hip/version" not found.  Cannot give HIP version information.
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:35:140: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   35 |    MB_CHECK(MB_RT(EventRecord)(stop));MB_CHECK(MB_RT(EventSynchronize)(stop));float ms=0;MB_CHECK(MB_RT(EventElapsedTime)(&ms,start,stop));MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);if(ms<bestms){bestms=ms;best=policy;}emit(("candidate_"+pre+"_"+std::to_string(policy)).c_str(),cc.get());
+      |                                                                                                                                            ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:489:1: note: expanded from here
+  489 | hipEventDestroy
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:35:167: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   35 |    MB_CHECK(MB_RT(EventRecord)(stop));MB_CHECK(MB_RT(EventSynchronize)(stop));float ms=0;MB_CHECK(MB_RT(EventElapsedTime)(&ms,start,stop));MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);if(ms<bestms){bestms=ms;best=policy;}emit(("candidate_"+pre+"_"+std::to_string(policy)).c_str(),cc.get());
+      |                                                                                                                                                                       ^~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:490:1: note: expanded from here
+  490 | hipEventDestroy
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:51:357: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   51 |  for(int i=0;i<found;++i){if(algorithms[i].state!=0||algorithms[i].workspaceSize>budget)continue;d.put(C);MB_RT(Event_t)start,stop;MB_CHECK(MB_RT(EventCreate)(&start));MB_CHECK(MB_RT(EventCreate)(&stop));MB_CHECK(MB_RT(EventRecord)(start));auto rc=T7_LT(Matmul)(h,op,&alpha,a.p,ad,b.p,bdesc,&beta,cc.p,cd,d.p,cd,&algorithms[i].algo,work.p,budget,0);if(rc){MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);continue;}MB_CHECK(MB_RT(EventRecord)(stop));MB_CHECK(MB_RT(EventSynchronize)(stop));float ms;MB_CHECK(MB_RT(EventElapsedTime)(&ms,start,stop));MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);if(ms<bestms){bestms=ms;best=i;}bin7("candidate_"+pre+"_"+std::to_string(executed),d.get());scalar(("candidate_workspace_"+pre+"_"+std::to_string(executed)).c_str(),algorithms[i].workspaceSize);++executed;}
+      |                                                                                                                                                                                                                                                                                                                                                                     ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:32:1: note: expanded from here
+   32 | hipEventDestroy
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:51:384: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   51 |  for(int i=0;i<found;++i){if(algorithms[i].state!=0||algorithms[i].workspaceSize>budget)continue;d.put(C);MB_RT(Event_t)start,stop;MB_CHECK(MB_RT(EventCreate)(&start));MB_CHECK(MB_RT(EventCreate)(&stop));MB_CHECK(MB_RT(EventRecord)(start));auto rc=T7_LT(Matmul)(h,op,&alpha,a.p,ad,b.p,bdesc,&beta,cc.p,cd,d.p,cd,&algorithms[i].algo,work.p,budget,0);if(rc){MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);continue;}MB_CHECK(MB_RT(EventRecord)(stop));MB_CHECK(MB_RT(EventSynchronize)(stop));float ms;MB_CHECK(MB_RT(EventElapsedTime)(&ms,start,stop));MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);if(ms<bestms){bestms=ms;best=i;}bin7("candidate_"+pre+"_"+std::to_string(executed),d.get());scalar(("candidate_workspace_"+pre+"_"+std::to_string(executed)).c_str(),algorithms[i].workspaceSize);++executed;}
+      |                                                                                                                                                                                                                                                                                                                                                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:33:1: note: expanded from here
+   33 | hipEventDestroy
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:51:554: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   51 |  for(int i=0;i<found;++i){if(algorithms[i].state!=0||algorithms[i].workspaceSize>budget)continue;d.put(C);MB_RT(Event_t)start,stop;MB_CHECK(MB_RT(EventCreate)(&start));MB_CHECK(MB_RT(EventCreate)(&stop));MB_CHECK(MB_RT(EventRecord)(start));auto rc=T7_LT(Matmul)(h,op,&alpha,a.p,ad,b.p,bdesc,&beta,cc.p,cd,d.p,cd,&algorithms[i].algo,work.p,budget,0);if(rc){MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);continue;}MB_CHECK(MB_RT(EventRecord)(stop));MB_CHECK(MB_RT(EventSynchronize)(stop));float ms;MB_CHECK(MB_RT(EventElapsedTime)(&ms,start,stop));MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);if(ms<bestms){bestms=ms;best=i;}bin7("candidate_"+pre+"_"+std::to_string(executed),d.get());scalar(("candidate_workspace_"+pre+"_"+std::to_string(executed)).c_str(),algorithms[i].workspaceSize);++executed;}
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:40:1: note: expanded from here
+   40 | hipEventDestroy
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:51:581: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   51 |  for(int i=0;i<found;++i){if(algorithms[i].state!=0||algorithms[i].workspaceSize>budget)continue;d.put(C);MB_RT(Event_t)start,stop;MB_CHECK(MB_RT(EventCreate)(&start));MB_CHECK(MB_RT(EventCreate)(&stop));MB_CHECK(MB_RT(EventRecord)(start));auto rc=T7_LT(Matmul)(h,op,&alpha,a.p,ad,b.p,bdesc,&beta,cc.p,cd,d.p,cd,&algorithms[i].algo,work.p,budget,0);if(rc){MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);continue;}MB_CHECK(MB_RT(EventRecord)(stop));MB_CHECK(MB_RT(EventSynchronize)(stop));float ms;MB_CHECK(MB_RT(EventElapsedTime)(&ms,start,stop));MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);if(ms<bestms){bestms=ms;best=i;}bin7("candidate_"+pre+"_"+std::to_string(executed),d.get());scalar(("candidate_workspace_"+pre+"_"+std::to_string(executed)).c_str(),algorithms[i].workspaceSize);++executed;}
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ^~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:41:1: note: expanded from here
+   41 | hipEventDestroy
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:7:
+In file included from /opt/rocm/core-10.1/include/hipblaslt/hipblaslt.h:65:
+In file included from /opt/rocm/core-10.1/include/hipblaslt/hipblaslt-types.h:37:
+In file included from /opt/rocm/core-10.1/include/hip/hip_fp8.h:14:
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1033:12: warning: implicit conversion from 'int' to 'float' changes value from 2147483647 to 2147483648 [-Wimplicit-const-int-float-conversion]
+ 1033 |   if (f >= __hip_internal::numeric_limits<T_int>::max()) {
+      |         ~~ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1223:24: note: in instantiation of function template specialization 'hip_detail::internal_cvt_e8m0_to_int_type<int>' requested here
+ 1223 |     return hip_detail::internal_cvt_e8m0_to_int_type<int>(__x);
+      |                        ^
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1033:12: warning: implicit conversion from 'long' to 'float' changes value from 9223372036854775807 to 9223372036854775808 [-Wimplicit-const-int-float-conversion]
+ 1033 |   if (f >= __hip_internal::numeric_limits<T_int>::max()) {
+      |         ~~ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1226:24: note: in instantiation of function template specialization 'hip_detail::internal_cvt_e8m0_to_int_type<long>' requested here
+ 1226 |     return hip_detail::internal_cvt_e8m0_to_int_type<long int>(__x);
+      |                        ^
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1033:12: warning: implicit conversion from 'long long' to 'float' changes value from 9223372036854775807 to 9223372036854775808 [-Wimplicit-const-int-float-conversion]
+ 1033 |   if (f >= __hip_internal::numeric_limits<T_int>::max()) {
+      |         ~~ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1229:24: note: in instantiation of function template specialization 'hip_detail::internal_cvt_e8m0_to_int_type<long long>' requested here
+ 1229 |     return hip_detail::internal_cvt_e8m0_to_int_type<long long int>(__x);
+      |                        ^
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1033:12: warning: implicit conversion from 'unsigned int' to 'float' changes value from 4294967295 to 4294967296 [-Wimplicit-const-int-float-conversion]
+ 1033 |   if (f >= __hip_internal::numeric_limits<T_int>::max()) {
+      |         ~~ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1241:24: note: in instantiation of function template specialization 'hip_detail::internal_cvt_e8m0_to_int_type<unsigned int>' requested here
+ 1241 |     return hip_detail::internal_cvt_e8m0_to_int_type<unsigned int>(__x);
+      |                        ^
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1033:12: warning: implicit conversion from 'unsigned long' to 'float' changes value from 18446744073709551615 to 18446744073709551616 [-Wimplicit-const-int-float-conversion]
+ 1033 |   if (f >= __hip_internal::numeric_limits<T_int>::max()) {
+      |         ~~ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1244:24: note: in instantiation of function template specialization 'hip_detail::internal_cvt_e8m0_to_int_type<unsigned long>' requested here
+ 1244 |     return hip_detail::internal_cvt_e8m0_to_int_type<unsigned long int>(__x);
+      |                        ^
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1033:12: warning: implicit conversion from 'unsigned long long' to 'float' changes value from 18446744073709551615 to 18446744073709551616 [-Wimplicit-const-int-float-conversion]
+ 1033 |   if (f >= __hip_internal::numeric_limits<T_int>::max()) {
+      |         ~~ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1247:24: note: in instantiation of function template specialization 'hip_detail::internal_cvt_e8m0_to_int_type<unsigned long long>' requested here
+ 1247 |     return hip_detail::internal_cvt_e8m0_to_int_type<unsigned long long int>(__x);
+      |                        ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:29:318: note: in instantiation of member function 'migration_batch::Buffer<double>::~Buffer' requested here
+   29 |   std::string pre="g"+std::to_string(g);scalar(("input_n_"+pre).c_str(),n);scalar(("input_trans_"+pre).c_str(),int(tr));scalar(("input_alpha_"+pre).c_str(),alpha);scalar(("input_beta_"+pre).c_str(),beta);emit(("input_A_"+pre).c_str(),A);emit(("input_B_"+pre).c_str(),B);emit(("input_C_"+pre).c_str(),C);Buffer<double>a(A),bb(B),cc(C);
+      |                                                                                                                                                                                                                                                                                                                              ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:51:357: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   51 |  for(int i=0;i<found;++i){if(algorithms[i].state!=0||algorithms[i].workspaceSize>budget)continue;d.put(C);MB_RT(Event_t)start,stop;MB_CHECK(MB_RT(EventCreate)(&start));MB_CHECK(MB_RT(EventCreate)(&stop));MB_CHECK(MB_RT(EventRecord)(start));auto rc=T7_LT(Matmul)(h,op,&alpha,a.p,ad,b.p,bdesc,&beta,cc.p,cd,d.p,cd,&algorithms[i].algo,work.p,budget,0);if(rc){MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);continue;}MB_CHECK(MB_RT(EventRecord)(stop));MB_CHECK(MB_RT(EventSynchronize)(stop));float ms;MB_CHECK(MB_RT(EventElapsedTime)(&ms,start,stop));MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);if(ms<bestms){bestms=ms;best=i;}bin7("candidate_"+pre+"_"+std::to_string(executed),d.get());scalar(("candidate_workspace_"+pre+"_"+std::to_string(executed)).c_str(),algorithms[i].workspaceSize);++executed;}
+      |                                                                                                                                                                                                                                                                                                                                                                     ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:32:1: note: expanded from here
+   32 | hipEventDestroy
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:57:176: note: in instantiation of function template specialization 'migration_batch::lt7<__half>' requested here
+   57 |  if(grouped){std::srand(42);for(int i=0;i<2;++i){int m=(std::rand()%9)*8,n=(std::rand()%13)*8,k=(std::rand()%17)*8;if(c=="heterogeneous-groups"){m=24+16*i;n=16+24*i;k=32+8*i;}lt7<__half>(i,m,n,k,c=="negative-alpha"?-.75f:2.f,c=="heterogeneous-groups"?.5f:0.f,true,8*1024*1024);}}
+      |                                                                                                                                                                                ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:51:384: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   51 |  for(int i=0;i<found;++i){if(algorithms[i].state!=0||algorithms[i].workspaceSize>budget)continue;d.put(C);MB_RT(Event_t)start,stop;MB_CHECK(MB_RT(EventCreate)(&start));MB_CHECK(MB_RT(EventCreate)(&stop));MB_CHECK(MB_RT(EventRecord)(start));auto rc=T7_LT(Matmul)(h,op,&alpha,a.p,ad,b.p,bdesc,&beta,cc.p,cd,d.p,cd,&algorithms[i].algo,work.p,budget,0);if(rc){MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);continue;}MB_CHECK(MB_RT(EventRecord)(stop));MB_CHECK(MB_RT(EventSynchronize)(stop));float ms;MB_CHECK(MB_RT(EventElapsedTime)(&ms,start,stop));MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);if(ms<bestms){bestms=ms;best=i;}bin7("candidate_"+pre+"_"+std::to_string(executed),d.get());scalar(("candidate_workspace_"+pre+"_"+std::to_string(executed)).c_str(),algorithms[i].workspaceSize);++executed;}
+      |                                                                                                                                                                                                                                                                                                                                                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:33:1: note: expanded from here
+   33 | hipEventDestroy
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:51:554: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   51 |  for(int i=0;i<found;++i){if(algorithms[i].state!=0||algorithms[i].workspaceSize>budget)continue;d.put(C);MB_RT(Event_t)start,stop;MB_CHECK(MB_RT(EventCreate)(&start));MB_CHECK(MB_RT(EventCreate)(&stop));MB_CHECK(MB_RT(EventRecord)(start));auto rc=T7_LT(Matmul)(h,op,&alpha,a.p,ad,b.p,bdesc,&beta,cc.p,cd,d.p,cd,&algorithms[i].algo,work.p,budget,0);if(rc){MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);continue;}MB_CHECK(MB_RT(EventRecord)(stop));MB_CHECK(MB_RT(EventSynchronize)(stop));float ms;MB_CHECK(MB_RT(EventElapsedTime)(&ms,start,stop));MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);if(ms<bestms){bestms=ms;best=i;}bin7("candidate_"+pre+"_"+std::to_string(executed),d.get());scalar(("candidate_workspace_"+pre+"_"+std::to_string(executed)).c_str(),algorithms[i].workspaceSize);++executed;}
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:40:1: note: expanded from here
+   40 | hipEventDestroy
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:51:581: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   51 |  for(int i=0;i<found;++i){if(algorithms[i].state!=0||algorithms[i].workspaceSize>budget)continue;d.put(C);MB_RT(Event_t)start,stop;MB_CHECK(MB_RT(EventCreate)(&start));MB_CHECK(MB_RT(EventCreate)(&stop));MB_CHECK(MB_RT(EventRecord)(start));auto rc=T7_LT(Matmul)(h,op,&alpha,a.p,ad,b.p,bdesc,&beta,cc.p,cd,d.p,cd,&algorithms[i].algo,work.p,budget,0);if(rc){MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);continue;}MB_CHECK(MB_RT(EventRecord)(stop));MB_CHECK(MB_RT(EventSynchronize)(stop));float ms;MB_CHECK(MB_RT(EventElapsedTime)(&ms,start,stop));MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);if(ms<bestms){bestms=ms;best=i;}bin7("candidate_"+pre+"_"+std::to_string(executed),d.get());scalar(("candidate_workspace_"+pre+"_"+std::to_string(executed)).c_str(),algorithms[i].workspaceSize);++executed;}
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ^~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:41:1: note: expanded from here
+   41 | hipEventDestroy
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:41:213: note: in instantiation of member function 'migration_batch::Buffer<__half>::~Buffer' requested here
+   41 |  auto c=selected_case();std::string pre="g"+std::to_string(group);auto A=fixture7<T>(size_t(m)*k,c=="changed-values"?23:3),B=fixture7<T>(size_t(k)*n,5),C=fixture7<T>(size_t(m)*n,7),Bias=fixture7<T>(m,9);Buffer<T>a(A),b(B),cc(C),d(C),bd(Bias);bin7("input_A_"+pre,A);bin7("input_B_"+pre,B);bin7("input_C_"+pre,C);bin7("input_bias_"+pre,Bias);
+      |                                                                                                                                                                                                                     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:57:176: note: in instantiation of function template specialization 'migration_batch::lt7<__half>' requested here
+   57 |  if(grouped){std::srand(42);for(int i=0;i<2;++i){int m=(std::rand()%9)*8,n=(std::rand()%13)*8,k=(std::rand()%17)*8;if(c=="heterogeneous-groups"){m=24+16*i;n=16+24*i;k=32+8*i;}lt7<__half>(i,m,n,k,c=="negative-alpha"?-.75f:2.f,c=="heterogeneous-groups"?.5f:0.f,true,8*1024*1024);}}
+      |                                                                                                                                                                                ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:48:186: note: in instantiation of member function 'migration_batch::Buffer<unsigned char>::~Buffer' requested here
+   48 |  MB_CHECK(T7_LT(MatmulPreferenceCreate)(&pref));MB_CHECK(T7_LT(MatmulPreferenceSetAttribute)(pref,T7_ATTR(MATMUL_PREF_MAX_WORKSPACE_BYTES),&budget,sizeof(budget)));Buffer<unsigned char>work(budget);
+      |                                                                                                                                                                                          ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:57:176: note: in instantiation of function template specialization 'migration_batch::lt7<__half>' requested here
+   57 |  if(grouped){std::srand(42);for(int i=0;i<2;++i){int m=(std::rand()%9)*8,n=(std::rand()%13)*8,k=(std::rand()%17)*8;if(c=="heterogeneous-groups"){m=24+16*i;n=16+24*i;k=32+8*i;}lt7<__half>(i,m,n,k,c=="negative-alpha"?-.75f:2.f,c=="heterogeneous-groups"?.5f:0.f,true,8*1024*1024);}}
+      |                                                                                                                                                                                ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:51:357: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   51 |  for(int i=0;i<found;++i){if(algorithms[i].state!=0||algorithms[i].workspaceSize>budget)continue;d.put(C);MB_RT(Event_t)start,stop;MB_CHECK(MB_RT(EventCreate)(&start));MB_CHECK(MB_RT(EventCreate)(&stop));MB_CHECK(MB_RT(EventRecord)(start));auto rc=T7_LT(Matmul)(h,op,&alpha,a.p,ad,b.p,bdesc,&beta,cc.p,cd,d.p,cd,&algorithms[i].algo,work.p,budget,0);if(rc){MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);continue;}MB_CHECK(MB_RT(EventRecord)(stop));MB_CHECK(MB_RT(EventSynchronize)(stop));float ms;MB_CHECK(MB_RT(EventElapsedTime)(&ms,start,stop));MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);if(ms<bestms){bestms=ms;best=i;}bin7("candidate_"+pre+"_"+std::to_string(executed),d.get());scalar(("candidate_workspace_"+pre+"_"+std::to_string(executed)).c_str(),algorithms[i].workspaceSize);++executed;}
+      |                                                                                                                                                                                                                                                                                                                                                                     ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:32:1: note: expanded from here
+   32 | hipEventDestroy
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:58:182: note: in instantiation of function template specialization 'migration_batch::lt7<float>' requested here
+   58 |  else{int m=1024,n=kind=="LtSgemmCustomFind"?512:1024,k=kind=="LtSgemmCustomFind"?4096:1024;size_t bytes=c=="limited-workspace"?0:kind=="LtSgemmCustomFind"?16*1024*1024:4*1024*1024;lt7<float>(0,m,n,k,2,c=="changed-values"?.5f:0.f,false,bytes);}MB_CHECK(MB_RT(DeviceSynchronize)());return 0;
+      |                                                                                                                                                                                      ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:51:384: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   51 |  for(int i=0;i<found;++i){if(algorithms[i].state!=0||algorithms[i].workspaceSize>budget)continue;d.put(C);MB_RT(Event_t)start,stop;MB_CHECK(MB_RT(EventCreate)(&start));MB_CHECK(MB_RT(EventCreate)(&stop));MB_CHECK(MB_RT(EventRecord)(start));auto rc=T7_LT(Matmul)(h,op,&alpha,a.p,ad,b.p,bdesc,&beta,cc.p,cd,d.p,cd,&algorithms[i].algo,work.p,budget,0);if(rc){MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);continue;}MB_CHECK(MB_RT(EventRecord)(stop));MB_CHECK(MB_RT(EventSynchronize)(stop));float ms;MB_CHECK(MB_RT(EventElapsedTime)(&ms,start,stop));MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);if(ms<bestms){bestms=ms;best=i;}bin7("candidate_"+pre+"_"+std::to_string(executed),d.get());scalar(("candidate_workspace_"+pre+"_"+std::to_string(executed)).c_str(),algorithms[i].workspaceSize);++executed;}
+      |                                                                                                                                                                                                                                                                                                                                                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:33:1: note: expanded from here
+   33 | hipEventDestroy
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:51:554: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   51 |  for(int i=0;i<found;++i){if(algorithms[i].state!=0||algorithms[i].workspaceSize>budget)continue;d.put(C);MB_RT(Event_t)start,stop;MB_CHECK(MB_RT(EventCreate)(&start));MB_CHECK(MB_RT(EventCreate)(&stop));MB_CHECK(MB_RT(EventRecord)(start));auto rc=T7_LT(Matmul)(h,op,&alpha,a.p,ad,b.p,bdesc,&beta,cc.p,cd,d.p,cd,&algorithms[i].algo,work.p,budget,0);if(rc){MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);continue;}MB_CHECK(MB_RT(EventRecord)(stop));MB_CHECK(MB_RT(EventSynchronize)(stop));float ms;MB_CHECK(MB_RT(EventElapsedTime)(&ms,start,stop));MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);if(ms<bestms){bestms=ms;best=i;}bin7("candidate_"+pre+"_"+std::to_string(executed),d.get());scalar(("candidate_workspace_"+pre+"_"+std::to_string(executed)).c_str(),algorithms[i].workspaceSize);++executed;}
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:40:1: note: expanded from here
+   40 | hipEventDestroy
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:51:581: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   51 |  for(int i=0;i<found;++i){if(algorithms[i].state!=0||algorithms[i].workspaceSize>budget)continue;d.put(C);MB_RT(Event_t)start,stop;MB_CHECK(MB_RT(EventCreate)(&start));MB_CHECK(MB_RT(EventCreate)(&stop));MB_CHECK(MB_RT(EventRecord)(start));auto rc=T7_LT(Matmul)(h,op,&alpha,a.p,ad,b.p,bdesc,&beta,cc.p,cd,d.p,cd,&algorithms[i].algo,work.p,budget,0);if(rc){MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);continue;}MB_CHECK(MB_RT(EventRecord)(stop));MB_CHECK(MB_RT(EventSynchronize)(stop));float ms;MB_CHECK(MB_RT(EventElapsedTime)(&ms,start,stop));MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);if(ms<bestms){bestms=ms;best=i;}bin7("candidate_"+pre+"_"+std::to_string(executed),d.get());scalar(("candidate_workspace_"+pre+"_"+std::to_string(executed)).c_str(),algorithms[i].workspaceSize);++executed;}
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ^~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:41:1: note: expanded from here
+   41 | hipEventDestroy
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:41:213: note: in instantiation of member function 'migration_batch::Buffer<float>::~Buffer' requested here
+   41 |  auto c=selected_case();std::string pre="g"+std::to_string(group);auto A=fixture7<T>(size_t(m)*k,c=="changed-values"?23:3),B=fixture7<T>(size_t(k)*n,5),C=fixture7<T>(size_t(m)*n,7),Bias=fixture7<T>(m,9);Buffer<T>a(A),b(B),cc(C),d(C),bd(Bias);bin7("input_A_"+pre,A);bin7("input_B_"+pre,B);bin7("input_C_"+pre,C);bin7("input_bias_"+pre,Bias);
+      |                                                                                                                                                                                                                     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:58:182: note: in instantiation of function template specialization 'migration_batch::lt7<float>' requested here
+   58 |  else{int m=1024,n=kind=="LtSgemmCustomFind"?512:1024,k=kind=="LtSgemmCustomFind"?4096:1024;size_t bytes=c=="limited-workspace"?0:kind=="LtSgemmCustomFind"?16*1024*1024:4*1024*1024;lt7<float>(0,m,n,k,2,c=="changed-values"?.5f:0.f,false,bytes);}MB_CHECK(MB_RT(DeviceSynchronize)());return 0;
+      |                                                                                                                                                                                      ^
+24 warnings generated when compiling for gfx1201.
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:7:
+In file included from /opt/rocm/core-10.1/include/hipblaslt/hipblaslt.h:65:
+In file included from /opt/rocm/core-10.1/include/hipblaslt/hipblaslt-types.h:42:
+In file included from /opt/rocm/core-10.1/include/hipblaslt/hipblaslt_bfloat6.h:43:
+In file included from /opt/rocm/core-10.1/include/hip/hip_ext_ocp.h:12:
+In file included from /opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_ocp_fp.hpp:16:
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_ocp_host.hpp:812:22: warning: missing 'typename' prior to dependent type name '__hip_internal::conditional<in_float, OutType, InType>::type' is a C++20 extension [-Wc++20-extensions]
+  812 |   using other_type = __hip_internal::conditional<in_float, OutType, InType>::type;
+      |                      ^
+      |                      typename 
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_ocp_host.hpp:853:22: warning: missing 'typename' prior to dependent type name '__hip_internal::conditional<in_float, OutType, InType>::type' is a C++20 extension [-Wc++20-extensions]
+  853 |   using other_type = __hip_internal::conditional<in_float, OutType, InType>::type;
+      |                      ^
+      |                      typename 
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:35:140: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   35 |    MB_CHECK(MB_RT(EventRecord)(stop));MB_CHECK(MB_RT(EventSynchronize)(stop));float ms=0;MB_CHECK(MB_RT(EventElapsedTime)(&ms,start,stop));MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);if(ms<bestms){bestms=ms;best=policy;}emit(("candidate_"+pre+"_"+std::to_string(policy)).c_str(),cc.get());
+      |                                                                                                                                            ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:490:1: note: expanded from here
+  490 | hipEventDestroy
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:35:167: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   35 |    MB_CHECK(MB_RT(EventRecord)(stop));MB_CHECK(MB_RT(EventSynchronize)(stop));float ms=0;MB_CHECK(MB_RT(EventElapsedTime)(&ms,start,stop));MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);if(ms<bestms){bestms=ms;best=policy;}emit(("candidate_"+pre+"_"+std::to_string(policy)).c_str(),cc.get());
+      |                                                                                                                                                                       ^~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:491:1: note: expanded from here
+  491 | hipEventDestroy
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:51:357: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   51 |  for(int i=0;i<found;++i){if(algorithms[i].state!=0||algorithms[i].workspaceSize>budget)continue;d.put(C);MB_RT(Event_t)start,stop;MB_CHECK(MB_RT(EventCreate)(&start));MB_CHECK(MB_RT(EventCreate)(&stop));MB_CHECK(MB_RT(EventRecord)(start));auto rc=T7_LT(Matmul)(h,op,&alpha,a.p,ad,b.p,bdesc,&beta,cc.p,cd,d.p,cd,&algorithms[i].algo,work.p,budget,0);if(rc){MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);continue;}MB_CHECK(MB_RT(EventRecord)(stop));MB_CHECK(MB_RT(EventSynchronize)(stop));float ms;MB_CHECK(MB_RT(EventElapsedTime)(&ms,start,stop));MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);if(ms<bestms){bestms=ms;best=i;}bin7("candidate_"+pre+"_"+std::to_string(executed),d.get());scalar(("candidate_workspace_"+pre+"_"+std::to_string(executed)).c_str(),algorithms[i].workspaceSize);++executed;}
+      |                                                                                                                                                                                                                                                                                                                                                                     ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:32:1: note: expanded from here
+   32 | hipEventDestroy
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:51:384: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   51 |  for(int i=0;i<found;++i){if(algorithms[i].state!=0||algorithms[i].workspaceSize>budget)continue;d.put(C);MB_RT(Event_t)start,stop;MB_CHECK(MB_RT(EventCreate)(&start));MB_CHECK(MB_RT(EventCreate)(&stop));MB_CHECK(MB_RT(EventRecord)(start));auto rc=T7_LT(Matmul)(h,op,&alpha,a.p,ad,b.p,bdesc,&beta,cc.p,cd,d.p,cd,&algorithms[i].algo,work.p,budget,0);if(rc){MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);continue;}MB_CHECK(MB_RT(EventRecord)(stop));MB_CHECK(MB_RT(EventSynchronize)(stop));float ms;MB_CHECK(MB_RT(EventElapsedTime)(&ms,start,stop));MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);if(ms<bestms){bestms=ms;best=i;}bin7("candidate_"+pre+"_"+std::to_string(executed),d.get());scalar(("candidate_workspace_"+pre+"_"+std::to_string(executed)).c_str(),algorithms[i].workspaceSize);++executed;}
+      |                                                                                                                                                                                                                                                                                                                                                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:33:1: note: expanded from here
+   33 | hipEventDestroy
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:51:554: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   51 |  for(int i=0;i<found;++i){if(algorithms[i].state!=0||algorithms[i].workspaceSize>budget)continue;d.put(C);MB_RT(Event_t)start,stop;MB_CHECK(MB_RT(EventCreate)(&start));MB_CHECK(MB_RT(EventCreate)(&stop));MB_CHECK(MB_RT(EventRecord)(start));auto rc=T7_LT(Matmul)(h,op,&alpha,a.p,ad,b.p,bdesc,&beta,cc.p,cd,d.p,cd,&algorithms[i].algo,work.p,budget,0);if(rc){MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);continue;}MB_CHECK(MB_RT(EventRecord)(stop));MB_CHECK(MB_RT(EventSynchronize)(stop));float ms;MB_CHECK(MB_RT(EventElapsedTime)(&ms,start,stop));MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);if(ms<bestms){bestms=ms;best=i;}bin7("candidate_"+pre+"_"+std::to_string(executed),d.get());scalar(("candidate_workspace_"+pre+"_"+std::to_string(executed)).c_str(),algorithms[i].workspaceSize);++executed;}
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:40:1: note: expanded from here
+   40 | hipEventDestroy
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:51:581: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   51 |  for(int i=0;i<found;++i){if(algorithms[i].state!=0||algorithms[i].workspaceSize>budget)continue;d.put(C);MB_RT(Event_t)start,stop;MB_CHECK(MB_RT(EventCreate)(&start));MB_CHECK(MB_RT(EventCreate)(&stop));MB_CHECK(MB_RT(EventRecord)(start));auto rc=T7_LT(Matmul)(h,op,&alpha,a.p,ad,b.p,bdesc,&beta,cc.p,cd,d.p,cd,&algorithms[i].algo,work.p,budget,0);if(rc){MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);continue;}MB_CHECK(MB_RT(EventRecord)(stop));MB_CHECK(MB_RT(EventSynchronize)(stop));float ms;MB_CHECK(MB_RT(EventElapsedTime)(&ms,start,stop));MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);if(ms<bestms){bestms=ms;best=i;}bin7("candidate_"+pre+"_"+std::to_string(executed),d.get());scalar(("candidate_workspace_"+pre+"_"+std::to_string(executed)).c_str(),algorithms[i].workspaceSize);++executed;}
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ^~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:41:1: note: expanded from here
+   41 | hipEventDestroy
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:7:
+In file included from /opt/rocm/core-10.1/include/hipblaslt/hipblaslt.h:65:
+In file included from /opt/rocm/core-10.1/include/hipblaslt/hipblaslt-types.h:37:
+In file included from /opt/rocm/core-10.1/include/hip/hip_fp8.h:14:
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1033:12: warning: implicit conversion from 'int' to 'float' changes value from 2147483647 to 2147483648 [-Wimplicit-const-int-float-conversion]
+ 1033 |   if (f >= __hip_internal::numeric_limits<T_int>::max()) {
+      |         ~~ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1223:24: note: in instantiation of function template specialization 'hip_detail::internal_cvt_e8m0_to_int_type<int>' requested here
+ 1223 |     return hip_detail::internal_cvt_e8m0_to_int_type<int>(__x);
+      |                        ^
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1033:12: warning: implicit conversion from 'long' to 'float' changes value from 9223372036854775807 to 9223372036854775808 [-Wimplicit-const-int-float-conversion]
+ 1033 |   if (f >= __hip_internal::numeric_limits<T_int>::max()) {
+      |         ~~ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1226:24: note: in instantiation of function template specialization 'hip_detail::internal_cvt_e8m0_to_int_type<long>' requested here
+ 1226 |     return hip_detail::internal_cvt_e8m0_to_int_type<long int>(__x);
+      |                        ^
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1033:12: warning: implicit conversion from 'long long' to 'float' changes value from 9223372036854775807 to 9223372036854775808 [-Wimplicit-const-int-float-conversion]
+ 1033 |   if (f >= __hip_internal::numeric_limits<T_int>::max()) {
+      |         ~~ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1229:24: note: in instantiation of function template specialization 'hip_detail::internal_cvt_e8m0_to_int_type<long long>' requested here
+ 1229 |     return hip_detail::internal_cvt_e8m0_to_int_type<long long int>(__x);
+      |                        ^
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1033:12: warning: implicit conversion from 'unsigned int' to 'float' changes value from 4294967295 to 4294967296 [-Wimplicit-const-int-float-conversion]
+ 1033 |   if (f >= __hip_internal::numeric_limits<T_int>::max()) {
+      |         ~~ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1241:24: note: in instantiation of function template specialization 'hip_detail::internal_cvt_e8m0_to_int_type<unsigned int>' requested here
+ 1241 |     return hip_detail::internal_cvt_e8m0_to_int_type<unsigned int>(__x);
+      |                        ^
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1033:12: warning: implicit conversion from 'unsigned long' to 'float' changes value from 18446744073709551615 to 18446744073709551616 [-Wimplicit-const-int-float-conversion]
+ 1033 |   if (f >= __hip_internal::numeric_limits<T_int>::max()) {
+      |         ~~ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1244:24: note: in instantiation of function template specialization 'hip_detail::internal_cvt_e8m0_to_int_type<unsigned long>' requested here
+ 1244 |     return hip_detail::internal_cvt_e8m0_to_int_type<unsigned long int>(__x);
+      |                        ^
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1033:12: warning: implicit conversion from 'unsigned long long' to 'float' changes value from 18446744073709551615 to 18446744073709551616 [-Wimplicit-const-int-float-conversion]
+ 1033 |   if (f >= __hip_internal::numeric_limits<T_int>::max()) {
+      |         ~~ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_fp8.h:1247:24: note: in instantiation of function template specialization 'hip_detail::internal_cvt_e8m0_to_int_type<unsigned long long>' requested here
+ 1247 |     return hip_detail::internal_cvt_e8m0_to_int_type<unsigned long long int>(__x);
+      |                        ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:230:1: note: expanded from here
+  230 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:29:318: note: in instantiation of member function 'migration_batch::Buffer<double>::~Buffer' requested here
+   29 |   std::string pre="g"+std::to_string(g);scalar(("input_n_"+pre).c_str(),n);scalar(("input_trans_"+pre).c_str(),int(tr));scalar(("input_alpha_"+pre).c_str(),alpha);scalar(("input_beta_"+pre).c_str(),beta);emit(("input_A_"+pre).c_str(),A);emit(("input_B_"+pre).c_str(),B);emit(("input_C_"+pre).c_str(),C);Buffer<double>a(A),bb(B),cc(C);
+      |                                                                                                                                                                                                                                                                                                                              ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:51:357: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   51 |  for(int i=0;i<found;++i){if(algorithms[i].state!=0||algorithms[i].workspaceSize>budget)continue;d.put(C);MB_RT(Event_t)start,stop;MB_CHECK(MB_RT(EventCreate)(&start));MB_CHECK(MB_RT(EventCreate)(&stop));MB_CHECK(MB_RT(EventRecord)(start));auto rc=T7_LT(Matmul)(h,op,&alpha,a.p,ad,b.p,bdesc,&beta,cc.p,cd,d.p,cd,&algorithms[i].algo,work.p,budget,0);if(rc){MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);continue;}MB_CHECK(MB_RT(EventRecord)(stop));MB_CHECK(MB_RT(EventSynchronize)(stop));float ms;MB_CHECK(MB_RT(EventElapsedTime)(&ms,start,stop));MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);if(ms<bestms){bestms=ms;best=i;}bin7("candidate_"+pre+"_"+std::to_string(executed),d.get());scalar(("candidate_workspace_"+pre+"_"+std::to_string(executed)).c_str(),algorithms[i].workspaceSize);++executed;}
+      |                                                                                                                                                                                                                                                                                                                                                                     ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:32:1: note: expanded from here
+   32 | hipEventDestroy
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:57:176: note: in instantiation of function template specialization 'migration_batch::lt7<__half>' requested here
+   57 |  if(grouped){std::srand(42);for(int i=0;i<2;++i){int m=(std::rand()%9)*8,n=(std::rand()%13)*8,k=(std::rand()%17)*8;if(c=="heterogeneous-groups"){m=24+16*i;n=16+24*i;k=32+8*i;}lt7<__half>(i,m,n,k,c=="negative-alpha"?-.75f:2.f,c=="heterogeneous-groups"?.5f:0.f,true,8*1024*1024);}}
+      |                                                                                                                                                                                ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:51:384: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   51 |  for(int i=0;i<found;++i){if(algorithms[i].state!=0||algorithms[i].workspaceSize>budget)continue;d.put(C);MB_RT(Event_t)start,stop;MB_CHECK(MB_RT(EventCreate)(&start));MB_CHECK(MB_RT(EventCreate)(&stop));MB_CHECK(MB_RT(EventRecord)(start));auto rc=T7_LT(Matmul)(h,op,&alpha,a.p,ad,b.p,bdesc,&beta,cc.p,cd,d.p,cd,&algorithms[i].algo,work.p,budget,0);if(rc){MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);continue;}MB_CHECK(MB_RT(EventRecord)(stop));MB_CHECK(MB_RT(EventSynchronize)(stop));float ms;MB_CHECK(MB_RT(EventElapsedTime)(&ms,start,stop));MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);if(ms<bestms){bestms=ms;best=i;}bin7("candidate_"+pre+"_"+std::to_string(executed),d.get());scalar(("candidate_workspace_"+pre+"_"+std::to_string(executed)).c_str(),algorithms[i].workspaceSize);++executed;}
+      |                                                                                                                                                                                                                                                                                                                                                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:33:1: note: expanded from here
+   33 | hipEventDestroy
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:51:554: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   51 |  for(int i=0;i<found;++i){if(algorithms[i].state!=0||algorithms[i].workspaceSize>budget)continue;d.put(C);MB_RT(Event_t)start,stop;MB_CHECK(MB_RT(EventCreate)(&start));MB_CHECK(MB_RT(EventCreate)(&stop));MB_CHECK(MB_RT(EventRecord)(start));auto rc=T7_LT(Matmul)(h,op,&alpha,a.p,ad,b.p,bdesc,&beta,cc.p,cd,d.p,cd,&algorithms[i].algo,work.p,budget,0);if(rc){MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);continue;}MB_CHECK(MB_RT(EventRecord)(stop));MB_CHECK(MB_RT(EventSynchronize)(stop));float ms;MB_CHECK(MB_RT(EventElapsedTime)(&ms,start,stop));MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);if(ms<bestms){bestms=ms;best=i;}bin7("candidate_"+pre+"_"+std::to_string(executed),d.get());scalar(("candidate_workspace_"+pre+"_"+std::to_string(executed)).c_str(),algorithms[i].workspaceSize);++executed;}
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:40:1: note: expanded from here
+   40 | hipEventDestroy
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:51:581: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   51 |  for(int i=0;i<found;++i){if(algorithms[i].state!=0||algorithms[i].workspaceSize>budget)continue;d.put(C);MB_RT(Event_t)start,stop;MB_CHECK(MB_RT(EventCreate)(&start));MB_CHECK(MB_RT(EventCreate)(&stop));MB_CHECK(MB_RT(EventRecord)(start));auto rc=T7_LT(Matmul)(h,op,&alpha,a.p,ad,b.p,bdesc,&beta,cc.p,cd,d.p,cd,&algorithms[i].algo,work.p,budget,0);if(rc){MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);continue;}MB_CHECK(MB_RT(EventRecord)(stop));MB_CHECK(MB_RT(EventSynchronize)(stop));float ms;MB_CHECK(MB_RT(EventElapsedTime)(&ms,start,stop));MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);if(ms<bestms){bestms=ms;best=i;}bin7("candidate_"+pre+"_"+std::to_string(executed),d.get());scalar(("candidate_workspace_"+pre+"_"+std::to_string(executed)).c_str(),algorithms[i].workspaceSize);++executed;}
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ^~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:41:1: note: expanded from here
+   41 | hipEventDestroy
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:230:1: note: expanded from here
+  230 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:41:213: note: in instantiation of member function 'migration_batch::Buffer<__half>::~Buffer' requested here
+   41 |  auto c=selected_case();std::string pre="g"+std::to_string(group);auto A=fixture7<T>(size_t(m)*k,c=="changed-values"?23:3),B=fixture7<T>(size_t(k)*n,5),C=fixture7<T>(size_t(m)*n,7),Bias=fixture7<T>(m,9);Buffer<T>a(A),b(B),cc(C),d(C),bd(Bias);bin7("input_A_"+pre,A);bin7("input_B_"+pre,B);bin7("input_C_"+pre,C);bin7("input_bias_"+pre,Bias);
+      |                                                                                                                                                                                                                     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:57:176: note: in instantiation of function template specialization 'migration_batch::lt7<__half>' requested here
+   57 |  if(grouped){std::srand(42);for(int i=0;i<2;++i){int m=(std::rand()%9)*8,n=(std::rand()%13)*8,k=(std::rand()%17)*8;if(c=="heterogeneous-groups"){m=24+16*i;n=16+24*i;k=32+8*i;}lt7<__half>(i,m,n,k,c=="negative-alpha"?-.75f:2.f,c=="heterogeneous-groups"?.5f:0.f,true,8*1024*1024);}}
+      |                                                                                                                                                                                ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:230:1: note: expanded from here
+  230 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:48:186: note: in instantiation of member function 'migration_batch::Buffer<unsigned char>::~Buffer' requested here
+   48 |  MB_CHECK(T7_LT(MatmulPreferenceCreate)(&pref));MB_CHECK(T7_LT(MatmulPreferenceSetAttribute)(pref,T7_ATTR(MATMUL_PREF_MAX_WORKSPACE_BYTES),&budget,sizeof(budget)));Buffer<unsigned char>work(budget);
+      |                                                                                                                                                                                          ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:57:176: note: in instantiation of function template specialization 'migration_batch::lt7<__half>' requested here
+   57 |  if(grouped){std::srand(42);for(int i=0;i<2;++i){int m=(std::rand()%9)*8,n=(std::rand()%13)*8,k=(std::rand()%17)*8;if(c=="heterogeneous-groups"){m=24+16*i;n=16+24*i;k=32+8*i;}lt7<__half>(i,m,n,k,c=="negative-alpha"?-.75f:2.f,c=="heterogeneous-groups"?.5f:0.f,true,8*1024*1024);}}
+      |                                                                                                                                                                                ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:51:357: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   51 |  for(int i=0;i<found;++i){if(algorithms[i].state!=0||algorithms[i].workspaceSize>budget)continue;d.put(C);MB_RT(Event_t)start,stop;MB_CHECK(MB_RT(EventCreate)(&start));MB_CHECK(MB_RT(EventCreate)(&stop));MB_CHECK(MB_RT(EventRecord)(start));auto rc=T7_LT(Matmul)(h,op,&alpha,a.p,ad,b.p,bdesc,&beta,cc.p,cd,d.p,cd,&algorithms[i].algo,work.p,budget,0);if(rc){MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);continue;}MB_CHECK(MB_RT(EventRecord)(stop));MB_CHECK(MB_RT(EventSynchronize)(stop));float ms;MB_CHECK(MB_RT(EventElapsedTime)(&ms,start,stop));MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);if(ms<bestms){bestms=ms;best=i;}bin7("candidate_"+pre+"_"+std::to_string(executed),d.get());scalar(("candidate_workspace_"+pre+"_"+std::to_string(executed)).c_str(),algorithms[i].workspaceSize);++executed;}
+      |                                                                                                                                                                                                                                                                                                                                                                     ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:32:1: note: expanded from here
+   32 | hipEventDestroy
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:58:182: note: in instantiation of function template specialization 'migration_batch::lt7<float>' requested here
+   58 |  else{int m=1024,n=kind=="LtSgemmCustomFind"?512:1024,k=kind=="LtSgemmCustomFind"?4096:1024;size_t bytes=c=="limited-workspace"?0:kind=="LtSgemmCustomFind"?16*1024*1024:4*1024*1024;lt7<float>(0,m,n,k,2,c=="changed-values"?.5f:0.f,false,bytes);}MB_CHECK(MB_RT(DeviceSynchronize)());return 0;
+      |                                                                                                                                                                                      ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:51:384: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   51 |  for(int i=0;i<found;++i){if(algorithms[i].state!=0||algorithms[i].workspaceSize>budget)continue;d.put(C);MB_RT(Event_t)start,stop;MB_CHECK(MB_RT(EventCreate)(&start));MB_CHECK(MB_RT(EventCreate)(&stop));MB_CHECK(MB_RT(EventRecord)(start));auto rc=T7_LT(Matmul)(h,op,&alpha,a.p,ad,b.p,bdesc,&beta,cc.p,cd,d.p,cd,&algorithms[i].algo,work.p,budget,0);if(rc){MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);continue;}MB_CHECK(MB_RT(EventRecord)(stop));MB_CHECK(MB_RT(EventSynchronize)(stop));float ms;MB_CHECK(MB_RT(EventElapsedTime)(&ms,start,stop));MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);if(ms<bestms){bestms=ms;best=i;}bin7("candidate_"+pre+"_"+std::to_string(executed),d.get());scalar(("candidate_workspace_"+pre+"_"+std::to_string(executed)).c_str(),algorithms[i].workspaceSize);++executed;}
+      |                                                                                                                                                                                                                                                                                                                                                                                                ^~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:33:1: note: expanded from here
+   33 | hipEventDestroy
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:51:554: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   51 |  for(int i=0;i<found;++i){if(algorithms[i].state!=0||algorithms[i].workspaceSize>budget)continue;d.put(C);MB_RT(Event_t)start,stop;MB_CHECK(MB_RT(EventCreate)(&start));MB_CHECK(MB_RT(EventCreate)(&stop));MB_CHECK(MB_RT(EventRecord)(start));auto rc=T7_LT(Matmul)(h,op,&alpha,a.p,ad,b.p,bdesc,&beta,cc.p,cd,d.p,cd,&algorithms[i].algo,work.p,budget,0);if(rc){MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);continue;}MB_CHECK(MB_RT(EventRecord)(stop));MB_CHECK(MB_RT(EventSynchronize)(stop));float ms;MB_CHECK(MB_RT(EventElapsedTime)(&ms,start,stop));MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);if(ms<bestms){bestms=ms;best=i;}bin7("candidate_"+pre+"_"+std::to_string(executed),d.get());scalar(("candidate_workspace_"+pre+"_"+std::to_string(executed)).c_str(),algorithms[i].workspaceSize);++executed;}
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:40:1: note: expanded from here
+   40 | hipEventDestroy
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:51:581: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   51 |  for(int i=0;i<found;++i){if(algorithms[i].state!=0||algorithms[i].workspaceSize>budget)continue;d.put(C);MB_RT(Event_t)start,stop;MB_CHECK(MB_RT(EventCreate)(&start));MB_CHECK(MB_RT(EventCreate)(&stop));MB_CHECK(MB_RT(EventRecord)(start));auto rc=T7_LT(Matmul)(h,op,&alpha,a.p,ad,b.p,bdesc,&beta,cc.p,cd,d.p,cd,&algorithms[i].algo,work.p,budget,0);if(rc){MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);continue;}MB_CHECK(MB_RT(EventRecord)(stop));MB_CHECK(MB_RT(EventSynchronize)(stop));float ms;MB_CHECK(MB_RT(EventElapsedTime)(&ms,start,stop));MB_RT(EventDestroy)(start);MB_RT(EventDestroy)(stop);if(ms<bestms){bestms=ms;best=i;}bin7("candidate_"+pre+"_"+std::to_string(executed),d.get());scalar(("candidate_workspace_"+pre+"_"+std::to_string(executed)).c_str(),algorithms[i].workspaceSize);++executed;}
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     ^~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:41:1: note: expanded from here
+   41 | hipEventDestroy
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtSgemmCustomFind/main.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:230:1: note: expanded from here
+  230 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:41:213: note: in instantiation of member function 'migration_batch::Buffer<float>::~Buffer' requested here
+   41 |  auto c=selected_case();std::string pre="g"+std::to_string(group);auto A=fixture7<T>(size_t(m)*k,c=="changed-values"?23:3),B=fixture7<T>(size_t(k)*n,5),C=fixture7<T>(size_t(m)*n,7),Bias=fixture7<T>(m,9);Buffer<T>a(A),b(B),cc(C),d(C),bd(Bias);bin7("input_A_"+pre,A);bin7("input_B_"+pre,B);bin7("input_C_"+pre,C);bin7("input_bias_"+pre,Bias);
+      |                                                                                                                                                                                                                     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch7_gemm.hpp:58:182: note: in instantiation of function template specialization 'migration_batch::lt7<float>' requested here
+   58 |  else{int m=1024,n=kind=="LtSgemmCustomFind"?512:1024,k=kind=="LtSgemmCustomFind"?4096:1024;size_t bytes=c=="limited-workspace"?0:kind=="LtSgemmCustomFind"?16*1024*1024:4*1024*1024;lt7<float>(0,m,n,k,2,c=="changed-values"?.5f:0.f,false,bytes);}MB_CHECK(MB_RT(DeviceSynchronize)());return 0;
+      |                                                                                                                                                                                      ^
+26 warnings generated when compiling for host.

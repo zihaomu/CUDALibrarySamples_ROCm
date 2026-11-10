@@ -2,9 +2,9 @@
   "schema_version": 1,
   "counting_rule": "Operator/functional families are deduplicated within each module; dtypes, sizes, language, batch, storage formats and algorithm variants do not create extra operators. At least one explicitly scoped PASSED source profile is required. Cross-module totals may include the same mathematical operation implemented through different library interfaces.",
   "qualification_rule": "A verified family proves only its linked PASSED source profiles/required cases, not every API configuration. PARTIAL examples and capability probes are excluded.",
-  "verified_operator_families": 94,
+  "verified_operator_families": 99,
   "modules_with_verified_operators": 9,
-  "passed_source_profiles": 174,
+  "passed_source_profiles": 192,
   "modules": {
     "cuBLAS": {
       "verified_operator_family_count": 52,
@@ -120,6 +120,8 @@
           "sample_ids": [
             "cuBLAS/Extensions/GemmBatchedEx::cublas_GemmBatchedEx_example.cu",
             "cuBLAS/Extensions/GemmEx::cublas_GemmEx_example.cu",
+            "cuBLAS/Extensions/GemmExAutoTuning::cublas_GemmExAutoTuning_example.cu",
+            "cuBLAS/Extensions/GemmGroupedBatchedEx::cublas_GemmGroupedBatchedEx_example.cu",
             "cuBLAS/Extensions/GemmStridedBatchedEx::cublas_GemmStridedBatchedEx_example.cu",
             "cuBLAS/Level-3/gemm::cublas_gemm_example.cu",
             "cuBLAS/Level-3/gemmBatched::cublas_gemmBatched_example.cu",
@@ -129,13 +131,15 @@
           "sample_reports": [
             "migration/sample-reports/cuBLAS/Extensions/GemmBatchedEx/cublas_GemmBatchedEx_example.cu.md",
             "migration/sample-reports/cuBLAS/Extensions/GemmEx/cublas_GemmEx_example.cu.md",
+            "migration/sample-reports/cuBLAS/Extensions/GemmExAutoTuning/cublas_GemmExAutoTuning_example.cu.md",
+            "migration/sample-reports/cuBLAS/Extensions/GemmGroupedBatchedEx/cublas_GemmGroupedBatchedEx_example.cu.md",
             "migration/sample-reports/cuBLAS/Extensions/GemmStridedBatchedEx/cublas_GemmStridedBatchedEx_example.cu.md",
             "migration/sample-reports/cuBLAS/Level-3/gemm/cublas_gemm_example.cu.md",
             "migration/sample-reports/cuBLAS/Level-3/gemmBatched/cublas_gemmBatched_example.cu.md",
             "migration/sample-reports/cuBLAS/Level-3/gemmGroupedBatched/cublas_gemmGroupedBatched_example.cu.md",
             "migration/sample-reports/cuBLAS/Level-3/gemmStridedBatched/cublas_gemmStridedBatched_example.cu.md"
           ],
-          "source_profiles": 7
+          "source_profiles": 9
         },
         {
           "name": "gemv",
@@ -562,12 +566,12 @@
       ],
       "sample_count": 82,
       "sample_outcomes": {
-        "FAILED": 15,
-        "PASSED": 67
+        "FAILED": 13,
+        "PASSED": 69
       },
-      "validation_scope": "固定教学输入与所列扩展 cases；第二批含并列/空索引、旋转 flags、batch/grouped 和正负 alpha；rotmg 极端缩放使用明确登记的 HIP 修正。其它精度/API 仍逐例管理。",
+      "validation_scope": "固定教学profile与所列扩展cases；含复杂rank-k类型化适配、HIP GPU packed转换、FP32分组batched及FP64项目策略调优。rotmg极端缩放使用HIP修正；调优/批量变体按同一数学族去重。",
       "failure_reason_counts": {
-        "BUILD_ERROR": 15
+        "BUILD_ERROR": 13
       }
     },
     "cuBLASLt": {
@@ -576,26 +580,32 @@
         {
           "name": "GEMM",
           "sample_ids": [
+            "cuBLASLt/LtHSHgemmGroupedSimple::main.cpp",
             "cuBLASLt/LtHSHgemmPointerArrayBatchSimple::main.cpp",
             "cuBLASLt/LtHSHgemmStridedBatchSimple::main.cpp",
-            "cuBLASLt/LtSgemm::main.cpp"
+            "cuBLASLt/LtSgemm::main.cpp",
+            "cuBLASLt/LtSgemmCustomFind::main.cu",
+            "cuBLASLt/LtSgemmSimpleAutoTuning::main.cpp"
           ],
           "sample_reports": [
+            "migration/sample-reports/cuBLASLt/LtHSHgemmGroupedSimple/main.cpp.md",
             "migration/sample-reports/cuBLASLt/LtHSHgemmPointerArrayBatchSimple/main.cpp.md",
             "migration/sample-reports/cuBLASLt/LtHSHgemmStridedBatchSimple/main.cpp.md",
-            "migration/sample-reports/cuBLASLt/LtSgemm/main.cpp.md"
+            "migration/sample-reports/cuBLASLt/LtSgemm/main.cpp.md",
+            "migration/sample-reports/cuBLASLt/LtSgemmCustomFind/main.cu.md",
+            "migration/sample-reports/cuBLASLt/LtSgemmSimpleAutoTuning/main.cpp.md"
           ],
-          "source_profiles": 3
+          "source_profiles": 6
         }
       ],
       "sample_count": 20,
       "sample_outcomes": {
-        "FAILED": 17,
-        "PASSED": 3
+        "FAILED": 14,
+        "PASSED": 6
       },
-      "validation_scope": "3 个 profile：FP32 SGEMM、HSH FP16 input/output + FP32 compute 的 pointer-array 与 strided batch。",
+      "validation_scope": "6个profile：原FP32 SGEMM、HSH pointer-array/strided batch，以及B7 HSH grouped分发与SGEMM custom-find/autotune。FP16输入/输出、FP32累加、bias、候选全输出、workspace=0及所选方案重放通过；分发适配不等于原生device-grouped API。",
       "failure_reason_counts": {
-        "BUILD_ERROR": 17
+        "BUILD_ERROR": 14
       }
     },
     "cuBLASMp": {
@@ -870,7 +880,7 @@
       "failure_reason_counts": {}
     },
     "cuSOLVER": {
-      "verified_operator_family_count": 8,
+      "verified_operator_family_count": 9,
       "verified_operators": [
         {
           "name": "Cholesky 分解",
@@ -887,12 +897,14 @@
         {
           "name": "LU 分解/求解",
           "sample_ids": [
+            "cuSOLVER/Xgetrf::cusolver_Xgetrf_example.cu",
             "cuSOLVER/getrf::cusolver_getrf_example.cu"
           ],
           "sample_reports": [
+            "migration/sample-reports/cuSOLVER/Xgetrf/cusolver_Xgetrf_example.cu.md",
             "migration/sample-reports/cuSOLVER/getrf/cusolver_getrf_example.cu.md"
           ],
-          "source_profiles": 1
+          "source_profiles": 2
         },
         {
           "name": "QR 分解",
@@ -927,21 +939,34 @@
         {
           "name": "SVD",
           "sample_ids": [
+            "cuSOLVER/Xgesvd::cusolver_Xgesvd_example.cu",
             "cuSOLVER/gesvd::cusolver_gesvd_example.cu",
             "cuSOLVER/gesvdj::cusolver_gesvdj_example.cu",
             "cuSOLVER/gesvdjBatched::cusolver_gesvdjBatched_example.cu"
           ],
           "sample_reports": [
+            "migration/sample-reports/cuSOLVER/Xgesvd/cusolver_Xgesvd_example.cu.md",
             "migration/sample-reports/cuSOLVER/gesvd/cusolver_gesvd_example.cu.md",
             "migration/sample-reports/cuSOLVER/gesvdj/cusolver_gesvdj_example.cu.md",
             "migration/sample-reports/cuSOLVER/gesvdjBatched/cusolver_gesvdjBatched_example.cu.md"
           ],
-          "source_profiles": 3
+          "source_profiles": 4
+        },
+        {
+          "name": "三角矩阵求逆",
+          "sample_ids": [
+            "cuSOLVER/Xtrtri::cusolver_Xtrtri_example.cu"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuSOLVER/Xtrtri/cusolver_Xtrtri_example.cu.md"
+          ],
+          "source_profiles": 1
         },
         {
           "name": "对称特征分解",
           "sample_ids": [
             "cuSOLVER/Xsyevd::cusolver_Xsyevd_example.cu",
+            "cuSOLVER/Xsyevdx::cusolver_Xsyevdx_example.cu",
             "cuSOLVER/syevd::cusolver_syevd_example.cu",
             "cuSOLVER/syevdx::cusolver_syevdx_example.cu",
             "cuSOLVER/syevj::cusolver_syevj_example.cu",
@@ -949,12 +974,13 @@
           ],
           "sample_reports": [
             "migration/sample-reports/cuSOLVER/Xsyevd/cusolver_Xsyevd_example.cu.md",
+            "migration/sample-reports/cuSOLVER/Xsyevdx/cusolver_Xsyevdx_example.cu.md",
             "migration/sample-reports/cuSOLVER/syevd/cusolver_syevd_example.cu.md",
             "migration/sample-reports/cuSOLVER/syevdx/cusolver_syevdx_example.cu.md",
             "migration/sample-reports/cuSOLVER/syevj/cusolver_syevj_example.cu.md",
             "migration/sample-reports/cuSOLVER/syevjBatched/cusolver_syevjBatched_example.cu.md"
           ],
-          "source_profiles": 5
+          "source_profiles": 6
         },
         {
           "name": "广义对称特征分解",
@@ -973,14 +999,13 @@
       ],
       "sample_count": 39,
       "sample_outcomes": {
-        "FAILED": 18,
+        "FAILED": 14,
         "PARTIAL": 4,
-        "PASSED": 17
+        "PASSED": 21
       },
-      "validation_scope": "原始固定教学矩阵；检查 status/info、特征值/奇异值、重构、求解残差与正交性。第三批覆盖 batched SVD/未排序特征对、索引/值域/全量/空区间与实际 meig。",
+      "validation_scope": "原始FP64教学矩阵；status/info、全量分解/重构、残差、正交性、未排序配对及实际meig检查。B6增加64位LU/三角求逆；SVD/eigen typed接口显式INT_MAX限制。",
       "failure_reason_counts": {
-        "BUILD_ERROR": 17,
-        "RUNTIME_ERROR": 1
+        "BUILD_ERROR": 14
       }
     },
     "cuSOLVERMp": {
@@ -1008,7 +1033,7 @@
       }
     },
     "cuSPARSE": {
-      "verified_operator_family_count": 18,
+      "verified_operator_family_count": 20,
       "verified_operators": [
         {
           "name": "SpVV Graph Capture/Replay",
@@ -1140,13 +1165,25 @@
           "name": "spgemm",
           "sample_ids": [
             "cuSPARSE/spgemm::spgemm_example.c",
+            "cuSPARSE/spgemm_mem::spgemm_mem_example.c",
             "cuSPARSE/spgemm_reuse::spgemm_reuse_example.c"
           ],
           "sample_reports": [
             "migration/sample-reports/cuSPARSE/spgemm/spgemm_example.c.md",
+            "migration/sample-reports/cuSPARSE/spgemm_mem/spgemm_mem_example.c.md",
             "migration/sample-reports/cuSPARSE/spgemm_reuse/spgemm_reuse_example.c.md"
           ],
-          "source_profiles": 2
+          "source_profiles": 3
+        },
+        {
+          "name": "spmat",
+          "sample_ids": [
+            "cuSPARSE/spmat_convert::spmat_convert_example.c"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuSPARSE/spmat_convert/spmat_convert_example.c.md"
+          ],
+          "source_profiles": 1
         },
         {
           "name": "spmm",
@@ -1155,30 +1192,44 @@
             "cuSPARSE/spmm_coo::spmm_coo_example.c",
             "cuSPARSE/spmm_coo_batched::spmm_coo_batched_example.c",
             "cuSPARSE/spmm_csr::spmm_csr_example.c",
-            "cuSPARSE/spmm_csr_batched::spmm_csr_batched_example.c"
+            "cuSPARSE/spmm_csr_batched::spmm_csr_batched_example.c",
+            "cuSPARSE/spmm_csr_op::spmm_csr_op_example.c"
           ],
           "sample_reports": [
             "migration/sample-reports/cuSPARSE/spmm_blockedell/spmm_blockedell_example.cpp.md",
             "migration/sample-reports/cuSPARSE/spmm_coo/spmm_coo_example.c.md",
             "migration/sample-reports/cuSPARSE/spmm_coo_batched/spmm_coo_batched_example.c.md",
             "migration/sample-reports/cuSPARSE/spmm_csr/spmm_csr_example.c.md",
-            "migration/sample-reports/cuSPARSE/spmm_csr_batched/spmm_csr_batched_example.c.md"
+            "migration/sample-reports/cuSPARSE/spmm_csr_batched/spmm_csr_batched_example.c.md",
+            "migration/sample-reports/cuSPARSE/spmm_csr_op/spmm_csr_op_example.c.md"
           ],
-          "source_profiles": 5
+          "source_profiles": 6
         },
         {
           "name": "spmv",
           "sample_ids": [
             "cuSPARSE/spmv_coo::spmv_coo_example.c",
             "cuSPARSE/spmv_csr::spmv_csr_example.c",
-            "cuSPARSE/spmv_sell::spmv_sell_example.c"
+            "cuSPARSE/spmv_sell::spmv_sell_example.c",
+            "cuSPARSE/spmv_symmetric_csr::spmv_symmetric_example.c"
           ],
           "sample_reports": [
             "migration/sample-reports/cuSPARSE/spmv_coo/spmv_coo_example.c.md",
             "migration/sample-reports/cuSPARSE/spmv_csr/spmv_csr_example.c.md",
-            "migration/sample-reports/cuSPARSE/spmv_sell/spmv_sell_example.c.md"
+            "migration/sample-reports/cuSPARSE/spmv_sell/spmv_sell_example.c.md",
+            "migration/sample-reports/cuSPARSE/spmv_symmetric_csr/spmv_symmetric_example.c.md"
           ],
-          "source_profiles": 3
+          "source_profiles": 4
+        },
+        {
+          "name": "spmvop",
+          "sample_ids": [
+            "cuSPARSE/spmvop_csr::spmv_csr_op_example.c"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuSPARSE/spmvop_csr/spmv_csr_op_example.c.md"
+          ],
+          "source_profiles": 1
         },
         {
           "name": "spsm",
@@ -1219,12 +1270,12 @@
       ],
       "sample_count": 37,
       "sample_outcomes": {
-        "PASSED": 31,
-        "FAILED": 6
+        "PASSED": 36,
+        "FAILED": 1
       },
-      "validation_scope": "CSR/COO/SELL/blocked-ELL 等已登记格式与 batched 变体；SpVV/SpGEMM/reuse 数值变化与 CSR 结构；第三批 CG/BiCGSTAB 的独立求解、残差/收敛，gpsv 的逐 batch interleaved 布局，以及真实 GPU 图捕获/输入变化 replay。",
+      "validation_scope": "已登记CSR/COO/SELL/BSR等格式、CG/BiCG残差/收敛、gpsv布局和真实Graph replay。B8补CSR→CSC、对称展开、HIP GPU预算分块SpGEMM和融合custom op；3项CUDA新API缺失，使用明确标注的兼容数学基线。",
       "failure_reason_counts": {
-        "BUILD_ERROR": 6
+        "BUILD_ERROR": 1
       }
     },
     "cuSPARSELt": {
@@ -1240,7 +1291,7 @@
       }
     },
     "cuTENSOR": {
-      "verified_operator_family_count": 5,
+      "verified_operator_family_count": 7,
       "verified_operators": [
         {
           "name": "三元逐元素运算",
@@ -1265,20 +1316,44 @@
         {
           "name": "张量 contraction",
           "sample_ids": [
-            "cuTENSOR::contraction.cu"
+            "cuTENSOR::contraction.cu",
+            "cuTENSOR::contraction_trinary.cu"
           ],
           "sample_reports": [
-            "migration/sample-reports/cuTENSOR/contraction.cu.md"
+            "migration/sample-reports/cuTENSOR/contraction.cu.md",
+            "migration/sample-reports/cuTENSOR/contraction_trinary.cu.md"
+          ],
+          "source_profiles": 2
+        },
+        {
+          "name": "张量 einsum",
+          "sample_ids": [
+            "cuTENSOR::einsum.cu"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuTENSOR/einsum.cu.md"
           ],
           "source_profiles": 1
         },
         {
           "name": "张量 permutation",
           "sample_ids": [
-            "cuTENSOR::elementwise_permute.cu"
+            "cuTENSOR::elementwise_permute.cu",
+            "cuTENSOR::elementwise_permute_padding.cu"
           ],
           "sample_reports": [
-            "migration/sample-reports/cuTENSOR/elementwise_permute.cu.md"
+            "migration/sample-reports/cuTENSOR/elementwise_permute.cu.md",
+            "migration/sample-reports/cuTENSOR/elementwise_permute_padding.cu.md"
+          ],
+          "source_profiles": 2
+        },
+        {
+          "name": "张量 plan cache",
+          "sample_ids": [
+            "cuTENSOR::contraction_plan_cache.cu"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuTENSOR/contraction_plan_cache.cu.md"
           ],
           "source_profiles": 1
         },
@@ -1295,15 +1370,13 @@
       ],
       "sample_count": 13,
       "sample_outcomes": {
-        "FAILED": 8,
-        "PASSED": 5
+        "FAILED": 4,
+        "PASSED": 9
       },
-      "validation_scope": "FP32：contraction 用 rocBLAS + HIP；其它已通过的逐元素/permutation/reduction 使用 hipTensor。逐例记录原始 extents 与扩展小尺寸、全部输出 CPU 检查；contraction 的原始规模另为抽样验收。",
+      "validation_scope": "FP32：hipTensor逐元素/排列/规约；rocBLAS+HIP contraction；B5补HIP padding、einsum路由、三输入收缩和真实GPU分块搜索/持久化缓存。B2/B5全部原始规模输出均有全量FP64 CPU检查；早期M3 contraction仅抽样的历史证据另保留。",
       "failure_reason_counts": {
         "BINDING_OR_FRONTEND_MIGRATION_REQUIRED": 2,
-        "BUILD_ERROR": 2,
-        "RUNTIME_ERROR": 3,
-        "TIMEOUT": 1
+        "BUILD_ERROR": 2
       }
     },
     "cuTENSORMg": {

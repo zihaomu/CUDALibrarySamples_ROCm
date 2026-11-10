@@ -1,0 +1,50 @@
+{
+  "build": [
+    "hipcc",
+    "--rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay",
+    "--hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay",
+    "--rocm-device-lib-path=/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode",
+    "--offload-arch=gfx1201",
+    "-std=c++17",
+    "-O2",
+    "-D__HIP_PLATFORM_AMD__",
+    "-x",
+    "hip",
+    "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuTENSOR/contraction_trinary.cu",
+    "-o",
+    "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/20261110T031028.261181Z/batches4_8-rocm/cuTENSOR_contraction_trinary.cu/sample",
+    "-I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuTENSOR",
+    "-I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuTENSOR/utils",
+    "-I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common",
+    "-I/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/include",
+    "-I/opt/rocm/core-10.1/include",
+    "-I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/project-sdk/include",
+    "-I/opt/rocm/core-10.1/include/hipblas",
+    "-I/opt/rocm/core-10.1/include/hipsparse",
+    "-I/opt/rocm/core-10.1/include/hipsolver",
+    "-I/opt/rocm/core-10.1/include/rocsolver",
+    "-I/opt/rocm/core-10.1/include/rocblas",
+    "-I/opt/rocm/core-10.1/include/rocsparse",
+    "-I/opt/rocm/core-10.1/include/hipblaslt",
+    "-L/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/project-sdk/lib",
+    "-L/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib",
+    "-L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib",
+    "-L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib",
+    "-Wl,-rpath,/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/project-sdk/lib",
+    "-Wl,-rpath,/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib",
+    "-Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib",
+    "-Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib",
+    "-lhiptensor",
+    "-lrocblas",
+    "-lamdhip64"
+  ],
+  "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+  "cases": [
+    "original",
+    "small-nonzero-beta",
+    "small-zero-alpha"
+  ],
+  "run": [
+    "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/20261110T031028.261181Z/batches4_8-rocm/cuTENSOR_contraction_trinary.cu/sample"
+  ]
+}

@@ -1,0 +1,34 @@
+#!/usr/bin/env python3
+"""Refresh measured progress in the master README, operator tables and roadmap."""
+import collections,datetime,json
+from catalog import ROOT
+from batches4_8_spec import GROUPS
+cat=json.loads((ROOT/'migration/samples.yaml').read_text());samples={s['source']:s for s in cat['samples']}
+p=ROOT/'migration/reports/batches4_8-validation.json';proof={r['source']:r for r in json.loads(p.read_text())} if p.exists() else {}
+totals=collections.Counter(s['status'] for s in cat['samples']);text='# B4–B8 实时实施与验收\n\n'
+text+='更新时间：'+datetime.datetime.now(datetime.timezone.utc).isoformat()+'。26 个目标；当前全项目 '+str(totals['PASSED'])+' PASSED，'+str(totals['PARTIAL'])+' PARTIAL，'+str(totals['FAILED'])+' FAILED。每项只有预登记全部 case 的 AMD/CPU/CUDA 数值与语义检查通过后才提升。\n\n'
+text+='| 批次 | 样例 / 详细日志 | 实际 AMD 路线 | 本批进度 | CPU / CUDA |\n| --- | --- | --- | --- | --- |\n'
+summary=[]
+for group,rows in GROUPS.items():
+ passed=cases=0
+ for source,required in rows.items():
+  s=samples[source];r=proof.get(source);yes=bool(r and r['status']==r['cuda_comparison']=='PASSED');passed+=yes;cases+=len(required) if yes else 0
+  progress=('已验收 '+str(len(required))+'/'+str(len(required))+' cases') if yes else ('已尝试，见日志' if r else '待实施；保留既有 '+s['status'])
+  text+='| '+group.upper()+' | ['+source+'](../sample-reports/'+source+'.md) | '+str(s.get('actual_library') or '待验证')+' | '+progress+' | '+(r['status']+' / '+r['cuda_comparison'] if r else '未验收')+' |\n'
+ summary.append({'batch':group.upper(),'samples_passed':passed,'samples_required':len(rows),'cases_passed':cases,'cases_required':sum(len(v) for v in rows.values())})
+text+='\n原生 Ex 包装的运行失败和精确失败源码另存 [b4-native-ex-failure.json](b4-native-ex-failure.json)。固定 complex32 的 HERK/SYRK 使用类型化 hipBLAS；packed 使用项目 HIP GPU kernel；SELL/BSR 在 GPU 上转换后调用 hipSPARSE，再恢复原始存储格式。\n\n'
+text+='适配边界：B5 padding 为 HIP GPU 实现，einsum 为 hipTensor/rocBLAS 路由，三输入收缩为 FP32 rocBLAS + GPU 分块排列，缓存为项目真实分块搜索及持久化策略。B6 LU/三角求逆使用64位接口，SVD/eigen typed 接口显式拒绝超过 INT_MAX 的尺寸。B7 FP32 Grouped Ex 使用 hipBLAS batched 按组分发；FP64 autotune 为项目实际 row-dispatch 搜索；Lt 搜索会运行并核对每个候选，HSH保留原例seed42的空group，bias/out-of-place/FP16输出均验收，不声称HIP原生device-grouped描述符等价。\n\n'
+text+='B8 conversion 使用 hipSPARSE Csr2cscEx2；symmetric 在GPU上展开后用rocSPARSE v2；SpGEMM 为项目 HIP CSR kernel，numeric accumulator 按预算分块（不包含调用者输入/最终输出内存）；SpMV/SpMM custom op 保留原例设备函数并在HIP数值路径执行。CUDA 的 convert、新symmetric API、SpMVOp 在已安装SDK中缺失，三者使用**兼容CUDA数学基线**通过对照，原始CUDA API基线仍标FAILED，见 [native API failure](b8-native-cuda-api-failure.json)。SpGEMM ALG3/SpMMOp 则为原生CUDA API。\n\n'
+text+='验证加固：26项各一次有限错误输出与一次NaN，共52次全部拒绝；另8次缓存/search/workspace/chunk/symmetry/custom语义错误全部拒绝；4项真实进程运行边界检查通过；54个B5输入buffer以seed=20261110分块重建并逐文件核对SHA256。详见 [输出故障注入](batches4_8-negative.json)、[语义故障注入](batches4_8-semantic-negative.json)、[运行边界](batches4_8-runtime-checks.json)、[输入重建](batches4_8-input-replay.json)。\n\n'
+text+='本批源码与输入草案见 `tools/migration/batches4_8_spec.py`；数值证据见 [validation](batches4_8-validation.json)、[AMD](batches4_8-rocm.json)、[CUDA](batches4_8-cuda.json)。大二进制输出留本地、记录 SHA256/生成方式。性能资格单列，不将正确性运行的计时宣称为合格加速。\n'
+(ROOT/'migration/reports/batches4-8.md').write_text(text);(ROOT/'migration/reports/batches4-8-progress.json').write_text(json.dumps({'timestamp':datetime.datetime.now(datetime.timezone.utc).isoformat(),'batches':summary,'project_counts':dict(totals)},indent=2)+'\n')
+marker='<!-- B4B8_PROGRESS:START -->';end='<!-- B4B8_PROGRESS:END -->'
+canonical=ROOT.parent/'doc/cuda_samples_on_rocm_roadmap.md'
+if canonical.exists():
+ body=canonical.read_text();banner=marker+'\n\n**B4–B8 实施更新：** '+'；'.join(r['batch']+' '+str(r['samples_passed'])+'/'+str(r['samples_required']) for r in summary)+'。当前主表 '+str(totals['PASSED'])+' 个样例通过。[实时验收表](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/main/migration/reports/batches4-8.md)。以下 166/473 等数字为原始计划基线；本更新不改写历史计划。\n\n'+end+'\n\n'
+ if marker in body:body=body.split(marker)[0]+banner+body.split(end,1)[1].lstrip('\n')
+ else:body=body.replace('## 1. 当前基线与计划目标',banner+'## 1. 当前基线与计划目标',1)
+ if all(x['samples_passed']==x['samples_required'] for x in summary):body=body.replace('**B4–B8 正在按实时表实施；B9–B15 尚未启动。以下正文保留原始计划基线**','**B4–B8 已完成登记范围验收；B9–B15 尚未启动。以下正文保留原始计划基线**')
+ body=body.replace('**计划已制定，B4–B15 尚未执行；不构成新增支持声明**','**B4–B8 正在按实时表实施；B9–B15 尚未启动。以下正文保留原始计划基线**')
+ canonical.write_text(body);(ROOT/'migration/roadmap.md').write_text(body)
+print('Updated live B4--B8 table',[(r['batch'],r['samples_passed']) for r in summary])

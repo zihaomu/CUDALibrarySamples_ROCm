@@ -1,0 +1,34 @@
+{
+  "build": [
+    "/usr/local/cuda-13.4/bin/nvcc",
+    "-std=c++17",
+    "-O2",
+    "-x",
+    "cu",
+    "-arch=sm_120",
+    "/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuSPARSE/spmvop_csr/spmv_csr_op_example.c",
+    "-o",
+    "/home/zihaomu/cuda_samples_on_rocm_compare/artifacts/20261110T031433.835201Z/batches4_8-cuda/cuSPARSE_spmvop_csr_spmv_csr_op_example.c/sample",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuSPARSE/spmvop_csr",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuSPARSE/utils",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/rocm/common",
+    "-I/usr/local/cuda-13.4/include",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-sdk/include",
+    "-L/usr/local/cuda-13.4/lib64",
+    "-Xlinker=-rpath=/usr/local/cuda-13.4/lib64",
+    "-L/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-sdk/lib",
+    "-Xlinker=-rpath=/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-sdk/lib",
+    "-lcusparse",
+    "-lcublas",
+    "-lnvrtc"
+  ],
+  "cwd": "/home/zihaomu/cuda_samples_on_rocm_compare",
+  "cases": [
+    "original",
+    "changed-values",
+    "cancellation"
+  ],
+  "run": [
+    "/home/zihaomu/cuda_samples_on_rocm_compare/artifacts/20261110T031433.835201Z/batches4_8-cuda/cuSPARSE_spmvop_csr_spmv_csr_op_example.c/sample"
+  ]
+}

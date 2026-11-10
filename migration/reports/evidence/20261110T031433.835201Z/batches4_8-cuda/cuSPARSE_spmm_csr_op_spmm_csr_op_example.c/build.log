@@ -1,0 +1,29 @@
+/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuSPARSE/spmm_csr_op/spmm_csr_op_example.c(155): warning #177-D: variable "hC_result" was declared but never referenced
+      float hC_result[] = { 91.0f, 103.0f, 115.0f,
+            ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuSPARSE/spmm_csr_op/spmm_csr_op_example.c(254): warning #177-D: variable "correct" was declared but never referenced
+      int correct=1;
+          ^
+
+/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuSPARSE/spmm_csr_op/spmm_csr_op_example.c: In function ‘int main()’:
+/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuSPARSE/spmm_csr_op/spmm_csr_op_example.c:196:22: warning: ‘cusparseSpMMOpPlan_t’ is deprecated: The type will be removed in the next major release [-Wdeprecated-declarations]
+  196 |     cusparseSpMMOpPlan_t plan;
+      |                      ^~~~
+/usr/local/cuda-13.4/include/cusparse.h:6234:29: note: declared here
+ 6234 |     cusparseSpMMOpPlan_t CUSPARSE_DEPRECATED_TYPE;
+      |                             ^~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuSPARSE/spmm_csr_op/spmm_csr_op_example.c:227:54: warning: ‘cusparseStatus_t cusparseSpMMOp_createPlan(cusparseHandle_t, cusparseSpMMOpPlan**, cusparseOperation_t, cusparseOperation_t, cusparseConstSpMatDescr_t, cusparseConstDnMatDescr_t, cusparseDnMatDescr_t, cudaDataType, cusparseSpMMOpAlg_t, const void*, size_t, const void*, size_t, const void*, size_t, size_t*)’ is deprecated: The routine will be removed in the next major release [-Wdeprecated-declarations]
+  227 |     CHECK_CUSPARSE(
+      |                                                      ^                                                                                                                                                                                                                                                                                          
+/usr/local/cuda-13.4/include/cusparse.h:6242:1: note: declared here
+ 6242 | cusparseSpMMOp_createPlan(cusparseHandle_t          handle,
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuSPARSE/spmm_csr_op/spmm_csr_op_example.c:243:43: warning: ‘cusparseStatus_t cusparseSpMMOp(cusparseSpMMOpPlan_t, void*)’ is deprecated: The routine will be removed in the next major release [-Wdeprecated-declarations]
+  243 |     CHECK_CUSPARSE( cusparseSpMMOp(plan, dBuffer) )
+      |                             ~~~~~~~~~~~~~~^~~~~~~~~      
+/usr/local/cuda-13.4/include/cusparse.h:6261:1: note: declared here
+ 6261 | cusparseSpMMOp(cusparseSpMMOpPlan_t plan,
+      | ^~~~~~~~~~~~~~

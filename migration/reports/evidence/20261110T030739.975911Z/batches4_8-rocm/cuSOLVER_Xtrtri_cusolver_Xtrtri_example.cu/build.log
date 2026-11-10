@@ -1,0 +1,87 @@
+Warning: HIP version file: "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/share/hip/version" not found.  Cannot give HIP version information.
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/Xtrtri/cusolver_Xtrtri_example.cu:20:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch6_solver.hpp:25:47: error: no matching function for call to 'rocsolver_dgetf2_64'
+   25 |   if(pivot){if(c=="legacy-algorithm")MB_CHECK(rocsolver_dgetf2_64(blas.h,n,n,a.p,n,p.p,fi.p));else MB_CHECK(rocsolver_dgetrf_64(blas.h,n,n,a.p,n,p.p,fi.p));}
+      |                                               ^~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/rocsolver/rocsolver-functions.h:5618:33: note: candidate function not viable: cannot convert argument of incomplete type 'hipblasHandle_t' (aka 'void *') to 'rocblas_handle' (aka 'struct _rocblas_handle *') for 1st argument
+ 5618 | ROCSOLVER_EXPORT rocblas_status rocsolver_dgetf2_64(rocblas_handle handle,
+      |                                 ^                   ~~~~~~~~~~~~~~~~~~~~~
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/Xtrtri/cusolver_Xtrtri_example.cu:20:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch6_solver.hpp:25:109: error: no matching function for call to 'rocsolver_dgetrf_64'
+   25 |   if(pivot){if(c=="legacy-algorithm")MB_CHECK(rocsolver_dgetf2_64(blas.h,n,n,a.p,n,p.p,fi.p));else MB_CHECK(rocsolver_dgetrf_64(blas.h,n,n,a.p,n,p.p,fi.p));}
+      |                                                                                                             ^~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/rocsolver/rocsolver-functions.h:6016:33: note: candidate function not viable: cannot convert argument of incomplete type 'hipblasHandle_t' (aka 'void *') to 'rocblas_handle' (aka 'struct _rocblas_handle *') for 1st argument
+ 6016 | ROCSOLVER_EXPORT rocblas_status rocsolver_dgetrf_64(rocblas_handle handle,
+      |                                 ^                   ~~~~~~~~~~~~~~~~~~~~~
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/Xtrtri/cusolver_Xtrtri_example.cu:20:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch6_solver.hpp:26:17: error: no matching function for call to 'rocsolver_dgetrf_npvt_64'
+   26 |   else MB_CHECK(rocsolver_dgetrf_npvt_64(blas.h,n,n,a.p,n,fi.p));
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/rocsolver/rocsolver-functions.h:5267:33: note: candidate function not viable: cannot convert argument of incomplete type 'hipblasHandle_t' (aka 'void *') to 'rocblas_handle' (aka 'struct _rocblas_handle *') for 1st argument
+ 5267 | ROCSOLVER_EXPORT rocblas_status rocsolver_dgetrf_npvt_64(rocblas_handle handle,
+      |                                 ^                        ~~~~~~~~~~~~~~~~~~~~~
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/Xtrtri/cusolver_Xtrtri_example.cu:20:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch6_solver.hpp:28:21: error: no matching function for call to 'rocsolver_dgetrs_64'
+   28 |   if(!info)MB_CHECK(rocsolver_dgetrs_64(blas.h,rocblas_operation_none,n,1,a.p,n,p.p,b.p,n));
+      |                     ^~~~~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/rocsolver/rocsolver-functions.h:9774:33: note: candidate function not viable: cannot convert argument of incomplete type 'hipblasHandle_t' (aka 'void *') to 'rocblas_handle' (aka 'struct _rocblas_handle *') for 1st argument
+ 9774 | ROCSOLVER_EXPORT rocblas_status rocsolver_dgetrs_64(rocblas_handle handle,
+      |                                 ^                   ~~~~~~~~~~~~~~~~~~~~~
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/Xtrtri/cusolver_Xtrtri_example.cu:20:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch6_solver.hpp:54:12: error: no matching function for call to 'rocsolver_dsyevx'
+   54 |   MB_CHECK(rocsolver_dsyevx(blas.h,rocblas_evect_original,value?rocblas_erange_value:rocblas_erange_all,rocblas_fill_lower,ni,a.p,ni,vl,vu,1,ni,0,nev.p,w.p,z.p,ni,fail.p,fi.p));meig=nev.get()[0];vectors=z.get();
+      |            ^~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/rocsolver/rocsolver-functions.h:21653:33: note: candidate function not viable: cannot convert argument of incomplete type 'hipblasHandle_t' (aka 'void *') to 'rocblas_handle' (aka 'struct _rocblas_handle *') for 1st argument
+ 21653 | ROCSOLVER_EXPORT rocblas_status rocsolver_dsyevx(rocblas_handle handle,
+       |                                 ^                ~~~~~~~~~~~~~~~~~~~~~
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/Xtrtri/cusolver_Xtrtri_example.cu:20:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch6_solver.hpp:66:12: error: no matching function for call to 'rocsolver_dgesvd'
+   66 |   MB_CHECK(rocsolver_dgesvd(blas.h,rocblas_svect_all,rocblas_svect_all,mi,ni,a.p,mi,s.p,u.p,mi,vt.p,ni,e.p,rocblas_outofplace,fi.p));
+      |            ^~~~~~~~~~~~~~~~
+/opt/rocm/core-10.1/include/rocsolver/rocsolver-functions.h:13812:33: note: candidate function not viable: cannot convert argument of incomplete type 'hipblasHandle_t' (aka 'void *') to 'rocblas_handle' (aka 'struct _rocblas_handle *') for 1st argument
+ 13812 | ROCSOLVER_EXPORT rocblas_status rocsolver_dgesvd(rocblas_handle handle,
+       |                                 ^                ~~~~~~~~~~~~~~~~~~~~~
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/Xtrtri/cusolver_Xtrtri_example.cu:20:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch6_solver.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch6_solver.hpp:22:136: note: in instantiation of member function 'migration_batch::Buffer<double>::~Buffer' requested here
+   22 |   emit("input_A",A);emit("input_B",B);scalar("input_pivot",int(pivot));scalar("input_legacy",int(c=="legacy-algorithm"));Buffer<double>a(A),b(B);Buffer<int64_t>p(std::vector<int64_t>{1,2,3});int64_t info=0;
+      |                                                                                                                                        ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/Xtrtri/cusolver_Xtrtri_example.cu:20:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch6_solver.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch6_solver.hpp:22:161: note: in instantiation of member function 'migration_batch::Buffer<long>::~Buffer' requested here
+   22 |   emit("input_A",A);emit("input_B",B);scalar("input_pivot",int(pivot));scalar("input_legacy",int(c=="legacy-algorithm"));Buffer<double>a(A),b(B);Buffer<int64_t>p(std::vector<int64_t>{1,2,3});int64_t info=0;
+      |                                                                                                                                                                 ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/Xtrtri/cusolver_Xtrtri_example.cu:20:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch6_solver.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch6_solver.hpp:40:166: note: in instantiation of member function 'migration_batch::Buffer<int>::~Buffer' requested here
+   40 |   emit("input_A",A);scalar("input_n",n);scalar("input_lda",lda);scalar("input_upper",int(upper));scalar("input_unit",int(unit));Buffer<double>a(A),inv(I);Buffer<int>fi(std::vector<int>{int(n+1)});int info=0;
+      |                                                                                                                                                                      ^
+3 warnings and 6 errors generated when compiling for gfx1201.
+failed to execute:/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib/llvm/bin/clang++  --offload-arch=gfx1201 --driver-mode=g++ --hip-link  --rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --rocm-device-lib-path=/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode -std=c++17 -O2 -D__HIP_PLATFORM_AMD__ -x hip /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/Xtrtri/cusolver_Xtrtri_example.cu -o "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/20261110T030739.975911Z/batches4_8-rocm/cuSOLVER_Xtrtri_cusolver_Xtrtri_example.cu/sample" -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/Xtrtri -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/utils -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common -I/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/include -I/opt/rocm/core-10.1/include -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/project-sdk/include -I/opt/rocm/core-10.1/include/hipblas -I/opt/rocm/core-10.1/include/hipsparse -I/opt/rocm/core-10.1/include/hipsolver -I/opt/rocm/core-10.1/include/rocsolver -I/opt/rocm/core-10.1/include/rocblas -I/opt/rocm/core-10.1/include/rocsparse -I/opt/rocm/core-10.1/include/hipblaslt -L/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/project-sdk/lib -L/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib -L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib -L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib -Wl,-rpath,/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/project-sdk/lib -Wl,-rpath,/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib -Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib -Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib -lhipsolver -lhipblas -lrocsolver -lrocblas -lamdhip64

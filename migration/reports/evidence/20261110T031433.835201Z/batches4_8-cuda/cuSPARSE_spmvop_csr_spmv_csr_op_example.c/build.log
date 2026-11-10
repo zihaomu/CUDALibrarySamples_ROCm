@@ -1,0 +1,45 @@
+/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuSPARSE/spmvop_csr/spmv_csr_op_example.c(257): error: identifier "cusparseSpMVOpDescr_t" is undefined
+      cusparseSpMVOpDescr_t descr;
+      ^
+
+/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuSPARSE/spmvop_csr/spmv_csr_op_example.c(265): error: identifier "CUSPARSE_SPMVOP_ALG_DEFAULT" is undefined
+          { cusparseStatus_t status = (cusparseSpMVOp_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, matA, dummyX, dummyY, dummyZ, CUDA_R_64F, CUSPARSE_SPMVOP_ALG_DEFAULT, &buffer_size)); if (status != CUSPARSE_STATUS_SUCCESS) { printf("CUSPARSE API failed at line %d with error: %s (%d)\n", 265, cusparseGetErrorString(status), status); throw std::runtime_error("native CUDA API/RTC failure"); } }
+                                                                                                                                                     ^
+
+/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuSPARSE/spmvop_csr/spmv_csr_op_example.c(265): error: identifier "cusparseSpMVOp_bufferSize" is undefined
+          { cusparseStatus_t status = (cusparseSpMVOp_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, matA, dummyX, dummyY, dummyZ, CUDA_R_64F, CUSPARSE_SPMVOP_ALG_DEFAULT, &buffer_size)); if (status != CUSPARSE_STATUS_SUCCESS) { printf("CUSPARSE API failed at line %d with error: %s (%d)\n", 265, cusparseGetErrorString(status), status); throw std::runtime_error("native CUDA API/RTC failure"); } }
+                                       ^
+
+/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuSPARSE/spmvop_csr/spmv_csr_op_example.c(275): error: identifier "CUSPARSE_SPMVOP_ALG_DEFAULT" is undefined
+          { cusparseStatus_t status = (cusparseSpMVOp_createDescr(handle, &descr, CUSPARSE_OPERATION_NON_TRANSPOSE, matA, vecX, vecY, vecZ, CUDA_R_64F, CUSPARSE_SPMVOP_ALG_DEFAULT, d_buffer)); if (status != CUSPARSE_STATUS_SUCCESS) { printf("CUSPARSE API failed at line %d with error: %s (%d)\n", 275, cusparseGetErrorString(status), status); throw std::runtime_error("native CUDA API/RTC failure"); } }
+                                                                                                                                                        ^
+
+/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuSPARSE/spmvop_csr/spmv_csr_op_example.c(275): error: identifier "cusparseSpMVOp_createDescr" is undefined
+          { cusparseStatus_t status = (cusparseSpMVOp_createDescr(handle, &descr, CUSPARSE_OPERATION_NON_TRANSPOSE, matA, vecX, vecY, vecZ, CUDA_R_64F, CUSPARSE_SPMVOP_ALG_DEFAULT, d_buffer)); if (status != CUSPARSE_STATUS_SUCCESS) { printf("CUSPARSE API failed at line %d with error: %s (%d)\n", 275, cusparseGetErrorString(status), status); throw std::runtime_error("native CUDA API/RTC failure"); } }
+                                       ^
+
+/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuSPARSE/spmvop_csr/spmv_csr_op_example.c(283): error: identifier "cusparseSpMVOpPlan_t" is undefined
+      cusparseSpMVOpPlan_t plan;
+      ^
+
+/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuSPARSE/spmvop_csr/spmv_csr_op_example.c(284): error: identifier "cusparseSpMVOp_createPlan" is undefined
+      { cusparseStatus_t status = (cusparseSpMVOp_createPlan(handle, descr, &plan, lto_buffer, lto_buffer_size)); if (status != CUSPARSE_STATUS_SUCCESS) { printf("CUSPARSE API failed at line %d with error: %s (%d)\n", 284, cusparseGetErrorString(status), status); throw std::runtime_error("native CUDA API/RTC failure"); } };
+                                   ^
+
+/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuSPARSE/spmvop_csr/spmv_csr_op_example.c(291): error: identifier "cusparseSpMVOp_setGlobalUserData" is undefined
+          { cusparseStatus_t status = (cusparseSpMVOp_setGlobalUserData( handle, plan, epilogue_data_symbol, &epilogue_data, sizeof(epilogue_data_t))); if (status != CUSPARSE_STATUS_SUCCESS) { printf("CUSPARSE API failed at line %d with error: %s (%d)\n", 291, cusparseGetErrorString(status), status); throw std::runtime_error("native CUDA API/RTC failure"); } }
+                                       ^
+
+/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuSPARSE/spmvop_csr/spmv_csr_op_example.c(300): error: identifier "cusparseSpMVOp" is undefined
+      { cusparseStatus_t status = (cusparseSpMVOp(handle, plan, &alpha, &beta, vecX, vecY, vecZ)); if (status != CUSPARSE_STATUS_SUCCESS) { printf("CUSPARSE API failed at line %d with error: %s (%d)\n", 300, cusparseGetErrorString(status), status); throw std::runtime_error("native CUDA API/RTC failure"); } };
+                                   ^
+
+/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuSPARSE/spmvop_csr/spmv_csr_op_example.c(307): error: identifier "cusparseSpMVOp_destroyPlan" is undefined
+      { cusparseStatus_t status = (cusparseSpMVOp_destroyPlan(plan)); if (status != CUSPARSE_STATUS_SUCCESS) { printf("CUSPARSE API failed at line %d with error: %s (%d)\n", 307, cusparseGetErrorString(status), status); throw std::runtime_error("native CUDA API/RTC failure"); } };
+                                   ^
+
+/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuSPARSE/spmvop_csr/spmv_csr_op_example.c(308): error: identifier "cusparseSpMVOp_destroyDescr" is undefined
+      { cusparseStatus_t status = (cusparseSpMVOp_destroyDescr(descr)); if (status != CUSPARSE_STATUS_SUCCESS) { printf("CUSPARSE API failed at line %d with error: %s (%d)\n", 308, cusparseGetErrorString(status), status); throw std::runtime_error("native CUDA API/RTC failure"); } };
+                                   ^
+
+11 errors detected in the compilation of "/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuSPARSE/spmvop_csr/spmv_csr_op_example.c".

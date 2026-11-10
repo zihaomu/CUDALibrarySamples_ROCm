@@ -15,19 +15,6 @@
  * limitations under the License.
  */
 
-#include "hip/hip_runtime.h"
-#include "LtMatmulCustomFind.h"
-#include "helpers.h"
-
-int main() {
-    TestBench<float> props(HIPBLAS_OP_N, HIPBLAS_OP_N, 1024, 512, 4096, 2.0f, 0.0f, 1024 * 1024 * 16);
-
-    props.run([&props] {
-        LtMatmulCustomFind(props.ltHandle, props.transa, props.transb, props.m, props.n, props.k, HIP_R_32F,
-                           &props.alpha, HIP_R_32F, props.Adev, props.lda, HIP_R_32F, props.Bdev, props.ldb,
-                           &props.beta, HIP_R_32F, props.Cdev, props.ldc, HIP_R_32F, props.Cdev, props.ldc,
-                           props.workspace, props.workspaceSize);
-    });
-
-    return 0;
-}
+// MIGRATION_BATCH7: original precision and size; observed actual search and grouped dispatch.
+#include "batch7_gemm.hpp"
+int main(){return migration_batch::gemm7_main("LtSgemmCustomFind");}

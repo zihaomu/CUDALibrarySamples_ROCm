@@ -6,6 +6,7 @@ from run import digest
 from operator_support import summarize
 from batch2_spec import ALL
 from batch3_spec import ALL as BATCH3
+from batches4_8_spec import ALL as BATCHES4_8
 
 def main():
  errors=[];checks={};cat=json.loads((ROOT/'migration/samples.yaml').read_text());samples=cat['samples'];counts=collections.Counter(s['status'] for s in samples);proofs={}
@@ -85,9 +86,25 @@ def main():
  inputs3=json.loads((ROOT/'migration/reports/batch3-input-regeneration.json').read_text());require(inputs3['status']=='PASSED' and len(inputs3['checks'])==36 and all(c['passed'] for c in inputs3['checks']),'Batch3 input identity replay incomplete')
  for r in json.loads((ROOT/'migration/reports/batch3-inputs.json').read_text())['fixtures']:require(digest(ROOT/r['shared_rhs'])==r['inputs']['input_rhs.bin']['sha256'],'Batch3 shared RHS identity changed')
  require('Regenerated and hash-verified 27 input buffers' in (ROOT/'migration/reports/batch2-fixture-replay.log').read_text(),'Tensor fixture regeneration not verified')
+ cohort=json.loads((ROOT/'migration/reports/batches4_8-validation.json').read_text());require(len(cohort)==26 and {r['source'] for r in cohort}==set(BATCHES4_8),'B4-B8 target inventory incomplete')
+ for r in cohort:
+  require(r['status']==r['cuda_comparison']=='PASSED' and {c['case'] for c in r['cases']}==set(BATCHES4_8[r['source']]) and len(r['cuda_cases'])==len(r['cases']) and all(c['status']=='PASSED' and all(v['passed'] for v in c['checks']) for c in r['cases']) and all(c['status']=='PASSED' and c['identical_input'] and c['cuda_cpu_checks']['status']=='PASSED' and all(x['passed'] for x in c['cuda_cpu_checks']['checks']) for c in r['cuda_cases']),'B4-B8 case/math/semantics incomplete '+r['source'])
+  require(r['validation_source_sha256']==digest(ROOT/'tools/migration/batches4_8_validate.py'),'B4-B8 qualifier changed '+r['source'])
+  for name,sha in r['dependencies'].items():require(digest(ROOT/name)==sha,'B4-B8 current oracle/helper changed '+name)
+  require(digest(ROOT/r['implementation'])==r['implementation_sha256'],'B4-B8 implementation changed '+r['source'])
+  require(r['environment']['rocm_release']=='10.1.0' and r['environment']['image_id']=='sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03','B4-B8 environment identity changed '+r['source'])
+ neg48=json.loads((ROOT/'migration/reports/batches4_8-negative.json').read_text());require(neg48['status']=='PASSED' and neg48['oracles']==26 and len(neg48['tests'])==52 and all(v['rejected'] for v in neg48['tests']) and neg48['generator_sha256']==digest(ROOT/'tools/migration/batches4_8_negative.py'),'B4-B8 52 output corruption gates incomplete')
+ runtime48=json.loads((ROOT/'migration/reports/batches4_8-runtime-checks.json').read_text());require(runtime48['status']=='PASSED' and len(runtime48['tests'])==4 and all(x['rejected'] for x in runtime48['tests']) and runtime48['generator_sha256']==digest(ROOT/'tools/migration/batches4_8_runtime_checks.py'),'B4-B8 runtime rejection gates incomplete')
+ semantic48=json.loads((ROOT/'migration/reports/batches4_8-semantic-negative.json').read_text());require(semantic48['status']=='PASSED' and len(semantic48['tests'])==8 and all(x['rejected'] for x in semantic48['tests']) and semantic48['generator_sha256']==digest(ROOT/'tools/migration/batches4_8_semantic_negative.py'),'B4-B8 eight semantic fault gates incomplete');checks['batches4_8_semantic_faults_rejected']=len(semantic48['tests'])
+ inputs48=json.loads((ROOT/'migration/reports/batches4_8-input-replay.json').read_text());require(inputs48['status']=='PASSED' and len(inputs48['checks'])==54 and all(x['passed'] for x in inputs48['checks']) and inputs48['generator_sha256']==digest(ROOT/'tools/migration/batches4_8_input_replay.py'),'B5 captured input recipe regeneration incomplete')
+ for r in cohort:
+  sample=next(x for x in samples if x['source']==r['source'])
+  if r['cuda_baseline_kind']=='COMPATIBLE_CUDA_MATH_BASELINE':require(sample['cuda_baseline']=='FAILED' and sample['cuda_comparison_mode']==r['cuda_baseline_kind'],'Missing native-CUDA API limitation '+r['source'])
+ checks.update(batches4_8_samples=len(cohort),batches4_8_cases=sum(len(r['cases']) for r in cohort),batches4_8_corruptions_rejected=len(neg48['tests']),batches4_8_runtime_guards=len(runtime48['tests']),batches4_8_input_buffers_verified=len(inputs48['checks']),batches4_8_compatible_cuda_baselines=sum(r['cuda_baseline_kind']=='COMPATIBLE_CUDA_MATH_BASELINE' for r in cohort))
  ctest=(ROOT/'migration/reports/ctest-final.log').read_text();require('100% tests passed, 0 tests failed out of 16' in ctest,'Final 16 CTest checks not passed')
  perf=json.loads((ROOT/'migration/reports/performance-comparison.json').read_text());require(perf['status']=='BLOCKED' and len(perf['profiles'])==6 and all(v['qualified_speed_ratio'] is None for v in perf['profiles']),'Performance ratio incorrectly qualified')
  manifest=json.loads((ROOT/'migration/source-tree.json').read_text())
+ for r in cohort:require(manifest['files'].get('build/cuda-observed/'+r['source'],{}).get('sha256')==r['cuda_implementation_sha256'],'B4-B8 CUDA source identity stale '+r['source'])
  for r in batch3:require(manifest['files'].get('build/cuda-observed/'+r['source'],{}).get('sha256')==r['cuda_implementation_sha256'],'Batch3 CUDA source identity stale '+r['source'])
  for name,r in manifest['files'].items():
   archived_observation=name.startswith(('build/cuda-observed/','build/cuda-observed-fft/')) and not (ROOT/name).exists();require((archived_observation or (ROOT/name).exists() and digest(ROOT/name)==r['sha256']) and digest(ROOT/r['object'])==r['sha256'],'Source seal mismatch '+name)

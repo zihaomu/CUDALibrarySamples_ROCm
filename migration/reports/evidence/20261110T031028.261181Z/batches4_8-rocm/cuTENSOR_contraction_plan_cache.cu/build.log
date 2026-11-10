@@ -1,0 +1,73 @@
+Warning: HIP version file: "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/share/hip/version" not found.  Cannot give HIP version information.
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuTENSOR/contraction_plan_cache.cu:19:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch5_tensor.hpp:87:385: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   87 |   if(load!=0){float best=1e30;for(int divisor:{1,2,4}){int candidate=(plan.m+divisor-1)/divisor;hipEvent_t start,stop;MB_CHECK(hipEventCreate(&start));MB_CHECK(hipEventCreate(&stop));MB_CHECK(hipEventRecord(start));prepared.execute(C.p,C.p,alpha,beta,candidate);MB_CHECK(hipEventRecord(stop));MB_CHECK(hipEventSynchronize(stop));float ms;MB_CHECK(hipEventElapsedTime(&ms,start,stop));hipEventDestroy(start);hipEventDestroy(stop);if(ms<best){best=ms;block=candidate;}C.put(cv);++candidates;}
+      |                                                                                                                                                                                                                                                                                                                                                                                                 ^~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch5_tensor.hpp:87:408: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   87 |   if(load!=0){float best=1e30;for(int divisor:{1,2,4}){int candidate=(plan.m+divisor-1)/divisor;hipEvent_t start,stop;MB_CHECK(hipEventCreate(&start));MB_CHECK(hipEventCreate(&stop));MB_CHECK(hipEventRecord(start));prepared.execute(C.p,C.p,alpha,beta,candidate);MB_CHECK(hipEventRecord(stop));MB_CHECK(hipEventSynchronize(stop));float ms;MB_CHECK(hipEventElapsedTime(&ms,start,stop));hipEventDestroy(start);hipEventDestroy(stop);if(ms<best){best=ms;block=candidate;}C.put(cv);++candidates;}
+      |                                                                                                                                                                                                                                                                                                                                                                                                                        ^~~~~~~~~~~~~~~~~~~~~
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuTENSOR/contraction_plan_cache.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch5_tensor.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch5_tensor.hpp:29:2: note: in instantiation of member function 'migration_batch::Buffer<float>::~Buffer' requested here
+   29 |  PreparedContract(const float*A,const float*B,const ContractPlan&p):plan(p),capacity(std::min(p.m,65536)),pa(size_t(capacity)*p.k),pb(size_t(p.k)*p.n),pc(size_t(capacity)*p.n),inputA(A){MB_CHECK(rocblas_create_handle(&h));tensor_pack<<<(p.b.total+255)/256,256>>>(B,pb.p,p.b,false);MB_CHECK(hipGetLastError());}
+      |  ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuTENSOR/contraction_plan_cache.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch5_tensor.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch5_tensor.hpp:49:328: note: in instantiation of member function 'migration_batch::Buffer<unsigned char>::~Buffer' requested here
+   49 |  hiptensorPlanPreference_t pref;MB_CHECK(hiptensorCreatePlanPreference(h,&pref,HIPTENSOR_ALGO_DEFAULT,HIPTENSOR_JIT_MODE_NONE));uint64_t bytes=0;MB_CHECK(hiptensorEstimateWorkspaceSize(h,op,pref,HIPTENSOR_WORKSPACE_DEFAULT,&bytes));hiptensorPlan_t plan;MB_CHECK(hiptensorCreatePlan(h,&plan,op,pref,bytes));Buffer<unsigned char>workspace(bytes);float alpha=1,beta=0;
+      |                                                                                                                                                                                                                                                                                                                                        ^
+4 warnings generated when compiling for gfx1201.
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuTENSOR/contraction_plan_cache.cu:19:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch5_tensor.hpp:87:385: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   87 |   if(load!=0){float best=1e30;for(int divisor:{1,2,4}){int candidate=(plan.m+divisor-1)/divisor;hipEvent_t start,stop;MB_CHECK(hipEventCreate(&start));MB_CHECK(hipEventCreate(&stop));MB_CHECK(hipEventRecord(start));prepared.execute(C.p,C.p,alpha,beta,candidate);MB_CHECK(hipEventRecord(stop));MB_CHECK(hipEventSynchronize(stop));float ms;MB_CHECK(hipEventElapsedTime(&ms,start,stop));hipEventDestroy(start);hipEventDestroy(stop);if(ms<best){best=ms;block=candidate;}C.put(cv);++candidates;}
+      |                                                                                                                                                                                                                                                                                                                                                                                                 ^~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch5_tensor.hpp:87:408: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   87 |   if(load!=0){float best=1e30;for(int divisor:{1,2,4}){int candidate=(plan.m+divisor-1)/divisor;hipEvent_t start,stop;MB_CHECK(hipEventCreate(&start));MB_CHECK(hipEventCreate(&stop));MB_CHECK(hipEventRecord(start));prepared.execute(C.p,C.p,alpha,beta,candidate);MB_CHECK(hipEventRecord(stop));MB_CHECK(hipEventSynchronize(stop));float ms;MB_CHECK(hipEventElapsedTime(&ms,start,stop));hipEventDestroy(start);hipEventDestroy(stop);if(ms<best){best=ms;block=candidate;}C.put(cv);++candidates;}
+      |                                                                                                                                                                                                                                                                                                                                                                                                                        ^~~~~~~~~~~~~~~~~~~~~
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuTENSOR/contraction_plan_cache.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch5_tensor.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:230:1: note: expanded from here
+  230 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch5_tensor.hpp:29:2: note: in instantiation of member function 'migration_batch::Buffer<float>::~Buffer' requested here
+   29 |  PreparedContract(const float*A,const float*B,const ContractPlan&p):plan(p),capacity(std::min(p.m,65536)),pa(size_t(capacity)*p.k),pb(size_t(p.k)*p.n),pc(size_t(capacity)*p.n),inputA(A){MB_CHECK(rocblas_create_handle(&h));tensor_pack<<<(p.b.total+255)/256,256>>>(B,pb.p,p.b,false);MB_CHECK(hipGetLastError());}
+      |  ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuTENSOR/contraction_plan_cache.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch5_tensor.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:230:1: note: expanded from here
+  230 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch5_tensor.hpp:49:328: note: in instantiation of member function 'migration_batch::Buffer<unsigned char>::~Buffer' requested here
+   49 |  hiptensorPlanPreference_t pref;MB_CHECK(hiptensorCreatePlanPreference(h,&pref,HIPTENSOR_ALGO_DEFAULT,HIPTENSOR_JIT_MODE_NONE));uint64_t bytes=0;MB_CHECK(hiptensorEstimateWorkspaceSize(h,op,pref,HIPTENSOR_WORKSPACE_DEFAULT,&bytes));hiptensorPlan_t plan;MB_CHECK(hiptensorCreatePlan(h,&plan,op,pref,bytes));Buffer<unsigned char>workspace(bytes);float alpha=1,beta=0;
+      |                                                                                                                                                                                                                                                                                                                                        ^
+4 warnings generated when compiling for host.

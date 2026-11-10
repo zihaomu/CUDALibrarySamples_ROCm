@@ -15,45 +15,6 @@
  * limitations under the License.
  */
 
-#include "hip/hip_runtime.h"
-#include <cstdio>
-#include <hipblaslt.h>
-
-#include "sample_cublasLt_LtSgemmSimpleAutoTuning.h"
-#include "helpers.h"
-
-void printAlgo(const hipblasLtMatmulAlgo_t &algo) {
-    int algoId, tile, swizzle, customOption, numSplitsK, reductionScheme;
-
-    checkCublasStatus(
-        cublasLtMatmulAlgoConfigGetAttribute(&algo, CUBLASLT_ALGO_CONFIG_ID, &algoId, sizeof(algoId), NULL));
-    checkCublasStatus(
-        cublasLtMatmulAlgoConfigGetAttribute(&algo, CUBLASLT_ALGO_CONFIG_TILE_ID, &tile, sizeof(tile), NULL));
-    checkCublasStatus(cublasLtMatmulAlgoConfigGetAttribute(&algo, CUBLASLT_ALGO_CONFIG_SPLITK_NUM, &numSplitsK,
-                                                           sizeof(numSplitsK), NULL));
-    checkCublasStatus(cublasLtMatmulAlgoConfigGetAttribute(&algo, CUBLASLT_ALGO_CONFIG_REDUCTION_SCHEME,
-                                                           &reductionScheme, sizeof(reductionScheme), NULL));
-    checkCublasStatus(cublasLtMatmulAlgoConfigGetAttribute(&algo, CUBLASLT_ALGO_CONFIG_CTA_SWIZZLING, &swizzle,
-                                                           sizeof(swizzle), NULL));
-    checkCublasStatus(cublasLtMatmulAlgoConfigGetAttribute(&algo, CUBLASLT_ALGO_CONFIG_CUSTOM_OPTION, &customOption,
-                                                           sizeof(customOption), NULL));
-
-    printf("algo={ Id=%d, tileIdx=%d splitK=%d reduc=%d swizzle=%d custom=%d }\n", algoId, tile, numSplitsK,
-           reductionScheme, swizzle, customOption);
-}
-
-int main() {
-    TestBench<float> props(HIPBLAS_OP_N, HIPBLAS_OP_N, 1024, 1024, 1024, 2.0f, 0.0f, 1024 * 1024 * 4);
-
-    hipblasLtMatmulAlgo_t algo;
-
-    props.run([&props, &algo] {
-        LtSgemmSimpleAutoTuning(props.ltHandle, props.transa, props.transb, props.m, props.n, props.k, &props.alpha,
-                                props.Adev, props.lda, props.Bdev, props.ldb, &props.beta, props.Cdev, props.ldc,
-                                props.workspace, props.workspaceSize, algo);
-    });
-
-    printAlgo(algo);
-
-    return 0;
-}
+// MIGRATION_BATCH7: original precision and size; observed actual search and grouped dispatch.
+#include "batch7_gemm.hpp"
+int main(){return migration_batch::gemm7_main("LtSgemmSimpleAutoTuning");}

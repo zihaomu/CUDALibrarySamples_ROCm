@@ -47,6 +47,9 @@ if batch.exists():
 batch=r/'batch3-validation.json'
 if batch.exists():
  rows=json.loads(batch.read_text());good=[x for x in rows if x['status']==x['cuda_comparison']=='PASSED'];text+='第三批：'+str(len(good))+'/8 样例、'+str(sum(len(x['cases']) for x in good))+' 个输入 case 三方通过。稀疏3项 → solver4项 → Graph Capture1项依次完成。CG/BiCGSTAB 保留原始700×700网格，独立CSR/CPU求解/真实残差/收敛检查；BiCG变体共享捕获RHS消除生成顺序造成的末位差异，36个输入buffer可重建或按固定fixture核对hash。solver按batch和实际meig检查，含秩亏、未排序配对及索引/值域/全量/空区间。原规模SpVV图含2000个GPU kernel节点，三次输入变化replay通过；24个数值/图语义反向检查全部拒绝。AMD稀疏用物理GPU0，之后该卡被预约，guard阻止启动，solver/graph改用HIP ordinal1→物理GPU2。报告：`migration/reports/batch3.md`。\n\n'
+live=r/'batches4-8-progress.json'
+if live.exists():
+ summary=json.loads(live.read_text());text+='第四至第八批实时结果：'+'；'.join(x['batch']+' '+str(x['samples_passed'])+'/'+str(x['samples_required'])+' 样例、'+str(x['cases_passed'])+'/'+str(x['cases_required'])+' cases' for x in summary['batches'])+'。完整逐例路线、限制和日志入口见 `migration/reports/batches4-8.md`；B8三项CUDA原生新API缺失，兼容数学对照与原始API基线分开记录。\n\n'
 with DOC.with_suffix('.lock').open('w') as lock:
  fcntl.flock(lock,fcntl.LOCK_EX);body=DOC.read_text();start=body.index('## 12.');end=body.index('## 附录 A',start);body=body[:start]+text+body[end:];body=body.replace('HIP_VISIBLE_DEVICES=0 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh','HIP_VISIBLE_DEVICES=2 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh');DOC.write_text(body.rstrip()+'\n')
 print('Current design snapshot refreshed')

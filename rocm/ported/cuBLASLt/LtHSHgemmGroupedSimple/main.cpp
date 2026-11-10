@@ -15,21 +15,6 @@
  * limitations under the License.
  */
 
-#include "hip/hip_runtime.h"
-#include "sample_cublasLt_LtHSHgemmGroupedSimple.h"
-#include "helpers.h"
-
-int main() {
-    TestBench<__half, __half, float> props(HIPBLAS_OP_N, HIPBLAS_OP_N, 64, 96, 128, 2.0f, 0.0f, 4 * 1024 * 1024 * 2, 2,
-                                           false, true, true);
-
-    props.run([&props] {
-        LtHSHgemmGroupedSimple(props.ltHandle, props.transa, props.transb, props.mArrayDev, props.avgM, props.nArrayDev,
-                               props.avgN, props.kArrayDev, props.avgK, props.alphaArrayDev, props.APtrArrayDev,
-                               props.ldaArrayDev, props.BPtrArrayDev, props.ldbArrayDev, props.betaArrayDev,
-                               props.CPtrArrayDev, props.ldcArrayDev, props.DPtrArrayDev, props.lddArrayDev,
-                               props.BiasPtrArrayDev, props.N, props.workspace, props.workspaceSize);
-    });
-
-    return 0;
-}
+// MIGRATION_BATCH7: original precision and size; observed actual search and grouped dispatch.
+#include "batch7_gemm.hpp"
+int main(){return migration_batch::gemm7_main("LtHSHgemmGroupedSimple");}

@@ -8,8 +8,10 @@ def operator_name(sample):
  if family=='cuBLAS':
   if 'dotc' in path.name.lower():return 'dotc'
   if kind.startswith(('cherk','csyrk')):kind=kind[1:]
-  kind=re.sub(r'(stridedbatched|groupedbatched|batched|autotuning|3m|ex)$','',kind)
-  return re.sub(r'(stridedbatched|groupedbatched|batched|3m)$','',kind)
+  while True:
+   normalized=re.sub(r'(stridedbatched|groupedbatched|batched|autotuning|3m|ex)$','',kind)
+   if normalized==kind:return kind
+   kind=normalized
  if family=='cuBLASLt':return 'GEMM'
  if family=='cuDSS':return '稀疏 SPD 直接求解'
  if family=='cuFFT':
@@ -40,6 +42,13 @@ SCOPES={
  'cuSOLVER':'原始固定教学矩阵；检查 status/info、特征值/奇异值、重构、求解残差与正交性。第三批覆盖 batched SVD/未排序特征对、索引/值域/全量/空区间与实际 meig。',
  'cuSPARSE':'CSR/COO/SELL/blocked-ELL 等已登记格式与 batched 变体；SpVV/SpGEMM/reuse 数值变化与 CSR 结构；第三批 CG/BiCGSTAB 的独立求解、残差/收敛，gpsv 的逐 batch interleaved 布局，以及真实 GPU 图捕获/输入变化 replay。',
  'cuTENSOR':'FP32：contraction 用 rocBLAS + HIP；其它已通过的逐元素/permutation/reduction 使用 hipTensor。逐例记录原始 extents 与扩展小尺寸、全部输出 CPU 检查；contraction 的原始规模另为抽样验收。'}
+
+SCOPES.update({
+ 'cuBLAS':'固定教学profile与所列扩展cases；含复杂rank-k类型化适配、HIP GPU packed转换、FP32分组batched及FP64项目策略调优。rotmg极端缩放使用HIP修正；调优/批量变体按同一数学族去重。',
+ 'cuBLASLt':'6个profile：原FP32 SGEMM、HSH pointer-array/strided batch，以及B7 HSH grouped分发与SGEMM custom-find/autotune。FP16输入/输出、FP32累加、bias、候选全输出、workspace=0及所选方案重放通过；分发适配不等于原生device-grouped API。',
+ 'cuSOLVER':'原始FP64教学矩阵；status/info、全量分解/重构、残差、正交性、未排序配对及实际meig检查。B6增加64位LU/三角求逆；SVD/eigen typed接口显式INT_MAX限制。',
+ 'cuSPARSE':'已登记CSR/COO/SELL/BSR等格式、CG/BiCG残差/收敛、gpsv布局和真实Graph replay。B8补CSR→CSC、对称展开、HIP GPU预算分块SpGEMM和融合custom op；3项CUDA新API缺失，使用明确标注的兼容数学基线。',
+ 'cuTENSOR':'FP32：hipTensor逐元素/排列/规约；rocBLAS+HIP contraction；B5补HIP padding、einsum路由、三输入收缩和真实GPU分块搜索/持久化缓存。B2/B5全部原始规模输出均有全量FP64 CPU检查；早期M3 contraction仅抽样的历史证据另保留。'})
 
 def summarize(cat):
  families={};total_operators=0

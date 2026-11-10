@@ -1,0 +1,34 @@
+{
+  "build": [
+    "/usr/local/cuda-13.4/bin/nvcc",
+    "-std=c++17",
+    "-O2",
+    "-x",
+    "cu",
+    "-arch=sm_120",
+    "/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuSOLVER/Xtrtri/cusolver_Xtrtri_example.cu",
+    "-o",
+    "/home/zihaomu/cuda_samples_on_rocm_compare/artifacts/20261110T030831.738178Z/batches4_8-cuda/cuSOLVER_Xtrtri_cusolver_Xtrtri_example.cu/sample",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuSOLVER/Xtrtri",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuSOLVER/utils",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/rocm/common",
+    "-I/usr/local/cuda-13.4/include",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-sdk/include",
+    "-L/usr/local/cuda-13.4/lib64",
+    "-Xlinker=-rpath=/usr/local/cuda-13.4/lib64",
+    "-L/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-sdk/lib",
+    "-Xlinker=-rpath=/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-sdk/lib",
+    "-lcusolver",
+    "-lcublas"
+  ],
+  "cwd": "/home/zihaomu/cuda_samples_on_rocm_compare",
+  "cases": [
+    "original",
+    "lower",
+    "unit-diagonal",
+    "singular-info"
+  ],
+  "run": [
+    "/home/zihaomu/cuda_samples_on_rocm_compare/artifacts/20261110T030831.738178Z/batches4_8-cuda/cuSOLVER_Xtrtri_cusolver_Xtrtri_example.cu/sample"
+  ]
+}

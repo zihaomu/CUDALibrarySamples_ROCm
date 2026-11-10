@@ -63,6 +63,11 @@ def render():
   batch=json.loads((ROOT/'migration/reports/batch2-validation.json').read_text());qualified=[r for r in batch if r['status']=='PASSED'];intro+='**第二批已收口：'+str(len(qualified))+'/17 个样例、'+str(sum(len(r['cases']) for r in qualified))+' 个输入 case。** [详细验收报告](migration/reports/batch2.md) 包含稀疏 3 项、BLAS 8 项、tensor 4 项与 solver 2 项的 CPU/CUDA 对照、原始规模与边界检查。`rotmg` 的原生缩放错误及项目 GPU 修正[单独记录](migration/reports/rotmg-scale-fix.md)；大张量 fixture 支持按 seed 和 SHA256 完整重建。\n\n'
  if (ROOT/'migration/reports/batch3-validation.json').exists():
   batch=json.loads((ROOT/'migration/reports/batch3-validation.json').read_text());qualified=[r for r in batch if r['status']==r['cuda_comparison']=='PASSED'];intro+='**第三批已收口：'+str(len(qualified))+'/8 个样例、'+str(sum(len(r['cases']) for r in qualified))+' 个输入 case，ROCm/独立 CPU/CUDA 三方通过。** [第三批详细验收与复现](migration/reports/batch3.md) 覆盖 CG、BiCGSTAB、五对角批量求解、4 项 solver 与 SpVV Graph Capture/Replay；包含 meig/未排序配对检查、2000 个实际 GPU 图节点、输入变化重放，以及 24 项反向检查。\n\n'
+ live=ROOT/'migration/reports/batches4-8-progress.json'
+ if live.exists():
+  progress=json.loads(live.read_text());intro+='**B4–B8：'+str(sum(x['samples_passed'] for x in progress['batches']))+'/26 个样例、'+str(sum(x['cases_passed'] for x in progress['batches']))+'/92 个预登记用例验收通过。** [逐例实际库、限制与详细日志](migration/reports/batches4-8.md)。3项CUDA新API在已安装SDK缺失，原生基线保持FAILED，兼容CUDA数学基线通过。\n\n| 批次 | 样例通过 | 用例通过 |\n| --- | ---: | ---: |\n'
+  for row in progress['batches']:intro+='| '+row['batch']+' | '+str(row['samples_passed'])+'/'+str(row['samples_required'])+' | '+str(row['cases_passed'])+'/'+str(row['cases_required'])+' |\n'
+  intro+='\n'
  intro+=render_overview(operators)
  intro+='## 模块支持矩阵\n\n下表覆盖全部 30 个库级模块。“已验收算子族”按上文口径去重；“通过/总入口”是原始 sample 数，二者分别统计。部分完成、失败、明确不支持、前置条件阻塞分别列出；每个模块链接包含全部原始样例的实际库、代码、逐例原因和证据。候选库不计为实际使用库。\n\n| 模块 | 实际/候选 AMD 路线 | 已验收算子族 | 通过/总入口 | 部分 | 失败 | 不支持 | 阻塞 | 当前范围及未通过原因 |\n| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |\n'
  for family in CANDIDATES:

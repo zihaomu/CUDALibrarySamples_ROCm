@@ -530,14 +530,20 @@ artifacts/<run-id>/<sample-id>/<backend>/<case-id>/
 | S54 | 已完成 | 后续12批路线图与能力边界已推送fork/main，远端commit、首页README与migration/roadmap.md blob均已核对。65候选、473项逐例去向和577仓库/16页内链接验证记录已发布；本地doc与仓库副本一致。实测支持仍166样例/91族，计划状态PLANNED_NOT_EXECUTED。 | 后续如启动实施，先从B4锁定case与实际GPU能力，按每步更新文档的流程执行。 |
 | S55 | 已完成 | 按用户指令启动B4-B8共26个样例；ROCm10.1锁定镜像通过，HIP ordinal2对应物理GPU0空闲且预约已释放，5090两卡空闲。先登记每例输入case，再逐项三方验收，实时刷新主清单与算子支持表。 | B4先修BLAS Ex/ormqr并实现GPU packed转换、SELL/BSR存储桥接。 |
 | S56 | 已完成 | B4的8/8样例、32个预登记case通过ROCm/独立CPU/CUDA三方。GemmBatchedEx、QR应用、packed互转、SELL三角求解与BSR SDDMM均验收；原生Ex包装失败保留源码对象与日志，complex32采用类型化hipBLAS Cherk/Csyrk，不改变dtype或公式。主清单/首页和算子表即时刷新。 | B5保留张量原始规模，补初始化、布局和真实plan cache语义。 |
+| S57 | 已完成 | B5全部4个原始profile、12cases三方验收；原始4GiB输出全量FP64 CPU检查。修正einsum ROW布局及CUDA padding物理步长，GPU打包按行分块降低临时显存；真实计划搜索/缓存新进程重放通过。 | 继续B7/B8并保持实时表 |
+| S58 | 已完成 | B6全部4个原始profile、15cases三方验收；64位LU/triangular solve，eigen/SVD显式INT_MAX桥接限制。奇异info、返回meig、全量分解/重构/残差通过。 | B7分组/搜索及B8稀疏语义 |
+| S59 | 已完成 | B8全部5项18cases数值/结构/对称/预算/custom-device语义通过。3项原始CUDA API在SDK缺失，保留FAILED原始基线；兼容CUDA数学基线独立通过，不冒充原始API成功。hipSPARSE SpMV包装不兼容改用已验证rocSPARSE v2。 | B7最后同输入复核与全批故障注入 |
+| S60 | 已完成 | B7全部5项15cases通过同输入CPU/CUDA；FP32真实grouped/batched路线、FP64项目row-policy搜索、Lt候选全输出/workspace/replay通过；提前固定seed42 group尺寸，规范JSON整数/浮点表示后hash一致。B4-B8共26项92cases。 | 52次错误输出拒绝、运行边界与输入重建总验收 |
+| S61 | 已完成 | 52/52有限错误与NaN拒绝，8/8缓存/搜索/workspace/分块/对称/custom语义错误拒绝；4/4真实进程边界通过；54输入buffer按seed20261110完整重建hash一致。去重GEMM autotune后全项目99功能族、192样例通过。 | 封存源代码/日志、最终一致性审计并推送fork |
+| S62 | 已完成 | 最终一致性审计PASSED：26/26样例92/92cases；60次输出/语义故障拒绝、4运行边界、54输入重建；192个当前源码证明与1147个封存文件匹配，上游866源/477构建文件未改。 | 提交并推送fork，校验远端README及干净检出 |
 
 ## 12. 当前实施快照（工具刷新）
 
 本节替代设计阶段的未开始快照。逐步过程保留在第 11 节；整例成功、部分功能、路线失败分别报告，不将执行过计划解释为所有功能均已迁移成功。
 
-更新时间：2026-11-10T02:45:42.938929+00:00。
+更新时间：2026-11-10T03:31:01.964851+00:00。
 
-清单为 **639 个独立可执行/脚本源入口**（563 C/C++、76 Fortran/Python），逐例均有实际尝试记录。当前：`PASSED` 174；`PARTIAL` 6；`FAILED` 456；`BLOCKED` 1；`UNSUPPORTED` 2；`NOT_STARTED` 0；`IN_PROGRESS` 0。
+清单为 **639 个独立可执行/脚本源入口**（563 C/C++、76 Fortran/Python），逐例均有实际尝试记录。当前：`PASSED` 192；`PARTIAL` 6；`FAILED` 438；`BLOCKED` 1；`UNSUPPORTED` 2；`NOT_STARTED` 0；`IN_PROGRESS` 0。
 
 M0 静态审计覆盖全部 477 个构建定义和 866 个源文件，记录 863 个声明、682 个源文件构建绑定；53 个 SDK/测试生成输入/条件变体表达式逐项归类，不重复膨胀入口数量。这不是全部 SDK 条件配置均已生成运行的声明。
 
@@ -572,6 +578,8 @@ python3 tools/migration/render.py
 第二批：17/17 样例、45 个输入 case 通过独立 CPU，CUDA 对照 17/17。覆盖稀疏 3、BLAS 8、tensor 4、solver 2；tensor 保留原始规模，全部语义输出检查，加小尺寸/非零系数/零系数。27 个共享大/小输入 buffer 可按 seed=20261109 重建并逐文件核对 SHA256。原生 rotmg 重复缩放 H 错误由项目 HIP GPU 修正；原生失败与精确失败源码另存。详细见 `migration/reports/batch2.md` 与 `rotmg-scale-fix.md`。CUDA 侧 cuTENSOR 2.8.1 仅安装在项目 build overlay，单独锁定 library/wheel hash。
 
 第三批：8/8 样例、26 个输入 case 三方通过。稀疏3项 → solver4项 → Graph Capture1项依次完成。CG/BiCGSTAB 保留原始700×700网格，独立CSR/CPU求解/真实残差/收敛检查；BiCG变体共享捕获RHS消除生成顺序造成的末位差异，36个输入buffer可重建或按固定fixture核对hash。solver按batch和实际meig检查，含秩亏、未排序配对及索引/值域/全量/空区间。原规模SpVV图含2000个GPU kernel节点，三次输入变化replay通过；24个数值/图语义反向检查全部拒绝。AMD稀疏用物理GPU0，之后该卡被预约，guard阻止启动，solver/graph改用HIP ordinal1→物理GPU2。报告：`migration/reports/batch3.md`。
+
+第四至第八批实时结果：B4 8/8 样例、32/32 cases；B5 4/4 样例、12/12 cases；B6 4/4 样例、15/15 cases；B7 5/5 样例、15/15 cases；B8 5/5 样例、18/18 cases。完整逐例路线、限制和日志入口见 `migration/reports/batches4-8.md`；B8三项CUDA原生新API缺失，兼容数学对照与原始API基线分开记录。
 
 ## 附录 A：按目录核对的初始范围
 
