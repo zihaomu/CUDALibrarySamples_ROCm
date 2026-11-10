@@ -1,0 +1,1 @@
+Test cpu-validation for herk3m/boundary, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T082626.732759Z-R1-rocm-b783cccc3f.

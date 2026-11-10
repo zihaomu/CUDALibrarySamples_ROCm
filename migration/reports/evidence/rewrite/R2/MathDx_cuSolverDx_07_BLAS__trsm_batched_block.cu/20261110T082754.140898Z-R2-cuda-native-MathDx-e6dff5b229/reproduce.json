@@ -1,0 +1,116 @@
+{
+  "commands": [
+    {
+      "command_id": 1,
+      "phase": "prepare",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "mkdir -p /tmp/20261110T082754.140898Z-R2-cuda-native-MathDx-e6dff5b229/outputs"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-10T08:27:54.594587+00:00",
+      "timeout_seconds": 240,
+      "environment": {},
+      "stdout": "logs/0001-prepare.stdout.log",
+      "stderr": "logs/0001-prepare.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-10T08:27:54.910407+00:00",
+      "seconds": 0.3152448080072645
+    },
+    {
+      "command_id": 2,
+      "phase": "upload",
+      "argv": [
+        "scp",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/R2/MathDx_cuSolverDx_07_BLAS__trsm_batched_block.cu/20261110T082754.140898Z-R2-cuda-native-MathDx-e6dff5b229/source.tar.gz",
+        "nvidia-5090x2:/tmp/20261110T082754.140898Z-R2-cuda-native-MathDx-e6dff5b229/source.tar.gz"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-10T08:27:54.913230+00:00",
+      "timeout_seconds": 240,
+      "environment": {},
+      "stdout": "logs/0002-upload.stdout.log",
+      "stderr": "logs/0002-upload.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-10T08:27:55.229320+00:00",
+      "seconds": 0.3151810179988388
+    },
+    {
+      "command_id": 3,
+      "phase": "unpack",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "tar -xzf /tmp/20261110T082754.140898Z-R2-cuda-native-MathDx-e6dff5b229/source.tar.gz -C /tmp/20261110T082754.140898Z-R2-cuda-native-MathDx-e6dff5b229"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-10T08:27:55.231895+00:00",
+      "timeout_seconds": 240,
+      "environment": {},
+      "stdout": "logs/0003-unpack.stdout.log",
+      "stderr": "logs/0003-unpack.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-10T08:27:55.548309+00:00",
+      "seconds": 0.3154912660247646
+    },
+    {
+      "command_id": 4,
+      "phase": "build",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "/usr/local/cuda-13.4/bin/nvcc -std=c++17 -O2 -x cu --expt-relaxed-constexpr --extended-lambda -arch=sm_120 -DCUSOLVERDX_EXAMPLE_ENABLE_SM_120 -rdc=true -dlto -I/tmp/20261110T074308.933075Z-R2-cuda-sdk-b859a26f18/sdk/nvidia-mathdx-26.06.1-cuda13/nvidia/mathdx/26.06/include -I/tmp/20261110T074308.933075Z-R2-cuda-sdk-b859a26f18/sdk/nvidia-mathdx-26.06.1-cuda13/nvidia/mathdx/26.06/external/cutlass/include -I/tmp/20261110T082754.140898Z-R2-cuda-native-MathDx-e6dff5b229 /tmp/20261110T082754.140898Z-R2-cuda-native-MathDx-e6dff5b229/MathDx/cuSolverDx/07_BLAS/trsm_batched_block.cu /tmp/20261110T082754.140898Z-R2-cuda-native-MathDx-e6dff5b229/MathDx/cuSolverDx/common/error_checking.cpp -L/tmp/20261110T074308.933075Z-R2-cuda-sdk-b859a26f18/sdk/nvidia-mathdx-26.06.1-cuda13/nvidia/mathdx/26.06/lib -lcusolverdx -lcublas -lcusolver -o /tmp/20261110T082754.140898Z-R2-cuda-native-MathDx-e6dff5b229/native"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-10T08:27:55.550394+00:00",
+      "timeout_seconds": 240,
+      "environment": {},
+      "stdout": "logs/0004-build.stdout.log",
+      "stderr": "logs/0004-build.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-10T08:28:09.650697+00:00",
+      "seconds": 14.09931885698461
+    },
+    {
+      "command_id": 5,
+      "phase": "native-run",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "env NATIVE_CAPTURE_OUTPUT=/tmp/20261110T082754.140898Z-R2-cuda-native-MathDx-e6dff5b229/outputs /tmp/20261110T082754.140898Z-R2-cuda-native-MathDx-e6dff5b229/native"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-10T08:28:09.652453+00:00",
+      "timeout_seconds": 180,
+      "environment": {},
+      "stdout": "logs/0005-native-run.stdout.log",
+      "stderr": "logs/0005-native-run.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-10T08:28:10.620517+00:00",
+      "seconds": 0.9672192469879519
+    },
+    {
+      "command_id": 6,
+      "phase": "collect",
+      "argv": [
+        "scp",
+        "-r",
+        "nvidia-5090x2:/tmp/20261110T082754.140898Z-R2-cuda-native-MathDx-e6dff5b229/outputs/.",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/R2/MathDx_cuSolverDx_07_BLAS__trsm_batched_block.cu/20261110T082754.140898Z-R2-cuda-native-MathDx-e6dff5b229/outputs"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-10T08:28:10.622518+00:00",
+      "timeout_seconds": 60,
+      "environment": {},
+      "stdout": "logs/0006-collect.stdout.log",
+      "stderr": "logs/0006-collect.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-10T08:28:10.939735+00:00",
+      "seconds": 0.31620377200306393
+    }
+  ],
+  "source": "source.json",
+  "inputs": "inputs/manifest.json",
+  "expected_environment": "environment.expected.json"
+}

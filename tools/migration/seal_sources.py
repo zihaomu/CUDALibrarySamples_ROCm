@@ -3,7 +3,7 @@
 import hashlib,json,pathlib
 from catalog import ROOT,BASE
 objects=ROOT/'migration/source-objects';objects.mkdir(parents=True,exist_ok=True);files={};ext={'.cpp','.cu','.c','.hip','.h','.hpp','.cuh','.hxx','.inl','.f90','.cuf','.py','.sh','.txt'}
-for root in [ROOT/'rocm',ROOT/'tools/migration',ROOT/'build/cuda-observed',ROOT/'build/cuda-observed-fft']:
+for root in [ROOT/'rocm',ROOT/'tools/migration',ROOT/'tools/moat',ROOT/'cmake',ROOT/'build/cuda-observed',ROOT/'build/cuda-observed-fft']:
  for p in root.rglob('*'):
   if p.is_file() and (p.suffix in ext or p.name=='CMakeLists.txt'):
    data=p.read_bytes();sha=hashlib.sha256(data).hexdigest();obj=objects/(sha+'.txt')

@@ -1,0 +1,1 @@
+Test cpu-native-validation for trsm/original-native-comparison, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T082754.140898Z-R2-cuda-native-MathDx-e6dff5b229.

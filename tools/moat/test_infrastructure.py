@@ -7,6 +7,21 @@ from experiment import ROOT,write,digest
 import bootstrap,inventory
 
 class InfrastructureContract(unittest.TestCase):
+    def test_cold_checkout_restores_saved_control(self):
+        with tempfile.TemporaryDirectory(prefix='moat-cold-bootstrap-') as folder:
+            root=Path(folder)/'CUDALibrarySamples_ROCm';(root/'migration/moat').mkdir(parents=True)
+            for name in ['lock.json','control.bundle']:shutil.copyfile(ROOT/'migration/moat'/name,root/'migration/moat'/name)
+            lock=json.loads((root/'migration/moat/lock.json').read_text());control=(root/lock['control_checkout']).resolve();run=subprocess.run
+            def local_clone(argv,**kwargs):
+                if argv[:3]==['git','clone','--no-checkout']:
+                    clone=list(argv);clone[3]=str(ROOT.parent/'MOAT_CUDALibrarySamples_ROCm');result=run(clone,**kwargs)
+                    run(['git','remote','set-url','origin',lock['upstream_url']],cwd=control,check=True,capture_output=True)
+                    return result
+                return run(argv,**kwargs)
+            self.assertFalse(control.exists())
+            with patch.object(bootstrap.subprocess,'run',local_clone):self.assertEqual(bootstrap.ensure(root),control)
+            self.assertEqual(bootstrap.validate_existing(root),control)
+
     def test_inventory_preserves_recorded_state(self):
         with tempfile.TemporaryDirectory(prefix='moat-inventory-') as folder:
             root=Path(folder)

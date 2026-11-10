@@ -1,0 +1,1 @@
+Test cuda for MathDx/cuSolverDx/07_BLAS::trsm_batched_block.cu, case original. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T082906.265706Z-R1-R2-cuda-build-60e9add7b6.

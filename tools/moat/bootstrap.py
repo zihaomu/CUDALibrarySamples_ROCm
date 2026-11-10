@@ -21,9 +21,11 @@ def validate_existing(root=ROOT):
 
 def ensure(root=ROOT):
     lock=json.loads((root/'migration/moat/lock.json').read_text());control=(root/lock['control_checkout']).resolve();branch='port/'+lock['project']
-    if not control.exists():subprocess.run(['git','clone','--no-checkout',lock['upstream_url'],str(control)],check=True)
+    fresh=not control.exists()
+    if fresh:subprocess.run(['git','clone','--no-checkout',lock['upstream_url'],str(control)],check=True)
     if not (control/'.git').is_dir():raise RuntimeError('Existing control path is not a Git checkout')
     if git(control,'cat-file','-e',lock['upstream_commit']+'^{commit}',check=False).returncode:git(control,'fetch',lock['upstream_url'],lock['upstream_commit'])
+    if fresh:git(control,'checkout','--detach',lock['upstream_commit'])
     current=git(control,'branch','--show-current').stdout.strip();project=control/'projects'/lock['project']
     if current!=branch:
         if git(control,'status','--porcelain','--untracked-files=no').stdout:raise RuntimeError('Do not replace modified control files')

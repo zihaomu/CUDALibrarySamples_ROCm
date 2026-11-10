@@ -1,0 +1,1 @@
+Test rocm for cuBLAS/Level-3/gemm3m::cublas_gemm3m_example.cu, case irregular. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T082511.602776Z-R1-rocm-build-81984351b9.

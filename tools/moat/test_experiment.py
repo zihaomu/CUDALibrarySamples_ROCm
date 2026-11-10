@@ -56,4 +56,15 @@ class RecorderContract(unittest.TestCase):
         self.assertEqual(json.loads((target/'manifest.json').read_text())['experiment_outcome'],'INTERRUPTED')
         self.assertIn('child-stream-proof',logs[0].read_text());self.assertEqual(check(target),[])
 
+    def test_finished_child_with_missing_start_identity_can_recover(self):
+        code='from experiment import Experiment;import sys,time;e=Experiment("P0","recorder-short-child-contract","host");e.command([sys.executable,"-c","pass"],"short-child");print(e.path,flush=True);time.sleep(120)'
+        proc=subprocess.Popen([sys.executable,'-c',code],cwd=ROOT/'tools/moat',stdout=subprocess.PIPE,text=True)
+        from pathlib import Path
+        from experiment import write
+        target=Path(proc.stdout.readline().strip());child=json.loads((target/'subprocess.json').read_text())
+        child['start_ticks']=None;write(target/'subprocess.json',child)
+        os.kill(proc.pid,signal.SIGKILL);proc.wait();proc.stdout.close()
+        recovered=subprocess.run([sys.executable,str(ROOT/'tools/moat/recover.py'),'--target',str(target),'--reason','Fault injection: completed short child with unavailable start ticks'],capture_output=True,text=True)
+        self.assertEqual(recovered.returncode,0,recovered.stderr);self.assertEqual(check(target),[])
+
 if __name__=='__main__':unittest.main()

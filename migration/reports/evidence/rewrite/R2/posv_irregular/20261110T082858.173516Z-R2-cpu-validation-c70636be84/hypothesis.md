@@ -1,0 +1,1 @@
+Test cpu-validation for posv/irregular, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T082716.121123Z-R2-rocm-a51a56b710.

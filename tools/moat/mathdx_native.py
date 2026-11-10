@@ -19,7 +19,7 @@ for profile in spec:
  elif kind=='posv':
   marker='if (std::accumulate(info.begin()';out='native_emit("factor",L,size_t(batches)*one_batch_size_A);native_emit("output",X,size_t(batches)*one_batch_size_B);native_emit("info",info,size_t(batches));\n'
  else:
-  marker='// Reference using cuBLAS trsm';out='native_emit("output",X,size_t(batches)*one_batch_size_B);native_emit("A_after",A,size_t(batches)*one_batch_size_A);\n'
+  marker='// Reference using cuBLAS trsm';out='CUDA_CHECK_AND_EXIT(cudaMemcpyAsync(A.data(), d_A, size_t(batches)*one_batch_size_A*sizeof(typename TRSM::a_data_type), cudaMemcpyDeviceToHost, stream));CUDA_CHECK_AND_EXIT(cudaStreamSynchronize(stream));native_emit("output",X,size_t(batches)*one_batch_size_B);native_emit("A_after",A,size_t(batches)*one_batch_size_A);\n'
  at=text.index(marker);text=text[:at]+out+text[at:];generated.write_text(text)
  remote='/tmp/'+e.id;bundle=e.path/'source.tar.gz'
  with tarfile.open(bundle,'w:gz') as f:

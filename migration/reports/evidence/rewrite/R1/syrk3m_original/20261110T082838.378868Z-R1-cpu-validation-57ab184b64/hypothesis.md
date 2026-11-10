@@ -1,0 +1,1 @@
+Test cpu-validation for syrk3m/original, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T082628.817603Z-R1-rocm-a641cbe36b.

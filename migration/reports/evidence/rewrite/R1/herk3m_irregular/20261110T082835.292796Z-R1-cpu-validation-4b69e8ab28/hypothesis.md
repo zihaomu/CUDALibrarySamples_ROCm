@@ -1,0 +1,1 @@
+Test cpu-validation for herk3m/irregular, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T082620.421316Z-R1-rocm-ae681949ad.

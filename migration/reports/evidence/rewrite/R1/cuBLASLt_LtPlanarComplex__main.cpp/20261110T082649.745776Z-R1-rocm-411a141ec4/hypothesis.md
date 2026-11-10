@@ -1,0 +1,1 @@
+Test rocm for cuBLASLt/LtPlanarComplex::main.cpp, case repeat. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T082519.748530Z-R1-rocm-build-fb36eff567.

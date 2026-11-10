@@ -1,0 +1,56 @@
+diff --git a/tools/moat/bootstrap.py b/tools/moat/bootstrap.py
+index 978040a0..5b37de23 100644
+--- a/tools/moat/bootstrap.py
++++ b/tools/moat/bootstrap.py
+@@ -21,9 +21,11 @@ def validate_existing(root=ROOT):
+ 
+ def ensure(root=ROOT):
+     lock=json.loads((root/'migration/moat/lock.json').read_text());control=(root/lock['control_checkout']).resolve();branch='port/'+lock['project']
+-    if not control.exists():subprocess.run(['git','clone','--no-checkout',lock['upstream_url'],str(control)],check=True)
++    fresh=not control.exists()
++    if fresh:subprocess.run(['git','clone','--no-checkout',lock['upstream_url'],str(control)],check=True)
+     if not (control/'.git').is_dir():raise RuntimeError('Existing control path is not a Git checkout')
+     if git(control,'cat-file','-e',lock['upstream_commit']+'^{commit}',check=False).returncode:git(control,'fetch',lock['upstream_url'],lock['upstream_commit'])
++    if fresh:git(control,'checkout','--detach',lock['upstream_commit'])
+     current=git(control,'branch','--show-current').stdout.strip();project=control/'projects'/lock['project']
+     if current!=branch:
+         if git(control,'status','--porcelain','--untracked-files=no').stdout:raise RuntimeError('Do not replace modified control files')
+diff --git a/tools/moat/mathdx_native.py b/tools/moat/mathdx_native.py
+index 5498b18d..5d65edd9 100644
+--- a/tools/moat/mathdx_native.py
++++ b/tools/moat/mathdx_native.py
+@@ -19,7 +19,7 @@ for profile in spec:
+  elif kind=='posv':
+   marker='if (std::accumulate(info.begin()';out='native_emit("factor",L,size_t(batches)*one_batch_size_A);native_emit("output",X,size_t(batches)*one_batch_size_B);native_emit("info",info,size_t(batches));\n'
+  else:
+-  marker='// Reference using cuBLAS trsm';out='native_emit("output",X,size_t(batches)*one_batch_size_B);native_emit("A_after",A,size_t(batches)*one_batch_size_A);\n'
++  marker='// Reference using cuBLAS trsm';out='CUDA_CHECK_AND_EXIT(cudaMemcpyAsync(A.data(), d_A, size_t(batches)*one_batch_size_A*sizeof(typename TRSM::a_data_type), cudaMemcpyDeviceToHost, stream));CUDA_CHECK_AND_EXIT(cudaStreamSynchronize(stream));native_emit("output",X,size_t(batches)*one_batch_size_B);native_emit("A_after",A,size_t(batches)*one_batch_size_A);\n'
+  at=text.index(marker);text=text[:at]+out+text[at:];generated.write_text(text)
+  remote='/tmp/'+e.id;bundle=e.path/'source.tar.gz'
+  with tarfile.open(bundle,'w:gz') as f:
+diff --git a/tools/moat/test_infrastructure.py b/tools/moat/test_infrastructure.py
+index 0aeb0b4d..3712f294 100644
+--- a/tools/moat/test_infrastructure.py
++++ b/tools/moat/test_infrastructure.py
+@@ -7,6 +7,21 @@ from experiment import ROOT,write,digest
+ import bootstrap,inventory
+ 
+ class InfrastructureContract(unittest.TestCase):
++    def test_cold_checkout_restores_saved_control(self):
++        with tempfile.TemporaryDirectory(prefix='moat-cold-bootstrap-') as folder:
++            root=Path(folder)/'CUDALibrarySamples_ROCm';(root/'migration/moat').mkdir(parents=True)
++            for name in ['lock.json','control.bundle']:shutil.copyfile(ROOT/'migration/moat'/name,root/'migration/moat'/name)
++            lock=json.loads((root/'migration/moat/lock.json').read_text());control=(root/lock['control_checkout']).resolve();run=subprocess.run
++            def local_clone(argv,**kwargs):
++                if argv[:3]==['git','clone','--no-checkout']:
++                    clone=list(argv);clone[3]=str(ROOT.parent/'MOAT_CUDALibrarySamples_ROCm');result=run(clone,**kwargs)
++                    run(['git','remote','set-url','origin',lock['upstream_url']],cwd=control,check=True,capture_output=True)
++                    return result
++                return run(argv,**kwargs)
++            self.assertFalse(control.exists())
++            with patch.object(bootstrap.subprocess,'run',local_clone):self.assertEqual(bootstrap.ensure(root),control)
++            self.assertEqual(bootstrap.validate_existing(root),control)
++
+     def test_inventory_preserves_recorded_state(self):
+         with tempfile.TemporaryDirectory(prefix='moat-inventory-') as folder:
+             root=Path(folder)

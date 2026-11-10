@@ -1,0 +1,127 @@
+diff --git a/tools/migration/operator_support.py b/tools/migration/operator_support.py
+index 6224b9c3..61d5b44f 100644
+--- a/tools/migration/operator_support.py
++++ b/tools/migration/operator_support.py
+@@ -16,7 +16,7 @@ def operator_name(sample):
+  if family=='cuBLASMp':return {'geadd':'分布式 GEADD','gemr2d':'block-cyclic 重分布','gemm':'分布式 GEMM'}[path.stem]
+  if family=='cuFFTMp':return '多进程 slab C2C FFT'
+  if family=='cuTENSORMg':return '多 GPU 张量 contraction'
+- if family.startswith('MathDx/'):return {'introduction_example':'设备内 GEMM','simple_fft_block':'设备内 C2C FFT','potrf_block':'设备内 complex Cholesky'}[path.stem]
++ if family.startswith('MathDx/'):return {'introduction_example':'设备内 GEMM','simple_fft_block':'设备内 C2C FFT','potrf_block':'设备内 complex Cholesky','getrf_partial_pivot_block':'设备内 partial-pivot LU','posv_batched_block':'设备内 Cholesky 分解/求解','trsm_batched_block':'设备内三角求解'}[path.stem]
+  if family=='NPP':return {'distanceTransform':'Euclidean 距离变换/Voronoi','templateMatching':'零均值 NCC','nppCanny':'三通道 Canny'}[path.parent.name]
+  if family=='cuBLASLt':return 'GEMM'
+  if family=='cuDSS':return '稀疏重排序分析' if kind=='simple_reordering_phase' else '稀疏直接求解'
+@@ -61,7 +61,7 @@ SCOPES.update({
+  'NPP':'精确Euclidean距离/Voronoi/整数截断，原始313×317与64²图及边界/stride/空site；Canny、NCC原始文件harness、NPP+完整元数据等缺口单列PARTIAL。',
+  'nvCOMP':'hipCOMP LZ4/Snappy原生批处理；CPU↔GPU与hipCOMP↔nvCOMP双向互解、逐chunk status/实际长度、空/边界/损坏流；LZ4 native manager/factory +项目CRC32C及100 raw buffers。完整NVBENCH框架仍单列PARTIAL。',
+  'cuBLAS':'固定教学profile与所列扩展cases；含复杂rank-k类型化适配、HIP GPU packed转换、FP32分组batched及FP64项目策略调优。rotmg极端缩放使用HIP修正；调优/批量变体按同一数学族去重。',
+- 'cuBLASLt':'6个profile：原FP32 SGEMM、HSH pointer-array/strided batch，以及B7 HSH grouped分发与SGEMM custom-find/autotune。FP16输入/输出、FP32累加、bias、候选全输出、workspace=0及所选方案重放通过；分发适配不等于原生device-grouped API。',
++ 'cuBLASLt':'既有6个profile为FP32 SGEMM、HSH pointer-array/strided、grouped分发及custom-find/autotune。MOAT新资格分别登记FP16 planar负偏移转换/FP32 3M/FP16输出，以及真实COL32/COL4 packing + native INT8/INT32 GemmEx；按样例链接与资格状态限定范围。',
+  'cuSOLVER':'B13补611阶双GPU LU/pivot/solve，tile256列分布+RCCL+HIP，全部CPU重构/残差；MgPotrf及Mp原始descriptor缺口另列。原始FP64教学矩阵；status/info、全量分解/重构、残差、正交性、未排序配对及实际meig检查。B6增加64位LU/三角求逆；SVD/eigen typed接口显式INT_MAX限制。',
+  'cuSPARSE':'已登记CSR/COO/SELL/BSR等格式、CG/BiCG残差/收敛、gpsv布局和真实Graph replay。B8补CSR→CSC、对称展开、HIP GPU预算分块SpGEMM和融合custom op；3项CUDA新API缺失，使用明确标注的兼容数学基线。',
+  'cuTENSOR':'FP32：hipTensor逐元素/排列/规约；rocBLAS+HIP contraction；B5补HIP padding、einsum路由、三输入收缩和真实GPU分块搜索/持久化缓存。B2/B5全部原始规模输出均有全量FP64 CPU检查；早期M3 contraction仅抽样的历史证据另保留。'})
+diff --git a/tools/migration/seal_sources.py b/tools/migration/seal_sources.py
+index bb0ae02a..4f09683d 100644
+--- a/tools/migration/seal_sources.py
++++ b/tools/migration/seal_sources.py
+@@ -3,7 +3,7 @@
+ import hashlib,json,pathlib
+ from catalog import ROOT,BASE
+ objects=ROOT/'migration/source-objects';objects.mkdir(parents=True,exist_ok=True);files={};ext={'.cpp','.cu','.c','.hip','.h','.hpp','.cuh','.hxx','.inl','.f90','.cuf','.py','.sh','.txt'}
+-for root in [ROOT/'rocm',ROOT/'tools/migration',ROOT/'build/cuda-observed',ROOT/'build/cuda-observed-fft']:
++for root in [ROOT/'rocm',ROOT/'tools/migration',ROOT/'tools/moat',ROOT/'cmake',ROOT/'build/cuda-observed',ROOT/'build/cuda-observed-fft']:
+  for p in root.rglob('*'):
+   if p.is_file() and (p.suffix in ext or p.name=='CMakeLists.txt'):
+    data=p.read_bytes();sha=hashlib.sha256(data).hexdigest();obj=objects/(sha+'.txt')
+diff --git a/tools/moat/bootstrap.py b/tools/moat/bootstrap.py
+index 978040a0..5b37de23 100644
+--- a/tools/moat/bootstrap.py
++++ b/tools/moat/bootstrap.py
+@@ -21,9 +21,11 @@ def validate_existing(root=ROOT):
+ 
+ def ensure(root=ROOT):
+     lock=json.loads((root/'migration/moat/lock.json').read_text());control=(root/lock['control_checkout']).resolve();branch='port/'+lock['project']
+-    if not control.exists():subprocess.run(['git','clone','--no-checkout',lock['upstream_url'],str(control)],check=True)
++    fresh=not control.exists()
++    if fresh:subprocess.run(['git','clone','--no-checkout',lock['upstream_url'],str(control)],check=True)
+     if not (control/'.git').is_dir():raise RuntimeError('Existing control path is not a Git checkout')
+     if git(control,'cat-file','-e',lock['upstream_commit']+'^{commit}',check=False).returncode:git(control,'fetch',lock['upstream_url'],lock['upstream_commit'])
++    if fresh:git(control,'checkout','--detach',lock['upstream_commit'])
+     current=git(control,'branch','--show-current').stdout.strip();project=control/'projects'/lock['project']
+     if current!=branch:
+         if git(control,'status','--porcelain','--untracked-files=no').stdout:raise RuntimeError('Do not replace modified control files')
+diff --git a/tools/moat/mathdx_native.py b/tools/moat/mathdx_native.py
+index 5498b18d..5d65edd9 100644
+--- a/tools/moat/mathdx_native.py
++++ b/tools/moat/mathdx_native.py
+@@ -19,7 +19,7 @@ for profile in spec:
+  elif kind=='posv':
+   marker='if (std::accumulate(info.begin()';out='native_emit("factor",L,size_t(batches)*one_batch_size_A);native_emit("output",X,size_t(batches)*one_batch_size_B);native_emit("info",info,size_t(batches));\n'
+  else:
+-  marker='// Reference using cuBLAS trsm';out='native_emit("output",X,size_t(batches)*one_batch_size_B);native_emit("A_after",A,size_t(batches)*one_batch_size_A);\n'
++  marker='// Reference using cuBLAS trsm';out='CUDA_CHECK_AND_EXIT(cudaMemcpyAsync(A.data(), d_A, size_t(batches)*one_batch_size_A*sizeof(typename TRSM::a_data_type), cudaMemcpyDeviceToHost, stream));CUDA_CHECK_AND_EXIT(cudaStreamSynchronize(stream));native_emit("output",X,size_t(batches)*one_batch_size_B);native_emit("A_after",A,size_t(batches)*one_batch_size_A);\n'
+  at=text.index(marker);text=text[:at]+out+text[at:];generated.write_text(text)
+  remote='/tmp/'+e.id;bundle=e.path/'source.tar.gz'
+  with tarfile.open(bundle,'w:gz') as f:
+diff --git a/tools/moat/recover.py b/tools/moat/recover.py
+index 861b068c..eadee39a 100644
+--- a/tools/moat/recover.py
++++ b/tools/moat/recover.py
+@@ -10,8 +10,9 @@ if m.get('recorder_pid') and recorder_alive(m) is not False:raise SystemExit('Re
+ child=d/'subprocess.json'
+ if child.exists():
+     c=json.loads(child.read_text())
+-    if c.get('hostname')==platform.node() and process_start(c['pid'])==c.get('start_ticks'):
+-        os.killpg(c['pid'],signal.SIGKILL)
++    if c.get('hostname')==platform.node() and c.get('start_ticks') is not None and process_start(c['pid'])==c['start_ticks']:
++        try:os.killpg(c['pid'],signal.SIGKILL)
++        except ProcessLookupError:pass
+ shutil.copyfile(d/'manifest.json',d/'manifest.before-recovery.json')
+ m.update(experiment_outcome='INTERRUPTED' if m.get('recorder_pid') else 'INITIALIZATION_ERROR',previous_outcome=m.get('experiment_outcome'),finished_at_utc=now(),reason=a.reason,raw_artifact_dir=str(d.relative_to(ROOT)),eligible_for_sample_pass=False)
+ write(d/'manifest.json',m);write(d/'recovery.json',dict(observed_reason=a.reason,numerical_result='NOT_QUALIFIED',note='Recorder confirmed dead or abandoned before subprocess initialization; preserve existing streams without reconstructing results.'))
+diff --git a/tools/moat/test_experiment.py b/tools/moat/test_experiment.py
+index 07f50777..43ed3d3b 100644
+--- a/tools/moat/test_experiment.py
++++ b/tools/moat/test_experiment.py
+@@ -56,4 +56,15 @@ class RecorderContract(unittest.TestCase):
+         self.assertEqual(json.loads((target/'manifest.json').read_text())['experiment_outcome'],'INTERRUPTED')
+         self.assertIn('child-stream-proof',logs[0].read_text());self.assertEqual(check(target),[])
+ 
++    def test_finished_child_with_missing_start_identity_can_recover(self):
++        code='from experiment import Experiment;import sys,time;e=Experiment("P0","recorder-short-child-contract","host");e.command([sys.executable,"-c","pass"],"short-child");print(e.path,flush=True);time.sleep(120)'
++        proc=subprocess.Popen([sys.executable,'-c',code],cwd=ROOT/'tools/moat',stdout=subprocess.PIPE,text=True)
++        from pathlib import Path
++        from experiment import write
++        target=Path(proc.stdout.readline().strip());child=json.loads((target/'subprocess.json').read_text())
++        child['start_ticks']=None;write(target/'subprocess.json',child)
++        os.kill(proc.pid,signal.SIGKILL);proc.wait();proc.stdout.close()
++        recovered=subprocess.run([sys.executable,str(ROOT/'tools/moat/recover.py'),'--target',str(target),'--reason','Fault injection: completed short child with unavailable start ticks'],capture_output=True,text=True)
++        self.assertEqual(recovered.returncode,0,recovered.stderr);self.assertEqual(check(target),[])
++
+ if __name__=='__main__':unittest.main()
+diff --git a/tools/moat/test_infrastructure.py b/tools/moat/test_infrastructure.py
+index 0aeb0b4d..3712f294 100644
+--- a/tools/moat/test_infrastructure.py
++++ b/tools/moat/test_infrastructure.py
+@@ -7,6 +7,21 @@ from experiment import ROOT,write,digest
+ import bootstrap,inventory
+ 
+ class InfrastructureContract(unittest.TestCase):
++    def test_cold_checkout_restores_saved_control(self):
++        with tempfile.TemporaryDirectory(prefix='moat-cold-bootstrap-') as folder:
++            root=Path(folder)/'CUDALibrarySamples_ROCm';(root/'migration/moat').mkdir(parents=True)
++            for name in ['lock.json','control.bundle']:shutil.copyfile(ROOT/'migration/moat'/name,root/'migration/moat'/name)
++            lock=json.loads((root/'migration/moat/lock.json').read_text());control=(root/lock['control_checkout']).resolve();run=subprocess.run
++            def local_clone(argv,**kwargs):
++                if argv[:3]==['git','clone','--no-checkout']:
++                    clone=list(argv);clone[3]=str(ROOT.parent/'MOAT_CUDALibrarySamples_ROCm');result=run(clone,**kwargs)
++                    run(['git','remote','set-url','origin',lock['upstream_url']],cwd=control,check=True,capture_output=True)
++                    return result
++                return run(argv,**kwargs)
++            self.assertFalse(control.exists())
++            with patch.object(bootstrap.subprocess,'run',local_clone):self.assertEqual(bootstrap.ensure(root),control)
++            self.assertEqual(bootstrap.validate_existing(root),control)
++
+     def test_inventory_preserves_recorded_state(self):
+         with tempfile.TemporaryDirectory(prefix='moat-inventory-') as folder:
+             root=Path(folder)

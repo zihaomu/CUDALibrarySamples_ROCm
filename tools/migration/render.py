@@ -48,6 +48,8 @@ def render():
 
 # CUDA Library Samples on ROCm
 
+[MOAT 重写计划](migration/moat-rewrite-plan.md) · [重写实时进展与实验日志](migration/reports/rewrite-progress.md)
+
 对照 NVIDIA CUDA Library Samples，逐例选择 AMD/ROCm 生态中适合的库并实现。每例公开实际使用库、实现程度、正确性结果、CUDA 对照及失败原因。保留 CUDA 原始源码作为参考；AMD 实验固定 ROCm 10.1.0 / Radeon AI PRO R9700（gfx1201），CUDA 对照使用双 RTX 5090 机器。
 
 [B12–B15 实施与缺口](migration/reports/batches12-15.md) · [B9–B11 验收](migration/reports/batches9-11.md) · [B4–B8 验收](migration/reports/batches4-8.md) · [后续批次计划与能力边界](migration/roadmap.md) · [支持方式与详细日志总表](migration/reports/support-log-index.md) · [模块支持矩阵](#模块支持矩阵) · [已验收算子](#已验收算子与验证范围) · [未通过的具体原因](#未通过和不支持的具体原因) · [设计与实施日志](migration/design.md) · [执行交付报告](migration/reports/plan-execution.md) · [逐例清单](migration/samples.yaml) · [环境锁](migration/environments/project.lock.json)
@@ -75,6 +77,8 @@ def render():
  if live1215.exists():
   progress=json.loads(live1215.read_text());intro+='**B12–B15：** '+'；'.join(x['batch']+' '+str(x['samples_passed'])+'整例、'+str(x['samples_partial'])+'部分支持、'+str(x['cases_verified'])+'/'+str(x['cases_required'])+'cases' for x in progress['batches'])+'。[实际路线、逐例限制与详细日志](migration/reports/batches12-15.md)。原始vendor基线与兼容CUDA数学对照分别记录。\n\n'
 
+ if (ROOT/'migration/reports/rewrite-first-qualification.json').exists():
+  q=json.loads((ROOT/'migration/reports/rewrite-first-qualification.json').read_text());qualified=[r for r in q['qualifications'] if r['status']=='PASSED'];intro+='**MOAT R1–R2：'+str(len(qualified))+'/8 个原始样例满足复合验收门槛，'+str(sum(r['case_count'] for r in qualified))+' 个预登记输入。** [逐例路线、原生/兼容 CUDA 区分与完整实验入口](migration/reports/rewrite-R1-R2.md)。支持计数以已写入主表的资格为准；失败、重试和证据勘误保留。\n\n'
  intro+=render_overview(operators)
  intro+='## 模块支持矩阵\n\n下表覆盖全部 30 个库级模块。“已验收算子族”按上文口径去重；“通过/总入口”是原始 sample 数，二者分别统计。部分完成、失败、明确不支持、前置条件阻塞分别列出；每个模块链接包含全部原始样例的实际库、代码、逐例原因和证据。候选库不计为实际使用库。\n\n| 模块 | 实际/候选 AMD 路线 | 已验收算子族 | 通过/总入口 | 部分 | 失败 | 不支持 | 阻塞 | 当前范围及未通过原因 |\n| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |\n'
  for family in CANDIDATES:

@@ -16,7 +16,7 @@ def operator_name(sample):
  if family=='cuBLASMp':return {'geadd':'分布式 GEADD','gemr2d':'block-cyclic 重分布','gemm':'分布式 GEMM'}[path.stem]
  if family=='cuFFTMp':return '多进程 slab C2C FFT'
  if family=='cuTENSORMg':return '多 GPU 张量 contraction'
- if family.startswith('MathDx/'):return {'introduction_example':'设备内 GEMM','simple_fft_block':'设备内 C2C FFT','potrf_block':'设备内 complex Cholesky'}[path.stem]
+ if family.startswith('MathDx/'):return {'introduction_example':'设备内 GEMM','simple_fft_block':'设备内 C2C FFT','potrf_block':'设备内 complex Cholesky','getrf_partial_pivot_block':'设备内 partial-pivot LU','posv_batched_block':'设备内 Cholesky 分解/求解','trsm_batched_block':'设备内三角求解'}[path.stem]
  if family=='NPP':return {'distanceTransform':'Euclidean 距离变换/Voronoi','templateMatching':'零均值 NCC','nppCanny':'三通道 Canny'}[path.parent.name]
  if family=='cuBLASLt':return 'GEMM'
  if family=='cuDSS':return '稀疏重排序分析' if kind=='simple_reordering_phase' else '稀疏直接求解'
@@ -56,12 +56,12 @@ SCOPES.update({
  'cuTENSORMg':'单进程双GPU；原始4096 extents/2048 block及i,k / k,j / i,j，hipBLAS + RCCL，全部FP64 CPU参考；其它分区/精度/多节点不外推。',
  'MathDx/cuBLASDx':'HIP调用方kernel内协作GEMM三阶段、128点双FFT、32阶complex上三角Cholesky/shared LDA33；原生SDK25.6版本差异与兼容CUDA数学对照分开。RNG LEGACY逐位合同仍PARTIAL。',
  'MathDx/cuFFTDx':'HIP调用方kernel内协作128点双C2C FFT、ElementsPerThread=8/共32线程及扩展线程块；全部CPU频谱输出与兼容CUDA数学基线。',
- 'MathDx/cuSolverDx':'HIP调用方kernel内32阶complex FP64上三角Cholesky，共享LDA33/256线程、完整因子与非SPD info；原生SDK版本缺口另记。',
+ 'MathDx/cuSolverDx':'HIP调用方kernel内complex Cholesky；MOAT新增complex FP32 48×32 pivot LU、complex FP64 32阶双batch POSV、FP64 right/lower 32×33 TRSM。原生MathDx26.06.1原例实际device输出、同字节HIP与独立CPU分别记录；只按已通过样例的登记范围统计。',
  'MathDx/cuRANDDx':'rocRAND设备Philox10 + 显式53bit Box-Muller；NVIDIA LEGACY逐位合同未等价，保持PARTIAL。',
  'NPP':'精确Euclidean距离/Voronoi/整数截断，原始313×317与64²图及边界/stride/空site；Canny、NCC原始文件harness、NPP+完整元数据等缺口单列PARTIAL。',
  'nvCOMP':'hipCOMP LZ4/Snappy原生批处理；CPU↔GPU与hipCOMP↔nvCOMP双向互解、逐chunk status/实际长度、空/边界/损坏流；LZ4 native manager/factory +项目CRC32C及100 raw buffers。完整NVBENCH框架仍单列PARTIAL。',
  'cuBLAS':'固定教学profile与所列扩展cases；含复杂rank-k类型化适配、HIP GPU packed转换、FP32分组batched及FP64项目策略调优。rotmg极端缩放使用HIP修正；调优/批量变体按同一数学族去重。',
- 'cuBLASLt':'6个profile：原FP32 SGEMM、HSH pointer-array/strided batch，以及B7 HSH grouped分发与SGEMM custom-find/autotune。FP16输入/输出、FP32累加、bias、候选全输出、workspace=0及所选方案重放通过；分发适配不等于原生device-grouped API。',
+ 'cuBLASLt':'既有6个profile为FP32 SGEMM、HSH pointer-array/strided、grouped分发及custom-find/autotune。MOAT新资格分别登记FP16 planar负偏移转换/FP32 3M/FP16输出，以及真实COL32/COL4 packing + native INT8/INT32 GemmEx；按样例链接与资格状态限定范围。',
  'cuSOLVER':'B13补611阶双GPU LU/pivot/solve，tile256列分布+RCCL+HIP，全部CPU重构/残差；MgPotrf及Mp原始descriptor缺口另列。原始FP64教学矩阵；status/info、全量分解/重构、残差、正交性、未排序配对及实际meig检查。B6增加64位LU/三角求逆；SVD/eigen typed接口显式INT_MAX限制。',
  'cuSPARSE':'已登记CSR/COO/SELL/BSR等格式、CG/BiCG残差/收敛、gpsv布局和真实Graph replay。B8补CSR→CSC、对称展开、HIP GPU预算分块SpGEMM和融合custom op；3项CUDA新API缺失，使用明确标注的兼容数学基线。',
  'cuTENSOR':'FP32：hipTensor逐元素/排列/规约；rocBLAS+HIP contraction；B5补HIP padding、einsum路由、三输入收缩和真实GPU分块搜索/持久化缓存。B2/B5全部原始规模输出均有全量FP64 CPU检查；早期M3 contraction仅抽样的历史证据另保留。'})
@@ -87,7 +87,7 @@ def render_overview(report,prefix=''):
  text+='\n以下仅有子集/能力探针，**不计入上述整例支持数**：\n\n| 模块 | 已验证子集 | 原始样例尚缺什么 |\n| --- | --- | --- |\n'
  if not report['modules']['nvCOMP']['verified_operator_family_count']:text+='| nvCOMP | hipCOMP LZ4 单 chunk 往返 | 完整 batch/manager 待验收 |\n'
  text+='| nvJPEG | rocJPEG baseline 解码；B10真实CLI/布局/缩放/ROI/多实例/后处理逐例验收 | progressive缺少原生GPU后端；显式CPU fallback/encode另标注；'+str(report['modules']['nvJPEG']['sample_outcomes'].get('PARTIAL',0))+' PARTIAL、0 PASSED |\n'
- text+='| NPP | RPP HIP U8 c1/c3、32×24 identity resize 探针 | 原始 Canny、distance transform、label/watershed 等算子未实现；0 PASSED |\n'
+ text+='| NPP | 精确Euclidean距离/Voronoi已整例通过；Canny与NCC有数值子集 | 原生Canny像素策略、NCC文件harness及其它尚未完成合同按逐例状态记录 |\n'
  text+=f'\n逐个算子族与样例的可追溯映射见 [operator-support.json]({prefix}migration/reports/operator-support.json)；失败仍按具体入口和原因保留。\n\n'
  return text
 

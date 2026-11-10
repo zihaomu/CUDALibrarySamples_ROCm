@@ -10,8 +10,9 @@ if m.get('recorder_pid') and recorder_alive(m) is not False:raise SystemExit('Re
 child=d/'subprocess.json'
 if child.exists():
     c=json.loads(child.read_text())
-    if c.get('hostname')==platform.node() and process_start(c['pid'])==c.get('start_ticks'):
-        os.killpg(c['pid'],signal.SIGKILL)
+    if c.get('hostname')==platform.node() and c.get('start_ticks') is not None and process_start(c['pid'])==c['start_ticks']:
+        try:os.killpg(c['pid'],signal.SIGKILL)
+        except ProcessLookupError:pass
 shutil.copyfile(d/'manifest.json',d/'manifest.before-recovery.json')
 m.update(experiment_outcome='INTERRUPTED' if m.get('recorder_pid') else 'INITIALIZATION_ERROR',previous_outcome=m.get('experiment_outcome'),finished_at_utc=now(),reason=a.reason,raw_artifact_dir=str(d.relative_to(ROOT)),eligible_for_sample_pass=False)
 write(d/'manifest.json',m);write(d/'recovery.json',dict(observed_reason=a.reason,numerical_result='NOT_QUALIFIED',note='Recorder confirmed dead or abandoned before subprocess initialization; preserve existing streams without reconstructing results.'))
