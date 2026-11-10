@@ -543,6 +543,7 @@ artifacts/<run-id>/<sample-id>/<backend>/<case-id>/
 | S67 | 已完成 | B11 五个入口AMD 40个case通过独立SciPy稀疏求解/因子/残差/排列/配置查询检查。原始1000阶GENERAL双RHS经rocSOLVER CSRRF，未转dense；uniform未选batch真实GPU缓冲区保持canary。get_set完整vendor查询仍PARTIAL。 | 核验CUDA奇异矩阵真实NPIVOTS与反向检查。 |
 | S68 | 已完成 | 19入口/146预登记case完成AMD、独立CPU与同输入CUDA验收。整例10通过、9部分；47次数值/语义错误全部拒绝，23项真实文件CLI边界通过。ROI元数据独立几何检查已加固并复核。CUDA奇异例NPIVOTS=1为扰动系统，未算作原奇异系统有效解。 | 归档、主表/算子支持表同步、干净checkout审计与fork发布。 |
 | S69 | 已完成 | B9–B11源码、日志、逐case输出/日志hash与数值参考归档；一致性审计通过202个当前整例证明。fork默认分支已从main变为rocm，远端起点791dca20一致；发布目标改为默认rocm。 | 提交实现后，在无build产物的干净checkout审计，并核对fork提交与README blob。 |
+| S70 | 已完成 | 实现81c8fa87已推送fork默认rocm分支；GitHub API确认提交及README blob一致。无build依赖的干净checkout完整审计通过；累计202整例、13部分、102功能族/10模块。本轮146case、47错误拒绝、23CLI边界记录完整。 | B12–B15仍为后续计划；B9–B11九项部分合同按逐例恢复条件继续收口。 |
 
 ## 12. 当前实施快照（工具刷新）
 
