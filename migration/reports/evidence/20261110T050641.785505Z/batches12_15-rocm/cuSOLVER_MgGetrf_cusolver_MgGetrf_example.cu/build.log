@@ -1,0 +1,90 @@
+Warning: HIP version file: "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/share/hip/version" not found.  Cannot give HIP version information.
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/MgGetrf/cusolver_MgGetrf_example.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch13_multi.hpp:3:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch12_dist.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch12_dist.hpp:41:127: note: in instantiation of member function 'migration_batch::Buffer<float>::~Buffer' requested here
+   41 | inline std::vector<float>gather12(Context&c,const std::vector<float>&local,const std::vector<int>&idx,int total){Buffer<float>l(local),masked(std::vector<float>(total,0)),all(total);Buffer<int>ix(idx);if(!idx.empty()){scatter12<<<(idx.size()+255)/256,256>>>(l.p,ix.p,masked.p,idx.size());++c.kernels;}c.sum(masked.p,all.p,total);return all.get();}
+      |                                                                                                                               ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/MgGetrf/cusolver_MgGetrf_example.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch13_multi.hpp:3:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch12_dist.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch12_dist.hpp:41:194: note: in instantiation of member function 'migration_batch::Buffer<int>::~Buffer' requested here
+   41 | inline std::vector<float>gather12(Context&c,const std::vector<float>&local,const std::vector<int>&idx,int total){Buffer<float>l(local),masked(std::vector<float>(total,0)),all(total);Buffer<int>ix(idx);if(!idx.empty()){scatter12<<<(idx.size()+255)/256,256>>>(l.p,ix.p,masked.p,idx.size());++c.kernels;}c.sum(masked.p,all.p,total);return all.get();}
+      |                                                                                                                                                                                                  ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/MgGetrf/cusolver_MgGetrf_example.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch13_multi.hpp:3:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch12_dist.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch12_dist.hpp:44:289: note: in instantiation of member function 'migration_batch::Buffer<__half>::~Buffer' requested here
+   44 |  else {std::vector<float>ha(size_t(m)*k),hb(size_t(k)*n);MB_CHECK(MB_RT(Memcpy)(ha.data(),a,ha.size()*4,MB_RT(MemcpyDeviceToHost)));MB_CHECK(MB_RT(Memcpy)(hb.data(),b,hb.size()*4,MB_RT(MemcpyDeviceToHost)));std::vector<__half>ah(ha.begin(),ha.end()),bh(hb.begin(),hb.end());Buffer<__half>aa(ah),bb(bh);MB_CHECK(MB_BLAS(GemmEx)(h.h,MB_CONST(OP_N),MB_CONST(OP_N),m,n,k,&alpha,aa.p,D12_F16,m,bb.p,D12_F16,k,&beta,out,D12_F32,m,D12_COMPUTE,MB_CONST(GEMM_DEFAULT)));}
+      |                                                                                                                                                                                                                                                                                                 ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/MgGetrf/cusolver_MgGetrf_example.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch13_multi.hpp:3:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch12_dist.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch13_multi.hpp:27:376: note: in instantiation of member function 'migration_batch::Buffer<double>::~Buffer' requested here
+   27 |  if(cas=="singular-or-empty")for(int j=0;j<n;++j){A[j*n]=0;A[j]=0;}auto original=rhs;std::vector<int>cols;for(int j=0;j<n;++j)if((j/block)%c.size==c.rank)cols.push_back(j);std::vector<double>local(n*cols.size());for(size_t j=0;j<cols.size();++j)std::copy_n(A.data()+cols[j]*n,n,local.data()+j*n);c.save("A_local",local);c.save("columns",cols);c.save("rhs",rhs);Buffer<double>a(local),column(n),x(rhs);Buffer<int>gc(cols),piv(n),info(std::vector<int>{0});std::vector<int>ip(n);std::iota(ip.begin(),ip.end(),0);piv.put(ip);int actual=0,repeat=cas=="repeat"?2:1;
+      |                                                                                                                                                                                                                                                                                                                                                                                        ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/MgGetrf/cusolver_MgGetrf_example.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch13_multi.hpp:3:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch12_dist.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch13_multi.hpp:36:607: note: in instantiation of member function 'migration_batch::Buffer<HIP_vector_type<float, 2>>::~Buffer' requested here
+   36 | inline void fft13(Context&c){auto cas=selected_case();int nx=16,ny=16,nz=16;if(cas=="irregular"){nx=17;ny=13;nz=9;}if(cas=="boundary"){nx=2;ny=3;nz=1;}auto part=[](int n,int rank){return n/2+(rank<n%2);};int xc=part(nx,c.rank),x0=c.rank?part(nx,0):0,yc=part(ny,c.rank),y0=c.rank?part(ny,0):0;std::vector<F13(Complex)>in(xc*ny*nz);for(int x=0;x<xc;++x)for(int y=0;y<ny;++y)for(int z=0;z<nz;++z){int i=(x*ny+y)*nz+z;in[i].x=value12(x+x0,y*nz+z,cas=="changed-values"?11:3);in[i].y=cas=="singular-or-empty"?0:value12(x+x0,y*nz+z,7);if(cas=="singular-or-empty")in[i].x=0;}c.save("input",in);Buffer<F13(Complex)>x(in),y(nx*yc*nz);F13(Handle)yz,xx;int dims[2]={ny,nz},one[1]={nx};MB_CHECK(F13(PlanMany)(&yz,2,dims,nullptr,1,ny*nz,nullptr,1,ny*nz,F13_C2C,xc));MB_CHECK(F13(PlanMany)(&xx,1,one,nullptr,1,nx,nullptr,1,nx,F13_C2C,yc*nz));int sends=0,recvs=0,ffts=0;
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ^
+5 warnings generated when compiling for gfx1201.
+ld.lld: error: undefined symbol: fabs(double)
+>>> referenced by /tmp/cusolver_MgGetrf_example-9230d6.hipfb.amdgcn.gfx1201-ec9175.img.lto.o:(migration_dist::pivot13(double const*, int, int, int, int*, int*))
+>>> referenced by /tmp/cusolver_MgGetrf_example-9230d6.hipfb.amdgcn.gfx1201-ec9175.img.lto.o:(migration_dist::pivot13(double const*, int, int, int, int*, int*))
+>>> referenced by /tmp/cusolver_MgGetrf_example-9230d6.hipfb.amdgcn.gfx1201-ec9175.img.lto.o:(migration_dist::pivot13(double const*, int, int, int, int*, int*))
+>>> referenced 1 more times
+
+ld.lld: error: undefined symbol: sqrt(double)
+>>> referenced by /tmp/cusolver_MgGetrf_example-9230d6.hipfb.amdgcn.gfx1201-ec9175.img.lto.o:(migration_dist::column13(double*, double*, int, int, int, int*, bool))
+>>> referenced by /tmp/cusolver_MgGetrf_example-9230d6.hipfb.amdgcn.gfx1201-ec9175.img.lto.o:(migration_dist::column13(double*, double*, int, int, int, int*, bool))
+clang: error: ld.lld command failed with exit code 1 (use -v to see invocation)
+/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/bin/clang-linker-wrapper: error: 'clang' failed
+clang++: error: amdgcn-link command failed with exit code 1 (use -v to see invocation)
+failed to execute:/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib/llvm/bin/clang++  --offload-arch=gfx1201 --driver-mode=g++ --hip-link  --rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --rocm-device-lib-path=/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode -std=c++17 -O2 -D__HIP_PLATFORM_AMD__ -x hip /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/MgGetrf/cusolver_MgGetrf_example.cu -o "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/20261110T050641.785505Z/batches12_15-rocm/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu/sample" -pthread -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/MgGetrf -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/mpi/include -I/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/include -I/opt/rocm/core-10.1/include -I/opt/rocm/core-10.1/include/hipblas -I/opt/rocm/core-10.1/include/hipsolver -I/opt/rocm/core-10.1/include/hipsparse -I/opt/rocm/core-10.1/include/rocblas -I/opt/rocm/core-10.1/include/rocsolver -I/opt/rocm/core-10.1/include/rocsparse -I/opt/rocm/core-10.1/include/hipfft -I/opt/rocm/core-10.1/include/rocrand -L/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/mpi/lib -L/opt/rocm/core-10.1/lib -L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib -L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib -Wl,-rpath,/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/mpi/lib -Wl,-rpath,/opt/rocm/core-10.1/lib -Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib -Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib -lmpi -lamdhip64 -lhipblas -lrccl -lhipfft -lrocrand

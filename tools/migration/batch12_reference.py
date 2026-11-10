@@ -1,0 +1,38 @@
+"""Independent NumPy reconstruction of distributed inputs, outputs and rank semantics."""
+import hashlib,json,pathlib
+from validate_blas import np
+from batches12_15_spec import kind
+
+def value(i,j,s):return (((i*17+j*13+s)%31)-15)/32
+
+def validate(source,case,d):
+ checks=[];k=kind(source);inputs={};outputs={};metas=[];allai=[];allci=[]
+ def gate(n,v,**kw):checks.append(dict(check=n,passed=bool(v),**kw))
+ def read(rank,name,dtype=np.float32):
+  p=d/f'r{rank}_{name}.bin';v=np.fromfile(p,dtype);return v
+ def near(n,a,b,tol=3e-5):
+  delta=np.abs(a.astype(np.float64)-b);gate(n,a.shape==b.shape and np.isfinite(a).all() and np.all(delta<=tol*np.maximum(1,np.abs(b))),max_abs=float(delta.max(initial=0)))
+ for rank in range(2):
+  meta=json.loads((d/f'rank{rank}.json').read_text());metas.append(meta);gate('real-rank-device-'+str(rank),meta['rank']==meta['device']==rank and meta['size']==2)
+  cfg=read(rank,'config',np.int32).tolist();
+  if case=='original':gate('original-profile-scale-'+str(rank),cfg[:2]==([1024,1024] if k.startswith('matmul_') or k=='gemr2d' else [10,10]))
+  dtype=np.float64 if k=='geadd' else np.float32;o=read(rank,'output',dtype);a=read(rank,'A_local',dtype);inputs[str(rank)]=dict(config=cfg,A_sha=hashlib.sha256(a.tobytes()).hexdigest(),extra={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(d.glob('r'+str(rank)+'_*.bin')) if any(t in p.stem for t in ['_indices','_initial','B_local'])})
+  if not k.startswith('matmul_'):
+   m,n,inner,block,p,q,ar,ac,cr,cc,ia,ja,repeat=cfg;idx=read(rank,'A_indices',np.int32);ci=read(rank,'C_indices',np.int32);ini=read(rank,'C_initial',dtype);expected_a=value(idx%ar,idx//ar,9 if case=='changed-values' else 3)*(32/31 if k=='geadd' else 1);near('owned-input-'+str(rank),a,expected_a,1e-15);gate('block-cyclic-source-owner-'+str(rank),np.all(((idx%ar//block)%p)+((idx//ar//block)%q)*p==rank));gate('actual-allreduce-distribution-'+str(rank),meta['allreduce']>=1)
+   allai.extend(idx.tolist());allci.extend(ci.tolist())
+   if k=='gemr2d':
+    near('redistributed-output-'+str(rank),o,value(ci%cr,ci//cr,9 if case=='changed-values' else 3),0);near('redistribution-roundtrip-'+str(rank),read(rank,'roundtrip'),a,0);gate('changed-process-grid-and-block-'+str(rank),np.all(((ci%cr//128)%q)+((ci//cr//128)%p)*q==rank));gate('roundtrip-collective-'+str(rank),meta['allreduce']==2)
+   elif k=='geadd':near('geadd-full-local-'+str(rank),o,value(ci%cr+ia,ci//cr+ja,9 if case=='changed-values' else 3)*32/31+ini,1e-15)
+   else:
+    ri=ci%cr;co=ci//cr;A=value(np.arange(m)[:,None]+ia,np.arange(inner)[None,:]+ja,9 if case=='changed-values' else 3);B=value(np.arange(inner)[:,None],np.arange(n)[None,:],5);answer=A@B;near('local-GEMM-'+str(rank),o,answer[ri,co]+ini);gate('native-GPU-BLAS-'+str(rank),meta['blas']==repeat if len(ci) else meta['blas']==0)
+  else:
+   m,n,inner,count,start,nc,ns,repeat,ag,rs=cfg;b=read(rank,'B_local');inputs[str(rank)]['B_sha']=hashlib.sha256(b.tobytes()).hexdigest();A=value(np.arange(m)[:,None],np.arange(inner)[None,:],11 if case=='changed-values' else 3);B=value(np.arange(inner)[:,None],np.arange(n)[None,:],5);result=(A@B).astype(np.float16).astype(np.float32)
+   if ag or rs:
+    expected=np.zeros((m,nc));end=min(n,ns+nc);expected[:,:end-ns]=result[:,ns:end];expected=expected.ravel(order='F')
+   else:expected=result.ravel(order='F')
+   near('collective-global-math-'+str(rank),o,expected,1e-3);gate('real-collective-kind-'+str(rank),meta['allgather']==repeat if ag else meta['reducescatter']==repeat if rs else meta['allreduce']==repeat);gate('native-local-GEMM-'+str(rank),meta['blas']==repeat)
+
+  if o.size<=4096:outputs[str(rank)]=o.tolist()
+ if not k.startswith('matmul_'):gate('complete-disjoint-global-ownership',sorted(allai)==list(range(ar*ac)) and sorted(allci)==list(range(cr*cc)))
+ gate('separate-processes-and-GPUs',len({m['pid'] for m in metas})==2 and len({m['pci'] for m in metas})==2)
+ return dict(status='PASSED' if all(c['passed'] for c in checks) else 'FAILED',checks=checks,input_sha256=hashlib.sha256(json.dumps(inputs,sort_keys=True).encode()).hexdigest(),output_values=outputs,oracle='NumPy block-cyclic ownership/reconstruction, redistribution roundtrip and full GEMM/collective outputs; distinct MPI PIDs and PCI devices')

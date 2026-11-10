@@ -1,0 +1,143 @@
+Warning: HIP version file: "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/share/hip/version" not found.  Cannot give HIP version information.
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/MathDx/cuSolverDx/01_Linear_Solve/potrf_block.cu:18:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch14_device.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch14_device.hpp:66:204: note: in instantiation of member function 'migration_batch::Buffer<int>::~Buffer' requested here
+   66 | inline int main14(const std::string&kind){try{auto cas=selected_case();int n=32,threads=256,repeat=cas=="repeat"?3:1;if(cas=="irregular"){n=17;threads=128;}if(cas=="boundary"){n=8;threads=64;}Buffer<int>trace(std::vector<int>(6,0));
+      |                                                                                                                                                                                                            ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/MathDx/cuSolverDx/01_Linear_Solve/potrf_block.cu:18:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch14_device.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch14_device.hpp:67:314: note: in instantiation of member function 'migration_batch::Buffer<double>::~Buffer' requested here
+   67 |  if(kind=="introduction_example") {std::vector<double>a(n*n),b(n*n),c(n*n);for(int i=0;i<n*n;++i){a[i]=double(i%17+1)/17;b[i]=double(i%13+1)/13;c[i]=double(i%11+1)/11;if(cas=="changed-values")a[i]=-.5*a[i];if(cas=="singular-or-empty")a[i]=0;}bin14("input_A",a);bin14("input_B",b);bin14("input_C",c);Buffer<double>aa(a),bb(b),cc(c);for(int r=0;r<repeat;++r){cc.put(c);for(int mode=0;mode<3;++mode){gemm_block14<<<1,threads>>>(aa.p,bb.p,cc.p,n,mode,trace.p);MB_CHECK(MB_RT(DeviceSynchronize)());if(!r)bin14("phase"+std::to_string(mode),cc.get());}}bin14("output",cc.get());bin14("config",std::vector<int>{n,threads,repeat});}
+      |                                                                                                                                                                                                                                                                                                                          ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/MathDx/cuSolverDx/01_Linear_Solve/potrf_block.cu:18:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch14_device.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch14_device.hpp:68:311: note: in instantiation of member function 'migration_batch::Buffer<HIP_vector_type<float, 2>>::~Buffer' requested here
+   68 |  else if(kind=="simple_fft_block"){n=cas=="irregular"?64:cas=="boundary"?8:128;threads=cas=="boundary"?64:32;int batch=cas=="irregular"?3:2;std::vector<float2>in(n*batch);for(int i=0;i<n*batch;++i){float v=cas=="changed-values"?float((i*7)%19-9):cas=="singular-or-empty"?0:float(i);in[i]={v,-v};}Buffer<float2>x(in);bin14("input",in);for(int r=0;r<repeat;++r){x.put(in);fft_block14<<<1,threads>>>(x.p,n,batch,trace.p);MB_CHECK(MB_RT(DeviceSynchronize)());}bin14("output",x.get());bin14("config",std::vector<int>{n,batch,threads,repeat});}
+      |                                                                                                                                                                                                                                                                                                                       ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/MathDx/cuSolverDx/01_Linear_Solve/potrf_block.cu:18:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch14_device.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch14_device.hpp:69:303: note: in instantiation of member function 'migration_batch::Buffer<migration_device::Complex14>::~Buffer' requested here
+   69 |  else if(kind=="potrf_block"){std::vector<Complex14>a(n*n);for(int j=0;j<n;++j)for(int i=0;i<n;++i)a[i+j*n]=i==j?Complex14{double(n*4+(cas=="changed-values"?3:0)),0}:Complex14{double((i*7+j*3)%13-6)/8,double((i*5+j*11)%17-8)/8};if(cas=="singular-or-empty")a[0].x=-1;bin14("input_A",a);Buffer<Complex14>x(a);Buffer<int>info(1);for(int r=0;r<repeat;++r){x.put(a);chol_block14<<<1,threads>>>(x.p,n,info.p,trace.p);MB_CHECK(MB_RT(DeviceSynchronize)());}bin14("output",x.get());bin14("info",info.get());bin14("config",std::vector<int>{n,33,threads,repeat});}
+      |                                                                                                                                                                                                                                                                                                               ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/MathDx/cuSolverDx/01_Linear_Solve/potrf_block.cu:18:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch14_device.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch14_device.hpp:70:194: note: in instantiation of member function 'migration_batch::Buffer<unsigned int>::~Buffer' requested here
+   70 |  else {n=cas=="boundary"?20:cas=="irregular"?5004:cas=="singular-or-empty"?0:5000;int seed=cas=="changed-values"?6789:1234,offset=cas=="boundary"?65535:1;Buffer<double>x(n);Buffer<unsigned int>raw(n*2);for(int r=0;r<repeat;++r){if(n)rng_thread14<<<(n/4+255)/256,256>>>(x.p,raw.p,n,seed,offset,trace.p);MB_CHECK(MB_RT(DeviceSynchronize)());if(!r)bin14("first",x.get());}bin14("output",x.get());bin14("raw",raw.get());bin14("config",std::vector<int>{n,seed,offset,256,repeat});}
+      |                                                                                                                                                                                                  ^
+5 warnings generated when compiling for gfx1201.
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/MathDx/cuSolverDx/01_Linear_Solve/potrf_block.cu:18:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch14_device.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:230:1: note: expanded from here
+  230 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch14_device.hpp:66:204: note: in instantiation of member function 'migration_batch::Buffer<int>::~Buffer' requested here
+   66 | inline int main14(const std::string&kind){try{auto cas=selected_case();int n=32,threads=256,repeat=cas=="repeat"?3:1;if(cas=="irregular"){n=17;threads=128;}if(cas=="boundary"){n=8;threads=64;}Buffer<int>trace(std::vector<int>(6,0));
+      |                                                                                                                                                                                                            ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/MathDx/cuSolverDx/01_Linear_Solve/potrf_block.cu:18:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch14_device.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:230:1: note: expanded from here
+  230 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch14_device.hpp:67:314: note: in instantiation of member function 'migration_batch::Buffer<double>::~Buffer' requested here
+   67 |  if(kind=="introduction_example") {std::vector<double>a(n*n),b(n*n),c(n*n);for(int i=0;i<n*n;++i){a[i]=double(i%17+1)/17;b[i]=double(i%13+1)/13;c[i]=double(i%11+1)/11;if(cas=="changed-values")a[i]=-.5*a[i];if(cas=="singular-or-empty")a[i]=0;}bin14("input_A",a);bin14("input_B",b);bin14("input_C",c);Buffer<double>aa(a),bb(b),cc(c);for(int r=0;r<repeat;++r){cc.put(c);for(int mode=0;mode<3;++mode){gemm_block14<<<1,threads>>>(aa.p,bb.p,cc.p,n,mode,trace.p);MB_CHECK(MB_RT(DeviceSynchronize)());if(!r)bin14("phase"+std::to_string(mode),cc.get());}}bin14("output",cc.get());bin14("config",std::vector<int>{n,threads,repeat});}
+      |                                                                                                                                                                                                                                                                                                                          ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/MathDx/cuSolverDx/01_Linear_Solve/potrf_block.cu:18:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch14_device.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:230:1: note: expanded from here
+  230 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch14_device.hpp:68:311: note: in instantiation of member function 'migration_batch::Buffer<HIP_vector_type<float, 2>>::~Buffer' requested here
+   68 |  else if(kind=="simple_fft_block"){n=cas=="irregular"?64:cas=="boundary"?8:128;threads=cas=="boundary"?64:32;int batch=cas=="irregular"?3:2;std::vector<float2>in(n*batch);for(int i=0;i<n*batch;++i){float v=cas=="changed-values"?float((i*7)%19-9):cas=="singular-or-empty"?0:float(i);in[i]={v,-v};}Buffer<float2>x(in);bin14("input",in);for(int r=0;r<repeat;++r){x.put(in);fft_block14<<<1,threads>>>(x.p,n,batch,trace.p);MB_CHECK(MB_RT(DeviceSynchronize)());}bin14("output",x.get());bin14("config",std::vector<int>{n,batch,threads,repeat});}
+      |                                                                                                                                                                                                                                                                                                                       ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/MathDx/cuSolverDx/01_Linear_Solve/potrf_block.cu:18:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch14_device.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:230:1: note: expanded from here
+  230 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch14_device.hpp:69:303: note: in instantiation of member function 'migration_batch::Buffer<migration_device::Complex14>::~Buffer' requested here
+   69 |  else if(kind=="potrf_block"){std::vector<Complex14>a(n*n);for(int j=0;j<n;++j)for(int i=0;i<n;++i)a[i+j*n]=i==j?Complex14{double(n*4+(cas=="changed-values"?3:0)),0}:Complex14{double((i*7+j*3)%13-6)/8,double((i*5+j*11)%17-8)/8};if(cas=="singular-or-empty")a[0].x=-1;bin14("input_A",a);Buffer<Complex14>x(a);Buffer<int>info(1);for(int r=0;r<repeat;++r){x.put(a);chol_block14<<<1,threads>>>(x.p,n,info.p,trace.p);MB_CHECK(MB_RT(DeviceSynchronize)());}bin14("output",x.get());bin14("info",info.get());bin14("config",std::vector<int>{n,33,threads,repeat});}
+      |                                                                                                                                                                                                                                                                                                               ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/MathDx/cuSolverDx/01_Linear_Solve/potrf_block.cu:18:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch14_device.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:230:1: note: expanded from here
+  230 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch14_device.hpp:70:194: note: in instantiation of member function 'migration_batch::Buffer<unsigned int>::~Buffer' requested here
+   70 |  else {n=cas=="boundary"?20:cas=="irregular"?5004:cas=="singular-or-empty"?0:5000;int seed=cas=="changed-values"?6789:1234,offset=cas=="boundary"?65535:1;Buffer<double>x(n);Buffer<unsigned int>raw(n*2);for(int r=0;r<repeat;++r){if(n)rng_thread14<<<(n/4+255)/256,256>>>(x.p,raw.p,n,seed,offset,trace.p);MB_CHECK(MB_RT(DeviceSynchronize)());if(!r)bin14("first",x.get());}bin14("output",x.get());bin14("raw",raw.get());bin14("config",std::vector<int>{n,seed,offset,256,repeat});}
+      |                                                                                                                                                                                                  ^
+5 warnings generated when compiling for host.

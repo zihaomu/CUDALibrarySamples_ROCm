@@ -1,0 +1,62 @@
+{
+  "source": "cuBLASMp/gemm.cu",
+  "batch": "b12",
+  "execution_model": "mpi",
+  "implementation": "build/cuda-observed/cuBLASMp/gemm.cu",
+  "implementation_sha256": "f6fde82af7e6b83aa21b9b254a5c82a0755e36178afd443fc5b5b0b416797753",
+  "original_sha256": "d44714cf598486dc665036d5e9a5e78ad2194489f3b8ec233f1e743020ebe1a0",
+  "build_return_code": 0,
+  "runs": [
+    {
+      "case": "original",
+      "return_code": 0,
+      "evidence": "artifacts/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_gemm.cu/original"
+    },
+    {
+      "case": "irregular",
+      "return_code": 0,
+      "evidence": "artifacts/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_gemm.cu/irregular"
+    },
+    {
+      "case": "changed-values",
+      "return_code": 0,
+      "evidence": "artifacts/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_gemm.cu/changed-values"
+    },
+    {
+      "case": "boundary",
+      "return_code": 0,
+      "evidence": "artifacts/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_gemm.cu/boundary"
+    },
+    {
+      "case": "repeat",
+      "return_code": 0,
+      "evidence": "artifacts/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_gemm.cu/repeat"
+    },
+    {
+      "case": "singular-or-empty",
+      "return_code": 0,
+      "evidence": "artifacts/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_gemm.cu/singular-or-empty"
+    }
+  ],
+  "evidence": "artifacts/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_gemm.cu",
+  "environment": {
+    "backend": "cuda",
+    "devices": "0, NVIDIA GeForce RTX 5090, GPU-5864d26e-25e9-041f-2901-2745fccf5e30, 615.71.09\n1, NVIDIA GeForce RTX 5090, GPU-17390cc0-bf3c-53e3-170c-21eb949de43b, 615.71.09\n",
+    "image_id": null,
+    "rocm_release": null,
+    "visible_devices": "0,1"
+  },
+  "libraries": [
+    "mpi",
+    "cublas",
+    "nccl",
+    "cufft",
+    "curand"
+  ],
+  "dependencies": {
+    "rocm/common/batch12_dist.hpp": "ff632ea63a9563f899a59d1ee31eca37352c3e93eb96cb8c843469cd6dbd967e",
+    "rocm/common/batches_runtime.hpp": "04dc008dae2ade89ea3ef3e349d4a2dd0a842601737c77f0c7f076187b34f26f",
+    "rocm/common/observe.hpp": "3bd452d352dfce533bfb51a6e32ea308d9ca5d85a3a22afeca109d1cae743410",
+    "rocm/common/binary_observe.hpp": "c932e3d979f33ea8c62b38e687be1a083dfec0481d5e9ffbb04ffe6865899e73"
+  }
+}

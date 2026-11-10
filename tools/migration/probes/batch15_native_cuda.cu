@@ -1,0 +1,16 @@
+// SPDX-License-Identifier: Apache-2.0
+#include "batches_runtime.hpp"
+using namespace migration_batch;
+namespace migration_image {
+using namespace migration_batch;
+inline std::vector<unsigned char>read15(const std::string&path){std::ifstream f(path,std::ios::binary);if(!f)throw std::runtime_error("input missing");return std::vector<unsigned char>((std::istreambuf_iterator<char>(f)),{});}
+template<class T>void save15(const std::string&name,const std::vector<T>&v){migration_binary::emit((name+".bin").c_str(),v.data(),v.size()*sizeof(T));}
+}
+#include <npp.h>
+#include <nppi.h>
+using namespace migration_image;
+int main(int argc,char**argv){try{if(argc!=2)return 2;std::string kind=argv[1],base="build/batch15-fixtures/"+kind+"/"+selected_case();std::ifstream count_file(base+"/count.txt");int count=0;count_file>>count;if(!count)throw std::runtime_error("fixtures absent");NppStreamContext ctx{};cudaDeviceProp prop{};MB_CHECK(cudaGetDevice(&ctx.nCudaDeviceId));MB_CHECK(cudaGetDeviceProperties(&prop,ctx.nCudaDeviceId));ctx.nMultiProcessorCount=prop.multiProcessorCount;ctx.nMaxThreadsPerMultiProcessor=prop.maxThreadsPerMultiProcessor;ctx.nMaxThreadsPerBlock=prop.maxThreadsPerBlock;ctx.nSharedMemPerBlock=prop.sharedMemPerBlock;ctx.nCudaDevAttrComputeCapabilityMajor=prop.major;ctx.nCudaDevAttrComputeCapabilityMinor=prop.minor;for(int image=0;image<count;++image){std::string prefix=base+"/"+std::to_string(image),id="i"+std::to_string(image)+"_";std::ifstream params(prefix+"/params.txt");std::vector<int>p(18);for(auto&v:p)params>>v;int stride=p[3],rx=p[4],ry=p[5],w=p[6],h=p[7],n=w*h;Buffer<unsigned char>src(read15(prefix+"/input.bin"));NppiSize roi{w,h};
+ if(kind=="canny"){int bytes=0;MB_CHECK(nppiFilterCannyBorderGetBufferSize(roi,&bytes));Buffer<unsigned char>scratch(bytes),out(n);MB_CHECK(nppiFilterCannyBorder_8u_C3C1R_Ctx(src.p,stride,NppiSize{p[0],p[1]},NppiPoint{rx,ry},out.p,w,roi,NPP_FILTER_SOBEL,NPP_MASK_SIZE_3_X_3,(Npp16s)p[8],(Npp16s)p[9],nppiNormL2,NPP_BORDER_REPLICATE,scratch.p,ctx));MB_CHECK(cudaDeviceSynchronize());save15(id+"output",out.get());}
+ else if(kind=="distance"){size_t bytes=0;MB_CHECK(nppiDistanceTransformPBAGetBufferSize(roi,&bytes));Buffer<unsigned char>scratch(bytes);Buffer<float>out(n);Buffer<unsigned short>truncated(n);Buffer<short>vor(n*2);auto input=src.p+ry*stride+rx;MB_CHECK(nppiDistanceTransformPBA_8u32f_C1R_Ctx(input,stride,0,0,nullptr,0,nullptr,0,vor.p,w*4,out.p,w*4,roi,scratch.p,ctx));MB_CHECK(nppiDistanceTransformPBA_8u16u_C1R_Ctx(input,stride,0,0,nullptr,0,nullptr,0,nullptr,0,truncated.p,w*2,roi,scratch.p,ctx));MB_CHECK(cudaDeviceSynchronize());save15(id+"output",out.get());save15(id+"truncated",truncated.get());save15(id+"voronoi",vor.get());}
+ else if(kind=="ncc"){int tw=p[14],th=p[15],ow=w-tw+1,oh=h-th+1;Buffer<unsigned char>tpl(read15(prefix+"/template.bin"));Buffer<float>out(ow*oh);size_t bytes=0;MB_CHECK(nppiValidNormLevelGetBufferHostSize_8u32f_C1R_Ctx(roi,&bytes,ctx));Buffer<unsigned char>scratch(bytes);MB_CHECK(nppiCrossCorrValid_NormLevel_8u32f_C1R_Ctx(src.p+ry*stride+rx,stride,roi,tpl.p,tw,NppiSize{tw,th},out.p,ow*4,scratch.p,ctx));MB_CHECK(cudaDeviceSynchronize());save15(id+"output",out.get());}
+ }std::cout<<"NATIVE_NPP_PASS"<<std::endl;return 0;}catch(const std::exception&e){std::cerr<<e.what()<<std::endl;return 1;}}

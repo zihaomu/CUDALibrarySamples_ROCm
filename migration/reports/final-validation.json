@@ -1,7 +1,7 @@
 {
   "status": "PASSED",
   "scope": "Consistency and proof integrity of the recorded execution outcomes; not a claim that failed/unimplemented samples were successfully migrated.",
-  "timestamp": "2026-11-10T04:54:58.361851+00:00",
+  "timestamp": "2026-11-10T05:51:31.942891+00:00",
   "checks": {
     "batches4_8_semantic_faults_rejected": 8,
     "batches4_8_samples": 26,
@@ -17,21 +17,29 @@
     "batches9_11_faults_rejected": 47,
     "batches9_11_runtime_checks": 23,
     "b9_cross_vendor_producers": 16,
+    "batches12_15_profiles": 20,
+    "batches12_15_complete_profiles": 9,
+    "batches12_15_partial_profiles": 11,
+    "batches12_15_cases": 120,
+    "batches12_15_faults_rejected": 53,
+    "batches12_15_runtime_guards": 10,
+    "batches12_15_native_vendor_attempts": 20,
+    "native_NPP_original_distance_images": 2,
     "unique_entrypoints": 639,
     "terminal_counts": {
-      "FAILED": 422,
-      "PASSED": 202,
-      "PARTIAL": 13,
+      "PASSED": 211,
+      "FAILED": 402,
+      "PARTIAL": 24,
       "UNSUPPORTED": 2
     },
     "families": 30,
-    "verified_operator_families": 102,
-    "modules_with_verified_operators": 10,
+    "verified_operator_families": 111,
+    "modules_with_verified_operators": 17,
     "upstream_sources_unchanged": 866,
     "upstream_build_definitions_unchanged": 477,
-    "current_qualified_proofs": 202,
+    "current_qualified_proofs": 211,
     "detail_pages": 639,
-    "generated_relative_links": 7096,
+    "generated_relative_links": 7195,
     "m1_samples": 16,
     "m1_required_cases": 95,
     "additional_comparisons": 54,
@@ -41,8 +49,8 @@
     "ctest_samples": 16,
     "performance_profiles": 6,
     "performance_qualification": "BLOCKED",
-    "source_files_sealed": 1186,
-    "source_tree_sha256": "bf64583b853e47cfd6cd714a4d4850b03b506e03e7b7471bd4c03f7e4a3f1a20",
+    "source_files_sealed": 1229,
+    "source_tree_sha256": "c9d7296f110b88515822ed0d05799cf06b00c4c1fb9191b59d0edd21accb135e",
     "batch3_samples": 8,
     "batch3_cases": 26,
     "batch3_corruptions_rejected": 24,
@@ -50,6 +58,54 @@
   },
   "errors": [],
   "qualified_implementations": {
+    "MathDx/cuBLASDx/01_gemm_introduction::introduction_example.cu": {
+      "implementation": "rocm/ported/MathDx/cuBLASDx/01_gemm_introduction/introduction_example.cu",
+      "sha256": "4838809205cb36c2645b77db45b3dabc52f20f92d179093d77c5affafc5f35ef",
+      "evidence": "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuBLASDx_01_gemm_introduction_introduction_example.cu",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
+    "MathDx/cuFFTDx/02_simple_fft_block::simple_fft_block.cu": {
+      "implementation": "rocm/ported/MathDx/cuFFTDx/02_simple_fft_block/simple_fft_block.cu",
+      "sha256": "4df2048a08cccbb735232aebb9c1c31c3297f83f05ddaf222d141805b83c6359",
+      "evidence": "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuFFTDx_02_simple_fft_block_simple_fft_block.cu",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
+    "MathDx/cuSolverDx/01_Linear_Solve::potrf_block.cu": {
+      "implementation": "rocm/ported/MathDx/cuSolverDx/01_Linear_Solve/potrf_block.cu",
+      "sha256": "14ecbfcbe293ee67cb99f43c1099519f60dcc2dd588ac8e234232310dd686f6d",
+      "evidence": "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuSolverDx_01_Linear_Solve_potrf_block.cu",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
+    "NPP/distanceTransform::distanceTransform.cpp": {
+      "implementation": "rocm/ported/NPP/distanceTransform/distanceTransform.cpp",
+      "sha256": "f877fd1daedb7edc5b8e191601fc054b94e3b4963fae9f97517e49393f1ce27e",
+      "evidence": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_distanceTransform_distanceTransform.cpp",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
     "cuBLAS/Extensions/AxpyEx::cublas_AxpyEx_example.cu": {
       "implementation": "rocm/ported/cuBLAS/Extensions/AxpyEx/cublas_AxpyEx_example.cu",
       "sha256": "e192fbd3a60c45b64da5515620ff514cea6cb657fb0906a422ecac49044136d7",
@@ -950,6 +1006,40 @@
         }
       ]
     },
+    "cuBLASMp::geadd.cu": {
+      "implementation": "rocm/ported/cuBLASMp/geadd.cu",
+      "sha256": "97dd19cd2cd2688911de7b4a25c83bd1f0a994c8f9c791689b3b2c49186a6f77",
+      "evidence": "migration/reports/evidence/20261110T052021.829140Z/batches12_15-rocm/cuBLASMp_geadd.cu",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        },
+        {
+          "logical_id": 1,
+          "pci_bdf": "0000:43:00.0",
+          "physical_id": 2
+        }
+      ]
+    },
+    "cuBLASMp::gemr2d.cu": {
+      "implementation": "rocm/ported/cuBLASMp/gemr2d.cu",
+      "sha256": "37a502e1a18c2f5b538f8f297cf8c86da518fe8e6e09f28aef578a81f48141bf",
+      "evidence": "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_gemr2d.cu",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        },
+        {
+          "logical_id": 1,
+          "pci_bdf": "0000:43:00.0",
+          "physical_id": 2
+        }
+      ]
+    },
     "cuDSS/fortran/simple::simple.f90": {
       "implementation": "rocm/cuDSS/fortran/simple/sample.f90",
       "sha256": "04a8d838e4fb81bc5c3221b81b5d758f85714c698729105232c128845b5d7a33",
@@ -1176,6 +1266,23 @@
           "logical_id": 0,
           "pci_bdf": "0000:e3:00.0",
           "physical_id": 7
+        }
+      ]
+    },
+    "cuFFTMp/samples/c2c::cufftmp_c2c.cu": {
+      "implementation": "rocm/ported/cuFFTMp/samples/c2c/cufftmp_c2c.cu",
+      "sha256": "cb8b7c782aeda13b68d08bd539f13c3fc2301d05408fcd61f46607bed75d224e",
+      "evidence": "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuFFTMp_samples_c2c_cufftmp_c2c.cu",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        },
+        {
+          "logical_id": 1,
+          "pci_bdf": "0000:43:00.0",
+          "physical_id": 2
         }
       ]
     },
@@ -1632,6 +1739,23 @@
           "logical_id": 0,
           "pci_bdf": "0000:03:00.0",
           "physical_id": 0
+        }
+      ]
+    },
+    "cuSOLVER/MgGetrf::cusolver_MgGetrf_example.cu": {
+      "implementation": "rocm/ported/cuSOLVER/MgGetrf/cusolver_MgGetrf_example.cu",
+      "sha256": "e8f466f1214b4eb91441c0a0957f9a982316bca01fe43d9f9b55de521b410fd0",
+      "evidence": "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        },
+        {
+          "logical_id": 1,
+          "pci_bdf": "0000:43:00.0",
+          "physical_id": 2
         }
       ]
     },
@@ -2424,6 +2548,23 @@
           "logical_id": 0,
           "pci_bdf": "0000:03:00.0",
           "physical_id": 0
+        }
+      ]
+    },
+    "cuTENSORMg::contraction_multi_gpu.cu": {
+      "implementation": "rocm/ported/cuTENSORMg/contraction_multi_gpu.cu",
+      "sha256": "16ab9abf40f16951dc70d92598f2eb7c3221ecf4caffe6a904f10486a5ed28c1",
+      "evidence": "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuTENSORMg_contraction_multi_gpu.cu",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        },
+        {
+          "logical_id": 1,
+          "pci_bdf": "0000:43:00.0",
+          "physical_id": 2
         }
       ]
     },

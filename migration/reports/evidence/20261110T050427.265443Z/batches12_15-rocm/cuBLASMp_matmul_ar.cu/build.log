@@ -1,0 +1,87 @@
+Warning: HIP version file: "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/share/hip/version" not found.  Cannot give HIP version information.
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASMp/matmul_ar.cu:18:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch12_dist.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch12_dist.hpp:41:127: note: in instantiation of member function 'migration_batch::Buffer<float>::~Buffer' requested here
+   41 | inline std::vector<float>gather12(Context&c,const std::vector<float>&local,const std::vector<int>&idx,int total){Buffer<float>l(local),masked(std::vector<float>(total,0)),all(total);Buffer<int>ix(idx);if(!idx.empty()){scatter12<<<(idx.size()+255)/256,256>>>(l.p,ix.p,masked.p,idx.size());++c.kernels;}c.sum(masked.p,all.p,total);return all.get();}
+      |                                                                                                                               ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASMp/matmul_ar.cu:18:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch12_dist.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch12_dist.hpp:41:194: note: in instantiation of member function 'migration_batch::Buffer<int>::~Buffer' requested here
+   41 | inline std::vector<float>gather12(Context&c,const std::vector<float>&local,const std::vector<int>&idx,int total){Buffer<float>l(local),masked(std::vector<float>(total,0)),all(total);Buffer<int>ix(idx);if(!idx.empty()){scatter12<<<(idx.size()+255)/256,256>>>(l.p,ix.p,masked.p,idx.size());++c.kernels;}c.sum(masked.p,all.p,total);return all.get();}
+      |                                                                                                                                                                                                  ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASMp/matmul_ar.cu:18:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch12_dist.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch12_dist.hpp:44:289: note: in instantiation of member function 'migration_batch::Buffer<__half>::~Buffer' requested here
+   44 |  else {std::vector<float>ha(size_t(m)*k),hb(size_t(k)*n);MB_CHECK(MB_RT(Memcpy)(ha.data(),a,ha.size()*4,MB_RT(MemcpyDeviceToHost)));MB_CHECK(MB_RT(Memcpy)(hb.data(),b,hb.size()*4,MB_RT(MemcpyDeviceToHost)));std::vector<__half>ah(ha.begin(),ha.end()),bh(hb.begin(),hb.end());Buffer<__half>aa(ah),bb(bh);MB_CHECK(MB_BLAS(GemmEx)(h.h,MB_CONST(OP_N),MB_CONST(OP_N),m,n,k,&alpha,aa.p,D12_F16,m,bb.p,D12_F16,k,&beta,out,D12_F32,m,D12_COMPUTE,MB_CONST(GEMM_DEFAULT)));}
+      |                                                                                                                                                                                                                                                                                                 ^
+3 warnings generated when compiling for gfx1201.
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASMp/matmul_ar.cu:18:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch12_dist.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:230:1: note: expanded from here
+  230 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch12_dist.hpp:41:127: note: in instantiation of member function 'migration_batch::Buffer<float>::~Buffer' requested here
+   41 | inline std::vector<float>gather12(Context&c,const std::vector<float>&local,const std::vector<int>&idx,int total){Buffer<float>l(local),masked(std::vector<float>(total,0)),all(total);Buffer<int>ix(idx);if(!idx.empty()){scatter12<<<(idx.size()+255)/256,256>>>(l.p,ix.p,masked.p,idx.size());++c.kernels;}c.sum(masked.p,all.p,total);return all.get();}
+      |                                                                                                                               ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASMp/matmul_ar.cu:18:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch12_dist.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:230:1: note: expanded from here
+  230 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch12_dist.hpp:41:194: note: in instantiation of member function 'migration_batch::Buffer<int>::~Buffer' requested here
+   41 | inline std::vector<float>gather12(Context&c,const std::vector<float>&local,const std::vector<int>&idx,int total){Buffer<float>l(local),masked(std::vector<float>(total,0)),all(total);Buffer<int>ix(idx);if(!idx.empty()){scatter12<<<(idx.size()+255)/256,256>>>(l.p,ix.p,masked.p,idx.size());++c.kernels;}c.sum(masked.p,all.p,total);return all.get();}
+      |                                                                                                                                                                                                  ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASMp/matmul_ar.cu:18:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch12_dist.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:230:1: note: expanded from here
+  230 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch12_dist.hpp:44:289: note: in instantiation of member function 'migration_batch::Buffer<__half>::~Buffer' requested here
+   44 |  else {std::vector<float>ha(size_t(m)*k),hb(size_t(k)*n);MB_CHECK(MB_RT(Memcpy)(ha.data(),a,ha.size()*4,MB_RT(MemcpyDeviceToHost)));MB_CHECK(MB_RT(Memcpy)(hb.data(),b,hb.size()*4,MB_RT(MemcpyDeviceToHost)));std::vector<__half>ah(ha.begin(),ha.end()),bh(hb.begin(),hb.end());Buffer<__half>aa(ah),bb(bh);MB_CHECK(MB_BLAS(GemmEx)(h.h,MB_CONST(OP_N),MB_CONST(OP_N),m,n,k,&alpha,aa.p,D12_F16,m,bb.p,D12_F16,k,&beta,out,D12_F32,m,D12_COMPUTE,MB_CONST(GEMM_DEFAULT)));}
+      |                                                                                                                                                                                                                                                                                                 ^
+3 warnings generated when compiling for host.

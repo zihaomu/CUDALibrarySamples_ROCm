@@ -1,0 +1,39 @@
+{
+  "build": [
+    "/usr/local/cuda-13.4/bin/nvcc",
+    "-std=c++17",
+    "-O2",
+    "-x",
+    "cu",
+    "-arch=sm_120",
+    "/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/MathDx/cuFFTDx/02_simple_fft_block/simple_fft_block.cu",
+    "-o",
+    "/home/zihaomu/cuda_samples_on_rocm_compare/artifacts/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuFFTDx_02_simple_fft_block_simple_fft_block.cu/sample",
+    "-Xcompiler=-pthread",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/MathDx/cuFFTDx/02_simple_fft_block",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/rocm/common",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/build/mpi/include",
+    "-I/usr/local/cuda-13.4/include",
+    "-I/usr/include",
+    "-L/home/zihaomu/cuda_samples_on_rocm_compare/build/mpi/lib",
+    "-L/usr/local/cuda-13.4/lib64",
+    "-L/usr/lib/x86_64-linux-gnu",
+    "-Xlinker=-rpath=/home/zihaomu/cuda_samples_on_rocm_compare/build/mpi/lib",
+    "-Xlinker=-rpath=/usr/local/cuda-13.4/lib64",
+    "-Xlinker=-rpath=/usr/lib/x86_64-linux-gnu",
+    "-lmpi",
+    "-lcublas",
+    "-lnccl",
+    "-lcufft",
+    "-lcurand"
+  ],
+  "cwd": "/home/zihaomu/cuda_samples_on_rocm_compare",
+  "cases": [
+    "original",
+    "irregular",
+    "changed-values",
+    "boundary",
+    "repeat",
+    "singular-or-empty"
+  ]
+}

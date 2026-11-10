@@ -1,0 +1,143 @@
+Warning: HIP version file: "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/share/hip/version" not found.  Cannot give HIP version information.
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/NPP/distanceTransform/distanceTransform.cpp:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch15_image.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch15_image.hpp:33:1342: note: in instantiation of member function 'migration_batch::Buffer<unsigned char>::~Buffer' requested here
+   33 | inline int main15(const std::string&kind){try{auto cas=selected_case();std::string base="build/batch15-fixtures/"+kind+"/"+cas;std::ifstream count_file(base+"/count.txt");int count=0;if(!(count_file>>count))throw std::runtime_error("fixtures absent");std::vector<int>trace;for(int image=0;image<count;++image){std::string prefix=base+"/"+std::to_string(image),id="i"+std::to_string(image)+"_";std::ifstream params(prefix+"/params.txt");std::vector<int>p(18);for(auto&v:p)if(!(params>>v))throw std::runtime_error("invalid params");int width=p[0],height=p[1],channels=p[2],stride=p[3],rx=p[4],ry=p[5],w=p[6],h=p[7],n=w*h;if(width<=0||height<=0||width>8192||height>8192||!(channels==1||channels==3)||stride<width*channels||rx<0||ry<0||w<=0||h<=0||w>width||h>height||rx>width-w||ry>height-h)throw std::runtime_error("invalid image/ROI/stride descriptor");if(kind=="flood"&&(p[11]<0||p[12]<0||p[11]>=w||p[12]>=h))throw std::runtime_error("invalid seed");if(kind=="ncc"&&(p[14]<=0||p[15]<=0||p[14]>w||p[15]>h))throw std::runtime_error("invalid template dimensions");if(kind=="canny"&&(p[8]<0||p[9]<p[8]))throw std::runtime_error("invalid thresholds");auto input=read15(prefix+"/input.bin");if(input.size()!=size_t(stride)*height)throw std::runtime_error("input length mismatch");save15(id+"input",input);save15(id+"params",p);Buffer<unsigned char>src(input);int launches=0,iterations=0,repeat=cas=="repeat"?3:1;
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/NPP/distanceTransform/distanceTransform.cpp:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch15_image.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch15_image.hpp:34:34: note: in instantiation of member function 'migration_batch::Buffer<int>::~Buffer' requested here
+   34 |  if(kind=="distance"){Buffer<int>rows(n),sites(n);Buffer<float>out(n);Buffer<unsigned short>truncated(n);Buffer<short>voronoi(n*2);for(int rep=0;rep<repeat;++rep){distance_row15<<<(n+255)/256,256>>>(src.p,rows.p,sites.p,w,h,stride,rx,ry);distance_col15<<<(n+255)/256,256>>>(rows.p,sites.p,out.p,truncated.p,voronoi.p,w,h);launches+=2;}MB_CHECK(MB_RT(DeviceSynchronize)());save15(id+"output",out.get());save15(id+"truncated",truncated.get());save15(id+"voronoi",voronoi.get());}
+      |                                  ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/NPP/distanceTransform/distanceTransform.cpp:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch15_image.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch15_image.hpp:34:64: note: in instantiation of member function 'migration_batch::Buffer<float>::~Buffer' requested here
+   34 |  if(kind=="distance"){Buffer<int>rows(n),sites(n);Buffer<float>out(n);Buffer<unsigned short>truncated(n);Buffer<short>voronoi(n*2);for(int rep=0;rep<repeat;++rep){distance_row15<<<(n+255)/256,256>>>(src.p,rows.p,sites.p,w,h,stride,rx,ry);distance_col15<<<(n+255)/256,256>>>(rows.p,sites.p,out.p,truncated.p,voronoi.p,w,h);launches+=2;}MB_CHECK(MB_RT(DeviceSynchronize)());save15(id+"output",out.get());save15(id+"truncated",truncated.get());save15(id+"voronoi",voronoi.get());}
+      |                                                                ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/NPP/distanceTransform/distanceTransform.cpp:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch15_image.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch15_image.hpp:34:93: note: in instantiation of member function 'migration_batch::Buffer<unsigned short>::~Buffer' requested here
+   34 |  if(kind=="distance"){Buffer<int>rows(n),sites(n);Buffer<float>out(n);Buffer<unsigned short>truncated(n);Buffer<short>voronoi(n*2);for(int rep=0;rep<repeat;++rep){distance_row15<<<(n+255)/256,256>>>(src.p,rows.p,sites.p,w,h,stride,rx,ry);distance_col15<<<(n+255)/256,256>>>(rows.p,sites.p,out.p,truncated.p,voronoi.p,w,h);launches+=2;}MB_CHECK(MB_RT(DeviceSynchronize)());save15(id+"output",out.get());save15(id+"truncated",truncated.get());save15(id+"voronoi",voronoi.get());}
+      |                                                                                             ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/NPP/distanceTransform/distanceTransform.cpp:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch15_image.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch15_image.hpp:34:119: note: in instantiation of member function 'migration_batch::Buffer<short>::~Buffer' requested here
+   34 |  if(kind=="distance"){Buffer<int>rows(n),sites(n);Buffer<float>out(n);Buffer<unsigned short>truncated(n);Buffer<short>voronoi(n*2);for(int rep=0;rep<repeat;++rep){distance_row15<<<(n+255)/256,256>>>(src.p,rows.p,sites.p,w,h,stride,rx,ry);distance_col15<<<(n+255)/256,256>>>(rows.p,sites.p,out.p,truncated.p,voronoi.p,w,h);launches+=2;}MB_CHECK(MB_RT(DeviceSynchronize)());save15(id+"output",out.get());save15(id+"truncated",truncated.get());save15(id+"voronoi",voronoi.get());}
+      |                                                                                                                       ^
+5 warnings generated when compiling for gfx1201.
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/NPP/distanceTransform/distanceTransform.cpp:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch15_image.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:230:1: note: expanded from here
+  230 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch15_image.hpp:33:1342: note: in instantiation of member function 'migration_batch::Buffer<unsigned char>::~Buffer' requested here
+   33 | inline int main15(const std::string&kind){try{auto cas=selected_case();std::string base="build/batch15-fixtures/"+kind+"/"+cas;std::ifstream count_file(base+"/count.txt");int count=0;if(!(count_file>>count))throw std::runtime_error("fixtures absent");std::vector<int>trace;for(int image=0;image<count;++image){std::string prefix=base+"/"+std::to_string(image),id="i"+std::to_string(image)+"_";std::ifstream params(prefix+"/params.txt");std::vector<int>p(18);for(auto&v:p)if(!(params>>v))throw std::runtime_error("invalid params");int width=p[0],height=p[1],channels=p[2],stride=p[3],rx=p[4],ry=p[5],w=p[6],h=p[7],n=w*h;if(width<=0||height<=0||width>8192||height>8192||!(channels==1||channels==3)||stride<width*channels||rx<0||ry<0||w<=0||h<=0||w>width||h>height||rx>width-w||ry>height-h)throw std::runtime_error("invalid image/ROI/stride descriptor");if(kind=="flood"&&(p[11]<0||p[12]<0||p[11]>=w||p[12]>=h))throw std::runtime_error("invalid seed");if(kind=="ncc"&&(p[14]<=0||p[15]<=0||p[14]>w||p[15]>h))throw std::runtime_error("invalid template dimensions");if(kind=="canny"&&(p[8]<0||p[9]<p[8]))throw std::runtime_error("invalid thresholds");auto input=read15(prefix+"/input.bin");if(input.size()!=size_t(stride)*height)throw std::runtime_error("input length mismatch");save15(id+"input",input);save15(id+"params",p);Buffer<unsigned char>src(input);int launches=0,iterations=0,repeat=cas=="repeat"?3:1;
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/NPP/distanceTransform/distanceTransform.cpp:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch15_image.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:230:1: note: expanded from here
+  230 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch15_image.hpp:34:34: note: in instantiation of member function 'migration_batch::Buffer<int>::~Buffer' requested here
+   34 |  if(kind=="distance"){Buffer<int>rows(n),sites(n);Buffer<float>out(n);Buffer<unsigned short>truncated(n);Buffer<short>voronoi(n*2);for(int rep=0;rep<repeat;++rep){distance_row15<<<(n+255)/256,256>>>(src.p,rows.p,sites.p,w,h,stride,rx,ry);distance_col15<<<(n+255)/256,256>>>(rows.p,sites.p,out.p,truncated.p,voronoi.p,w,h);launches+=2;}MB_CHECK(MB_RT(DeviceSynchronize)());save15(id+"output",out.get());save15(id+"truncated",truncated.get());save15(id+"voronoi",voronoi.get());}
+      |                                  ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/NPP/distanceTransform/distanceTransform.cpp:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch15_image.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:230:1: note: expanded from here
+  230 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch15_image.hpp:34:64: note: in instantiation of member function 'migration_batch::Buffer<float>::~Buffer' requested here
+   34 |  if(kind=="distance"){Buffer<int>rows(n),sites(n);Buffer<float>out(n);Buffer<unsigned short>truncated(n);Buffer<short>voronoi(n*2);for(int rep=0;rep<repeat;++rep){distance_row15<<<(n+255)/256,256>>>(src.p,rows.p,sites.p,w,h,stride,rx,ry);distance_col15<<<(n+255)/256,256>>>(rows.p,sites.p,out.p,truncated.p,voronoi.p,w,h);launches+=2;}MB_CHECK(MB_RT(DeviceSynchronize)());save15(id+"output",out.get());save15(id+"truncated",truncated.get());save15(id+"voronoi",voronoi.get());}
+      |                                                                ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/NPP/distanceTransform/distanceTransform.cpp:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch15_image.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:230:1: note: expanded from here
+  230 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch15_image.hpp:34:93: note: in instantiation of member function 'migration_batch::Buffer<unsigned short>::~Buffer' requested here
+   34 |  if(kind=="distance"){Buffer<int>rows(n),sites(n);Buffer<float>out(n);Buffer<unsigned short>truncated(n);Buffer<short>voronoi(n*2);for(int rep=0;rep<repeat;++rep){distance_row15<<<(n+255)/256,256>>>(src.p,rows.p,sites.p,w,h,stride,rx,ry);distance_col15<<<(n+255)/256,256>>>(rows.p,sites.p,out.p,truncated.p,voronoi.p,w,h);launches+=2;}MB_CHECK(MB_RT(DeviceSynchronize)());save15(id+"output",out.get());save15(id+"truncated",truncated.get());save15(id+"voronoi",voronoi.get());}
+      |                                                                                             ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/NPP/distanceTransform/distanceTransform.cpp:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch15_image.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:230:1: note: expanded from here
+  230 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch15_image.hpp:34:119: note: in instantiation of member function 'migration_batch::Buffer<short>::~Buffer' requested here
+   34 |  if(kind=="distance"){Buffer<int>rows(n),sites(n);Buffer<float>out(n);Buffer<unsigned short>truncated(n);Buffer<short>voronoi(n*2);for(int rep=0;rep<repeat;++rep){distance_row15<<<(n+255)/256,256>>>(src.p,rows.p,sites.p,w,h,stride,rx,ry);distance_col15<<<(n+255)/256,256>>>(rows.p,sites.p,out.p,truncated.p,voronoi.p,w,h);launches+=2;}MB_CHECK(MB_RT(DeviceSynchronize)());save15(id+"output",out.get());save15(id+"truncated",truncated.get());save15(id+"voronoi",voronoi.get());}
+      |                                                                                                                       ^
+5 warnings generated when compiling for host.

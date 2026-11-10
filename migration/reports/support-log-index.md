@@ -1,6 +1,6 @@
 # 样例支持方式与详细日志总表
 
-覆盖 **639 个样例入口**：202 PASSED、13 PARTIAL、422 FAILED、2 UNSUPPORTED、0 BLOCKED。全部 30 个模块逐项列出实现方式、范围/原因、AMD 日志、CUDA 日志与验收报告。数据直接来自 [逐例清单](../samples.yaml)，[JSON 索引](support-log-index.json) 另含全部历史证据路径、源码 SHA256、已通过/必需用例及恢复条件。
+覆盖 **639 个样例入口**：211 PASSED、24 PARTIAL、402 FAILED、2 UNSUPPORTED、0 BLOCKED。全部 30 个模块逐项列出实现方式、范围/原因、AMD 日志、CUDA 日志与验收报告。数据直接来自 [逐例清单](../samples.yaml)，[JSON 索引](support-log-index.json) 另含全部历史证据路径、源码 SHA256、已通过/必需用例及恢复条件。
 
 **查阅方式：** 先看状态和“支持范围/失败原因”，再看实际库与实现源码。AMD 栏优先链接与当前源码 hash 匹配的选定验收日志；未通过项链接实际尝试。`build.log` 是编译/链接记录，`run.log` 是程序输出，`<case>/run.log` 是对应输入的输出。命令与环境位于同目录的 `commands.json` 和 `*.environment.json`，从“证据目录”进入。缺少运行日志时会明确标注，不将编译/import 成功视作 GPU 通过。
 
@@ -132,12 +132,12 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 
 | 样例 / 详情 | 状态 / 用例 | 实际库与实现方式 | 详细日志与范围 |
 | --- | --- | --- | --- |
-| [geadd.cu](../sample-reports/cuBLASMp/geadd.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLASMp.md#sample-f716d108f6e8) |
-| [gemm.cu](../sample-reports/cuBLASMp/gemm.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLASMp.md#sample-617eb8884d08) |
-| [gemr2d.cu](../sample-reports/cuBLASMp/gemr2d.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLASMp.md#sample-5fecb0dc9913) |
-| [matmul_ag.cu](../sample-reports/cuBLASMp/matmul_ag.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLASMp.md#sample-250830c05814) |
-| [matmul_ar.cu](../sample-reports/cuBLASMp/matmul_ar.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLASMp.md#sample-5acd6c625cbe) |
-| [matmul_rs.cu](../sample-reports/cuBLASMp/matmul_rs.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLASMp.md#sample-7dce0307d2f3) |
+| [geadd.cu](../sample-reports/cuBLASMp/geadd.cu.md) | PASSED / 6/6 | MPI + RCCL AllReduce + HIP FP64 block-cyclic GEADD / MPI + RCCL AllReduce + HIP FP64 block-cyclic GEADD；库 API 迁移 + 执行语义适配 | [日志、范围、源码](support-log-index/cuBLASMp.md#sample-f716d108f6e8) |
+| [gemr2d.cu](../sample-reports/cuBLASMp/gemr2d.cu.md) | PASSED / 6/6 | MPI + RCCL AllReduce + HIP block-cyclic redistribution/roundtrip / MPI + RCCL AllReduce + HIP block-cyclic redistribution/roundtrip；库 API 迁移 + 执行语义适配 | [日志、范围、源码](support-log-index/cuBLASMp.md#sample-5fecb0dc9913) |
+| [gemm.cu](../sample-reports/cuBLASMp/gemm.cu.md) | PARTIAL / 6/7 | MPI + RCCL distribution + hipBLAS FP32 local GEMM / MPI + RCCL distribution + hipBLAS FP32 local GEMM；库 API 迁移 + 执行语义适配 | [日志、范围、源码](support-log-index/cuBLASMp.md#sample-617eb8884d08) |
+| [matmul_ag.cu](../sample-reports/cuBLASMp/matmul_ag.cu.md) | PARTIAL / 6/7 | MPI + RCCL AllGather + hipBLAS GemmEx FP16 inputs/FP32 accumulation + HIP FP16 quantization / MPI + RCCL AllGather + hipBLAS GemmEx FP16 inputs/FP32 accumulation + HIP FP16 quantization；库 API 迁移 + 执行语义适配 | [日志、范围、源码](support-log-index/cuBLASMp.md#sample-250830c05814) |
+| [matmul_ar.cu](../sample-reports/cuBLASMp/matmul_ar.cu.md) | PARTIAL / 6/7 | MPI + RCCL AllReduce + hipBLAS GemmEx FP16 inputs/FP32 accumulation + HIP FP16 quantization / MPI + RCCL AllReduce + hipBLAS GemmEx FP16 inputs/FP32 accumulation + HIP FP16 quantization；库 API 迁移 + 执行语义适配 | [日志、范围、源码](support-log-index/cuBLASMp.md#sample-5acd6c625cbe) |
+| [matmul_rs.cu](../sample-reports/cuBLASMp/matmul_rs.cu.md) | PARTIAL / 6/7 | MPI + RCCL ReduceScatter + hipBLAS GemmEx FP16 inputs/FP32 accumulation + HIP FP16 quantization / MPI + RCCL ReduceScatter + hipBLAS GemmEx FP16 inputs/FP32 accumulation + HIP FP16 quantization；库 API 迁移 + 执行语义适配 | [日志、范围、源码](support-log-index/cuBLASMp.md#sample-7dce0307d2f3) |
 | [symm.cu](../sample-reports/cuBLASMp/symm.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLASMp.md#sample-9114e43283a3) |
 | [syr2k.cu](../sample-reports/cuBLASMp/syr2k.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLASMp.md#sample-2af77476003c) |
 | [syrk.cu](../sample-reports/cuBLASMp/syrk.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLASMp.md#sample-9f63af00cccc) |
@@ -294,6 +294,7 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 
 | 样例 / 详情 | 状态 / 用例 | 实际库与实现方式 | 详细日志与范围 |
 | --- | --- | --- | --- |
+| [samples/c2c/cufftmp_c2c.cu](../sample-reports/cuFFTMp/samples/c2c/cufftmp_c2c.cu.md) | PASSED / 6/6 | MPI + hipFFT local YZ/X FFT + RCCL Send/Recv + HIP slab transpose/scale / MPI + hipFFT local YZ/X FFT + RCCL Send/Recv + HIP slab transpose/scale；库 API 迁移 + 执行语义适配 | [日志、范围、源码](support-log-index/cuFFTMp.md#sample-a55d8e4231ee) |
 | [Fortran_samples/c2c/cufftmp_c2c.f90](../sample-reports/cuFFTMp/Fortran_samples/c2c/cufftmp_c2c.f90.md) | FAILED / 0/2 | 尚无已验证使用库；语言绑定尚未实现 | [日志、范围、源码](support-log-index/cuFFTMp.md#sample-cbc2a469a53d) |
 | [Fortran_samples/c2c_no_descriptors/cufftmp_c2c_no_descriptors.f90](../sample-reports/cuFFTMp/Fortran_samples/c2c_no_descriptors/cufftmp_c2c_no_descriptors.f90.md) | FAILED / 0/2 | 尚无已验证使用库；语言绑定尚未实现 | [日志、范围、源码](support-log-index/cuFFTMp.md#sample-16624924b798) |
 | [Fortran_samples/c2c_pencils/cufftmp_c2c_pencils.f90](../sample-reports/cuFFTMp/Fortran_samples/c2c_pencils/cufftmp_c2c_pencils.f90.md) | FAILED / 0/2 | 尚无已验证使用库；语言绑定尚未实现 | [日志、范围、源码](support-log-index/cuFFTMp.md#sample-75cd2963b7f2) |
@@ -303,7 +304,6 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 | [Fortran_samples/r2c_c2r_shared_scratch/cufftmp_r2c_workarea.f90](../sample-reports/cuFFTMp/Fortran_samples/r2c_c2r_shared_scratch/cufftmp_r2c_workarea.f90.md) | FAILED / 0/2 | 尚无已验证使用库；语言绑定尚未实现 | [日志、范围、源码](support-log-index/cuFFTMp.md#sample-71f5fec6bdfd) |
 | [Fortran_samples/reshape/cufftmp_reshape.f90](../sample-reports/cuFFTMp/Fortran_samples/reshape/cufftmp_reshape.f90.md) | FAILED / 0/2 | 尚无已验证使用库；语言绑定尚未实现 | [日志、范围、源码](support-log-index/cuFFTMp.md#sample-5fd6a55b1315) |
 | [JAX_FFT/tests/fft_test.py](../sample-reports/cuFFTMp/JAX_FFT/tests/fft_test.py.md) | FAILED / 0/2 | 尚无已验证使用库；语言绑定尚未实现 | [日志、范围、源码](support-log-index/cuFFTMp.md#sample-4bb57c79c646) |
-| [samples/c2c/cufftmp_c2c.cu](../sample-reports/cuFFTMp/samples/c2c/cufftmp_c2c.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuFFTMp.md#sample-a55d8e4231ee) |
 | [samples/c2c_no_descriptors/cufftmp_c2c_no_descriptors.cu](../sample-reports/cuFFTMp/samples/c2c_no_descriptors/cufftmp_c2c_no_descriptors.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuFFTMp.md#sample-fc90f40c8b00) |
 | [samples/c2c_no_descriptors_cufftMpMakePlan/cufftmp_c2c_no_descriptors_cufftMpMakePlan.cu](../sample-reports/cuFFTMp/samples/c2c_no_descriptors_cufftMpMakePlan/cufftmp_c2c_no_descriptors_cufftMpMakePlan.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuFFTMp.md#sample-a3642dfe720f) |
 | [samples/c2c_pencils/cufftmp_c2c_pencils.cu](../sample-reports/cuFFTMp/samples/c2c_pencils/cufftmp_c2c_pencils.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuFFTMp.md#sample-ebbdcbecdbc5) |
@@ -377,6 +377,7 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 
 | 样例 / 详情 | 状态 / 用例 | 实际库与实现方式 | 详细日志与范围 |
 | --- | --- | --- | --- |
+| [MgGetrf/cusolver_MgGetrf_example.cu](../sample-reports/cuSOLVER/MgGetrf/cusolver_MgGetrf_example.cu.md) | PASSED / 6/6 | HIP multi-device pivot LU/solve + RCCL broadcast/AllReduce; single process with two GPU threads / HIP multi-device pivot LU/solve + RCCL broadcast/AllReduce; single process with two GPU threads；库 API 迁移 + 执行语义适配 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-59479cba1451) |
 | [Xgeqrf/cusolver_Xgeqrf_example.cu](../sample-reports/cuSOLVER/Xgeqrf/cusolver_Xgeqrf_example.cu.md) | PASSED / 1/1 | hipSOLVER + hipBLAS / rocSOLVER/rocBLAS；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-68f8ec5cd2db) |
 | [Xgesvd/cusolver_Xgesvd_example.cu](../sample-reports/cuSOLVER/Xgesvd/cusolver_Xgesvd_example.cu.md) | PASSED / 3/3 | rocSOLVER dgesvd + checked dimension bridge / rocSOLVER；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-a8cf7c4caf76) |
 | [Xgetrf/cusolver_Xgetrf_example.cu](../sample-reports/cuSOLVER/Xgetrf/cusolver_Xgetrf_example.cu.md) | PASSED / 4/4 | rocSOLVER ILP64 / rocSOLVER；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-f21f3e2bc8c3) |
@@ -398,12 +399,11 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 | [sygvd/cusolver_sygvd_example.cu](../sample-reports/cuSOLVER/sygvd/cusolver_sygvd_example.cu.md) | PASSED / 3/3 | hipSOLVER + hipBLAS / rocSOLVER/rocBLAS；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-6fdf8f2795d6) |
 | [sygvdx/cusolver_sygvdx_example.cu](../sample-reports/cuSOLVER/sygvdx/cusolver_sygvdx_example.cu.md) | PASSED / 4/4 | hipSOLVER / rocSOLVER/rocBLAS；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-4fe2b2bfcf2b) |
 | [sygvj/cusolver_sygvj_example.cu](../sample-reports/cuSOLVER/sygvj/cusolver_sygvj_example.cu.md) | PASSED / 3/3 | hipSOLVER + hipBLAS / rocSOLVER/rocBLAS；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-4e30a6c5a93d) |
+| [MgPotrf/cusolver_MgPotrf_example1.cu](../sample-reports/cuSOLVER/MgPotrf/cusolver_MgPotrf_example1.cu.md) | PARTIAL / 6/7 | HIP multi-device Cholesky/solve + RCCL broadcast/AllReduce; single process with two GPU threads / HIP multi-device Cholesky/solve + RCCL broadcast/AllReduce; single process with two GPU threads；库 API 迁移 + 执行语义适配 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-f1d624cfda5f) |
 | [Xgeev/cusolver_Xgeev_example1.cu](../sample-reports/cuSOLVER/Xgeev/cusolver_Xgeev_example1.cu.md) | PARTIAL / 1/3 | hipsolver / rocSOLVER；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-695c063397de) |
 | [Xgeev/cusolver_Xgeev_example2.cu](../sample-reports/cuSOLVER/Xgeev/cusolver_Xgeev_example2.cu.md) | PARTIAL / 1/3 | hipsolver / rocSOLVER；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-1fe56daf1bd7) |
 | [Xgeev/cusolver_Xgeev_example3.cu](../sample-reports/cuSOLVER/Xgeev/cusolver_Xgeev_example3.cu.md) | PARTIAL / 1/3 | hipsolver / rocSOLVER；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-9602fa21ffdb) |
 | [gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu](../sample-reports/cuSOLVER/gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu.md) | PARTIAL / 1/3 | hipsolver / rocSOLVER；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-c717ad5ad665) |
-| [MgGetrf/cusolver_MgGetrf_example.cu](../sample-reports/cuSOLVER/MgGetrf/cusolver_MgGetrf_example.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-59479cba1451) |
-| [MgPotrf/cusolver_MgPotrf_example1.cu](../sample-reports/cuSOLVER/MgPotrf/cusolver_MgPotrf_example1.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-f1d624cfda5f) |
 | [MgPotrf/cusolver_MgPotrf_example2.cu](../sample-reports/cuSOLVER/MgPotrf/cusolver_MgPotrf_example2.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-59f2f1325b54) |
 | [MgSyevd/cusolver_MgSyevd_example1.cu](../sample-reports/cuSOLVER/MgSyevd/cusolver_MgSyevd_example1.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-e6fe5059759e) |
 | [MgSyevd/cusolver_MgSyevd_example2.cu](../sample-reports/cuSOLVER/MgSyevd/cusolver_MgSyevd_example2.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-0ebd46d9a63d) |
@@ -423,16 +423,16 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 
 | 样例 / 详情 | 状态 / 用例 | 实际库与实现方式 | 详细日志与范围 |
 | --- | --- | --- | --- |
+| [mp_getrf_getrs.c](../sample-reports/cuSOLVERMp/mp_getrf_getrs.c.md) | PARTIAL / 6/7 | MPI + RCCL + HIP column-distributed partial-row-pivot LU/solve / MPI + RCCL + HIP column-distributed partial-row-pivot LU/solve；库 API 迁移 + 执行语义适配 | [日志、范围、源码](support-log-index/cuSOLVERMp.md#sample-eb7f57261b5a) |
+| [mp_potrf_potrs.c](../sample-reports/cuSOLVERMp/mp_potrf_potrs.c.md) | PARTIAL / 6/7 | MPI + RCCL + HIP distributed column Cholesky/solve / MPI + RCCL + HIP distributed column Cholesky/solve；库 API 迁移 + 执行语义适配 | [日志、范围、源码](support-log-index/cuSOLVERMp.md#sample-a678fa558997) |
 | [mp_gels.c](../sample-reports/cuSOLVERMp/mp_gels.c.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVERMp.md#sample-bf9374632fcb) |
 | [mp_geqrf.c](../sample-reports/cuSOLVERMp/mp_geqrf.c.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVERMp.md#sample-a1f07106cb41) |
 | [mp_geqrf_orgqr.c](../sample-reports/cuSOLVERMp/mp_geqrf_orgqr.c.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVERMp.md#sample-dc01537ee369) |
 | [mp_gesvd.c](../sample-reports/cuSOLVERMp/mp_gesvd.c.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVERMp.md#sample-0c5f1a6e102d) |
-| [mp_getrf_getrs.c](../sample-reports/cuSOLVERMp/mp_getrf_getrs.c.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVERMp.md#sample-eb7f57261b5a) |
 | [mp_laset.c](../sample-reports/cuSOLVERMp/mp_laset.c.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVERMp.md#sample-c476e0541dfe) |
 | [mp_newton_schulz.cpp](../sample-reports/cuSOLVERMp/mp_newton_schulz.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVERMp.md#sample-c5757bec6a74) |
 | [mp_ormqr.c](../sample-reports/cuSOLVERMp/mp_ormqr.c.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVERMp.md#sample-dbdeaf677ce7) |
 | [mp_polar.c](../sample-reports/cuSOLVERMp/mp_polar.c.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVERMp.md#sample-c4b80b4030ec) |
-| [mp_potrf_potrs.c](../sample-reports/cuSOLVERMp/mp_potrf_potrs.c.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVERMp.md#sample-a678fa558997) |
 | [mp_potrf_potrs_fp32.c](../sample-reports/cuSOLVERMp/mp_potrf_potrs_fp32.c.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVERMp.md#sample-fc6b698ecd98) |
 | [mp_potrf_potrs_fp32emulation.c](../sample-reports/cuSOLVERMp/mp_potrf_potrs_fp32emulation.c.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVERMp.md#sample-42c3786130c5) |
 | [mp_syevd.c](../sample-reports/cuSOLVERMp/mp_syevd.c.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVERMp.md#sample-4b6281b3308b) |
@@ -533,8 +533,8 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 
 | 样例 / 详情 | 状态 / 用例 | 实际库与实现方式 | 详细日志与范围 |
 | --- | --- | --- | --- |
+| [contraction_multi_gpu.cu](../sample-reports/cuTENSORMg/contraction_multi_gpu.cu.md) | PASSED / 6/6 | hipBLAS FP32 partitioned contraction + RCCL AllGather; single process with two GPU threads / hipBLAS FP32 partitioned contraction + RCCL AllGather; single process with two GPU threads；库 API 迁移 + 执行语义适配 | [日志、范围、源码](support-log-index/cuTENSORMg.md#sample-a4fc3e244077) |
 | [blog_post.cu](../sample-reports/cuTENSORMg/blog_post.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuTENSORMg.md#sample-b2e8a353479c) |
-| [contraction_multi_gpu.cu](../sample-reports/cuTENSORMg/contraction_multi_gpu.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuTENSORMg.md#sample-a4fc3e244077) |
 
 <a id="module-16"></a>
 
@@ -552,7 +552,7 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 
 | 样例 / 详情 | 状态 / 用例 | 实际库与实现方式 | 详细日志与范围 |
 | --- | --- | --- | --- |
-| [01_gemm_introduction/introduction_example.cu](../sample-reports/MathDx/cuBLASDx/01_gemm_introduction/introduction_example.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuBLASDx.md#sample-855cf663094c) |
+| [01_gemm_introduction/introduction_example.cu](../sample-reports/MathDx/cuBLASDx/01_gemm_introduction/introduction_example.cu.md) | PASSED / 6/6 | HIP cooperative device FP64 GEMM (shared, register-accumulate, register-store phases) / HIP cooperative device FP64 GEMM (shared, register-accumulate, register-store phases)；库 API 迁移 + 执行语义适配 | [日志、范围、源码](support-log-index/MathDx__cuBLASDx.md#sample-855cf663094c) |
 | [01_gemm_introduction/introduction_pipeline.cu](../sample-reports/MathDx/cuBLASDx/01_gemm_introduction/introduction_pipeline.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuBLASDx.md#sample-bc0a6e8de235) |
 | [02_gemm_precisions/simple_gemm_fp32.cu](../sample-reports/MathDx/cuBLASDx/02_gemm_precisions/simple_gemm_fp32.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuBLASDx.md#sample-b400177c3885) |
 | [02_gemm_precisions/simple_gemm_fp8.cu](../sample-reports/MathDx/cuBLASDx/02_gemm_precisions/simple_gemm_fp8.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuBLASDx.md#sample-154a06bbba2b) |
@@ -593,11 +593,11 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 
 | 样例 / 详情 | 状态 / 用例 | 实际库与实现方式 | 详细日志与范围 |
 | --- | --- | --- | --- |
+| [02_simple_fft_block/simple_fft_block.cu](../sample-reports/MathDx/cuFFTDx/02_simple_fft_block/simple_fft_block.cu.md) | PASSED / 6/6 | HIP cooperative device radix-2 C2C FFT / HIP cooperative device radix-2 C2C FFT；库 API 迁移 + 执行语义适配 | [日志、范围、源码](support-log-index/MathDx__cuFFTDx.md#sample-d2fdfd837938) |
 | [00_introduction_example/introduction_example.cu](../sample-reports/MathDx/cuFFTDx/00_introduction_example/introduction_example.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuFFTDx.md#sample-93fd8975fa89) |
 | [01_simple_fft_thread/simple_fft_thread.cu](../sample-reports/MathDx/cuFFTDx/01_simple_fft_thread/simple_fft_thread.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuFFTDx.md#sample-e5576766561c) |
 | [01_simple_fft_thread/simple_fft_thread_fp16.cu](../sample-reports/MathDx/cuFFTDx/01_simple_fft_thread/simple_fft_thread_fp16.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuFFTDx.md#sample-da5f878a62fa) |
 | [01_simple_fft_thread/simple_fft_thread_lto.cu](../sample-reports/MathDx/cuFFTDx/01_simple_fft_thread/simple_fft_thread_lto.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuFFTDx.md#sample-a2810159e029) |
-| [02_simple_fft_block/simple_fft_block.cu](../sample-reports/MathDx/cuFFTDx/02_simple_fft_block/simple_fft_block.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuFFTDx.md#sample-d2fdfd837938) |
 | [02_simple_fft_block/simple_fft_block_block_dim.cu](../sample-reports/MathDx/cuFFTDx/02_simple_fft_block/simple_fft_block_block_dim.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuFFTDx.md#sample-ab9e7825f44c) |
 | [02_simple_fft_block/simple_fft_block_c2r.cu](../sample-reports/MathDx/cuFFTDx/02_simple_fft_block/simple_fft_block_c2r.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuFFTDx.md#sample-875113afd329) |
 | [02_simple_fft_block/simple_fft_block_c2r_fp16.cu](../sample-reports/MathDx/cuFFTDx/02_simple_fft_block/simple_fft_block_c2r_fp16.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuFFTDx.md#sample-31150cc1cc08) |
@@ -649,7 +649,7 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 
 | 样例 / 详情 | 状态 / 用例 | 实际库与实现方式 | 详细日志与范围 |
 | --- | --- | --- | --- |
-| [01_introduction/philox_thread_api.cu](../sample-reports/MathDx/cuRANDDx/01_introduction/philox_thread_api.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuRANDDx.md#sample-fc4bf2c80a2c) |
+| [01_introduction/philox_thread_api.cu](../sample-reports/MathDx/cuRANDDx/01_introduction/philox_thread_api.cu.md) | PARTIAL / 6/7 | rocRAND device Philox4x32-10 + HIP/OCML explicit 53-bit Box-Muller lognormal / rocRAND device Philox4x32-10 + HIP/OCML explicit 53-bit Box-Muller lognormal；库 API 迁移 + 执行语义适配 | [日志、范围、源码](support-log-index/MathDx__cuRANDDx.md#sample-fc4bf2c80a2c) |
 | [02_thread_api/mrg_two_distributions_thread_api.cu](../sample-reports/MathDx/cuRANDDx/02_thread_api/mrg_two_distributions_thread_api.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuRANDDx.md#sample-19025ba95aec) |
 | [02_thread_api/pcg_thread_api.cu](../sample-reports/MathDx/cuRANDDx/02_thread_api/pcg_thread_api.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuRANDDx.md#sample-dfe2406dc8df) |
 | [02_thread_api/philox_random_bits_thread_api.cu](../sample-reports/MathDx/cuRANDDx/02_thread_api/philox_random_bits_thread_api.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuRANDDx.md#sample-b517ef92c787) |
@@ -663,6 +663,7 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 
 | 样例 / 详情 | 状态 / 用例 | 实际库与实现方式 | 详细日志与范围 |
 | --- | --- | --- | --- |
+| [01_Linear_Solve/potrf_block.cu](../sample-reports/MathDx/cuSolverDx/01_Linear_Solve/potrf_block.cu.md) | PASSED / 6/6 | HIP cooperative device complex FP64 upper Cholesky, shared LDA33 / HIP cooperative device complex FP64 upper Cholesky, shared LDA33；库 API 迁移 + 执行语义适配 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-0865ab8c293e) |
 | [00_Introduction/posv_batched_block.cu](../sample-reports/MathDx/cuSolverDx/00_Introduction/posv_batched_block.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-83c8ed9c775f) |
 | [01_Linear_Solve/gesv_batched_partial_pivot_block.cu](../sample-reports/MathDx/cuSolverDx/01_Linear_Solve/gesv_batched_partial_pivot_block.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-00dcb1e022dd) |
 | [01_Linear_Solve/gesv_batched_partial_pivot_thread.cu](../sample-reports/MathDx/cuSolverDx/01_Linear_Solve/gesv_batched_partial_pivot_thread.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-6815bc824613) |
@@ -675,7 +676,6 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 | [01_Linear_Solve/posv_batched_thread.cu](../sample-reports/MathDx/cuSolverDx/01_Linear_Solve/posv_batched_thread.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-c1cc5b3edd0d) |
 | [01_Linear_Solve/potrf_batched_cluster.cu](../sample-reports/MathDx/cuSolverDx/01_Linear_Solve/potrf_batched_cluster.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-ea8c5a8bf9c1) |
 | [01_Linear_Solve/potrf_batched_thread.cu](../sample-reports/MathDx/cuSolverDx/01_Linear_Solve/potrf_batched_thread.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-51d4e1537dff) |
-| [01_Linear_Solve/potrf_block.cu](../sample-reports/MathDx/cuSolverDx/01_Linear_Solve/potrf_block.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-0865ab8c293e) |
 | [01_Linear_Solve/potrf_runtime_ld_block.cu](../sample-reports/MathDx/cuSolverDx/01_Linear_Solve/potrf_runtime_ld_block.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-3395e40d5343) |
 | [02_Least_Squares/gels_batched_block.cu](../sample-reports/MathDx/cuSolverDx/02_Least_Squares/gels_batched_block.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-f30d33a26137) |
 | [02_Least_Squares/gels_batched_thread.cu](../sample-reports/MathDx/cuSolverDx/02_Least_Squares/gels_batched_thread.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-b79b60983556) |
@@ -745,14 +745,14 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 
 | 样例 / 详情 | 状态 / 用例 | 实际库与实现方式 | 详细日志与范围 |
 | --- | --- | --- | --- |
+| [distanceTransform/distanceTransform.cpp](../sample-reports/NPP/distanceTransform/distanceTransform.cpp.md) | PASSED / 6/6 | HIP exact separable Euclidean distance/Voronoi/integer truncation kernels / HIP exact separable Euclidean distance/Voronoi/integer truncation kernels；库 API 迁移 + 执行语义适配 | [日志、范围、源码](support-log-index/NPP.md#sample-d91dd1bb00e8) |
+| [nppCanny/npp_canny_simple.cpp](../sample-reports/NPP/nppCanny/npp_canny_simple.cpp.md) | PARTIAL / 6/7 | HIP three-channel Sobel/NMS/connected hysteresis kernels / HIP three-channel Sobel/NMS/connected hysteresis kernels；库 API 迁移 + 执行语义适配 | [日志、范围、源码](support-log-index/NPP.md#sample-3348e80044c5) |
+| [templateMatching/templateMatching.cpp](../sample-reports/NPP/templateMatching/templateMatching.cpp.md) | PARTIAL / 6/7 | HIP zero-mean normalized correlation + GPU argmax kernels / HIP zero-mean normalized correlation + GPU argmax kernels；库 API 迁移 + 执行语义适配 | [日志、范围、源码](support-log-index/NPP.md#sample-7ecae8272f98) |
 | [batchedLabelMarkersAndCompression/batchedLabelMarkersAndCompression.cpp](../sample-reports/NPP/batchedLabelMarkersAndCompression/batchedLabelMarkersAndCompression.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/NPP.md#sample-234b64d6ff2e) |
-| [distanceTransform/distanceTransform.cpp](../sample-reports/NPP/distanceTransform/distanceTransform.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/NPP.md#sample-d91dd1bb00e8) |
 | [findContour/findContour.cpp](../sample-reports/NPP/findContour/findContour.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/NPP.md#sample-6e9875bedc70) |
 | [houghLines/houghLines.cpp](../sample-reports/NPP/houghLines/houghLines.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/NPP.md#sample-2fad73bf731b) |
-| [nppCanny/npp_canny_simple.cpp](../sample-reports/NPP/nppCanny/npp_canny_simple.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/NPP.md#sample-3348e80044c5) |
 | [nppCanny/npp_canny_simple.py](../sample-reports/NPP/nppCanny/npp_canny_simple.py.md) | FAILED / 0/2 | 尚无已验证使用库；语言绑定尚未实现 | [日志、范围、源码](support-log-index/NPP.md#sample-46f944149acb) |
 | [opencvBenchmark/opencvBenchmark.cpp](../sample-reports/NPP/opencvBenchmark/opencvBenchmark.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/NPP.md#sample-d17ea2c018b5) |
-| [templateMatching/templateMatching.cpp](../sample-reports/NPP/templateMatching/templateMatching.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/NPP.md#sample-7ecae8272f98) |
 | [watershedSegmentation/watershedSegmentation.cpp](../sample-reports/NPP/watershedSegmentation/watershedSegmentation.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/NPP.md#sample-eb94340a73f3) |
 
 <a id="module-24"></a>
@@ -761,11 +761,11 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 
 | 样例 / 详情 | 状态 / 用例 | 实际库与实现方式 | 详细日志与范围 |
 | --- | --- | --- | --- |
+| [floodFill/floodFillVariousRegionTypesNPPPlus.cpp](../sample-reports/NPP+/floodFill/floodFillVariousRegionTypesNPPPlus.cpp.md) | PARTIAL / 6/7 | HIP connected-region equal/gradient/range/boundary kernels + GPU area/bbox metadata / HIP connected-region equal/gradient/range/boundary kernels + GPU area/bbox metadata；库 API 迁移 + 执行语义适配 | [日志、范围、源码](support-log-index/NPP+.md#sample-8ababedf979d) |
 | [batchedLabelMarkersAndCompression/batchedLabelMarkersAndCompressionNPPPlus.cpp](../sample-reports/NPP+/batchedLabelMarkersAndCompression/batchedLabelMarkersAndCompressionNPPPlus.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/NPP+.md#sample-bfdab826030c) |
 | [cannyEdgeDetectorPython/cannyEdgeDetector.py](../sample-reports/NPP+/cannyEdgeDetectorPython/cannyEdgeDetector.py.md) | FAILED / 0/2 | 尚无已验证使用库；语言绑定尚未实现 | [日志、范围、源码](support-log-index/NPP+.md#sample-bcaff07a3997) |
 | [distanceTransform/unsignedAndSignedDistanceTransformNPPPlus.cpp](../sample-reports/NPP+/distanceTransform/unsignedAndSignedDistanceTransformNPPPlus.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/NPP+.md#sample-3305e6d9970b) |
 | [findContour/findContourNPPPlus.cpp](../sample-reports/NPP+/findContour/findContourNPPPlus.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/NPP+.md#sample-dbe80853dcbe) |
-| [floodFill/floodFillVariousRegionTypesNPPPlus.cpp](../sample-reports/NPP+/floodFill/floodFillVariousRegionTypesNPPPlus.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/NPP+.md#sample-8ababedf979d) |
 | [watershedSegmentation/watershedSegmentationNPPPlus.cpp](../sample-reports/NPP+/watershedSegmentation/watershedSegmentationNPPPlus.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/NPP+.md#sample-cd89abdb2c1f) |
 
 <a id="module-25"></a>

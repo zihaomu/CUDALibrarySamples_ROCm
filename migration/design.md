@@ -544,14 +544,20 @@ artifacts/<run-id>/<sample-id>/<backend>/<case-id>/
 | S68 | 已完成 | 19入口/146预登记case完成AMD、独立CPU与同输入CUDA验收。整例10通过、9部分；47次数值/语义错误全部拒绝，23项真实文件CLI边界通过。ROI元数据独立几何检查已加固并复核。CUDA奇异例NPIVOTS=1为扰动系统，未算作原奇异系统有效解。 | 归档、主表/算子支持表同步、干净checkout审计与fork发布。 |
 | S69 | 已完成 | B9–B11源码、日志、逐case输出/日志hash与数值参考归档；一致性审计通过202个当前整例证明。fork默认分支已从main变为rocm，远端起点791dca20一致；发布目标改为默认rocm。 | 提交实现后，在无build产物的干净checkout审计，并核对fork提交与README blob。 |
 | S70 | 已完成 | 实现81c8fa87已推送fork默认rocm分支；GitHub API确认提交及README blob一致。无build依赖的干净checkout完整审计通过；累计202整例、13部分、102功能族/10模块。本轮146case、47错误拒绝、23CLI边界记录完整。 | B12–B15仍为后续计划；B9–B11九项部分合同按逐例恢复条件继续收口。 |
+| S71 | 已完成 | 启动B12–B15共20个目标，预登记120个case。两GPU guard确认HIP 2,1对应物理GPU0/2，避开忙碌GPU1和禁用GPU3；MPI缺失使用项目MPICH4.3.2 wheel，MathDx25.6 CUDA SDK已下载。 | 先验证MPI/RCCL与分片，再依次完成分布算法、设备内算法和图像算法；完整契约缺口单列。 |
+| S72 | 已完成 | B12 36个AMD/独立CPU分布/重分布/collective case通过。B13已在两GPU完成611阶LU、16³ slab FFT和4096²/block2048 contraction原始规模，CPU残差/布局/全输出复核进行中。 | 收口同输入CUDA基线与原生SDK探针，分别记录执行模型/descriptor和低精度缺口。 |
+| S73 | 已完成 | B14四个设备内试点24case完成AMD/CPU验收：FP64 GEMM三种phase、128点双FFT、32阶complex上三角Cholesky/共享LDA33、原生rocRAND Philox设备引擎。rocRAND normal头与当前HIP overlay不兼容，改用显式53bit Box-Muller；不声称NVIDIA LEGACY bitwise合同。 | 运行原生MathDx25.6 SDK基线并保留版本/API不匹配日志，继续B15逐像素验收。 |
+| S74 | 已完成 | 20个目标120case完成AMD/独立CPU/同输入兼容CUDA验收，9整例/11部分；52次数值与执行语义破坏全部拒绝、10项真实MPI/GPU数量/图像descriptor运行边界通过。原始vendor CUDA构建/运行20项另记，MgGetrf成功，MgPotrf原生执行失败及MathDx25.6 API差异保留。 | 绑定当前源码与证据、归档native NPP差异和Voronoi修正，刷新主表/算子支持/设计与路线图。 |
+| S75 | 已完成 | native NPP全量对照定位Voronoi为像素减最近site的位移，已修正HIP原绝对坐标输出并重跑B15。313×317与64²原图float距离与uint16截断逐像素完全一致，位移/最近site验证通过；失败源码/日志单独保留。Canny原始图1995/921600像素差异仍PARTIAL，NCC native FP32误差与文件harness缺口另记。 | 最终证据审计、干净checkout与fork默认rocm分支发布。 |
+| S76 | 已完成 | B12–B15原始vendor尝试20项、兼容CUDA数学与CPU/AMD 120case、53个错误输出/执行语义拒绝、10项运行边界均留证；9整例/11部分。全项目211整例、24部分、111功能族/17模块；B4–B15全部65候选已执行，45整例/20部分合同，未声明多节点/性能或未完成合同成功。 | 干净checkout复核后推送fork默认rocm，核对远端commit与README blob。 |
 
 ## 12. 当前实施快照（工具刷新）
 
 本节替代设计阶段的未开始快照。逐步过程保留在第 11 节；整例成功、部分功能、路线失败分别报告，不将执行过计划解释为所有功能均已迁移成功。
 
-更新时间：2026-11-10T04:50:53.569317+00:00。
+更新时间：2026-11-10T05:51:27.902465+00:00。
 
-清单为 **639 个独立可执行/脚本源入口**（563 C/C++、76 Fortran/Python），逐例均有实际尝试记录。当前：`PASSED` 202；`PARTIAL` 13；`FAILED` 422；`BLOCKED` 0；`UNSUPPORTED` 2；`NOT_STARTED` 0；`IN_PROGRESS` 0。
+清单为 **639 个独立可执行/脚本源入口**（563 C/C++、76 Fortran/Python），逐例均有实际尝试记录。当前：`PASSED` 211；`PARTIAL` 24；`FAILED` 402；`BLOCKED` 0；`UNSUPPORTED` 2；`NOT_STARTED` 0；`IN_PROGRESS` 0。
 
 M0 静态审计覆盖全部 477 个构建定义和 866 个源文件，记录 863 个声明、682 个源文件构建绑定；53 个 SDK/测试生成输入/条件变体表达式逐项归类，不重复膨胀入口数量。这不是全部 SDK 条件配置均已生成运行的声明。
 
@@ -590,6 +596,8 @@ python3 tools/migration/render.py
 第四至第八批实时结果：B4 8/8 样例、32/32 cases；B5 4/4 样例、12/12 cases；B6 4/4 样例、15/15 cases；B7 5/5 样例、15/15 cases；B8 5/5 样例、18/18 cases。完整逐例路线、限制和日志入口见 `migration/reports/batches4-8.md`；B8三项CUDA原生新API缺失，兼容数学对照与原始API基线分开记录。
 
 第九至第十一批：B9 6/8 整例、2 部分支持、64/64 cases三方验收；B10 0/6 整例、6 部分支持、42/42 cases三方验收；B11 4/5 整例、1 部分支持、40/40 cases三方验收。B9两个benchmark缺完整NVBENCH框架；B10六项含明确CPU progressive fallback，原生GPU后端和部分原例控制仍缺；B11 get_set完整vendor配置/查询未等价。主表与支持日志保持PARTIAL及恢复条件。详见 `migration/reports/batches9-11.md`。
+
+第十二至第十五批：B12 2整例/4部分、36/36case；B13 3整例/3部分、36/36case；B14 3整例/1部分、24/24case；B15 1整例/3部分、24/24case。所有原始vendor CUDA尝试与兼容CUDA数学对照分开；53项输出/执行语义破坏拒绝、10项真实MPI/设备数/图像descriptor边界通过。原始NPP距离与整数截断逐像素一致，Voronoi位移语义已修正并保留失败源码；Canny原始图1995像素差异及其它未完成合同明确PARTIAL。详见 `migration/reports/batches12-15.md`。
 
 ## 附录 A：按目录核对的初始范围
 

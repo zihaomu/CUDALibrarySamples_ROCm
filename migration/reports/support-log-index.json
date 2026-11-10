@@ -1,9 +1,9 @@
 {
   "scope": "All 639 entrypoints, including failures. PASSED is limited to registered cases. Logs point to current-source qualification where available, otherwise the recorded attempt; compilation/import logs are not GPU correctness proof.",
   "counts": {
-    "FAILED": 422,
-    "PASSED": 202,
-    "PARTIAL": 13,
+    "PASSED": 211,
+    "FAILED": 402,
+    "PARTIAL": 24,
     "UNSUPPORTED": 2
   },
   "implementation_methods": {
@@ -19,37 +19,66 @@
       "id": "MathDx/cuBLASDx/01_gemm_introduction::introduction_example.cu",
       "family": "MathDx/cuBLASDx",
       "source": "MathDx/cuBLASDx/01_gemm_introduction/introduction_example.cu",
-      "status": "FAILED",
-      "level": "L1",
-      "actual_library": null,
-      "backend_library": null,
-      "implementation_method": "API_PORT",
+      "status": "PASSED",
+      "level": "L4",
+      "actual_library": "HIP cooperative device FP64 GEMM (shared, register-accumulate, register-store phases)",
+      "backend_library": "HIP cooperative device FP64 GEMM (shared, register-accumulate, register-store phases)",
+      "implementation_method": "API_PORT_WITH_EXECUTION_ADAPTER",
       "implementation": "rocm/ported/MathDx/cuBLASDx/01_gemm_introduction/introduction_example.cu",
-      "implementation_sha256": "bce9150b18c0121cbc3ddd2797d03e373c168a131be9c21fb94eb7abb50c43a3",
-      "passed_cases": [],
+      "implementation_sha256": "4838809205cb36c2645b77db45b3dabc52f20f92d179093d77c5affafc5f35ef",
+      "passed_cases": [
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty"
+      ],
       "required_cases": [
-        "original-functional-contract",
-        "independent-numerical-or-semantic-reference"
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty"
       ],
-      "scope_and_reason": "build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/MathDx/cuBLASDx/01_gemm_introduction/introduction_example.cu:24:10: fatal error: 'cublasdx.hpp' file not found；failed to execute:/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib/llvm/bin/clang++  --offload-arch=gfx1201 --driver-mode=g++ --hip-link  -std=c++17 -O2 -D__HIP_PLATFORM_AMD__ --rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sa",
-      "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
+      "scope_and_reason": "使用HIP cooperative device FP64 GEMM (shared, register-accumulate, register-store phases)；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。仅登记profile/规模/执行方式通过，不外推其它dtype、规模、网格或性能；内部数据重分配/CPU布局编排与项目GPU算法已公开。",
+      "retry_condition": "扩展其它dtype、规模、线程块/进程网格、多节点或性能需新增登记case并重验。",
       "detail": "migration/sample-reports/MathDx/cuBLASDx/01_gemm_introduction/introduction_example.cu.md",
-      "record_field": "attempts/1",
-      "amd_evidence": "migration/reports/evidence/20261109T084256.329631Z/original-rocm/MathDx_cuBLASDx_01_gemm_introduction_introduction_example.cu",
+      "record_field": "selected_validation",
+      "amd_evidence": "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuBLASDx_01_gemm_introduction_introduction_example.cu",
       "amd_logs": [
-        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/MathDx_cuBLASDx_01_gemm_introduction_introduction_example.cu/build.log"
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuBLASDx_01_gemm_introduction_introduction_example.cu/boundary/run.log",
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuBLASDx_01_gemm_introduction_introduction_example.cu/build.log",
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuBLASDx_01_gemm_introduction_introduction_example.cu/changed-values/run.log",
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuBLASDx_01_gemm_introduction_introduction_example.cu/irregular/run.log",
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuBLASDx_01_gemm_introduction_introduction_example.cu/original/run.log",
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuBLASDx_01_gemm_introduction_introduction_example.cu/repeat/run.log",
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuBLASDx_01_gemm_introduction_introduction_example.cu/singular-or-empty/run.log"
       ],
-      "cuda_comparison": "BLOCKED",
-      "cuda_evidence": "migration/reports/evidence/20261109T084857.451692Z/original-cuda/MathDx_cuBLASDx_01_gemm_introduction_introduction_example.cu",
-      "cuda_evidence_basis": "原始 CUDA 尝试",
+      "cuda_comparison": "PASSED",
+      "cuda_evidence": "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuBLASDx_01_gemm_introduction_introduction_example.cu",
+      "cuda_evidence_basis": "当前验收记录",
       "cuda_logs": [
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/MathDx_cuBLASDx_01_gemm_introduction_introduction_example.cu/build.log"
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuBLASDx_01_gemm_introduction_introduction_example.cu/boundary/run.log",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuBLASDx_01_gemm_introduction_introduction_example.cu/build.log",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuBLASDx_01_gemm_introduction_introduction_example.cu/changed-values/run.log",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuBLASDx_01_gemm_introduction_introduction_example.cu/irregular/run.log",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuBLASDx_01_gemm_introduction_introduction_example.cu/original/run.log",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuBLASDx_01_gemm_introduction_introduction_example.cu/repeat/run.log",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuBLASDx_01_gemm_introduction_introduction_example.cu/singular-or-empty/run.log"
       ],
-      "validation_reports": [],
+      "validation_reports": [
+        "migration/reports/batches12_15-validation.json"
+      ],
       "all_evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/MathDx_cuBLASDx_01_gemm_introduction_introduction_example.cu",
         "migration/reports/evidence/20261109T084256.329631Z/original-rocm/MathDx_cuBLASDx_01_gemm_introduction_introduction_example.cu",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/MathDx_cuBLASDx_01_gemm_introduction_introduction_example.cu"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/MathDx_cuBLASDx_01_gemm_introduction_introduction_example.cu",
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuBLASDx_01_gemm_introduction_introduction_example.cu",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuBLASDx_01_gemm_introduction_introduction_example.cu",
+        "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/MathDx_cuBLASDx_01_gemm_introduction_introduction_example.cu"
       ]
     },
     {
@@ -1425,37 +1454,66 @@
       "id": "MathDx/cuFFTDx/02_simple_fft_block::simple_fft_block.cu",
       "family": "MathDx/cuFFTDx",
       "source": "MathDx/cuFFTDx/02_simple_fft_block/simple_fft_block.cu",
-      "status": "FAILED",
-      "level": "L1",
-      "actual_library": null,
-      "backend_library": null,
-      "implementation_method": "API_PORT",
+      "status": "PASSED",
+      "level": "L4",
+      "actual_library": "HIP cooperative device radix-2 C2C FFT",
+      "backend_library": "HIP cooperative device radix-2 C2C FFT",
+      "implementation_method": "API_PORT_WITH_EXECUTION_ADAPTER",
       "implementation": "rocm/ported/MathDx/cuFFTDx/02_simple_fft_block/simple_fft_block.cu",
-      "implementation_sha256": "c596b64ce3da023f85ba9e1af601aa3adff5579fc875b3833fe59315003a60bc",
-      "passed_cases": [],
+      "implementation_sha256": "4df2048a08cccbb735232aebb9c1c31c3297f83f05ddaf222d141805b83c6359",
+      "passed_cases": [
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty"
+      ],
       "required_cases": [
-        "original-functional-contract",
-        "independent-numerical-or-semantic-reference"
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty"
       ],
-      "scope_and_reason": "build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/MathDx/cuFFTDx/02_simple_fft_block/simple_fft_block.cu:23:10: fatal error: 'cufftdx.hpp' file not found；failed to execute:/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib/llvm/bin/clang++  --offload-arch=gfx1201 --driver-mode=g++ --hip-link  -std=c++17 -O2 -D__HIP_PLATFORM_AMD__ --rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_wo",
-      "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
+      "scope_and_reason": "使用HIP cooperative device radix-2 C2C FFT；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。仅登记profile/规模/执行方式通过，不外推其它dtype、规模、网格或性能；内部数据重分配/CPU布局编排与项目GPU算法已公开。",
+      "retry_condition": "扩展其它dtype、规模、线程块/进程网格、多节点或性能需新增登记case并重验。",
       "detail": "migration/sample-reports/MathDx/cuFFTDx/02_simple_fft_block/simple_fft_block.cu.md",
-      "record_field": "attempts/1",
-      "amd_evidence": "migration/reports/evidence/20261109T084256.329631Z/original-rocm/MathDx_cuFFTDx_02_simple_fft_block_simple_fft_block.cu",
+      "record_field": "selected_validation",
+      "amd_evidence": "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuFFTDx_02_simple_fft_block_simple_fft_block.cu",
       "amd_logs": [
-        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/MathDx_cuFFTDx_02_simple_fft_block_simple_fft_block.cu/build.log"
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuFFTDx_02_simple_fft_block_simple_fft_block.cu/boundary/run.log",
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuFFTDx_02_simple_fft_block_simple_fft_block.cu/build.log",
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuFFTDx_02_simple_fft_block_simple_fft_block.cu/changed-values/run.log",
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuFFTDx_02_simple_fft_block_simple_fft_block.cu/irregular/run.log",
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuFFTDx_02_simple_fft_block_simple_fft_block.cu/original/run.log",
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuFFTDx_02_simple_fft_block_simple_fft_block.cu/repeat/run.log",
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuFFTDx_02_simple_fft_block_simple_fft_block.cu/singular-or-empty/run.log"
       ],
-      "cuda_comparison": "BLOCKED",
-      "cuda_evidence": "migration/reports/evidence/20261109T084857.451692Z/original-cuda/MathDx_cuFFTDx_02_simple_fft_block_simple_fft_block.cu",
-      "cuda_evidence_basis": "原始 CUDA 尝试",
+      "cuda_comparison": "PASSED",
+      "cuda_evidence": "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuFFTDx_02_simple_fft_block_simple_fft_block.cu",
+      "cuda_evidence_basis": "当前验收记录",
       "cuda_logs": [
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/MathDx_cuFFTDx_02_simple_fft_block_simple_fft_block.cu/build.log"
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuFFTDx_02_simple_fft_block_simple_fft_block.cu/boundary/run.log",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuFFTDx_02_simple_fft_block_simple_fft_block.cu/build.log",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuFFTDx_02_simple_fft_block_simple_fft_block.cu/changed-values/run.log",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuFFTDx_02_simple_fft_block_simple_fft_block.cu/irregular/run.log",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuFFTDx_02_simple_fft_block_simple_fft_block.cu/original/run.log",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuFFTDx_02_simple_fft_block_simple_fft_block.cu/repeat/run.log",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuFFTDx_02_simple_fft_block_simple_fft_block.cu/singular-or-empty/run.log"
       ],
-      "validation_reports": [],
+      "validation_reports": [
+        "migration/reports/batches12_15-validation.json"
+      ],
       "all_evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/MathDx_cuFFTDx_02_simple_fft_block_simple_fft_block.cu",
         "migration/reports/evidence/20261109T084256.329631Z/original-rocm/MathDx_cuFFTDx_02_simple_fft_block_simple_fft_block.cu",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/MathDx_cuFFTDx_02_simple_fft_block_simple_fft_block.cu"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/MathDx_cuFFTDx_02_simple_fft_block_simple_fft_block.cu",
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuFFTDx_02_simple_fft_block_simple_fft_block.cu",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuFFTDx_02_simple_fft_block_simple_fft_block.cu",
+        "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/MathDx_cuFFTDx_02_simple_fft_block_simple_fft_block.cu"
       ]
     },
     {
@@ -3090,37 +3148,67 @@
       "id": "MathDx/cuRANDDx/01_introduction::philox_thread_api.cu",
       "family": "MathDx/cuRANDDx",
       "source": "MathDx/cuRANDDx/01_introduction/philox_thread_api.cu",
-      "status": "FAILED",
-      "level": "L1",
-      "actual_library": null,
-      "backend_library": null,
-      "implementation_method": "API_PORT",
+      "status": "PARTIAL",
+      "level": "L4",
+      "actual_library": "rocRAND device Philox4x32-10 + HIP/OCML explicit 53-bit Box-Muller lognormal",
+      "backend_library": "rocRAND device Philox4x32-10 + HIP/OCML explicit 53-bit Box-Muller lognormal",
+      "implementation_method": "API_PORT_WITH_EXECUTION_ADAPTER",
       "implementation": "rocm/ported/MathDx/cuRANDDx/01_introduction/philox_thread_api.cu",
-      "implementation_sha256": "f362994f340cf3ce4d4ce7cf6c3fc2ac0a5cd4dea912827c4ccceb71d578f701",
-      "passed_cases": [],
+      "implementation_sha256": "74879d529676297f343ff7b58001129b30c974697c041288c4c795eee4f004ad",
+      "passed_cases": [
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty"
+      ],
       "required_cases": [
-        "original-functional-contract",
-        "independent-numerical-or-semantic-reference"
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty",
+        "batches12_15/NVIDIA-LEGACY-bitwise-host-device-lognormal-contract"
       ],
-      "scope_and_reason": "build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/MathDx/cuRANDDx/01_introduction/philox_thread_api.cu:22:10: fatal error: 'curanddx.hpp' file not found；failed to execute:/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib/llvm/bin/clang++  --offload-arch=gfx1201 --driver-mode=g++ --hip-link  -std=c++17 -O2 -D__HIP_PLATFORM_AMD__ --rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_wor",
-      "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
+      "scope_and_reason": "使用rocRAND device Philox4x32-10 + HIP/OCML explicit 53-bit Box-Muller lognormal；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。使用真实rocRAND Philox设备引擎，CPU整数oracle逐word验证counter/subsequence；分布使用显式53-bit Box-Muller。ROCm normal头与当前overlay不兼容，且不声称原例NVIDIA LEGACY host/device逐位相等。",
+      "retry_condition": "未完成合同：NVIDIA-LEGACY-bitwise-host-device-lognormal-contract；补实现/真实后端并重验。",
       "detail": "migration/sample-reports/MathDx/cuRANDDx/01_introduction/philox_thread_api.cu.md",
-      "record_field": "attempts/1",
-      "amd_evidence": "migration/reports/evidence/20261109T084256.329631Z/original-rocm/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu",
+      "record_field": "selected_validation",
+      "amd_evidence": "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu",
       "amd_logs": [
-        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu/build.log"
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu/boundary/run.log",
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu/build.log",
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu/changed-values/run.log",
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu/irregular/run.log",
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu/original/run.log",
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu/repeat/run.log",
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu/singular-or-empty/run.log"
       ],
-      "cuda_comparison": "BLOCKED",
-      "cuda_evidence": "migration/reports/evidence/20261109T084857.451692Z/original-cuda/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu",
-      "cuda_evidence_basis": "原始 CUDA 尝试",
+      "cuda_comparison": "PASSED",
+      "cuda_evidence": "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu",
+      "cuda_evidence_basis": "当前验收记录",
       "cuda_logs": [
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu/build.log"
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu/boundary/run.log",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu/build.log",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu/changed-values/run.log",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu/irregular/run.log",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu/original/run.log",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu/repeat/run.log",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu/singular-or-empty/run.log"
       ],
-      "validation_reports": [],
+      "validation_reports": [
+        "migration/reports/batches12_15-validation.json"
+      ],
       "all_evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu",
         "migration/reports/evidence/20261109T084256.329631Z/original-rocm/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu",
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu",
+        "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu"
       ]
     },
     {
@@ -3793,37 +3881,66 @@
       "id": "MathDx/cuSolverDx/01_Linear_Solve::potrf_block.cu",
       "family": "MathDx/cuSolverDx",
       "source": "MathDx/cuSolverDx/01_Linear_Solve/potrf_block.cu",
-      "status": "FAILED",
-      "level": "L1",
-      "actual_library": null,
-      "backend_library": null,
-      "implementation_method": "API_PORT",
+      "status": "PASSED",
+      "level": "L4",
+      "actual_library": "HIP cooperative device complex FP64 upper Cholesky, shared LDA33",
+      "backend_library": "HIP cooperative device complex FP64 upper Cholesky, shared LDA33",
+      "implementation_method": "API_PORT_WITH_EXECUTION_ADAPTER",
       "implementation": "rocm/ported/MathDx/cuSolverDx/01_Linear_Solve/potrf_block.cu",
-      "implementation_sha256": "bdbebecea9be65d59c9efaab64566a1a02eab4adcd744e2e3f96b956b680e15b",
-      "passed_cases": [],
+      "implementation_sha256": "14ecbfcbe293ee67cb99f43c1099519f60dcc2dd588ac8e234232310dd686f6d",
+      "passed_cases": [
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty"
+      ],
       "required_cases": [
-        "original-functional-contract",
-        "independent-numerical-or-semantic-reference"
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty"
       ],
-      "scope_and_reason": "build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/MathDx/cuSolverDx/01_Linear_Solve/potrf_block.cu:19:10: fatal error: 'cusolverdx.hpp' file not found；failed to execute:/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib/llvm/bin/clang++  --offload-arch=gfx1201 --driver-mode=g++ --hip-link  -std=c++17 -O2 -D__HIP_PLATFORM_AMD__ --rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_works",
-      "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
+      "scope_and_reason": "使用HIP cooperative device complex FP64 upper Cholesky, shared LDA33；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。仅登记profile/规模/执行方式通过，不外推其它dtype、规模、网格或性能；内部数据重分配/CPU布局编排与项目GPU算法已公开。",
+      "retry_condition": "扩展其它dtype、规模、线程块/进程网格、多节点或性能需新增登记case并重验。",
       "detail": "migration/sample-reports/MathDx/cuSolverDx/01_Linear_Solve/potrf_block.cu.md",
-      "record_field": "attempts/1",
-      "amd_evidence": "migration/reports/evidence/20261109T084256.329631Z/original-rocm/MathDx_cuSolverDx_01_Linear_Solve_potrf_block.cu",
+      "record_field": "selected_validation",
+      "amd_evidence": "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuSolverDx_01_Linear_Solve_potrf_block.cu",
       "amd_logs": [
-        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/MathDx_cuSolverDx_01_Linear_Solve_potrf_block.cu/build.log"
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuSolverDx_01_Linear_Solve_potrf_block.cu/boundary/run.log",
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuSolverDx_01_Linear_Solve_potrf_block.cu/build.log",
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuSolverDx_01_Linear_Solve_potrf_block.cu/changed-values/run.log",
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuSolverDx_01_Linear_Solve_potrf_block.cu/irregular/run.log",
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuSolverDx_01_Linear_Solve_potrf_block.cu/original/run.log",
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuSolverDx_01_Linear_Solve_potrf_block.cu/repeat/run.log",
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuSolverDx_01_Linear_Solve_potrf_block.cu/singular-or-empty/run.log"
       ],
-      "cuda_comparison": "BLOCKED",
-      "cuda_evidence": "migration/reports/evidence/20261109T084857.451692Z/original-cuda/MathDx_cuSolverDx_01_Linear_Solve_potrf_block.cu",
-      "cuda_evidence_basis": "原始 CUDA 尝试",
+      "cuda_comparison": "PASSED",
+      "cuda_evidence": "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuSolverDx_01_Linear_Solve_potrf_block.cu",
+      "cuda_evidence_basis": "当前验收记录",
       "cuda_logs": [
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/MathDx_cuSolverDx_01_Linear_Solve_potrf_block.cu/build.log"
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuSolverDx_01_Linear_Solve_potrf_block.cu/boundary/run.log",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuSolverDx_01_Linear_Solve_potrf_block.cu/build.log",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuSolverDx_01_Linear_Solve_potrf_block.cu/changed-values/run.log",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuSolverDx_01_Linear_Solve_potrf_block.cu/irregular/run.log",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuSolverDx_01_Linear_Solve_potrf_block.cu/original/run.log",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuSolverDx_01_Linear_Solve_potrf_block.cu/repeat/run.log",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuSolverDx_01_Linear_Solve_potrf_block.cu/singular-or-empty/run.log"
       ],
-      "validation_reports": [],
+      "validation_reports": [
+        "migration/reports/batches12_15-validation.json"
+      ],
       "all_evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/MathDx_cuSolverDx_01_Linear_Solve_potrf_block.cu",
         "migration/reports/evidence/20261109T084256.329631Z/original-rocm/MathDx_cuSolverDx_01_Linear_Solve_potrf_block.cu",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/MathDx_cuSolverDx_01_Linear_Solve_potrf_block.cu"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/MathDx_cuSolverDx_01_Linear_Solve_potrf_block.cu",
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuSolverDx_01_Linear_Solve_potrf_block.cu",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuSolverDx_01_Linear_Solve_potrf_block.cu",
+        "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/MathDx_cuSolverDx_01_Linear_Solve_potrf_block.cu"
       ]
     },
     {
@@ -5753,37 +5870,69 @@
       "id": "NPP+/floodFill::floodFillVariousRegionTypesNPPPlus.cpp",
       "family": "NPP+",
       "source": "NPP+/floodFill/floodFillVariousRegionTypesNPPPlus.cpp",
-      "status": "FAILED",
-      "level": "L1",
-      "actual_library": null,
-      "backend_library": null,
-      "implementation_method": "API_PORT",
+      "status": "PARTIAL",
+      "level": "L4",
+      "actual_library": "HIP connected-region equal/gradient/range/boundary kernels + GPU area/bbox metadata",
+      "backend_library": "HIP connected-region equal/gradient/range/boundary kernels + GPU area/bbox metadata",
+      "implementation_method": "API_PORT_WITH_EXECUTION_ADAPTER",
       "implementation": "rocm/ported/NPP+/floodFill/floodFillVariousRegionTypesNPPPlus.cpp",
-      "implementation_sha256": "fe19a590d9e1099b485cd5682c436a0b2071117ffebe99962e7623587bc80f8e",
-      "passed_cases": [],
+      "implementation_sha256": "7b266c87722393ed12c3baf36169bd1456120e8066cc5820d90e3537c2cc9dcd",
+      "passed_cases": [
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty"
+      ],
       "required_cases": [
-        "original-functional-contract",
-        "independent-numerical-or-semantic-reference"
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty",
+        "batches12_15/native-NPPPlus-five-mode-metadata-and-paint-contract"
       ],
-      "scope_and_reason": "build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/NPP+/floodFill/floodFillVariousRegionTypesNPPPlus.cpp:42:10: fatal error: 'nppPlus/nppPlus.h' file not found；failed to execute:/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib/llvm/bin/clang++  --offload-arch=gfx1201 --driver-mode=g++ --hip-link  -std=c++17 -O2 -D__HIP_PLATFORM_AMD__ --rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_samp",
-      "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
+      "scope_and_reason": "使用HIP connected-region equal/gradient/range/boundary kernels + GPU area/bbox metadata；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。五种GPU连接/gradient/range/boundary路径及区域统计已验收；原生NPP+ SDK缺失，原例完整paint值/metadata结构和边界策略未逐项等价。",
+      "retry_condition": "未完成合同：native-NPPPlus-five-mode-metadata-and-paint-contract；补实现/真实后端并重验。",
       "detail": "migration/sample-reports/NPP+/floodFill/floodFillVariousRegionTypesNPPPlus.cpp.md",
-      "record_field": "attempts/1",
-      "amd_evidence": "migration/reports/evidence/20261109T084256.329631Z/original-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp",
+      "record_field": "selected_validation",
+      "amd_evidence": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp",
       "amd_logs": [
-        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/build.log"
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/boundary/run.log",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/build.log",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/changed-values/run.log",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/irregular/run.log",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/original/run.log",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/repeat/run.log",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/singular-or-empty/run.log"
       ],
-      "cuda_comparison": "BLOCKED",
-      "cuda_evidence": "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp",
-      "cuda_evidence_basis": "原始 CUDA 尝试",
+      "cuda_comparison": "PASSED",
+      "cuda_evidence": "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp",
+      "cuda_evidence_basis": "当前验收记录",
       "cuda_logs": [
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/build.log"
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/boundary/run.log",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/build.log",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/changed-values/run.log",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/irregular/run.log",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/original/run.log",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/repeat/run.log",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/singular-or-empty/run.log"
       ],
-      "validation_reports": [],
+      "validation_reports": [
+        "migration/reports/batches12_15-validation.json"
+      ],
       "all_evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp",
         "migration/reports/evidence/20261109T084256.329631Z/original-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp",
+        "migration/reports/evidence/20261110T051547.561861Z/batches12_15-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp",
+        "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp"
       ]
     },
     {
@@ -5864,38 +6013,68 @@
       "id": "NPP/distanceTransform::distanceTransform.cpp",
       "family": "NPP",
       "source": "NPP/distanceTransform/distanceTransform.cpp",
-      "status": "FAILED",
-      "level": "L1",
-      "actual_library": null,
-      "backend_library": null,
-      "implementation_method": "API_PORT",
+      "status": "PASSED",
+      "level": "L4",
+      "actual_library": "HIP exact separable Euclidean distance/Voronoi/integer truncation kernels",
+      "backend_library": "HIP exact separable Euclidean distance/Voronoi/integer truncation kernels",
+      "implementation_method": "API_PORT_WITH_EXECUTION_ADAPTER",
       "implementation": "rocm/ported/NPP/distanceTransform/distanceTransform.cpp",
-      "implementation_sha256": "dbebe97321b4c498e2c9f25a51274cffb8c9ef1aec62d0463b2fefdc596da161",
-      "passed_cases": [],
+      "implementation_sha256": "f877fd1daedb7edc5b8e191601fc054b94e3b4963fae9f97517e49393f1ce27e",
+      "passed_cases": [
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty"
+      ],
       "required_cases": [
-        "original-functional-contract",
-        "independent-numerical-or-semantic-reference"
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty"
       ],
-      "scope_and_reason": "build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/NPP/distanceTransform/distanceTransform.cpp:26:10: fatal error: 'nppdefs.h' file not found；failed to execute:/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib/llvm/bin/clang++  --offload-arch=gfx1201 --driver-mode=g++ --hip-link  -std=c++17 -O2 -D__HIP_PLATFORM_AMD__ --rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra",
-      "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
+      "scope_and_reason": "使用HIP exact separable Euclidean distance/Voronoi/integer truncation kernels；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。仅登记profile/规模/执行方式通过，不外推其它dtype、规模、网格或性能；内部数据重分配/CPU布局编排与项目GPU算法已公开。",
+      "retry_condition": "扩展其它dtype、规模、线程块/进程网格、多节点或性能需新增登记case并重验。",
       "detail": "migration/sample-reports/NPP/distanceTransform/distanceTransform.cpp.md",
-      "record_field": "attempts/1",
-      "amd_evidence": "migration/reports/evidence/20261109T084256.329631Z/original-rocm/NPP_distanceTransform_distanceTransform.cpp",
+      "record_field": "selected_validation",
+      "amd_evidence": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_distanceTransform_distanceTransform.cpp",
       "amd_logs": [
-        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/NPP_distanceTransform_distanceTransform.cpp/build.log"
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_distanceTransform_distanceTransform.cpp/boundary/run.log",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_distanceTransform_distanceTransform.cpp/build.log",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_distanceTransform_distanceTransform.cpp/changed-values/run.log",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_distanceTransform_distanceTransform.cpp/irregular/run.log",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_distanceTransform_distanceTransform.cpp/original/run.log",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_distanceTransform_distanceTransform.cpp/repeat/run.log",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_distanceTransform_distanceTransform.cpp/singular-or-empty/run.log"
       ],
-      "cuda_comparison": "BLOCKED",
-      "cuda_evidence": "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP_distanceTransform_distanceTransform.cpp",
-      "cuda_evidence_basis": "原始 CUDA 尝试",
+      "cuda_comparison": "PASSED",
+      "cuda_evidence": "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_distanceTransform_distanceTransform.cpp",
+      "cuda_evidence_basis": "当前验收记录",
       "cuda_logs": [
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP_distanceTransform_distanceTransform.cpp/build.log",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP_distanceTransform_distanceTransform.cpp/run.log"
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_distanceTransform_distanceTransform.cpp/boundary/run.log",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_distanceTransform_distanceTransform.cpp/build.log",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_distanceTransform_distanceTransform.cpp/changed-values/run.log",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_distanceTransform_distanceTransform.cpp/irregular/run.log",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_distanceTransform_distanceTransform.cpp/original/run.log",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_distanceTransform_distanceTransform.cpp/repeat/run.log",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_distanceTransform_distanceTransform.cpp/singular-or-empty/run.log"
       ],
-      "validation_reports": [],
+      "validation_reports": [
+        "migration/reports/batches12_15-validation.json"
+      ],
       "all_evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/NPP_distanceTransform_distanceTransform.cpp",
         "migration/reports/evidence/20261109T084256.329631Z/original-rocm/NPP_distanceTransform_distanceTransform.cpp",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP_distanceTransform_distanceTransform.cpp"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP_distanceTransform_distanceTransform.cpp",
+        "migration/reports/evidence/20261110T051547.561861Z/batches12_15-rocm/NPP_distanceTransform_distanceTransform.cpp",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/NPP_distanceTransform_distanceTransform.cpp",
+        "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/NPP_distanceTransform_distanceTransform.cpp",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_distanceTransform_distanceTransform.cpp",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_distanceTransform_distanceTransform.cpp"
       ]
     },
     {
@@ -5978,37 +6157,69 @@
       "id": "NPP/nppCanny::npp_canny_simple.cpp",
       "family": "NPP",
       "source": "NPP/nppCanny/npp_canny_simple.cpp",
-      "status": "FAILED",
-      "level": "L1",
-      "actual_library": null,
-      "backend_library": null,
-      "implementation_method": "API_PORT",
+      "status": "PARTIAL",
+      "level": "L4",
+      "actual_library": "HIP three-channel Sobel/NMS/connected hysteresis kernels",
+      "backend_library": "HIP three-channel Sobel/NMS/connected hysteresis kernels",
+      "implementation_method": "API_PORT_WITH_EXECUTION_ADAPTER",
       "implementation": "rocm/ported/NPP/nppCanny/npp_canny_simple.cpp",
-      "implementation_sha256": "7adbac6cac499239424949127761525e82d9128380500cadd717b0283b1b8c50",
-      "passed_cases": [],
+      "implementation_sha256": "642803273a59f28e98a40c02e70c759628f9d0c29eed50ecba7daa3619c18abf",
+      "passed_cases": [
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty"
+      ],
       "required_cases": [
-        "original-functional-contract",
-        "independent-numerical-or-semantic-reference"
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty",
+        "batches12_15/native-NPP-C3-gradient-tie-and-file-CLI-equivalence"
       ],
-      "scope_and_reason": "build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/NPP/nppCanny/npp_canny_simple.cpp:33:10: fatal error: 'opencv2/opencv.hpp' file not found；failed to execute:/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib/llvm/bin/clang++  --offload-arch=gfx1201 --driver-mode=g++ --hip-link  -std=c++17 -O2 -D__HIP_PLATFORM_AMD__ --rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/",
-      "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
+      "scope_and_reason": "使用HIP three-channel Sobel/NMS/connected hysteresis kernels；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。GPU三通道最大梯度/Sobel/NMS/滞后连接已全像素验收；原生NPP C3梯度与NMS tie策略及原例OpenCV文件CLI未完成逐像素等价。",
+      "retry_condition": "未完成合同：native-NPP-C3-gradient-tie-and-file-CLI-equivalence；补实现/真实后端并重验。",
       "detail": "migration/sample-reports/NPP/nppCanny/npp_canny_simple.cpp.md",
-      "record_field": "attempts/1",
-      "amd_evidence": "migration/reports/evidence/20261109T084256.329631Z/original-rocm/NPP_nppCanny_npp_canny_simple.cpp",
+      "record_field": "selected_validation",
+      "amd_evidence": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_nppCanny_npp_canny_simple.cpp",
       "amd_logs": [
-        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/NPP_nppCanny_npp_canny_simple.cpp/build.log"
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_nppCanny_npp_canny_simple.cpp/boundary/run.log",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_nppCanny_npp_canny_simple.cpp/build.log",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_nppCanny_npp_canny_simple.cpp/changed-values/run.log",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_nppCanny_npp_canny_simple.cpp/irregular/run.log",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_nppCanny_npp_canny_simple.cpp/original/run.log",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_nppCanny_npp_canny_simple.cpp/repeat/run.log",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_nppCanny_npp_canny_simple.cpp/singular-or-empty/run.log"
       ],
-      "cuda_comparison": "BLOCKED",
-      "cuda_evidence": "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP_nppCanny_npp_canny_simple.cpp",
-      "cuda_evidence_basis": "原始 CUDA 尝试",
+      "cuda_comparison": "PASSED",
+      "cuda_evidence": "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_nppCanny_npp_canny_simple.cpp",
+      "cuda_evidence_basis": "当前验收记录",
       "cuda_logs": [
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP_nppCanny_npp_canny_simple.cpp/build.log"
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_nppCanny_npp_canny_simple.cpp/boundary/run.log",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_nppCanny_npp_canny_simple.cpp/build.log",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_nppCanny_npp_canny_simple.cpp/changed-values/run.log",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_nppCanny_npp_canny_simple.cpp/irregular/run.log",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_nppCanny_npp_canny_simple.cpp/original/run.log",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_nppCanny_npp_canny_simple.cpp/repeat/run.log",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_nppCanny_npp_canny_simple.cpp/singular-or-empty/run.log"
       ],
-      "validation_reports": [],
+      "validation_reports": [
+        "migration/reports/batches12_15-validation.json"
+      ],
       "all_evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/NPP_nppCanny_npp_canny_simple.cpp",
         "migration/reports/evidence/20261109T084256.329631Z/original-rocm/NPP_nppCanny_npp_canny_simple.cpp",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP_nppCanny_npp_canny_simple.cpp"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP_nppCanny_npp_canny_simple.cpp",
+        "migration/reports/evidence/20261110T051547.561861Z/batches12_15-rocm/NPP_nppCanny_npp_canny_simple.cpp",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/NPP_nppCanny_npp_canny_simple.cpp",
+        "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/NPP_nppCanny_npp_canny_simple.cpp",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_nppCanny_npp_canny_simple.cpp",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_nppCanny_npp_canny_simple.cpp"
       ]
     },
     {
@@ -6088,37 +6299,69 @@
       "id": "NPP/templateMatching::templateMatching.cpp",
       "family": "NPP",
       "source": "NPP/templateMatching/templateMatching.cpp",
-      "status": "FAILED",
-      "level": "L1",
-      "actual_library": null,
-      "backend_library": null,
-      "implementation_method": "API_PORT",
+      "status": "PARTIAL",
+      "level": "L4",
+      "actual_library": "HIP zero-mean normalized correlation + GPU argmax kernels",
+      "backend_library": "HIP zero-mean normalized correlation + GPU argmax kernels",
+      "implementation_method": "API_PORT_WITH_EXECUTION_ADAPTER",
       "implementation": "rocm/ported/NPP/templateMatching/templateMatching.cpp",
-      "implementation_sha256": "22f4b21a374e268f86592338c7bb9acf1f4ccd24f3e2e4903ed8fd2ece63a418",
-      "passed_cases": [],
+      "implementation_sha256": "e7d1f6bc6a7229963605d97c28632701583aba5b257cdcb36115f54b5a3bb8e0",
+      "passed_cases": [
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty"
+      ],
       "required_cases": [
-        "original-functional-contract",
-        "independent-numerical-or-semantic-reference"
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty",
+        "batches12_15/original-annotation-file-CLI-and-timing-harness"
       ],
-      "scope_and_reason": "build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/NPP/templateMatching/templateMatching.cpp:34:10: fatal error: 'npp.h' file not found；failed to execute:/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib/llvm/bin/clang++  --offload-arch=gfx1201 --driver-mode=g++ --hip-link  -std=c++17 -O2 -D__HIP_PLATFORM_AMD__ --rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDAL",
-      "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
+      "scope_and_reason": "使用HIP zero-mean normalized correlation + GPU argmax kernels；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。原始2048x1024/96x64、seed1234退化模板、完整score与GPU argmax均验收；原例注释图文件、全部CLI和计时harness尚未移植。",
+      "retry_condition": "未完成合同：original-annotation-file-CLI-and-timing-harness；补实现/真实后端并重验。",
       "detail": "migration/sample-reports/NPP/templateMatching/templateMatching.cpp.md",
-      "record_field": "attempts/1",
-      "amd_evidence": "migration/reports/evidence/20261109T084256.329631Z/original-rocm/NPP_templateMatching_templateMatching.cpp",
+      "record_field": "selected_validation",
+      "amd_evidence": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp",
       "amd_logs": [
-        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/NPP_templateMatching_templateMatching.cpp/build.log"
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp/boundary/run.log",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp/build.log",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp/changed-values/run.log",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp/irregular/run.log",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp/original/run.log",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp/repeat/run.log",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp/singular-or-empty/run.log"
       ],
-      "cuda_comparison": "BLOCKED",
-      "cuda_evidence": "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP_templateMatching_templateMatching.cpp",
-      "cuda_evidence_basis": "原始 CUDA 尝试",
+      "cuda_comparison": "PASSED",
+      "cuda_evidence": "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp",
+      "cuda_evidence_basis": "当前验收记录",
       "cuda_logs": [
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP_templateMatching_templateMatching.cpp/build.log"
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp/boundary/run.log",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp/build.log",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp/changed-values/run.log",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp/irregular/run.log",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp/original/run.log",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp/repeat/run.log",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp/singular-or-empty/run.log"
       ],
-      "validation_reports": [],
+      "validation_reports": [
+        "migration/reports/batches12_15-validation.json"
+      ],
       "all_evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/NPP_templateMatching_templateMatching.cpp",
         "migration/reports/evidence/20261109T084256.329631Z/original-rocm/NPP_templateMatching_templateMatching.cpp",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP_templateMatching_templateMatching.cpp"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP_templateMatching_templateMatching.cpp",
+        "migration/reports/evidence/20261110T051547.561861Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp",
+        "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/NPP_templateMatching_templateMatching.cpp",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp"
       ]
     },
     {
@@ -11312,222 +11555,400 @@
       "id": "cuBLASMp::geadd.cu",
       "family": "cuBLASMp",
       "source": "cuBLASMp/geadd.cu",
-      "status": "FAILED",
-      "level": "L1",
-      "actual_library": null,
-      "backend_library": null,
-      "implementation_method": "API_PORT",
+      "status": "PASSED",
+      "level": "L4",
+      "actual_library": "MPI + RCCL AllReduce + HIP FP64 block-cyclic GEADD",
+      "backend_library": "MPI + RCCL AllReduce + HIP FP64 block-cyclic GEADD",
+      "implementation_method": "API_PORT_WITH_EXECUTION_ADAPTER",
       "implementation": "rocm/ported/cuBLASMp/geadd.cu",
-      "implementation_sha256": "0cf394389ffdc257e008bd423c3616238e418b3c65de86aa75067aee8c2770cb",
-      "passed_cases": [],
+      "implementation_sha256": "97dd19cd2cd2688911de7b4a25c83bd1f0a994c8f9c791689b3b2c49186a6f77",
+      "passed_cases": [
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty"
+      ],
       "required_cases": [
-        "original-functional-contract",
-        "independent-numerical-or-semantic-reference"
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty"
       ],
-      "scope_and_reason": "build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASMp/geadd.cu:20:10: fatal error: 'cublasmp.h' file not found",
-      "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
+      "scope_and_reason": "使用MPI + RCCL AllReduce + HIP FP64 block-cyclic GEADD；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。仅登记profile/规模/执行方式通过，不外推其它dtype、规模、网格或性能；内部数据重分配/CPU布局编排与项目GPU算法已公开。",
+      "retry_condition": "扩展其它dtype、规模、线程块/进程网格、多节点或性能需新增登记case并重验。",
       "detail": "migration/sample-reports/cuBLASMp/geadd.cu.md",
-      "record_field": "attempts/1",
-      "amd_evidence": "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuBLASMp_geadd.cu",
+      "record_field": "selected_validation",
+      "amd_evidence": "migration/reports/evidence/20261110T052021.829140Z/batches12_15-rocm/cuBLASMp_geadd.cu",
       "amd_logs": [
-        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuBLASMp_geadd.cu/build.log"
+        "migration/reports/evidence/20261110T052021.829140Z/batches12_15-rocm/cuBLASMp_geadd.cu/boundary/run.log",
+        "migration/reports/evidence/20261110T052021.829140Z/batches12_15-rocm/cuBLASMp_geadd.cu/build.log",
+        "migration/reports/evidence/20261110T052021.829140Z/batches12_15-rocm/cuBLASMp_geadd.cu/changed-values/run.log",
+        "migration/reports/evidence/20261110T052021.829140Z/batches12_15-rocm/cuBLASMp_geadd.cu/irregular/run.log",
+        "migration/reports/evidence/20261110T052021.829140Z/batches12_15-rocm/cuBLASMp_geadd.cu/original/run.log",
+        "migration/reports/evidence/20261110T052021.829140Z/batches12_15-rocm/cuBLASMp_geadd.cu/repeat/run.log",
+        "migration/reports/evidence/20261110T052021.829140Z/batches12_15-rocm/cuBLASMp_geadd.cu/singular-or-empty/run.log"
       ],
-      "cuda_comparison": "BLOCKED",
-      "cuda_evidence": "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuBLASMp_geadd.cu",
-      "cuda_evidence_basis": "原始 CUDA 尝试",
+      "cuda_comparison": "PASSED",
+      "cuda_evidence": "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_geadd.cu",
+      "cuda_evidence_basis": "当前验收记录",
       "cuda_logs": [
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuBLASMp_geadd.cu/build.log"
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_geadd.cu/boundary/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_geadd.cu/build.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_geadd.cu/changed-values/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_geadd.cu/irregular/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_geadd.cu/original/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_geadd.cu/repeat/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_geadd.cu/singular-or-empty/run.log"
       ],
-      "validation_reports": [],
+      "validation_reports": [
+        "migration/reports/batches12_15-validation.json"
+      ],
       "all_evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/cuBLASMp_geadd.cu",
         "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuBLASMp_geadd.cu",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuBLASMp_geadd.cu"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuBLASMp_geadd.cu",
+        "migration/reports/evidence/20261110T052021.829140Z/batches12_15-rocm/cuBLASMp_geadd.cu",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_geadd.cu",
+        "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/cuBLASMp_geadd.cu"
       ]
     },
     {
       "id": "cuBLASMp::gemm.cu",
       "family": "cuBLASMp",
       "source": "cuBLASMp/gemm.cu",
-      "status": "FAILED",
-      "level": "L1",
-      "actual_library": null,
-      "backend_library": null,
-      "implementation_method": "API_PORT",
+      "status": "PARTIAL",
+      "level": "L4",
+      "actual_library": "MPI + RCCL distribution + hipBLAS FP32 local GEMM",
+      "backend_library": "MPI + RCCL distribution + hipBLAS FP32 local GEMM",
+      "implementation_method": "API_PORT_WITH_EXECUTION_ADAPTER",
       "implementation": "rocm/ported/cuBLASMp/gemm.cu",
-      "implementation_sha256": "339cb87a559ed99350ddc34e2d9556679b3d445f6822ba8d0dea311baf79838d",
-      "passed_cases": [],
+      "implementation_sha256": "f6fde82af7e6b83aa21b9b254a5c82a0755e36178afd443fc5b5b0b416797753",
+      "passed_cases": [
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty"
+      ],
       "required_cases": [
-        "original-functional-contract",
-        "independent-numerical-or-semantic-reference"
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty",
+        "batches12_15/original-B-submatrix-offset-and-full-transpose-controls"
       ],
-      "scope_and_reason": "build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASMp/gemm.cu:19:10: fatal error: 'cublasmp.h' file not found",
-      "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
+      "scope_and_reason": "使用MPI + RCCL distribution + hipBLAS FP32 local GEMM；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。本轮GEMM保持FP32/尺寸与A/C分布；原例B的IB=3子矩阵描述符及完整transpose/CLI控制未逐项等价，保留部分支持。",
+      "retry_condition": "未完成合同：original-B-submatrix-offset-and-full-transpose-controls；补实现/真实后端并重验。",
       "detail": "migration/sample-reports/cuBLASMp/gemm.cu.md",
-      "record_field": "attempts/1",
-      "amd_evidence": "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuBLASMp_gemm.cu",
+      "record_field": "selected_validation",
+      "amd_evidence": "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_gemm.cu",
       "amd_logs": [
-        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuBLASMp_gemm.cu/build.log"
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_gemm.cu/boundary/run.log",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_gemm.cu/build.log",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_gemm.cu/changed-values/run.log",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_gemm.cu/irregular/run.log",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_gemm.cu/original/run.log",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_gemm.cu/repeat/run.log",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_gemm.cu/singular-or-empty/run.log"
       ],
-      "cuda_comparison": "BLOCKED",
-      "cuda_evidence": "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuBLASMp_gemm.cu",
-      "cuda_evidence_basis": "原始 CUDA 尝试",
+      "cuda_comparison": "PASSED",
+      "cuda_evidence": "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_gemm.cu",
+      "cuda_evidence_basis": "当前验收记录",
       "cuda_logs": [
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuBLASMp_gemm.cu/build.log"
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_gemm.cu/boundary/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_gemm.cu/build.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_gemm.cu/changed-values/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_gemm.cu/irregular/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_gemm.cu/original/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_gemm.cu/repeat/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_gemm.cu/singular-or-empty/run.log"
       ],
-      "validation_reports": [],
+      "validation_reports": [
+        "migration/reports/batches12_15-validation.json"
+      ],
       "all_evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/cuBLASMp_gemm.cu",
         "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuBLASMp_gemm.cu",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuBLASMp_gemm.cu"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuBLASMp_gemm.cu",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_gemm.cu",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_gemm.cu",
+        "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/cuBLASMp_gemm.cu"
       ]
     },
     {
       "id": "cuBLASMp::gemr2d.cu",
       "family": "cuBLASMp",
       "source": "cuBLASMp/gemr2d.cu",
-      "status": "FAILED",
-      "level": "L1",
-      "actual_library": null,
-      "backend_library": null,
-      "implementation_method": "API_PORT",
+      "status": "PASSED",
+      "level": "L4",
+      "actual_library": "MPI + RCCL AllReduce + HIP block-cyclic redistribution/roundtrip",
+      "backend_library": "MPI + RCCL AllReduce + HIP block-cyclic redistribution/roundtrip",
+      "implementation_method": "API_PORT_WITH_EXECUTION_ADAPTER",
       "implementation": "rocm/ported/cuBLASMp/gemr2d.cu",
-      "implementation_sha256": "04ab7a0d3388e7c5c34309641fe33e758024395cfc8ac9e188f8ee392f40e344",
-      "passed_cases": [],
+      "implementation_sha256": "37a502e1a18c2f5b538f8f297cf8c86da518fe8e6e09f28aef578a81f48141bf",
+      "passed_cases": [
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty"
+      ],
       "required_cases": [
-        "original-functional-contract",
-        "independent-numerical-or-semantic-reference"
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty"
       ],
-      "scope_and_reason": "build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASMp/gemr2d.cu:19:10: fatal error: 'cublasmp.h' file not found",
-      "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
+      "scope_and_reason": "使用MPI + RCCL AllReduce + HIP block-cyclic redistribution/roundtrip；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。仅登记profile/规模/执行方式通过，不外推其它dtype、规模、网格或性能；内部数据重分配/CPU布局编排与项目GPU算法已公开。",
+      "retry_condition": "扩展其它dtype、规模、线程块/进程网格、多节点或性能需新增登记case并重验。",
       "detail": "migration/sample-reports/cuBLASMp/gemr2d.cu.md",
-      "record_field": "attempts/1",
-      "amd_evidence": "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuBLASMp_gemr2d.cu",
+      "record_field": "selected_validation",
+      "amd_evidence": "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_gemr2d.cu",
       "amd_logs": [
-        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuBLASMp_gemr2d.cu/build.log"
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_gemr2d.cu/boundary/run.log",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_gemr2d.cu/build.log",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_gemr2d.cu/changed-values/run.log",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_gemr2d.cu/irregular/run.log",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_gemr2d.cu/original/run.log",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_gemr2d.cu/repeat/run.log",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_gemr2d.cu/singular-or-empty/run.log"
       ],
-      "cuda_comparison": "BLOCKED",
-      "cuda_evidence": "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuBLASMp_gemr2d.cu",
-      "cuda_evidence_basis": "原始 CUDA 尝试",
+      "cuda_comparison": "PASSED",
+      "cuda_evidence": "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_gemr2d.cu",
+      "cuda_evidence_basis": "当前验收记录",
       "cuda_logs": [
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuBLASMp_gemr2d.cu/build.log"
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_gemr2d.cu/boundary/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_gemr2d.cu/build.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_gemr2d.cu/changed-values/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_gemr2d.cu/irregular/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_gemr2d.cu/original/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_gemr2d.cu/repeat/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_gemr2d.cu/singular-or-empty/run.log"
       ],
-      "validation_reports": [],
+      "validation_reports": [
+        "migration/reports/batches12_15-validation.json"
+      ],
       "all_evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/cuBLASMp_gemr2d.cu",
         "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuBLASMp_gemr2d.cu",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuBLASMp_gemr2d.cu"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuBLASMp_gemr2d.cu",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_gemr2d.cu",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_gemr2d.cu",
+        "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/cuBLASMp_gemr2d.cu"
       ]
     },
     {
       "id": "cuBLASMp::matmul_ag.cu",
       "family": "cuBLASMp",
       "source": "cuBLASMp/matmul_ag.cu",
-      "status": "FAILED",
-      "level": "L1",
-      "actual_library": null,
-      "backend_library": null,
-      "implementation_method": "API_PORT",
+      "status": "PARTIAL",
+      "level": "L4",
+      "actual_library": "MPI + RCCL AllGather + hipBLAS GemmEx FP16 inputs/FP32 accumulation + HIP FP16 quantization",
+      "backend_library": "MPI + RCCL AllGather + hipBLAS GemmEx FP16 inputs/FP32 accumulation + HIP FP16 quantization",
+      "implementation_method": "API_PORT_WITH_EXECUTION_ADAPTER",
       "implementation": "rocm/ported/cuBLASMp/matmul_ag.cu",
-      "implementation_sha256": "9bddd64a75b9255be78a8bfc6d5f900cfa8328cac65c0324a7689b8ecd14c680",
-      "passed_cases": [],
+      "implementation_sha256": "efdaec2f80a2479c7ba4efcdcae53b8f96d1a5dd62dbbf6340db98fd0bfaf294",
+      "passed_cases": [
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty"
+      ],
       "required_cases": [
-        "original-functional-contract",
-        "independent-numerical-or-semantic-reference"
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty",
+        "batches12_15/original-half-collective-and-quantized-scale-modes"
       ],
-      "scope_and_reason": "build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASMp/matmul_ag.cu:19:10: fatal error: 'cublasmp.h' file not found",
-      "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
+      "scope_and_reason": "使用MPI + RCCL AllGather + hipBLAS GemmEx FP16 inputs/FP32 accumulation + HIP FP16 quantization；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。FP16输入用native GemmEx计算，项目FP32通信/累加后GPU量化FP16；原始FP16 collective舍入、FP8/FP4/scale模式与完整CLI尚未等价。",
+      "retry_condition": "未完成合同：original-half-collective-and-quantized-scale-modes；补实现/真实后端并重验。",
       "detail": "migration/sample-reports/cuBLASMp/matmul_ag.cu.md",
-      "record_field": "attempts/1",
-      "amd_evidence": "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuBLASMp_matmul_ag.cu",
+      "record_field": "selected_validation",
+      "amd_evidence": "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_matmul_ag.cu",
       "amd_logs": [
-        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuBLASMp_matmul_ag.cu/build.log"
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_matmul_ag.cu/boundary/run.log",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_matmul_ag.cu/build.log",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_matmul_ag.cu/changed-values/run.log",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_matmul_ag.cu/irregular/run.log",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_matmul_ag.cu/original/run.log",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_matmul_ag.cu/repeat/run.log",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_matmul_ag.cu/singular-or-empty/run.log"
       ],
-      "cuda_comparison": "BLOCKED",
-      "cuda_evidence": "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuBLASMp_matmul_ag.cu",
-      "cuda_evidence_basis": "原始 CUDA 尝试",
+      "cuda_comparison": "PASSED",
+      "cuda_evidence": "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_matmul_ag.cu",
+      "cuda_evidence_basis": "当前验收记录",
       "cuda_logs": [
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuBLASMp_matmul_ag.cu/build.log"
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_matmul_ag.cu/boundary/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_matmul_ag.cu/build.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_matmul_ag.cu/changed-values/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_matmul_ag.cu/irregular/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_matmul_ag.cu/original/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_matmul_ag.cu/repeat/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_matmul_ag.cu/singular-or-empty/run.log"
       ],
-      "validation_reports": [],
+      "validation_reports": [
+        "migration/reports/batches12_15-validation.json"
+      ],
       "all_evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/cuBLASMp_matmul_ag.cu",
         "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuBLASMp_matmul_ag.cu",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuBLASMp_matmul_ag.cu"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuBLASMp_matmul_ag.cu",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_matmul_ag.cu",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_matmul_ag.cu",
+        "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/cuBLASMp_matmul_ag.cu"
       ]
     },
     {
       "id": "cuBLASMp::matmul_ar.cu",
       "family": "cuBLASMp",
       "source": "cuBLASMp/matmul_ar.cu",
-      "status": "FAILED",
-      "level": "L1",
-      "actual_library": null,
-      "backend_library": null,
-      "implementation_method": "API_PORT",
+      "status": "PARTIAL",
+      "level": "L4",
+      "actual_library": "MPI + RCCL AllReduce + hipBLAS GemmEx FP16 inputs/FP32 accumulation + HIP FP16 quantization",
+      "backend_library": "MPI + RCCL AllReduce + hipBLAS GemmEx FP16 inputs/FP32 accumulation + HIP FP16 quantization",
+      "implementation_method": "API_PORT_WITH_EXECUTION_ADAPTER",
       "implementation": "rocm/ported/cuBLASMp/matmul_ar.cu",
-      "implementation_sha256": "d780a98dca771254897d228b604f05e02988eb47db2dfee7389328505923925d",
-      "passed_cases": [],
+      "implementation_sha256": "5de17c403c2a572b7e78d73f836fe0c3be75da67ffd9e75dc11076559bdad74e",
+      "passed_cases": [
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty"
+      ],
       "required_cases": [
-        "original-functional-contract",
-        "independent-numerical-or-semantic-reference"
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty",
+        "batches12_15/original-half-collective-and-quantized-scale-modes"
       ],
-      "scope_and_reason": "build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASMp/matmul_ar.cu:19:10: fatal error: 'cublasmp.h' file not found",
-      "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
+      "scope_and_reason": "使用MPI + RCCL AllReduce + hipBLAS GemmEx FP16 inputs/FP32 accumulation + HIP FP16 quantization；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。FP16输入用native GemmEx计算，项目FP32通信/累加后GPU量化FP16；原始FP16 collective舍入、FP8/FP4/scale模式与完整CLI尚未等价。",
+      "retry_condition": "未完成合同：original-half-collective-and-quantized-scale-modes；补实现/真实后端并重验。",
       "detail": "migration/sample-reports/cuBLASMp/matmul_ar.cu.md",
-      "record_field": "attempts/1",
-      "amd_evidence": "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuBLASMp_matmul_ar.cu",
+      "record_field": "selected_validation",
+      "amd_evidence": "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_matmul_ar.cu",
       "amd_logs": [
-        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuBLASMp_matmul_ar.cu/build.log"
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_matmul_ar.cu/boundary/run.log",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_matmul_ar.cu/build.log",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_matmul_ar.cu/changed-values/run.log",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_matmul_ar.cu/irregular/run.log",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_matmul_ar.cu/original/run.log",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_matmul_ar.cu/repeat/run.log",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_matmul_ar.cu/singular-or-empty/run.log"
       ],
-      "cuda_comparison": "BLOCKED",
-      "cuda_evidence": "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuBLASMp_matmul_ar.cu",
-      "cuda_evidence_basis": "原始 CUDA 尝试",
+      "cuda_comparison": "PASSED",
+      "cuda_evidence": "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_matmul_ar.cu",
+      "cuda_evidence_basis": "当前验收记录",
       "cuda_logs": [
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuBLASMp_matmul_ar.cu/build.log"
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_matmul_ar.cu/boundary/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_matmul_ar.cu/build.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_matmul_ar.cu/changed-values/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_matmul_ar.cu/irregular/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_matmul_ar.cu/original/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_matmul_ar.cu/repeat/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_matmul_ar.cu/singular-or-empty/run.log"
       ],
-      "validation_reports": [],
+      "validation_reports": [
+        "migration/reports/batches12_15-validation.json"
+      ],
       "all_evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/cuBLASMp_matmul_ar.cu",
         "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuBLASMp_matmul_ar.cu",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuBLASMp_matmul_ar.cu"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuBLASMp_matmul_ar.cu",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_matmul_ar.cu",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_matmul_ar.cu",
+        "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/cuBLASMp_matmul_ar.cu"
       ]
     },
     {
       "id": "cuBLASMp::matmul_rs.cu",
       "family": "cuBLASMp",
       "source": "cuBLASMp/matmul_rs.cu",
-      "status": "FAILED",
-      "level": "L1",
-      "actual_library": null,
-      "backend_library": null,
-      "implementation_method": "API_PORT",
+      "status": "PARTIAL",
+      "level": "L4",
+      "actual_library": "MPI + RCCL ReduceScatter + hipBLAS GemmEx FP16 inputs/FP32 accumulation + HIP FP16 quantization",
+      "backend_library": "MPI + RCCL ReduceScatter + hipBLAS GemmEx FP16 inputs/FP32 accumulation + HIP FP16 quantization",
+      "implementation_method": "API_PORT_WITH_EXECUTION_ADAPTER",
       "implementation": "rocm/ported/cuBLASMp/matmul_rs.cu",
-      "implementation_sha256": "2bf676a735c24f4133ef2e0451c6ef5bc4a0669f548a358f0952aed994369d16",
-      "passed_cases": [],
+      "implementation_sha256": "527de7797fcfb472042993b027c8fa803543250804ddd33d7e9bdad9a6139ce4",
+      "passed_cases": [
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty"
+      ],
       "required_cases": [
-        "original-functional-contract",
-        "independent-numerical-or-semantic-reference"
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty",
+        "batches12_15/original-half-collective-and-quantized-scale-modes"
       ],
-      "scope_and_reason": "build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASMp/matmul_rs.cu:19:10: fatal error: 'cublasmp.h' file not found",
-      "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
+      "scope_and_reason": "使用MPI + RCCL ReduceScatter + hipBLAS GemmEx FP16 inputs/FP32 accumulation + HIP FP16 quantization；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。FP16输入用native GemmEx计算，项目FP32通信/累加后GPU量化FP16；原始FP16 collective舍入、FP8/FP4/scale模式与完整CLI尚未等价。",
+      "retry_condition": "未完成合同：original-half-collective-and-quantized-scale-modes；补实现/真实后端并重验。",
       "detail": "migration/sample-reports/cuBLASMp/matmul_rs.cu.md",
-      "record_field": "attempts/1",
-      "amd_evidence": "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuBLASMp_matmul_rs.cu",
+      "record_field": "selected_validation",
+      "amd_evidence": "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_matmul_rs.cu",
       "amd_logs": [
-        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuBLASMp_matmul_rs.cu/build.log"
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_matmul_rs.cu/boundary/run.log",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_matmul_rs.cu/build.log",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_matmul_rs.cu/changed-values/run.log",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_matmul_rs.cu/irregular/run.log",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_matmul_rs.cu/original/run.log",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_matmul_rs.cu/repeat/run.log",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_matmul_rs.cu/singular-or-empty/run.log"
       ],
-      "cuda_comparison": "BLOCKED",
-      "cuda_evidence": "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuBLASMp_matmul_rs.cu",
-      "cuda_evidence_basis": "原始 CUDA 尝试",
+      "cuda_comparison": "PASSED",
+      "cuda_evidence": "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_matmul_rs.cu",
+      "cuda_evidence_basis": "当前验收记录",
       "cuda_logs": [
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuBLASMp_matmul_rs.cu/build.log"
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_matmul_rs.cu/boundary/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_matmul_rs.cu/build.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_matmul_rs.cu/changed-values/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_matmul_rs.cu/irregular/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_matmul_rs.cu/original/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_matmul_rs.cu/repeat/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_matmul_rs.cu/singular-or-empty/run.log"
       ],
-      "validation_reports": [],
+      "validation_reports": [
+        "migration/reports/batches12_15-validation.json"
+      ],
       "all_evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/cuBLASMp_matmul_rs.cu",
         "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuBLASMp_matmul_rs.cu",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuBLASMp_matmul_rs.cu"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuBLASMp_matmul_rs.cu",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_matmul_rs.cu",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_matmul_rs.cu",
+        "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/cuBLASMp_matmul_rs.cu"
       ]
     },
     {
@@ -16888,37 +17309,66 @@
       "id": "cuFFTMp/samples/c2c::cufftmp_c2c.cu",
       "family": "cuFFTMp",
       "source": "cuFFTMp/samples/c2c/cufftmp_c2c.cu",
-      "status": "FAILED",
-      "level": "L1",
-      "actual_library": null,
-      "backend_library": null,
-      "implementation_method": "API_PORT",
+      "status": "PASSED",
+      "level": "L4",
+      "actual_library": "MPI + hipFFT local YZ/X FFT + RCCL Send/Recv + HIP slab transpose/scale",
+      "backend_library": "MPI + hipFFT local YZ/X FFT + RCCL Send/Recv + HIP slab transpose/scale",
+      "implementation_method": "API_PORT_WITH_EXECUTION_ADAPTER",
       "implementation": "rocm/ported/cuFFTMp/samples/c2c/cufftmp_c2c.cu",
-      "implementation_sha256": "cc6a3fd5765eb879b30bf00fc8014633f29bcbfdf67c02175c664bdb7802410c",
-      "passed_cases": [],
+      "implementation_sha256": "cb8b7c782aeda13b68d08bd539f13c3fc2301d05408fcd61f46607bed75d224e",
+      "passed_cases": [
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty"
+      ],
       "required_cases": [
-        "original-functional-contract",
-        "independent-numerical-or-semantic-reference"
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty"
       ],
-      "scope_and_reason": "build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuFFTMp/samples/c2c/cufftmp_c2c.cu:26:10: fatal error: 'cufftMp.h' file not found",
-      "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
+      "scope_and_reason": "使用MPI + hipFFT local YZ/X FFT + RCCL Send/Recv + HIP slab transpose/scale；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。仅登记profile/规模/执行方式通过，不外推其它dtype、规模、网格或性能；内部数据重分配/CPU布局编排与项目GPU算法已公开。",
+      "retry_condition": "扩展其它dtype、规模、线程块/进程网格、多节点或性能需新增登记case并重验。",
       "detail": "migration/sample-reports/cuFFTMp/samples/c2c/cufftmp_c2c.cu.md",
-      "record_field": "attempts/1",
-      "amd_evidence": "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuFFTMp_samples_c2c_cufftmp_c2c.cu",
+      "record_field": "selected_validation",
+      "amd_evidence": "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuFFTMp_samples_c2c_cufftmp_c2c.cu",
       "amd_logs": [
-        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuFFTMp_samples_c2c_cufftmp_c2c.cu/build.log"
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuFFTMp_samples_c2c_cufftmp_c2c.cu/boundary/run.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuFFTMp_samples_c2c_cufftmp_c2c.cu/build.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuFFTMp_samples_c2c_cufftmp_c2c.cu/changed-values/run.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuFFTMp_samples_c2c_cufftmp_c2c.cu/irregular/run.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuFFTMp_samples_c2c_cufftmp_c2c.cu/original/run.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuFFTMp_samples_c2c_cufftmp_c2c.cu/repeat/run.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuFFTMp_samples_c2c_cufftmp_c2c.cu/singular-or-empty/run.log"
       ],
-      "cuda_comparison": "BLOCKED",
-      "cuda_evidence": "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuFFTMp_samples_c2c_cufftmp_c2c.cu",
-      "cuda_evidence_basis": "原始 CUDA 尝试",
+      "cuda_comparison": "PASSED",
+      "cuda_evidence": "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuFFTMp_samples_c2c_cufftmp_c2c.cu",
+      "cuda_evidence_basis": "当前验收记录",
       "cuda_logs": [
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuFFTMp_samples_c2c_cufftmp_c2c.cu/build.log"
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuFFTMp_samples_c2c_cufftmp_c2c.cu/boundary/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuFFTMp_samples_c2c_cufftmp_c2c.cu/build.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuFFTMp_samples_c2c_cufftmp_c2c.cu/changed-values/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuFFTMp_samples_c2c_cufftmp_c2c.cu/irregular/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuFFTMp_samples_c2c_cufftmp_c2c.cu/original/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuFFTMp_samples_c2c_cufftmp_c2c.cu/repeat/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuFFTMp_samples_c2c_cufftmp_c2c.cu/singular-or-empty/run.log"
       ],
-      "validation_reports": [],
+      "validation_reports": [
+        "migration/reports/batches12_15-validation.json"
+      ],
       "all_evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/cuFFTMp_samples_c2c_cufftmp_c2c.cu",
         "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuFFTMp_samples_c2c_cufftmp_c2c.cu",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuFFTMp_samples_c2c_cufftmp_c2c.cu"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuFFTMp_samples_c2c_cufftmp_c2c.cu",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuFFTMp_samples_c2c_cufftmp_c2c.cu",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuFFTMp_samples_c2c_cufftmp_c2c.cu",
+        "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/cuFFTMp_samples_c2c_cufftmp_c2c.cu"
       ]
     },
     {
@@ -19828,33 +20278,58 @@
       "id": "cuSOLVER/MgGetrf::cusolver_MgGetrf_example.cu",
       "family": "cuSOLVER",
       "source": "cuSOLVER/MgGetrf/cusolver_MgGetrf_example.cu",
-      "status": "FAILED",
-      "level": "L1",
-      "actual_library": null,
-      "backend_library": null,
-      "implementation_method": "API_PORT",
+      "status": "PASSED",
+      "level": "L4",
+      "actual_library": "HIP multi-device pivot LU/solve + RCCL broadcast/AllReduce; single process with two GPU threads",
+      "backend_library": "HIP multi-device pivot LU/solve + RCCL broadcast/AllReduce; single process with two GPU threads",
+      "implementation_method": "API_PORT_WITH_EXECUTION_ADAPTER",
       "implementation": "rocm/ported/cuSOLVER/MgGetrf/cusolver_MgGetrf_example.cu",
-      "implementation_sha256": "fc5900121db6a9b5c909b4782d2ad8b042258935c53e7000077ca4787828f698",
-      "passed_cases": [],
+      "implementation_sha256": "e8f466f1214b4eb91441c0a0957f9a982316bca01fe43d9f9b55de521b410fd0",
+      "passed_cases": [
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty"
+      ],
       "required_cases": [
-        "original-functional-contract",
-        "independent-numerical-or-semantic-reference"
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty"
       ],
-      "scope_and_reason": "build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/MgGetrf/cusolver_MgGetrf_example.cu:56:5: error: unknown type name 'cusolverMgHandle_t'；/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/MgGetrf/cusolver_MgGetrf_example.cu:79:5: error: unknown type name 'cudaLibMgMatrixDesc_t'",
-      "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
+      "scope_and_reason": "使用HIP multi-device pivot LU/solve + RCCL broadcast/AllReduce; single process with two GPU threads；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。仅登记profile/规模/执行方式通过，不外推其它dtype、规模、网格或性能；内部数据重分配/CPU布局编排与项目GPU算法已公开。",
+      "retry_condition": "扩展其它dtype、规模、线程块/进程网格、多节点或性能需新增登记case并重验。",
       "detail": "migration/sample-reports/cuSOLVER/MgGetrf/cusolver_MgGetrf_example.cu.md",
-      "record_field": "attempts/6",
-      "amd_evidence": "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu",
+      "record_field": "selected_validation",
+      "amd_evidence": "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu",
       "amd_logs": [
-        "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu/build.log"
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu/boundary/run.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu/build.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu/changed-values/run.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu/irregular/run.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu/original/run.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu/repeat/run.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu/singular-or-empty/run.log"
       ],
-      "cuda_comparison": "BLOCKED",
-      "cuda_evidence": "migration/reports/evidence/20261109T100720.422147Z/original-cuda/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu",
-      "cuda_evidence_basis": "原始 CUDA 尝试",
+      "cuda_comparison": "PASSED",
+      "cuda_evidence": "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu",
+      "cuda_evidence_basis": "当前验收记录",
       "cuda_logs": [
-        "migration/reports/evidence/20261109T100720.422147Z/original-cuda/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu/build.log"
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu/boundary/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu/build.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu/changed-values/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu/irregular/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu/original/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu/repeat/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu/singular-or-empty/run.log"
       ],
-      "validation_reports": [],
+      "validation_reports": [
+        "migration/reports/batches12_15-validation.json"
+      ],
       "all_evidence": [
         "migration/reports/evidence/20261109T080822.795958Z/original-rocm/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu",
         "migration/reports/evidence/20261109T081329.986729Z/original-rocm/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu",
@@ -19863,40 +20338,70 @@
         "migration/reports/evidence/20261109T081929.210831Z/original-rocm/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu",
         "migration/reports/evidence/20261109T084753.304309Z/original-rocm/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu",
         "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu",
-        "migration/reports/evidence/20261109T100720.422147Z/original-cuda/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu"
+        "migration/reports/evidence/20261109T100720.422147Z/original-cuda/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu",
+        "migration/reports/evidence/20261110T051849.336070Z/batches12_15-native-cuda/cuSOLVER_MgGetrf_cusolver_MgGetrf_example.cu"
       ]
     },
     {
       "id": "cuSOLVER/MgPotrf::cusolver_MgPotrf_example1.cu",
       "family": "cuSOLVER",
       "source": "cuSOLVER/MgPotrf/cusolver_MgPotrf_example1.cu",
-      "status": "FAILED",
-      "level": "L1",
-      "actual_library": null,
-      "backend_library": null,
-      "implementation_method": "API_PORT",
+      "status": "PARTIAL",
+      "level": "L4",
+      "actual_library": "HIP multi-device Cholesky/solve + RCCL broadcast/AllReduce; single process with two GPU threads",
+      "backend_library": "HIP multi-device Cholesky/solve + RCCL broadcast/AllReduce; single process with two GPU threads",
+      "implementation_method": "API_PORT_WITH_EXECUTION_ADAPTER",
       "implementation": "rocm/ported/cuSOLVER/MgPotrf/cusolver_MgPotrf_example1.cu",
-      "implementation_sha256": "4fb56543015d98b3b8025b4b70f6fe639e13dda25aad7750d0023973eb036fd0",
-      "passed_cases": [],
+      "implementation_sha256": "250ed049de84cbc9d22176010be15d3b98a1ff73ac4d0b9c8d2fae3dd3d5f12c",
+      "passed_cases": [
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty"
+      ],
       "required_cases": [
-        "original-functional-contract",
-        "independent-numerical-or-semantic-reference"
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty",
+        "batches12_15/original-Mg-input-distribution-descriptor"
       ],
-      "scope_and_reason": "build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/MgPotrf/cusolver_MgPotrf_example1.cu:67:5: error: unknown type name 'cusolverMgHandle_t'；/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVER/MgPotrf/cusolver_MgPotrf_example1.cu:92:5: error: unknown type name 'cudaLibMgMatrixDesc_t'",
-      "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
+      "scope_and_reason": "使用HIP multi-device Cholesky/solve + RCCL broadcast/AllReduce; single process with two GPU threads；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。8阶/2RHS与单进程多GPU数值通过；项目按列重分配让两卡计算，未实现原始tile256输入/输出描述符的完整转换契约。",
+      "retry_condition": "未完成合同：original-Mg-input-distribution-descriptor；补实现/真实后端并重验。",
       "detail": "migration/sample-reports/cuSOLVER/MgPotrf/cusolver_MgPotrf_example1.cu.md",
-      "record_field": "attempts/6",
-      "amd_evidence": "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
+      "record_field": "selected_validation",
+      "amd_evidence": "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
       "amd_logs": [
-        "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu/build.log"
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu/boundary/run.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu/build.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu/changed-values/run.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu/irregular/run.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu/original/run.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu/repeat/run.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu/singular-or-empty/run.log"
       ],
-      "cuda_comparison": "BLOCKED",
-      "cuda_evidence": "migration/reports/evidence/20261109T100720.422147Z/original-cuda/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
-      "cuda_evidence_basis": "原始 CUDA 尝试",
+      "cuda_comparison": "PASSED",
+      "cuda_evidence": "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
+      "cuda_evidence_basis": "当前验收记录",
       "cuda_logs": [
-        "migration/reports/evidence/20261109T100720.422147Z/original-cuda/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu/build.log"
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu/boundary/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu/build.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu/changed-values/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu/irregular/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu/original/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu/repeat/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu/singular-or-empty/run.log"
       ],
-      "validation_reports": [],
+      "validation_reports": [
+        "migration/reports/batches12_15-validation.json"
+      ],
       "all_evidence": [
         "migration/reports/evidence/20261109T080822.795958Z/original-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
         "migration/reports/evidence/20261109T081329.986729Z/original-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
@@ -19905,7 +20410,11 @@
         "migration/reports/evidence/20261109T081929.210831Z/original-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
         "migration/reports/evidence/20261109T084753.304309Z/original-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
         "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
-        "migration/reports/evidence/20261109T100720.422147Z/original-cuda/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu"
+        "migration/reports/evidence/20261109T100720.422147Z/original-cuda/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
+        "migration/reports/evidence/20261110T051849.336070Z/batches12_15-native-cuda/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu"
       ]
     },
     {
@@ -21970,37 +22479,67 @@
       "id": "cuSOLVERMp::mp_getrf_getrs.c",
       "family": "cuSOLVERMp",
       "source": "cuSOLVERMp/mp_getrf_getrs.c",
-      "status": "FAILED",
-      "level": "L1",
-      "actual_library": null,
-      "backend_library": null,
-      "implementation_method": "API_PORT",
+      "status": "PARTIAL",
+      "level": "L4",
+      "actual_library": "MPI + RCCL + HIP column-distributed partial-row-pivot LU/solve",
+      "backend_library": "MPI + RCCL + HIP column-distributed partial-row-pivot LU/solve",
+      "implementation_method": "API_PORT_WITH_EXECUTION_ADAPTER",
       "implementation": "rocm/ported/cuSOLVERMp/mp_getrf_getrs.c",
-      "implementation_sha256": "0eb416d5261c7c58c15af47eb309a84f3ba81056e113463ff518998d40c54a44",
-      "passed_cases": [],
+      "implementation_sha256": "7c86c353cad83f537f3bde47cdb2f5bdb476d497093d2ad08292f57e253dec9e",
+      "passed_cases": [
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty"
+      ],
       "required_cases": [
-        "original-functional-contract",
-        "independent-numerical-or-semantic-reference"
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty",
+        "batches12_15/original-Mp-2D-grid-and-submatrix-offsets"
       ],
-      "scope_and_reason": "build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVERMp/mp_getrf_getrs.c:24:10: fatal error: 'mpi.h' file not found",
-      "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
+      "scope_and_reason": "使用MPI + RCCL + HIP column-distributed partial-row-pivot LU/solve；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。保留MPI双rank/10阶LU+solve和真实分布数值；原例二维block-cyclic网格及IA/JA=3等子矩阵描述符尚未等价，当前为项目列分布。",
+      "retry_condition": "未完成合同：original-Mp-2D-grid-and-submatrix-offsets；补实现/真实后端并重验。",
       "detail": "migration/sample-reports/cuSOLVERMp/mp_getrf_getrs.c.md",
-      "record_field": "attempts/1",
-      "amd_evidence": "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuSOLVERMp_mp_getrf_getrs.c",
+      "record_field": "selected_validation",
+      "amd_evidence": "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVERMp_mp_getrf_getrs.c",
       "amd_logs": [
-        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuSOLVERMp_mp_getrf_getrs.c/build.log"
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVERMp_mp_getrf_getrs.c/boundary/run.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVERMp_mp_getrf_getrs.c/build.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVERMp_mp_getrf_getrs.c/changed-values/run.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVERMp_mp_getrf_getrs.c/irregular/run.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVERMp_mp_getrf_getrs.c/original/run.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVERMp_mp_getrf_getrs.c/repeat/run.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVERMp_mp_getrf_getrs.c/singular-or-empty/run.log"
       ],
-      "cuda_comparison": "BLOCKED",
-      "cuda_evidence": "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSOLVERMp_mp_getrf_getrs.c",
-      "cuda_evidence_basis": "原始 CUDA 尝试",
+      "cuda_comparison": "PASSED",
+      "cuda_evidence": "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVERMp_mp_getrf_getrs.c",
+      "cuda_evidence_basis": "当前验收记录",
       "cuda_logs": [
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSOLVERMp_mp_getrf_getrs.c/build.log"
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVERMp_mp_getrf_getrs.c/boundary/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVERMp_mp_getrf_getrs.c/build.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVERMp_mp_getrf_getrs.c/changed-values/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVERMp_mp_getrf_getrs.c/irregular/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVERMp_mp_getrf_getrs.c/original/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVERMp_mp_getrf_getrs.c/repeat/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVERMp_mp_getrf_getrs.c/singular-or-empty/run.log"
       ],
-      "validation_reports": [],
+      "validation_reports": [
+        "migration/reports/batches12_15-validation.json"
+      ],
       "all_evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/cuSOLVERMp_mp_getrf_getrs.c",
         "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuSOLVERMp_mp_getrf_getrs.c",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSOLVERMp_mp_getrf_getrs.c"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSOLVERMp_mp_getrf_getrs.c",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVERMp_mp_getrf_getrs.c",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVERMp_mp_getrf_getrs.c",
+        "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/cuSOLVERMp_mp_getrf_getrs.c"
       ]
     },
     {
@@ -22155,37 +22694,67 @@
       "id": "cuSOLVERMp::mp_potrf_potrs.c",
       "family": "cuSOLVERMp",
       "source": "cuSOLVERMp/mp_potrf_potrs.c",
-      "status": "FAILED",
-      "level": "L1",
-      "actual_library": null,
-      "backend_library": null,
-      "implementation_method": "API_PORT",
+      "status": "PARTIAL",
+      "level": "L4",
+      "actual_library": "MPI + RCCL + HIP distributed column Cholesky/solve",
+      "backend_library": "MPI + RCCL + HIP distributed column Cholesky/solve",
+      "implementation_method": "API_PORT_WITH_EXECUTION_ADAPTER",
       "implementation": "rocm/ported/cuSOLVERMp/mp_potrf_potrs.c",
-      "implementation_sha256": "bb2ed7a37796f38b8cdd6d1d0ded3e39daa55605a4fdd55a8ac3ed1e5de43da7",
-      "passed_cases": [],
+      "implementation_sha256": "e9acfdb211bc2a7e5fd447b21ce4da1f2a2e22e5e1c6c7e2a22818398679e8ac",
+      "passed_cases": [
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty"
+      ],
       "required_cases": [
-        "original-functional-contract",
-        "independent-numerical-or-semantic-reference"
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty",
+        "batches12_15/original-Mp-2D-grid-offsets-and-random-SPD-profile"
       ],
-      "scope_and_reason": "build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSOLVERMp/mp_potrf_potrs.c:25:10: fatal error: 'mpi.h' file not found",
-      "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
+      "scope_and_reason": "使用MPI + RCCL + HIP distributed column Cholesky/solve；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。保留MPI双rank/Cholesky+solve和真实分布数值；原例二维网格/子矩阵offset及随机对角占优生成profile尚未等价，当前为已登记Laplacian列分布。",
+      "retry_condition": "未完成合同：original-Mp-2D-grid-offsets-and-random-SPD-profile；补实现/真实后端并重验。",
       "detail": "migration/sample-reports/cuSOLVERMp/mp_potrf_potrs.c.md",
-      "record_field": "attempts/1",
-      "amd_evidence": "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuSOLVERMp_mp_potrf_potrs.c",
+      "record_field": "selected_validation",
+      "amd_evidence": "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVERMp_mp_potrf_potrs.c",
       "amd_logs": [
-        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuSOLVERMp_mp_potrf_potrs.c/build.log"
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVERMp_mp_potrf_potrs.c/boundary/run.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVERMp_mp_potrf_potrs.c/build.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVERMp_mp_potrf_potrs.c/changed-values/run.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVERMp_mp_potrf_potrs.c/irregular/run.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVERMp_mp_potrf_potrs.c/original/run.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVERMp_mp_potrf_potrs.c/repeat/run.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVERMp_mp_potrf_potrs.c/singular-or-empty/run.log"
       ],
-      "cuda_comparison": "BLOCKED",
-      "cuda_evidence": "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSOLVERMp_mp_potrf_potrs.c",
-      "cuda_evidence_basis": "原始 CUDA 尝试",
+      "cuda_comparison": "PASSED",
+      "cuda_evidence": "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVERMp_mp_potrf_potrs.c",
+      "cuda_evidence_basis": "当前验收记录",
       "cuda_logs": [
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSOLVERMp_mp_potrf_potrs.c/build.log"
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVERMp_mp_potrf_potrs.c/boundary/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVERMp_mp_potrf_potrs.c/build.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVERMp_mp_potrf_potrs.c/changed-values/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVERMp_mp_potrf_potrs.c/irregular/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVERMp_mp_potrf_potrs.c/original/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVERMp_mp_potrf_potrs.c/repeat/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVERMp_mp_potrf_potrs.c/singular-or-empty/run.log"
       ],
-      "validation_reports": [],
+      "validation_reports": [
+        "migration/reports/batches12_15-validation.json"
+      ],
       "all_evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/cuSOLVERMp_mp_potrf_potrs.c",
         "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuSOLVERMp_mp_potrf_potrs.c",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSOLVERMp_mp_potrf_potrs.c"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSOLVERMp_mp_potrf_potrs.c",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVERMp_mp_potrf_potrs.c",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVERMp_mp_potrf_potrs.c",
+        "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/cuSOLVERMp_mp_potrf_potrs.c"
       ]
     },
     {
@@ -25317,37 +25886,66 @@
       "id": "cuTENSORMg::contraction_multi_gpu.cu",
       "family": "cuTENSORMg",
       "source": "cuTENSORMg/contraction_multi_gpu.cu",
-      "status": "FAILED",
-      "level": "L1",
-      "actual_library": null,
-      "backend_library": null,
-      "implementation_method": "API_PORT",
+      "status": "PASSED",
+      "level": "L4",
+      "actual_library": "hipBLAS FP32 partitioned contraction + RCCL AllGather; single process with two GPU threads",
+      "backend_library": "hipBLAS FP32 partitioned contraction + RCCL AllGather; single process with two GPU threads",
+      "implementation_method": "API_PORT_WITH_EXECUTION_ADAPTER",
       "implementation": "rocm/ported/cuTENSORMg/contraction_multi_gpu.cu",
-      "implementation_sha256": "0fc41d138b746f41906d762fbcb8ed3d003e594a35ae75d32672018c53be7709",
-      "passed_cases": [],
+      "implementation_sha256": "16ab9abf40f16951dc70d92598f2eb7c3221ecf4caffe6a904f10486a5ed28c1",
+      "passed_cases": [
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty"
+      ],
       "required_cases": [
-        "original-functional-contract",
-        "independent-numerical-or-semantic-reference"
+        "batches12_15/original",
+        "batches12_15/irregular",
+        "batches12_15/changed-values",
+        "batches12_15/boundary",
+        "batches12_15/repeat",
+        "batches12_15/singular-or-empty"
       ],
-      "scope_and_reason": "build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuTENSORMg/contraction_multi_gpu.cu:18:10: fatal error: 'hiptensor.h' file not found",
-      "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
+      "scope_and_reason": "使用hipBLAS FP32 partitioned contraction + RCCL AllGather; single process with two GPU threads；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。仅登记profile/规模/执行方式通过，不外推其它dtype、规模、网格或性能；内部数据重分配/CPU布局编排与项目GPU算法已公开。",
+      "retry_condition": "扩展其它dtype、规模、线程块/进程网格、多节点或性能需新增登记case并重验。",
       "detail": "migration/sample-reports/cuTENSORMg/contraction_multi_gpu.cu.md",
-      "record_field": "attempts/1",
-      "amd_evidence": "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuTENSORMg_contraction_multi_gpu.cu",
+      "record_field": "selected_validation",
+      "amd_evidence": "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuTENSORMg_contraction_multi_gpu.cu",
       "amd_logs": [
-        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuTENSORMg_contraction_multi_gpu.cu/build.log"
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuTENSORMg_contraction_multi_gpu.cu/boundary/run.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuTENSORMg_contraction_multi_gpu.cu/build.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuTENSORMg_contraction_multi_gpu.cu/changed-values/run.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuTENSORMg_contraction_multi_gpu.cu/irregular/run.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuTENSORMg_contraction_multi_gpu.cu/original/run.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuTENSORMg_contraction_multi_gpu.cu/repeat/run.log",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuTENSORMg_contraction_multi_gpu.cu/singular-or-empty/run.log"
       ],
-      "cuda_comparison": "BLOCKED",
-      "cuda_evidence": "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuTENSORMg_contraction_multi_gpu.cu",
-      "cuda_evidence_basis": "原始 CUDA 尝试",
+      "cuda_comparison": "PASSED",
+      "cuda_evidence": "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuTENSORMg_contraction_multi_gpu.cu",
+      "cuda_evidence_basis": "当前验收记录",
       "cuda_logs": [
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuTENSORMg_contraction_multi_gpu.cu/build.log"
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuTENSORMg_contraction_multi_gpu.cu/boundary/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuTENSORMg_contraction_multi_gpu.cu/build.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuTENSORMg_contraction_multi_gpu.cu/changed-values/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuTENSORMg_contraction_multi_gpu.cu/irregular/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuTENSORMg_contraction_multi_gpu.cu/original/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuTENSORMg_contraction_multi_gpu.cu/repeat/run.log",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuTENSORMg_contraction_multi_gpu.cu/singular-or-empty/run.log"
       ],
-      "validation_reports": [],
+      "validation_reports": [
+        "migration/reports/batches12_15-validation.json"
+      ],
       "all_evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/cuTENSORMg_contraction_multi_gpu.cu",
         "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuTENSORMg_contraction_multi_gpu.cu",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuTENSORMg_contraction_multi_gpu.cu"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuTENSORMg_contraction_multi_gpu.cu",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuTENSORMg_contraction_multi_gpu.cu",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuTENSORMg_contraction_multi_gpu.cu",
+        "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/cuTENSORMg_contraction_multi_gpu.cu"
       ]
     },
     {

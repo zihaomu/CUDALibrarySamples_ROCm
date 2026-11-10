@@ -1,0 +1,42 @@
+{
+  "build": [
+    "/usr/local/cuda-13.4/bin/nvcc",
+    "-std=c++17",
+    "-O2",
+    "-x",
+    "cu",
+    "-arch=sm_120",
+    "-Xlinker=/home/zihaomu/cuda_samples_on_rocm_compare/build/mpi/lib/mpich/libfabric.so.1",
+    "/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuSOLVER/MgPotrf/cusolver_MgPotrf_example1.cu",
+    "-o",
+    "/home/zihaomu/cuda_samples_on_rocm_compare/artifacts/20261110T052304.022239Z/batches12_15-cuda/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu/sample",
+    "-Xcompiler=-pthread",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/cuSOLVER/MgPotrf",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/rocm/common",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/build/mpi/include",
+    "-I/usr/local/cuda-13.4/include",
+    "-I/usr/include",
+    "-L/home/zihaomu/cuda_samples_on_rocm_compare/build/mpi/lib",
+    "-L/home/zihaomu/cuda_samples_on_rocm_compare/build/mpi/lib/mpich",
+    "-L/usr/local/cuda-13.4/lib64",
+    "-L/usr/lib/x86_64-linux-gnu",
+    "-Xlinker=-rpath=/home/zihaomu/cuda_samples_on_rocm_compare/build/mpi/lib",
+    "-Xlinker=-rpath=/home/zihaomu/cuda_samples_on_rocm_compare/build/mpi/lib/mpich",
+    "-Xlinker=-rpath=/usr/local/cuda-13.4/lib64",
+    "-Xlinker=-rpath=/usr/lib/x86_64-linux-gnu",
+    "-lmpi",
+    "-lcublas",
+    "-lnccl",
+    "-lcufft",
+    "-lcurand"
+  ],
+  "cwd": "/home/zihaomu/cuda_samples_on_rocm_compare",
+  "cases": [
+    "original",
+    "irregular",
+    "changed-values",
+    "boundary",
+    "repeat",
+    "singular-or-empty"
+  ]
+}

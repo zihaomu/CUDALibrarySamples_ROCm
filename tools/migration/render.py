@@ -24,7 +24,7 @@ def render():
   if s.get('original_port'):
    a=s['original_port'];lines+=['## 原始 API 自动移植稿最近一次尝试','', '该记录与上表选定的手写/替代实现分别保留。','',safe(a.get('reason')),'', '尝试库：'+safe(', '.join(a.get('attempted_libraries',[])))+'；实现 hash：`'+a.get('implementation_sha256','')+'`。','']
   lines+=['## 复现与证据','', '从仓库根目录，先核对物理 GPU 占用。HIP ordinal 与物理编号不同；项目 guard 根据 PCI 地址拒绝 GPU3 和被预约的卡。','']
-  if s.get('reproduce'):lines+=[('在仓库根目录运行：GPU 构建/执行由 launcher 进入锁定容器，CPU 验收在宿主 Python3.12；先按对应批次报告同步 CUDA 证据。' if s.get('reason_code') in {'VALIDATED_BATCH2','VALIDATED_BATCH3','VALIDATED_B4_B8','VALIDATED_B9_B11','VALIDATED_B9_B11_SUBSET'} else '在已锁定并通过 guard 的 ROCm 10.1.0 容器中（多 GPU 用例须暴露两个允许的设备）：'),'', '```bash',s['reproduce'],'```','']
+  if s.get('reproduce'):lines+=[('在仓库根目录运行：GPU 构建/执行由 launcher 进入锁定容器，CPU 验收在宿主 Python3.12；先按对应批次报告同步 CUDA 证据。' if s.get('reason_code') in {'VALIDATED_BATCH2','VALIDATED_BATCH3','VALIDATED_B4_B8','VALIDATED_B9_B11','VALIDATED_B9_B11_SUBSET','VALIDATED_B12_B15','VALIDATED_B12_B15_SUBSET'} else '在已锁定并通过 guard 的 ROCm 10.1.0 容器中（多 GPU 用例须暴露两个允许的设备）：'),'', '```bash',s['reproduce'],'```','']
   elif s.get('implementation','') and not s['implementation'].startswith('rocm/ported/') and s['implementation'].endswith('sample.cpp') and s['family']!='cuDSS':
    f=str(pathlib.Path(s['implementation']).parent.relative_to('rocm'));lines+=['```bash','HIP_VISIBLE_DEVICES=2 tools/migration/run_rocm.sh --filter '+f,'```','']
   else:lines+=['具体命令见该入口证据目录中的 `commands.json`，运行环境见同批 `environment.json`。批量入口：`tools/migration/bulk_run.py --families <family>`；特殊驱动见专项报告。','']
@@ -50,13 +50,13 @@ def render():
 
 对照 NVIDIA CUDA Library Samples，逐例选择 AMD/ROCm 生态中适合的库并实现。每例公开实际使用库、实现程度、正确性结果、CUDA 对照及失败原因。保留 CUDA 原始源码作为参考；AMD 实验固定 ROCm 10.1.0 / Radeon AI PRO R9700（gfx1201），CUDA 对照使用双 RTX 5090 机器。
 
-[B9–B11 实时进度](migration/reports/batches9-11.md) · [B4–B8 验收](migration/reports/batches4-8.md) · [后续批次计划与能力边界](migration/roadmap.md) · [支持方式与详细日志总表](migration/reports/support-log-index.md) · [模块支持矩阵](#模块支持矩阵) · [已验收算子](#已验收算子与验证范围) · [未通过的具体原因](#未通过和不支持的具体原因) · [设计与实施日志](migration/design.md) · [执行交付报告](migration/reports/plan-execution.md) · [逐例清单](migration/samples.yaml) · [环境锁](migration/environments/project.lock.json)
+[B12–B15 实施与缺口](migration/reports/batches12-15.md) · [B9–B11 验收](migration/reports/batches9-11.md) · [B4–B8 验收](migration/reports/batches4-8.md) · [后续批次计划与能力边界](migration/roadmap.md) · [支持方式与详细日志总表](migration/reports/support-log-index.md) · [模块支持矩阵](#模块支持矩阵) · [已验收算子](#已验收算子与验证范围) · [未通过的具体原因](#未通过和不支持的具体原因) · [设计与实施日志](migration/design.md) · [执行交付报告](migration/reports/plan-execution.md) · [逐例清单](migration/samples.yaml) · [环境锁](migration/environments/project.lock.json)
 
 ## 当前结果
 
 '''
  intro+=f'上游固定为 `{BASE}`。静态审计覆盖 **866 个源文件、477 个构建定义、{len(cat["samples"])} 个独立可执行/脚本源入口**。链接辅助文件、外部 SDK binding、架构/静态链接/通信变体另存元数据，不重复计入入口分母；没有在所有专有 SDK 条件下展开并执行每个构建配置。\n\n'+totals+'。\n\n'
- intro+='`PASSED` 只表示该行明确登记的原始功能和必需用例通过，不能推及整库、其它精度/规模或性能。`PARTIAL` 包括已运行但尚无独立数值验收的端口；`FAILED` 保留真实失败日志和重试条件。不存在“HIPIFY 退出成功即迁移成功”的统计。\n\n'
+ intro+='`PASSED` 只表示该行明确登记的原始功能和必需用例通过，不能推及整库、其它精度/规模或性能。`PARTIAL` 包括数值子集已通过但原始功能/执行合同仍有缺口，或已运行尚缺独立验收的端口；`FAILED` 保留真实失败日志和重试条件。不存在“HIPIFY 退出成功即迁移成功”的统计。\n\n'
  intro+='专项证据：[M1 双端数值对照](migration/reports/m1-comparison.json)、[BLAS 三方对照](migration/reports/blas-three-way.json)、[稀疏 expected 检查](migration/reports/sparse-original-validation.json)、[新增双端数值/分布对照](migration/reports/additional-comparison.json)、[AMD 生态探针](migration/reports/native-probes.json)、[选型与缺口](migration/reports/ecosystem-decisions.md)、[最终一致性检查](migration/reports/final-validation.json)。**M0–M5 已逐批执行并记录结果；按逐例登记范围的成功率为 '+f'{100*counts["PASSED"]/len(cat["samples"]):.2f}%'+ '，失败/部分完成仍在分母。**\n\n'
  intro+='性能仅选择 6 个 GEMM profile；AMD GPU 有其它任务，空闲资格检查失败，因此 [性能报告](migration/reports/performance-comparison.md) 标为 BLOCKED，仅保留原始计时，不发布合格速度比。\n\n'
  if (ROOT/'migration/reports/batch2-validation.json').exists():
@@ -71,6 +71,10 @@ def render():
  live911=ROOT/'migration/reports/batches9-11-progress.json'
  if live911.exists():
   progress=json.loads(live911.read_text());intro+='**B9–B11实施结果：** '+'；'.join(x['batch']+' '+str(x['samples_passed'])+'/'+str(x['samples_required'])+' 整例通过、'+str(x['samples_partial'])+' 部分支持' for x in progress['batches'])+'。[逐例支持方式、缺口与日志](migration/reports/batches9-11.md)。CPU progressive fallback、完整NVBENCH框架与cuDSS配置/查询缺口保留PARTIAL。\n\n'
+ live1215=ROOT/'migration/reports/batches12-15-progress.json'
+ if live1215.exists():
+  progress=json.loads(live1215.read_text());intro+='**B12–B15：** '+'；'.join(x['batch']+' '+str(x['samples_passed'])+'整例、'+str(x['samples_partial'])+'部分支持、'+str(x['cases_verified'])+'/'+str(x['cases_required'])+'cases' for x in progress['batches'])+'。[实际路线、逐例限制与详细日志](migration/reports/batches12-15.md)。原始vendor基线与兼容CUDA数学对照分别记录。\n\n'
+
  intro+=render_overview(operators)
  intro+='## 模块支持矩阵\n\n下表覆盖全部 30 个库级模块。“已验收算子族”按上文口径去重；“通过/总入口”是原始 sample 数，二者分别统计。部分完成、失败、明确不支持、前置条件阻塞分别列出；每个模块链接包含全部原始样例的实际库、代码、逐例原因和证据。候选库不计为实际使用库。\n\n| 模块 | 实际/候选 AMD 路线 | 已验收算子族 | 通过/总入口 | 部分 | 失败 | 不支持 | 阻塞 | 当前范围及未通过原因 |\n| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |\n'
  for family in CANDIDATES:
@@ -91,10 +95,12 @@ def render():
   ('FAILED','TIMEOUT','cuTENSOR trinary contraction 在记录的时限内未结束，未获得合格结果。','[逐例报告](migration/sample-reports/cuTENSOR/contraction_trinary.cu.md)；定位执行/规模问题后重跑。'),
   ('PARTIAL','INDEPENDENT_VALIDATION_PENDING','剩余为 Xgeev 三例与 gesvdaStridedBatched：需排除 CPU 兼容执行，或确认近似算法和 residual norm 语义，并补齐对应独立验收。第三批稀疏与图捕获已通过。','逐例 required cases 保留缺项；补 CPU/数学参考和边界检查，返回 0 不能代替验收。'),
   ('PARTIAL','SEMANTIC_GAP','LZ4 和 JPEG 仅完成上述子集，尚未保留完整原样例的 API、输入和执行流程。','[能力探针](migration/reports/native-probes.json)、[JPEG 像素对照](migration/reports/rocjpeg-cpu.json)；补完整原始功能。'),
+  ('PARTIAL','VALIDATED_B9_B11_SUBSET','B9两个NVBENCH框架、B10原生GPU progressive及部分调度/流水线、B11完整配置/查询语义仍未等价。','[逐例B9–B11缺口与日志](migration/reports/batches9-11.md)；缺失功能补齐后重验，不把CPU fallback当完整GPU支持。'),
+  ('PARTIAL','VALIDATED_B12_B15_SUBSET','B12部分子矩阵/低精度collective、B13部分原始descriptor、B14 RNG LEGACY序列和B15原生像素/metadata/文件harness合同仍有缺口。','[逐例B12–B15缺口与日志](migration/reports/batches12-15.md)；完整数值与兼容CUDA数学通过不代表所有原始合同均已等价。'),
   ('UNSUPPORTED','HW_UNSUPPORTED','锁定 ROCm 10.1.0 hipSPARSELt/gfx1201 缺 Tensile kernel bundle；实际运行报错且固定源码的架构 gate 拒绝该目标。','[实测与源码证据](cuSPARSELt/README.md)；需匹配 kernel bundle、新实现或受支持 GPU，不能以 dense GEMM 替代。'),
   ('BLOCKED','ENV_MISSING_DEP','nvJPEG Python 测试的 imports 已通过，但 AMD decoder 可执行文件/完整 CLI 测试前置条件尚未实现。','[逐例报告](migration/sample-reports/nvJPEG/nvJPEG-Decoder/tests/test_decoder.py.md)；补 GPU 可执行文件后执行原始测试。')]:
   intro+=f'| {status} / `{code}` | {reasons[(status,code)]} | {reason} | {evidence} |\n'
- intro+='\n已验收模块内部也保留具体限制：hipTensor FP32 原生 contraction 的架构 gate 失败由 rocBLAS + HIP 保持精度的路线补足；hipFFT 单 batch 1D Xt 缺口由两卡分解/通信/合并补足。cuFFTMp/cuBLASMp/cuSOLVERMp/cuTENSORMg/Mp 的原始分布式算法，以及 MathDx 的设备内融合仍未完成；JPEG2000/TIFF 未找到并实现完整 AMD GPU codec 路线。上述原因在模块矩阵中逐项展示。\n\n'
+ intro+='\n已验收模块内部也保留具体限制：hipTensor FP32 原生 contraction 的架构 gate 失败由 rocBLAS + HIP 保持精度的路线补足；hipFFT 单 batch 1D Xt 缺口由两卡分解/通信/合并补足。B12–B15已完成登记范围的分布/设备内GPU与图像数值试点；部分原始descriptor、低精度通信、RNG LEGACY、原生NPP像素与文件/metadata合同仍保持PARTIAL，多节点与其它未覆盖入口未完成；JPEG2000/TIFF 未找到并实现完整 AMD GPU codec 路线。上述原因在模块矩阵中逐项展示。\n\n'
  intro+='''
 ## 构建与复现
 

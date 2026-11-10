@@ -1,0 +1,52 @@
+// SPDX-License-Identifier: Apache-2.0
+#pragma once
+#include "batch12_dist.hpp"
+#ifdef __HIP_PLATFORM_AMD__
+#include <hipfft/hipfft.h>
+#define F13(x) hipfft##x
+#define F13_C2C HIPFFT_C2C
+#define F13_FWD HIPFFT_FORWARD
+#define F13_INV HIPFFT_BACKWARD
+#else
+#include <cufft.h>
+#define F13(x) cufft##x
+#define F13_C2C CUFFT_C2C
+#define F13_FWD CUFFT_FORWARD
+#define F13_INV CUFFT_INVERSE
+#endif
+namespace migration_dist {
+__device__ double abs13(double x){return x<0?-x:x;}
+__device__ double sqrt13(double x){
+#ifdef __HIP_PLATFORM_AMD__
+return __builtin_sqrt(x);
+#else
+return sqrt(x);
+#endif
+}
+
+__global__ void pivot13(const double*a,int n,int col,int k,int*piv,int*info){if(threadIdx.x==0&&blockIdx.x==0&&!*info){int row=k;double best=abs13(a[k+col*n]);for(int i=k+1;i<n;++i)if(abs13(a[i+col*n])>best){best=abs13(a[i+col*n]);row=i;}piv[k]=row;if(best<1e-14)*info=k+1;}}
+__global__ void swap13(double*a,int n,int cols,int k,const int*piv,const int*info){int j=blockIdx.x*blockDim.x+threadIdx.x;if(j<cols&&!*info){double t=a[k+j*n];a[k+j*n]=a[piv[k]+j*n];a[piv[k]+j*n]=t;}}
+__global__ void column13(double*a,double*column,int n,int local,int k,int*info,bool chol){if(threadIdx.x==0&&blockIdx.x==0){if(!*info){double diag=a[k+local*n];if(chol){if(diag<=0)*info=k+1;else diag=sqrt13(diag);a[k+local*n]=diag;}if(!*info)for(int i=k+1;i<n;++i)a[i+local*n]/=diag;}for(int i=0;i<n;++i)column[i]=a[i+local*n];}}
+__global__ void update13(double*a,const double*column,const int*cols,int n,int count,int k,const int*info,bool chol){int t=blockIdx.x*blockDim.x+threadIdx.x;if(t<n*count&&!*info){int i=t%n,j=t/n,global=cols[j];if(global>k&&i>k&&(!chol||i>=global))a[t]-=column[i]*(chol?column[global]:a[k+j*n]);}}
+__global__ void assemble13(const double*local,const int*cols,double*full,int n,int count){int t=blockIdx.x*blockDim.x+threadIdx.x;if(t<n*count)full[t%n+cols[t/n]*n]=local[t];}
+__global__ void solve13(const double*lu,double*x,int n,int nrhs,const int*piv,const int*info,bool chol){int rhs=threadIdx.x;if(rhs<nrhs&&!*info){double*v=x+rhs*n;if(!chol)for(int k=0;k<n;++k){double t=v[k];v[k]=v[piv[k]];v[piv[k]]=t;}for(int i=0;i<n;++i){double t=v[i];for(int j=0;j<i;++j)t-=lu[i+j*n]*v[j];v[i]=chol?t/lu[i+i*n]:t;}for(int i=n-1;i>=0;--i){double t=v[i];for(int j=i+1;j<n;++j)t-=(chol?lu[j+i*n]:lu[i+j*n])*v[j];v[i]=t/lu[i+i*n];}}}
+inline void factor13(Context&c,const std::string&kind){auto cas=selected_case();bool chol=kind.find("chol")!=std::string::npos,mg=kind.rfind("mg_",0)==0;int n=mg?(chol?8:611):10,nrhs=mg&&chol?2:1,block=mg&&!chol?256:1;if(cas=="irregular"){n=17;block=3;}if(cas=="boundary"){n=5;block=1;}std::vector<double>A(n*n,0),rhs(n*nrhs,1);for(int j=0;j<n;++j)for(int i=std::max(0,j-1);i<=std::min(n-1,j+1);++i)A[(chol?i:n-1-i)+j*n]=i==j?(cas=="changed-values"?4:2):-1;
+ if(cas=="changed-values")for(int i=0;i<n*nrhs;++i)rhs[i]=1+(i%5)*.125;
+ if(chol&&mg){for(int h=0;h<nrhs;++h)for(int i=0;i<n;++i){double sum=0;for(int j=0;j<n;++j)sum+=A[i+j*n]*(1+j%3+h);rhs[i+h*n]=sum;}}
+ if(cas=="singular-or-empty")for(int j=0;j<n;++j){A[j*n]=0;A[j]=0;}auto original=rhs;std::vector<int>cols;for(int j=0;j<n;++j)if((j/block)%c.size==c.rank)cols.push_back(j);std::vector<double>local(n*cols.size());for(size_t j=0;j<cols.size();++j)std::copy_n(A.data()+cols[j]*n,n,local.data()+j*n);c.save("A_local",local);c.save("columns",cols);c.save("rhs",rhs);Buffer<double>a(local),column(n),x(rhs);Buffer<int>gc(cols),piv(n),info(std::vector<int>{0});std::vector<int>ip(n);std::iota(ip.begin(),ip.end(),0);piv.put(ip);int actual=0,repeat=cas=="repeat"?2:1;
+ for(int rep=0;rep<repeat;++rep){a.put(local);info.put({0});piv.put(ip);for(int k=0;k<n;++k){int owner=k/block%c.size;int localcol=(k/(block*c.size))*block+k%block;
+  if(!chol){if(c.rank==owner){pivot13<<<1,1>>>(a.p,n,localcol,k,piv.p,info.p);++c.kernels;}c.broadcast(piv.p+k,1,ncclInt,owner);c.broadcast(info.p,1,ncclInt,owner);swap13<<<(cols.size()+255)/256,256>>>(a.p,n,cols.size(),k,piv.p,info.p);++c.kernels;}
+  if(c.rank==owner){column13<<<1,1>>>(a.p,column.p,n,localcol,k,info.p,chol);++c.kernels;++actual;}c.broadcast(column.p,n,ncclDouble,owner);c.broadcast(info.p,1,ncclInt,owner);update13<<<(n*cols.size()+255)/256,256>>>(a.p,column.p,gc.p,n,cols.size(),k,info.p,chol);++c.kernels;
+ }}
+ c.sync();Buffer<double>masked(std::vector<double>(n*n,0)),full(n*n);assemble13<<<(n*cols.size()+255)/256,256>>>(a.p,gc.p,masked.p,n,cols.size());++c.kernels;MB_CHECK(ncclAllReduce(masked.p,full.p,n*n,ncclDouble,ncclSum,c.comm,0));++c.ar;c.sync();x.put(original);solve13<<<1,32>>>(full.p,x.p,n,nrhs,piv.p,info.p,chol);++c.kernels;c.sync();c.save("factor_local",a.get());c.save("solution",x.get());c.save("pivots",piv.get());c.save("info",info.get());c.save("config",std::vector<int>{n,nrhs,block,int(chol),repeat,actual,int(mg),mg?256:2,mg&&chol?10:mg?100:2});}
+__global__ void pack_fft13(const F13(Complex)*in,F13(Complex)*out,int nx,int ny,int nz,int x0,int xc,int y0,int yc,bool reverse){int t=blockIdx.x*blockDim.x+threadIdx.x;if(t<xc*yc*nz){int z=t%nz,y=(t/nz)%yc,x=t/(nz*yc);if(!reverse)out[t]=in[(x*ny+y+y0)*nz+z];else out[t]=in[((y*nz+z)*nx)+x+x0];}}
+__global__ void unpack_fft13(const F13(Complex)*in,F13(Complex)*out,int nx,int ny,int nz,int x0,int xc,int y0,int yc,bool reverse){int t=blockIdx.x*blockDim.x+threadIdx.x;if(t<xc*yc*nz){int z=t%nz,y=(t/nz)%yc,x=t/(nz*yc);if(!reverse)out[(y*nz+z)*nx+x+x0]=in[t];else out[(x*ny+y+y0)*nz+z]=in[t];}}
+__global__ void scale_fft13(F13(Complex)*v,int n,float scale){int t=blockIdx.x*blockDim.x+threadIdx.x;if(t<n){v[t].x*=scale;v[t].y*=scale;}}
+inline void fft13(Context&c){auto cas=selected_case();int nx=16,ny=16,nz=16;if(cas=="irregular"){nx=17;ny=13;nz=9;}if(cas=="boundary"){nx=2;ny=3;nz=1;}auto part=[](int n,int rank){return n/2+(rank<n%2);};int xc=part(nx,c.rank),x0=c.rank?part(nx,0):0,yc=part(ny,c.rank),y0=c.rank?part(ny,0):0;std::vector<F13(Complex)>in(xc*ny*nz);for(int x=0;x<xc;++x)for(int y=0;y<ny;++y)for(int z=0;z<nz;++z){int i=(x*ny+y)*nz+z;in[i].x=value12(x+x0,y*nz+z,cas=="changed-values"?11:3);in[i].y=cas=="singular-or-empty"?0:value12(x+x0,y*nz+z,7);if(cas=="singular-or-empty")in[i].x=0;}c.save("input",in);Buffer<F13(Complex)>x(in),y(nx*yc*nz);F13(Handle)yz,xx;int dims[2]={ny,nz},one[1]={nx};MB_CHECK(F13(PlanMany)(&yz,2,dims,nullptr,1,ny*nz,nullptr,1,ny*nz,F13_C2C,xc));MB_CHECK(F13(PlanMany)(&xx,1,one,nullptr,1,nx,nullptr,1,nx,F13_C2C,yc*nz));int sends=0,recvs=0,ffts=0;
+ auto exchange=[&](bool reverse){std::vector<std::unique_ptr<Buffer<F13(Complex)>>>send,recv;for(int peer=0;peer<2;++peer){int px=part(nx,peer),py=part(ny,peer);send.emplace_back(new Buffer<F13(Complex)>(reverse?px*yc*nz:xc*py*nz));recv.emplace_back(new Buffer<F13(Complex)>(reverse?xc*py*nz:px*yc*nz));pack_fft13<<<(send.back()->n+255)/256,256>>>(reverse?y.p:x.p,send.back()->p,nx,ny,nz,peer?part(nx,0):0,reverse?px:xc,peer?part(ny,0):0,reverse?yc:py,reverse);++c.kernels;}
+  c.sync();MB_CHECK(ncclGroupStart());for(int peer=0;peer<2;++peer){MB_CHECK(ncclSend(send[peer]->p,send[peer]->n*2,ncclFloat,peer,c.comm,0));MB_CHECK(ncclRecv(recv[peer]->p,recv[peer]->n*2,ncclFloat,peer,c.comm,0));++sends;++recvs;}MB_CHECK(ncclGroupEnd());c.sync();for(int peer=0;peer<2;++peer){unpack_fft13<<<(recv[peer]->n+255)/256,256>>>(recv[peer]->p,reverse?x.p:y.p,nx,ny,nz,peer?part(nx,0):0,reverse?xc:part(nx,peer),peer?part(ny,0):0,reverse?part(ny,peer):yc,reverse);++c.kernels;}c.sync();};
+ int repeat=cas=="repeat"?3:1;for(int rep=0;rep<repeat;++rep){x.put(in);MB_CHECK(F13(ExecC2C)(yz,x.p,x.p,F13_FWD));++ffts;exchange(false);MB_CHECK(F13(ExecC2C)(xx,y.p,y.p,F13_FWD));++ffts;c.sync();if(rep==0)c.save("frequency_y_slab",y.get());scale_fft13<<<(y.n+255)/256,256>>>(y.p,y.n,1.f/(nx*ny*nz));++c.kernels;MB_CHECK(F13(ExecC2C)(xx,y.p,y.p,F13_INV));++ffts;exchange(true);MB_CHECK(F13(ExecC2C)(yz,x.p,x.p,F13_INV));++ffts;c.sync();}c.save("output",x.get());c.save("config",std::vector<int>{nx,ny,nz,xc,x0,yc,y0,repeat,ffts,sends,recvs});F13(Destroy)(yz);F13(Destroy)(xx);}
+inline void tensor13(Context&c){auto cas=selected_case();int n=4096,block=2048;if(cas=="irregular"){n=35;block=18;}if(cas=="boundary"){n=4;block=2;}if(cas=="singular-or-empty"){n=2;block=1;}int count=(n+1)/2,start=c.rank*count,rows=std::max(0,std::min(count,n-start));std::vector<float>A(rows*n),B(count*n,0);for(int j=0;j<n;++j){for(int i=0;i<rows;++i)A[i+j*rows]=cas=="singular-or-empty"?0:value12(i+start,j,cas=="changed-values"?11:3);for(int i=0;i<count&&i+start<n;++i)B[i+j*count]=value12(i+start,j,5);}c.save("A_local",A);c.save("B_local",B);Buffer<float>a(A),b(B),packed(count*n*2),out(rows*n);MB_CHECK(ncclAllGather(b.p,packed.p,count*n,ncclFloat,c.comm,0));++c.ag;c.sync();auto received=packed.get();std::vector<float>full(n*n);for(int j=0;j<n;++j)for(int i=0;i<n;++i)full[i+j*n]=received[(i/count)*count*n+i%count+j*count];Buffer<float>bb(full);int repeat=cas=="repeat"?5:3;for(int r=0;r<repeat;++r)gemm12(c,rows,n,n,a.p,bb.p,out.p);c.save("output",out.get());c.save("config",std::vector<int>{n,block,count,start,rows,repeat});}
+inline void dispatch13(Context&c,const std::string&kind){if(kind=="mp_fft")fft13(c);else if(kind=="mg_tensor")tensor13(c);else factor13(c,kind);c.finish();}
+inline int main13(const std::string&kind,int argc,char**argv){bool mg=kind.rfind("mg_",0)==0;const char*dir=std::getenv("MIGRATION_OUTPUT_DIR");if(!dir)return 2;try{int count;MB_CHECK(MB_RT(GetDeviceCount)(&count));if(count<2)throw std::runtime_error("two visible GPUs required");if(mg){ncclComm_t comms[2];int devices[2]={0,1};MB_CHECK(ncclCommInitAll(comms,2,devices));std::exception_ptr error;std::mutex mutex;std::vector<std::thread>threads;for(int rank=0;rank<2;++rank)threads.emplace_back([&,rank]{try{MB_CHECK(MB_RT(SetDevice)(rank));Context c{rank,2,rank,comms[rank],dir};dispatch13(c,kind);MB_CHECK(ncclCommDestroy(comms[rank]));}catch(...){std::lock_guard<std::mutex>lock(mutex);error=std::current_exception();}});for(auto&t:threads)t.join();if(error)std::rethrow_exception(error);}else{MPI_Init(&argc,&argv);int rank,size;MPI_Comm_rank(MPI_COMM_WORLD,&rank);MPI_Comm_size(MPI_COMM_WORLD,&size);if(size!=2)throw std::runtime_error("requires two MPI ranks");MB_CHECK(MB_RT(SetDevice)(rank));ncclUniqueId id;if(!rank)MB_CHECK(ncclGetUniqueId(&id));MPI_Bcast(&id,sizeof(id),MPI_BYTE,0,MPI_COMM_WORLD);ncclComm_t comm;MB_CHECK(ncclCommInitRank(&comm,2,id,rank));Context c{rank,2,rank,comm,dir};dispatch13(c,kind);MB_CHECK(ncclCommDestroy(comm));MPI_Finalize();}return 0;}catch(const std::exception&e){std::cerr<<e.what()<<std::endl;return 1;}}
+}

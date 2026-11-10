@@ -1,12 +1,12 @@
 # CUDA Samples on ROCm：后续多批支持计划与能力边界
 
-日期：2026-11-10。文档状态：**B4–B8已收口；B9–B11结果见实时表，未完成合同保留PARTIAL；B12–B15尚未启动。以下正文保留原始计划基线**。
+日期：2026-11-10。文档状态：**B4–B8已收口；B9–B11结果见实时表，未完成合同保留PARTIAL；B12–B15实施结果见实时表。以下正文保留原始计划基线**。
 
 [12 批总览](#batches) · [当前无法等价支持的项目与原因](#limits) · [验收与日志规则](#acceptance) · [473 项逐例去向](#inventory)
 
 <!-- B4B8_PROGRESS:START -->
 
-**B4–B8 实施更新：** B4 8/8；B5 4/4；B6 4/4；B7 5/5；B8 5/5。当前主表 202 个样例通过。[实时验收表](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/reports/batches4-8.md)。以下 166/473 等数字为原始计划基线；本更新不改写历史计划。
+**B4–B8 实施更新：** B4 8/8；B5 4/4；B6 4/4；B7 5/5；B8 5/5。当前主表 211 个样例通过。[实时验收表](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/reports/batches4-8.md)。以下 166/473 等数字为原始计划基线；本更新不改写历史计划。
 
 <!-- B4B8_PROGRESS:END -->
 
@@ -15,6 +15,12 @@
 **B9–B11实施更新：** B9 6/8 整例通过、2 部分完成；B10 0/6 整例通过、6 部分完成；B11 4/5 整例通过、1 部分完成。详见 [实时表](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/reports/batches9-11.md)。完整支持与已验证子集分开统计。
 
 <!-- B9B11_PROGRESS:END -->
+
+<!-- B12B15_PROGRESS:START -->
+
+**B12–B15实施：** B12 2整例/4部分，36/36case；B13 3整例/3部分，36/36case；B14 3整例/1部分，24/24case；B15 1整例/3部分，24/24case。详见[实施与缺口表](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/reports/batches12-15.md)。
+
+<!-- B12B15_PROGRESS:END -->
 
 ## 1. 当前基线与计划目标
 

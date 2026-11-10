@@ -2,9 +2,9 @@
   "schema_version": 1,
   "counting_rule": "Operator/functional families are deduplicated within each module; dtypes, sizes, language, batch, storage formats and algorithm variants do not create extra operators. At least one explicitly scoped PASSED source profile is required. Cross-module totals may include the same mathematical operation implemented through different library interfaces.",
   "qualification_rule": "A verified family proves only its linked PASSED source profiles/required cases, not every API configuration. PARTIAL examples and capability probes are excluded.",
-  "verified_operator_families": 102,
-  "modules_with_verified_operators": 10,
-  "passed_source_profiles": 202,
+  "verified_operator_families": 111,
+  "modules_with_verified_operators": 17,
+  "passed_source_profiles": 211,
   "modules": {
     "cuBLAS": {
       "verified_operator_family_count": 52,
@@ -609,15 +609,38 @@
       }
     },
     "cuBLASMp": {
-      "verified_operator_family_count": 0,
-      "verified_operators": [],
+      "verified_operator_family_count": 2,
+      "verified_operators": [
+        {
+          "name": "block-cyclic 重分布",
+          "sample_ids": [
+            "cuBLASMp::gemr2d.cu"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuBLASMp/gemr2d.cu.md"
+          ],
+          "source_profiles": 1
+        },
+        {
+          "name": "分布式 GEADD",
+          "sample_ids": [
+            "cuBLASMp::geadd.cu"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuBLASMp/geadd.cu.md"
+          ],
+          "source_profiles": 1
+        }
+      ],
       "sample_count": 14,
       "sample_outcomes": {
-        "FAILED": 14
+        "PASSED": 2,
+        "PARTIAL": 4,
+        "FAILED": 8
       },
-      "validation_scope": "尚无通过整例验收的算子族。",
+      "validation_scope": "已登记FP64 GEADD与1024阶block-cyclic重分布/往返；双MPI进程和不同GPU实际通信。GEMM子矩阵与低精度collective/quantized scale模式等缺口保持PARTIAL，未覆盖多节点。",
       "failure_reason_counts": {
-        "BUILD_ERROR": 14
+        "BUILD_ERROR": 8
       }
     },
     "cuDSS": {
@@ -735,16 +758,28 @@
       "failure_reason_counts": {}
     },
     "cuFFTMp": {
-      "verified_operator_family_count": 0,
-      "verified_operators": [],
+      "verified_operator_family_count": 1,
+      "verified_operators": [
+        {
+          "name": "多进程 slab C2C FFT",
+          "sample_ids": [
+            "cuFFTMp/samples/c2c::cufftmp_c2c.cu"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuFFTMp/samples/c2c/cufftmp_c2c.cu.md"
+          ],
+          "source_profiles": 1
+        }
+      ],
       "sample_count": 20,
       "sample_outcomes": {
-        "FAILED": 20
+        "FAILED": 19,
+        "PASSED": 1
       },
-      "validation_scope": "尚无通过整例验收的算子族。",
+      "validation_scope": "双MPI rank，原始16³及不均匀17×13×9；hipFFT本地YZ/X FFT + RCCL Send/Recv + HIP pack/unpack/归一化，完整频域与逆变换输出。",
       "failure_reason_counts": {
         "BINDING_OR_FRONTEND_MIGRATION_REQUIRED": 9,
-        "BUILD_ERROR": 11
+        "BUILD_ERROR": 10
       }
     },
     "cuPQC": {
@@ -897,7 +932,7 @@
       "failure_reason_counts": {}
     },
     "cuSOLVER": {
-      "verified_operator_family_count": 9,
+      "verified_operator_family_count": 10,
       "verified_operators": [
         {
           "name": "Cholesky 分解",
@@ -980,6 +1015,16 @@
           "source_profiles": 1
         },
         {
+          "name": "多 GPU LU 分解/求解",
+          "sample_ids": [
+            "cuSOLVER/MgGetrf::cusolver_MgGetrf_example.cu"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuSOLVER/MgGetrf/cusolver_MgGetrf_example.cu.md"
+          ],
+          "source_profiles": 1
+        },
+        {
           "name": "对称特征分解",
           "sample_ids": [
             "cuSOLVER/Xsyevd::cusolver_Xsyevd_example.cu",
@@ -1016,13 +1061,13 @@
       ],
       "sample_count": 39,
       "sample_outcomes": {
-        "FAILED": 14,
-        "PARTIAL": 4,
-        "PASSED": 21
+        "PASSED": 22,
+        "PARTIAL": 5,
+        "FAILED": 12
       },
-      "validation_scope": "原始FP64教学矩阵；status/info、全量分解/重构、残差、正交性、未排序配对及实际meig检查。B6增加64位LU/三角求逆；SVD/eigen typed接口显式INT_MAX限制。",
+      "validation_scope": "B13补611阶双GPU LU/pivot/solve，tile256列分布+RCCL+HIP，全部CPU重构/残差；MgPotrf及Mp原始descriptor缺口另列。原始FP64教学矩阵；status/info、全量分解/重构、残差、正交性、未排序配对及实际meig检查。B6增加64位LU/三角求逆；SVD/eigen typed接口显式INT_MAX限制。",
       "failure_reason_counts": {
-        "BUILD_ERROR": 14
+        "BUILD_ERROR": 12
       }
     },
     "cuSOLVERMp": {
@@ -1030,11 +1075,12 @@
       "verified_operators": [],
       "sample_count": 16,
       "sample_outcomes": {
-        "FAILED": 16
+        "FAILED": 14,
+        "PARTIAL": 2
       },
       "validation_scope": "尚无通过整例验收的算子族。",
       "failure_reason_counts": {
-        "BUILD_ERROR": 16
+        "BUILD_ERROR": 14
       }
     },
     "cuSOLVERSp2cuDSS": {
@@ -1397,15 +1443,27 @@
       }
     },
     "cuTENSORMg": {
-      "verified_operator_family_count": 0,
-      "verified_operators": [],
+      "verified_operator_family_count": 1,
+      "verified_operators": [
+        {
+          "name": "多 GPU 张量 contraction",
+          "sample_ids": [
+            "cuTENSORMg::contraction_multi_gpu.cu"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuTENSORMg/contraction_multi_gpu.cu.md"
+          ],
+          "source_profiles": 1
+        }
+      ],
       "sample_count": 2,
       "sample_outcomes": {
-        "FAILED": 2
+        "FAILED": 1,
+        "PASSED": 1
       },
-      "validation_scope": "尚无通过整例验收的算子族。",
+      "validation_scope": "单进程双GPU；原始4096 extents/2048 block及i,k / k,j / i,j，hipBLAS + RCCL，全部FP64 CPU参考；其它分区/精度/多节点不外推。",
       "failure_reason_counts": {
-        "BUILD_ERROR": 2
+        "BUILD_ERROR": 1
       }
     },
     "cuTENSORMp": {
@@ -1421,27 +1479,51 @@
       }
     },
     "MathDx/cuBLASDx": {
-      "verified_operator_family_count": 0,
-      "verified_operators": [],
+      "verified_operator_family_count": 1,
+      "verified_operators": [
+        {
+          "name": "设备内 GEMM",
+          "sample_ids": [
+            "MathDx/cuBLASDx/01_gemm_introduction::introduction_example.cu"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/MathDx/cuBLASDx/01_gemm_introduction/introduction_example.cu.md"
+          ],
+          "source_profiles": 1
+        }
+      ],
       "sample_count": 34,
       "sample_outcomes": {
-        "FAILED": 34
+        "PASSED": 1,
+        "FAILED": 33
       },
-      "validation_scope": "尚无通过整例验收的算子族。",
+      "validation_scope": "HIP调用方kernel内协作GEMM三阶段、128点双FFT、32阶complex上三角Cholesky/shared LDA33；原生SDK25.6版本差异与兼容CUDA数学对照分开。RNG LEGACY逐位合同仍PARTIAL。",
       "failure_reason_counts": {
-        "BUILD_ERROR": 34
+        "BUILD_ERROR": 33
       }
     },
     "MathDx/cuFFTDx": {
-      "verified_operator_family_count": 0,
-      "verified_operators": [],
+      "verified_operator_family_count": 1,
+      "verified_operators": [
+        {
+          "name": "设备内 C2C FFT",
+          "sample_ids": [
+            "MathDx/cuFFTDx/02_simple_fft_block::simple_fft_block.cu"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/MathDx/cuFFTDx/02_simple_fft_block/simple_fft_block.cu.md"
+          ],
+          "source_profiles": 1
+        }
+      ],
       "sample_count": 49,
       "sample_outcomes": {
-        "FAILED": 49
+        "FAILED": 48,
+        "PASSED": 1
       },
-      "validation_scope": "尚无通过整例验收的算子族。",
+      "validation_scope": "HIP调用方kernel内协作128点双C2C FFT、ElementsPerThread=8/共32线程及扩展线程块；全部CPU频谱输出与兼容CUDA数学基线。",
       "failure_reason_counts": {
-        "BUILD_ERROR": 49
+        "BUILD_ERROR": 48
       }
     },
     "MathDx/cuRANDDx": {
@@ -1449,23 +1531,36 @@
       "verified_operators": [],
       "sample_count": 7,
       "sample_outcomes": {
-        "FAILED": 7
+        "PARTIAL": 1,
+        "FAILED": 6
       },
-      "validation_scope": "尚无通过整例验收的算子族。",
+      "validation_scope": "rocRAND设备Philox10 + 显式53bit Box-Muller；NVIDIA LEGACY逐位合同未等价，保持PARTIAL。",
       "failure_reason_counts": {
-        "BUILD_ERROR": 7
+        "BUILD_ERROR": 6
       }
     },
     "MathDx/cuSolverDx": {
-      "verified_operator_family_count": 0,
-      "verified_operators": [],
+      "verified_operator_family_count": 1,
+      "verified_operators": [
+        {
+          "name": "设备内 complex Cholesky",
+          "sample_ids": [
+            "MathDx/cuSolverDx/01_Linear_Solve::potrf_block.cu"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/MathDx/cuSolverDx/01_Linear_Solve/potrf_block.cu.md"
+          ],
+          "source_profiles": 1
+        }
+      ],
       "sample_count": 42,
       "sample_outcomes": {
-        "FAILED": 42
+        "FAILED": 41,
+        "PASSED": 1
       },
-      "validation_scope": "尚无通过整例验收的算子族。",
+      "validation_scope": "HIP调用方kernel内32阶complex FP64上三角Cholesky，共享LDA33/256线程、完整因子与非SPD info；原生SDK版本缺口另记。",
       "failure_reason_counts": {
-        "BUILD_ERROR": 42
+        "BUILD_ERROR": 41
       }
     },
     "MathDx/libmathdx": {
@@ -1493,15 +1588,28 @@
       }
     },
     "NPP": {
-      "verified_operator_family_count": 0,
-      "verified_operators": [],
+      "verified_operator_family_count": 1,
+      "verified_operators": [
+        {
+          "name": "Euclidean 距离变换/Voronoi",
+          "sample_ids": [
+            "NPP/distanceTransform::distanceTransform.cpp"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/NPP/distanceTransform/distanceTransform.cpp.md"
+          ],
+          "source_profiles": 1
+        }
+      ],
       "sample_count": 9,
       "sample_outcomes": {
-        "FAILED": 9
+        "FAILED": 6,
+        "PASSED": 1,
+        "PARTIAL": 2
       },
-      "validation_scope": "尚无通过整例验收的算子族。",
+      "validation_scope": "精确Euclidean距离/Voronoi/整数截断，原始313×317与64²图及边界/stride/空site；Canny、NCC原始文件harness、NPP+完整元数据等缺口单列PARTIAL。",
       "failure_reason_counts": {
-        "BUILD_ERROR": 8,
+        "BUILD_ERROR": 5,
         "BINDING_OR_FRONTEND_MIGRATION_REQUIRED": 1
       }
     },
@@ -1510,11 +1618,12 @@
       "verified_operators": [],
       "sample_count": 6,
       "sample_outcomes": {
-        "FAILED": 6
+        "FAILED": 5,
+        "PARTIAL": 1
       },
       "validation_scope": "尚无通过整例验收的算子族。",
       "failure_reason_counts": {
-        "BUILD_ERROR": 5,
+        "BUILD_ERROR": 4,
         "BINDING_OR_FRONTEND_MIGRATION_REQUIRED": 1
       }
     },

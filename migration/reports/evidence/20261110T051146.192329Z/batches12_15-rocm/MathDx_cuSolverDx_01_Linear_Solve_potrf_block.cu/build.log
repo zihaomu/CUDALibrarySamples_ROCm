@@ -1,0 +1,130 @@
+Warning: HIP version file: "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/share/hip/version" not found.  Cannot give HIP version information.
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/MathDx/cuSolverDx/01_Linear_Solve/potrf_block.cu:18:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch14_device.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch14_device.hpp:66:204: note: in instantiation of member function 'migration_batch::Buffer<int>::~Buffer' requested here
+   66 | inline int main14(const std::string&kind){try{auto cas=selected_case();int n=32,threads=256,repeat=cas=="repeat"?3:1;if(cas=="irregular"){n=17;threads=128;}if(cas=="boundary"){n=8;threads=64;}Buffer<int>trace(std::vector<int>(6,0));
+      |                                                                                                                                                                                                            ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/MathDx/cuSolverDx/01_Linear_Solve/potrf_block.cu:18:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch14_device.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch14_device.hpp:67:314: note: in instantiation of member function 'migration_batch::Buffer<double>::~Buffer' requested here
+   67 |  if(kind=="introduction_example") {std::vector<double>a(n*n),b(n*n),c(n*n);for(int i=0;i<n*n;++i){a[i]=double(i%17+1)/17;b[i]=double(i%13+1)/13;c[i]=double(i%11+1)/11;if(cas=="changed-values")a[i]=-.5*a[i];if(cas=="singular-or-empty")a[i]=0;}bin14("input_A",a);bin14("input_B",b);bin14("input_C",c);Buffer<double>aa(a),bb(b),cc(c);for(int r=0;r<repeat;++r){cc.put(c);for(int mode=0;mode<3;++mode){gemm_block14<<<1,threads>>>(aa.p,bb.p,cc.p,n,mode,trace.p);MB_CHECK(MB_RT(DeviceSynchronize)());if(!r)bin14("phase"+std::to_string(mode),cc.get());}}bin14("output",cc.get());bin14("config",std::vector<int>{n,threads,repeat});}
+      |                                                                                                                                                                                                                                                                                                                          ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/MathDx/cuSolverDx/01_Linear_Solve/potrf_block.cu:18:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch14_device.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch14_device.hpp:68:311: note: in instantiation of member function 'migration_batch::Buffer<HIP_vector_type<float, 2>>::~Buffer' requested here
+   68 |  else if(kind=="simple_fft_block"){n=cas=="irregular"?64:cas=="boundary"?8:128;threads=cas=="boundary"?64:32;int batch=cas=="irregular"?3:2;std::vector<float2>in(n*batch);for(int i=0;i<n*batch;++i){float v=cas=="changed-values"?float((i*7)%19-9):cas=="singular-or-empty"?0:float(i);in[i]={v,-v};}Buffer<float2>x(in);bin14("input",in);for(int r=0;r<repeat;++r){x.put(in);fft_block14<<<1,threads>>>(x.p,n,batch,trace.p);MB_CHECK(MB_RT(DeviceSynchronize)());}bin14("output",x.get());bin14("config",std::vector<int>{n,batch,threads,repeat});}
+      |                                                                                                                                                                                                                                                                                                                       ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/MathDx/cuSolverDx/01_Linear_Solve/potrf_block.cu:18:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch14_device.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch14_device.hpp:69:303: note: in instantiation of member function 'migration_batch::Buffer<migration_device::Complex14>::~Buffer' requested here
+   69 |  else if(kind=="potrf_block"){std::vector<Complex14>a(n*n);for(int j=0;j<n;++j)for(int i=0;i<n;++i)a[i+j*n]=i==j?Complex14{double(n*4+(cas=="changed-values"?3:0)),0}:Complex14{double((i*7+j*3)%13-6)/8,double((i*5+j*11)%17-8)/8};if(cas=="singular-or-empty")a[0].x=-1;bin14("input_A",a);Buffer<Complex14>x(a);Buffer<int>info(1);for(int r=0;r<repeat;++r){x.put(a);chol_block14<<<1,threads>>>(x.p,n,info.p,trace.p);MB_CHECK(MB_RT(DeviceSynchronize)());}bin14("output",x.get());bin14("info",info.get());bin14("config",std::vector<int>{n,33,threads,repeat});}
+      |                                                                                                                                                                                                                                                                                                               ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/MathDx/cuSolverDx/01_Linear_Solve/potrf_block.cu:18:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch14_device.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch14_device.hpp:70:194: note: in instantiation of member function 'migration_batch::Buffer<unsigned int>::~Buffer' requested here
+   70 |  else {n=cas=="boundary"?20:cas=="irregular"?5004:cas=="singular-or-empty"?0:5000;int seed=cas=="changed-values"?6789:1234,offset=cas=="boundary"?65535:1;Buffer<double>x(n);Buffer<unsigned int>raw(n*2);for(int r=0;r<repeat;++r){if(n)rng_thread14<<<(n/4+255)/256,256>>>(x.p,raw.p,n,seed,offset,trace.p);MB_CHECK(MB_RT(DeviceSynchronize)());if(!r)bin14("first",x.get());}bin14("output",x.get());bin14("raw",raw.get());bin14("config",std::vector<int>{n,seed,offset,256,repeat});}
+      |                                                                                                                                                                                                  ^
+5 warnings generated when compiling for gfx1201.
+ld.lld: error: no libcall available for flog
+ld.lld: error: no libcall available for flog
+LLVM ERROR: Cannot select: 0x1e136ba0: f64 = fsin contract # D:1 0x1e030e40
+  0x1e030e40: f64 = fmul nnan contract # D:1 0x1e1b6dd0, ConstantFP:f64<6.283185e+00>
+    0x1e1b6dd0: f64 = fmul nnan contract # D:1 0x1e1b69e0, ConstantFP:f64<1.110223e-16>
+      0x1e1b69e0: f64 = fadd nnan contract # D:1 0x1e21a970, ConstantFP:f64<5.000000e-01>
+        0x1e21a970: f64 = fma nnan contract # D:1 0x1e03ced0, ConstantFP:f64<6.710886e+07>, 0x1e1c2770
+          0x1e03ced0: f64 = uint_to_fp nneg contract # D:1 0x1e12b720
+            0x1e12b720: i32 = srl # D:1 0x1e047d30, Constant:i32<5>
+              0x1e047d30: i32,ch = CopyFromReg # D:1 0x1de6b6c0, Register:i32 %91
+          0x1e1c2770: f64 = uint_to_fp nneg contract # D:1 0x1e03f040
+            0x1e03f040: i32 = srl # D:1 0x1e1c27e0, Constant:i32<6>
+              0x1e1c27e0: i32,ch = CopyFromReg # D:1 0x1de6b6c0, Register:i32 %90
+In function: _ZN16migration_device12rng_thread14EPdPjiyyPi
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace and instructions to reproduce the bug.
+Stack dump:
+0.	Program arguments: /opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/bin/ld.lld --no-undefined -shared -plugin-opt=mcpu=gfx1201 -plugin-opt=O2 --lto-CGO2 -L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/clang/24/lib/amdgcn-amd-amdhsa --no-undefined /tmp/potrf_block-202576-amdgcn-amd-amdhsa-gfx1201-662ee4.o -o /tmp/potrf_block-f60123.hipfb.amdgcn.gfx1201-2db2d2.img
+1.	Running pass 'CallGraph Pass Manager' on module 'ld-temp.o'.
+2.	Running pass 'AMDGPU DAG->DAG Pattern Instruction Selection' on function '@_ZN16migration_device12rng_thread14EPdPjiyyPi'
+ #0 0x00007ac53f7aa10a llvm::sys::PrintStackTrace(llvm::raw_ostream&, int) (/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/bin/../lib/libLLVM.so.24.0git+0x88210a)
+ #1 0x00007ac53f7a6dc6 SignalHandler(int, siginfo_t*, void*) Signals.cpp:0:0
+ #2 0x00007ac53e9c5330 (/lib/x86_64-linux-gnu/libc.so.6+0x45330)
+ #3 0x00007ac53ea1ec0c pthread_kill (/lib/x86_64-linux-gnu/libc.so.6+0x9ec0c)
+ #4 0x00007ac53e9c527e raise (/lib/x86_64-linux-gnu/libc.so.6+0x4527e)
+ #5 0x00007ac53e9a88ff abort (/lib/x86_64-linux-gnu/libc.so.6+0x288ff)
+ #6 0x00007ac53f4e998b llvm::json::operator==(llvm::json::Value const&, llvm::json::Value const&) (.cold) JSON.cpp:0:0
+ #7 0x00007ac5403a6d59 llvm::SelectionDAGISel::CannotYetSelect(llvm::SDNode*) (/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/bin/../lib/libLLVM.so.24.0git+0x147ed59)
+ #8 0x00007ac5403addfa llvm::SelectionDAGISel::SelectCodeCommon(llvm::SDNode*, unsigned char const*, unsigned int, unsigned char const*) (/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/bin/../lib/libLLVM.so.24.0git+0x1485dfa)
+ #9 0x00007ac5403a5469 llvm::SelectionDAGISel::DoInstructionSelection() (/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/bin/../lib/libLLVM.so.24.0git+0x147d469)
+#10 0x00007ac5403b4c75 llvm::SelectionDAGISel::CodeGenAndEmitDAG() (/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/bin/../lib/libLLVM.so.24.0git+0x148cc75)
+#11 0x00007ac5403b6ef0 llvm::SelectionDAGISel::SelectAllBasicBlocks(llvm::Function const&) (/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/bin/../lib/libLLVM.so.24.0git+0x148eef0)
+#12 0x00007ac5403b88ad llvm::SelectionDAGISel::runOnMachineFunction(llvm::MachineFunction&) (/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/bin/../lib/libLLVM.so.24.0git+0x14908ad)
+#13 0x00007ac5403b3f39 llvm::SelectionDAGISelLegacy::runOnMachineFunction(llvm::MachineFunction&) (/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/bin/../lib/libLLVM.so.24.0git+0x148bf39)
+#14 0x00007ac53fd3d28c llvm::MachineFunctionPass::runOnFunction(llvm::Function&) (/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/bin/../lib/libLLVM.so.24.0git+0xe1528c)
+#15 0x00007ac53f97c151 llvm::FPPassManager::runOnFunction(llvm::Function&) (/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/bin/../lib/libLLVM.so.24.0git+0xa54151)
+#16 0x00007ac5416dee11 (anonymous namespace)::CGPassManager::runOnModule(llvm::Module&) CallGraphSCCPass.cpp:0:0
+#17 0x00007ac53f97d1d4 (anonymous namespace)::MPPassManager::runOnModule(llvm::Module&) LegacyPassManager.cpp:0:0
+#18 0x00007ac53f97d6ac llvm::legacy::PassManagerImpl::run(llvm::Module&) (/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/bin/../lib/libLLVM.so.24.0git+0xa556ac)
+#19 0x00007ac541a016e8 codegen(CodegenConfig const&, llvm::TargetMachine*, std::function<llvm::Expected<std::unique_ptr<llvm::CachedFileStream, std::default_delete<llvm::CachedFileStream>>> (unsigned int, llvm::Twine const&)>, unsigned int, llvm::Module&, llvm::ModuleSummaryIndex const&) LTOBackend.cpp:0:0
+#20 0x00007ac541a041af llvm::lto::backend(llvm::lto::Config const&, std::function<llvm::Expected<std::unique_ptr<llvm::CachedFileStream, std::default_delete<llvm::CachedFileStream>>> (unsigned int, llvm::Twine const&)>, unsigned int, llvm::Module&, llvm::ModuleSummaryIndex&, llvm::ArrayRef<llvm::StringRef>) (/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/bin/../lib/libLLVM.so.24.0git+0x2adc1af)
+#21 0x00007ac5419dcf13 llvm::lto::LTO::runRegularLTO(std::function<llvm::Expected<std::unique_ptr<llvm::CachedFileStream, std::default_delete<llvm::CachedFileStream>>> (unsigned int, llvm::Twine const&)>) (/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/bin/../lib/libLLVM.so.24.0git+0x2ab4f13)
+#22 0x00007ac5419f67c3 llvm::lto::LTO::run(std::function<llvm::Expected<std::unique_ptr<llvm::CachedFileStream, std::default_delete<llvm::CachedFileStream>>> (unsigned int, llvm::Twine const&)>, llvm::FileCache) (/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/bin/../lib/libLLVM.so.24.0git+0x2ace7c3)
+#23 0x000000000062fc88 _end (/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/bin/ld.lld+0x62fc88)
+#24 0x000000000059f615 _end (/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/bin/ld.lld+0x59f615)
+#25 0x00000000005b4af0 _end (/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/bin/ld.lld+0x5b4af0)
+#26 0x00000000005bd3e2 _end (/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/bin/ld.lld+0x5bd3e2)
+#27 0x00000000005bd9a6 _end (/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/bin/ld.lld+0x5bd9a6)
+#28 0x000000000048189b _end (/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/bin/ld.lld+0x48189b)
+#29 0x00000000004810fb _end (/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/bin/ld.lld+0x4810fb)
+#30 0x000000000047ff26 _end (/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/bin/ld.lld+0x47ff26)
+#31 0x00007ac53e9aa1ca (/lib/x86_64-linux-gnu/libc.so.6+0x2a1ca)
+#32 0x00007ac53e9aa28b __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2a28b)
+#33 0x0000000000480a2e _end (/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/bin/ld.lld+0x480a2e)
+clang: error: unable to execute command: Aborted (core dumped)
+clang: error: ld.lld command failed with exit code -2 (use -v to see invocation)
+/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/bin/clang-linker-wrapper: error: 'clang' failed
+clang++: error: amdgcn-link command failed with exit code 1 (use -v to see invocation)
+failed to execute:/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib/llvm/bin/clang++  --offload-arch=gfx1201 --driver-mode=g++ --hip-link  --rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --rocm-device-lib-path=/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode -std=c++17 -O2 -D__HIP_PLATFORM_AMD__ -x hip /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/MathDx/cuSolverDx/01_Linear_Solve/potrf_block.cu -o "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/20261110T051146.192329Z/batches12_15-rocm/MathDx_cuSolverDx_01_Linear_Solve_potrf_block.cu/sample" -pthread -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/MathDx/cuSolverDx/01_Linear_Solve -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/mpi/include -I/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/include -I/opt/rocm/core-10.1/include -I/opt/rocm/core-10.1/include/hipblas -I/opt/rocm/core-10.1/include/hipsolver -I/opt/rocm/core-10.1/include/hipsparse -I/opt/rocm/core-10.1/include/rocblas -I/opt/rocm/core-10.1/include/rocsolver -I/opt/rocm/core-10.1/include/rocsparse -I/opt/rocm/core-10.1/include/hipfft -I/opt/rocm/core-10.1/include/rocrand -L/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/mpi/lib -L/opt/rocm/core-10.1/lib -L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib -L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib -Wl,-rpath,/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/mpi/lib -Wl,-rpath,/opt/rocm/core-10.1/lib -Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib -Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib -lmpi -lamdhip64 -lhipblas -lrccl -lhipfft -lrocrand

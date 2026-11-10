@@ -8,6 +8,7 @@ from batch2_spec import ALL
 from batch3_spec import ALL as BATCH3
 from batches4_8_spec import ALL as BATCHES4_8
 from batches9_11_spec import ALL as BATCHES9_11
+from batches12_15_spec import ALL as BATCHES12_15, LIMITS as LIMITS12_15, kind as kind12_15
 
 def main():
  errors=[];checks={};cat=json.loads((ROOT/'migration/samples.yaml').read_text());samples=cat['samples'];counts=collections.Counter(s['status'] for s in samples);proofs={}
@@ -127,6 +128,36 @@ def main():
  runtime911=json.loads((ROOT/'migration/reports/batches9_11-runtime-checks.json').read_text());require(runtime911['status']=='PASSED' and len(runtime911['tests'])==23 and all(x['passed'] for x in runtime911['tests']) and runtime911['generator_sha256']==digest(ROOT/'tools/migration/batches9_11_runtime_checks.py'),'B9-B11 runtime/file CLI gates incomplete')
  interop=json.loads((ROOT/'migration/reports/b9-cross-interop-inputs.json').read_text());require(len(interop)==16 and {x['producer_backend'] for x in interop}=={'rocm','cuda'} and all((ROOT/x['producer_evidence']).exists() and len(x['streams'])==16 for x in interop),'B9 cross-vendor stream provenance missing')
  checks.update(batches9_11_profiles=len(cohort911),batches9_11_complete_profiles=sum(r['contract_status']=='PASSED' for r in cohort911),batches9_11_partial_profiles=sum(r['contract_status']=='PARTIAL' for r in cohort911),batches9_11_cases=sum(len(r['cases']) for r in cohort911),batches9_11_faults_rejected=len(neg911['tests']),batches9_11_runtime_checks=len(runtime911['tests']),b9_cross_vendor_producers=len(interop))
+ cohort1215=json.loads((ROOT/'migration/reports/batches12_15-validation.json').read_text());require(len(cohort1215)==20 and {r['source'] for r in cohort1215}==set(BATCHES12_15),'B12-B15 target inventory incomplete')
+ binary_index=json.loads((ROOT/'migration/reports/binary-outputs.json').read_text())
+ for r in cohort1215:
+  require(r['status']==r['cuda_comparison']=='PASSED' and r['current_source_proof'] and r['current_cuda_source_proof'],'B12-B15 execution/source gate failed '+r['source'])
+  require({c['case'] for c in r['cases']}==set(BATCHES12_15[r['source']]) and len(r['cuda_cases'])==len(r['cases']) and all(c['status']=='PASSED' and c['checks'] and all(x['passed'] for x in c['checks']) for c in r['cases']) and all(c['status']=='PASSED' and c['identical_input'] and c['cuda_cpu_checks']['status']=='PASSED' and all(x['passed'] for x in c['cuda_cpu_checks']['checks']) for c in r['cuda_cases']),'B12-B15 independent numerical/semantics checks incomplete '+r['source'])
+  require(r['validation_source_sha256']==digest(ROOT/'tools/migration/batches12_15_validate.py') and sealed_hash(r['implementation'])==r['implementation_sha256'],'B12-B15 qualifier/implementation stale '+r['source'])
+  require(manifest['files'].get('build/cuda-observed/'+r['source'],{}).get('sha256')==r['cuda_implementation_sha256'],'B12-B15 CUDA source stale '+r['source'])
+  for name,sha in dict(r['dependencies'],**r['cuda_dependencies']).items():require(sealed_hash(name)==sha,'B12-B15 oracle/helper stale '+name)
+  require(r['environment']['rocm_release']=='10.1.0' and r['environment']['image_id']=='sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03' and all(d['physical_id'] in [0,2] for d in r['environment']['devices']),'B12-B15 environment/device mismatch '+r['source'])
+  if r['execution_model']!='single':require({d['physical_id'] for d in r['environment']['devices']}=={0,2},'B12-B15 two-GPU allocation missing '+r['source'])
+  for c in r['cases']+[c['cuda_cpu_checks'] for c in r['cuda_cases']]:
+   m=c['output_manifest'];mp=ROOT/m['path'];require(mp.exists() and digest(mp)==m['sha256'] and m['files']>0,'B12-B15 output manifest missing '+r['source'])
+   if mp.exists():
+    entries=json.loads(mp.read_text());require(len(entries)==m['files'],'B12-B15 manifest file count stale '+r['source'])
+    for n,v in entries.items():
+     f=mp.parent/n
+     if pathlib.Path(n).suffix in {'.log','.json','.txt'}:require(f.exists() and digest(f)==v['sha256'],'B12-B15 archived log/metadata altered '+str(f))
+     else:
+      original=str(f.relative_to(ROOT)).replace('migration/reports/evidence/','artifacts/',1);require(binary_index.get(original,{}).get('sha256')==v['sha256'],'B12-B15 binary output identity missing '+original)
+  s=next(s for s in samples if s['source']==r['source']);partial=kind12_15(r['source']) in LIMITS12_15;require(r['contract_status']==s['status']==('PARTIAL' if partial else 'PASSED'),'B12-B15 original contract incorrectly promoted '+r['source'])
+  if partial:require(r['missing_contract'] and set(s['passed_cases'])<set(s['required_cases']),'B12-B15 missing partial contract '+r['source'])
+  require(s['cuda_comparison_mode']==r['cuda_baseline_kind']=='COMPATIBLE_CUDA_MATH_BASELINE' and r['native_cuda_attempt'] is not None,'B12-B15 vendor and compatible baseline conflated '+r['source'])
+ neg1215=json.loads((ROOT/'migration/reports/batches12_15-negative.json').read_text());require(neg1215['status']=='PASSED' and neg1215['oracles']==20 and neg1215['output_faults']==40 and neg1215['semantic_faults']==13 and len(neg1215['tests'])==53 and all(x['rejected'] for x in neg1215['tests']) and neg1215['generator_sha256']==digest(ROOT/'tools/migration/batches12_15_negative.py'),'B12-B15 rejection gates incomplete')
+ runtime1215=json.loads((ROOT/'migration/reports/batches12_15-runtime-checks.json').read_text());require(runtime1215['status']=='PASSED' and len(runtime1215['tests'])==10 and all(x['passed'] for x in runtime1215['tests']) and runtime1215['generator_sha256']==digest(ROOT/'tools/migration/batches12_15_runtime_checks.py'),'B12-B15 runtime guards incomplete')
+ npp=json.loads((ROOT/'migration/reports/batch15-native-comparison.json').read_text());require(npp['generator_sha256']==digest(ROOT/'tools/migration/batch15_native_compare.py') and npp['native_probe_source_sha256']==digest(ROOT/'tools/migration/probes/batch15_native_cuda.cu'),'Native NPP oracle identity stale')
+ nd=next(x for x in npp['rows'] if x['kind']=='distance' and x['case']=='original');require(nd['status']=='PASSED' and len(nd['comparisons'])==2 and all(x['max_abs']==0 and x['integer_truncation_exact'] and x['amd_displacement_is_valid_nearest_site'] and x['native_displacement_is_valid_nearest_site'] for x in nd['comparisons']),'Original two-image NPP distance/Voronoi agreement incomplete')
+ nc=next(x for x in npp['rows'] if x['kind']=='canny' and x['case']=='original');require(nc['status']=='DIFFERENT' and nc['comparisons'][0]['different']>0,'Known Canny native semantic gap lost')
+ failure=json.loads((ROOT/'migration/reports/batch15-native-voronoi-failure.json').read_text());require(digest(ROOT/failure['failed_source_object'])==failure['failed_header_sha256'],'Historical Voronoi failed source missing')
+ caps=json.loads((ROOT/'migration/reports/batches12_15-capabilities.json').read_text());require(caps['source_sha256']==digest(ROOT/caps['source']) and caps['native_normal_header_build_return_code']!=0,'Native rocRAND normal-header capability evidence changed')
+ checks.update(batches12_15_profiles=len(cohort1215),batches12_15_complete_profiles=sum(r['contract_status']=='PASSED' for r in cohort1215),batches12_15_partial_profiles=sum(r['contract_status']=='PARTIAL' for r in cohort1215),batches12_15_cases=sum(len(r['cases']) for r in cohort1215),batches12_15_faults_rejected=len(neg1215['tests']),batches12_15_runtime_guards=len(runtime1215['tests']),batches12_15_native_vendor_attempts=len(cohort1215),native_NPP_original_distance_images=len(nd['comparisons']))
  for r in cohort:require(manifest['files'].get('build/cuda-observed/'+r['source'],{}).get('sha256')==r['cuda_implementation_sha256'],'B4-B8 CUDA source identity stale '+r['source'])
  for r in batch3:require(manifest['files'].get('build/cuda-observed/'+r['source'],{}).get('sha256')==r['cuda_implementation_sha256'],'Batch3 CUDA source identity stale '+r['source'])
  for name,r in manifest['files'].items():

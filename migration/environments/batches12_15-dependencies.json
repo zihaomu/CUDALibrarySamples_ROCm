@@ -1,0 +1,45 @@
+{
+  "rocm_release": "10.1.0",
+  "foundation_image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+  "physical_gpus": [
+    0,
+    2
+  ],
+  "hip_visible_devices": "2,1",
+  "mpi": {
+    "package": "mpich",
+    "version": "4.3.2",
+    "source": "https://pypi.org/project/mpich/4.3.2/",
+    "wheel_sha256": "afb503104df7e3ba828d86e78f54427ef410e9fc4a2da113de529fc851128ed4",
+    "libraries": {
+      "build/mpi/lib/libmpi.so.12": "341f48a184c6280a5ff20b970da15ceaab2dedadcd5d7a436a813f124faf02d4",
+      "build/mpi/lib/libmpi.so": "07f1c6c361895fe03b6aac4dabdc62299d95b84829c9787708cc1f3daca7ee62",
+      "build/mpi/lib/mpich/libfabric.so.1": "33eb3ea3c5820f343dd367ab6cb2ae73cbd7055f9971569de861cfd2d7b7bf0c",
+      "build/mpi/lib/mpich/libucp.so.0": "6cd68832e7e7c757586322204271c4e23b7688fcdfc44b9c4d30f60fb16fdf99",
+      "build/mpi/lib/mpich/libucs.so.0": "aaeefcba5186b00832ce1163da996d3a60d5ccf2752ca1509db3ae17c050dd23",
+      "build/mpi/lib/mpich/libucm.so.0": "783f62cc23810008e425c6433ba0807954756fa2f1aac7ace867bf54c4109499",
+      "build/mpi/lib/mpich/libuct.so.0": "4c90e2b04d6cc3b464443d678dd22e0b776c396dbceff6c8e83e2a516d4d9271",
+      "build/mpi/lib/mpich/libucs_signal.so.0": "22aa585133999cbf2f7fed54c5eba18ee954a3e7b666b5f19d55f4836cbb82b6",
+      "build/mpi/lib/mpich/libfabric/libefa-fi.so": "ceba1d9813309e62be905b8494b9a73e8903d7a01260f9d754cf80692a3999e1",
+      "build/mpi/lib/mpich/libfabric/libverbs-fi.so": "a7e27aef23a8e5259f2554454ad8f4d8c726553c949e62c37d8c9e74d1319fea",
+      "build/mpi/lib/mpich/libfabric/libpsmx2-fi.so": "e1ca1bbae5899b3419607871e014b80238142a52db5c29f0ea4dc278d5e4291b",
+      "build/mpi/lib/mpich/ucx/libuct_ib_mlx5.so.0": "185d4d49a82cc8a1240d592a8ec6cfdbb2b5f1ed28ca8870052b5260187be91d",
+      "build/mpi/lib/mpich/ucx/libuct_ib.so.0": "7baa404dfaf4c0c0585a79439c756cd1297abb7a2626f2c529399b18d725b6c0",
+      "build/mpi/lib/mpich/ucx/libuct_rdmacm.so.0": "e13230ba9ac2980d13fd1ac6c41be424caa5a54caf092a1f7197961ac9e4f0cb",
+      "build/mpi/lib/mpich/ucx/libuct_cma.so.0": "7679f45d837ec988cd729528faccfe9035da166d30f0334b6ceacc934e6f94d1"
+    }
+  },
+  "native_mathdx": {
+    "package": "nvidia-mathdx",
+    "version": "25.6.0",
+    "source": "https://pypi.org/project/nvidia-mathdx/25.6.0/",
+    "wheel_sha256": "22e6ad5d0d005f836be5cbd14e836cf2e9ea42c82deb602707246ce8198eaa96",
+    "scope": "Original NVIDIA CUDA SDK probes only; current source uses newer APIs in several examples, failures retained."
+  },
+  "notes": [
+    "Project-only MPI and SDK, shared foundation unmodified.",
+    "FP32 collective transport with FP16 inputs/output quantization remains a partial original matmul contract.",
+    "RPP API scan found no matching Canny/distance/NCC/flood entrypoints in installed public headers; direct HIP fallback explicitly identified.",
+    "No multi-node or performance qualification."
+  ]
+}

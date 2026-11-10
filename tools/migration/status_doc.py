@@ -53,6 +53,9 @@ if live.exists():
 live=r/'batches9-11-progress.json'
 if live.exists():
  summary=json.loads(live.read_text());text+='第九至第十一批：'+'；'.join(x['batch']+' '+str(x['samples_passed'])+'/'+str(x['samples_required'])+' 整例、'+str(x['samples_partial'])+' 部分支持、'+str(x['cases_verified'])+'/'+str(x['cases_required'])+' cases三方验收' for x in summary['batches'])+'。B9两个benchmark缺完整NVBENCH框架；B10六项含明确CPU progressive fallback，原生GPU后端和部分原例控制仍缺；B11 get_set完整vendor配置/查询未等价。主表与支持日志保持PARTIAL及恢复条件。详见 `migration/reports/batches9-11.md`。\n\n'
+live=r/'batches12-15-progress.json'
+if live.exists():
+ summary=json.loads(live.read_text());text+='第十二至第十五批：'+'；'.join(x['batch']+' '+str(x['samples_passed'])+'整例/'+str(x['samples_partial'])+'部分、'+str(x['cases_verified'])+'/'+str(x['cases_required'])+'case' for x in summary['batches'])+'。所有原始vendor CUDA尝试与兼容CUDA数学对照分开；53项输出/执行语义破坏拒绝、10项真实MPI/设备数/图像descriptor边界通过。原始NPP距离与整数截断逐像素一致，Voronoi位移语义已修正并保留失败源码；Canny原始图1995像素差异及其它未完成合同明确PARTIAL。详见 `migration/reports/batches12-15.md`。\n\n'
 with DOC.with_suffix('.lock').open('w') as lock:
  fcntl.flock(lock,fcntl.LOCK_EX);body=DOC.read_text();start=body.index('## 12.');end=body.index('## 附录 A',start);body=body[:start]+text+body[end:];body=body.replace('HIP_VISIBLE_DEVICES=0 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh','HIP_VISIBLE_DEVICES=2 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh');DOC.write_text(body.rstrip()+'\n')
 print('Current design snapshot refreshed')

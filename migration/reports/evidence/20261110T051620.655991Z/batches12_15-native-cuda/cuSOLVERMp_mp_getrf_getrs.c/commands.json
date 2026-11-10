@@ -1,0 +1,27 @@
+{
+  "build": [
+    "/usr/local/cuda-13.4/bin/nvcc",
+    "-std=c++17",
+    "-O2",
+    "-x",
+    "cu",
+    "-arch=sm_120",
+    "/home/zihaomu/cuda_samples_on_rocm_compare/cuSOLVERMp/mp_getrf_getrs.c",
+    "-o",
+    "/home/zihaomu/cuda_samples_on_rocm_compare/artifacts/20261110T051620.655991Z/batches12_15-native-cuda/cuSOLVERMp_mp_getrf_getrs.c/sample",
+    "-Xcompiler=-pthread",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/build/mpi/include",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/cuSOLVER/utils",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/cuSOLVERMp",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/build/mathdx-sdk/nvidia/mathdx/include",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/build/mathdx-sdk/nvidia/mathdx/external/cutlass/include",
+    "-L/home/zihaomu/cuda_samples_on_rocm_compare/build/mpi/lib",
+    "-Xlinker=-rpath=/home/zihaomu/cuda_samples_on_rocm_compare/build/mpi/lib",
+    "-lmpi",
+    "-lcublas",
+    "-lcufft",
+    "-lcusolver",
+    "-lcurand",
+    "-lnccl"
+  ]
+}
