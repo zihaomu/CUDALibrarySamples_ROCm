@@ -16,7 +16,7 @@ def review_identity(review):
         import subprocess
         subprocess.run(['git','merge-base','--is-ancestor',commit,'HEAD'],cwd=ROOT,check=True,capture_output=True)
         listing=git('ls-tree','-r',commit,'--',*REVIEW_PATHS).splitlines()
-        current=set(git('ls-tree','-r','--name-only','HEAD','--',*REVIEW_PATHS).splitlines())
+        current=set(git('ls-files','--cached','--',*REVIEW_PATHS).splitlines())
         expected={line.split('\t',1)[1]:line.split()[2] for line in listing}
         if set(expected)!=current or git('ls-files','--others','--exclude-standard','--',*REVIEW_PATHS).strip():return False
         # hash-object reads the current bytes, including uncommitted changes.

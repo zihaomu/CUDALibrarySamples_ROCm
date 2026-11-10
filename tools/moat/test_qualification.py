@@ -10,6 +10,13 @@ class QualificationContract(unittest.TestCase):
         self.assertTrue(q.review_identity(dict(source_commit=git('rev-parse','HEAD').strip())))
         self.assertFalse(q.review_identity(dict(source_commit='c6c8eac5cbd1966438c8211b89cfb613633f6375')))
 
+    def test_staged_added_source_needs_review(self):
+        original=q.git;head=git('rev-parse','HEAD').strip()
+        def staged(*args):
+            result=original(*args)
+            return result+'tools/moat/unreviewed-staged-source.py\n' if args[:2]==('ls-files','--cached') else result
+        with patch.object(q,'git',staged):self.assertFalse(q.review_identity(dict(source_commit=head)))
+
     def test_required_auxiliary_identity(self):
         record=q.load('rewrite-first-negative.json')['checks'][0];run=q.load('rewrite-first-rocm.json')['gemm3m/changed-values']
         args=dict(parent=run['experiment_id'],comparison=run['comparison_id'],input_hash=run['input_manifest_sha256'])
