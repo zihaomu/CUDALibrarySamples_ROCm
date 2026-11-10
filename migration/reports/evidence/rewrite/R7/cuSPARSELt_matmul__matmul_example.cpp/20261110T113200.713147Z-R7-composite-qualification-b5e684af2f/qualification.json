@@ -1,0 +1,562 @@
+{
+  "sample_id": "cuSPARSELt/matmul::matmul_example.cpp",
+  "kind": "sparse24",
+  "status": "PASSED",
+  "implementation": "rocm/ported/cuSPARSELt/matmul/matmul_example.cpp",
+  "implementation_sha256": "4666029d661a7a1800e6674aea1db95e621aa985883f9ce7f435d98e48af52ac",
+  "dependencies": {
+    "rocm/ported/cuSPARSELt/matmul/matmul_example.cpp": "4666029d661a7a1800e6674aea1db95e621aa985883f9ce7f435d98e48af52ac",
+    "rocm/backends/sparse/sparse24.hpp": "4e1ad834386de91f6156fe8a7426f336cfc3f7c9addf2cd5b41919cc86063ed6",
+    "rocm/common/rewrite_runtime.hpp": "f2b97f13b7f4c89f24827e96ba82bb6d2d6d692f909e80625fc16e81ffe5572c"
+  },
+  "case_count": 7,
+  "case_ids": [
+    "original",
+    "changed-values",
+    "layout",
+    "irregular",
+    "zero-A",
+    "ties",
+    "repeat"
+  ],
+  "checks": [
+    {
+      "check": "current-independent-review",
+      "passed": true
+    },
+    {
+      "check": "two-unique-original-profiles",
+      "passed": true
+    },
+    {
+      "check": "actual-native-build-and-derived-input-bundle",
+      "passed": true
+    },
+    {
+      "check": "sparse24/seven-fixed-cases",
+      "passed": true
+    },
+    {
+      "check": "sparse24/unchanged-original-CUDA",
+      "passed": true
+    },
+    {
+      "check": "sparse24/sealed-complete-current-build",
+      "passed": true
+    },
+    {
+      "check": "sparse24/original/frozen-profile-and-dtype",
+      "passed": true
+    },
+    {
+      "check": "sparse24/original/rocm/frozen-actual-run",
+      "passed": true
+    },
+    {
+      "check": "sparse24/original/rocm/current-independent-reference",
+      "passed": true
+    },
+    {
+      "check": "sparse24/original/cuda/frozen-actual-run",
+      "passed": true
+    },
+    {
+      "check": "sparse24/original/cuda/current-independent-reference",
+      "passed": true
+    },
+    {
+      "check": "sparse24/original/same-pruned-A-native-sparse-comparison",
+      "passed": true
+    },
+    {
+      "check": "sparse24/changed-values/frozen-profile-and-dtype",
+      "passed": true
+    },
+    {
+      "check": "sparse24/changed-values/rocm/frozen-actual-run",
+      "passed": true
+    },
+    {
+      "check": "sparse24/changed-values/rocm/current-independent-reference",
+      "passed": true
+    },
+    {
+      "check": "sparse24/changed-values/cuda/frozen-actual-run",
+      "passed": true
+    },
+    {
+      "check": "sparse24/changed-values/cuda/current-independent-reference",
+      "passed": true
+    },
+    {
+      "check": "sparse24/changed-values/same-pruned-A-native-sparse-comparison",
+      "passed": true
+    },
+    {
+      "check": "sparse24/layout/frozen-profile-and-dtype",
+      "passed": true
+    },
+    {
+      "check": "sparse24/layout/rocm/frozen-actual-run",
+      "passed": true
+    },
+    {
+      "check": "sparse24/layout/rocm/current-independent-reference",
+      "passed": true
+    },
+    {
+      "check": "sparse24/layout/cuda/frozen-actual-run",
+      "passed": true
+    },
+    {
+      "check": "sparse24/layout/cuda/current-independent-reference",
+      "passed": true
+    },
+    {
+      "check": "sparse24/layout/same-pruned-A-native-sparse-comparison",
+      "passed": true
+    },
+    {
+      "check": "sparse24/irregular/frozen-profile-and-dtype",
+      "passed": true
+    },
+    {
+      "check": "sparse24/irregular/rocm/frozen-actual-run",
+      "passed": true
+    },
+    {
+      "check": "sparse24/irregular/rocm/current-independent-reference",
+      "passed": true
+    },
+    {
+      "check": "sparse24/irregular/cuda/frozen-actual-run",
+      "passed": true
+    },
+    {
+      "check": "sparse24/irregular/cuda/current-independent-reference",
+      "passed": true
+    },
+    {
+      "check": "sparse24/irregular/same-pruned-A-native-sparse-comparison",
+      "passed": true
+    },
+    {
+      "check": "sparse24/zero-A/frozen-profile-and-dtype",
+      "passed": true
+    },
+    {
+      "check": "sparse24/zero-A/rocm/frozen-actual-run",
+      "passed": true
+    },
+    {
+      "check": "sparse24/zero-A/rocm/current-independent-reference",
+      "passed": true
+    },
+    {
+      "check": "sparse24/zero-A/cuda/frozen-actual-run",
+      "passed": true
+    },
+    {
+      "check": "sparse24/zero-A/cuda/current-independent-reference",
+      "passed": true
+    },
+    {
+      "check": "sparse24/zero-A/same-pruned-A-native-sparse-comparison",
+      "passed": true
+    },
+    {
+      "check": "sparse24/ties/frozen-profile-and-dtype",
+      "passed": true
+    },
+    {
+      "check": "sparse24/ties/rocm/frozen-actual-run",
+      "passed": true
+    },
+    {
+      "check": "sparse24/ties/rocm/current-independent-reference",
+      "passed": true
+    },
+    {
+      "check": "sparse24/ties/cuda/frozen-actual-run",
+      "passed": true
+    },
+    {
+      "check": "sparse24/ties/cuda/current-independent-reference",
+      "passed": true
+    },
+    {
+      "check": "sparse24/ties/same-pruned-A-native-sparse-comparison",
+      "passed": true
+    },
+    {
+      "check": "sparse24/repeat/frozen-profile-and-dtype",
+      "passed": true
+    },
+    {
+      "check": "sparse24/repeat/rocm/frozen-actual-run",
+      "passed": true
+    },
+    {
+      "check": "sparse24/repeat/rocm/current-independent-reference",
+      "passed": true
+    },
+    {
+      "check": "sparse24/repeat/cuda/frozen-actual-run",
+      "passed": true
+    },
+    {
+      "check": "sparse24/repeat/cuda/current-independent-reference",
+      "passed": true
+    },
+    {
+      "check": "sparse24/repeat/same-pruned-A-native-sparse-comparison",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/seven-fixed-cases",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/unchanged-original-CUDA",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/sealed-complete-current-build",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/original/frozen-profile-and-dtype",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/original/rocm/frozen-actual-run",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/original/rocm/current-independent-reference",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/original/cuda/frozen-actual-run",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/original/cuda/current-independent-reference",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/original/same-pruned-A-native-sparse-comparison",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/changed-values/frozen-profile-and-dtype",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/changed-values/rocm/frozen-actual-run",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/changed-values/rocm/current-independent-reference",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/changed-values/cuda/frozen-actual-run",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/changed-values/cuda/current-independent-reference",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/changed-values/same-pruned-A-native-sparse-comparison",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/layout/frozen-profile-and-dtype",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/layout/rocm/frozen-actual-run",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/layout/rocm/current-independent-reference",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/layout/cuda/frozen-actual-run",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/layout/cuda/current-independent-reference",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/layout/same-pruned-A-native-sparse-comparison",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/irregular/frozen-profile-and-dtype",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/irregular/rocm/frozen-actual-run",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/irregular/rocm/current-independent-reference",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/irregular/cuda/frozen-actual-run",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/irregular/cuda/current-independent-reference",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/irregular/same-pruned-A-native-sparse-comparison",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/zero-A/frozen-profile-and-dtype",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/zero-A/rocm/frozen-actual-run",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/zero-A/rocm/current-independent-reference",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/zero-A/cuda/frozen-actual-run",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/zero-A/cuda/current-independent-reference",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/zero-A/same-pruned-A-native-sparse-comparison",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/ties/frozen-profile-and-dtype",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/ties/rocm/frozen-actual-run",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/ties/rocm/current-independent-reference",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/ties/cuda/frozen-actual-run",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/ties/cuda/current-independent-reference",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/ties/same-pruned-A-native-sparse-comparison",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/repeat/frozen-profile-and-dtype",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/repeat/rocm/frozen-actual-run",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/repeat/rocm/current-independent-reference",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/repeat/cuda/frozen-actual-run",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/repeat/cuda/current-independent-reference",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/repeat/same-pruned-A-native-sparse-comparison",
+      "passed": true
+    },
+    {
+      "check": "two-actual-original-native-harnesses",
+      "passed": true
+    },
+    {
+      "check": "sparse24/actual-original-native-program",
+      "passed": true
+    },
+    {
+      "check": "sparse24/original-native-DP-and-mathematical-CPU",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/actual-original-native-program",
+      "passed": true
+    },
+    {
+      "check": "sparse24_advanced/original-native-DP-and-mathematical-CPU",
+      "passed": true
+    },
+    {
+      "check": "seventeen-unique-semantic-faults",
+      "passed": true
+    },
+    {
+      "check": "negative/packed-value",
+      "passed": true
+    },
+    {
+      "check": "negative/metadata-index",
+      "passed": true
+    },
+    {
+      "check": "negative/tile-mask",
+      "passed": true
+    },
+    {
+      "check": "negative/nonoptimal-prune",
+      "passed": true
+    },
+    {
+      "check": "negative/three-ULP-output",
+      "passed": true
+    },
+    {
+      "check": "negative/output-padding",
+      "passed": true
+    },
+    {
+      "check": "negative/GPU-input-echo",
+      "passed": true
+    },
+    {
+      "check": "negative/search-choice",
+      "passed": true
+    },
+    {
+      "check": "negative/NaN-timing",
+      "passed": true
+    },
+    {
+      "check": "negative/truncated-packed",
+      "passed": true
+    },
+    {
+      "check": "negative/trailing-metadata",
+      "passed": true
+    },
+    {
+      "check": "negative/ReLU-threshold",
+      "passed": true
+    },
+    {
+      "check": "negative/ReLU-upper-bound",
+      "passed": true
+    },
+    {
+      "check": "negative/native-compact-B",
+      "passed": true
+    },
+    {
+      "check": "negative/native-coupled-output",
+      "passed": true
+    },
+    {
+      "check": "negative/native-coupled-padding",
+      "passed": true
+    },
+    {
+      "check": "negative/allocation-query",
+      "passed": true
+    },
+    {
+      "check": "ten-unique-actual-descriptor-rejections",
+      "passed": true
+    },
+    {
+      "check": "runtime/tile-m",
+      "passed": true
+    },
+    {
+      "check": "runtime/tile-k",
+      "passed": true
+    },
+    {
+      "check": "runtime/empty-batch",
+      "passed": true
+    },
+    {
+      "check": "runtime/short-lda",
+      "passed": true
+    },
+    {
+      "check": "runtime/overlapping-stride",
+      "passed": true
+    },
+    {
+      "check": "runtime/unsupported-transpose",
+      "passed": true
+    },
+    {
+      "check": "runtime/unsupported-dtype",
+      "passed": true
+    },
+    {
+      "check": "runtime/nonfinite-alpha",
+      "passed": true
+    },
+    {
+      "check": "runtime/reversed-ReLU-bounds",
+      "passed": true
+    },
+    {
+      "check": "runtime/truncated-A",
+      "passed": true
+    },
+    {
+      "check": "real-GPU-valid-and-three-corrupt-metadata-cases",
+      "passed": true
+    },
+    {
+      "check": "two-unique-sparse-GPU-traces",
+      "passed": true
+    },
+    {
+      "check": "trace/sparse24/prune-compress-check-sparse-only-matmul",
+      "passed": true
+    },
+    {
+      "check": "trace/sparse24_advanced/prune-compress-check-sparse-only-matmul",
+      "passed": true
+    },
+    {
+      "check": "two-native-SDK-route-observations-preserved",
+      "passed": true
+    },
+    {
+      "check": "native-route/matmul/failure-kept-separate",
+      "passed": true
+    },
+    {
+      "check": "native-route/matmul_advanced/failure-kept-separate",
+      "passed": true
+    }
+  ],
+  "source_commit": "0d530192c6203b10ede8630e6d2346280fe81264",
+  "scope": "Default FP16 A/B/C/bias, FP32 accumulate; TILE optimal L1 ties may differ. Actual native originals checked separately. Native sparse compression/matmul baseline consumes corresponding HIP-pruned A and uses CUDA packing for vendor descriptor limits. Project packed format: two FP16 values and one metadata byte per group; low four bits encode positions. No native hipSPARSELt or vendor opaque-format compatibility claim."
+}

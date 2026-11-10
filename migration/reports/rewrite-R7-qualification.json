@@ -1,9 +1,9 @@
 {
-  "status": "FAILED",
+  "status": "PASSED",
   "checks": [
     {
       "check": "current-independent-review",
-      "passed": false
+      "passed": true
     },
     {
       "check": "two-unique-original-profiles",
@@ -541,7 +541,7 @@
   "profile_count": 2,
   "registered_inputs": 14,
   "native_original_programs": 2,
-  "source_commit": "77ea2d007d0ba6c845c20e32b6f63d920b0fe3f9",
+  "source_commit": "0d530192c6203b10ede8630e6d2346280fe81264",
   "evidence_references": [
     "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul/20261110T105522.703709Z-R7-cuda-original-220c5ac860",
     "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul/20261110T111233.201954Z-R7-cpu-native-original-validation-3bd5405161",
@@ -639,5 +639,1405 @@
     "migration/reports/evidence/rewrite/R7/sparse24_negative_trailing-metadata/20261110T111247.309731Z-R7-cpu-negative-9aa230cada",
     "migration/reports/evidence/rewrite/R7/sparse24_negative_truncated-packed/20261110T111246.154616Z-R7-cpu-negative-3c3e71af99"
   ],
-  "scope": "Default FP16 A/B/C/bias, FP32 accumulate; TILE optimal L1 ties may differ. Actual native originals checked separately. Native sparse compression/matmul baseline consumes corresponding HIP-pruned A and uses CUDA packing for vendor descriptor limits. Project packed format: two FP16 values and one metadata byte per group; low four bits encode positions. No native hipSPARSELt or vendor opaque-format compatibility claim."
+  "scope": "Default FP16 A/B/C/bias, FP32 accumulate; TILE optimal L1 ties may differ. Actual native originals checked separately. Native sparse compression/matmul baseline consumes corresponding HIP-pruned A and uses CUDA packing for vendor descriptor limits. Project packed format: two FP16 values and one metadata byte per group; low four bits encode positions. No native hipSPARSELt or vendor opaque-format compatibility claim.",
+  "qualifications": [
+    {
+      "sample_id": "cuSPARSELt/matmul::matmul_example.cpp",
+      "kind": "sparse24",
+      "status": "PASSED",
+      "implementation": "rocm/ported/cuSPARSELt/matmul/matmul_example.cpp",
+      "implementation_sha256": "4666029d661a7a1800e6674aea1db95e621aa985883f9ce7f435d98e48af52ac",
+      "dependencies": {
+        "rocm/ported/cuSPARSELt/matmul/matmul_example.cpp": "4666029d661a7a1800e6674aea1db95e621aa985883f9ce7f435d98e48af52ac",
+        "rocm/backends/sparse/sparse24.hpp": "4e1ad834386de91f6156fe8a7426f336cfc3f7c9addf2cd5b41919cc86063ed6",
+        "rocm/common/rewrite_runtime.hpp": "f2b97f13b7f4c89f24827e96ba82bb6d2d6d692f909e80625fc16e81ffe5572c"
+      },
+      "case_count": 7,
+      "case_ids": [
+        "original",
+        "changed-values",
+        "layout",
+        "irregular",
+        "zero-A",
+        "ties",
+        "repeat"
+      ],
+      "checks": [
+        {
+          "check": "current-independent-review",
+          "passed": true
+        },
+        {
+          "check": "two-unique-original-profiles",
+          "passed": true
+        },
+        {
+          "check": "actual-native-build-and-derived-input-bundle",
+          "passed": true
+        },
+        {
+          "check": "sparse24/seven-fixed-cases",
+          "passed": true
+        },
+        {
+          "check": "sparse24/unchanged-original-CUDA",
+          "passed": true
+        },
+        {
+          "check": "sparse24/sealed-complete-current-build",
+          "passed": true
+        },
+        {
+          "check": "sparse24/original/frozen-profile-and-dtype",
+          "passed": true
+        },
+        {
+          "check": "sparse24/original/rocm/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24/original/rocm/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24/original/cuda/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24/original/cuda/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24/original/same-pruned-A-native-sparse-comparison",
+          "passed": true
+        },
+        {
+          "check": "sparse24/changed-values/frozen-profile-and-dtype",
+          "passed": true
+        },
+        {
+          "check": "sparse24/changed-values/rocm/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24/changed-values/rocm/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24/changed-values/cuda/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24/changed-values/cuda/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24/changed-values/same-pruned-A-native-sparse-comparison",
+          "passed": true
+        },
+        {
+          "check": "sparse24/layout/frozen-profile-and-dtype",
+          "passed": true
+        },
+        {
+          "check": "sparse24/layout/rocm/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24/layout/rocm/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24/layout/cuda/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24/layout/cuda/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24/layout/same-pruned-A-native-sparse-comparison",
+          "passed": true
+        },
+        {
+          "check": "sparse24/irregular/frozen-profile-and-dtype",
+          "passed": true
+        },
+        {
+          "check": "sparse24/irregular/rocm/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24/irregular/rocm/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24/irregular/cuda/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24/irregular/cuda/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24/irregular/same-pruned-A-native-sparse-comparison",
+          "passed": true
+        },
+        {
+          "check": "sparse24/zero-A/frozen-profile-and-dtype",
+          "passed": true
+        },
+        {
+          "check": "sparse24/zero-A/rocm/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24/zero-A/rocm/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24/zero-A/cuda/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24/zero-A/cuda/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24/zero-A/same-pruned-A-native-sparse-comparison",
+          "passed": true
+        },
+        {
+          "check": "sparse24/ties/frozen-profile-and-dtype",
+          "passed": true
+        },
+        {
+          "check": "sparse24/ties/rocm/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24/ties/rocm/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24/ties/cuda/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24/ties/cuda/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24/ties/same-pruned-A-native-sparse-comparison",
+          "passed": true
+        },
+        {
+          "check": "sparse24/repeat/frozen-profile-and-dtype",
+          "passed": true
+        },
+        {
+          "check": "sparse24/repeat/rocm/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24/repeat/rocm/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24/repeat/cuda/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24/repeat/cuda/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24/repeat/same-pruned-A-native-sparse-comparison",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/seven-fixed-cases",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/unchanged-original-CUDA",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/sealed-complete-current-build",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/original/frozen-profile-and-dtype",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/original/rocm/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/original/rocm/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/original/cuda/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/original/cuda/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/original/same-pruned-A-native-sparse-comparison",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/changed-values/frozen-profile-and-dtype",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/changed-values/rocm/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/changed-values/rocm/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/changed-values/cuda/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/changed-values/cuda/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/changed-values/same-pruned-A-native-sparse-comparison",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/layout/frozen-profile-and-dtype",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/layout/rocm/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/layout/rocm/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/layout/cuda/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/layout/cuda/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/layout/same-pruned-A-native-sparse-comparison",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/irregular/frozen-profile-and-dtype",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/irregular/rocm/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/irregular/rocm/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/irregular/cuda/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/irregular/cuda/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/irregular/same-pruned-A-native-sparse-comparison",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/zero-A/frozen-profile-and-dtype",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/zero-A/rocm/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/zero-A/rocm/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/zero-A/cuda/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/zero-A/cuda/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/zero-A/same-pruned-A-native-sparse-comparison",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/ties/frozen-profile-and-dtype",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/ties/rocm/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/ties/rocm/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/ties/cuda/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/ties/cuda/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/ties/same-pruned-A-native-sparse-comparison",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/repeat/frozen-profile-and-dtype",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/repeat/rocm/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/repeat/rocm/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/repeat/cuda/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/repeat/cuda/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/repeat/same-pruned-A-native-sparse-comparison",
+          "passed": true
+        },
+        {
+          "check": "two-actual-original-native-harnesses",
+          "passed": true
+        },
+        {
+          "check": "sparse24/actual-original-native-program",
+          "passed": true
+        },
+        {
+          "check": "sparse24/original-native-DP-and-mathematical-CPU",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/actual-original-native-program",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/original-native-DP-and-mathematical-CPU",
+          "passed": true
+        },
+        {
+          "check": "seventeen-unique-semantic-faults",
+          "passed": true
+        },
+        {
+          "check": "negative/packed-value",
+          "passed": true
+        },
+        {
+          "check": "negative/metadata-index",
+          "passed": true
+        },
+        {
+          "check": "negative/tile-mask",
+          "passed": true
+        },
+        {
+          "check": "negative/nonoptimal-prune",
+          "passed": true
+        },
+        {
+          "check": "negative/three-ULP-output",
+          "passed": true
+        },
+        {
+          "check": "negative/output-padding",
+          "passed": true
+        },
+        {
+          "check": "negative/GPU-input-echo",
+          "passed": true
+        },
+        {
+          "check": "negative/search-choice",
+          "passed": true
+        },
+        {
+          "check": "negative/NaN-timing",
+          "passed": true
+        },
+        {
+          "check": "negative/truncated-packed",
+          "passed": true
+        },
+        {
+          "check": "negative/trailing-metadata",
+          "passed": true
+        },
+        {
+          "check": "negative/ReLU-threshold",
+          "passed": true
+        },
+        {
+          "check": "negative/ReLU-upper-bound",
+          "passed": true
+        },
+        {
+          "check": "negative/native-compact-B",
+          "passed": true
+        },
+        {
+          "check": "negative/native-coupled-output",
+          "passed": true
+        },
+        {
+          "check": "negative/native-coupled-padding",
+          "passed": true
+        },
+        {
+          "check": "negative/allocation-query",
+          "passed": true
+        },
+        {
+          "check": "ten-unique-actual-descriptor-rejections",
+          "passed": true
+        },
+        {
+          "check": "runtime/tile-m",
+          "passed": true
+        },
+        {
+          "check": "runtime/tile-k",
+          "passed": true
+        },
+        {
+          "check": "runtime/empty-batch",
+          "passed": true
+        },
+        {
+          "check": "runtime/short-lda",
+          "passed": true
+        },
+        {
+          "check": "runtime/overlapping-stride",
+          "passed": true
+        },
+        {
+          "check": "runtime/unsupported-transpose",
+          "passed": true
+        },
+        {
+          "check": "runtime/unsupported-dtype",
+          "passed": true
+        },
+        {
+          "check": "runtime/nonfinite-alpha",
+          "passed": true
+        },
+        {
+          "check": "runtime/reversed-ReLU-bounds",
+          "passed": true
+        },
+        {
+          "check": "runtime/truncated-A",
+          "passed": true
+        },
+        {
+          "check": "real-GPU-valid-and-three-corrupt-metadata-cases",
+          "passed": true
+        },
+        {
+          "check": "two-unique-sparse-GPU-traces",
+          "passed": true
+        },
+        {
+          "check": "trace/sparse24/prune-compress-check-sparse-only-matmul",
+          "passed": true
+        },
+        {
+          "check": "trace/sparse24_advanced/prune-compress-check-sparse-only-matmul",
+          "passed": true
+        },
+        {
+          "check": "two-native-SDK-route-observations-preserved",
+          "passed": true
+        },
+        {
+          "check": "native-route/matmul/failure-kept-separate",
+          "passed": true
+        },
+        {
+          "check": "native-route/matmul_advanced/failure-kept-separate",
+          "passed": true
+        }
+      ],
+      "source_commit": "0d530192c6203b10ede8630e6d2346280fe81264",
+      "scope": "Default FP16 A/B/C/bias, FP32 accumulate; TILE optimal L1 ties may differ. Actual native originals checked separately. Native sparse compression/matmul baseline consumes corresponding HIP-pruned A and uses CUDA packing for vendor descriptor limits. Project packed format: two FP16 values and one metadata byte per group; low four bits encode positions. No native hipSPARSELt or vendor opaque-format compatibility claim.",
+      "qualification_id": "20261110T113200.713147Z-R7-composite-qualification-b5e684af2f",
+      "evidence": "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul__matmul_example.cpp/20261110T113200.713147Z-R7-composite-qualification-b5e684af2f",
+      "rocm_evidence": "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul__matmul_example.cpp/20261110T110642.947660Z-R7-rocm-4e68d878e2",
+      "cuda_evidence": "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul__matmul_example.cpp/20261110T110914.291332Z-R7-cuda-native-compressed-f90d81b3db",
+      "environment": {
+        "hostname": "7e746253528d",
+        "platform": "Linux-7.0.0-42-generic-x86_64-with-glibc2.39",
+        "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "rocm_release": "10.1.0",
+        "visible_devices": "2",
+        "devices": [
+          {
+            "logical_id": 0,
+            "pci_bdf": "0000:03:00.0",
+            "physical_id": 0,
+            "uuid": "32396463623033636131356166623633"
+          }
+        ],
+        "versions": {
+          "hipRuntimeGetVersion": {
+            "status": 0,
+            "value": 71626385
+          },
+          "hipDriverGetVersion": {
+            "status": 0,
+            "value": 71626385
+          }
+        },
+        "packages": {
+          "rocm-sdk-core": "10.1.0",
+          "rocm-sdk-device-gfx1100": "10.1.0",
+          "rocm-sdk-device-gfx942": "10.1.0",
+          "rocm-sdk-device-gfx1010": "10.1.0",
+          "rocm-sdk-device-gfx1011": "10.1.0",
+          "rocm-sdk-device-gfx1101": "10.1.0",
+          "rocm-bootstrap": "0.3.0",
+          "triton": "3.8.0+git669b31ac.rocm10.1.0",
+          "rocm-sdk-device-gfx1035": "10.1.0",
+          "rocm-sdk-device-gfx1012": "10.1.0",
+          "torch": "2.14.0+rocm10.1.0",
+          "rocm-sdk-device-gfx1152": "10.1.0",
+          "rocm-sdk-device-gfx908": "10.1.0",
+          "rocm-sdk-libraries": "10.1.0",
+          "rocm-sdk-device-gfx1031": "10.1.0",
+          "rocm-sdk-device-gfx1151": "10.1.0",
+          "rocm-sdk-device-gfx1030": "10.1.0",
+          "rocm-sdk-device-gfx1103": "10.1.0",
+          "rocm-sdk-device-gfx1250": "10.1.0",
+          "rocm-sdk-device-gfx1032": "10.1.0",
+          "rocm-sdk-device-gfx1102": "10.1.0",
+          "rocm-sdk-device-gfx1201": "10.1.0",
+          "rocm-sdk-device-gfx90a": "10.1.0",
+          "torchvision": "0.29.0a0+rocm10.1.0",
+          "rocm-sdk-device-gfx1036": "10.1.0",
+          "rocm-sdk-device-gfx1153": "10.1.0",
+          "rocm": "10.1.0",
+          "rocm-sdk-device-gfx1150": "10.1.0",
+          "rocm-sdk-device-gfx1200": "10.1.0",
+          "rocm-sdk-device-gfx1034": "10.1.0",
+          "rocm-sdk-device-gfx1033": "10.1.0",
+          "rocm-sdk-device-gfx950": "10.1.0"
+        },
+        "loaded_libraries": [
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamd_comgr.so.3",
+            "sha256": "6bf2f6fe6b243c5ac3621cd5745887933d3a41edd944a447c88c21ec77da5d5b"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamdhip64.so.7",
+            "sha256": "6d1dbee8cb3ad924e4c1bca7734e22f2c93026eb3bc871a7f64a916778d55e36"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-amd-aqlprofile64.so.1",
+            "sha256": "6d4be9a3d53457b466f3e1fb1b07b897cd78be9b934a5326444b7b2070dabd61"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-runtime64.so.1",
+            "sha256": "12d49db16881b9505629192231d5b3971e9030b26a326fc2c003e92da7de0c44"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocm_kpack.so.0",
+            "sha256": "e2af394dea58ad53d6074c7aa9d56de5dc027ca186f6bbc27d6f32d7b8f12ac3"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocprofiler-register.so.0",
+            "sha256": "a67764cf46d1d579eb27311576ba9c0b4dbfa5052ddd64a062131f716faa11b6"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libLLVM.so.24.0git",
+            "sha256": "3e7b50e1f252792eba7380b8503c05c899bf8ae9deeb70faf3f9be5f995c8e0a"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libclang-cpp.so.24.0git",
+            "sha256": "18ef4cb8bd32366a68599fb6d723ed38814707a2ada1ff34b722dafc7856663b"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_bz2.so",
+            "sha256": "37a39b12a7e6e9f480d10e5e139b9aedbe5824e63b6b9e12a16837baee608602"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm.so.2",
+            "sha256": "b715ae24e1d62e407ffceca56b546e8a35abe37ac50878cbb16fa8b93d9c9fd5"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm_amdgpu.so.1",
+            "sha256": "b25742cda500eaa61e39b2b32492bb482235ad3e3df8a988d8f4130054d94cad"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_elf.so.1",
+            "sha256": "692dd9fe3575a45df78b319ad0e2a58ee36814958771dd810d5d91f9616c6d8f"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_liblzma.so.5",
+            "sha256": "d17f947bfe3947db5aefee897f6d32dfe98c73bf80b477764ba7f4107594a671"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_numa.so.1",
+            "sha256": "26fffd0f85369950b834cfb8f56fa9e1ea4804be8bbc40db98b788c554802bc3"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_z.so.1",
+            "sha256": "e1d7568f4a0b77eeab26f30cc9d2794dfe7ffd14e34b4ae55a9f80bc4f94ba7a"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_zstd.so.1",
+            "sha256": "fc3edd0b74fa071079b0095abe7b3f41418ca39be138f4ec0c57d0640a0b2d8b"
+          }
+        ]
+      },
+      "devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0,
+          "uuid": "32396463623033636131356166623633"
+        }
+      ]
+    },
+    {
+      "sample_id": "cuSPARSELt/matmul_advanced::matmul_advanced_example.cpp",
+      "kind": "sparse24_advanced",
+      "status": "PASSED",
+      "implementation": "rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp",
+      "implementation_sha256": "02acc20a288c30126d33cc38c3fded5d7d85d055232f36e1624e030924270019",
+      "dependencies": {
+        "rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp": "02acc20a288c30126d33cc38c3fded5d7d85d055232f36e1624e030924270019",
+        "rocm/backends/sparse/sparse24.hpp": "4e1ad834386de91f6156fe8a7426f336cfc3f7c9addf2cd5b41919cc86063ed6",
+        "rocm/common/rewrite_runtime.hpp": "f2b97f13b7f4c89f24827e96ba82bb6d2d6d692f909e80625fc16e81ffe5572c"
+      },
+      "case_count": 7,
+      "case_ids": [
+        "original",
+        "changed-values",
+        "layout",
+        "irregular",
+        "zero-A",
+        "ties",
+        "repeat"
+      ],
+      "checks": [
+        {
+          "check": "current-independent-review",
+          "passed": true
+        },
+        {
+          "check": "two-unique-original-profiles",
+          "passed": true
+        },
+        {
+          "check": "actual-native-build-and-derived-input-bundle",
+          "passed": true
+        },
+        {
+          "check": "sparse24/seven-fixed-cases",
+          "passed": true
+        },
+        {
+          "check": "sparse24/unchanged-original-CUDA",
+          "passed": true
+        },
+        {
+          "check": "sparse24/sealed-complete-current-build",
+          "passed": true
+        },
+        {
+          "check": "sparse24/original/frozen-profile-and-dtype",
+          "passed": true
+        },
+        {
+          "check": "sparse24/original/rocm/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24/original/rocm/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24/original/cuda/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24/original/cuda/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24/original/same-pruned-A-native-sparse-comparison",
+          "passed": true
+        },
+        {
+          "check": "sparse24/changed-values/frozen-profile-and-dtype",
+          "passed": true
+        },
+        {
+          "check": "sparse24/changed-values/rocm/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24/changed-values/rocm/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24/changed-values/cuda/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24/changed-values/cuda/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24/changed-values/same-pruned-A-native-sparse-comparison",
+          "passed": true
+        },
+        {
+          "check": "sparse24/layout/frozen-profile-and-dtype",
+          "passed": true
+        },
+        {
+          "check": "sparse24/layout/rocm/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24/layout/rocm/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24/layout/cuda/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24/layout/cuda/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24/layout/same-pruned-A-native-sparse-comparison",
+          "passed": true
+        },
+        {
+          "check": "sparse24/irregular/frozen-profile-and-dtype",
+          "passed": true
+        },
+        {
+          "check": "sparse24/irregular/rocm/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24/irregular/rocm/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24/irregular/cuda/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24/irregular/cuda/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24/irregular/same-pruned-A-native-sparse-comparison",
+          "passed": true
+        },
+        {
+          "check": "sparse24/zero-A/frozen-profile-and-dtype",
+          "passed": true
+        },
+        {
+          "check": "sparse24/zero-A/rocm/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24/zero-A/rocm/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24/zero-A/cuda/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24/zero-A/cuda/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24/zero-A/same-pruned-A-native-sparse-comparison",
+          "passed": true
+        },
+        {
+          "check": "sparse24/ties/frozen-profile-and-dtype",
+          "passed": true
+        },
+        {
+          "check": "sparse24/ties/rocm/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24/ties/rocm/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24/ties/cuda/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24/ties/cuda/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24/ties/same-pruned-A-native-sparse-comparison",
+          "passed": true
+        },
+        {
+          "check": "sparse24/repeat/frozen-profile-and-dtype",
+          "passed": true
+        },
+        {
+          "check": "sparse24/repeat/rocm/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24/repeat/rocm/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24/repeat/cuda/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24/repeat/cuda/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24/repeat/same-pruned-A-native-sparse-comparison",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/seven-fixed-cases",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/unchanged-original-CUDA",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/sealed-complete-current-build",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/original/frozen-profile-and-dtype",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/original/rocm/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/original/rocm/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/original/cuda/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/original/cuda/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/original/same-pruned-A-native-sparse-comparison",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/changed-values/frozen-profile-and-dtype",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/changed-values/rocm/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/changed-values/rocm/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/changed-values/cuda/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/changed-values/cuda/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/changed-values/same-pruned-A-native-sparse-comparison",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/layout/frozen-profile-and-dtype",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/layout/rocm/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/layout/rocm/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/layout/cuda/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/layout/cuda/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/layout/same-pruned-A-native-sparse-comparison",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/irregular/frozen-profile-and-dtype",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/irregular/rocm/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/irregular/rocm/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/irregular/cuda/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/irregular/cuda/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/irregular/same-pruned-A-native-sparse-comparison",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/zero-A/frozen-profile-and-dtype",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/zero-A/rocm/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/zero-A/rocm/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/zero-A/cuda/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/zero-A/cuda/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/zero-A/same-pruned-A-native-sparse-comparison",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/ties/frozen-profile-and-dtype",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/ties/rocm/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/ties/rocm/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/ties/cuda/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/ties/cuda/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/ties/same-pruned-A-native-sparse-comparison",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/repeat/frozen-profile-and-dtype",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/repeat/rocm/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/repeat/rocm/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/repeat/cuda/frozen-actual-run",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/repeat/cuda/current-independent-reference",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/repeat/same-pruned-A-native-sparse-comparison",
+          "passed": true
+        },
+        {
+          "check": "two-actual-original-native-harnesses",
+          "passed": true
+        },
+        {
+          "check": "sparse24/actual-original-native-program",
+          "passed": true
+        },
+        {
+          "check": "sparse24/original-native-DP-and-mathematical-CPU",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/actual-original-native-program",
+          "passed": true
+        },
+        {
+          "check": "sparse24_advanced/original-native-DP-and-mathematical-CPU",
+          "passed": true
+        },
+        {
+          "check": "seventeen-unique-semantic-faults",
+          "passed": true
+        },
+        {
+          "check": "negative/packed-value",
+          "passed": true
+        },
+        {
+          "check": "negative/metadata-index",
+          "passed": true
+        },
+        {
+          "check": "negative/tile-mask",
+          "passed": true
+        },
+        {
+          "check": "negative/nonoptimal-prune",
+          "passed": true
+        },
+        {
+          "check": "negative/three-ULP-output",
+          "passed": true
+        },
+        {
+          "check": "negative/output-padding",
+          "passed": true
+        },
+        {
+          "check": "negative/GPU-input-echo",
+          "passed": true
+        },
+        {
+          "check": "negative/search-choice",
+          "passed": true
+        },
+        {
+          "check": "negative/NaN-timing",
+          "passed": true
+        },
+        {
+          "check": "negative/truncated-packed",
+          "passed": true
+        },
+        {
+          "check": "negative/trailing-metadata",
+          "passed": true
+        },
+        {
+          "check": "negative/ReLU-threshold",
+          "passed": true
+        },
+        {
+          "check": "negative/ReLU-upper-bound",
+          "passed": true
+        },
+        {
+          "check": "negative/native-compact-B",
+          "passed": true
+        },
+        {
+          "check": "negative/native-coupled-output",
+          "passed": true
+        },
+        {
+          "check": "negative/native-coupled-padding",
+          "passed": true
+        },
+        {
+          "check": "negative/allocation-query",
+          "passed": true
+        },
+        {
+          "check": "ten-unique-actual-descriptor-rejections",
+          "passed": true
+        },
+        {
+          "check": "runtime/tile-m",
+          "passed": true
+        },
+        {
+          "check": "runtime/tile-k",
+          "passed": true
+        },
+        {
+          "check": "runtime/empty-batch",
+          "passed": true
+        },
+        {
+          "check": "runtime/short-lda",
+          "passed": true
+        },
+        {
+          "check": "runtime/overlapping-stride",
+          "passed": true
+        },
+        {
+          "check": "runtime/unsupported-transpose",
+          "passed": true
+        },
+        {
+          "check": "runtime/unsupported-dtype",
+          "passed": true
+        },
+        {
+          "check": "runtime/nonfinite-alpha",
+          "passed": true
+        },
+        {
+          "check": "runtime/reversed-ReLU-bounds",
+          "passed": true
+        },
+        {
+          "check": "runtime/truncated-A",
+          "passed": true
+        },
+        {
+          "check": "real-GPU-valid-and-three-corrupt-metadata-cases",
+          "passed": true
+        },
+        {
+          "check": "two-unique-sparse-GPU-traces",
+          "passed": true
+        },
+        {
+          "check": "trace/sparse24/prune-compress-check-sparse-only-matmul",
+          "passed": true
+        },
+        {
+          "check": "trace/sparse24_advanced/prune-compress-check-sparse-only-matmul",
+          "passed": true
+        },
+        {
+          "check": "two-native-SDK-route-observations-preserved",
+          "passed": true
+        },
+        {
+          "check": "native-route/matmul/failure-kept-separate",
+          "passed": true
+        },
+        {
+          "check": "native-route/matmul_advanced/failure-kept-separate",
+          "passed": true
+        }
+      ],
+      "source_commit": "0d530192c6203b10ede8630e6d2346280fe81264",
+      "scope": "Default FP16 A/B/C/bias, FP32 accumulate; TILE optimal L1 ties may differ. Actual native originals checked separately. Native sparse compression/matmul baseline consumes corresponding HIP-pruned A and uses CUDA packing for vendor descriptor limits. Project packed format: two FP16 values and one metadata byte per group; low four bits encode positions. No native hipSPARSELt or vendor opaque-format compatibility claim.",
+      "qualification_id": "20261110T113201.453874Z-R7-composite-qualification-696b878907",
+      "evidence": "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul_advanced__matmul_advanced_example.cpp/20261110T113201.453874Z-R7-composite-qualification-696b878907",
+      "rocm_evidence": "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul_advanced__matmul_advanced_example.cpp/20261110T110656.431869Z-R7-rocm-ba45d06ded",
+      "cuda_evidence": "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul_advanced__matmul_advanced_example.cpp/20261110T110928.894110Z-R7-cuda-native-compressed-06257c5057",
+      "environment": {
+        "hostname": "7e746253528d",
+        "platform": "Linux-7.0.0-42-generic-x86_64-with-glibc2.39",
+        "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "rocm_release": "10.1.0",
+        "visible_devices": "2",
+        "devices": [
+          {
+            "logical_id": 0,
+            "pci_bdf": "0000:03:00.0",
+            "physical_id": 0,
+            "uuid": "32396463623033636131356166623633"
+          }
+        ],
+        "versions": {
+          "hipRuntimeGetVersion": {
+            "status": 0,
+            "value": 71626385
+          },
+          "hipDriverGetVersion": {
+            "status": 0,
+            "value": 71626385
+          }
+        },
+        "packages": {
+          "rocm-sdk-core": "10.1.0",
+          "rocm-sdk-device-gfx1100": "10.1.0",
+          "rocm-sdk-device-gfx942": "10.1.0",
+          "rocm-sdk-device-gfx1010": "10.1.0",
+          "rocm-sdk-device-gfx1011": "10.1.0",
+          "rocm-sdk-device-gfx1101": "10.1.0",
+          "rocm-bootstrap": "0.3.0",
+          "triton": "3.8.0+git669b31ac.rocm10.1.0",
+          "rocm-sdk-device-gfx1035": "10.1.0",
+          "rocm-sdk-device-gfx1012": "10.1.0",
+          "torch": "2.14.0+rocm10.1.0",
+          "rocm-sdk-device-gfx1152": "10.1.0",
+          "rocm-sdk-device-gfx908": "10.1.0",
+          "rocm-sdk-libraries": "10.1.0",
+          "rocm-sdk-device-gfx1031": "10.1.0",
+          "rocm-sdk-device-gfx1151": "10.1.0",
+          "rocm-sdk-device-gfx1030": "10.1.0",
+          "rocm-sdk-device-gfx1103": "10.1.0",
+          "rocm-sdk-device-gfx1250": "10.1.0",
+          "rocm-sdk-device-gfx1032": "10.1.0",
+          "rocm-sdk-device-gfx1102": "10.1.0",
+          "rocm-sdk-device-gfx1201": "10.1.0",
+          "rocm-sdk-device-gfx90a": "10.1.0",
+          "torchvision": "0.29.0a0+rocm10.1.0",
+          "rocm-sdk-device-gfx1036": "10.1.0",
+          "rocm-sdk-device-gfx1153": "10.1.0",
+          "rocm": "10.1.0",
+          "rocm-sdk-device-gfx1150": "10.1.0",
+          "rocm-sdk-device-gfx1200": "10.1.0",
+          "rocm-sdk-device-gfx1034": "10.1.0",
+          "rocm-sdk-device-gfx1033": "10.1.0",
+          "rocm-sdk-device-gfx950": "10.1.0"
+        },
+        "loaded_libraries": [
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamd_comgr.so.3",
+            "sha256": "6bf2f6fe6b243c5ac3621cd5745887933d3a41edd944a447c88c21ec77da5d5b"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamdhip64.so.7",
+            "sha256": "6d1dbee8cb3ad924e4c1bca7734e22f2c93026eb3bc871a7f64a916778d55e36"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-amd-aqlprofile64.so.1",
+            "sha256": "6d4be9a3d53457b466f3e1fb1b07b897cd78be9b934a5326444b7b2070dabd61"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-runtime64.so.1",
+            "sha256": "12d49db16881b9505629192231d5b3971e9030b26a326fc2c003e92da7de0c44"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocm_kpack.so.0",
+            "sha256": "e2af394dea58ad53d6074c7aa9d56de5dc027ca186f6bbc27d6f32d7b8f12ac3"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocprofiler-register.so.0",
+            "sha256": "a67764cf46d1d579eb27311576ba9c0b4dbfa5052ddd64a062131f716faa11b6"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libLLVM.so.24.0git",
+            "sha256": "3e7b50e1f252792eba7380b8503c05c899bf8ae9deeb70faf3f9be5f995c8e0a"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libclang-cpp.so.24.0git",
+            "sha256": "18ef4cb8bd32366a68599fb6d723ed38814707a2ada1ff34b722dafc7856663b"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_bz2.so",
+            "sha256": "37a39b12a7e6e9f480d10e5e139b9aedbe5824e63b6b9e12a16837baee608602"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm.so.2",
+            "sha256": "b715ae24e1d62e407ffceca56b546e8a35abe37ac50878cbb16fa8b93d9c9fd5"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm_amdgpu.so.1",
+            "sha256": "b25742cda500eaa61e39b2b32492bb482235ad3e3df8a988d8f4130054d94cad"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_elf.so.1",
+            "sha256": "692dd9fe3575a45df78b319ad0e2a58ee36814958771dd810d5d91f9616c6d8f"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_liblzma.so.5",
+            "sha256": "d17f947bfe3947db5aefee897f6d32dfe98c73bf80b477764ba7f4107594a671"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_numa.so.1",
+            "sha256": "26fffd0f85369950b834cfb8f56fa9e1ea4804be8bbc40db98b788c554802bc3"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_z.so.1",
+            "sha256": "e1d7568f4a0b77eeab26f30cc9d2794dfe7ffd14e34b4ae55a9f80bc4f94ba7a"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_zstd.so.1",
+            "sha256": "fc3edd0b74fa071079b0095abe7b3f41418ca39be138f4ec0c57d0640a0b2d8b"
+          }
+        ]
+      },
+      "devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0,
+          "uuid": "32396463623033636131356166623633"
+        }
+      ]
+    }
+  ]
 }

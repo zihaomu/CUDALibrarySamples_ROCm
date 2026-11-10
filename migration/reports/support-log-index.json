@@ -1,9 +1,9 @@
 {
   "scope": "All 639 entrypoints, including failures. PASSED is limited to registered cases. Logs point to current-source qualification where available, otherwise the recorded attempt; compilation/import logs are not GPU correctness proof.",
   "counts": {
-    "PASSED": 229,
+    "PASSED": 231,
     "FAILED": 385,
-    "PARTIAL": 25
+    "PARTIAL": 23
   },
   "implementation_methods": {
     "API_PORT": "库 API 迁移",
@@ -25597,36 +25597,67 @@
       "id": "cuSPARSELt/matmul::matmul_example.cpp",
       "family": "cuSPARSELt",
       "source": "cuSPARSELt/matmul/matmul_example.cpp",
-      "status": "PARTIAL",
-      "level": "L3",
+      "status": "PASSED",
+      "level": "L4",
       "actual_library": "project HIP GPU TILE prune + packed 2:4 values/metadata + sparse-only matmul",
       "backend_library": "HIP GPU; CPU descriptor/constant-mask setup only",
       "implementation_method": "PROJECT_HIP_ALGORITHM_REWRITE",
       "implementation": "rocm/ported/cuSPARSELt/matmul/matmul_example.cpp",
       "implementation_sha256": "4666029d661a7a1800e6674aea1db95e621aa985883f9ce7f435d98e48af52ac",
-      "passed_cases": [],
-      "required_cases": [
-        "original-functional-contract",
-        "independent-numerical-or-semantic-reference"
+      "passed_cases": [
+        "rewrite/R7/original",
+        "rewrite/R7/changed-values",
+        "rewrite/R7/layout",
+        "rewrite/R7/irregular",
+        "rewrite/R7/zero-A",
+        "rewrite/R7/ties",
+        "rewrite/R7/repeat",
+        "rewrite/R7/native-original",
+        "rewrite/R7/native-sparse-math",
+        "rewrite/R7/17-semantic-faults",
+        "rewrite/R7/10-descriptors",
+        "rewrite/R7/real-GPU-metadata-check",
+        "rewrite/R7/GPU-trace",
+        "rewrite/R7/review"
       ],
-      "scope_and_reason": "原生hipSPARSELt路线仍缺gfx1201 bundle/高级属性；已实现项目HIP真实2:4 TILE裁剪、压缩metadata与稀疏乘法，14 AMD/CPU场景通过。原始CUDA两例通过，完整扩展CUDA对照、负向、运行边界、轨迹和独立复核尚待收口。不是dense GEMM回退或原生Sparse Tensor Core支持。",
+      "required_cases": [
+        "rewrite/R7/original",
+        "rewrite/R7/changed-values",
+        "rewrite/R7/layout",
+        "rewrite/R7/irregular",
+        "rewrite/R7/zero-A",
+        "rewrite/R7/ties",
+        "rewrite/R7/repeat",
+        "rewrite/R7/native-original",
+        "rewrite/R7/native-sparse-math",
+        "rewrite/R7/17-semantic-faults",
+        "rewrite/R7/10-descriptors",
+        "rewrite/R7/real-GPU-metadata-check",
+        "rewrite/R7/GPU-trace",
+        "rewrite/R7/review"
+      ],
+      "scope_and_reason": "项目HIP真实TILE最大L1 2:4裁剪/压缩metadata/稀疏乘法：FP16+FP32累积，basic实际GPU搜索；advanced双batch/stride/bias/ReLU。7场景通过独立容量DP与FP64参考；原生CUDA原例另验，数学对照使用同HIP裁剪A及显式CUDA packing，合法tie不要求相同mask。17注入/10非法descriptor/真实GPU metadata损坏/稀疏核轨迹及独立复核通过；原生hipSPARSELt/gfx1201失败单独保留，不声称原生加速或opaque布局兼容。",
       "retry_condition": "使用有匹配 kernel bundle 的受支持 GPU，或新的 gfx1201 hipSPARSELt 实现/包；重新跑 prune/compress/matmul 与 CPU 参考。",
       "detail": "migration/sample-reports/cuSPARSELt/matmul/matmul_example.cpp.md",
-      "record_field": "original_port",
-      "amd_evidence": "migration/reports/evidence/20261109T092720.531889Z/original-rocm/cuSPARSELt_matmul_matmul_example.cpp",
+      "record_field": "selected_validation",
+      "amd_evidence": "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul__matmul_example.cpp/20261110T110642.947660Z-R7-rocm-4e68d878e2",
       "amd_logs": [
-        "migration/reports/evidence/20261109T092720.531889Z/original-rocm/cuSPARSELt_matmul_matmul_example.cpp/build.log",
-        "migration/reports/evidence/20261109T092720.531889Z/original-rocm/cuSPARSELt_matmul_matmul_example.cpp/run.log"
+        "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul__matmul_example.cpp/20261110T110642.947660Z-R7-rocm-4e68d878e2/logs/0001-run.stderr.log",
+        "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul__matmul_example.cpp/20261110T110642.947660Z-R7-rocm-4e68d878e2/logs/0001-run.stdout.log"
       ],
-      "cuda_comparison": "BLOCKED",
-      "cuda_evidence": "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSPARSELt_matmul_matmul_example.cpp",
-      "cuda_evidence_basis": "原始 CUDA 尝试",
+      "cuda_comparison": "PASSED",
+      "cuda_evidence": "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul__matmul_example.cpp/20261110T110914.291332Z-R7-cuda-native-compressed-f90d81b3db",
+      "cuda_evidence_basis": "当前验收记录",
       "cuda_logs": [
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSPARSELt_matmul_matmul_example.cpp/build.log"
+        "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul__matmul_example.cpp/20261110T110914.291332Z-R7-cuda-native-compressed-f90d81b3db/logs/0001-native-compressed-sparse-matmul.stderr.log",
+        "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul__matmul_example.cpp/20261110T110914.291332Z-R7-cuda-native-compressed-f90d81b3db/logs/0001-native-compressed-sparse-matmul.stdout.log",
+        "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul__matmul_example.cpp/20261110T110914.291332Z-R7-cuda-native-compressed-f90d81b3db/logs/0002-collect.stderr.log",
+        "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul__matmul_example.cpp/20261110T110914.291332Z-R7-cuda-native-compressed-f90d81b3db/logs/0002-collect.stdout.log"
       ],
       "validation_reports": [
         "migration/reports/upstream-support/sources.json",
-        "migration/reports/rewrite-sparseLt-native-route.json"
+        "migration/reports/rewrite-sparseLt-native-route.json",
+        "migration/reports/rewrite-R7-qualification.json"
       ],
       "all_evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/cuSPARSELt_matmul_matmul_example.cpp",
@@ -25638,43 +25669,76 @@
         "migration/reports/upstream-support/sources.json",
         "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSPARSELt_matmul_matmul_example.cpp",
         "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul__matmul_example.cpp/20261110T110155.523031Z-R7-rocm-e4da9f1bd1",
-        "migration/reports/rewrite-sparseLt-native-route.json"
+        "migration/reports/rewrite-sparseLt-native-route.json",
+        "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul__matmul_example.cpp/20261110T113200.713147Z-R7-composite-qualification-b5e684af2f",
+        "migration/reports/rewrite-R7-qualification.json"
       ]
     },
     {
       "id": "cuSPARSELt/matmul_advanced::matmul_advanced_example.cpp",
       "family": "cuSPARSELt",
       "source": "cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp",
-      "status": "PARTIAL",
-      "level": "L3",
+      "status": "PASSED",
+      "level": "L4",
       "actual_library": "project HIP GPU TILE prune + packed 2:4 values/metadata + sparse-only matmul",
       "backend_library": "HIP GPU; CPU descriptor/constant-mask setup only",
       "implementation_method": "PROJECT_HIP_ALGORITHM_REWRITE",
       "implementation": "rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp",
       "implementation_sha256": "02acc20a288c30126d33cc38c3fded5d7d85d055232f36e1624e030924270019",
-      "passed_cases": [],
-      "required_cases": [
-        "original-functional-contract",
-        "independent-numerical-or-semantic-reference"
+      "passed_cases": [
+        "rewrite/R7/original",
+        "rewrite/R7/changed-values",
+        "rewrite/R7/layout",
+        "rewrite/R7/irregular",
+        "rewrite/R7/zero-A",
+        "rewrite/R7/ties",
+        "rewrite/R7/repeat",
+        "rewrite/R7/native-original",
+        "rewrite/R7/native-sparse-math",
+        "rewrite/R7/17-semantic-faults",
+        "rewrite/R7/10-descriptors",
+        "rewrite/R7/real-GPU-metadata-check",
+        "rewrite/R7/GPU-trace",
+        "rewrite/R7/review"
       ],
-      "scope_and_reason": "原生hipSPARSELt路线仍缺gfx1201 bundle/高级属性；已实现项目HIP真实2:4 TILE裁剪、压缩metadata与稀疏乘法，14 AMD/CPU场景通过。原始CUDA两例通过，完整扩展CUDA对照、负向、运行边界、轨迹和独立复核尚待收口。不是dense GEMM回退或原生Sparse Tensor Core支持。",
+      "required_cases": [
+        "rewrite/R7/original",
+        "rewrite/R7/changed-values",
+        "rewrite/R7/layout",
+        "rewrite/R7/irregular",
+        "rewrite/R7/zero-A",
+        "rewrite/R7/ties",
+        "rewrite/R7/repeat",
+        "rewrite/R7/native-original",
+        "rewrite/R7/native-sparse-math",
+        "rewrite/R7/17-semantic-faults",
+        "rewrite/R7/10-descriptors",
+        "rewrite/R7/real-GPU-metadata-check",
+        "rewrite/R7/GPU-trace",
+        "rewrite/R7/review"
+      ],
+      "scope_and_reason": "项目HIP真实TILE最大L1 2:4裁剪/压缩metadata/稀疏乘法：FP16+FP32累积，basic实际GPU搜索；advanced双batch/stride/bias/ReLU。7场景通过独立容量DP与FP64参考；原生CUDA原例另验，数学对照使用同HIP裁剪A及显式CUDA packing，合法tie不要求相同mask。17注入/10非法descriptor/真实GPU metadata损坏/稀疏核轨迹及独立复核通过；原生hipSPARSELt/gfx1201失败单独保留，不声称原生加速或opaque布局兼容。",
       "retry_condition": "使用有匹配 kernel bundle 的受支持 GPU，或新的 gfx1201 hipSPARSELt 实现/包；重新跑 prune/compress/matmul 与 CPU 参考。",
       "detail": "migration/sample-reports/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp.md",
-      "record_field": "original_port",
-      "amd_evidence": "migration/reports/evidence/20261109T092720.531889Z/original-rocm/cuSPARSELt_matmul_advanced_matmul_advanced_example.cpp",
+      "record_field": "selected_validation",
+      "amd_evidence": "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul_advanced__matmul_advanced_example.cpp/20261110T110656.431869Z-R7-rocm-ba45d06ded",
       "amd_logs": [
-        "migration/reports/evidence/20261109T092720.531889Z/original-rocm/cuSPARSELt_matmul_advanced_matmul_advanced_example.cpp/build.log",
-        "migration/reports/evidence/20261109T092720.531889Z/original-rocm/cuSPARSELt_matmul_advanced_matmul_advanced_example.cpp/run.log"
+        "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul_advanced__matmul_advanced_example.cpp/20261110T110656.431869Z-R7-rocm-ba45d06ded/logs/0001-run.stderr.log",
+        "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul_advanced__matmul_advanced_example.cpp/20261110T110656.431869Z-R7-rocm-ba45d06ded/logs/0001-run.stdout.log"
       ],
-      "cuda_comparison": "BLOCKED",
-      "cuda_evidence": "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSPARSELt_matmul_advanced_matmul_advanced_example.cpp",
-      "cuda_evidence_basis": "原始 CUDA 尝试",
+      "cuda_comparison": "PASSED",
+      "cuda_evidence": "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul_advanced__matmul_advanced_example.cpp/20261110T110928.894110Z-R7-cuda-native-compressed-06257c5057",
+      "cuda_evidence_basis": "当前验收记录",
       "cuda_logs": [
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSPARSELt_matmul_advanced_matmul_advanced_example.cpp/build.log"
+        "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul_advanced__matmul_advanced_example.cpp/20261110T110928.894110Z-R7-cuda-native-compressed-06257c5057/logs/0001-native-compressed-sparse-matmul.stderr.log",
+        "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul_advanced__matmul_advanced_example.cpp/20261110T110928.894110Z-R7-cuda-native-compressed-06257c5057/logs/0001-native-compressed-sparse-matmul.stdout.log",
+        "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul_advanced__matmul_advanced_example.cpp/20261110T110928.894110Z-R7-cuda-native-compressed-06257c5057/logs/0002-collect.stderr.log",
+        "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul_advanced__matmul_advanced_example.cpp/20261110T110928.894110Z-R7-cuda-native-compressed-06257c5057/logs/0002-collect.stdout.log"
       ],
       "validation_reports": [
         "migration/reports/upstream-support/sources.json",
-        "migration/reports/rewrite-sparseLt-native-route.json"
+        "migration/reports/rewrite-sparseLt-native-route.json",
+        "migration/reports/rewrite-R7-qualification.json"
       ],
       "all_evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/cuSPARSELt_matmul_advanced_matmul_advanced_example.cpp",
@@ -25686,7 +25750,9 @@
         "migration/reports/upstream-support/sources.json",
         "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSPARSELt_matmul_advanced_matmul_advanced_example.cpp",
         "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul_advanced__matmul_advanced_example.cpp/20261110T110208.886413Z-R7-rocm-e78d101558",
-        "migration/reports/rewrite-sparseLt-native-route.json"
+        "migration/reports/rewrite-sparseLt-native-route.json",
+        "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul_advanced__matmul_advanced_example.cpp/20261110T113201.453874Z-R7-composite-qualification-696b878907",
+        "migration/reports/rewrite-R7-qualification.json"
       ]
     },
     {

@@ -179,7 +179,7 @@ CUDALibrarySamples_ROCm/
 | R4 | 其它基础/高级算法扩展 | 稀疏 QR/IRS/SVD、低精度、图像、压缩、heuristics 等按探针拆批 | 一次只冻结一个可审查小批；完整原始合同和独立验收 | IN_PROGRESS |
 | R5 | 语言绑定扩展 | 对 73 个前端失败入口逐一建立 C ABI / Fortran / Python 路线 | 先有已验收 GPU 核心，再通过原语言实际入口与数据/错误传播检查 | IN_PROGRESS |
 | R6 | 长尾 SDK/设备算法研究 | cuEST、PQC、JPEG2000/TIFF、剩余 MathDx/分布式等分专题 | 每专题明确可实施路线、最小探针、成本和失败恢复条件 | NOT_STARTED |
-| R7 | 2:4 结构化稀疏替代 | 原生路线重探或真正的 HIP sparse 2:4 实现 | prune/compress/metadata/稀疏 matmul 与原例合同通过；原生失败记录保留 | IN_PROGRESS |
+| R7 | 2:4 结构化稀疏替代 | 原生路线重探或真正的 HIP sparse 2:4 实现 | prune/compress/metadata/稀疏 matmul 与原例合同通过；原生失败记录保留 | COMPLETED_SCOPED |
 | R8 | 阶段回归、清理与交付 | 干净检出复现、源码封存、全量统计、README 和详细报告 | 当前源码/依赖与全部选中证据一致；未完成入口有明确原因 | NOT_STARTED |
 
 执行顺序：P0 → P1 → R1 → R2 → R3 中可收口小批；R4–R7 依赖相应核心/SDK/设备探针，逐批安排。R8 的归档和文档动作在每批结束都执行，阶段结束再做一次整体审计。
@@ -542,7 +542,7 @@ PLAN-01 至 PLAN-03 是规划阶段记录，不代表实验结果。实施中的
 
 <!-- MOAT_EXEC_PROGRESS:START -->
 
-最近更新：2026-11-10T11:28:52.283764+00:00。首批 AMD 51/51 已运行，独立 CPU 51/51 通过；CUDA 51/51 已运行，独立 CPU 51/51 通过。已签发首批整例资格 8/8。R3–R8仍待完成。
+最近更新：2026-11-10T11:34:16.712157+00:00。首批 AMD 51/51 已运行，独立 CPU 51/51 通过；CUDA 51/51 已运行，独立 CPU 51/51 通过。已签发首批整例资格 8/8。R3–R8仍待完成。
 
 <!-- MOAT_EXEC_PROGRESS:END -->
 
@@ -563,3 +563,5 @@ PLAN-01 至 PLAN-03 是规划阶段记录，不代表实验结果。实施中的
 | 2026-11-10 | EXEC-22 | R7当前14 AMD/CPU及14 native稀疏数学对照均通过；native对照明确使用对应HIP裁剪A，并由CUDA GPU packing补齐LDA限制，两个原CUDA完整样例另验通过，不要求非唯一裁剪tie的mask相同。17语义故障命中预期拒绝、10真实非法descriptor、1有效+3损坏metadata GPU检查、两组真实prune/compress/check/sparse-matmul轨迹通过；基础搜索9次稀疏kernel，高级1次，runtime copy核单列。 | 固定内容独立复核/资格；R6专题和R8仍待完成 |
 
 | 2026-11-10 | EXEC-23 | R7数值/执行合同独立复核批准；证据复核发现另验原CUDA程序的可变output与封存目录/CPU命令未绑定。已补原例raw输出/remote/build/run/collect及CPU冻结输入/完整validation/实际--output绑定，新增不存在输出替换与摘要篡改反例；当前10身份测试执行后复核。 | 重新签发固定内容资格；不跳过失败或用仅return0升级 |
+
+| 2026-11-10 | EXEC-24 | R7固定0d530192三角色批准并签发两例资格；231 PASSED、25→23 PARTIAL、385 FAILED，原两项原生UNSUPPORTED已通过显式项目重写路线收口但原生库失败保留。18模块/117功能族。完整typed FP16默认合同、30次后端数学检查与全部负向/轨迹归档。 | R6专题/全部剩余入口明确去向，以及R8总回归、源码封存、干净检出复现和fork交付 |

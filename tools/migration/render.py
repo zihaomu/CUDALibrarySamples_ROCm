@@ -108,6 +108,7 @@ def render():
   intro+=f'| {status} / `{code}` | {reasons[(status,code)]} | {reason} | {evidence} |\n'
  if (ROOT/'migration/reports/rewrite-R4.md').exists():intro+='**MOAT R4：IEEE/PKZIP CRC32 GPU实现，6数值+1原生空chunk拒绝。** [详细日志与资格](migration/reports/rewrite-R4.md)。\n\n'
  if (ROOT/'migration/reports/rewrite-R5.md').exists():intro+='**MOAT R5：8个标准Fortran来源入口完成真实语言绑定、批选择重算及应用残差检查。** [逐例范围、CUDA工具链限制和日志](migration/reports/rewrite-R5.md)。\n\n'
+ if (ROOT/'migration/reports/rewrite-R7.md').exists():intro+='**MOAT R7：两个默认FP16结构化2:4样例通过，新增1个功能族。** [真实GPU裁剪/压缩/稀疏乘法、原生边界与日志](migration/reports/rewrite-R7.md)。\n\n'
  intro+='\n已验收模块内部也保留具体限制：hipTensor FP32 原生 contraction 的架构 gate 失败由 rocBLAS + HIP 保持精度的路线补足；hipFFT 单 batch 1D Xt 缺口由两卡分解/通信/合并补足。B12–B15已完成登记范围的分布/设备内GPU与图像数值试点；部分原始descriptor、低精度通信、RNG LEGACY、原生NPP像素与文件/metadata合同仍保持PARTIAL，多节点与其它未覆盖入口未完成；JPEG2000/TIFF 未找到并实现完整 AMD GPU codec 路线。上述原因在模块矩阵中逐项展示。\n\n'
  intro+='''
 ## 构建与复现
