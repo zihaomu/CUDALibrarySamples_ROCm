@@ -22,7 +22,7 @@ class SparseBindingQualification(unittest.TestCase):
    return value
   self.assertFalse(next(c['passed'] for c in self.checks(mutate) if c['check']=='fortran/batch/changed-values/AMD-frozen-case'))
  def test_unique_fault_lists(self):
-  for target,gate in [('rewrite-sparse-binding-negative.json','ten-unique-output-faults'),('rewrite-sparse-binding-runtime.json','eight-unique-Fortran-runtime-rejections')]:
+  for target,gate in [('rewrite-sparse-binding-negative.json','fourteen-unique-output-faults'),('rewrite-sparse-binding-runtime.json','eight-unique-Fortran-runtime-rejections')]:
    def mutate(name,value):
     if name==target:value['tests']=[copy.deepcopy(value['tests'][0]) for _ in value['tests']]
     return value
@@ -37,4 +37,30 @@ class SparseBindingQualification(unittest.TestCase):
    if name=='rewrite-sparse-binding-cuda-validation.json':value['residual/singular-info']['status']='PASSED'
    return value
   self.assertFalse(next(c['passed'] for c in self.checks(mutate) if c['check']=='fortran/residual/singular-info/native-singular-observation'))
+ def test_dependency_cropping_cannot_hide_stale_header(self):
+  header='rocm/adapters/fortran/sparse_bridge.h';original=q.digest
+  def crop(value):
+   if isinstance(value,dict):
+    if 'dependencies' in value:value['dependencies'].pop(header,None)
+    for child in value.values():crop(child)
+   elif isinstance(value,list):
+    for child in value:crop(child)
+  def mutate(name,value):crop(value);return value
+  with patch.object(q,'digest',side_effect=lambda path:'f'*64 if str(path)==str(q.ROOT/header) else original(path)):
+   self.assertFalse(next(c['passed'] for c in self.checks(mutate) if c['check']=='eight-binaries-and-core-in-sealed-build'))
+ def test_native_run_cannot_substitute_build(self):
+  build=copy.deepcopy(q.load('rewrite-sparse-binding-native-build.json'));build['evidence']=q.load('rewrite-sparse-binding-cuda.json')['batch/original']['evidence']
+  def mutate(name,value):
+   if name=='rewrite-sparse-binding-native-build.json':return build
+   if name=='rewrite-sparse-binding-cuda.json':
+    for r in value.values():r['build']=build
+   if name=='rewrite-sparse-binding-cuda-validation.json':
+    for r in value.values():r['run']['build']=build
+   return value
+  self.assertFalse(next(c['passed'] for c in self.checks(mutate) if c['check']=='current-native-cuDSS-build'))
+ def test_native_failed_observation_cannot_be_numeric_pass(self):
+  def mutate(name,value):
+   if name=='rewrite-sparse-native-failure.json':value['numeric_baseline_passed']=True
+   return value
+  self.assertFalse(next(c['passed'] for c in self.checks(mutate) if c['check']=='synchronized-native-GENERAL-failure-never-a-numeric-pass'))
 if __name__=='__main__':unittest.main()

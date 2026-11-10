@@ -14,6 +14,8 @@ struct Context {
  Sparse11 input; Symbolic11 symbolic; int base=0; bool analyzed=false,solved=false;
  std::vector<int> row_perm,column_perm,pivots,info,phase;
  std::vector<double> solution,values,before,after,residual;
+ std::unique_ptr<Buffer<double>> factor_gpu;
+ std::unique_ptr<Buffer<int>> pivots_gpu;
  int ldb=0,ldx=0,nrhs=0;
 };
 std::set<Context*> live;
@@ -50,15 +52,20 @@ extern "C" int rw_sparse_solve(void*p,int nrhs,const double*b,int ldb,double*x,i
  try{
   auto&h=get(p);int n=h.input.n;require(h.analyzed,"analysis required before numeric phases");require(b&&x&&info&&nrhs>0&&nrhs<=32&&ldb>=n&&ldb<=n+64&&ldx>=n&&ldx<=n+64,"dense descriptor");
   std::vector<double>hv(b,b+ldb*nrhs),initial(x,x+ldx*nrhs);for(double value:hv)require(std::isfinite(value),"nonfinite RHS");for(double value:initial)require(std::isfinite(value),"nonfinite initial X");
-  auto&s=h.symbolic;Buffer<int>ar(s.ar),ac(s.ac),fr(s.r),fc(s.c),perm(s.perm),pivot(n),status(std::vector<int>{0});Buffer<double>av(s.a),factor(s.c.size()),rhs(n*nrhs),compact(n*nrhs),scale(std::vector<double>(n,1)),db(hv),output(initial);
+  auto&s=h.symbolic;if(!h.factor_gpu){h.factor_gpu=std::make_unique<Buffer<double>>(s.c.size());h.pivots_gpu=std::make_unique<Buffer<int>>(n);}auto&factor=*h.factor_gpu;auto&pivot=*h.pivots_gpu;
+  Buffer<int>ar(s.ar),ac(s.ac),fr(s.r),fc(s.c),perm(s.perm),status(std::vector<int>{0});Buffer<double>av(s.a),rhs(n*nrhs),compact(n*nrhs),scale(std::vector<double>(n,1)),db(hv),output(initial);
   migration_batch::prepare11<<<(n+255)/256,256>>>(n,ar.p,ac.p,av.p,fr.p,fc.p,factor.p,perm.p,db.p,ldb,nrhs,rhs.p,scale.p);
   migration_batch::lu11<<<1,1>>>(n,fr.p,fc.p,factor.p,pivot.p,status.p,0,n);rewrite::sync();h.phase.push_back(2);h.info=status.get();*info=h.info[0];
   if(!*info){migration_batch::solve11<<<1,nrhs>>>(n,nrhs,fr.p,fc.p,factor.p,pivot.p,rhs.p,compact.p);migration_batch::scatter11<<<(n*nrhs+255)/256,256>>>(n,nrhs,perm.p,scale.p,compact.p,output.p,ldx,false);rewrite::sync();h.phase.push_back(3);}
   h.solution=output.get();std::copy(h.solution.begin(),h.solution.end(),x);h.pivots=pivot.get();h.values=factor.get();h.before=initial;h.after=db.get();h.ldb=ldb;h.ldx=ldx;h.nrhs=nrhs;h.input.b=hv;h.input.nrhs=nrhs;h.solved=true;return 0;
  }catch(const std::invalid_argument&e){std::cerr<<e.what()<<'\n';return 1;}catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 2;}
 }
+extern "C" int rw_sparse_set_values(void*p,int nnz,const double*values){
+ std::lock_guard<std::mutex> guard(lock);
+ try{auto&h=get(p);require(h.analyzed&&h.solved&&h.factor_gpu&&values&&nnz==int(h.input.v.size()),"retained factor/value descriptor");for(int i=0;i<nnz;++i)require(std::isfinite(values[i]),"nonfinite updated matrix");h.input.v.assign(values,values+nnz);auto full=migration_batch::full11(h.input);std::vector<int>inverse(h.input.n);for(int i=0;i<h.input.n;++i)inverse[h.symbolic.perm[i]]=i;h.symbolic.a.clear();for(int i=0;i<h.input.n;++i){std::map<int,double>row;for(auto[j,v]:full[h.symbolic.perm[i]])row[inverse[j]]=v;for(auto[j,v]:row)h.symbolic.a.push_back(v);}h.phase.push_back(4);return 0;}catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 1;}
+}
 extern "C" int rw_sparse_export(void*p,const char*label){
  std::lock_guard<std::mutex> guard(lock);
- try{auto&h=get(p);require(label&&*label&&h.solved,"export requires solved handle");std::string s(label);auto emit=[&](const std::string&name,const auto&v){rewrite::emit(s+"_"+name,v);};emit("permutation",h.row_perm);emit("column_permutation",h.column_perm);emit("factor_rows",h.symbolic.r);emit("factor_columns",h.symbolic.c);emit("factor_values",h.values);emit("factor_pivots",h.pivots);emit("info",h.info);emit("phase",h.phase);emit("solution",h.solution);emit("B_after",h.after);emit("X_initial",h.before);emit("dimensions",std::vector<int>{h.input.n,int(h.input.v.size()),h.nrhs,h.ldb,h.ldx,h.base,h.input.mtype});return 0;}catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 1;}
+ try{auto&h=get(p);require(label&&*label&&h.solved,"export requires solved handle");std::string s(label);auto emit=[&](const std::string&name,const auto&v){rewrite::emit(s+"_"+name,v);};emit("permutation",h.row_perm);emit("column_permutation",h.column_perm);emit("factor_rows",h.symbolic.r);emit("factor_columns",h.symbolic.c);emit("factor_values",h.factor_gpu->get());emit("factor_pivots",h.pivots_gpu->get());emit("factor_storage",std::vector<uint64_t>{reinterpret_cast<uintptr_t>(h.factor_gpu->p),reinterpret_cast<uintptr_t>(h.pivots_gpu->p),h.factor_gpu->size*sizeof(double)});emit("info",h.info);emit("phase",h.phase);emit("solution",h.solution);emit("B_after",h.after);emit("X_initial",h.before);emit("dimensions",std::vector<int>{h.input.n,int(h.input.v.size()),h.nrhs,h.ldb,h.ldx,h.base,h.input.mtype});return 0;}catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 1;}
 }
 extern "C" int rw_sparse_destroy(void*p){std::lock_guard<std::mutex> guard(lock);try{auto&h=get(p);live.erase(&h);delete &h;return 0;}catch(...){return 1;}}

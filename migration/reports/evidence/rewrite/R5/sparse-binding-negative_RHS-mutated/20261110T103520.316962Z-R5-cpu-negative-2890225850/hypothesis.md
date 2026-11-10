@@ -1,0 +1,1 @@
+Test cpu-negative for sparse-binding-negative/RHS-mutated, case layout. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T103211.342261Z-R5-rocm-fortran-38e7100c13.

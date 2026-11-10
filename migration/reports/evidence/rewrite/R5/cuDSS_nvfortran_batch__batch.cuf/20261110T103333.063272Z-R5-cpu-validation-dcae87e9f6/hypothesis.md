@@ -1,0 +1,1 @@
+Test cpu-validation for cuDSS/nvfortran/batch::batch.cuf, case base0. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T103222.259923Z-R5-rocm-fortran-91f52f7034.

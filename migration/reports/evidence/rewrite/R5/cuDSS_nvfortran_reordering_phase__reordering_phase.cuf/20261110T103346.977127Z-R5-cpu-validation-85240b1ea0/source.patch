@@ -1,0 +1,386 @@
+diff --git a/rocm/adapters/fortran/sparse_bridge.cpp b/rocm/adapters/fortran/sparse_bridge.cpp
+index 7ae332bd..a5635fe0 100644
+--- a/rocm/adapters/fortran/sparse_bridge.cpp
++++ b/rocm/adapters/fortran/sparse_bridge.cpp
+@@ -14,6 +14,8 @@ struct Context {
+  Sparse11 input; Symbolic11 symbolic; int base=0; bool analyzed=false,solved=false;
+  std::vector<int> row_perm,column_perm,pivots,info,phase;
+  std::vector<double> solution,values,before,after,residual;
++ std::unique_ptr<Buffer<double>> factor_gpu;
++ std::unique_ptr<Buffer<int>> pivots_gpu;
+  int ldb=0,ldx=0,nrhs=0;
+ };
+ std::set<Context*> live;
+@@ -50,15 +52,20 @@ extern "C" int rw_sparse_solve(void*p,int nrhs,const double*b,int ldb,double*x,i
+  try{
+   auto&h=get(p);int n=h.input.n;require(h.analyzed,"analysis required before numeric phases");require(b&&x&&info&&nrhs>0&&nrhs<=32&&ldb>=n&&ldb<=n+64&&ldx>=n&&ldx<=n+64,"dense descriptor");
+   std::vector<double>hv(b,b+ldb*nrhs),initial(x,x+ldx*nrhs);for(double value:hv)require(std::isfinite(value),"nonfinite RHS");for(double value:initial)require(std::isfinite(value),"nonfinite initial X");
+-  auto&s=h.symbolic;Buffer<int>ar(s.ar),ac(s.ac),fr(s.r),fc(s.c),perm(s.perm),pivot(n),status(std::vector<int>{0});Buffer<double>av(s.a),factor(s.c.size()),rhs(n*nrhs),compact(n*nrhs),scale(std::vector<double>(n,1)),db(hv),output(initial);
++  auto&s=h.symbolic;if(!h.factor_gpu){h.factor_gpu=std::make_unique<Buffer<double>>(s.c.size());h.pivots_gpu=std::make_unique<Buffer<int>>(n);}auto&factor=*h.factor_gpu;auto&pivot=*h.pivots_gpu;
++  Buffer<int>ar(s.ar),ac(s.ac),fr(s.r),fc(s.c),perm(s.perm),status(std::vector<int>{0});Buffer<double>av(s.a),rhs(n*nrhs),compact(n*nrhs),scale(std::vector<double>(n,1)),db(hv),output(initial);
+   migration_batch::prepare11<<<(n+255)/256,256>>>(n,ar.p,ac.p,av.p,fr.p,fc.p,factor.p,perm.p,db.p,ldb,nrhs,rhs.p,scale.p);
+   migration_batch::lu11<<<1,1>>>(n,fr.p,fc.p,factor.p,pivot.p,status.p,0,n);rewrite::sync();h.phase.push_back(2);h.info=status.get();*info=h.info[0];
+   if(!*info){migration_batch::solve11<<<1,nrhs>>>(n,nrhs,fr.p,fc.p,factor.p,pivot.p,rhs.p,compact.p);migration_batch::scatter11<<<(n*nrhs+255)/256,256>>>(n,nrhs,perm.p,scale.p,compact.p,output.p,ldx,false);rewrite::sync();h.phase.push_back(3);}
+   h.solution=output.get();std::copy(h.solution.begin(),h.solution.end(),x);h.pivots=pivot.get();h.values=factor.get();h.before=initial;h.after=db.get();h.ldb=ldb;h.ldx=ldx;h.nrhs=nrhs;h.input.b=hv;h.input.nrhs=nrhs;h.solved=true;return 0;
+  }catch(const std::invalid_argument&e){std::cerr<<e.what()<<'\n';return 1;}catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 2;}
+ }
++extern "C" int rw_sparse_set_values(void*p,int nnz,const double*values){
++ std::lock_guard<std::mutex> guard(lock);
++ try{auto&h=get(p);require(h.analyzed&&h.solved&&h.factor_gpu&&values&&nnz==int(h.input.v.size()),"retained factor/value descriptor");for(int i=0;i<nnz;++i)require(std::isfinite(values[i]),"nonfinite updated matrix");h.input.v.assign(values,values+nnz);auto full=migration_batch::full11(h.input);std::vector<int>inverse(h.input.n);for(int i=0;i<h.input.n;++i)inverse[h.symbolic.perm[i]]=i;h.symbolic.a.clear();for(int i=0;i<h.input.n;++i){std::map<int,double>row;for(auto[j,v]:full[h.symbolic.perm[i]])row[inverse[j]]=v;for(auto[j,v]:row)h.symbolic.a.push_back(v);}h.phase.push_back(4);return 0;}catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 1;}
++}
+ extern "C" int rw_sparse_export(void*p,const char*label){
+  std::lock_guard<std::mutex> guard(lock);
+- try{auto&h=get(p);require(label&&*label&&h.solved,"export requires solved handle");std::string s(label);auto emit=[&](const std::string&name,const auto&v){rewrite::emit(s+"_"+name,v);};emit("permutation",h.row_perm);emit("column_permutation",h.column_perm);emit("factor_rows",h.symbolic.r);emit("factor_columns",h.symbolic.c);emit("factor_values",h.values);emit("factor_pivots",h.pivots);emit("info",h.info);emit("phase",h.phase);emit("solution",h.solution);emit("B_after",h.after);emit("X_initial",h.before);emit("dimensions",std::vector<int>{h.input.n,int(h.input.v.size()),h.nrhs,h.ldb,h.ldx,h.base,h.input.mtype});return 0;}catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 1;}
++ try{auto&h=get(p);require(label&&*label&&h.solved,"export requires solved handle");std::string s(label);auto emit=[&](const std::string&name,const auto&v){rewrite::emit(s+"_"+name,v);};emit("permutation",h.row_perm);emit("column_permutation",h.column_perm);emit("factor_rows",h.symbolic.r);emit("factor_columns",h.symbolic.c);emit("factor_values",h.factor_gpu->get());emit("factor_pivots",h.pivots_gpu->get());emit("factor_storage",std::vector<uint64_t>{reinterpret_cast<uintptr_t>(h.factor_gpu->p),reinterpret_cast<uintptr_t>(h.pivots_gpu->p),h.factor_gpu->size*sizeof(double)});emit("info",h.info);emit("phase",h.phase);emit("solution",h.solution);emit("B_after",h.after);emit("X_initial",h.before);emit("dimensions",std::vector<int>{h.input.n,int(h.input.v.size()),h.nrhs,h.ldb,h.ldx,h.base,h.input.mtype});return 0;}catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 1;}
+ }
+ extern "C" int rw_sparse_destroy(void*p){std::lock_guard<std::mutex> guard(lock);try{auto&h=get(p);live.erase(&h);delete &h;return 0;}catch(...){return 1;}}
+diff --git a/rocm/adapters/fortran/sparse_bridge.h b/rocm/adapters/fortran/sparse_bridge.h
+index 3def13e5..197a9da9 100644
+--- a/rocm/adapters/fortran/sparse_bridge.h
++++ b/rocm/adapters/fortran/sparse_bridge.h
+@@ -8,6 +8,7 @@ extern "C" {
+ int rw_sparse_create(int n,int nnz,const int*rows,const int*cols,const double*values,
+                      int base,int type,int reorder,void**handle);
+ int rw_sparse_analyze(void*handle,int*row_perm,int*column_perm,size_t*bytes);
++int rw_sparse_set_values(void*handle,int nnz,const double*values);
+ int rw_sparse_solve(void*handle,int nrhs,const double*b,int ldb,double*x,int ldx,int*info);
+ int rw_sparse_export(void*handle,const char*label);
+ int rw_sparse_destroy(void*handle);
+diff --git a/rocm/adapters/fortran/sparse_samples.f90 b/rocm/adapters/fortran/sparse_samples.f90
+index 1258326f..9f37dc3c 100644
+--- a/rocm/adapters/fortran/sparse_samples.f90
++++ b/rocm/adapters/fortran/sparse_samples.f90
+@@ -26,6 +26,12 @@ module rewrite_sparse_samples
+    real(c_double),intent(inout) :: x(*)
+    integer(c_int),intent(out) :: info
+   end function
++  integer(c_int) function set_values(h,nnz,values) bind(C,name='rw_sparse_set_values')
++   import
++   type(c_ptr),value :: h
++   integer(c_int),value :: nnz
++   real(c_double),intent(in) :: values(*)
++  end function
+   integer(c_int) function export(h,label) bind(C,name='rw_sparse_export')
+    import
+    type(c_ptr),value :: h
+@@ -48,11 +54,15 @@ contains
+   character(*),intent(in) :: profile
+   character(4096) :: input,output,path
+   character(32) :: kind,label
+-  integer :: unit,s,j,status,count
++  integer :: unit,s,j,status,count,i,k,col
+   integer(c_int) :: n,nnz,nrhs,ldb,ldx,base,mtype,reorder,info,rc
++  integer(c_int) :: saved_descriptor(8)
+   integer(c_size_t) :: bytes
+   integer(c_int),allocatable :: r(:),c(:),rp(:),cp(:),saved_r(:),saved_c(:)
+   real(c_double),allocatable :: v(:),b(:),x(:),bcopy(:)
++  real(c_double),allocatable :: uniform_v(:,:),uniform_b(:,:),uniform_x(:,:),residuals(:),y(:)
++  real(c_double) :: af,denominator
++  type(c_ptr),allocatable :: handles(:)
+   type(c_ptr) :: h
+   call get_environment_variable('REWRITE_INPUT',input,status=status)
+   if(status/=0.or.len_trim(input)==0) error stop 'REWRITE_INPUT required'
+@@ -64,10 +74,18 @@ contains
+   if(status/=0.or.trim(kind)/=profile.or.count<1.or.count>16) error stop 'profile/batch descriptor'
+   if((profile=='batch'.or.profile=='uniform_batch').and.count/=2) error stop 'batch count'
+   if((profile=='reordering_phase'.or.profile=='residual').and.count/=1) error stop 'single count'
++  allocate(handles(count))
+   do s=1,count
+    read(unit,*,iostat=status) n,nnz,nrhs,ldb,ldx,base,mtype,reorder
+    if(status/=0.or.n<1.or.n>64.or.nnz<n.or.nnz>n*n.or.nrhs<1.or.nrhs>32) error stop 'shape'
+    if(ldb<n.or.ldb>n+64.or.ldx<n.or.ldx>n+64) error stop 'leading dimension'
++   if(profile=='uniform_batch') then
++    if(s==1) then
++     saved_descriptor=[n,nnz,nrhs,ldb,ldx,base,mtype,reorder]
++    else
++     if(any(saved_descriptor/=[n,nnz,nrhs,ldb,ldx,base,mtype,reorder])) error stop 'uniform descriptor'
++    endif
++   endif
+    write(label,'("b",i0)') s-1
+    allocate(r(n+1),c(nnz),v(nnz),b(ldb*nrhs),x(ldx*nrhs),bcopy(ldb*nrhs),rp(n),cp(n))
+    path=trim(input)//'/'//trim(label)//'_rows.bin'
+@@ -83,6 +101,7 @@ contains
+    if(profile=='uniform_batch') then
+     if(s==1) then
+      saved_r=r;saved_c=c
++     allocate(uniform_v(nnz,count),uniform_b(ldb*nrhs,count),uniform_x(ldx*nrhs,count))
+     else
+      if(size(r)/=size(saved_r).or.size(c)/=size(saved_c)) error stop 'uniform shape'
+      if(any(r/=saved_r).or.any(c/=saved_c)) error stop 'uniform pattern'
+@@ -90,12 +109,38 @@ contains
+    endif
+    bcopy=b
+    rc=create(n,nnz,r,c,v,base,mtype,reorder,h);call check(rc)
++   handles(s)=h
+    rc=analyze(h,rp,cp,bytes);call check(rc)
+    if(bytes/=int(n,c_size_t)*c_sizeof(rp(1))) error stop 'query byte count'
+    if(any(rp<base).or.any(rp>=n+base).or.any(cp<base).or.any(cp>=n+base)) error stop 'permutation range'
+    rc=solve(h,nrhs,b,ldb,x,ldx,info);call check(rc)
+    if(any(b/=bcopy)) error stop 'RHS was mutated'
+    if(any(.not.ieee_is_finite(x))) error stop 'nonfinite solution'
++   if(profile=='residual'.and.info==0) then
++    allocate(residuals(nrhs+1),y(n));af=sqrt(sum(v*v))
++    do j=1,nrhs
++     y=0
++     do i=1,n
++      do k=r(i)-base+1,r(i+1)-base
++       col=c(k)-base+1
++       y(i)=y(i)+v(k)*x((j-1)*ldx+col)
++      enddo
++     enddo
++     y=y-b((j-1)*ldb+1:(j-1)*ldb+n)
++     denominator=af*sqrt(sum(x((j-1)*ldx+1:(j-1)*ldx+n)**2)) &
++        +sqrt(sum(b((j-1)*ldb+1:(j-1)*ldb+n)**2))
++     if(denominator>0) then
++      residuals(j)=sqrt(sum(y*y))/denominator
++     else
++      residuals(j)=sqrt(sum(y*y))
++     endif
++    enddo
++    residuals(nrhs+1)=maxval(residuals(1:nrhs))
++    path=trim(output)//'/'//trim(label)//'_fortran_residual.bin'
++    open(newunit=j,file=trim(path),access='stream',form='unformatted',status='replace');write(j) residuals;close(j)
++    if(any(.not.ieee_is_finite(residuals)).or.residuals(nrhs+1)>1.0e-12_c_double) error stop 2
++    deallocate(residuals,y)
++   endif
+    rc=export(h,trim(label)//c_null_char);call check(rc)
+    path=trim(output)//'/'//trim(label)//'_fortran_X.bin'
+    open(newunit=j,file=trim(path),access='stream',form='unformatted',status='replace');write(j) x;close(j)
+@@ -103,7 +148,11 @@ contains
+    open(newunit=j,file=trim(path),access='stream',form='unformatted',status='replace');write(j) rp,cp;close(j)
+    path=trim(output)//'/'//trim(label)//'_fortran_query_bytes.bin'
+    open(newunit=j,file=trim(path),access='stream',form='unformatted',status='replace');write(j) bytes;close(j)
+-   rc=destroy(h);call check(rc)
++   if(profile=='uniform_batch') then
++    uniform_v(:,s)=v;uniform_b(:,s)=b;uniform_x(:,s)=x
++   else
++    rc=destroy(h);call check(rc)
++   endif
+    if(info/=0) then
+     print *, 'numerical info propagated to Fortran:',info
+     error stop 2
+@@ -111,6 +160,30 @@ contains
+    deallocate(r,c,v,b,x,bcopy,rp,cp)
+   enddo
+   close(unit)
++  if(profile=='uniform_batch') then
++   ! Original UBATCH_INDEX=1 selects the second retained factor; the output
++   ! matrix pointer stays at slot zero. No analysis or other factor is rebuilt.
++   allocate(x(ldx*nrhs));x=uniform_x(:,1)
++   rc=set_values(handles(2),nnz,uniform_v(:,2));call check(rc)
++   rc=solve(handles(2),nrhs,uniform_b(:,2),ldb,x,ldx,info);call check(rc)
++   if(info/=0) error stop 2
++   rc=export(handles(2),'selected'//c_null_char);call check(rc)
++   uniform_x(:,1)=x
++   path=trim(output)//'/selected_fortran_X.bin'
++   open(newunit=j,file=trim(path),access='stream',form='unformatted',status='replace');write(j) x;close(j)
++   path=trim(output)//'/uniform_final_X.bin'
++   open(newunit=j,file=trim(path),access='stream',form='unformatted',status='replace');write(j) uniform_x;close(j)
++   path=trim(output)//'/selection.bin'
++   open(newunit=j,file=trim(path),access='stream',form='unformatted',status='replace')
++   write(j) 1_c_int,0_c_int,2_c_int
++   close(j)
++   rc=export(handles(1),'retained_b0'//c_null_char);call check(rc)
++   rc=export(handles(2),'retained_b1'//c_null_char);call check(rc)
++   do s=1,count
++    rc=destroy(handles(s));call check(rc)
++   enddo
++   deallocate(x,uniform_v,uniform_b,uniform_x)
++  endif
+   print *, 'PASSED standard Fortran + HIP: ',profile
+  end subroutine
+ end module
+diff --git a/tools/moat/build_sparse_bindings.py b/tools/moat/build_sparse_bindings.py
+index b9c4ff86..b11eb30b 100644
+--- a/tools/moat/build_sparse_bindings.py
++++ b/tools/moat/build_sparse_bindings.py
+@@ -6,6 +6,8 @@ from experiment import ROOT,Experiment,write,digest
+ from snapshot import capture
+ profiles=json.loads((ROOT/'migration/rewrite/sparse-bindings.json').read_text())['profiles'];observed=capture();sources=['rocm/adapters/fortran/sparse_bridge.cpp','rocm/adapters/fortran/sparse_bridge.h','rocm/adapters/fortran/sparse_samples.f90','rocm/common/batch11_sparse.hpp','rocm/common/batches_runtime.hpp','rocm/common/rewrite_runtime.hpp',__file__]
+ sources += [p[field] for p in profiles for field in ['implementation','source']]+['migration/rewrite/sparse-bindings.json']
++sources += [str(p.relative_to(ROOT)) for p in (ROOT/'rocm').rglob('*') if p.suffix in ['.hpp','.h']]
++sources=list(dict.fromkeys(sources))
+ e=Experiment('R5','sparse-binding-common-core','rocm-build',sources=[ROOT/p if not Path(p).is_absolute() else p for p in sources]);write(e.path/'backend.observed.json',observed)
+ core=Path('/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core');native=Path('/opt/rocm/core-10.1');overlay=ROOT/'build/rocm-sdk-overlay';lib=e.path/'librewrite_sparse.so';dep=e.path/'dependencies.d';flang=str(native/'lib/llvm/bin/flang')
+ cmd=['hipcc','--rocm-path='+str(overlay),'--hip-path='+str(overlay),'--rocm-device-lib-path='+str(core/'lib/llvm/amdgcn/bitcode'),'--offload-arch=gfx1201','-std=c++17','-O2','-shared','-fPIC','-D__HIP_PLATFORM_AMD__','-MMD','-MF',str(dep),'-x','hip',str(ROOT/'rocm/adapters/fortran/sparse_bridge.cpp'),'-o',str(lib)]
+@@ -20,5 +22,7 @@ if rc==0:
+   binary=e.path/(p['language']+'_'+p['kind']);rc=e.command([flang,'-O2','-I'+str(e.path),str(ROOT/p['implementation']),str(e.path/'samples.o'),'-L'+str(e.path),'-lrewrite_sparse','-Wl,-rpath,'+str(e.path),'-o',str(binary)],'Fortran-'+p['language']+'-'+p['kind'],cwd=e.path)
+   if not rc:rows.append(dict(sample_id=p['sample_id'],binary=str(binary.relative_to(ROOT)),binary_sha256=digest(binary),implementation_sha256=digest(ROOT/p['implementation'])))
+  result.update(status='BUILT' if rc==0 else 'BUILD_ERROR',dependencies=dependencies,binaries=rows,shared_library=str(lib.relative_to(ROOT)),shared_library_sha256=digest(lib),build_recipe_sha256=digest(__file__))
++if rc==0:write(e.path/'compiled-dependencies.json',result['dependencies'])
++write(e.path/'build-result.json',result)
+ result['evidence']=e.finish('EXECUTED' if rc==0 else 'BUILD_ERROR');write(ROOT/'migration/reports/rewrite-sparse-binding-build.json',result);print(result['status'],result['evidence'])
+ raise SystemExit(bool(rc))
+diff --git a/tools/moat/cuda_sparse_binding_reference.cu b/tools/moat/cuda_sparse_binding_reference.cu
+index b32f0a1e..cf3fc4d1 100644
+--- a/tools/moat/cuda_sparse_binding_reference.cu
++++ b/tools/moat/cuda_sparse_binding_reference.cu
+@@ -3,6 +3,7 @@
+ #include "rewrite_runtime.hpp"
+ #include <cudss.h>
+ using namespace rewrite;
++#include "cuda_uniform_binding.hpp"
+ int main(){try{identity();const char*in=std::getenv("REWRITE_INPUT");if(!in)throw std::runtime_error("input required");std::ifstream cfg(std::string(in)+"/config.txt");std::string kind;int count;cfg>>kind>>count;if(!cfg||count<1||count>16)throw std::runtime_error("config");
+-for(int batch=0;batch<count;++batch){int n,nnz,nrhs,ldb,ldx,base,typ,reorder;cfg>>n>>nnz>>nrhs>>ldb>>ldx>>base>>typ>>reorder;if(!cfg||n<1||n>64||nnz<n||nnz>n*n||nrhs<1||nrhs>32||ldb<n||ldx<n)throw std::runtime_error("shape");std::string label="b"+std::to_string(batch);auto r=read<int>(label+"_rows",n+1),c=read<int>(label+"_columns",nnz);auto v=read<double>(label+"_values",nnz),b=read<double>(label+"_B",ldb*nrhs),initial=read<double>(label+"_X",ldx*nrhs);Buffer<int>dr(r),dc(c);Buffer<double>dv(v),db(b),dx(initial);cudssHandle_t h;cudssConfig_t conf;cudssData_t data;cudssMatrix_t a,bm,xm;RW_CHECK(cudssCreate(&h));RW_CHECK(cudssConfigCreate(&conf));RW_CHECK(cudssDataCreate(h,&data));RW_CHECK(cudssMatrixCreateCsr(&a,n,n,nnz,dr.p,nullptr,dc.p,dv.p,CUDA_R_32I,CUDA_R_32I,CUDA_R_64F,typ?CUDSS_MTYPE_SPD:CUDSS_MTYPE_GENERAL,typ?CUDSS_MVIEW_UPPER:CUDSS_MVIEW_FULL,base?CUDSS_BASE_ONE:CUDSS_BASE_ZERO));RW_CHECK(cudssMatrixCreateDn(&bm,n,nrhs,ldb,db.p,CUDA_R_64F,CUDSS_LAYOUT_COL_MAJOR));RW_CHECK(cudssMatrixCreateDn(&xm,n,nrhs,ldx,dx.p,CUDA_R_64F,CUDSS_LAYOUT_COL_MAJOR));std::vector<int>phase={0};RW_CHECK(cudssExecute(h,CUDSS_PHASE_REORDERING,conf,data,a,xm,bm));phase.push_back(1);std::vector<int>rp(n),cp(n);size_t bytes=0;RW_CHECK(cudssDataGet(h,data,CUDSS_DATA_PERM_REORDER_ROW,rp.data(),n*sizeof(int),&bytes));if(bytes!=n*sizeof(int))throw std::runtime_error("row query size");RW_CHECK(cudssDataGet(h,data,CUDSS_DATA_PERM_REORDER_COL,cp.data(),n*sizeof(int),&bytes));if(bytes!=n*sizeof(int))throw std::runtime_error("column query size");for(int&i:rp)i-=base;for(int&i:cp)i-=base;RW_CHECK(cudssExecute(h,CUDSS_PHASE_SYMBOLIC_FACTORIZATION,conf,data,a,xm,bm));auto rc=cudssExecute(h,CUDSS_PHASE_FACTORIZATION,conf,data,a,xm,bm);phase.push_back(2);int info=0;RW_CHECK(cudssDataGet(h,data,CUDSS_DATA_INFO,&info,sizeof(info),&bytes));if(rc&&!info)info=int(rc);if(!info){RW_CHECK(cudssExecute(h,CUDSS_PHASE_SOLVE,conf,data,a,xm,bm));phase.push_back(3);}sync();emit(label+"_dimensions",std::vector<int>{n,nnz,nrhs,ldb,ldx,base,typ});emit(label+"_permutation",rp);emit(label+"_column_permutation",cp);emit(label+"_phase",phase);emit(label+"_info",std::vector<int>{info});emit(label+"_solution",dx.get());emit(label+"_B_after",db.get());RW_CHECK(cudssMatrixDestroy(a));RW_CHECK(cudssMatrixDestroy(bm));RW_CHECK(cudssMatrixDestroy(xm));RW_CHECK(cudssDataDestroy(h,data));RW_CHECK(cudssConfigDestroy(conf));RW_CHECK(cudssDestroy(h));if(info)return 2;}
+-return 0;}catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 1;}}
++for(int batch=0;batch<count;++batch){int n,nnz,nrhs,ldb,ldx,base,typ,reorder;cfg>>n>>nnz>>nrhs>>ldb>>ldx>>base>>typ>>reorder;if(!cfg||n<1||n>64||nnz<n||nnz>n*n||nrhs<1||nrhs>32||ldb<n||ldx<n)throw std::runtime_error("shape");std::string label="b"+std::to_string(batch);auto r=read<int>(label+"_rows",n+1),c=read<int>(label+"_columns",nnz);auto v=read<double>(label+"_values",nnz),b=read<double>(label+"_B",ldb*nrhs),initial=read<double>(label+"_X",ldx*nrhs);Buffer<int>dr(r),dc(c);Buffer<double>dv(v),db(b),dx(initial);cudssHandle_t h;cudssConfig_t conf;cudssData_t data;cudssMatrix_t a,bm,xm;RW_CHECK(cudssCreate(&h));RW_CHECK(cudssConfigCreate(&conf));RW_CHECK(cudssDataCreate(h,&data));RW_CHECK(cudssMatrixCreateCsr(&a,n,n,nnz,dr.p,nullptr,dc.p,dv.p,CUDA_R_32I,CUDA_R_32I,CUDA_R_64F,typ?CUDSS_MTYPE_SPD:CUDSS_MTYPE_GENERAL,typ?CUDSS_MVIEW_UPPER:CUDSS_MVIEW_FULL,base?CUDSS_BASE_ONE:CUDSS_BASE_ZERO));RW_CHECK(cudssMatrixCreateDn(&bm,n,nrhs,ldb,db.p,CUDA_R_64F,CUDSS_LAYOUT_COL_MAJOR));RW_CHECK(cudssMatrixCreateDn(&xm,n,nrhs,ldx,dx.p,CUDA_R_64F,CUDSS_LAYOUT_COL_MAJOR));std::vector<int>phase={0};RW_CHECK(cudssExecute(h,CUDSS_PHASE_REORDERING,conf,data,a,xm,bm));sync();phase.push_back(1);std::vector<int>rp(n),cp(n);size_t bytes=0;RW_CHECK(cudssDataGet(h,data,CUDSS_DATA_PERM_REORDER_ROW,rp.data(),n*sizeof(int),&bytes));if(bytes!=n*sizeof(int))throw std::runtime_error("row query size");RW_CHECK(cudssDataGet(h,data,CUDSS_DATA_PERM_REORDER_COL,cp.data(),n*sizeof(int),&bytes));if(bytes!=n*sizeof(int))throw std::runtime_error("column query size");for(int&i:rp)i-=base;for(int&i:cp)i-=base;RW_CHECK(cudssExecute(h,CUDSS_PHASE_SYMBOLIC_FACTORIZATION,conf,data,a,xm,bm));auto rc=cudssExecute(h,CUDSS_PHASE_FACTORIZATION,conf,data,a,xm,bm);sync();phase.push_back(2);int info=0;RW_CHECK(cudssDataGet(h,data,CUDSS_DATA_INFO,&info,sizeof(info),&bytes));if(rc&&!info)info=int(rc);if(!info){RW_CHECK(cudssExecute(h,CUDSS_PHASE_SOLVE,conf,data,a,xm,bm));phase.push_back(3);}sync();emit(label+"_dimensions",std::vector<int>{n,nnz,nrhs,ldb,ldx,base,typ});emit(label+"_permutation",rp);emit(label+"_column_permutation",cp);emit(label+"_phase",phase);emit(label+"_info",std::vector<int>{info});emit(label+"_solution",dx.get());emit(label+"_B_after",db.get());RW_CHECK(cudssMatrixDestroy(a));RW_CHECK(cudssMatrixDestroy(bm));RW_CHECK(cudssMatrixDestroy(xm));RW_CHECK(cudssDataDestroy(h,data));RW_CHECK(cudssConfigDestroy(conf));RW_CHECK(cudssDestroy(h));if(info)return 2;}
++if(kind=="uniform_batch")native_uniform_selected();return 0;}catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 1;}}
+diff --git a/tools/moat/cuda_sparse_bindings.py b/tools/moat/cuda_sparse_bindings.py
+index 8e764936..6a7d9a9b 100644
+--- a/tools/moat/cuda_sparse_bindings.py
++++ b/tools/moat/cuda_sparse_bindings.py
+@@ -3,7 +3,7 @@
+ import json,shlex,shutil,tarfile
+ from experiment import ROOT,Experiment,write,digest
+ from qualification_common import fixture
+-host='nvidia-5090x2';sdk=ROOT/'build/cuda-sdk';sources=['tools/moat/cuda_sparse_binding_reference.cu','rocm/common/rewrite_runtime.hpp',__file__];e=Experiment('R5','sparse-binding-native-cuDSS','cuda-build',sources=[ROOT/n for n in sources]);remote='/tmp/'+e.id;bundle=e.path/'native.tar.gz';headers=list((sdk/'include').glob('cudss*.h'));library=sdk/'lib/libcudss.so.1';write(e.path/'sdk-identity.json',dict(headers={p.name:digest(p) for p in headers},library=dict(name=library.name,sha256=digest(library),bytes=library.stat().st_size)))
++host='nvidia-5090x2';sdk=ROOT/'build/cuda-sdk';sources=['tools/moat/cuda_uniform_binding.hpp','tools/moat/cuda_sparse_binding_reference.cu','rocm/common/rewrite_runtime.hpp',__file__];e=Experiment('R5','sparse-binding-native-cuDSS','cuda-build',sources=[ROOT/n for n in sources]);remote='/tmp/'+e.id;bundle=e.path/'native.tar.gz';headers=list((sdk/'include').glob('cudss*.h'));library=sdk/'lib/libcudss.so.1';write(e.path/'sdk-identity.json',dict(headers={p.name:digest(p) for p in headers},library=dict(name=library.name,sha256=digest(library),bytes=library.stat().st_size)))
+ with tarfile.open(bundle,'w:gz') as f:
+  for name in sources:f.add(ROOT/name,arcname=str(name) if not str(name).startswith('/') else 'tools/moat/cuda_sparse_bindings.py')
+  for path in headers:f.add(path,arcname='sdk/include/'+path.name)
+diff --git a/tools/moat/qualify_sparse_bindings.py b/tools/moat/qualify_sparse_bindings.py
+index d3d8b9a0..89580a11 100644
+--- a/tools/moat/qualify_sparse_bindings.py
++++ b/tools/moat/qualify_sparse_bindings.py
+@@ -15,7 +15,8 @@ def collect():
+  review=load('rewrite-R5-review.json');gate('current-independent-review',review.get('verdict')=='APPROVED' and reviews.review_identity(review));gate('eight-unique-original-entries',len(profiles)==8 and {(p['kind'],p['language']) for p in profiles}=={(k,l) for k in KINDS for l in ['fortran','nvfortran']})
+  expected={p['sample_id']+'/'+case for p in profiles for case in CASES};gate('complete-unique-AMD-cases',set(amd)==expected and set(cpu)==expected);gate('compiled-core-current',build['status']=='BUILT' and all(digest(ROOT/n)==sha for n,sha in build['dependencies'].items()) and digest(ROOT/build['shared_library'])==build['shared_library_sha256'] and build['build_recipe_sha256']==digest(ROOT/'tools/moat/build_sparse_bindings.py'));gate('sealed-build',proof(build['evidence'],sources=['tools/moat/build_sparse_bindings.py',spec['core'],'rocm/adapters/fortran/sparse_samples.f90'],outcome='EXECUTED'))
+  def build_identity():
+-  directory,raw,meta=evidence(build['evidence']);sealed=read(directory/'sealed.json')['files'];rows=build['binaries'];return len(rows)==8 and {b['sample_id'] for b in rows}=={p['sample_id'] for p in profiles} and ROOT/build['shared_library']==raw/'librewrite_sparse.so' and sealed['librewrite_sparse.so']['sha256']==build['shared_library_sha256'] and all(ROOT/b['binary']==raw/next(p['language']+'_'+p['kind'] for p in profiles if p['sample_id']==b['sample_id']) and sealed[(ROOT/b['binary']).name]['sha256']==b['binary_sha256'] for b in rows)
++  directory,raw,meta=evidence(build['evidence'],backend='rocm-build',sample='sparse-binding-common-core',outcome='EXECUTED');sealed=read(directory/'sealed.json')['files'];rows=build['binaries'];compiled=read(directory/'compiled-dependencies.json');source=read(directory/'source.json')['dependencies'];actual={str(__import__('pathlib').Path(word).resolve().relative_to(ROOT)) for word in (directory/'dependencies.d').read_text().replace('\\\n',' ').split()[1:] if __import__('pathlib').Path(word).resolve().is_relative_to(ROOT/'rocm')};actual.add('rocm/adapters/fortran/sparse_samples.f90')
++  return meta['experiment_id']==build['experiment_id'] and read(directory/'build-result.json')=={k:v for k,v in build.items() if k!='evidence'} and compiled==build['dependencies'] and set(compiled)==actual and all(source.get(n)==sha and digest(ROOT/n)==sha for n,sha in compiled.items()) and len(rows)==8 and {b['sample_id'] for b in rows}=={p['sample_id'] for p in profiles} and ROOT/build['shared_library']==raw/'librewrite_sparse.so' and sealed['librewrite_sparse.so']['sha256']==build['shared_library_sha256'] and all(ROOT/b['binary']==raw/next(p['language']+'_'+p['kind'] for p in profiles if p['sample_id']==b['sample_id']) and sealed[(ROOT/b['binary']).name]['sha256']==b['binary_sha256'] and source.get(p['implementation'])==digest(ROOT/p['implementation']) for b in rows for p in profiles if p['sample_id']==b['sample_id'])
+  gate('eight-binaries-and-core-in-sealed-build',guarded(build_identity))
+  def run_identity(run,p,case,backend,parent,sample):
+   mh=digest(ROOT/p['fixture_root']/case/'manifest.json');comparison='sparse-binding/'+p['kind']+'/'+case+'/'+mh;sources=['tools/moat/run_sparse_bindings.py',p['implementation'],p['source']]+list(build['dependencies']) if backend=='rocm-fortran' else ['tools/moat/cuda_sparse_bindings.py','tools/moat/cuda_sparse_binding_reference.cu'];directory,raw,meta=evidence(run['evidence'],sources=sources,parent=parent,case=case,backend=backend,sample=sample,comparison=comparison);fixture(raw/'inputs',mh,'sparse-binding',case)
+@@ -23,7 +24,20 @@ def collect():
+  def reference(v,run,p,case,sample,passed=True):
+   if v['run']!=run or v['status']!=('PASSED' if passed else 'FAILED'):return False
+   directory,raw,meta=evidence(v['evidence'],sources=['tools/moat/sparse_binding_reference.py','tools/moat/validate_sparse_bindings.py'],parent=run['experiment_id'],case=case,backend='cpu-validation',sample=sample,comparison=run['comparison_id'],outcome='PASSED' if passed else 'NUMERIC_MISMATCH');fixture(raw/'inputs',run['input_manifest_sha256'],'sparse-binding',case);command=next(c for c in read(directory/'commands.json') if c['phase']=='independent-CSR-reference');argv=command['argv'];return argv[1:]==[str(ROOT/'tools/moat/sparse_binding_reference.py'),'--input',str(raw/'inputs'),'--output',str(ROOT/run['output']),'--report',str(raw/'cpu-report.json'),'--backend','rocm' if 'rocm-fortran'==read(ROOT/run['evidence']/'manifest.json')['backend'] else 'cuda'] and command['return_code']==(0 if passed else 1)
+- native_build=load('rewrite-sparse-binding-native-build.json');gate('current-native-cuDSS-build',proof(native_build['evidence'],sources=['tools/moat/cuda_sparse_bindings.py','tools/moat/cuda_sparse_binding_reference.cu','rocm/common/rewrite_runtime.hpp'],outcome='EXECUTED'))
++ native_build=load('rewrite-sparse-binding-native-build.json')
++ def native_build_identity():
++  import shlex,tarfile,hashlib
++  names=['tools/moat/cuda_sparse_bindings.py','tools/moat/cuda_sparse_binding_reference.cu','tools/moat/cuda_uniform_binding.hpp','rocm/common/rewrite_runtime.hpp'];directory,raw,meta=evidence(native_build['evidence'],sources=names,backend='cuda-build',sample='sparse-binding-native-cuDSS',outcome='EXECUTED');commands=read(directory/'commands.json');cmd=next(c for c in commands if c['phase']=='native-build');argv=shlex.split(cmd['argv'][2]);remote='/tmp/'+meta['experiment_id']
++  if meta['experiment_id']!=native_build['experiment_id'] or native_build['remote']!=remote or not all(c['return_code']==0 for c in commands) or cmd['argv'][:2]!=['ssh','nvidia-5090x2'] or argv[0]!='/usr/local/cuda-13.4/bin/nvcc' or remote+'/tools/moat/cuda_sparse_binding_reference.cu' not in argv or argv[-2:]!=['-o',remote+'/reference']:return False
++  with tarfile.open(raw/'native.tar.gz') as archive:
++   for name in names:
++    if hashlib.sha256(archive.extractfile(name).read()).hexdigest()!=digest(ROOT/name):return False
++   sdk=read(directory/'sdk-identity.json')
++   for name,sha in sdk['headers'].items():
++    if hashlib.sha256(archive.extractfile('sdk/include/'+name).read()).hexdigest()!=sha:return False
++   if hashlib.sha256(archive.extractfile('sdk/lib/'+sdk['library']['name']).read()).hexdigest()!=sdk['library']['sha256']:return False
++  return True
++ gate('current-native-cuDSS-build',guarded(native_build_identity));refs.append(native_build['evidence'])
+  for p in profiles:
+   sid=p['sample_id'];tag=p['language']+'/'+p['kind'];gate(tag+'/seven-fixed-cases',len(p['cases'])==7 and set(p['cases'])==CASES);gate(tag+'/unchanged-original',digest(ROOT/p['source'])==p['original_sha256']);binary=next(b for b in build['binaries'] if b['sample_id']==sid);gate(tag+'/current-actual-Fortran-binary',digest(ROOT/binary['binary'])==binary['binary_sha256'] and digest(ROOT/p['implementation'])==binary['implementation_sha256'])
+   for case in p['cases']:
+@@ -38,16 +52,16 @@ def collect():
+     # difference and never require or claim native equality for this error case.
+     native_pass=p['kind']!='residual';gate(label+'/native-singular-observation',native['return_code']==(2 if native_pass else 0) and guarded(reference,ccpu[p['kind']+'/'+case],native,p,case,native_sid,native_pass))
+    refs.append(ccpu[p['kind']+'/'+case]['evidence'])
+- modes={'solution','padding','permutation','query-byte-count','missing-solve-phase','factor-values','RHS-mutated','info','trailing-byte','truncated-Fortran-X'};negative=load('rewrite-sparse-binding-negative.json')['tests'];gate('ten-unique-output-faults',len(negative)==len(modes) and {r['mode'] for r in negative}==modes)
+- parent=amd['cuDSS/fortran/residual::residual.f90/layout']
+- for r in negative:gate('negative/'+r['mode'],r['passed'] and proof(r['evidence'],sources=['tools/moat/sparse_binding_negative.py','tools/moat/sparse_binding_reference.py'],parent=parent['experiment_id'],comparison=parent['comparison_id'],backend='cpu-negative',case='layout',outcome='PASSED',check_names={r['mode']}))
++ modes={'solution','padding','permutation','query-byte-count','missing-solve-phase','factor-values','RHS-mutated','info','trailing-byte','truncated-Fortran-X','application-residual','selected-index','retained-factor','selected-output'};negative=load('rewrite-sparse-binding-negative.json')['tests'];gate('fourteen-unique-output-faults',len(negative)==len(modes) and {r['mode'] for r in negative}==modes)
++ for r in negative:
++  parent=amd['cuDSS/fortran/uniform_batch::uniform_batch.f90/layout' if r['mode'] in ['selected-index','retained-factor','selected-output'] else 'cuDSS/fortran/residual::residual.f90/layout'];gate('negative/'+r['mode'],r['passed'] and proof(r['evidence'],sources=['tools/moat/sparse_binding_negative.py','tools/moat/sparse_binding_reference.py'],parent=parent['experiment_id'],comparison=parent['comparison_id'],backend='cpu-negative',case='layout',outcome='PASSED',check_names={r['mode']}))
+  tests={'CSR-endpoint','CSR-column-range','CSR-column-order','index-base','matrix-type','leading-dimension','uniform-pattern','nonfinite-RHS'};runtime=load('rewrite-sparse-binding-runtime.json')['tests'];gate('eight-unique-Fortran-runtime-rejections',len(runtime)==len(tests) and {r['test'] for r in runtime}==tests)
+  for r in runtime:gate('runtime/'+r['test'],r['passed'] and proof(r['evidence'],sources=['tools/moat/sparse_binding_runtime.py',spec['core'],'rocm/adapters/fortran/sparse_samples.f90'],parent=build['experiment_id'],backend='rocm-invalid-descriptor',outcome='EXPECTED_REJECTION',check_names={r['test']}))
+- abi=load('rewrite-sparse-binding-abi.json');abi_names={'C-widths','create','solve-before-analysis-rejected','query','bad-stride-rejected','solve','destroy','double-destroy-rejected','stale-handle-rejected','null-handle-rejected'};gate('actual-C-ABI-phase-width-and-lifetime',abi['status']=='PASSED' and proof(abi['evidence'],sources=['tools/moat/sparse_binding_abi.py',spec['core']],parent=build['experiment_id'],backend='rocm-ABI',outcome='PASSED',check_names=abi_names))
++ abi=load('rewrite-sparse-binding-abi.json');abi_names={'C-widths','create','solve-before-analysis-rejected','query','bad-stride-rejected','solve','destroy','double-destroy-rejected','stale-handle-rejected','null-handle-rejected','set-values-requires-retained-factor','updated-value-shape-rejected','selected-values-reuse'};gate('actual-C-ABI-phase-width-and-lifetime',abi['status']=='PASSED' and proof(abi['evidence'],sources=['tools/moat/sparse_binding_abi.py',spec['core']],parent=build['experiment_id'],backend='rocm-ABI',outcome='PASSED',check_names=abi_names))
+  traces=load('rewrite-sparse-binding-traces.json')['profiles'];gate('four-unique-actual-Fortran-GPU-traces',len(traces)==4 and {r['profile'] for r in traces}==KINDS)
+  for row in traces:
+   def trace():
+-   kind=row['profile'];sid=f'cuDSS/fortran/{kind}::{kind}.f90';binary=next(b for b in build['binaries'] if b['sample_id']==sid);p=next(p for p in profiles if p['sample_id']==sid);mh=digest(ROOT/p['fixture_root']/'original/manifest.json');directory,raw,meta=evidence(row['evidence'],sources=['tools/moat/profile_sparse_bindings.py',spec['core'],'rocm/common/batch11_sparse.hpp'],parent=build['experiment_id'],case='original',backend='rocm-profile',sample=sid+'/backend-trace',comparison='sparse-binding/'+kind+'/original/'+mh,outcome='PROFILE_OBSERVED');s=read(directory/'kernel-summary.json');fixture(raw/'inputs',mh,'sparse-binding','original');cmd=next(c for c in read(directory/'commands.json') if c['phase']=='actual-Fortran-GPU-trace');pos=cmd['argv'].index('--');n=2 if kind in ['batch','uniform_batch'] else 1;return {k:v for k,v in row.items() if k!='evidence'}==s and s['binary']==binary and s['build_experiment_id']==build['experiment_id'] and s['shared_library_sha256']==build['shared_library_sha256'] and s['input_manifest_sha256']==mh and s['return_code']==0 and s['factor_dispatches']==n and s['solve_dispatches']==n and cmd['argv'][pos+1:]==[str(ROOT/binary['binary'])] and cmd['return_code']==0 and cmd['environment_changes']==dict(REWRITE_INPUT=str(raw/'inputs'),REWRITE_OUTPUT=str(raw/'outputs'))
++   kind=row['profile'];sid=f'cuDSS/fortran/{kind}::{kind}.f90';binary=next(b for b in build['binaries'] if b['sample_id']==sid);p=next(p for p in profiles if p['sample_id']==sid);mh=digest(ROOT/p['fixture_root']/'original/manifest.json');directory,raw,meta=evidence(row['evidence'],sources=['tools/moat/profile_sparse_bindings.py',spec['core'],'rocm/common/batch11_sparse.hpp'],parent=build['experiment_id'],case='original',backend='rocm-profile',sample=sid+'/backend-trace',comparison='sparse-binding/'+kind+'/original/'+mh,outcome='PROFILE_OBSERVED');s=read(directory/'kernel-summary.json');fixture(raw/'inputs',mh,'sparse-binding','original');cmd=next(c for c in read(directory/'commands.json') if c['phase']=='actual-Fortran-GPU-trace');pos=cmd['argv'].index('--');n=2 if kind=='batch' else 3 if kind=='uniform_batch' else 1;return {k:v for k,v in row.items() if k!='evidence'}==s and s['binary']==binary and s['build_experiment_id']==build['experiment_id'] and s['shared_library_sha256']==build['shared_library_sha256'] and s['input_manifest_sha256']==mh and s['return_code']==0 and s['factor_dispatches']==n and s['solve_dispatches']==n and cmd['argv'][pos+1:]==[str(ROOT/binary['binary'])] and cmd['return_code']==0 and cmd['environment_changes']==dict(REWRITE_INPUT=str(raw/'inputs'),REWRITE_OUTPUT=str(raw/'outputs'))
+   gate('trace/'+row['profile'],guarded(trace));refs.append(row['evidence'])
+  return profiles,build,checks,sorted(set(refs))
+ def main():
+diff --git a/tools/moat/sparse_binding_abi.py b/tools/moat/sparse_binding_abi.py
+index b5d440d0..7da1fec0 100644
+--- a/tools/moat/sparse_binding_abi.py
++++ b/tools/moat/sparse_binding_abi.py
+@@ -6,7 +6,7 @@ def run(library):
+  import numpy as np
+  from sparse_binding_reference import validate
+  lib=ctypes.CDLL(library);ip=ctypes.POINTER(ctypes.c_int);dp=ctypes.POINTER(ctypes.c_double);vp=ctypes.c_void_p;size=ctypes.c_size_t
+- lib.rw_sparse_create.argtypes=[ctypes.c_int,ctypes.c_int,ip,ip,dp,ctypes.c_int,ctypes.c_int,ctypes.c_int,ctypes.POINTER(vp)];lib.rw_sparse_analyze.argtypes=[vp,ip,ip,ctypes.POINTER(size)];lib.rw_sparse_solve.argtypes=[vp,ctypes.c_int,dp,ctypes.c_int,dp,ctypes.c_int,ip];lib.rw_sparse_destroy.argtypes=[vp]
++ lib.rw_sparse_create.argtypes=[ctypes.c_int,ctypes.c_int,ip,ip,dp,ctypes.c_int,ctypes.c_int,ctypes.c_int,ctypes.POINTER(vp)];lib.rw_sparse_analyze.argtypes=[vp,ip,ip,ctypes.POINTER(size)];lib.rw_sparse_solve.argtypes=[vp,ctypes.c_int,dp,ctypes.c_int,dp,ctypes.c_int,ip];lib.rw_sparse_destroy.argtypes=[vp];lib.rw_sparse_set_values.argtypes=[vp,ctypes.c_int,dp]
+  rows=np.array([1,3,5,7,8,9],dtype=np.int32);cols=np.array([1,3,2,3,3,5,4,5],dtype=np.int32);vals=np.array([4,1,3,2,5,1,1,2],dtype=np.float64);b=np.array([7,12,25,4,13],dtype=np.float64);x=np.zeros(5,dtype=np.float64);info=ctypes.c_int();h=vp();rp=np.zeros(5,dtype=np.int32);cp=rp.copy();nbytes=size();checks=[]
+  def check(name,value):checks.append(dict(check=name,passed=bool(value)))
+  ptr=lambda array,kind:array.ctypes.data_as(kind)
+@@ -14,8 +14,11 @@ def run(library):
+  check('create',lib.rw_sparse_create(5,8,ptr(rows,ip),ptr(cols,ip),ptr(vals,dp),1,1,1,ctypes.byref(h))==0 and bool(h))
+  check('solve-before-analysis-rejected',lib.rw_sparse_solve(h,1,ptr(b,dp),5,ptr(x,dp),5,ctypes.byref(info))==1)
+  check('query',lib.rw_sparse_analyze(h,ptr(rp,ip),ptr(cp,ip),ctypes.byref(nbytes))==0 and nbytes.value==20)
++ check('set-values-requires-retained-factor',lib.rw_sparse_set_values(h,8,ptr(vals,dp))==1)
+  check('bad-stride-rejected',lib.rw_sparse_solve(h,1,ptr(b,dp),4,ptr(x,dp),5,ctypes.byref(info))==1)
+  check('solve',lib.rw_sparse_solve(h,1,ptr(b,dp),5,ptr(x,dp),5,ctypes.byref(info))==0 and info.value==0 and np.allclose(x,[1,2,3,4,5],atol=1e-12))
++ check('updated-value-shape-rejected',lib.rw_sparse_set_values(h,7,ptr(vals,dp))==1)
++ vals*=2;check('selected-values-reuse',lib.rw_sparse_set_values(h,8,ptr(vals,dp))==0 and lib.rw_sparse_solve(h,1,ptr(b,dp),5,ptr(x,dp),5,ctypes.byref(info))==0 and info.value==0 and np.allclose(x,[.5,1,1.5,2,2.5],atol=1e-12))
+  check('destroy',lib.rw_sparse_destroy(h)==0);check('double-destroy-rejected',lib.rw_sparse_destroy(h)==1);check('stale-handle-rejected',lib.rw_sparse_analyze(h,ptr(rp,ip),ptr(cp,ip),ctypes.byref(nbytes))==1);check('null-handle-rejected',lib.rw_sparse_destroy(None)==1)
+  return dict(status='PASSED' if all(c['passed'] for c in checks) else 'FAILED',checks=checks)
+ p=argparse.ArgumentParser();p.add_argument('--single',nargs=2);args=p.parse_args()
+diff --git a/tools/moat/sparse_binding_negative.py b/tools/moat/sparse_binding_negative.py
+index ab3178d0..6120e6d6 100644
+--- a/tools/moat/sparse_binding_negative.py
++++ b/tools/moat/sparse_binding_negative.py
+@@ -9,18 +9,20 @@ if args.single:
+  try:r=validate(src,out)
+  except Exception as error:r=dict(status='FAILED',error=str(error),checks=[dict(check='complete-parse',passed=False)])
+  write(report,r);raise SystemExit(0 if r['status']=='FAILED' else 1)
+-run=json.loads((ROOT/'migration/reports/rewrite-sparse-binding-rocm.json').read_text())['cuDSS/fortran/residual::residual.f90/layout'];modes=['solution','padding','permutation','query-byte-count','missing-solve-phase','factor-values','RHS-mutated','info','trailing-byte','truncated-Fortran-X'];results=[]
++runs=json.loads((ROOT/'migration/reports/rewrite-sparse-binding-rocm.json').read_text());modes=['solution','padding','permutation','query-byte-count','missing-solve-phase','factor-values','RHS-mutated','info','trailing-byte','truncated-Fortran-X','application-residual','selected-index','retained-factor','selected-output'];results=[]
+ for mode in modes:
++ run=runs['cuDSS/fortran/uniform_batch::uniform_batch.f90/layout' if mode in ['selected-index','retained-factor','selected-output'] else 'cuDSS/fortran/residual::residual.f90/layout']
+  e=Experiment('R5','sparse-binding-negative/'+mode,'cpu-negative',case=run['case'],sources=[__file__,ROOT/'tools/moat/sparse_binding_reference.py'],parent=run['experiment_id'],comparison_id=run['comparison_id']);shutil.copytree(ROOT/run['input_snapshot'],e.path/'inputs');shutil.copytree(ROOT/run['output'],e.path/'outputs');out=e.path/'outputs'
+  if validate(e.path/'inputs',out)['status']!='PASSED':raise RuntimeError('injection needs valid baseline')
+- field={'solution':'solution','padding':'solution','permutation':'permutation','query-byte-count':'fortran_query_bytes','missing-solve-phase':'phase','factor-values':'factor_values','RHS-mutated':'B_after','info':'info','trailing-byte':'solution','truncated-Fortran-X':'fortran_X'}[mode];path=out/('b0_'+field+'.bin');data=bytearray(path.read_bytes())
+- if mode in ['solution','padding','factor-values','RHS-mutated']:
++ field={'solution':'solution','padding':'solution','permutation':'permutation','query-byte-count':'fortran_query_bytes','missing-solve-phase':'phase','factor-values':'factor_values','RHS-mutated':'B_after','info':'info','trailing-byte':'solution','truncated-Fortran-X':'fortran_X','application-residual':'fortran_residual','selected-index':'unused','retained-factor':'unused','selected-output':'unused'}[mode];filename={'selected-index':'selection.bin','retained-factor':'retained_b0_factor_values.bin','selected-output':'selected_solution.bin'}.get(mode,'b0_'+field+'.bin');path=out/filename;data=bytearray(path.read_bytes())
++ if mode in ['solution','padding','factor-values','RHS-mutated','application-residual','retained-factor','selected-output']:
+   offset=5*8 if mode=='padding' else 0;struct.pack_into('<d',data,offset,struct.unpack_from('<d',data,offset)[0]+1)
+  elif mode=='missing-solve-phase':data=data[:-4]
+  elif mode=='trailing-byte':data+=b'\0'
+  elif mode=='truncated-Fortran-X':data=data[:-1]
+  elif mode=='query-byte-count':struct.pack_into('<Q',data,0,0)
+  elif mode=='info':struct.pack_into('<i',data,0,1)
++ elif mode=='selected-index':struct.pack_into('<i',data,0,0)
+  else:struct.pack_into('<i',data,0,-1)
+  path.write_bytes(data);rc=e.command([sys.executable,__file__,'--single',str(e.path/'inputs'),str(out),str(e.path/'rejection.json')],'reject-'+mode);row=dict(mode=mode,passed=rc==0,parent_run=run['experiment_id']);row['evidence']=e.finish('PASSED' if rc==0 else 'VALIDATOR_GAP',dict(checks=[dict(check=mode,passed=rc==0)]));results.append(row);print(mode,rc,flush=True)
+ write(ROOT/'migration/reports/rewrite-sparse-binding-negative.json',dict(tests=results,status='PASSED' if all(r['passed'] for r in results) else 'FAILED'))
+diff --git a/tools/moat/sparse_binding_reference.py b/tools/moat/sparse_binding_reference.py
+index 2fc52260..df95355a 100644
+--- a/tools/moat/sparse_binding_reference.py
++++ b/tools/moat/sparse_binding_reference.py
+@@ -29,6 +29,8 @@ def validate(src,out,backend='rocm'):
+    check(label+'/independent-solve',np.allclose(x[:,:n],reference,atol=2e-11,rtol=2e-11))
+    for j in range(nrhs):
+     residual=np.linalg.norm(a@x[j,:n]-b[j,:n])/(np.linalg.norm(a)*np.linalg.norm(x[j,:n])+np.linalg.norm(b[j,:n]));check(label+'/relative-residual-'+str(j),np.isfinite(residual) and residual<1e-12)
++   if backend=='rocm' and mf['profile']=='residual':
++    actual=read(out,label+'_fortran_residual.bin','<f8',nrhs+1);expected=np.array([np.linalg.norm(a@x[j,:n]-b[j,:n])/(np.linalg.norm(a)*np.linalg.norm(x[j,:n])+np.linalg.norm(b[j,:n])) for j in range(nrhs)]);check(label+'/actual-Fortran-residual',np.isfinite(actual).all() and np.allclose(actual[:-1],expected,atol=5e-17,rtol=1e-10) and actual[-1]==np.max(actual[:-1]) and actual[-1]<=1e-12)
+   else:check(label+'/singular-keeps-X',np.array_equal(x,initial))
+   if backend=='rocm':
+    check(label+'/actual-Fortran-X',np.array_equal(read(out,label+'_fortran_X.bin','<f8',nrhs*ldx).reshape(nrhs,ldx),x));check(label+'/Fortran-kind-size_t',read(out,label+'_fortran_query_bytes.bin','<u8',1)[0]==n*4);q=read(out,label+'_fortran_permutation.bin','<i4',2*n);check(label+'/Fortran-index-base',np.array_equal(q,np.r_[perm+base,cp+base]))
+@@ -39,6 +41,21 @@ def validate(src,out,backend='rocm'):
+     for i in range(n):packed[i,fc[fr[i]:fr[i+1]]]=fv[fr[i]:fr[i+1]]
+     lu=packed[piv];lower=np.tril(lu,-1)+np.eye(n);upper=np.triu(lu);permuted=a[np.ix_(perm,cp)];check(label+'/queried-permutation-actually-factored',np.allclose(lower@upper,permuted[piv],atol=1e-11,rtol=1e-11))
+   if singular:break # Both actual language entries stop after the first numerical failure.
++ if mf['profile']=='uniform_batch' and mf['case']!='singular-info':
++  s=mf['systems'][1];n=s['n'];nrhs=s['nrhs'];ldx=s['ldx'];ldb=s['ldb'];nnz=s['nnz'];base=s['base'];rows=read(src,'b1_rows.bin','<i4',n+1)-base;cols=read(src,'b1_columns.bin','<i4',nnz)-base;v=read(src,'b1_values.bin','<f8',nnz);b=read(src,'b1_B.bin','<f8',nrhs*ldb).reshape(nrhs,ldb);a=np.zeros((n,n))
++  for i in range(n):
++   for p in range(rows[i],rows[i+1]):
++    j=cols[p];a[i,j]=v[p]
++    if s['mtype'] and i!=j:a[j,i]=v[p]
++  prefix='selected' if backend=='rocm' else 'uniform_selected';selected=read(out,prefix+'_solution.bin','<f8',nrhs*ldx).reshape(nrhs,ldx);check('uniform/selected-index-one-numerical-solve',np.isfinite(selected).all() and np.allclose(selected[:,:n],np.linalg.solve(a,b[:,:n].T).T,atol=2e-11,rtol=2e-11));final=read(out,'uniform_final_X.bin','<f8',2*nrhs*ldx).reshape(2,nrhs,ldx);before0=read(out,'b0_solution.bin','<f8',nrhs*ldx).reshape(nrhs,ldx);before1=read(out,'b1_solution.bin','<f8',nrhs*ldx).reshape(nrhs,ldx);check('uniform/selected-destination-slot-zero',np.array_equal(final[0],selected));check('uniform/other-output-slot-preserved',np.array_equal(final[1],before1));check('uniform/selected-output-padding',np.array_equal(selected[:,n:],before0[:,n:]));check('uniform/selection-descriptor',np.array_equal(read(out,'selection.bin' if backend=='rocm' else 'uniform_selection.bin','<i4',3),[1,0,2]))
++  if backend=='cuda':
++   initial_uniform=read(out,'uniform_initial_X.bin','<f8',2*nrhs*ldx).reshape(2,nrhs,ldx);check('uniform/native-full-batch-initial-solve',np.allclose(initial_uniform[0,:,:n],before0[:,:n],atol=2e-11,rtol=2e-11) and np.allclose(initial_uniform[1,:,:n],before1[:,:n],atol=2e-11,rtol=2e-11));checks=[c for c in checks if c['check']!='uniform/other-output-slot-preserved'];check('uniform/other-output-slot-preserved',np.array_equal(final[1],initial_uniform[1]))
++  if backend=='rocm':
++   check('uniform/actual-Fortran-selected-X',np.array_equal(read(out,'selected_fortran_X.bin','<f8',nrhs*ldx).reshape(nrhs,ldx),selected));check('uniform/selected-refactor-phase',np.array_equal(read(out,'selected_phase.bin','<i4',7),[0,1,2,3,4,2,3]));check('uniform/selected-RHS-pointer',np.array_equal(read(out,'selected_B_after.bin','<f8',nrhs*ldb).reshape(nrhs,ldb),b));check('uniform/selected-output-initial-slot-zero',np.array_equal(read(out,'selected_X_initial.bin','<f8',nrhs*ldx).reshape(nrhs,ldx),before0))
++   stores=[read(out,'b'+str(i)+'_factor_storage.bin','<u8',3) for i in range(2)];check('uniform/distinct-resident-GPU-factors',stores[0][0]>0 and stores[1][0]>0 and stores[0][0]!=stores[1][0] and stores[0][1]!=stores[1][1]);check('uniform/selected-GPU-factor-storage-reused',np.array_equal(read(out,'selected_factor_storage.bin','<u8',3),stores[1]) and np.array_equal(read(out,'retained_b1_factor_storage.bin','<u8',3),stores[1]))
++   for name in ['factor_storage','factor_rows','factor_columns','factor_values','factor_pivots','phase']:
++    check('uniform/unselected-factor-preserved/'+name,(out/('b0_'+name+'.bin')).read_bytes()==(out/('retained_b0_'+name+'.bin')).read_bytes())
++  else:check('uniform/native-selected-status',np.array_equal(read(out,'uniform_native_info.bin','<i4',2),[0,0]))
+  return dict(status='PASSED' if checks and all(c['passed'] for c in checks) else 'FAILED',checks=checks,scope='FP64 CSR independent solve/residual; full stride/phase/query and real Fortran data roundtrip' if backend=='rocm' else 'native cuDSS compatible mathematical baseline, not native Fortran compiler')
+ def main():
+  p=argparse.ArgumentParser();p.add_argument('--input',required=True);p.add_argument('--output',required=True);p.add_argument('--report',required=True);p.add_argument('--backend',default='rocm');args=p.parse_args()

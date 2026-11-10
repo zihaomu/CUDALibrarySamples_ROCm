@@ -6,6 +6,8 @@ from experiment import ROOT,Experiment,write,digest
 from snapshot import capture
 profiles=json.loads((ROOT/'migration/rewrite/sparse-bindings.json').read_text())['profiles'];observed=capture();sources=['rocm/adapters/fortran/sparse_bridge.cpp','rocm/adapters/fortran/sparse_bridge.h','rocm/adapters/fortran/sparse_samples.f90','rocm/common/batch11_sparse.hpp','rocm/common/batches_runtime.hpp','rocm/common/rewrite_runtime.hpp',__file__]
 sources += [p[field] for p in profiles for field in ['implementation','source']]+['migration/rewrite/sparse-bindings.json']
+sources += [str(p.relative_to(ROOT)) for p in (ROOT/'rocm').rglob('*') if p.suffix in ['.hpp','.h']]
+sources=list(dict.fromkeys(sources))
 e=Experiment('R5','sparse-binding-common-core','rocm-build',sources=[ROOT/p if not Path(p).is_absolute() else p for p in sources]);write(e.path/'backend.observed.json',observed)
 core=Path('/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core');native=Path('/opt/rocm/core-10.1');overlay=ROOT/'build/rocm-sdk-overlay';lib=e.path/'librewrite_sparse.so';dep=e.path/'dependencies.d';flang=str(native/'lib/llvm/bin/flang')
 cmd=['hipcc','--rocm-path='+str(overlay),'--hip-path='+str(overlay),'--rocm-device-lib-path='+str(core/'lib/llvm/amdgcn/bitcode'),'--offload-arch=gfx1201','-std=c++17','-O2','-shared','-fPIC','-D__HIP_PLATFORM_AMD__','-MMD','-MF',str(dep),'-x','hip',str(ROOT/'rocm/adapters/fortran/sparse_bridge.cpp'),'-o',str(lib)]
@@ -20,5 +22,7 @@ if rc==0:
   binary=e.path/(p['language']+'_'+p['kind']);rc=e.command([flang,'-O2','-I'+str(e.path),str(ROOT/p['implementation']),str(e.path/'samples.o'),'-L'+str(e.path),'-lrewrite_sparse','-Wl,-rpath,'+str(e.path),'-o',str(binary)],'Fortran-'+p['language']+'-'+p['kind'],cwd=e.path)
   if not rc:rows.append(dict(sample_id=p['sample_id'],binary=str(binary.relative_to(ROOT)),binary_sha256=digest(binary),implementation_sha256=digest(ROOT/p['implementation'])))
  result.update(status='BUILT' if rc==0 else 'BUILD_ERROR',dependencies=dependencies,binaries=rows,shared_library=str(lib.relative_to(ROOT)),shared_library_sha256=digest(lib),build_recipe_sha256=digest(__file__))
+if rc==0:write(e.path/'compiled-dependencies.json',result['dependencies'])
+write(e.path/'build-result.json',result)
 result['evidence']=e.finish('EXECUTED' if rc==0 else 'BUILD_ERROR');write(ROOT/'migration/reports/rewrite-sparse-binding-build.json',result);print(result['status'],result['evidence'])
 raise SystemExit(bool(rc))

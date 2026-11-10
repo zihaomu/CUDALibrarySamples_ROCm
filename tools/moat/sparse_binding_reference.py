@@ -29,6 +29,8 @@ def validate(src,out,backend='rocm'):
    check(label+'/independent-solve',np.allclose(x[:,:n],reference,atol=2e-11,rtol=2e-11))
    for j in range(nrhs):
     residual=np.linalg.norm(a@x[j,:n]-b[j,:n])/(np.linalg.norm(a)*np.linalg.norm(x[j,:n])+np.linalg.norm(b[j,:n]));check(label+'/relative-residual-'+str(j),np.isfinite(residual) and residual<1e-12)
+   if backend=='rocm' and mf['profile']=='residual':
+    actual=read(out,label+'_fortran_residual.bin','<f8',nrhs+1);expected=np.array([np.linalg.norm(a@x[j,:n]-b[j,:n])/(np.linalg.norm(a)*np.linalg.norm(x[j,:n])+np.linalg.norm(b[j,:n])) for j in range(nrhs)]);check(label+'/actual-Fortran-residual',np.isfinite(actual).all() and np.allclose(actual[:-1],expected,atol=5e-17,rtol=1e-10) and actual[-1]==np.max(actual[:-1]) and actual[-1]<=1e-12)
   else:check(label+'/singular-keeps-X',np.array_equal(x,initial))
   if backend=='rocm':
    check(label+'/actual-Fortran-X',np.array_equal(read(out,label+'_fortran_X.bin','<f8',nrhs*ldx).reshape(nrhs,ldx),x));check(label+'/Fortran-kind-size_t',read(out,label+'_fortran_query_bytes.bin','<u8',1)[0]==n*4);q=read(out,label+'_fortran_permutation.bin','<i4',2*n);check(label+'/Fortran-index-base',np.array_equal(q,np.r_[perm+base,cp+base]))
@@ -39,6 +41,21 @@ def validate(src,out,backend='rocm'):
     for i in range(n):packed[i,fc[fr[i]:fr[i+1]]]=fv[fr[i]:fr[i+1]]
     lu=packed[piv];lower=np.tril(lu,-1)+np.eye(n);upper=np.triu(lu);permuted=a[np.ix_(perm,cp)];check(label+'/queried-permutation-actually-factored',np.allclose(lower@upper,permuted[piv],atol=1e-11,rtol=1e-11))
   if singular:break # Both actual language entries stop after the first numerical failure.
+ if mf['profile']=='uniform_batch' and mf['case']!='singular-info':
+  s=mf['systems'][1];n=s['n'];nrhs=s['nrhs'];ldx=s['ldx'];ldb=s['ldb'];nnz=s['nnz'];base=s['base'];rows=read(src,'b1_rows.bin','<i4',n+1)-base;cols=read(src,'b1_columns.bin','<i4',nnz)-base;v=read(src,'b1_values.bin','<f8',nnz);b=read(src,'b1_B.bin','<f8',nrhs*ldb).reshape(nrhs,ldb);a=np.zeros((n,n))
+  for i in range(n):
+   for p in range(rows[i],rows[i+1]):
+    j=cols[p];a[i,j]=v[p]
+    if s['mtype'] and i!=j:a[j,i]=v[p]
+  prefix='selected' if backend=='rocm' else 'uniform_selected';selected=read(out,prefix+'_solution.bin','<f8',nrhs*ldx).reshape(nrhs,ldx);check('uniform/selected-index-one-numerical-solve',np.isfinite(selected).all() and np.allclose(selected[:,:n],np.linalg.solve(a,b[:,:n].T).T,atol=2e-11,rtol=2e-11));final=read(out,'uniform_final_X.bin','<f8',2*nrhs*ldx).reshape(2,nrhs,ldx);before0=read(out,'b0_solution.bin','<f8',nrhs*ldx).reshape(nrhs,ldx);before1=read(out,'b1_solution.bin','<f8',nrhs*ldx).reshape(nrhs,ldx);check('uniform/selected-destination-slot-zero',np.array_equal(final[0],selected));check('uniform/other-output-slot-preserved',np.array_equal(final[1],before1));check('uniform/selected-output-padding',np.array_equal(selected[:,n:],before0[:,n:]));check('uniform/selection-descriptor',np.array_equal(read(out,'selection.bin' if backend=='rocm' else 'uniform_selection.bin','<i4',3),[1,0,2]))
+  if backend=='cuda':
+   initial_uniform=read(out,'uniform_initial_X.bin','<f8',2*nrhs*ldx).reshape(2,nrhs,ldx);check('uniform/native-full-batch-initial-solve',np.allclose(initial_uniform[0,:,:n],before0[:,:n],atol=2e-11,rtol=2e-11) and np.allclose(initial_uniform[1,:,:n],before1[:,:n],atol=2e-11,rtol=2e-11));checks=[c for c in checks if c['check']!='uniform/other-output-slot-preserved'];check('uniform/other-output-slot-preserved',np.array_equal(final[1],initial_uniform[1]))
+  if backend=='rocm':
+   check('uniform/actual-Fortran-selected-X',np.array_equal(read(out,'selected_fortran_X.bin','<f8',nrhs*ldx).reshape(nrhs,ldx),selected));check('uniform/selected-refactor-phase',np.array_equal(read(out,'selected_phase.bin','<i4',7),[0,1,2,3,4,2,3]));check('uniform/selected-RHS-pointer',np.array_equal(read(out,'selected_B_after.bin','<f8',nrhs*ldb).reshape(nrhs,ldb),b));check('uniform/selected-output-initial-slot-zero',np.array_equal(read(out,'selected_X_initial.bin','<f8',nrhs*ldx).reshape(nrhs,ldx),before0))
+   stores=[read(out,'b'+str(i)+'_factor_storage.bin','<u8',3) for i in range(2)];check('uniform/distinct-resident-GPU-factors',stores[0][0]>0 and stores[1][0]>0 and stores[0][0]!=stores[1][0] and stores[0][1]!=stores[1][1]);check('uniform/selected-GPU-factor-storage-reused',np.array_equal(read(out,'selected_factor_storage.bin','<u8',3),stores[1]) and np.array_equal(read(out,'retained_b1_factor_storage.bin','<u8',3),stores[1]))
+   for name in ['factor_storage','factor_rows','factor_columns','factor_values','factor_pivots','phase']:
+    check('uniform/unselected-factor-preserved/'+name,(out/('b0_'+name+'.bin')).read_bytes()==(out/('retained_b0_'+name+'.bin')).read_bytes())
+  else:check('uniform/native-selected-status',np.array_equal(read(out,'uniform_native_info.bin','<i4',2),[0,0]))
  return dict(status='PASSED' if checks and all(c['passed'] for c in checks) else 'FAILED',checks=checks,scope='FP64 CSR independent solve/residual; full stride/phase/query and real Fortran data roundtrip' if backend=='rocm' else 'native cuDSS compatible mathematical baseline, not native Fortran compiler')
 def main():
  p=argparse.ArgumentParser();p.add_argument('--input',required=True);p.add_argument('--output',required=True);p.add_argument('--report',required=True);p.add_argument('--backend',default='rocm');args=p.parse_args()

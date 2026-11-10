@@ -1,0 +1,51 @@
+{
+  "commands": [
+    {
+      "command_id": 1,
+      "phase": "download-pinned-native-SDK",
+      "argv": [
+        "curl",
+        "--fail",
+        "--location",
+        "--silent",
+        "--show-error",
+        "https://files.pythonhosted.org/packages/e7/d9/e337376cd3ec661feaea2075d50843a0f03dc94367f583674df9a18d2e6b/nvidia_cusparselt_cu13-0.10.0-py3-none-manylinux2014_x86_64.whl",
+        "--output",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/sparseLt-sdk/nvidia_cusparselt_cu13-0.10.0.whl"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-10T10:22:21.879649+00:00",
+      "timeout_seconds": 240,
+      "environment": {},
+      "stdout": "logs/0001-download-pinned-native-SDK.stdout.log",
+      "stderr": "logs/0001-download-pinned-native-SDK.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-10T10:22:29.913904+00:00",
+      "seconds": 8.031400739972014
+    },
+    {
+      "command_id": 2,
+      "phase": "verify-and-unpack",
+      "argv": [
+        "/usr/bin/python3",
+        "-c",
+        "import hashlib,pathlib,sys,zipfile;p=pathlib.Path(sys.argv[1]);assert hashlib.sha256(p.read_bytes()).hexdigest()==sys.argv[2];zipfile.ZipFile(p).extractall(sys.argv[3])",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/sparseLt-sdk/nvidia_cusparselt_cu13-0.10.0.whl",
+        "b46f95b786b4ed96193d639527d95c1703f421d14a89afea1437a84ae3c36823",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/sparseLt-sdk"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-10T10:22:29.916999+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0002-verify-and-unpack.stdout.log",
+      "stderr": "logs/0002-verify-and-unpack.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-10T10:22:30.634438+00:00",
+      "seconds": 0.7165443680132739
+    }
+  ],
+  "source": "source.json",
+  "inputs": "inputs/manifest.json",
+  "expected_environment": "environment.expected.json"
+}

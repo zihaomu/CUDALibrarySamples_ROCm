@@ -25,6 +25,16 @@
       "scope": "R4 initial CRC32 empty-only trial",
       "reason": "Native nvCOMP rejects zero chunks; the initial HIP no-op returned success. Superseded by explicit preflight rejection and rerun on both backends; no qualification used the no-op. Native abort -6 is normalized to project exit 1.",
       "replacement": "rewrite-R4-qualification.json"
+    },
+    {
+      "scope": "R5 original native residual/singular-info before factor synchronization fix",
+      "reason": "The native reference queried cuDSS INFO before asynchronous factor completion. It then returned success with NaN output. Initial wording about native perturbation policy was premature; not a valid numerical/native-policy baseline. All failed outputs preserved and no qualification issued.",
+      "replacement": "post-factor synchronization native rerun; review finding R5-CUDA-ASYNC-INFO"
+    },
+    {
+      "scope": "R5 review request on f8695059",
+      "reason": "Uniform batch missed selected refactor and residual application missed its own formula; no qualification issued. Current implementation adds retained GPU factors, selected refactor and actual Fortran residual. Native GENERAL singular remains INFO=0/NaN even after synchronization; record as a measured numerical failure without inferring a perturbation policy.",
+      "replacement": "rewrite-sparse-native-failure.json; post-review R5 evidence"
     }
   ]
 }

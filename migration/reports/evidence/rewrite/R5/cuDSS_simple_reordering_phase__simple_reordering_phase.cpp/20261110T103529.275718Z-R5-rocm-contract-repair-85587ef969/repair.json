@@ -1,0 +1,26 @@
+{
+  "sample_id": "cuDSS/simple_reordering_phase::simple_reordering_phase.cpp",
+  "status": "PARTIAL",
+  "return_code": 1,
+  "checks": [
+    {
+      "check": "complete-reordering-factor-solve",
+      "passed": true
+    },
+    {
+      "check": "original-solution-tolerance",
+      "passed": true
+    },
+    {
+      "check": "valid-AMD-permutation",
+      "passed": true
+    },
+    {
+      "check": "original-strict-vendor-permutation",
+      "passed": false
+    }
+  ],
+  "implementation_sha256": "1530e7511571ff339c2dac113b1a0d1281a80513ccda1591ec2a63b0cd69cb96",
+  "shared_library_sha256": "6f565d6ee037f85688b6124dca3744aa0467895831a218b087aba761ece24889",
+  "reason": "Missing numerical stages restored. Original strict vendor METIS ordering differs from declared CPU min-degree, so full sample remains PARTIAL; do not replace the expected vector to gain a pass."
+}

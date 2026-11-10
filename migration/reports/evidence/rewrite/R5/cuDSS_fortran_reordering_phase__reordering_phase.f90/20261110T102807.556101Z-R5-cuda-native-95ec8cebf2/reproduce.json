@@ -1,0 +1,44 @@
+{
+  "commands": [
+    {
+      "command_id": 1,
+      "phase": "native-cuDSS-solve",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "mkdir -p /tmp/20261110T102719.763563Z-R5-cuda-build-43fccb2399/outputs/reordering_phase/base0 && REWRITE_INPUT=/tmp/20261110T102719.763563Z-R5-cuda-build-43fccb2399/inputs/reordering_phase/base0 REWRITE_OUTPUT=/tmp/20261110T102719.763563Z-R5-cuda-build-43fccb2399/outputs/reordering_phase/base0 /tmp/20261110T102719.763563Z-R5-cuda-build-43fccb2399/reference"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-10T10:28:08.097908+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0001-native-cuDSS-solve.stdout.log",
+      "stderr": "logs/0001-native-cuDSS-solve.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-10T10:28:09.067789+00:00",
+      "seconds": 0.9682793999672867
+    },
+    {
+      "command_id": 2,
+      "phase": "collect",
+      "argv": [
+        "scp",
+        "-r",
+        "nvidia-5090x2:/tmp/20261110T102719.763563Z-R5-cuda-build-43fccb2399/outputs/reordering_phase/base0/.",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/R5/cuDSS_fortran_reordering_phase__reordering_phase.f90/20261110T102807.556101Z-R5-cuda-native-95ec8cebf2/outputs"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-10T10:28:09.069478+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0002-collect.stdout.log",
+      "stderr": "logs/0002-collect.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-10T10:28:09.436751+00:00",
+      "seconds": 0.3661998269963078
+    }
+  ],
+  "source": "source.json",
+  "inputs": "inputs/manifest.json",
+  "expected_environment": "environment.expected.json"
+}

@@ -1,0 +1,97 @@
+{
+  "commands": [
+    {
+      "command_id": 1,
+      "phase": "prepare",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "mkdir -p /tmp/20261110T103130.379147Z-R5-cuda-build-a1b0d64f35"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-10T10:31:34.874050+00:00",
+      "timeout_seconds": 240,
+      "environment": {},
+      "stdout": "logs/0001-prepare.stdout.log",
+      "stderr": "logs/0001-prepare.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-10T10:31:35.190310+00:00",
+      "seconds": 0.3152989170048386
+    },
+    {
+      "command_id": 2,
+      "phase": "upload",
+      "argv": [
+        "scp",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/R5/sparse-binding-native-cuDSS/20261110T103130.379147Z-R5-cuda-build-a1b0d64f35/native.tar.gz",
+        "nvidia-5090x2:/tmp/20261110T103130.379147Z-R5-cuda-build-a1b0d64f35/native.tar.gz"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-10T10:31:35.191811+00:00",
+      "timeout_seconds": 240,
+      "environment": {},
+      "stdout": "logs/0002-upload.stdout.log",
+      "stderr": "logs/0002-upload.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-10T10:31:36.861978+00:00",
+      "seconds": 1.6692786099738441
+    },
+    {
+      "command_id": 3,
+      "phase": "unpack",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "tar -xzf /tmp/20261110T103130.379147Z-R5-cuda-build-a1b0d64f35/native.tar.gz -C /tmp/20261110T103130.379147Z-R5-cuda-build-a1b0d64f35"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-10T10:31:36.893324+00:00",
+      "timeout_seconds": 240,
+      "environment": {},
+      "stdout": "logs/0003-unpack.stdout.log",
+      "stderr": "logs/0003-unpack.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-10T10:31:37.911447+00:00",
+      "seconds": 1.017180102004204
+    },
+    {
+      "command_id": 4,
+      "phase": "native-build",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "/usr/local/cuda-13.4/bin/nvcc -std=c++17 -O2 -arch=sm_120 /tmp/20261110T103130.379147Z-R5-cuda-build-a1b0d64f35/tools/moat/cuda_sparse_binding_reference.cu -I/tmp/20261110T103130.379147Z-R5-cuda-build-a1b0d64f35/rocm/common -I/tmp/20261110T103130.379147Z-R5-cuda-build-a1b0d64f35/sdk/include -L/tmp/20261110T103130.379147Z-R5-cuda-build-a1b0d64f35/sdk/lib -Xlinker -rpath=/tmp/20261110T103130.379147Z-R5-cuda-build-a1b0d64f35/sdk/lib -l:libcudss.so.1 -lcublas -o /tmp/20261110T103130.379147Z-R5-cuda-build-a1b0d64f35/reference"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-10T10:31:37.912524+00:00",
+      "timeout_seconds": 240,
+      "environment": {},
+      "stdout": "logs/0004-native-build.stdout.log",
+      "stderr": "logs/0004-native-build.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-10T10:31:41.485182+00:00",
+      "seconds": 3.5722433289629407
+    },
+    {
+      "command_id": 5,
+      "phase": "device-identity",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "nvidia-smi --query-gpu=index,name,uuid,driver_version --format=csv,noheader"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-10T10:31:41.486820+00:00",
+      "timeout_seconds": 240,
+      "environment": {},
+      "stdout": "logs/0005-device-identity.stdout.log",
+      "stderr": "logs/0005-device-identity.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-10T10:31:41.803311+00:00",
+      "seconds": 0.31558232597308233
+    }
+  ],
+  "source": "source.json",
+  "inputs": "inputs/manifest.json",
+  "expected_environment": "environment.expected.json"
+}

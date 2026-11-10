@@ -1,0 +1,1 @@
+Test cpu-native-failure-observation for cuDSS/fortran/residual::residual.f90, case singular-info. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T103237.704129Z-R5-cuda-native-239f52008b.

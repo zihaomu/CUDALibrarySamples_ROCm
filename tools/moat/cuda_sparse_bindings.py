@@ -3,7 +3,7 @@
 import json,shlex,shutil,tarfile
 from experiment import ROOT,Experiment,write,digest
 from qualification_common import fixture
-host='nvidia-5090x2';sdk=ROOT/'build/cuda-sdk';sources=['tools/moat/cuda_sparse_binding_reference.cu','rocm/common/rewrite_runtime.hpp',__file__];e=Experiment('R5','sparse-binding-native-cuDSS','cuda-build',sources=[ROOT/n for n in sources]);remote='/tmp/'+e.id;bundle=e.path/'native.tar.gz';headers=list((sdk/'include').glob('cudss*.h'));library=sdk/'lib/libcudss.so.1';write(e.path/'sdk-identity.json',dict(headers={p.name:digest(p) for p in headers},library=dict(name=library.name,sha256=digest(library),bytes=library.stat().st_size)))
+host='nvidia-5090x2';sdk=ROOT/'build/cuda-sdk';sources=['tools/moat/cuda_uniform_binding.hpp','tools/moat/cuda_sparse_binding_reference.cu','rocm/common/rewrite_runtime.hpp',__file__];e=Experiment('R5','sparse-binding-native-cuDSS','cuda-build',sources=[ROOT/n for n in sources]);remote='/tmp/'+e.id;bundle=e.path/'native.tar.gz';headers=list((sdk/'include').glob('cudss*.h'));library=sdk/'lib/libcudss.so.1';write(e.path/'sdk-identity.json',dict(headers={p.name:digest(p) for p in headers},library=dict(name=library.name,sha256=digest(library),bytes=library.stat().st_size)))
 with tarfile.open(bundle,'w:gz') as f:
  for name in sources:f.add(ROOT/name,arcname=str(name) if not str(name).startswith('/') else 'tools/moat/cuda_sparse_bindings.py')
  for path in headers:f.add(path,arcname='sdk/include/'+path.name)

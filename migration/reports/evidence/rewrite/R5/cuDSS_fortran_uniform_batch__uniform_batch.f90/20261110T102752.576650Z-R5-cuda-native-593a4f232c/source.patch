@@ -1,0 +1,203 @@
+diff --git a/rocm/adapters/fortran/sparse_bridge.cpp b/rocm/adapters/fortran/sparse_bridge.cpp
+index 7ae332bd..a5635fe0 100644
+--- a/rocm/adapters/fortran/sparse_bridge.cpp
++++ b/rocm/adapters/fortran/sparse_bridge.cpp
+@@ -14,6 +14,8 @@ struct Context {
+  Sparse11 input; Symbolic11 symbolic; int base=0; bool analyzed=false,solved=false;
+  std::vector<int> row_perm,column_perm,pivots,info,phase;
+  std::vector<double> solution,values,before,after,residual;
++ std::unique_ptr<Buffer<double>> factor_gpu;
++ std::unique_ptr<Buffer<int>> pivots_gpu;
+  int ldb=0,ldx=0,nrhs=0;
+ };
+ std::set<Context*> live;
+@@ -50,15 +52,20 @@ extern "C" int rw_sparse_solve(void*p,int nrhs,const double*b,int ldb,double*x,i
+  try{
+   auto&h=get(p);int n=h.input.n;require(h.analyzed,"analysis required before numeric phases");require(b&&x&&info&&nrhs>0&&nrhs<=32&&ldb>=n&&ldb<=n+64&&ldx>=n&&ldx<=n+64,"dense descriptor");
+   std::vector<double>hv(b,b+ldb*nrhs),initial(x,x+ldx*nrhs);for(double value:hv)require(std::isfinite(value),"nonfinite RHS");for(double value:initial)require(std::isfinite(value),"nonfinite initial X");
+-  auto&s=h.symbolic;Buffer<int>ar(s.ar),ac(s.ac),fr(s.r),fc(s.c),perm(s.perm),pivot(n),status(std::vector<int>{0});Buffer<double>av(s.a),factor(s.c.size()),rhs(n*nrhs),compact(n*nrhs),scale(std::vector<double>(n,1)),db(hv),output(initial);
++  auto&s=h.symbolic;if(!h.factor_gpu){h.factor_gpu=std::make_unique<Buffer<double>>(s.c.size());h.pivots_gpu=std::make_unique<Buffer<int>>(n);}auto&factor=*h.factor_gpu;auto&pivot=*h.pivots_gpu;
++  Buffer<int>ar(s.ar),ac(s.ac),fr(s.r),fc(s.c),perm(s.perm),status(std::vector<int>{0});Buffer<double>av(s.a),rhs(n*nrhs),compact(n*nrhs),scale(std::vector<double>(n,1)),db(hv),output(initial);
+   migration_batch::prepare11<<<(n+255)/256,256>>>(n,ar.p,ac.p,av.p,fr.p,fc.p,factor.p,perm.p,db.p,ldb,nrhs,rhs.p,scale.p);
+   migration_batch::lu11<<<1,1>>>(n,fr.p,fc.p,factor.p,pivot.p,status.p,0,n);rewrite::sync();h.phase.push_back(2);h.info=status.get();*info=h.info[0];
+   if(!*info){migration_batch::solve11<<<1,nrhs>>>(n,nrhs,fr.p,fc.p,factor.p,pivot.p,rhs.p,compact.p);migration_batch::scatter11<<<(n*nrhs+255)/256,256>>>(n,nrhs,perm.p,scale.p,compact.p,output.p,ldx,false);rewrite::sync();h.phase.push_back(3);}
+   h.solution=output.get();std::copy(h.solution.begin(),h.solution.end(),x);h.pivots=pivot.get();h.values=factor.get();h.before=initial;h.after=db.get();h.ldb=ldb;h.ldx=ldx;h.nrhs=nrhs;h.input.b=hv;h.input.nrhs=nrhs;h.solved=true;return 0;
+  }catch(const std::invalid_argument&e){std::cerr<<e.what()<<'\n';return 1;}catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 2;}
+ }
++extern "C" int rw_sparse_set_values(void*p,int nnz,const double*values){
++ std::lock_guard<std::mutex> guard(lock);
++ try{auto&h=get(p);require(h.analyzed&&h.solved&&h.factor_gpu&&values&&nnz==int(h.input.v.size()),"retained factor/value descriptor");for(int i=0;i<nnz;++i)require(std::isfinite(values[i]),"nonfinite updated matrix");h.input.v.assign(values,values+nnz);auto full=migration_batch::full11(h.input);std::vector<int>inverse(h.input.n);for(int i=0;i<h.input.n;++i)inverse[h.symbolic.perm[i]]=i;h.symbolic.a.clear();for(int i=0;i<h.input.n;++i){std::map<int,double>row;for(auto[j,v]:full[h.symbolic.perm[i]])row[inverse[j]]=v;for(auto[j,v]:row)h.symbolic.a.push_back(v);}h.phase.push_back(4);return 0;}catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 1;}
++}
+ extern "C" int rw_sparse_export(void*p,const char*label){
+  std::lock_guard<std::mutex> guard(lock);
+- try{auto&h=get(p);require(label&&*label&&h.solved,"export requires solved handle");std::string s(label);auto emit=[&](const std::string&name,const auto&v){rewrite::emit(s+"_"+name,v);};emit("permutation",h.row_perm);emit("column_permutation",h.column_perm);emit("factor_rows",h.symbolic.r);emit("factor_columns",h.symbolic.c);emit("factor_values",h.values);emit("factor_pivots",h.pivots);emit("info",h.info);emit("phase",h.phase);emit("solution",h.solution);emit("B_after",h.after);emit("X_initial",h.before);emit("dimensions",std::vector<int>{h.input.n,int(h.input.v.size()),h.nrhs,h.ldb,h.ldx,h.base,h.input.mtype});return 0;}catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 1;}
++ try{auto&h=get(p);require(label&&*label&&h.solved,"export requires solved handle");std::string s(label);auto emit=[&](const std::string&name,const auto&v){rewrite::emit(s+"_"+name,v);};emit("permutation",h.row_perm);emit("column_permutation",h.column_perm);emit("factor_rows",h.symbolic.r);emit("factor_columns",h.symbolic.c);emit("factor_values",h.factor_gpu->get());emit("factor_pivots",h.pivots_gpu->get());emit("factor_storage",std::vector<uint64_t>{reinterpret_cast<uintptr_t>(h.factor_gpu->p),reinterpret_cast<uintptr_t>(h.pivots_gpu->p),h.factor_gpu->size*sizeof(double)});emit("info",h.info);emit("phase",h.phase);emit("solution",h.solution);emit("B_after",h.after);emit("X_initial",h.before);emit("dimensions",std::vector<int>{h.input.n,int(h.input.v.size()),h.nrhs,h.ldb,h.ldx,h.base,h.input.mtype});return 0;}catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 1;}
+ }
+ extern "C" int rw_sparse_destroy(void*p){std::lock_guard<std::mutex> guard(lock);try{auto&h=get(p);live.erase(&h);delete &h;return 0;}catch(...){return 1;}}
+diff --git a/rocm/adapters/fortran/sparse_bridge.h b/rocm/adapters/fortran/sparse_bridge.h
+index 3def13e5..197a9da9 100644
+--- a/rocm/adapters/fortran/sparse_bridge.h
++++ b/rocm/adapters/fortran/sparse_bridge.h
+@@ -8,6 +8,7 @@ extern "C" {
+ int rw_sparse_create(int n,int nnz,const int*rows,const int*cols,const double*values,
+                      int base,int type,int reorder,void**handle);
+ int rw_sparse_analyze(void*handle,int*row_perm,int*column_perm,size_t*bytes);
++int rw_sparse_set_values(void*handle,int nnz,const double*values);
+ int rw_sparse_solve(void*handle,int nrhs,const double*b,int ldb,double*x,int ldx,int*info);
+ int rw_sparse_export(void*handle,const char*label);
+ int rw_sparse_destroy(void*handle);
+diff --git a/rocm/adapters/fortran/sparse_samples.f90 b/rocm/adapters/fortran/sparse_samples.f90
+index 1258326f..9f37dc3c 100644
+--- a/rocm/adapters/fortran/sparse_samples.f90
++++ b/rocm/adapters/fortran/sparse_samples.f90
+@@ -26,6 +26,12 @@ module rewrite_sparse_samples
+    real(c_double),intent(inout) :: x(*)
+    integer(c_int),intent(out) :: info
+   end function
++  integer(c_int) function set_values(h,nnz,values) bind(C,name='rw_sparse_set_values')
++   import
++   type(c_ptr),value :: h
++   integer(c_int),value :: nnz
++   real(c_double),intent(in) :: values(*)
++  end function
+   integer(c_int) function export(h,label) bind(C,name='rw_sparse_export')
+    import
+    type(c_ptr),value :: h
+@@ -48,11 +54,15 @@ contains
+   character(*),intent(in) :: profile
+   character(4096) :: input,output,path
+   character(32) :: kind,label
+-  integer :: unit,s,j,status,count
++  integer :: unit,s,j,status,count,i,k,col
+   integer(c_int) :: n,nnz,nrhs,ldb,ldx,base,mtype,reorder,info,rc
++  integer(c_int) :: saved_descriptor(8)
+   integer(c_size_t) :: bytes
+   integer(c_int),allocatable :: r(:),c(:),rp(:),cp(:),saved_r(:),saved_c(:)
+   real(c_double),allocatable :: v(:),b(:),x(:),bcopy(:)
++  real(c_double),allocatable :: uniform_v(:,:),uniform_b(:,:),uniform_x(:,:),residuals(:),y(:)
++  real(c_double) :: af,denominator
++  type(c_ptr),allocatable :: handles(:)
+   type(c_ptr) :: h
+   call get_environment_variable('REWRITE_INPUT',input,status=status)
+   if(status/=0.or.len_trim(input)==0) error stop 'REWRITE_INPUT required'
+@@ -64,10 +74,18 @@ contains
+   if(status/=0.or.trim(kind)/=profile.or.count<1.or.count>16) error stop 'profile/batch descriptor'
+   if((profile=='batch'.or.profile=='uniform_batch').and.count/=2) error stop 'batch count'
+   if((profile=='reordering_phase'.or.profile=='residual').and.count/=1) error stop 'single count'
++  allocate(handles(count))
+   do s=1,count
+    read(unit,*,iostat=status) n,nnz,nrhs,ldb,ldx,base,mtype,reorder
+    if(status/=0.or.n<1.or.n>64.or.nnz<n.or.nnz>n*n.or.nrhs<1.or.nrhs>32) error stop 'shape'
+    if(ldb<n.or.ldb>n+64.or.ldx<n.or.ldx>n+64) error stop 'leading dimension'
++   if(profile=='uniform_batch') then
++    if(s==1) then
++     saved_descriptor=[n,nnz,nrhs,ldb,ldx,base,mtype,reorder]
++    else
++     if(any(saved_descriptor/=[n,nnz,nrhs,ldb,ldx,base,mtype,reorder])) error stop 'uniform descriptor'
++    endif
++   endif
+    write(label,'("b",i0)') s-1
+    allocate(r(n+1),c(nnz),v(nnz),b(ldb*nrhs),x(ldx*nrhs),bcopy(ldb*nrhs),rp(n),cp(n))
+    path=trim(input)//'/'//trim(label)//'_rows.bin'
+@@ -83,6 +101,7 @@ contains
+    if(profile=='uniform_batch') then
+     if(s==1) then
+      saved_r=r;saved_c=c
++     allocate(uniform_v(nnz,count),uniform_b(ldb*nrhs,count),uniform_x(ldx*nrhs,count))
+     else
+      if(size(r)/=size(saved_r).or.size(c)/=size(saved_c)) error stop 'uniform shape'
+      if(any(r/=saved_r).or.any(c/=saved_c)) error stop 'uniform pattern'
+@@ -90,12 +109,38 @@ contains
+    endif
+    bcopy=b
+    rc=create(n,nnz,r,c,v,base,mtype,reorder,h);call check(rc)
++   handles(s)=h
+    rc=analyze(h,rp,cp,bytes);call check(rc)
+    if(bytes/=int(n,c_size_t)*c_sizeof(rp(1))) error stop 'query byte count'
+    if(any(rp<base).or.any(rp>=n+base).or.any(cp<base).or.any(cp>=n+base)) error stop 'permutation range'
+    rc=solve(h,nrhs,b,ldb,x,ldx,info);call check(rc)
+    if(any(b/=bcopy)) error stop 'RHS was mutated'
+    if(any(.not.ieee_is_finite(x))) error stop 'nonfinite solution'
++   if(profile=='residual'.and.info==0) then
++    allocate(residuals(nrhs+1),y(n));af=sqrt(sum(v*v))
++    do j=1,nrhs
++     y=0
++     do i=1,n
++      do k=r(i)-base+1,r(i+1)-base
++       col=c(k)-base+1
++       y(i)=y(i)+v(k)*x((j-1)*ldx+col)
++      enddo
++     enddo
++     y=y-b((j-1)*ldb+1:(j-1)*ldb+n)
++     denominator=af*sqrt(sum(x((j-1)*ldx+1:(j-1)*ldx+n)**2)) &
++        +sqrt(sum(b((j-1)*ldb+1:(j-1)*ldb+n)**2))
++     if(denominator>0) then
++      residuals(j)=sqrt(sum(y*y))/denominator
++     else
++      residuals(j)=sqrt(sum(y*y))
++     endif
++    enddo
++    residuals(nrhs+1)=maxval(residuals(1:nrhs))
++    path=trim(output)//'/'//trim(label)//'_fortran_residual.bin'
++    open(newunit=j,file=trim(path),access='stream',form='unformatted',status='replace');write(j) residuals;close(j)
++    if(any(.not.ieee_is_finite(residuals)).or.residuals(nrhs+1)>1.0e-12_c_double) error stop 2
++    deallocate(residuals,y)
++   endif
+    rc=export(h,trim(label)//c_null_char);call check(rc)
+    path=trim(output)//'/'//trim(label)//'_fortran_X.bin'
+    open(newunit=j,file=trim(path),access='stream',form='unformatted',status='replace');write(j) x;close(j)
+@@ -103,7 +148,11 @@ contains
+    open(newunit=j,file=trim(path),access='stream',form='unformatted',status='replace');write(j) rp,cp;close(j)
+    path=trim(output)//'/'//trim(label)//'_fortran_query_bytes.bin'
+    open(newunit=j,file=trim(path),access='stream',form='unformatted',status='replace');write(j) bytes;close(j)
+-   rc=destroy(h);call check(rc)
++   if(profile=='uniform_batch') then
++    uniform_v(:,s)=v;uniform_b(:,s)=b;uniform_x(:,s)=x
++   else
++    rc=destroy(h);call check(rc)
++   endif
+    if(info/=0) then
+     print *, 'numerical info propagated to Fortran:',info
+     error stop 2
+@@ -111,6 +160,30 @@ contains
+    deallocate(r,c,v,b,x,bcopy,rp,cp)
+   enddo
+   close(unit)
++  if(profile=='uniform_batch') then
++   ! Original UBATCH_INDEX=1 selects the second retained factor; the output
++   ! matrix pointer stays at slot zero. No analysis or other factor is rebuilt.
++   allocate(x(ldx*nrhs));x=uniform_x(:,1)
++   rc=set_values(handles(2),nnz,uniform_v(:,2));call check(rc)
++   rc=solve(handles(2),nrhs,uniform_b(:,2),ldb,x,ldx,info);call check(rc)
++   if(info/=0) error stop 2
++   rc=export(handles(2),'selected'//c_null_char);call check(rc)
++   uniform_x(:,1)=x
++   path=trim(output)//'/selected_fortran_X.bin'
++   open(newunit=j,file=trim(path),access='stream',form='unformatted',status='replace');write(j) x;close(j)
++   path=trim(output)//'/uniform_final_X.bin'
++   open(newunit=j,file=trim(path),access='stream',form='unformatted',status='replace');write(j) uniform_x;close(j)
++   path=trim(output)//'/selection.bin'
++   open(newunit=j,file=trim(path),access='stream',form='unformatted',status='replace')
++   write(j) 1_c_int,0_c_int,2_c_int
++   close(j)
++   rc=export(handles(1),'retained_b0'//c_null_char);call check(rc)
++   rc=export(handles(2),'retained_b1'//c_null_char);call check(rc)
++   do s=1,count
++    rc=destroy(handles(s));call check(rc)
++   enddo
++   deallocate(x,uniform_v,uniform_b,uniform_x)
++  endif
+   print *, 'PASSED standard Fortran + HIP: ',profile
+  end subroutine
+ end module
+diff --git a/tools/moat/cuda_sparse_binding_reference.cu b/tools/moat/cuda_sparse_binding_reference.cu
+index b32f0a1e..c075ad21 100644
+--- a/tools/moat/cuda_sparse_binding_reference.cu
++++ b/tools/moat/cuda_sparse_binding_reference.cu
+@@ -4,5 +4,5 @@
+ #include <cudss.h>
+ using namespace rewrite;
+ int main(){try{identity();const char*in=std::getenv("REWRITE_INPUT");if(!in)throw std::runtime_error("input required");std::ifstream cfg(std::string(in)+"/config.txt");std::string kind;int count;cfg>>kind>>count;if(!cfg||count<1||count>16)throw std::runtime_error("config");
+-for(int batch=0;batch<count;++batch){int n,nnz,nrhs,ldb,ldx,base,typ,reorder;cfg>>n>>nnz>>nrhs>>ldb>>ldx>>base>>typ>>reorder;if(!cfg||n<1||n>64||nnz<n||nnz>n*n||nrhs<1||nrhs>32||ldb<n||ldx<n)throw std::runtime_error("shape");std::string label="b"+std::to_string(batch);auto r=read<int>(label+"_rows",n+1),c=read<int>(label+"_columns",nnz);auto v=read<double>(label+"_values",nnz),b=read<double>(label+"_B",ldb*nrhs),initial=read<double>(label+"_X",ldx*nrhs);Buffer<int>dr(r),dc(c);Buffer<double>dv(v),db(b),dx(initial);cudssHandle_t h;cudssConfig_t conf;cudssData_t data;cudssMatrix_t a,bm,xm;RW_CHECK(cudssCreate(&h));RW_CHECK(cudssConfigCreate(&conf));RW_CHECK(cudssDataCreate(h,&data));RW_CHECK(cudssMatrixCreateCsr(&a,n,n,nnz,dr.p,nullptr,dc.p,dv.p,CUDA_R_32I,CUDA_R_32I,CUDA_R_64F,typ?CUDSS_MTYPE_SPD:CUDSS_MTYPE_GENERAL,typ?CUDSS_MVIEW_UPPER:CUDSS_MVIEW_FULL,base?CUDSS_BASE_ONE:CUDSS_BASE_ZERO));RW_CHECK(cudssMatrixCreateDn(&bm,n,nrhs,ldb,db.p,CUDA_R_64F,CUDSS_LAYOUT_COL_MAJOR));RW_CHECK(cudssMatrixCreateDn(&xm,n,nrhs,ldx,dx.p,CUDA_R_64F,CUDSS_LAYOUT_COL_MAJOR));std::vector<int>phase={0};RW_CHECK(cudssExecute(h,CUDSS_PHASE_REORDERING,conf,data,a,xm,bm));phase.push_back(1);std::vector<int>rp(n),cp(n);size_t bytes=0;RW_CHECK(cudssDataGet(h,data,CUDSS_DATA_PERM_REORDER_ROW,rp.data(),n*sizeof(int),&bytes));if(bytes!=n*sizeof(int))throw std::runtime_error("row query size");RW_CHECK(cudssDataGet(h,data,CUDSS_DATA_PERM_REORDER_COL,cp.data(),n*sizeof(int),&bytes));if(bytes!=n*sizeof(int))throw std::runtime_error("column query size");for(int&i:rp)i-=base;for(int&i:cp)i-=base;RW_CHECK(cudssExecute(h,CUDSS_PHASE_SYMBOLIC_FACTORIZATION,conf,data,a,xm,bm));auto rc=cudssExecute(h,CUDSS_PHASE_FACTORIZATION,conf,data,a,xm,bm);phase.push_back(2);int info=0;RW_CHECK(cudssDataGet(h,data,CUDSS_DATA_INFO,&info,sizeof(info),&bytes));if(rc&&!info)info=int(rc);if(!info){RW_CHECK(cudssExecute(h,CUDSS_PHASE_SOLVE,conf,data,a,xm,bm));phase.push_back(3);}sync();emit(label+"_dimensions",std::vector<int>{n,nnz,nrhs,ldb,ldx,base,typ});emit(label+"_permutation",rp);emit(label+"_column_permutation",cp);emit(label+"_phase",phase);emit(label+"_info",std::vector<int>{info});emit(label+"_solution",dx.get());emit(label+"_B_after",db.get());RW_CHECK(cudssMatrixDestroy(a));RW_CHECK(cudssMatrixDestroy(bm));RW_CHECK(cudssMatrixDestroy(xm));RW_CHECK(cudssDataDestroy(h,data));RW_CHECK(cudssConfigDestroy(conf));RW_CHECK(cudssDestroy(h));if(info)return 2;}
++for(int batch=0;batch<count;++batch){int n,nnz,nrhs,ldb,ldx,base,typ,reorder;cfg>>n>>nnz>>nrhs>>ldb>>ldx>>base>>typ>>reorder;if(!cfg||n<1||n>64||nnz<n||nnz>n*n||nrhs<1||nrhs>32||ldb<n||ldx<n)throw std::runtime_error("shape");std::string label="b"+std::to_string(batch);auto r=read<int>(label+"_rows",n+1),c=read<int>(label+"_columns",nnz);auto v=read<double>(label+"_values",nnz),b=read<double>(label+"_B",ldb*nrhs),initial=read<double>(label+"_X",ldx*nrhs);Buffer<int>dr(r),dc(c);Buffer<double>dv(v),db(b),dx(initial);cudssHandle_t h;cudssConfig_t conf;cudssData_t data;cudssMatrix_t a,bm,xm;RW_CHECK(cudssCreate(&h));RW_CHECK(cudssConfigCreate(&conf));RW_CHECK(cudssDataCreate(h,&data));RW_CHECK(cudssMatrixCreateCsr(&a,n,n,nnz,dr.p,nullptr,dc.p,dv.p,CUDA_R_32I,CUDA_R_32I,CUDA_R_64F,typ?CUDSS_MTYPE_SPD:CUDSS_MTYPE_GENERAL,typ?CUDSS_MVIEW_UPPER:CUDSS_MVIEW_FULL,base?CUDSS_BASE_ONE:CUDSS_BASE_ZERO));RW_CHECK(cudssMatrixCreateDn(&bm,n,nrhs,ldb,db.p,CUDA_R_64F,CUDSS_LAYOUT_COL_MAJOR));RW_CHECK(cudssMatrixCreateDn(&xm,n,nrhs,ldx,dx.p,CUDA_R_64F,CUDSS_LAYOUT_COL_MAJOR));std::vector<int>phase={0};RW_CHECK(cudssExecute(h,CUDSS_PHASE_REORDERING,conf,data,a,xm,bm));sync();phase.push_back(1);std::vector<int>rp(n),cp(n);size_t bytes=0;RW_CHECK(cudssDataGet(h,data,CUDSS_DATA_PERM_REORDER_ROW,rp.data(),n*sizeof(int),&bytes));if(bytes!=n*sizeof(int))throw std::runtime_error("row query size");RW_CHECK(cudssDataGet(h,data,CUDSS_DATA_PERM_REORDER_COL,cp.data(),n*sizeof(int),&bytes));if(bytes!=n*sizeof(int))throw std::runtime_error("column query size");for(int&i:rp)i-=base;for(int&i:cp)i-=base;RW_CHECK(cudssExecute(h,CUDSS_PHASE_SYMBOLIC_FACTORIZATION,conf,data,a,xm,bm));auto rc=cudssExecute(h,CUDSS_PHASE_FACTORIZATION,conf,data,a,xm,bm);sync();phase.push_back(2);int info=0;RW_CHECK(cudssDataGet(h,data,CUDSS_DATA_INFO,&info,sizeof(info),&bytes));if(rc&&!info)info=int(rc);if(!info){RW_CHECK(cudssExecute(h,CUDSS_PHASE_SOLVE,conf,data,a,xm,bm));phase.push_back(3);}sync();emit(label+"_dimensions",std::vector<int>{n,nnz,nrhs,ldb,ldx,base,typ});emit(label+"_permutation",rp);emit(label+"_column_permutation",cp);emit(label+"_phase",phase);emit(label+"_info",std::vector<int>{info});emit(label+"_solution",dx.get());emit(label+"_B_after",db.get());RW_CHECK(cudssMatrixDestroy(a));RW_CHECK(cudssMatrixDestroy(bm));RW_CHECK(cudssMatrixDestroy(xm));RW_CHECK(cudssDataDestroy(h,data));RW_CHECK(cudssConfigDestroy(conf));RW_CHECK(cudssDestroy(h));if(info)return 2;}
+ return 0;}catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 1;}}
