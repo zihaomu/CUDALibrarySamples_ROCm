@@ -1,0 +1,104 @@
+{
+  "source_commit": "ad2fc72457f384cc420a0e29866bb5fcacbc172c",
+  "verdict": "APPROVED",
+  "reviewers": [
+    "r1_contract_review",
+    "r2_contract_review",
+    "remaining_scope_review"
+  ],
+  "findings": [
+    {
+      "id": "R1-EXACT-STORAGE",
+      "description": "Untouched padding/triangle must be checked bit-exactly",
+      "state": "RESOLVED"
+    },
+    {
+      "id": "R1-HALF-ULP",
+      "description": "Float16 spacing at maximum finite value is infinite; use ordered bit ULP distance",
+      "state": "RESOLVED"
+    },
+    {
+      "id": "R2-SHARED-BARRIER",
+      "description": "Sentinel initialization races padded shared-memory loads",
+      "state": "RESOLVED"
+    },
+    {
+      "id": "R2-NONSPD",
+      "description": "Check exact failure minor, unchanged RHS and untouched storage on non-SPD",
+      "state": "RESOLVED"
+    },
+    {
+      "id": "R2-INPUT-IDENTITY",
+      "description": "Run and validate immutable per-attempt inputs, with hashes",
+      "state": "RESOLVED"
+    },
+    {
+      "id": "R2-DESCRIPTOR-GUARD",
+      "description": "Reject invalid leading dimensions, shape, batch and launch configuration",
+      "state": "RESOLVED"
+    },
+    {
+      "id": "P0-SOURCE-OBJECTS",
+      "description": "Audit external source objects and mapping completeness",
+      "state": "RESOLVED"
+    },
+    {
+      "id": "P0-INTERRUPTED",
+      "description": "Recover dead recorders and audit unmatched starts",
+      "state": "RESOLVED"
+    },
+    {
+      "id": "P0-BOOTSTRAP",
+      "description": "Bootstrap must safely resume interrupted existing checkouts",
+      "state": "RESOLVED"
+    },
+    {
+      "id": "P0-INVENTORY",
+      "description": "Preserve task and library observations on repeated inventory generation",
+      "state": "RESOLVED"
+    },
+    {
+      "id": "P0-COLD-BOOTSTRAP",
+      "description": "Cold clone checkout before dirty protection",
+      "state": "RESOLVED"
+    },
+    {
+      "id": "P0-SHORT-CHILD",
+      "description": "Recover missing start ticks and exited child races",
+      "state": "RESOLVED"
+    },
+    {
+      "id": "R2-NATIVE-A-AFTER",
+      "description": "Observe native TRSM device A by actual D2H and sync",
+      "state": "RESOLVED"
+    },
+    {
+      "id": "Q-REVIEW-IDENTITY",
+      "description": "Bind review to frozen source/profile/fixture bytes including staged additions",
+      "state": "RESOLVED"
+    },
+    {
+      "id": "Q-AUXILIARY-PROOF",
+      "description": "Audit auxiliary seals, current checkers, parent/build and immutable input identity",
+      "state": "RESOLVED"
+    }
+  ],
+  "scope": "P0/P1 and first eight R1/R2 rewrites only; R3–R8 and whole-project platform gates remain owed",
+  "review_rounds": [
+    {
+      "commit": "f15c460393befcdb5f3d2eb0d1659467dd0827b5",
+      "reviewer": "r1_contract_review",
+      "verdict": "APPROVED_R1_SCOPE"
+    },
+    {
+      "commit": "b09753d56dae73fd9493c6cdcbee5dd2d44e641d",
+      "reviewer": "remaining_scope_review",
+      "verdict": "APPROVED_P0_AND_QUALIFICATION_SCOPE"
+    },
+    {
+      "commit": "ad2fc72457f384cc420a0e29866bb5fcacbc172c",
+      "reviewer": "r2_contract_review",
+      "verdict": "APPROVED_FINAL_FIX"
+    }
+  ]
+}

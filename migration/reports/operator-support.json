@@ -2,9 +2,9 @@
   "schema_version": 1,
   "counting_rule": "Operator/functional families are deduplicated within each module; dtypes, sizes, language, batch, storage formats and algorithm variants do not create extra operators. At least one explicitly scoped PASSED source profile is required. Cross-module totals may include the same mathematical operation implemented through different library interfaces.",
   "qualification_rule": "A verified family proves only its linked PASSED source profiles/required cases, not every API configuration. PARTIAL examples and capability probes are excluded.",
-  "verified_operator_families": 111,
+  "verified_operator_families": 114,
   "modules_with_verified_operators": 17,
-  "passed_source_profiles": 211,
+  "passed_source_profiles": 219,
   "modules": {
     "cuBLAS": {
       "verified_operator_family_count": 52,
@@ -123,6 +123,7 @@
             "cuBLAS/Extensions/GemmExAutoTuning::cublas_GemmExAutoTuning_example.cu",
             "cuBLAS/Extensions/GemmGroupedBatchedEx::cublas_GemmGroupedBatchedEx_example.cu",
             "cuBLAS/Extensions/GemmStridedBatchedEx::cublas_GemmStridedBatchedEx_example.cu",
+            "cuBLAS/Level-3/gemm3m::cublas_gemm3m_example.cu",
             "cuBLAS/Level-3/gemm::cublas_gemm_example.cu",
             "cuBLAS/Level-3/gemmBatched::cublas_gemmBatched_example.cu",
             "cuBLAS/Level-3/gemmGroupedBatched::cublas_gemmGroupedBatched_example.cu",
@@ -134,12 +135,13 @@
             "migration/sample-reports/cuBLAS/Extensions/GemmExAutoTuning/cublas_GemmExAutoTuning_example.cu.md",
             "migration/sample-reports/cuBLAS/Extensions/GemmGroupedBatchedEx/cublas_GemmGroupedBatchedEx_example.cu.md",
             "migration/sample-reports/cuBLAS/Extensions/GemmStridedBatchedEx/cublas_GemmStridedBatchedEx_example.cu.md",
+            "migration/sample-reports/cuBLAS/Level-3/gemm3m/cublas_gemm3m_example.cu.md",
             "migration/sample-reports/cuBLAS/Level-3/gemm/cublas_gemm_example.cu.md",
             "migration/sample-reports/cuBLAS/Level-3/gemmBatched/cublas_gemmBatched_example.cu.md",
             "migration/sample-reports/cuBLAS/Level-3/gemmGroupedBatched/cublas_gemmGroupedBatched_example.cu.md",
             "migration/sample-reports/cuBLAS/Level-3/gemmStridedBatched/cublas_gemmStridedBatched_example.cu.md"
           ],
-          "source_profiles": 9
+          "source_profiles": 10
         },
         {
           "name": "gemv",
@@ -224,14 +226,16 @@
         {
           "name": "herk",
           "sample_ids": [
+            "cuBLAS/Extensions/Cherk3mEx::cublas_Cherk3mEx_example.cu",
             "cuBLAS/Extensions/CherkEx::cublas_CherkEx_example.cu",
             "cuBLAS/Level-3/herk::cublas_herk_example.cu"
           ],
           "sample_reports": [
+            "migration/sample-reports/cuBLAS/Extensions/Cherk3mEx/cublas_Cherk3mEx_example.cu.md",
             "migration/sample-reports/cuBLAS/Extensions/CherkEx/cublas_CherkEx_example.cu.md",
             "migration/sample-reports/cuBLAS/Level-3/herk/cublas_herk_example.cu.md"
           ],
-          "source_profiles": 2
+          "source_profiles": 3
         },
         {
           "name": "herkx",
@@ -442,14 +446,16 @@
         {
           "name": "syrk",
           "sample_ids": [
+            "cuBLAS/Extensions/Csyrk3mEx::cublas_Csyrk3mEx_example.cu",
             "cuBLAS/Extensions/CsyrkEx::cublas_CsyrkEx_example.cu",
             "cuBLAS/Level-3/syrk::cublas_syrk_example.cu"
           ],
           "sample_reports": [
+            "migration/sample-reports/cuBLAS/Extensions/Csyrk3mEx/cublas_Csyrk3mEx_example.cu.md",
             "migration/sample-reports/cuBLAS/Extensions/CsyrkEx/cublas_CsyrkEx_example.cu.md",
             "migration/sample-reports/cuBLAS/Level-3/syrk/cublas_syrk_example.cu.md"
           ],
-          "source_profiles": 2
+          "source_profiles": 3
         },
         {
           "name": "syrkx",
@@ -566,12 +572,12 @@
       ],
       "sample_count": 82,
       "sample_outcomes": {
-        "FAILED": 13,
-        "PASSED": 69
+        "FAILED": 10,
+        "PASSED": 72
       },
       "validation_scope": "固定教学profile与所列扩展cases；含复杂rank-k类型化适配、HIP GPU packed转换、FP32分组batched及FP64项目策略调优。rotmg极端缩放使用HIP修正；调优/批量变体按同一数学族去重。",
       "failure_reason_counts": {
-        "BUILD_ERROR": 13
+        "BUILD_ERROR": 10
       }
     },
     "cuBLASLt": {
@@ -583,6 +589,8 @@
             "cuBLASLt/LtHSHgemmGroupedSimple::main.cpp",
             "cuBLASLt/LtHSHgemmPointerArrayBatchSimple::main.cpp",
             "cuBLASLt/LtHSHgemmStridedBatchSimple::main.cpp",
+            "cuBLASLt/LtIgemmTensor::main.cpp",
+            "cuBLASLt/LtPlanarComplex::main.cpp",
             "cuBLASLt/LtSgemm::main.cpp",
             "cuBLASLt/LtSgemmCustomFind::main.cu",
             "cuBLASLt/LtSgemmSimpleAutoTuning::main.cpp"
@@ -591,21 +599,23 @@
             "migration/sample-reports/cuBLASLt/LtHSHgemmGroupedSimple/main.cpp.md",
             "migration/sample-reports/cuBLASLt/LtHSHgemmPointerArrayBatchSimple/main.cpp.md",
             "migration/sample-reports/cuBLASLt/LtHSHgemmStridedBatchSimple/main.cpp.md",
+            "migration/sample-reports/cuBLASLt/LtIgemmTensor/main.cpp.md",
+            "migration/sample-reports/cuBLASLt/LtPlanarComplex/main.cpp.md",
             "migration/sample-reports/cuBLASLt/LtSgemm/main.cpp.md",
             "migration/sample-reports/cuBLASLt/LtSgemmCustomFind/main.cu.md",
             "migration/sample-reports/cuBLASLt/LtSgemmSimpleAutoTuning/main.cpp.md"
           ],
-          "source_profiles": 6
+          "source_profiles": 8
         }
       ],
       "sample_count": 20,
       "sample_outcomes": {
-        "FAILED": 14,
-        "PASSED": 6
+        "FAILED": 12,
+        "PASSED": 8
       },
-      "validation_scope": "6个profile：原FP32 SGEMM、HSH pointer-array/strided batch，以及B7 HSH grouped分发与SGEMM custom-find/autotune。FP16输入/输出、FP32累加、bias、候选全输出、workspace=0及所选方案重放通过；分发适配不等于原生device-grouped API。",
+      "validation_scope": "既有6个profile为FP32 SGEMM、HSH pointer-array/strided、grouped分发及custom-find/autotune。MOAT新资格分别登记FP16 planar负偏移转换/FP32 3M/FP16输出，以及真实COL32/COL4 packing + native INT8/INT32 GemmEx；按样例链接与资格状态限定范围。",
       "failure_reason_counts": {
-        "BUILD_ERROR": 14
+        "BUILD_ERROR": 12
       }
     },
     "cuBLASMp": {
@@ -1540,8 +1550,18 @@
       }
     },
     "MathDx/cuSolverDx": {
-      "verified_operator_family_count": 1,
+      "verified_operator_family_count": 4,
       "verified_operators": [
+        {
+          "name": "设备内 Cholesky 分解/求解",
+          "sample_ids": [
+            "MathDx/cuSolverDx/00_Introduction::posv_batched_block.cu"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/MathDx/cuSolverDx/00_Introduction/posv_batched_block.cu.md"
+          ],
+          "source_profiles": 1
+        },
         {
           "name": "设备内 complex Cholesky",
           "sample_ids": [
@@ -1551,16 +1571,36 @@
             "migration/sample-reports/MathDx/cuSolverDx/01_Linear_Solve/potrf_block.cu.md"
           ],
           "source_profiles": 1
+        },
+        {
+          "name": "设备内 partial-pivot LU",
+          "sample_ids": [
+            "MathDx/cuSolverDx/01_Linear_Solve::getrf_partial_pivot_block.cu"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/MathDx/cuSolverDx/01_Linear_Solve/getrf_partial_pivot_block.cu.md"
+          ],
+          "source_profiles": 1
+        },
+        {
+          "name": "设备内三角求解",
+          "sample_ids": [
+            "MathDx/cuSolverDx/07_BLAS::trsm_batched_block.cu"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/MathDx/cuSolverDx/07_BLAS/trsm_batched_block.cu.md"
+          ],
+          "source_profiles": 1
         }
       ],
       "sample_count": 42,
       "sample_outcomes": {
-        "FAILED": 41,
-        "PASSED": 1
+        "PASSED": 4,
+        "FAILED": 38
       },
-      "validation_scope": "HIP调用方kernel内32阶complex FP64上三角Cholesky，共享LDA33/256线程、完整因子与非SPD info；原生SDK版本缺口另记。",
+      "validation_scope": "HIP调用方kernel内complex Cholesky；MOAT新增complex FP32 48×32 pivot LU、complex FP64 32阶双batch POSV、FP64 right/lower 32×33 TRSM。原生MathDx26.06.1原例实际device输出、同字节HIP与独立CPU分别记录；只按已通过样例的登记范围统计。",
       "failure_reason_counts": {
-        "BUILD_ERROR": 41
+        "BUILD_ERROR": 38
       }
     },
     "MathDx/libmathdx": {

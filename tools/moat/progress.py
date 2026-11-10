@@ -17,18 +17,20 @@ for p in spec:
   return x in results and x in records and results[x]['status']=='PASSED' and results[x].get('validation_source_sha256')==digest(ROOT/'tools/moat/first_reference.py') and results[x]['run']['experiment_id']==records[x]['experiment_id']
  ar=sum(x in runs and runs[x]['return_code']==0 for x in keys);ap=sum(valid(cpu,runs,x) for x in keys);cr=sum(x in cuda and cuda[x]['return_code']==0 for x in keys);cp=sum(valid(cv,cuda,x) for x in keys)
  latest=next((cpu[x]['evidence'] for x in reversed(keys) if x in cpu),next((runs[x]['evidence'] for x in reversed(keys) if x in runs),None))
- text='数值复核中；尚未签发整例资格'
+ sample=next(s for s in cat['samples'] if s['id']==p['sample_id'])
+ text='整例已签发资格：'+sample['status'] if sample.get('reason_code')=='VALIDATED_MOAT_REWRITE' else '数值复核中；尚未签发整例资格'
  total=len(keys);lines.append(f'| {p["batch"]} / `{k}` | {ar}/{total} / {ap}/{total} | {cr}/{total} / {cp}/{total} | '+(f'[{text}]({latest.removeprefix("migration/reports/")}/summary.md)' if latest else text)+' |')
  rows.append(dict(kind=k,required=total,amd_executed=ar,cpu_verified=ap,cuda_executed=cr,cuda_cpu_verified=cp))
 lines+=['',f'反向检查：{sum(bool(x["passed"]) for x in negative.get("checks",[]))}/{len(negative.get("checks",[]))}；原生与兼容 CUDA 数学对照分别登记。',
         '', '当前全项目状态：'+ '、'.join(f'{v} {k}' for k,v in counts.items())+'。',
         '', '日志：[实验事件索引](rewrite-experiments.jsonl)；[AMD运行](rewrite-first-rocm.json)；[独立CPU验收](rewrite-first-rocm-validation.json)；[CUDA运行](rewrite-first-cuda.json)。',
-        '', '待完成：提交固定源码后的独立审查、必要原生 SDK 合同复核、反向检查与支持资格签发。']
+        '', 'R1–R2完整记录：[批次验收](rewrite-R1-R2.md)。后续R3–R8尚未完成，全项目MOAT surface与其它平台仍有owed项。']
 (ROOT/'migration/reports/rewrite-progress.md').write_text('\n'.join(lines)+'\n')
 write(ROOT/'migration/reports/rewrite-progress.json',dict(updated_at=now(),rows=rows,baseline_counts=dict(counts)))
 doc=ROOT.parent/'doc/cuda_samples_on_rocm_moat_rewrite_plan.md';body=doc.read_text();start='<!-- MOAT_EXEC_PROGRESS:START -->';end='<!-- MOAT_EXEC_PROGRESS:END -->'
 total=sum(x['required'] for x in rows)
-section='\n'.join([start,'',f'最近更新：{now()}。首批 AMD {sum(x["amd_executed"] for x in rows)}/{total} 已运行，独立 CPU {sum(x["cpu_verified"] for x in rows)}/{total} 通过；CUDA {sum(x["cuda_executed"] for x in rows)}/{total} 已运行，独立 CPU {sum(x["cuda_cpu_verified"] for x in rows)}/{total} 通过。整例资格仍在审查，未提前修改支持计数。','',end])
+qualified=sum(s.get('reason_code')=='VALIDATED_MOAT_REWRITE' and s['status']=='PASSED' for s in cat['samples'])
+section='\n'.join([start,'',f'最近更新：{now()}。首批 AMD {sum(x["amd_executed"] for x in rows)}/{total} 已运行，独立 CPU {sum(x["cpu_verified"] for x in rows)}/{total} 通过；CUDA {sum(x["cuda_executed"] for x in rows)}/{total} 已运行，独立 CPU {sum(x["cuda_cpu_verified"] for x in rows)}/{total} 通过。已签发首批整例资格 {qualified}/8。R3–R8仍待完成。','',end])
 if start in body:body=re.sub(re.escape(start)+'.*?'+re.escape(end),section,body,flags=re.S)
 else:body+='\n'+section+'\n'
 doc.write_text(body)

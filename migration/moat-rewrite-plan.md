@@ -171,10 +171,10 @@ CUDALibrarySamples_ROCm/
 
 | 阶段 | 内容 | 主要交付 | 退出条件 | 初始状态 |
 | --- | --- | --- | --- | --- |
-| P0 | MOAT 项目接入、环境和日志基础 | 固定版本控制仓库、包装 skill、适配说明、639 入口队列、状态/证据桥接 | 真实小型 GPU 试跑和一次失败/修复/恢复闭环均留证；流程状态与支持状态一致 | IMPLEMENTED_PENDING_REVIEW |
-| P1 | 库注册表和构建整理 | 30 模块的库/路线/依赖映射、公共接口、按样例构建注册 | 639 个 ID 可定位；既有通过路线的受影响回归通过；未发生静默 CPU 替代 | IMPLEMENTED_PENDING_REVIEW |
-| R1 | 5 个 BLAS/Lt 重写 | 复数 3M、PlanarComplex、INT8 布局与计算 | 第 5 节逐例合同、预登记用例、独立三方验证和反向检查 | IN_PROGRESS |
-| R2 | 3 个 MathDx 求解设备内重写 | partial-pivot LU、POSV、TRSM | 第 5 节原始 dtype/尺寸/执行位置通过，host API 替代检查通过 | IN_PROGRESS |
+| P0 | MOAT 项目接入、环境和日志基础 | 固定版本控制仓库、包装 skill、适配说明、639 入口队列、状态/证据桥接 | 真实小型 GPU 试跑和一次失败/修复/恢复闭环均留证；流程状态与支持状态一致 | COMPLETED_SCOPED |
+| P1 | 库注册表和构建整理 | 30 模块的库/路线/依赖映射、公共接口、按样例构建注册 | 639 个 ID 可定位；既有通过路线的受影响回归通过；未发生静默 CPU 替代 | COMPLETED_SCOPED |
+| R1 | 5 个 BLAS/Lt 重写 | 复数 3M、PlanarComplex、INT8 布局与计算 | 第 5 节逐例合同、预登记用例、独立三方验证和反向检查 | COMPLETED_SCOPED |
+| R2 | 3 个 MathDx 求解设备内重写 | partial-pivot LU、POSV、TRSM | 第 5 节原始 dtype/尺寸/执行位置通过，host API 替代检查通过 | COMPLETED_SCOPED |
 | R3 | 24 个 PARTIAL 收口 | 第 6 节逐例缺失合同、可收口实现或保留原因 | 每项有当前证据与下一步；仅完整等价项升级 PASSED | NOT_STARTED |
 | R4 | 其它基础/高级算法扩展 | 稀疏 QR/IRS/SVD、低精度、图像、压缩、heuristics 等按探针拆批 | 一次只冻结一个可审查小批；完整原始合同和独立验收 | NOT_STARTED |
 | R5 | 语言绑定扩展 | 对 73 个前端失败入口逐一建立 C ABI / Fortran / Python 路线 | 先有已验收 GPU 核心，再通过原语言实际入口与数据/错误传播检查 | NOT_STARTED |
@@ -523,10 +523,12 @@ CUDA 对照分成 `cuda_native` 与 `cuda_compatible_math`。原生 SDK 缺失�
 
 | 2026-11-10 | EXEC-06 | 原生 TRSM 已追加实际 d_A 回读，同步后封存；新版随机原始输入重新冻结并在 AMD/CUDA 重放，CPU 与原生对照通过。MOAT 冷启动、已有目录恢复、错来源拒绝及短命子进程恢复均完成真实隔离自检。R2 共34项真实非法descriptor全部在分配/计算前拒绝；编译器依赖文件替代过宽的手工依赖列表 | 最后一轮独立复审与复合资格门槛检查；之后更新首批支持表并推进R3–R8 |
 
+| 2026-11-10 | EXEC-07 | P0/P1、R1/R2 独立复审与复合资格通过，8例升级PASSED；51正向/27注入/34非法descriptor均有封存记录，支持211→219、功能族111→114。原生MathDx、原生cuBLAS/Lt及兼容CUDA数学基线明确区分 | 继续R3–R8；其余平台与全项目surface仍未完成 |
+
 PLAN-01 至 PLAN-03 是规划阶段记录，不代表实验结果。实施中的目录和 schema 按实际交付更新；未完成组件仍按待实现要求处理。
 
 <!-- MOAT_EXEC_PROGRESS:START -->
 
-最近更新：2026-11-10T08:31:47.047123+00:00。首批 AMD 51/51 已运行，独立 CPU 51/51 通过；CUDA 51/51 已运行，独立 CPU 51/51 通过。整例资格仍在审查，未提前修改支持计数。
+最近更新：2026-11-10T08:39:58.737989+00:00。首批 AMD 51/51 已运行，独立 CPU 51/51 通过；CUDA 51/51 已运行，独立 CPU 51/51 通过。已签发首批整例资格 8/8。R3–R8仍待完成。
 
 <!-- MOAT_EXEC_PROGRESS:END -->

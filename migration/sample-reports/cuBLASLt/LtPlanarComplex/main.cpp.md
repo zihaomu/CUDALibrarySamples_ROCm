@@ -1,23 +1,23 @@
 # cuBLASLt/LtPlanarComplex::main.cpp
 
-**FAILED / L1**
+**PASSED / L4**
 
-build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtPlanarComplex/sample_cublasLt_LtPlanarComplex.cu:64:64: error: use of undeclared identifier 'CUBLASLT_MATRIX_LAYOUT_PLANE_OFFSET'; did you mean 'HIPBLASLT_MATRIX_LAYOUT_OFFSET'?；/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLASLt/LtPlanarComplex/sample_cublasLt_LtPlanarComplex.cu:69:64: error: use of undeclared identifier 'CUBLASLT_MATRIX_LAYOUT_PLANE_OFFSET'; did you mean 'HIPBLASLT_MATRIX_LAYOUT_OFFSET'?
+原始数据/精度/布局与登记扩展用例通过 AMD、独立 CPU、相同输入 CUDA 验收；真实执行语义、反向检查及独立复审完成。实际路线：HIP negative-offset FP16 planar conversion + hipBLAS/rocBLAS FP32 3M + HIP FP16 output。性能未验收。
 
 | 字段 | 当前记录 |
 | --- | --- |
 | 原始入口 | [cuBLASLt/LtPlanarComplex/main.cpp](../../../../cuBLASLt/LtPlanarComplex/main.cpp) |
-| 实际库 / 后端 | — / — |
+| 实际库 / 后端 | HIP negative-offset FP16 planar conversion + hipBLAS/rocBLAS FP32 3M + HIP FP16 output / rocBLAS |
 | 候选路线 | hipBLASLt |
 | 代码 | [rocm/ported/cuBLASLt/LtPlanarComplex/main.cpp](../../../../rocm/ported/cuBLASLt/LtPlanarComplex/main.cpp) |
-| required cases | 0/2 |
-| CUDA baseline / comparison | PASSED / BLOCKED |
+| required cases | 8/8 |
+| CUDA baseline / comparison | PASSED / PASSED |
 | 性能 | NOT_RUN |
 | 原始源码 SHA256 | `e19a44936b727dc8ae9119a7b1ad031b050ff127ea6bc69033ad509d227f8ecc` |
 
 编译/运行返回 0 仅对应 L3；通过独立参考检查后才记 L4。失败的候选库不列为已使用库。
 
-必需用例：`original-functional-contract`, `independent-numerical-or-semantic-reference`。
+必需用例：`rewrite/original`, `rewrite/changed-values`, `rewrite/irregular`, `rewrite/layout`, `rewrite/repeat`, `rewrite/boundary`, `rewrite/half-max`, `rewrite/independent-negative-checks`。
 
 实现方式：`API_PORT`。
 
@@ -48,3 +48,7 @@ build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_mi
 - [migration/reports/evidence/20261109T085546.110648Z/original-rocm/cuBLASLt_LtPlanarComplex_main.cpp](../../../reports/evidence/20261109T085546.110648Z/original-rocm/cuBLASLt_LtPlanarComplex_main.cpp)
 - [migration/reports/evidence/20261109T090201.483404Z/original-rocm/cuBLASLt_LtPlanarComplex_main.cpp](../../../reports/evidence/20261109T090201.483404Z/original-rocm/cuBLASLt_LtPlanarComplex_main.cpp)
 - [migration/reports/evidence/20261109T081122.138627Z/original-cuda/cuBLASLt_LtPlanarComplex_main.cpp](../../../reports/evidence/20261109T081122.138627Z/original-cuda/cuBLASLt_LtPlanarComplex_main.cpp)
+- [migration/reports/evidence/rewrite/R1/cuBLASLt_LtPlanarComplex__main.cpp/20261110T083835.270533Z-R1-composite-qualification-e888d44f38](../../../reports/evidence/rewrite/R1/cuBLASLt_LtPlanarComplex__main.cpp/20261110T083835.270533Z-R1-composite-qualification-e888d44f38)
+- [migration/reports/rewrite-first-qualification.json](../../../reports/rewrite-first-qualification.json)
+- [migration/reports/rewrite-first-negative.json](../../../reports/rewrite-first-negative.json)
+- [migration/reports/rewrite-evidence-errata.json](../../../reports/rewrite-evidence-errata.json)

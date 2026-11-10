@@ -1,0 +1,1 @@
+Test composite-qualification for MathDx/cuSolverDx/01_Linear_Solve::getrf_partial_pivot_block.cu, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: none.

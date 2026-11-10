@@ -1,10 +1,10 @@
 {
-  "status": "FAILED",
+  "status": "PASSED",
   "qualifications": [
     {
       "sample_id": "cuBLAS/Level-3/gemm3m::cublas_gemm3m_example.cu",
       "kind": "gemm3m",
-      "status": "FAILED",
+      "status": "PASSED",
       "checks": [
         {
           "check": "frozen-nonempty-complete-case-contract",
@@ -12,7 +12,7 @@
         },
         {
           "check": "independent-review",
-          "passed": false
+          "passed": true
         },
         {
           "check": "current-compiled-dependencies",
@@ -407,7 +407,7 @@
           "passed": true
         }
       ],
-      "source_commit": "40084aba13de7253faf753c1469e22d450b079c3",
+      "source_commit": "ad2fc72457f384cc420a0e29866bb5fcacbc172c",
       "implementation": "rocm/ported/cuBLAS/Level-3/gemm3m/cublas_gemm3m_example.cu",
       "implementation_sha256": "d821576dc38a49b9ac5abd92a6c795cd3a27135502b4bcdb21637e69bb61c9a0",
       "dependencies": {
@@ -452,12 +452,151 @@
         "migration/reports/evidence/rewrite/R1/gemm3m_original/20261110T082829.172012Z-R1-cpu-validation-b24fe02b21",
         "migration/reports/evidence/rewrite/R1/gemm3m_repeat/20261110T082225.800592Z-R1-cpu-validation-615389b8e1",
         "migration/reports/evidence/rewrite/R1/gemm3m_repeat/20261110T082832.231380Z-R1-cpu-validation-5a7fc20049"
-      ]
+      ],
+      "rocm_evidence": "migration/reports/evidence/rewrite/R1/cuBLAS_Level-3_gemm3m__cublas_gemm3m_example.cu/20261110T082602.786210Z-R1-rocm-8f1c728c05",
+      "cuda_evidence": "migration/reports/evidence/rewrite/R1/cuBLAS_Level-3_gemm3m__cublas_gemm3m_example.cu/20261110T081651.872811Z-R1-cuda-3788ce51fe",
+      "cpu_report": "migration/reports/rewrite-first-rocm-validation.json",
+      "qualification_id": "20261110T083832.851647Z-R1-composite-qualification-6dce52aae0",
+      "evidence": "migration/reports/evidence/rewrite/R1/cuBLAS_Level-3_gemm3m__cublas_gemm3m_example.cu/20261110T083832.851647Z-R1-composite-qualification-6dce52aae0",
+      "environment": {
+        "hostname": "e2dccae76726",
+        "platform": "Linux-7.0.0-42-generic-x86_64-with-glibc2.39",
+        "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "rocm_release": "10.1.0",
+        "visible_devices": "2",
+        "devices": [
+          {
+            "logical_id": 0,
+            "pci_bdf": "0000:03:00.0",
+            "physical_id": 0,
+            "uuid": "32396463623033636131356166623633"
+          }
+        ],
+        "versions": {
+          "hipRuntimeGetVersion": {
+            "status": 0,
+            "value": 71626385
+          },
+          "hipDriverGetVersion": {
+            "status": 0,
+            "value": 71626385
+          }
+        },
+        "packages": {
+          "rocm-sdk-core": "10.1.0",
+          "rocm-sdk-device-gfx1100": "10.1.0",
+          "rocm-sdk-device-gfx942": "10.1.0",
+          "rocm-sdk-device-gfx1010": "10.1.0",
+          "rocm-sdk-device-gfx1011": "10.1.0",
+          "rocm-sdk-device-gfx1101": "10.1.0",
+          "rocm-bootstrap": "0.3.0",
+          "triton": "3.8.0+git669b31ac.rocm10.1.0",
+          "rocm-sdk-device-gfx1035": "10.1.0",
+          "rocm-sdk-device-gfx1012": "10.1.0",
+          "torch": "2.14.0+rocm10.1.0",
+          "rocm-sdk-device-gfx1152": "10.1.0",
+          "rocm-sdk-device-gfx908": "10.1.0",
+          "rocm-sdk-libraries": "10.1.0",
+          "rocm-sdk-device-gfx1031": "10.1.0",
+          "rocm-sdk-device-gfx1151": "10.1.0",
+          "rocm-sdk-device-gfx1030": "10.1.0",
+          "rocm-sdk-device-gfx1103": "10.1.0",
+          "rocm-sdk-device-gfx1250": "10.1.0",
+          "rocm-sdk-device-gfx1032": "10.1.0",
+          "rocm-sdk-device-gfx1102": "10.1.0",
+          "rocm-sdk-device-gfx1201": "10.1.0",
+          "rocm-sdk-device-gfx90a": "10.1.0",
+          "torchvision": "0.29.0a0+rocm10.1.0",
+          "rocm-sdk-device-gfx1036": "10.1.0",
+          "rocm-sdk-device-gfx1153": "10.1.0",
+          "rocm": "10.1.0",
+          "rocm-sdk-device-gfx1150": "10.1.0",
+          "rocm-sdk-device-gfx1200": "10.1.0",
+          "rocm-sdk-device-gfx1034": "10.1.0",
+          "rocm-sdk-device-gfx1033": "10.1.0",
+          "rocm-sdk-device-gfx950": "10.1.0"
+        },
+        "loaded_libraries": [
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamd_comgr.so.3",
+            "sha256": "6bf2f6fe6b243c5ac3621cd5745887933d3a41edd944a447c88c21ec77da5d5b"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamdhip64.so.7",
+            "sha256": "6d1dbee8cb3ad924e4c1bca7734e22f2c93026eb3bc871a7f64a916778d55e36"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-amd-aqlprofile64.so.1",
+            "sha256": "6d4be9a3d53457b466f3e1fb1b07b897cd78be9b934a5326444b7b2070dabd61"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-runtime64.so.1",
+            "sha256": "12d49db16881b9505629192231d5b3971e9030b26a326fc2c003e92da7de0c44"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocm_kpack.so.0",
+            "sha256": "e2af394dea58ad53d6074c7aa9d56de5dc027ca186f6bbc27d6f32d7b8f12ac3"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocprofiler-register.so.0",
+            "sha256": "a67764cf46d1d579eb27311576ba9c0b4dbfa5052ddd64a062131f716faa11b6"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libLLVM.so.24.0git",
+            "sha256": "3e7b50e1f252792eba7380b8503c05c899bf8ae9deeb70faf3f9be5f995c8e0a"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libclang-cpp.so.24.0git",
+            "sha256": "18ef4cb8bd32366a68599fb6d723ed38814707a2ada1ff34b722dafc7856663b"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_bz2.so",
+            "sha256": "37a39b12a7e6e9f480d10e5e139b9aedbe5824e63b6b9e12a16837baee608602"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm.so.2",
+            "sha256": "b715ae24e1d62e407ffceca56b546e8a35abe37ac50878cbb16fa8b93d9c9fd5"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm_amdgpu.so.1",
+            "sha256": "b25742cda500eaa61e39b2b32492bb482235ad3e3df8a988d8f4130054d94cad"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_elf.so.1",
+            "sha256": "692dd9fe3575a45df78b319ad0e2a58ee36814958771dd810d5d91f9616c6d8f"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_liblzma.so.5",
+            "sha256": "d17f947bfe3947db5aefee897f6d32dfe98c73bf80b477764ba7f4107594a671"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_numa.so.1",
+            "sha256": "26fffd0f85369950b834cfb8f56fa9e1ea4804be8bbc40db98b788c554802bc3"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_z.so.1",
+            "sha256": "e1d7568f4a0b77eeab26f30cc9d2794dfe7ffd14e34b4ae55a9f80bc4f94ba7a"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_zstd.so.1",
+            "sha256": "fc3edd0b74fa071079b0095abe7b3f41418ca39be138f4ec0c57d0640a0b2d8b"
+          }
+        ]
+      },
+      "devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0,
+          "uuid": "32396463623033636131356166623633"
+        }
+      ],
+      "scope": "MOAT rewrite original contract plus registered variants; composite qualification, not one process exit"
     },
     {
       "sample_id": "cuBLAS/Extensions/Cherk3mEx::cublas_Cherk3mEx_example.cu",
       "kind": "herk3m",
-      "status": "FAILED",
+      "status": "PASSED",
       "checks": [
         {
           "check": "frozen-nonempty-complete-case-contract",
@@ -465,7 +604,7 @@
         },
         {
           "check": "independent-review",
-          "passed": false
+          "passed": true
         },
         {
           "check": "current-compiled-dependencies",
@@ -864,7 +1003,7 @@
           "passed": true
         }
       ],
-      "source_commit": "40084aba13de7253faf753c1469e22d450b079c3",
+      "source_commit": "ad2fc72457f384cc420a0e29866bb5fcacbc172c",
       "implementation": "rocm/ported/cuBLAS/Extensions/Cherk3mEx/cublas_Cherk3mEx_example.cu",
       "implementation_sha256": "77068b1c30e3a10aac47504afd1daef76dbbaae48d7dd3d6d0d36c39d21daa5e",
       "dependencies": {
@@ -910,12 +1049,151 @@
         "migration/reports/evidence/rewrite/R1/herk3m_original/20261110T082833.769728Z-R1-cpu-validation-17939d9cf5",
         "migration/reports/evidence/rewrite/R1/herk3m_repeat/20261110T082230.223258Z-R1-cpu-validation-9b73ed1964",
         "migration/reports/evidence/rewrite/R1/herk3m_repeat/20261110T082836.839758Z-R1-cpu-validation-2875608732"
-      ]
+      ],
+      "rocm_evidence": "migration/reports/evidence/rewrite/R1/cuBLAS_Extensions_Cherk3mEx__cublas_Cherk3mEx_example.cu/20261110T082616.226329Z-R1-rocm-e110d978e5",
+      "cuda_evidence": "migration/reports/evidence/rewrite/R1/cuBLAS_Extensions_Cherk3mEx__cublas_Cherk3mEx_example.cu/20261110T081711.794828Z-R1-cuda-6603118ad2",
+      "cpu_report": "migration/reports/rewrite-first-rocm-validation.json",
+      "qualification_id": "20261110T083833.693586Z-R1-composite-qualification-7182a54a65",
+      "evidence": "migration/reports/evidence/rewrite/R1/cuBLAS_Extensions_Cherk3mEx__cublas_Cherk3mEx_example.cu/20261110T083833.693586Z-R1-composite-qualification-7182a54a65",
+      "environment": {
+        "hostname": "e2dccae76726",
+        "platform": "Linux-7.0.0-42-generic-x86_64-with-glibc2.39",
+        "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "rocm_release": "10.1.0",
+        "visible_devices": "2",
+        "devices": [
+          {
+            "logical_id": 0,
+            "pci_bdf": "0000:03:00.0",
+            "physical_id": 0,
+            "uuid": "32396463623033636131356166623633"
+          }
+        ],
+        "versions": {
+          "hipRuntimeGetVersion": {
+            "status": 0,
+            "value": 71626385
+          },
+          "hipDriverGetVersion": {
+            "status": 0,
+            "value": 71626385
+          }
+        },
+        "packages": {
+          "rocm-sdk-core": "10.1.0",
+          "rocm-sdk-device-gfx1100": "10.1.0",
+          "rocm-sdk-device-gfx942": "10.1.0",
+          "rocm-sdk-device-gfx1010": "10.1.0",
+          "rocm-sdk-device-gfx1011": "10.1.0",
+          "rocm-sdk-device-gfx1101": "10.1.0",
+          "rocm-bootstrap": "0.3.0",
+          "triton": "3.8.0+git669b31ac.rocm10.1.0",
+          "rocm-sdk-device-gfx1035": "10.1.0",
+          "rocm-sdk-device-gfx1012": "10.1.0",
+          "torch": "2.14.0+rocm10.1.0",
+          "rocm-sdk-device-gfx1152": "10.1.0",
+          "rocm-sdk-device-gfx908": "10.1.0",
+          "rocm-sdk-libraries": "10.1.0",
+          "rocm-sdk-device-gfx1031": "10.1.0",
+          "rocm-sdk-device-gfx1151": "10.1.0",
+          "rocm-sdk-device-gfx1030": "10.1.0",
+          "rocm-sdk-device-gfx1103": "10.1.0",
+          "rocm-sdk-device-gfx1250": "10.1.0",
+          "rocm-sdk-device-gfx1032": "10.1.0",
+          "rocm-sdk-device-gfx1102": "10.1.0",
+          "rocm-sdk-device-gfx1201": "10.1.0",
+          "rocm-sdk-device-gfx90a": "10.1.0",
+          "torchvision": "0.29.0a0+rocm10.1.0",
+          "rocm-sdk-device-gfx1036": "10.1.0",
+          "rocm-sdk-device-gfx1153": "10.1.0",
+          "rocm": "10.1.0",
+          "rocm-sdk-device-gfx1150": "10.1.0",
+          "rocm-sdk-device-gfx1200": "10.1.0",
+          "rocm-sdk-device-gfx1034": "10.1.0",
+          "rocm-sdk-device-gfx1033": "10.1.0",
+          "rocm-sdk-device-gfx950": "10.1.0"
+        },
+        "loaded_libraries": [
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamd_comgr.so.3",
+            "sha256": "6bf2f6fe6b243c5ac3621cd5745887933d3a41edd944a447c88c21ec77da5d5b"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamdhip64.so.7",
+            "sha256": "6d1dbee8cb3ad924e4c1bca7734e22f2c93026eb3bc871a7f64a916778d55e36"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-amd-aqlprofile64.so.1",
+            "sha256": "6d4be9a3d53457b466f3e1fb1b07b897cd78be9b934a5326444b7b2070dabd61"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-runtime64.so.1",
+            "sha256": "12d49db16881b9505629192231d5b3971e9030b26a326fc2c003e92da7de0c44"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocm_kpack.so.0",
+            "sha256": "e2af394dea58ad53d6074c7aa9d56de5dc027ca186f6bbc27d6f32d7b8f12ac3"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocprofiler-register.so.0",
+            "sha256": "a67764cf46d1d579eb27311576ba9c0b4dbfa5052ddd64a062131f716faa11b6"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libLLVM.so.24.0git",
+            "sha256": "3e7b50e1f252792eba7380b8503c05c899bf8ae9deeb70faf3f9be5f995c8e0a"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libclang-cpp.so.24.0git",
+            "sha256": "18ef4cb8bd32366a68599fb6d723ed38814707a2ada1ff34b722dafc7856663b"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_bz2.so",
+            "sha256": "37a39b12a7e6e9f480d10e5e139b9aedbe5824e63b6b9e12a16837baee608602"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm.so.2",
+            "sha256": "b715ae24e1d62e407ffceca56b546e8a35abe37ac50878cbb16fa8b93d9c9fd5"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm_amdgpu.so.1",
+            "sha256": "b25742cda500eaa61e39b2b32492bb482235ad3e3df8a988d8f4130054d94cad"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_elf.so.1",
+            "sha256": "692dd9fe3575a45df78b319ad0e2a58ee36814958771dd810d5d91f9616c6d8f"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_liblzma.so.5",
+            "sha256": "d17f947bfe3947db5aefee897f6d32dfe98c73bf80b477764ba7f4107594a671"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_numa.so.1",
+            "sha256": "26fffd0f85369950b834cfb8f56fa9e1ea4804be8bbc40db98b788c554802bc3"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_z.so.1",
+            "sha256": "e1d7568f4a0b77eeab26f30cc9d2794dfe7ffd14e34b4ae55a9f80bc4f94ba7a"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_zstd.so.1",
+            "sha256": "fc3edd0b74fa071079b0095abe7b3f41418ca39be138f4ec0c57d0640a0b2d8b"
+          }
+        ]
+      },
+      "devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0,
+          "uuid": "32396463623033636131356166623633"
+        }
+      ],
+      "scope": "MOAT rewrite original contract plus registered variants; composite qualification, not one process exit"
     },
     {
       "sample_id": "cuBLAS/Extensions/Csyrk3mEx::cublas_Csyrk3mEx_example.cu",
       "kind": "syrk3m",
-      "status": "FAILED",
+      "status": "PASSED",
       "checks": [
         {
           "check": "frozen-nonempty-complete-case-contract",
@@ -923,7 +1201,7 @@
         },
         {
           "check": "independent-review",
-          "passed": false
+          "passed": true
         },
         {
           "check": "current-compiled-dependencies",
@@ -1322,7 +1600,7 @@
           "passed": true
         }
       ],
-      "source_commit": "40084aba13de7253faf753c1469e22d450b079c3",
+      "source_commit": "ad2fc72457f384cc420a0e29866bb5fcacbc172c",
       "implementation": "rocm/ported/cuBLAS/Extensions/Csyrk3mEx/cublas_Csyrk3mEx_example.cu",
       "implementation_sha256": "55773c257221eea376be3adb856c628eb8d8b6598fdb93bbd7951d196252154b",
       "dependencies": {
@@ -1368,12 +1646,151 @@
         "migration/reports/evidence/rewrite/R1/syrk3m_original/20261110T082838.378868Z-R1-cpu-validation-57ab184b64",
         "migration/reports/evidence/rewrite/R1/syrk3m_repeat/20261110T082234.729226Z-R1-cpu-validation-de9972220e",
         "migration/reports/evidence/rewrite/R1/syrk3m_repeat/20261110T082841.417361Z-R1-cpu-validation-c0bf143529"
-      ]
+      ],
+      "rocm_evidence": "migration/reports/evidence/rewrite/R1/cuBLAS_Extensions_Csyrk3mEx__cublas_Csyrk3mEx_example.cu/20261110T082628.817603Z-R1-rocm-a641cbe36b",
+      "cuda_evidence": "migration/reports/evidence/rewrite/R1/cuBLAS_Extensions_Csyrk3mEx__cublas_Csyrk3mEx_example.cu/20261110T081730.452451Z-R1-cuda-eecde4bc63",
+      "cpu_report": "migration/reports/rewrite-first-rocm-validation.json",
+      "qualification_id": "20261110T083834.467939Z-R1-composite-qualification-8783783186",
+      "evidence": "migration/reports/evidence/rewrite/R1/cuBLAS_Extensions_Csyrk3mEx__cublas_Csyrk3mEx_example.cu/20261110T083834.467939Z-R1-composite-qualification-8783783186",
+      "environment": {
+        "hostname": "e2dccae76726",
+        "platform": "Linux-7.0.0-42-generic-x86_64-with-glibc2.39",
+        "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "rocm_release": "10.1.0",
+        "visible_devices": "2",
+        "devices": [
+          {
+            "logical_id": 0,
+            "pci_bdf": "0000:03:00.0",
+            "physical_id": 0,
+            "uuid": "32396463623033636131356166623633"
+          }
+        ],
+        "versions": {
+          "hipRuntimeGetVersion": {
+            "status": 0,
+            "value": 71626385
+          },
+          "hipDriverGetVersion": {
+            "status": 0,
+            "value": 71626385
+          }
+        },
+        "packages": {
+          "rocm-sdk-core": "10.1.0",
+          "rocm-sdk-device-gfx1100": "10.1.0",
+          "rocm-sdk-device-gfx942": "10.1.0",
+          "rocm-sdk-device-gfx1010": "10.1.0",
+          "rocm-sdk-device-gfx1011": "10.1.0",
+          "rocm-sdk-device-gfx1101": "10.1.0",
+          "rocm-bootstrap": "0.3.0",
+          "triton": "3.8.0+git669b31ac.rocm10.1.0",
+          "rocm-sdk-device-gfx1035": "10.1.0",
+          "rocm-sdk-device-gfx1012": "10.1.0",
+          "torch": "2.14.0+rocm10.1.0",
+          "rocm-sdk-device-gfx1152": "10.1.0",
+          "rocm-sdk-device-gfx908": "10.1.0",
+          "rocm-sdk-libraries": "10.1.0",
+          "rocm-sdk-device-gfx1031": "10.1.0",
+          "rocm-sdk-device-gfx1151": "10.1.0",
+          "rocm-sdk-device-gfx1030": "10.1.0",
+          "rocm-sdk-device-gfx1103": "10.1.0",
+          "rocm-sdk-device-gfx1250": "10.1.0",
+          "rocm-sdk-device-gfx1032": "10.1.0",
+          "rocm-sdk-device-gfx1102": "10.1.0",
+          "rocm-sdk-device-gfx1201": "10.1.0",
+          "rocm-sdk-device-gfx90a": "10.1.0",
+          "torchvision": "0.29.0a0+rocm10.1.0",
+          "rocm-sdk-device-gfx1036": "10.1.0",
+          "rocm-sdk-device-gfx1153": "10.1.0",
+          "rocm": "10.1.0",
+          "rocm-sdk-device-gfx1150": "10.1.0",
+          "rocm-sdk-device-gfx1200": "10.1.0",
+          "rocm-sdk-device-gfx1034": "10.1.0",
+          "rocm-sdk-device-gfx1033": "10.1.0",
+          "rocm-sdk-device-gfx950": "10.1.0"
+        },
+        "loaded_libraries": [
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamd_comgr.so.3",
+            "sha256": "6bf2f6fe6b243c5ac3621cd5745887933d3a41edd944a447c88c21ec77da5d5b"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamdhip64.so.7",
+            "sha256": "6d1dbee8cb3ad924e4c1bca7734e22f2c93026eb3bc871a7f64a916778d55e36"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-amd-aqlprofile64.so.1",
+            "sha256": "6d4be9a3d53457b466f3e1fb1b07b897cd78be9b934a5326444b7b2070dabd61"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-runtime64.so.1",
+            "sha256": "12d49db16881b9505629192231d5b3971e9030b26a326fc2c003e92da7de0c44"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocm_kpack.so.0",
+            "sha256": "e2af394dea58ad53d6074c7aa9d56de5dc027ca186f6bbc27d6f32d7b8f12ac3"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocprofiler-register.so.0",
+            "sha256": "a67764cf46d1d579eb27311576ba9c0b4dbfa5052ddd64a062131f716faa11b6"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libLLVM.so.24.0git",
+            "sha256": "3e7b50e1f252792eba7380b8503c05c899bf8ae9deeb70faf3f9be5f995c8e0a"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libclang-cpp.so.24.0git",
+            "sha256": "18ef4cb8bd32366a68599fb6d723ed38814707a2ada1ff34b722dafc7856663b"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_bz2.so",
+            "sha256": "37a39b12a7e6e9f480d10e5e139b9aedbe5824e63b6b9e12a16837baee608602"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm.so.2",
+            "sha256": "b715ae24e1d62e407ffceca56b546e8a35abe37ac50878cbb16fa8b93d9c9fd5"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm_amdgpu.so.1",
+            "sha256": "b25742cda500eaa61e39b2b32492bb482235ad3e3df8a988d8f4130054d94cad"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_elf.so.1",
+            "sha256": "692dd9fe3575a45df78b319ad0e2a58ee36814958771dd810d5d91f9616c6d8f"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_liblzma.so.5",
+            "sha256": "d17f947bfe3947db5aefee897f6d32dfe98c73bf80b477764ba7f4107594a671"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_numa.so.1",
+            "sha256": "26fffd0f85369950b834cfb8f56fa9e1ea4804be8bbc40db98b788c554802bc3"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_z.so.1",
+            "sha256": "e1d7568f4a0b77eeab26f30cc9d2794dfe7ffd14e34b4ae55a9f80bc4f94ba7a"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_zstd.so.1",
+            "sha256": "fc3edd0b74fa071079b0095abe7b3f41418ca39be138f4ec0c57d0640a0b2d8b"
+          }
+        ]
+      },
+      "devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0,
+          "uuid": "32396463623033636131356166623633"
+        }
+      ],
+      "scope": "MOAT rewrite original contract plus registered variants; composite qualification, not one process exit"
     },
     {
       "sample_id": "cuBLASLt/LtPlanarComplex::main.cpp",
       "kind": "planar",
-      "status": "FAILED",
+      "status": "PASSED",
       "checks": [
         {
           "check": "frozen-nonempty-complete-case-contract",
@@ -1381,7 +1798,7 @@
         },
         {
           "check": "independent-review",
-          "passed": false
+          "passed": true
         },
         {
           "check": "current-compiled-dependencies",
@@ -1840,7 +2257,7 @@
           "passed": true
         }
       ],
-      "source_commit": "40084aba13de7253faf753c1469e22d450b079c3",
+      "source_commit": "ad2fc72457f384cc420a0e29866bb5fcacbc172c",
       "implementation": "rocm/ported/cuBLASLt/LtPlanarComplex/main.cpp",
       "implementation_sha256": "4f932d460ff16969142b5c609ae9ef8b87b53f7f35321c936e8c8a67219e26f0",
       "dependencies": {
@@ -1891,12 +2308,151 @@
         "migration/reports/evidence/rewrite/R1/planar_original/20261110T082842.953465Z-R1-cpu-validation-0e837cbd8b",
         "migration/reports/evidence/rewrite/R1/planar_repeat/20261110T082239.218100Z-R1-cpu-validation-ae54d81415",
         "migration/reports/evidence/rewrite/R1/planar_repeat/20261110T082846.005891Z-R1-cpu-validation-047370176e"
-      ]
+      ],
+      "rocm_evidence": "migration/reports/evidence/rewrite/R1/cuBLASLt_LtPlanarComplex__main.cpp/20261110T082641.421111Z-R1-rocm-441dde6f13",
+      "cuda_evidence": "migration/reports/evidence/rewrite/R1/cuBLASLt_LtPlanarComplex__main.cpp/20261110T081749.166675Z-R1-cuda-efbeef612b",
+      "cpu_report": "migration/reports/rewrite-first-rocm-validation.json",
+      "qualification_id": "20261110T083835.270533Z-R1-composite-qualification-e888d44f38",
+      "evidence": "migration/reports/evidence/rewrite/R1/cuBLASLt_LtPlanarComplex__main.cpp/20261110T083835.270533Z-R1-composite-qualification-e888d44f38",
+      "environment": {
+        "hostname": "e2dccae76726",
+        "platform": "Linux-7.0.0-42-generic-x86_64-with-glibc2.39",
+        "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "rocm_release": "10.1.0",
+        "visible_devices": "2",
+        "devices": [
+          {
+            "logical_id": 0,
+            "pci_bdf": "0000:03:00.0",
+            "physical_id": 0,
+            "uuid": "32396463623033636131356166623633"
+          }
+        ],
+        "versions": {
+          "hipRuntimeGetVersion": {
+            "status": 0,
+            "value": 71626385
+          },
+          "hipDriverGetVersion": {
+            "status": 0,
+            "value": 71626385
+          }
+        },
+        "packages": {
+          "rocm-sdk-core": "10.1.0",
+          "rocm-sdk-device-gfx1100": "10.1.0",
+          "rocm-sdk-device-gfx942": "10.1.0",
+          "rocm-sdk-device-gfx1010": "10.1.0",
+          "rocm-sdk-device-gfx1011": "10.1.0",
+          "rocm-sdk-device-gfx1101": "10.1.0",
+          "rocm-bootstrap": "0.3.0",
+          "triton": "3.8.0+git669b31ac.rocm10.1.0",
+          "rocm-sdk-device-gfx1035": "10.1.0",
+          "rocm-sdk-device-gfx1012": "10.1.0",
+          "torch": "2.14.0+rocm10.1.0",
+          "rocm-sdk-device-gfx1152": "10.1.0",
+          "rocm-sdk-device-gfx908": "10.1.0",
+          "rocm-sdk-libraries": "10.1.0",
+          "rocm-sdk-device-gfx1031": "10.1.0",
+          "rocm-sdk-device-gfx1151": "10.1.0",
+          "rocm-sdk-device-gfx1030": "10.1.0",
+          "rocm-sdk-device-gfx1103": "10.1.0",
+          "rocm-sdk-device-gfx1250": "10.1.0",
+          "rocm-sdk-device-gfx1032": "10.1.0",
+          "rocm-sdk-device-gfx1102": "10.1.0",
+          "rocm-sdk-device-gfx1201": "10.1.0",
+          "rocm-sdk-device-gfx90a": "10.1.0",
+          "torchvision": "0.29.0a0+rocm10.1.0",
+          "rocm-sdk-device-gfx1036": "10.1.0",
+          "rocm-sdk-device-gfx1153": "10.1.0",
+          "rocm": "10.1.0",
+          "rocm-sdk-device-gfx1150": "10.1.0",
+          "rocm-sdk-device-gfx1200": "10.1.0",
+          "rocm-sdk-device-gfx1034": "10.1.0",
+          "rocm-sdk-device-gfx1033": "10.1.0",
+          "rocm-sdk-device-gfx950": "10.1.0"
+        },
+        "loaded_libraries": [
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamd_comgr.so.3",
+            "sha256": "6bf2f6fe6b243c5ac3621cd5745887933d3a41edd944a447c88c21ec77da5d5b"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamdhip64.so.7",
+            "sha256": "6d1dbee8cb3ad924e4c1bca7734e22f2c93026eb3bc871a7f64a916778d55e36"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-amd-aqlprofile64.so.1",
+            "sha256": "6d4be9a3d53457b466f3e1fb1b07b897cd78be9b934a5326444b7b2070dabd61"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-runtime64.so.1",
+            "sha256": "12d49db16881b9505629192231d5b3971e9030b26a326fc2c003e92da7de0c44"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocm_kpack.so.0",
+            "sha256": "e2af394dea58ad53d6074c7aa9d56de5dc027ca186f6bbc27d6f32d7b8f12ac3"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocprofiler-register.so.0",
+            "sha256": "a67764cf46d1d579eb27311576ba9c0b4dbfa5052ddd64a062131f716faa11b6"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libLLVM.so.24.0git",
+            "sha256": "3e7b50e1f252792eba7380b8503c05c899bf8ae9deeb70faf3f9be5f995c8e0a"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libclang-cpp.so.24.0git",
+            "sha256": "18ef4cb8bd32366a68599fb6d723ed38814707a2ada1ff34b722dafc7856663b"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_bz2.so",
+            "sha256": "37a39b12a7e6e9f480d10e5e139b9aedbe5824e63b6b9e12a16837baee608602"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm.so.2",
+            "sha256": "b715ae24e1d62e407ffceca56b546e8a35abe37ac50878cbb16fa8b93d9c9fd5"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm_amdgpu.so.1",
+            "sha256": "b25742cda500eaa61e39b2b32492bb482235ad3e3df8a988d8f4130054d94cad"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_elf.so.1",
+            "sha256": "692dd9fe3575a45df78b319ad0e2a58ee36814958771dd810d5d91f9616c6d8f"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_liblzma.so.5",
+            "sha256": "d17f947bfe3947db5aefee897f6d32dfe98c73bf80b477764ba7f4107594a671"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_numa.so.1",
+            "sha256": "26fffd0f85369950b834cfb8f56fa9e1ea4804be8bbc40db98b788c554802bc3"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_z.so.1",
+            "sha256": "e1d7568f4a0b77eeab26f30cc9d2794dfe7ffd14e34b4ae55a9f80bc4f94ba7a"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_zstd.so.1",
+            "sha256": "fc3edd0b74fa071079b0095abe7b3f41418ca39be138f4ec0c57d0640a0b2d8b"
+          }
+        ]
+      },
+      "devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0,
+          "uuid": "32396463623033636131356166623633"
+        }
+      ],
+      "scope": "MOAT rewrite original contract plus registered variants; composite qualification, not one process exit"
     },
     {
       "sample_id": "cuBLASLt/LtIgemmTensor::main.cpp",
       "kind": "igemm",
-      "status": "FAILED",
+      "status": "PASSED",
       "checks": [
         {
           "check": "frozen-nonempty-complete-case-contract",
@@ -1904,7 +2460,7 @@
         },
         {
           "check": "independent-review",
-          "passed": false
+          "passed": true
         },
         {
           "check": "current-compiled-dependencies",
@@ -2295,7 +2851,7 @@
           "passed": true
         }
       ],
-      "source_commit": "40084aba13de7253faf753c1469e22d450b079c3",
+      "source_commit": "ad2fc72457f384cc420a0e29866bb5fcacbc172c",
       "implementation": "rocm/ported/cuBLASLt/LtIgemmTensor/main.cpp",
       "implementation_sha256": "6efbf99cf5490e7cb11596ca78e175a45600adcbee132144952b95d8bcd56ada",
       "dependencies": {
@@ -2339,12 +2895,151 @@
         "migration/reports/evidence/rewrite/R1/igemm_original/20261110T082847.548487Z-R1-cpu-validation-bf9eb8cb28",
         "migration/reports/evidence/rewrite/R1/igemm_repeat/20261110T082243.739360Z-R1-cpu-validation-65351e110e",
         "migration/reports/evidence/rewrite/R1/igemm_repeat/20261110T082850.602109Z-R1-cpu-validation-c08f6cf14d"
-      ]
+      ],
+      "rocm_evidence": "migration/reports/evidence/rewrite/R1/cuBLASLt_LtIgemmTensor__main.cpp/20261110T082656.055658Z-R1-rocm-2e1c45a15c",
+      "cuda_evidence": "migration/reports/evidence/rewrite/R1/cuBLASLt_LtIgemmTensor__main.cpp/20261110T081810.733580Z-R1-cuda-e9ef4392af",
+      "cpu_report": "migration/reports/rewrite-first-rocm-validation.json",
+      "qualification_id": "20261110T083836.070469Z-R1-composite-qualification-2a63fbaaca",
+      "evidence": "migration/reports/evidence/rewrite/R1/cuBLASLt_LtIgemmTensor__main.cpp/20261110T083836.070469Z-R1-composite-qualification-2a63fbaaca",
+      "environment": {
+        "hostname": "e2dccae76726",
+        "platform": "Linux-7.0.0-42-generic-x86_64-with-glibc2.39",
+        "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "rocm_release": "10.1.0",
+        "visible_devices": "2",
+        "devices": [
+          {
+            "logical_id": 0,
+            "pci_bdf": "0000:03:00.0",
+            "physical_id": 0,
+            "uuid": "32396463623033636131356166623633"
+          }
+        ],
+        "versions": {
+          "hipRuntimeGetVersion": {
+            "status": 0,
+            "value": 71626385
+          },
+          "hipDriverGetVersion": {
+            "status": 0,
+            "value": 71626385
+          }
+        },
+        "packages": {
+          "rocm-sdk-core": "10.1.0",
+          "rocm-sdk-device-gfx1100": "10.1.0",
+          "rocm-sdk-device-gfx942": "10.1.0",
+          "rocm-sdk-device-gfx1010": "10.1.0",
+          "rocm-sdk-device-gfx1011": "10.1.0",
+          "rocm-sdk-device-gfx1101": "10.1.0",
+          "rocm-bootstrap": "0.3.0",
+          "triton": "3.8.0+git669b31ac.rocm10.1.0",
+          "rocm-sdk-device-gfx1035": "10.1.0",
+          "rocm-sdk-device-gfx1012": "10.1.0",
+          "torch": "2.14.0+rocm10.1.0",
+          "rocm-sdk-device-gfx1152": "10.1.0",
+          "rocm-sdk-device-gfx908": "10.1.0",
+          "rocm-sdk-libraries": "10.1.0",
+          "rocm-sdk-device-gfx1031": "10.1.0",
+          "rocm-sdk-device-gfx1151": "10.1.0",
+          "rocm-sdk-device-gfx1030": "10.1.0",
+          "rocm-sdk-device-gfx1103": "10.1.0",
+          "rocm-sdk-device-gfx1250": "10.1.0",
+          "rocm-sdk-device-gfx1032": "10.1.0",
+          "rocm-sdk-device-gfx1102": "10.1.0",
+          "rocm-sdk-device-gfx1201": "10.1.0",
+          "rocm-sdk-device-gfx90a": "10.1.0",
+          "torchvision": "0.29.0a0+rocm10.1.0",
+          "rocm-sdk-device-gfx1036": "10.1.0",
+          "rocm-sdk-device-gfx1153": "10.1.0",
+          "rocm": "10.1.0",
+          "rocm-sdk-device-gfx1150": "10.1.0",
+          "rocm-sdk-device-gfx1200": "10.1.0",
+          "rocm-sdk-device-gfx1034": "10.1.0",
+          "rocm-sdk-device-gfx1033": "10.1.0",
+          "rocm-sdk-device-gfx950": "10.1.0"
+        },
+        "loaded_libraries": [
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamd_comgr.so.3",
+            "sha256": "6bf2f6fe6b243c5ac3621cd5745887933d3a41edd944a447c88c21ec77da5d5b"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamdhip64.so.7",
+            "sha256": "6d1dbee8cb3ad924e4c1bca7734e22f2c93026eb3bc871a7f64a916778d55e36"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-amd-aqlprofile64.so.1",
+            "sha256": "6d4be9a3d53457b466f3e1fb1b07b897cd78be9b934a5326444b7b2070dabd61"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-runtime64.so.1",
+            "sha256": "12d49db16881b9505629192231d5b3971e9030b26a326fc2c003e92da7de0c44"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocm_kpack.so.0",
+            "sha256": "e2af394dea58ad53d6074c7aa9d56de5dc027ca186f6bbc27d6f32d7b8f12ac3"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocprofiler-register.so.0",
+            "sha256": "a67764cf46d1d579eb27311576ba9c0b4dbfa5052ddd64a062131f716faa11b6"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libLLVM.so.24.0git",
+            "sha256": "3e7b50e1f252792eba7380b8503c05c899bf8ae9deeb70faf3f9be5f995c8e0a"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libclang-cpp.so.24.0git",
+            "sha256": "18ef4cb8bd32366a68599fb6d723ed38814707a2ada1ff34b722dafc7856663b"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_bz2.so",
+            "sha256": "37a39b12a7e6e9f480d10e5e139b9aedbe5824e63b6b9e12a16837baee608602"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm.so.2",
+            "sha256": "b715ae24e1d62e407ffceca56b546e8a35abe37ac50878cbb16fa8b93d9c9fd5"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm_amdgpu.so.1",
+            "sha256": "b25742cda500eaa61e39b2b32492bb482235ad3e3df8a988d8f4130054d94cad"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_elf.so.1",
+            "sha256": "692dd9fe3575a45df78b319ad0e2a58ee36814958771dd810d5d91f9616c6d8f"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_liblzma.so.5",
+            "sha256": "d17f947bfe3947db5aefee897f6d32dfe98c73bf80b477764ba7f4107594a671"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_numa.so.1",
+            "sha256": "26fffd0f85369950b834cfb8f56fa9e1ea4804be8bbc40db98b788c554802bc3"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_z.so.1",
+            "sha256": "e1d7568f4a0b77eeab26f30cc9d2794dfe7ffd14e34b4ae55a9f80bc4f94ba7a"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_zstd.so.1",
+            "sha256": "fc3edd0b74fa071079b0095abe7b3f41418ca39be138f4ec0c57d0640a0b2d8b"
+          }
+        ]
+      },
+      "devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0,
+          "uuid": "32396463623033636131356166623633"
+        }
+      ],
+      "scope": "MOAT rewrite original contract plus registered variants; composite qualification, not one process exit"
     },
     {
       "sample_id": "MathDx/cuSolverDx/01_Linear_Solve::getrf_partial_pivot_block.cu",
       "kind": "lu",
-      "status": "FAILED",
+      "status": "PASSED",
       "checks": [
         {
           "check": "frozen-nonempty-complete-case-contract",
@@ -2352,7 +3047,7 @@
         },
         {
           "check": "independent-review",
-          "passed": false
+          "passed": true
         },
         {
           "check": "current-compiled-dependencies",
@@ -2863,7 +3558,7 @@
           "passed": true
         }
       ],
-      "source_commit": "40084aba13de7253faf753c1469e22d450b079c3",
+      "source_commit": "ad2fc72457f384cc420a0e29866bb5fcacbc172c",
       "implementation": "rocm/ported/MathDx/cuSolverDx/01_Linear_Solve/getrf_partial_pivot_block.cu",
       "implementation_sha256": "58b1fee4007dac10183d23bc6e1b9249e3ea1ba885097a3b8176c28189ac6348",
       "dependencies": {
@@ -2924,12 +3619,151 @@
         "migration/reports/evidence/rewrite/R2/lu_zero-m/20261110T082830.934902Z-R2-rocm-invalid-descriptor-a498a95e0e",
         "migration/reports/evidence/rewrite/R2/lu_zero-repeat/20261110T082835.981696Z-R2-rocm-invalid-descriptor-2c4638821f",
         "migration/reports/evidence/rewrite/R2/lu_zero-threads/20261110T082837.026181Z-R2-rocm-invalid-descriptor-107937555a"
-      ]
+      ],
+      "rocm_evidence": "migration/reports/evidence/rewrite/R2/MathDx_cuSolverDx_01_Linear_Solve__getrf_partial_pivot_block.cu/20261110T083245.632852Z-R2-rocm-c668ec69eb",
+      "cuda_evidence": "migration/reports/evidence/rewrite/R2/MathDx_cuSolverDx_01_Linear_Solve__getrf_partial_pivot_block.cu/20261110T083248.978987Z-R2-cuda-4dbd230768",
+      "cpu_report": "migration/reports/rewrite-first-rocm-validation.json",
+      "qualification_id": "20261110T083836.868780Z-R2-composite-qualification-5458043c46",
+      "evidence": "migration/reports/evidence/rewrite/R2/MathDx_cuSolverDx_01_Linear_Solve__getrf_partial_pivot_block.cu/20261110T083836.868780Z-R2-composite-qualification-5458043c46",
+      "environment": {
+        "hostname": "c750faa0ab82",
+        "platform": "Linux-7.0.0-42-generic-x86_64-with-glibc2.39",
+        "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "rocm_release": "10.1.0",
+        "visible_devices": "2",
+        "devices": [
+          {
+            "logical_id": 0,
+            "pci_bdf": "0000:03:00.0",
+            "physical_id": 0,
+            "uuid": "32396463623033636131356166623633"
+          }
+        ],
+        "versions": {
+          "hipRuntimeGetVersion": {
+            "status": 0,
+            "value": 71626385
+          },
+          "hipDriverGetVersion": {
+            "status": 0,
+            "value": 71626385
+          }
+        },
+        "packages": {
+          "rocm-sdk-core": "10.1.0",
+          "rocm-sdk-device-gfx1100": "10.1.0",
+          "rocm-sdk-device-gfx942": "10.1.0",
+          "rocm-sdk-device-gfx1010": "10.1.0",
+          "rocm-sdk-device-gfx1011": "10.1.0",
+          "rocm-sdk-device-gfx1101": "10.1.0",
+          "rocm-bootstrap": "0.3.0",
+          "triton": "3.8.0+git669b31ac.rocm10.1.0",
+          "rocm-sdk-device-gfx1035": "10.1.0",
+          "rocm-sdk-device-gfx1012": "10.1.0",
+          "torch": "2.14.0+rocm10.1.0",
+          "rocm-sdk-device-gfx1152": "10.1.0",
+          "rocm-sdk-device-gfx908": "10.1.0",
+          "rocm-sdk-libraries": "10.1.0",
+          "rocm-sdk-device-gfx1031": "10.1.0",
+          "rocm-sdk-device-gfx1151": "10.1.0",
+          "rocm-sdk-device-gfx1030": "10.1.0",
+          "rocm-sdk-device-gfx1103": "10.1.0",
+          "rocm-sdk-device-gfx1250": "10.1.0",
+          "rocm-sdk-device-gfx1032": "10.1.0",
+          "rocm-sdk-device-gfx1102": "10.1.0",
+          "rocm-sdk-device-gfx1201": "10.1.0",
+          "rocm-sdk-device-gfx90a": "10.1.0",
+          "torchvision": "0.29.0a0+rocm10.1.0",
+          "rocm-sdk-device-gfx1036": "10.1.0",
+          "rocm-sdk-device-gfx1153": "10.1.0",
+          "rocm": "10.1.0",
+          "rocm-sdk-device-gfx1150": "10.1.0",
+          "rocm-sdk-device-gfx1200": "10.1.0",
+          "rocm-sdk-device-gfx1034": "10.1.0",
+          "rocm-sdk-device-gfx1033": "10.1.0",
+          "rocm-sdk-device-gfx950": "10.1.0"
+        },
+        "loaded_libraries": [
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamd_comgr.so.3",
+            "sha256": "6bf2f6fe6b243c5ac3621cd5745887933d3a41edd944a447c88c21ec77da5d5b"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamdhip64.so.7",
+            "sha256": "6d1dbee8cb3ad924e4c1bca7734e22f2c93026eb3bc871a7f64a916778d55e36"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-amd-aqlprofile64.so.1",
+            "sha256": "6d4be9a3d53457b466f3e1fb1b07b897cd78be9b934a5326444b7b2070dabd61"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-runtime64.so.1",
+            "sha256": "12d49db16881b9505629192231d5b3971e9030b26a326fc2c003e92da7de0c44"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocm_kpack.so.0",
+            "sha256": "e2af394dea58ad53d6074c7aa9d56de5dc027ca186f6bbc27d6f32d7b8f12ac3"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocprofiler-register.so.0",
+            "sha256": "a67764cf46d1d579eb27311576ba9c0b4dbfa5052ddd64a062131f716faa11b6"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libLLVM.so.24.0git",
+            "sha256": "3e7b50e1f252792eba7380b8503c05c899bf8ae9deeb70faf3f9be5f995c8e0a"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libclang-cpp.so.24.0git",
+            "sha256": "18ef4cb8bd32366a68599fb6d723ed38814707a2ada1ff34b722dafc7856663b"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_bz2.so",
+            "sha256": "37a39b12a7e6e9f480d10e5e139b9aedbe5824e63b6b9e12a16837baee608602"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm.so.2",
+            "sha256": "b715ae24e1d62e407ffceca56b546e8a35abe37ac50878cbb16fa8b93d9c9fd5"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm_amdgpu.so.1",
+            "sha256": "b25742cda500eaa61e39b2b32492bb482235ad3e3df8a988d8f4130054d94cad"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_elf.so.1",
+            "sha256": "692dd9fe3575a45df78b319ad0e2a58ee36814958771dd810d5d91f9616c6d8f"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_liblzma.so.5",
+            "sha256": "d17f947bfe3947db5aefee897f6d32dfe98c73bf80b477764ba7f4107594a671"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_numa.so.1",
+            "sha256": "26fffd0f85369950b834cfb8f56fa9e1ea4804be8bbc40db98b788c554802bc3"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_z.so.1",
+            "sha256": "e1d7568f4a0b77eeab26f30cc9d2794dfe7ffd14e34b4ae55a9f80bc4f94ba7a"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_zstd.so.1",
+            "sha256": "fc3edd0b74fa071079b0095abe7b3f41418ca39be138f4ec0c57d0640a0b2d8b"
+          }
+        ]
+      },
+      "devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0,
+          "uuid": "32396463623033636131356166623633"
+        }
+      ],
+      "scope": "MOAT rewrite original contract plus registered variants; composite qualification, not one process exit"
     },
     {
       "sample_id": "MathDx/cuSolverDx/00_Introduction::posv_batched_block.cu",
       "kind": "posv",
-      "status": "FAILED",
+      "status": "PASSED",
       "checks": [
         {
           "check": "frozen-nonempty-complete-case-contract",
@@ -2937,7 +3771,7 @@
         },
         {
           "check": "independent-review",
-          "passed": false
+          "passed": true
         },
         {
           "check": "current-compiled-dependencies",
@@ -3468,7 +4302,7 @@
           "passed": true
         }
       ],
-      "source_commit": "40084aba13de7253faf753c1469e22d450b079c3",
+      "source_commit": "ad2fc72457f384cc420a0e29866bb5fcacbc172c",
       "implementation": "rocm/ported/MathDx/cuSolverDx/00_Introduction/posv_batched_block.cu",
       "implementation_sha256": "adbc1028183661956e21843f578afc1f1e9be299dad5d97c11edcd7accc1f4fe",
       "dependencies": {
@@ -3534,12 +4368,151 @@
         "migration/reports/evidence/rewrite/R2/posv_zero-m/20261110T082842.042761Z-R2-rocm-invalid-descriptor-6ef19cd235",
         "migration/reports/evidence/rewrite/R2/posv_zero-repeat/20261110T082847.056595Z-R2-rocm-invalid-descriptor-f5b5a01365",
         "migration/reports/evidence/rewrite/R2/posv_zero-threads/20261110T082848.121441Z-R2-rocm-invalid-descriptor-04da693c8a"
-      ]
+      ],
+      "rocm_evidence": "migration/reports/evidence/rewrite/R2/MathDx_cuSolverDx_00_Introduction__posv_batched_block.cu/20261110T082713.740396Z-R2-rocm-982ef81f0c",
+      "cuda_evidence": "migration/reports/evidence/rewrite/R2/MathDx_cuSolverDx_00_Introduction__posv_batched_block.cu/20261110T082101.151143Z-R2-cuda-56a218aa3e",
+      "cpu_report": "migration/reports/rewrite-first-rocm-validation.json",
+      "qualification_id": "20261110T083837.704115Z-R2-composite-qualification-8fbb0bb0a2",
+      "evidence": "migration/reports/evidence/rewrite/R2/MathDx_cuSolverDx_00_Introduction__posv_batched_block.cu/20261110T083837.704115Z-R2-composite-qualification-8fbb0bb0a2",
+      "environment": {
+        "hostname": "e2dccae76726",
+        "platform": "Linux-7.0.0-42-generic-x86_64-with-glibc2.39",
+        "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "rocm_release": "10.1.0",
+        "visible_devices": "2",
+        "devices": [
+          {
+            "logical_id": 0,
+            "pci_bdf": "0000:03:00.0",
+            "physical_id": 0,
+            "uuid": "32396463623033636131356166623633"
+          }
+        ],
+        "versions": {
+          "hipRuntimeGetVersion": {
+            "status": 0,
+            "value": 71626385
+          },
+          "hipDriverGetVersion": {
+            "status": 0,
+            "value": 71626385
+          }
+        },
+        "packages": {
+          "rocm-sdk-core": "10.1.0",
+          "rocm-sdk-device-gfx1100": "10.1.0",
+          "rocm-sdk-device-gfx942": "10.1.0",
+          "rocm-sdk-device-gfx1010": "10.1.0",
+          "rocm-sdk-device-gfx1011": "10.1.0",
+          "rocm-sdk-device-gfx1101": "10.1.0",
+          "rocm-bootstrap": "0.3.0",
+          "triton": "3.8.0+git669b31ac.rocm10.1.0",
+          "rocm-sdk-device-gfx1035": "10.1.0",
+          "rocm-sdk-device-gfx1012": "10.1.0",
+          "torch": "2.14.0+rocm10.1.0",
+          "rocm-sdk-device-gfx1152": "10.1.0",
+          "rocm-sdk-device-gfx908": "10.1.0",
+          "rocm-sdk-libraries": "10.1.0",
+          "rocm-sdk-device-gfx1031": "10.1.0",
+          "rocm-sdk-device-gfx1151": "10.1.0",
+          "rocm-sdk-device-gfx1030": "10.1.0",
+          "rocm-sdk-device-gfx1103": "10.1.0",
+          "rocm-sdk-device-gfx1250": "10.1.0",
+          "rocm-sdk-device-gfx1032": "10.1.0",
+          "rocm-sdk-device-gfx1102": "10.1.0",
+          "rocm-sdk-device-gfx1201": "10.1.0",
+          "rocm-sdk-device-gfx90a": "10.1.0",
+          "torchvision": "0.29.0a0+rocm10.1.0",
+          "rocm-sdk-device-gfx1036": "10.1.0",
+          "rocm-sdk-device-gfx1153": "10.1.0",
+          "rocm": "10.1.0",
+          "rocm-sdk-device-gfx1150": "10.1.0",
+          "rocm-sdk-device-gfx1200": "10.1.0",
+          "rocm-sdk-device-gfx1034": "10.1.0",
+          "rocm-sdk-device-gfx1033": "10.1.0",
+          "rocm-sdk-device-gfx950": "10.1.0"
+        },
+        "loaded_libraries": [
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamd_comgr.so.3",
+            "sha256": "6bf2f6fe6b243c5ac3621cd5745887933d3a41edd944a447c88c21ec77da5d5b"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamdhip64.so.7",
+            "sha256": "6d1dbee8cb3ad924e4c1bca7734e22f2c93026eb3bc871a7f64a916778d55e36"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-amd-aqlprofile64.so.1",
+            "sha256": "6d4be9a3d53457b466f3e1fb1b07b897cd78be9b934a5326444b7b2070dabd61"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-runtime64.so.1",
+            "sha256": "12d49db16881b9505629192231d5b3971e9030b26a326fc2c003e92da7de0c44"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocm_kpack.so.0",
+            "sha256": "e2af394dea58ad53d6074c7aa9d56de5dc027ca186f6bbc27d6f32d7b8f12ac3"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocprofiler-register.so.0",
+            "sha256": "a67764cf46d1d579eb27311576ba9c0b4dbfa5052ddd64a062131f716faa11b6"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libLLVM.so.24.0git",
+            "sha256": "3e7b50e1f252792eba7380b8503c05c899bf8ae9deeb70faf3f9be5f995c8e0a"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libclang-cpp.so.24.0git",
+            "sha256": "18ef4cb8bd32366a68599fb6d723ed38814707a2ada1ff34b722dafc7856663b"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_bz2.so",
+            "sha256": "37a39b12a7e6e9f480d10e5e139b9aedbe5824e63b6b9e12a16837baee608602"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm.so.2",
+            "sha256": "b715ae24e1d62e407ffceca56b546e8a35abe37ac50878cbb16fa8b93d9c9fd5"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm_amdgpu.so.1",
+            "sha256": "b25742cda500eaa61e39b2b32492bb482235ad3e3df8a988d8f4130054d94cad"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_elf.so.1",
+            "sha256": "692dd9fe3575a45df78b319ad0e2a58ee36814958771dd810d5d91f9616c6d8f"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_liblzma.so.5",
+            "sha256": "d17f947bfe3947db5aefee897f6d32dfe98c73bf80b477764ba7f4107594a671"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_numa.so.1",
+            "sha256": "26fffd0f85369950b834cfb8f56fa9e1ea4804be8bbc40db98b788c554802bc3"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_z.so.1",
+            "sha256": "e1d7568f4a0b77eeab26f30cc9d2794dfe7ffd14e34b4ae55a9f80bc4f94ba7a"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_zstd.so.1",
+            "sha256": "fc3edd0b74fa071079b0095abe7b3f41418ca39be138f4ec0c57d0640a0b2d8b"
+          }
+        ]
+      },
+      "devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0,
+          "uuid": "32396463623033636131356166623633"
+        }
+      ],
+      "scope": "MOAT rewrite original contract plus registered variants; composite qualification, not one process exit"
     },
     {
       "sample_id": "MathDx/cuSolverDx/07_BLAS::trsm_batched_block.cu",
       "kind": "trsm",
-      "status": "FAILED",
+      "status": "PASSED",
       "checks": [
         {
           "check": "frozen-nonempty-complete-case-contract",
@@ -3547,7 +4520,7 @@
         },
         {
           "check": "independent-review",
-          "passed": false
+          "passed": true
         },
         {
           "check": "current-compiled-dependencies",
@@ -3998,7 +4971,7 @@
           "passed": true
         }
       ],
-      "source_commit": "40084aba13de7253faf753c1469e22d450b079c3",
+      "source_commit": "ad2fc72457f384cc420a0e29866bb5fcacbc172c",
       "implementation": "rocm/ported/MathDx/cuSolverDx/07_BLAS/trsm_batched_block.cu",
       "implementation_sha256": "7fb5265ee1e3bab4c70925394d3eb7751dfd2c45488ab39c8edafc4b408401e6",
       "dependencies": {
@@ -4054,7 +5027,146 @@
         "migration/reports/evidence/rewrite/R2/trsm_zero-m/20261110T082854.119533Z-R2-rocm-invalid-descriptor-adbb1284a8",
         "migration/reports/evidence/rewrite/R2/trsm_zero-repeat/20261110T082859.102972Z-R2-rocm-invalid-descriptor-eee9904936",
         "migration/reports/evidence/rewrite/R2/trsm_zero-threads/20261110T082900.121931Z-R2-rocm-invalid-descriptor-8044a93d28"
-      ]
+      ],
+      "rocm_evidence": "migration/reports/evidence/rewrite/R2/MathDx_cuSolverDx_07_BLAS__trsm_batched_block.cu/20261110T082920.082970Z-R2-rocm-29a1c2d8fa",
+      "cuda_evidence": "migration/reports/evidence/rewrite/R2/MathDx_cuSolverDx_07_BLAS__trsm_batched_block.cu/20261110T082912.339799Z-R2-cuda-b78dbae7b7",
+      "cpu_report": "migration/reports/rewrite-first-rocm-validation.json",
+      "qualification_id": "20261110T083838.501295Z-R2-composite-qualification-f6d677810e",
+      "evidence": "migration/reports/evidence/rewrite/R2/MathDx_cuSolverDx_07_BLAS__trsm_batched_block.cu/20261110T083838.501295Z-R2-composite-qualification-f6d677810e",
+      "environment": {
+        "hostname": "116cae1314a3",
+        "platform": "Linux-7.0.0-42-generic-x86_64-with-glibc2.39",
+        "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "rocm_release": "10.1.0",
+        "visible_devices": "2",
+        "devices": [
+          {
+            "logical_id": 0,
+            "pci_bdf": "0000:03:00.0",
+            "physical_id": 0,
+            "uuid": "32396463623033636131356166623633"
+          }
+        ],
+        "versions": {
+          "hipRuntimeGetVersion": {
+            "status": 0,
+            "value": 71626385
+          },
+          "hipDriverGetVersion": {
+            "status": 0,
+            "value": 71626385
+          }
+        },
+        "packages": {
+          "rocm-sdk-core": "10.1.0",
+          "rocm-sdk-device-gfx1100": "10.1.0",
+          "rocm-sdk-device-gfx942": "10.1.0",
+          "rocm-sdk-device-gfx1010": "10.1.0",
+          "rocm-sdk-device-gfx1011": "10.1.0",
+          "rocm-sdk-device-gfx1101": "10.1.0",
+          "rocm-bootstrap": "0.3.0",
+          "triton": "3.8.0+git669b31ac.rocm10.1.0",
+          "rocm-sdk-device-gfx1035": "10.1.0",
+          "rocm-sdk-device-gfx1012": "10.1.0",
+          "torch": "2.14.0+rocm10.1.0",
+          "rocm-sdk-device-gfx1152": "10.1.0",
+          "rocm-sdk-device-gfx908": "10.1.0",
+          "rocm-sdk-libraries": "10.1.0",
+          "rocm-sdk-device-gfx1031": "10.1.0",
+          "rocm-sdk-device-gfx1151": "10.1.0",
+          "rocm-sdk-device-gfx1030": "10.1.0",
+          "rocm-sdk-device-gfx1103": "10.1.0",
+          "rocm-sdk-device-gfx1250": "10.1.0",
+          "rocm-sdk-device-gfx1032": "10.1.0",
+          "rocm-sdk-device-gfx1102": "10.1.0",
+          "rocm-sdk-device-gfx1201": "10.1.0",
+          "rocm-sdk-device-gfx90a": "10.1.0",
+          "torchvision": "0.29.0a0+rocm10.1.0",
+          "rocm-sdk-device-gfx1036": "10.1.0",
+          "rocm-sdk-device-gfx1153": "10.1.0",
+          "rocm": "10.1.0",
+          "rocm-sdk-device-gfx1150": "10.1.0",
+          "rocm-sdk-device-gfx1200": "10.1.0",
+          "rocm-sdk-device-gfx1034": "10.1.0",
+          "rocm-sdk-device-gfx1033": "10.1.0",
+          "rocm-sdk-device-gfx950": "10.1.0"
+        },
+        "loaded_libraries": [
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamd_comgr.so.3",
+            "sha256": "6bf2f6fe6b243c5ac3621cd5745887933d3a41edd944a447c88c21ec77da5d5b"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamdhip64.so.7",
+            "sha256": "6d1dbee8cb3ad924e4c1bca7734e22f2c93026eb3bc871a7f64a916778d55e36"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-amd-aqlprofile64.so.1",
+            "sha256": "6d4be9a3d53457b466f3e1fb1b07b897cd78be9b934a5326444b7b2070dabd61"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-runtime64.so.1",
+            "sha256": "12d49db16881b9505629192231d5b3971e9030b26a326fc2c003e92da7de0c44"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocm_kpack.so.0",
+            "sha256": "e2af394dea58ad53d6074c7aa9d56de5dc027ca186f6bbc27d6f32d7b8f12ac3"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocprofiler-register.so.0",
+            "sha256": "a67764cf46d1d579eb27311576ba9c0b4dbfa5052ddd64a062131f716faa11b6"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libLLVM.so.24.0git",
+            "sha256": "3e7b50e1f252792eba7380b8503c05c899bf8ae9deeb70faf3f9be5f995c8e0a"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libclang-cpp.so.24.0git",
+            "sha256": "18ef4cb8bd32366a68599fb6d723ed38814707a2ada1ff34b722dafc7856663b"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_bz2.so",
+            "sha256": "37a39b12a7e6e9f480d10e5e139b9aedbe5824e63b6b9e12a16837baee608602"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm.so.2",
+            "sha256": "b715ae24e1d62e407ffceca56b546e8a35abe37ac50878cbb16fa8b93d9c9fd5"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm_amdgpu.so.1",
+            "sha256": "b25742cda500eaa61e39b2b32492bb482235ad3e3df8a988d8f4130054d94cad"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_elf.so.1",
+            "sha256": "692dd9fe3575a45df78b319ad0e2a58ee36814958771dd810d5d91f9616c6d8f"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_liblzma.so.5",
+            "sha256": "d17f947bfe3947db5aefee897f6d32dfe98c73bf80b477764ba7f4107594a671"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_numa.so.1",
+            "sha256": "26fffd0f85369950b834cfb8f56fa9e1ea4804be8bbc40db98b788c554802bc3"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_z.so.1",
+            "sha256": "e1d7568f4a0b77eeab26f30cc9d2794dfe7ffd14e34b4ae55a9f80bc4f94ba7a"
+          },
+          {
+            "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_zstd.so.1",
+            "sha256": "fc3edd0b74fa071079b0095abe7b3f41418ca39be138f4ec0c57d0640a0b2d8b"
+          }
+        ]
+      },
+      "devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0,
+          "uuid": "32396463623033636131356166623633"
+        }
+      ],
+      "scope": "MOAT rewrite original contract plus registered variants; composite qualification, not one process exit"
     }
   ]
 }

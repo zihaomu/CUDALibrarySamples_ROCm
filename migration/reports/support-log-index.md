@@ -1,6 +1,6 @@
 # 样例支持方式与详细日志总表
 
-覆盖 **639 个样例入口**：211 PASSED、24 PARTIAL、402 FAILED、2 UNSUPPORTED、0 BLOCKED。全部 30 个模块逐项列出实现方式、范围/原因、AMD 日志、CUDA 日志与验收报告。数据直接来自 [逐例清单](../samples.yaml)，[JSON 索引](support-log-index.json) 另含全部历史证据路径、源码 SHA256、已通过/必需用例及恢复条件。
+覆盖 **639 个样例入口**：219 PASSED、24 PARTIAL、394 FAILED、2 UNSUPPORTED、0 BLOCKED。全部 30 个模块逐项列出实现方式、范围/原因、AMD 日志、CUDA 日志与验收报告。数据直接来自 [逐例清单](../samples.yaml)，[JSON 索引](support-log-index.json) 另含全部历史证据路径、源码 SHA256、已通过/必需用例及恢复条件。
 
 **查阅方式：** 先看状态和“支持范围/失败原因”，再看实际库与实现源码。AMD 栏优先链接与当前源码 hash 匹配的选定验收日志；未通过项链接实际尝试。`build.log` 是编译/链接记录，`run.log` 是程序输出，`<case>/run.log` 是对应输入的输出。命令与环境位于同目录的 `commands.json` 和 `*.environment.json`，从“证据目录”进入。缺少运行日志时会明确标注，不将编译/import 成功视作 GPU 通过。
 
@@ -17,7 +17,9 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 | 样例 / 详情 | 状态 / 用例 | 实际库与实现方式 | 详细日志与范围 |
 | --- | --- | --- | --- |
 | [Extensions/AxpyEx/cublas_AxpyEx_example.cu](../sample-reports/cuBLAS/Extensions/AxpyEx/cublas_AxpyEx_example.cu.md) | PASSED / 2/2 | hipBLAS / rocBLAS；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLAS.md#sample-8b0831d666f2) |
+| [Extensions/Cherk3mEx/cublas_Cherk3mEx_example.cu](../sample-reports/cuBLAS/Extensions/Cherk3mEx/cublas_Cherk3mEx_example.cu.md) | PASSED / 7/7 | hipBLAS/rocBLAS three real SGEMMs + HIP Hermitian triangle epilogue / rocBLAS；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLAS.md#sample-efcb80a73116) |
 | [Extensions/CherkEx/cublas_CherkEx_example.cu](../sample-reports/cuBLAS/Extensions/CherkEx/cublas_CherkEx_example.cu.md) | PASSED / 4/4 | hipBLAS / rocBLAS；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLAS.md#sample-edb12d5041ad) |
+| [Extensions/Csyrk3mEx/cublas_Csyrk3mEx_example.cu](../sample-reports/cuBLAS/Extensions/Csyrk3mEx/cublas_Csyrk3mEx_example.cu.md) | PASSED / 7/7 | hipBLAS/rocBLAS three real SGEMMs + HIP symmetric triangle epilogue / rocBLAS；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLAS.md#sample-46058545057d) |
 | [Extensions/CsyrkEx/cublas_CsyrkEx_example.cu](../sample-reports/cuBLAS/Extensions/CsyrkEx/cublas_CsyrkEx_example.cu.md) | PASSED / 4/4 | hipBLAS / rocBLAS；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLAS.md#sample-87696bb54546) |
 | [Extensions/DotEx/cublas_DotEx_example.cu](../sample-reports/cuBLAS/Extensions/DotEx/cublas_DotEx_example.cu.md) | PASSED / 2/2 | hipBLAS / rocBLAS；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLAS.md#sample-f87f3df88493) |
 | [Extensions/DotEx/cublas_DotcEx_example.cu](../sample-reports/cuBLAS/Extensions/DotEx/cublas_DotcEx_example.cu.md) | PASSED / 2/2 | hipBLAS / rocBLAS；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLAS.md#sample-d8f54d1cbcb1) |
@@ -71,6 +73,7 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 | [Level-2/trmv/cublas_trmv_example.cu](../sample-reports/cuBLAS/Level-2/trmv/cublas_trmv_example.cu.md) | PASSED / 2/2 | hipBLAS / rocBLAS；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLAS.md#sample-653922be39c5) |
 | [Level-2/trsv/cublas_trsv_example.cu](../sample-reports/cuBLAS/Level-2/trsv/cublas_trsv_example.cu.md) | PASSED / 2/2 | hipBLAS / rocBLAS；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLAS.md#sample-c67025a57be4) |
 | [Level-3/gemm/cublas_gemm_example.cu](../sample-reports/cuBLAS/Level-3/gemm/cublas_gemm_example.cu.md) | PASSED / 5/5 | hipBLAS / rocBLAS；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLAS.md#sample-55ff879af86a) |
+| [Level-3/gemm3m/cublas_gemm3m_example.cu](../sample-reports/cuBLAS/Level-3/gemm3m/cublas_gemm3m_example.cu.md) | PASSED / 7/7 | hipBLAS/rocBLAS three real SGEMMs + HIP complex split/merge / rocBLAS；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLAS.md#sample-9d6bd29de04f) |
 | [Level-3/gemmBatched/cublas_gemmBatched_example.cu](../sample-reports/cuBLAS/Level-3/gemmBatched/cublas_gemmBatched_example.cu.md) | PASSED / 2/2 | hipBLAS / rocBLAS；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLAS.md#sample-3d0fd757ddec) |
 | [Level-3/gemmGroupedBatched/cublas_gemmGroupedBatched_example.cu](../sample-reports/cuBLAS/Level-3/gemmGroupedBatched/cublas_gemmGroupedBatched_example.cu.md) | PASSED / 2/2 | hipBLAS / rocBLAS；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLAS.md#sample-3ee59c86042f) |
 | [Level-3/gemmStridedBatched/cublas_gemmStridedBatched_example.cu](../sample-reports/cuBLAS/Level-3/gemmStridedBatched/cublas_gemmStridedBatched_example.cu.md) | PASSED / 5/5 | hipBLAS / rocBLAS；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLAS.md#sample-2f3dd6e98cd3) |
@@ -95,9 +98,6 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 | [Emulation/gemm_grading/test_blas3.cpp](../sample-reports/cuBLAS/Emulation/gemm_grading/test_blas3.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLAS.md#sample-cc5f5cc2ba19) |
 | [Emulation/zgemm_dynamic/cublas_zgemm_dynamic_example.cu](../sample-reports/cuBLAS/Emulation/zgemm_dynamic/cublas_zgemm_dynamic_example.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLAS.md#sample-cb5dc49cb639) |
 | [Emulation/zgemm_fixed/cublas_zgemm_fixed_example.cu](../sample-reports/cuBLAS/Emulation/zgemm_fixed/cublas_zgemm_fixed_example.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLAS.md#sample-5508de03d501) |
-| [Extensions/Cherk3mEx/cublas_Cherk3mEx_example.cu](../sample-reports/cuBLAS/Extensions/Cherk3mEx/cublas_Cherk3mEx_example.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLAS.md#sample-efcb80a73116) |
-| [Extensions/Csyrk3mEx/cublas_Csyrk3mEx_example.cu](../sample-reports/cuBLAS/Extensions/Csyrk3mEx/cublas_Csyrk3mEx_example.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLAS.md#sample-46058545057d) |
-| [Level-3/gemm3m/cublas_gemm3m_example.cu](../sample-reports/cuBLAS/Level-3/gemm3m/cublas_gemm3m_example.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLAS.md#sample-9d6bd29de04f) |
 
 <a id="module-1"></a>
 
@@ -108,6 +108,8 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 | [LtHSHgemmGroupedSimple/main.cpp](../sample-reports/cuBLASLt/LtHSHgemmGroupedSimple/main.cpp.md) | PASSED / 3/3 | hipBLASLt + project search/group dispatch / hipBLASLt/rocBLAS；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/cuBLASLt.md#sample-c56a0a21cf0b) |
 | [LtHSHgemmPointerArrayBatchSimple/main.cpp](../sample-reports/cuBLASLt/LtHSHgemmPointerArrayBatchSimple/main.cpp.md) | PASSED / 1/1 | hipBLASLt / hipBLASLt；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLASLt.md#sample-b7bf7c30e86f) |
 | [LtHSHgemmStridedBatchSimple/main.cpp](../sample-reports/cuBLASLt/LtHSHgemmStridedBatchSimple/main.cpp.md) | PASSED / 1/1 | hipBLASLt / hipBLASLt；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLASLt.md#sample-59de0585937d) |
+| [LtIgemmTensor/main.cpp](../sample-reports/cuBLASLt/LtIgemmTensor/main.cpp.md) | PASSED / 7/7 | HIP COL32/COL4 packing/unpacking + native hipBLAS GemmEx INT8/INT32 / rocBLAS；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLASLt.md#sample-df70f98d9333) |
+| [LtPlanarComplex/main.cpp](../sample-reports/cuBLASLt/LtPlanarComplex/main.cpp.md) | PASSED / 8/8 | HIP negative-offset FP16 planar conversion + hipBLAS/rocBLAS FP32 3M + HIP FP16 output / rocBLAS；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLASLt.md#sample-3d1b270b1c38) |
 | [LtSgemm/main.cpp](../sample-reports/cuBLASLt/LtSgemm/main.cpp.md) | PASSED / 5/5 | hipBLASLt / hipBLASLt native；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLASLt.md#sample-7f13f06a75d4) |
 | [LtSgemmCustomFind/main.cu](../sample-reports/cuBLASLt/LtSgemmCustomFind/main.cu.md) | PASSED / 3/3 | hipBLASLt + project search/group dispatch / hipBLASLt/rocBLAS；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/cuBLASLt.md#sample-4d096dd02472) |
 | [LtSgemmSimpleAutoTuning/main.cpp](../sample-reports/cuBLASLt/LtSgemmSimpleAutoTuning/main.cpp.md) | PASSED / 3/3 | hipBLASLt + project search/group dispatch / hipBLASLt/rocBLAS；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/cuBLASLt.md#sample-1b5db0b7b489) |
@@ -118,12 +120,10 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 | [LtFp8CustomFind/main.cu](../sample-reports/cuBLASLt/LtFp8CustomFind/main.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLASLt.md#sample-42123a52890f) |
 | [LtFp8Matmul/main.cpp](../sample-reports/cuBLASLt/LtFp8Matmul/main.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLASLt.md#sample-3c33cf579f76) |
 | [LtFp8gemmGroupedSimple/main.cpp](../sample-reports/cuBLASLt/LtFp8gemmGroupedSimple/main.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLASLt.md#sample-f98a85ed9cac) |
-| [LtIgemmTensor/main.cpp](../sample-reports/cuBLASLt/LtIgemmTensor/main.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLASLt.md#sample-df70f98d9333) |
 | [LtMxfp8Matmul/main.cpp](../sample-reports/cuBLASLt/LtMxfp8Matmul/main.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLASLt.md#sample-27e76a257947) |
 | [LtMxfp8gemmGroupedSimple/main.cpp](../sample-reports/cuBLASLt/LtMxfp8gemmGroupedSimple/main.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLASLt.md#sample-f9186b694a88) |
 | [LtNvfp4Matmul/main.cpp](../sample-reports/cuBLASLt/LtNvfp4Matmul/main.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLASLt.md#sample-47296035378c) |
 | [LtNvfp4gemmGroupedSimple/main.cpp](../sample-reports/cuBLASLt/LtNvfp4gemmGroupedSimple/main.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLASLt.md#sample-15ab2ec6d8ca) |
-| [LtPlanarComplex/main.cpp](../sample-reports/cuBLASLt/LtPlanarComplex/main.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLASLt.md#sample-3d1b270b1c38) |
 | [LtSgemmGreenContext/main.cpp](../sample-reports/cuBLASLt/LtSgemmGreenContext/main.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuBLASLt.md#sample-acbea43003b8) |
 
 <a id="module-2"></a>
@@ -663,13 +663,14 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 
 | 样例 / 详情 | 状态 / 用例 | 实际库与实现方式 | 详细日志与范围 |
 | --- | --- | --- | --- |
+| [00_Introduction/posv_batched_block.cu](../sample-reports/MathDx/cuSolverDx/00_Introduction/posv_batched_block.cu.md) | PASSED / 10/10 | HIP caller-kernel cooperative complex FP64 Cholesky and solve / project HIP device algorithm；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-83c8ed9c775f) |
+| [01_Linear_Solve/getrf_partial_pivot_block.cu](../sample-reports/MathDx/cuSolverDx/01_Linear_Solve/getrf_partial_pivot_block.cu.md) | PASSED / 10/10 | HIP caller-kernel cooperative complex FP32 partial-pivot LU / project HIP device algorithm；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-0664c6319873) |
 | [01_Linear_Solve/potrf_block.cu](../sample-reports/MathDx/cuSolverDx/01_Linear_Solve/potrf_block.cu.md) | PASSED / 6/6 | HIP cooperative device complex FP64 upper Cholesky, shared LDA33 / HIP cooperative device complex FP64 upper Cholesky, shared LDA33；库 API 迁移 + 执行语义适配 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-0865ab8c293e) |
-| [00_Introduction/posv_batched_block.cu](../sample-reports/MathDx/cuSolverDx/00_Introduction/posv_batched_block.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-83c8ed9c775f) |
+| [07_BLAS/trsm_batched_block.cu](../sample-reports/MathDx/cuSolverDx/07_BLAS/trsm_batched_block.cu.md) | PASSED / 9/9 | HIP caller-kernel cooperative real FP64 right/lower triangular solve / project HIP device algorithm；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-efb59a683d6c) |
 | [01_Linear_Solve/gesv_batched_partial_pivot_block.cu](../sample-reports/MathDx/cuSolverDx/01_Linear_Solve/gesv_batched_partial_pivot_block.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-00dcb1e022dd) |
 | [01_Linear_Solve/gesv_batched_partial_pivot_thread.cu](../sample-reports/MathDx/cuSolverDx/01_Linear_Solve/gesv_batched_partial_pivot_thread.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-6815bc824613) |
 | [01_Linear_Solve/gesv_batched_wo_pivot_block.cu](../sample-reports/MathDx/cuSolverDx/01_Linear_Solve/gesv_batched_wo_pivot_block.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-bcfbf44fd3d1) |
 | [01_Linear_Solve/gesv_batched_wo_pivot_thread.cu](../sample-reports/MathDx/cuSolverDx/01_Linear_Solve/gesv_batched_wo_pivot_thread.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-98876e038a17) |
-| [01_Linear_Solve/getrf_partial_pivot_block.cu](../sample-reports/MathDx/cuSolverDx/01_Linear_Solve/getrf_partial_pivot_block.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-0664c6319873) |
 | [01_Linear_Solve/getrf_wo_pivot_block.cu](../sample-reports/MathDx/cuSolverDx/01_Linear_Solve/getrf_wo_pivot_block.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-1201bd6c560b) |
 | [01_Linear_Solve/gtsv_batched_wo_pivot_block.cu](../sample-reports/MathDx/cuSolverDx/01_Linear_Solve/gtsv_batched_wo_pivot_block.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-4f0bc3636659) |
 | [01_Linear_Solve/gtsv_batched_wo_pivot_thread.cu](../sample-reports/MathDx/cuSolverDx/01_Linear_Solve/gtsv_batched_wo_pivot_thread.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-9525cc0be866) |
@@ -696,7 +697,6 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 | [05_Singular_Value_Decomposition/bdsvd_batched_thread.cu](../sample-reports/MathDx/cuSolverDx/05_Singular_Value_Decomposition/bdsvd_batched_thread.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-c2f301c6d1d3) |
 | [05_Singular_Value_Decomposition/gesvd_batched_block.cu](../sample-reports/MathDx/cuSolverDx/05_Singular_Value_Decomposition/gesvd_batched_block.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-5e3eb37db107) |
 | [05_Singular_Value_Decomposition/gesvd_batched_thread.cu](../sample-reports/MathDx/cuSolverDx/05_Singular_Value_Decomposition/gesvd_batched_thread.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-7705822e4669) |
-| [07_BLAS/trsm_batched_block.cu](../sample-reports/MathDx/cuSolverDx/07_BLAS/trsm_batched_block.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-efb59a683d6c) |
 | [07_BLAS/trsm_batched_thread.cu](../sample-reports/MathDx/cuSolverDx/07_BLAS/trsm_batched_thread.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-db47304fb83d) |
 | [07_BLAS/trsm_batched_thread_advanced.cu](../sample-reports/MathDx/cuSolverDx/07_BLAS/trsm_batched_thread_advanced.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-7e5b59ac6e77) |
 | [08_NVRTC/nvrtc_potrs.cpp](../sample-reports/MathDx/cuSolverDx/08_NVRTC/nvrtc_potrs.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/MathDx__cuSolverDx.md#sample-4b3229f57517) |

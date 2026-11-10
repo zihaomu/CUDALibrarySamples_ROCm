@@ -1,23 +1,23 @@
 # cuBLAS/Extensions/Cherk3mEx::cublas_Cherk3mEx_example.cu
 
-**FAILED / L1**
+**PASSED / L4**
 
-build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLAS/Extensions/Cherk3mEx/cublas_Cherk3mEx_example.cu:75:18: error: use of undeclared identifier 'cublasCherk3mEx'
+原始数据/精度/布局与登记扩展用例通过 AMD、独立 CPU、相同输入 CUDA 验收；真实执行语义、反向检查及独立复审完成。实际路线：hipBLAS/rocBLAS three real SGEMMs + HIP Hermitian triangle epilogue。性能未验收。
 
 | 字段 | 当前记录 |
 | --- | --- |
 | 原始入口 | [cuBLAS/Extensions/Cherk3mEx/cublas_Cherk3mEx_example.cu](../../../../../cuBLAS/Extensions/Cherk3mEx/cublas_Cherk3mEx_example.cu) |
-| 实际库 / 后端 | — / — |
+| 实际库 / 后端 | hipBLAS/rocBLAS three real SGEMMs + HIP Hermitian triangle epilogue / rocBLAS |
 | 候选路线 | hipBLAS, rocBLAS |
 | 代码 | [rocm/ported/cuBLAS/Extensions/Cherk3mEx/cublas_Cherk3mEx_example.cu](../../../../../rocm/ported/cuBLAS/Extensions/Cherk3mEx/cublas_Cherk3mEx_example.cu) |
-| required cases | 0/2 |
-| CUDA baseline / comparison | PASSED / BLOCKED |
+| required cases | 7/7 |
+| CUDA baseline / comparison | PASSED / PASSED |
 | 性能 | NOT_RUN |
 | 原始源码 SHA256 | `919bfd5eb9adb1043f9479ad1d1fd954849942bd633ebc9378a73cd3269e7ce4` |
 
 编译/运行返回 0 仅对应 L3；通过独立参考检查后才记 L4。失败的候选库不列为已使用库。
 
-必需用例：`original-functional-contract`, `independent-numerical-or-semantic-reference`。
+必需用例：`rewrite/original`, `rewrite/changed-values`, `rewrite/irregular`, `rewrite/layout`, `rewrite/repeat`, `rewrite/boundary`, `rewrite/independent-negative-checks`。
 
 实现方式：`API_PORT`。
 
@@ -46,3 +46,7 @@ build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_mi
 - [migration/reports/evidence/20261109T081929.210831Z/original-rocm/cuBLAS_Extensions_Cherk3mEx_cublas_Cherk3mEx_example.cu](../../../../reports/evidence/20261109T081929.210831Z/original-rocm/cuBLAS_Extensions_Cherk3mEx_cublas_Cherk3mEx_example.cu)
 - [migration/reports/evidence/20261109T082832.792069Z/original-rocm/cuBLAS_Extensions_Cherk3mEx_cublas_Cherk3mEx_example.cu](../../../../reports/evidence/20261109T082832.792069Z/original-rocm/cuBLAS_Extensions_Cherk3mEx_cublas_Cherk3mEx_example.cu)
 - [migration/reports/evidence/20261109T082621.001055Z/original-cuda/cuBLAS_Extensions_Cherk3mEx_cublas_Cherk3mEx_example.cu](../../../../reports/evidence/20261109T082621.001055Z/original-cuda/cuBLAS_Extensions_Cherk3mEx_cublas_Cherk3mEx_example.cu)
+- [migration/reports/evidence/rewrite/R1/cuBLAS_Extensions_Cherk3mEx__cublas_Cherk3mEx_example.cu/20261110T083833.693586Z-R1-composite-qualification-7182a54a65](../../../../reports/evidence/rewrite/R1/cuBLAS_Extensions_Cherk3mEx__cublas_Cherk3mEx_example.cu/20261110T083833.693586Z-R1-composite-qualification-7182a54a65)
+- [migration/reports/rewrite-first-qualification.json](../../../../reports/rewrite-first-qualification.json)
+- [migration/reports/rewrite-first-negative.json](../../../../reports/rewrite-first-negative.json)
+- [migration/reports/rewrite-evidence-errata.json](../../../../reports/rewrite-evidence-errata.json)
