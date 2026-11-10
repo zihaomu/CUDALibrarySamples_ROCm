@@ -1,0 +1,67 @@
+Warning: HIP version file: "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/share/hip/version" not found.  Cannot give HIP version information.
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLAS/Extensions/Cherk3mEx/cublas_Cherk3mEx_example.cu:1:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/blas/complex3m.hpp:2:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:69:30: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   69 |  ~Blas(){RW_BLAS(Destroy)(h);RW_RT(StreamDestroy)(stream);}
+      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:6:18: note: expanded from macro 'RW_RT'
+    6 | #define RW_RT(n) hip##n
+      |                  ^
+<scratch space>:167:1: note: expanded from here
+  167 | hipStreamDestroy
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLAS/Extensions/Cherk3mEx/cublas_Cherk3mEx_example.cu:1:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/blas/complex3m.hpp:2:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:72:24: error: unknown type name 'hipDeviceProp'
+   72 | inline void identity(){RW_RT(DeviceProp) p;RW_CHECK(RW_RT(GetDeviceProperties)(&p,0));std::cout<<"{\"device\":\""<<p.name<<"\",\"warp_size\":"<<p.warpSize<<"}\n";}
+      |                        ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:6:18: note: expanded from macro 'RW_RT'
+    6 | #define RW_RT(n) hip##n
+      |                  ^
+<scratch space>:172:1: note: expanded from here
+  172 | hipDeviceProp
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLAS/Extensions/Cherk3mEx/cublas_Cherk3mEx_example.cu:1:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/blas/complex3m.hpp:2:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:62:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   62 |  ~Buffer(){if(p)RW_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:6:18: note: expanded from macro 'RW_RT'
+    6 | #define RW_RT(n) hip##n
+      |                  ^
+<scratch space>:153:1: note: expanded from here
+  153 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/blas/complex3m.hpp:16:16: note: in instantiation of member function 'rewrite::Buffer<float>::~Buffer' requested here
+   16 |  Buffer<float> ar(m*k),ai(m*k),as(m*k),br(k*n),bi(k*n),bs(k*n),p(m*n),q(m*n),r(m*n);
+      |                ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLAS/Extensions/Cherk3mEx/cublas_Cherk3mEx_example.cu:1:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/blas/complex3m.hpp:2:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:62:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   62 |  ~Buffer(){if(p)RW_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:6:18: note: expanded from macro 'RW_RT'
+    6 | #define RW_RT(n) hip##n
+      |                  ^
+<scratch space>:153:1: note: expanded from here
+  153 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/blas/complex3m.hpp:35:17: note: in instantiation of member function 'rewrite::Buffer<__half>::~Buffer' requested here
+   35 |   Buffer<__half>a(av),b(bv),c(cv);Buffer<C32>aa(lda*k),bb(ldb*n),cc(ldc*n);
+      |                 ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLAS/Extensions/Cherk3mEx/cublas_Cherk3mEx_example.cu:1:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/blas/complex3m.hpp:2:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:62:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   62 |  ~Buffer(){if(p)RW_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:6:18: note: expanded from macro 'RW_RT'
+    6 | #define RW_RT(n) hip##n
+      |                  ^
+<scratch space>:153:1: note: expanded from here
+  153 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/blas/complex3m.hpp:35:46: note: in instantiation of member function 'rewrite::Buffer<rewrite::Complex<float>>::~Buffer' requested here
+   35 |   Buffer<__half>a(av),b(bv),c(cv);Buffer<C32>aa(lda*k),bb(ldb*n),cc(ldc*n);
+      |                                              ^
+4 warnings and 1 error generated when compiling for gfx1201.
+failed to execute:/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib/llvm/bin/clang++  --offload-arch=gfx1201 --driver-mode=g++ --hip-link  --rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --rocm-device-lib-path=/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode -std=c++17 -O2 -D__HIP_PLATFORM_AMD__ -x hip /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLAS/Extensions/Cherk3mEx/cublas_Cherk3mEx_example.cu -o "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/R1/cuBLAS_Extensions_Cherk3mEx__cublas_Cherk3mEx_example.cu/20261110T072836.862308Z-R1-rocm-build-9c0f6415d2/sample" -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/blas -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/device/solver -I/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/include -I/opt/rocm/core-10.1/include -L/opt/rocm/core-10.1/lib -L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib -L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib -Wl,-rpath,/opt/rocm/core-10.1/lib -Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib -Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib -lhipblas -lamdhip64

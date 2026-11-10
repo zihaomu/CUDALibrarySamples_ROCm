@@ -1,0 +1,74 @@
+[
+  {
+    "command_id": 1,
+    "phase": "prepare",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "mkdir -p /tmp/20261110T072357.546857Z-R1-cuda_native-1bfb1e34a4"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-10T07:23:57.917803+00:00",
+    "timeout_seconds": 180,
+    "environment": {},
+    "stdout": "logs/0001-prepare.stdout.log",
+    "stderr": "logs/0001-prepare.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-10T07:23:58.234193+00:00",
+    "seconds": 0.31516893798834644
+  },
+  {
+    "command_id": 2,
+    "phase": "upload",
+    "argv": [
+      "scp",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/tools/moat/native_packing.cu",
+      "nvidia-5090x2:/tmp/20261110T072357.546857Z-R1-cuda_native-1bfb1e34a4/probe.cu"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-10T07:23:58.235877+00:00",
+    "timeout_seconds": 180,
+    "environment": {},
+    "stdout": "logs/0002-upload.stdout.log",
+    "stderr": "logs/0002-upload.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-10T07:23:58.552186+00:00",
+    "seconds": 0.31549037699005567
+  },
+  {
+    "command_id": 3,
+    "phase": "build",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "/usr/local/cuda-13.4/bin/nvcc /tmp/20261110T072357.546857Z-R1-cuda_native-1bfb1e34a4/probe.cu -o /tmp/20261110T072357.546857Z-R1-cuda_native-1bfb1e34a4/probe -lcublasLt -lcublas -arch=sm_120"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-10T07:23:58.553900+00:00",
+    "timeout_seconds": 180,
+    "environment": {},
+    "stdout": "logs/0003-build.stdout.log",
+    "stderr": "logs/0003-build.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-10T07:24:00.674899+00:00",
+    "seconds": 2.1201137070020195
+  },
+  {
+    "command_id": 4,
+    "phase": "native-transform",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "/tmp/20261110T072357.546857Z-R1-cuda_native-1bfb1e34a4/probe"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-10T07:24:00.676964+00:00",
+    "timeout_seconds": 180,
+    "environment": {},
+    "stdout": "logs/0004-native-transform.stdout.log",
+    "stderr": "logs/0004-native-transform.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-10T07:24:01.594981+00:00",
+    "seconds": 0.9170028829830699
+  }
+]

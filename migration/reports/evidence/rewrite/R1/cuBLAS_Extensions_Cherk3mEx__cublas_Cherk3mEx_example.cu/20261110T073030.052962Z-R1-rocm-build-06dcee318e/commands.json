@@ -1,0 +1,72 @@
+[
+  {
+    "command_id": 1,
+    "phase": "build",
+    "argv": [
+      "hipcc",
+      "--rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay",
+      "--hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay",
+      "--rocm-device-lib-path=/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode",
+      "--offload-arch=gfx1201",
+      "-std=c++17",
+      "-O2",
+      "-D__HIP_PLATFORM_AMD__",
+      "-x",
+      "hip",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuBLAS/Extensions/Cherk3mEx/cublas_Cherk3mEx_example.cu",
+      "-o",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/R1/cuBLAS_Extensions_Cherk3mEx__cublas_Cherk3mEx_example.cu/20261110T073030.052962Z-R1-rocm-build-06dcee318e/sample",
+      "-I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common",
+      "-I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/blas",
+      "-I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/device/solver",
+      "-I/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/include",
+      "-I/opt/rocm/core-10.1/include",
+      "-L/opt/rocm/core-10.1/lib",
+      "-L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib",
+      "-L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib",
+      "-Wl,-rpath,/opt/rocm/core-10.1/lib",
+      "-Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib",
+      "-Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib",
+      "-lhipblas",
+      "-lamdhip64"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-10T07:30:30.552443+00:00",
+    "timeout_seconds": 240,
+    "environment": {
+      "HIP_VISIBLE_DEVICES": "2",
+      "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+      "DEEPINFER_ROCM_RELEASE": "10.1.0",
+      "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+      "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+    },
+    "stdout": "logs/0001-build.stdout.log",
+    "stderr": "logs/0001-build.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-10T07:30:32.371638+00:00",
+    "seconds": 1.8183693290047813
+  },
+  {
+    "command_id": 2,
+    "phase": "runtime-links",
+    "argv": [
+      "ldd",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/R1/cuBLAS_Extensions_Cherk3mEx__cublas_Cherk3mEx_example.cu/20261110T073030.052962Z-R1-rocm-build-06dcee318e/sample"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-10T07:30:32.372719+00:00",
+    "timeout_seconds": 30,
+    "environment": {
+      "HIP_VISIBLE_DEVICES": "2",
+      "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+      "DEEPINFER_ROCM_RELEASE": "10.1.0",
+      "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+      "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+    },
+    "stdout": "logs/0002-runtime-links.stdout.log",
+    "stderr": "logs/0002-runtime-links.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-10T07:30:32.389247+00:00",
+    "seconds": 0.016053184983320534
+  }
+]

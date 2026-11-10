@@ -1,0 +1,1 @@
+Test cpu-validation for lu/changed-values, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T074836.628416Z-R2-rocm-96e3241536.

@@ -1,0 +1,1 @@
+Test cpu-validation for planar/original, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T074813.938625Z-R1-rocm-66f97894b4.

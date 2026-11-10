@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "routes"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "routes": {
+      "type": "array",
+      "minItems": 639,
+      "maxItems": 639,
+      "items": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "required": [
+          "sample_id",
+          "route_id",
+          "status",
+          "implementation",
+          "candidate_libraries"
+        ],
+        "properties": {
+          "sample_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "route_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "minLength": 1
+          },
+          "implementation": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "candidate_libraries": {
+            "type": "array"
+          }
+        }
+      }
+    }
+  }
+}

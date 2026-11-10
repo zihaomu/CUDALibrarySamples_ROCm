@@ -1,0 +1,1 @@
+Test cpu-validation for trsm/irregular, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T074808.443224Z-R2-cuda-85cba22acd.

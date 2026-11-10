@@ -1,0 +1,87 @@
+#pragma once
+#include "rewrite_runtime.hpp"
+namespace rewrite {
+__device__ void lu_device(C32*a,int m,int n,int ld,int*piv,int*info){
+ for(int k=0;k<(m<n?m:n);++k){
+  if(threadIdx.x==0){int pivot=k;float best=-1;for(int i=k;i<m;++i){auto v=a[i+k*ld];float z=(v.x<0?-v.x:v.x)+(v.y<0?-v.y:v.y);if(z>best){best=z;pivot=i;}}piv[k]=pivot+1;if(best==0&&*info==0)*info=k+1;}
+  __syncthreads();int p=piv[k]-1;
+  if(p!=k)for(int j=threadIdx.x;j<n;j+=blockDim.x){auto v=a[k+j*ld];a[k+j*ld]=a[p+j*ld];a[p+j*ld]=v;}
+  __syncthreads();auto diag=a[k+k*ld];
+  if(diag.x!=0||diag.y!=0)for(int i=k+1+threadIdx.x;i<m;i+=blockDim.x)a[i+k*ld]=div(a[i+k*ld],diag);
+  __syncthreads();int rows=m-k-1,cols=n-k-1;
+  for(int t=threadIdx.x;t<rows*cols;t+=blockDim.x){int i=k+1+t%rows,j=k+1+t/rows;a[i+j*ld]=sub(a[i+j*ld],mul(a[i+k*ld],a[k+j*ld]));}
+  __syncthreads();
+ }
+}
+__global__ void lu_block(C32*a,int m,int n,int lda,int*piv,int*info,int*trace){
+ __shared__ C32 s[65*64];__shared__ int ip[64],code;int ld=m+1;
+ for(int t=threadIdx.x;t<ld*n;t+=blockDim.x)s[t]={-97,13};
+ for(int t=threadIdx.x;t<m*n;t+=blockDim.x)s[t%m+(t/m)*ld]=a[t%m+(t/m)*lda];
+ if(threadIdx.x==0)code=0;__syncthreads();lu_device(s,m,n,ld,ip,&code);
+ for(int t=threadIdx.x;t<m*n;t+=blockDim.x)a[t%m+(t/m)*lda]=s[t%m+(t/m)*ld];
+ for(int i=threadIdx.x;i<(m<n?m:n);i+=blockDim.x)piv[i]=ip[i];
+ if(!threadIdx.x){*info=code;int okay=1;for(int j=0;j<n;++j)okay&=s[m+j*ld].x==-97&&s[m+j*ld].y==13;trace[0]++;trace[1]=blockDim.x;trace[2]=warpSize;trace[3]=okay;}
+}
+__device__ void posv_device(C64*a,C64*b,int n,int nrhs,int lda,int ldb,int*info){
+ for(int k=0;k<n;++k){
+  if(threadIdx.x==0&&*info==0){double v=a[k+k*lda].x;for(int p=0;p<k;++p){auto z=a[k+p*lda];v-=z.x*z.x+z.y*z.y;}if(v<=0)*info=k+1;else {
+#ifdef __HIP_PLATFORM_AMD__
+   a[k+k*lda]={__builtin_sqrt(v),0};
+#else
+   a[k+k*lda]={sqrt(v),0};
+#endif
+  }}
+  __syncthreads();
+  if(*info==0)for(int i=k+1+threadIdx.x;i<n;i+=blockDim.x){auto v=a[i+k*lda];for(int p=0;p<k;++p)v=sub(v,mul(a[i+p*lda],conj(a[k+p*lda])));a[i+k*lda]=scale(v,1/a[k+k*lda].x);}
+  __syncthreads();
+ }
+ if(*info==0)for(int rhs=threadIdx.x;rhs<nrhs;rhs+=blockDim.x){
+  for(int i=0;i<n;++i){auto v=b[i+rhs*ldb];for(int j=0;j<i;++j)v=sub(v,mul(a[i+j*lda],b[j+rhs*ldb]));b[i+rhs*ldb]=scale(v,1/a[i+i*lda].x);}
+  for(int i=n-1;i>=0;--i){auto v=b[i+rhs*ldb];for(int j=i+1;j<n;++j)v=sub(v,mul(conj(a[j+i*lda]),b[j+rhs*ldb]));b[i+rhs*ldb]=scale(v,1/a[i+i*lda].x);}
+ }
+ __syncthreads();
+}
+__global__ void posv_block(C64*a,C64*b,int n,int nrhs,int lda,int ldb,int*info,int*trace){
+ __shared__ C64 s[33*32],rhs[33*8];__shared__ int code;int batch=blockIdx.x,ld=n+1;
+ C64*aa=a+batch*lda*n,*bb=b+batch*ldb*nrhs;
+ for(int t=threadIdx.x;t<ld*n;t+=blockDim.x)s[t]={-97,13};
+ for(int t=threadIdx.x;t<ld*nrhs;t+=blockDim.x)rhs[t]={-97,13};
+ for(int t=threadIdx.x;t<n*n;t+=blockDim.x)s[t%n+(t/n)*ld]=aa[t%n+(t/n)*lda];
+ for(int t=threadIdx.x;t<n*nrhs;t+=blockDim.x)rhs[t%n+(t/n)*ld]=bb[t%n+(t/n)*ldb];
+ if(!threadIdx.x)code=0;__syncthreads();posv_device(s,rhs,n,nrhs,ld,ld,&code);
+ for(int t=threadIdx.x;t<n*n;t+=blockDim.x)aa[t%n+(t/n)*lda]=s[t%n+(t/n)*ld];
+ for(int t=threadIdx.x;t<n*nrhs;t+=blockDim.x)bb[t%n+(t/n)*ldb]=rhs[t%n+(t/n)*ld];
+ if(!threadIdx.x){info[batch]=code;int okay=1;for(int j=0;j<n;++j)okay&=s[n+j*ld].x==-97&&s[n+j*ld].y==13;for(int j=0;j<nrhs;++j)okay&=rhs[n+j*ld].x==-97&&rhs[n+j*ld].y==13;atomicAdd(trace,1);trace[1]=blockDim.x;trace[2]=warpSize;atomicAnd(trace+3,okay);}
+}
+__device__ void trsm_device(const double*a,double*b,int m,int n,int lda,int ldb){
+ for(int row=threadIdx.x;row<m;row+=blockDim.x)for(int j=n-1;j>=0;--j){double v=b[row+j*ldb];for(int k=j+1;k<n;++k)v-=b[row+k*ldb]*a[k+j*lda];b[row+j*ldb]=v/a[j+j*lda];}__syncthreads();
+}
+__global__ void trsm_block(const double*a,double*b,int m,int n,int lda,int ldb,int*trace){
+ __shared__ double s[49*48],rhs[49*48];int al=n+1,bl=m+1;
+ for(int t=threadIdx.x;t<al*n;t+=blockDim.x)s[t]=-97;
+ for(int t=threadIdx.x;t<bl*n;t+=blockDim.x)rhs[t]=-97;
+ for(int t=threadIdx.x;t<n*n;t+=blockDim.x)s[t%n+(t/n)*al]=a[t%n+(t/n)*lda];
+ for(int t=threadIdx.x;t<m*n;t+=blockDim.x)rhs[t%m+(t/m)*bl]=b[t%m+(t/m)*ldb];
+ __syncthreads();trsm_device(s,rhs,m,n,al,bl);
+ for(int t=threadIdx.x;t<m*n;t+=blockDim.x)b[t%m+(t/m)*ldb]=rhs[t%m+(t/m)*bl];
+ if(!threadIdx.x){int okay=1;for(int j=0;j<n;++j)okay&=s[n+j*al]==-97&&rhs[m+j*bl]==-97;trace[0]++;trace[1]=blockDim.x;trace[2]=warpSize;trace[3]=okay;}
+}
+inline int solver_main(const std::string&kind){try{
+ Config c;identity();int m=c.get("m"),n=c.get("n"),lda=c.get("lda"),ldb=c.get("ldb"),batch=c.get("batch",1),nrhs=c.get("nrhs",1),threads=c.get("threads",256),repeat=c.get("repeat",1);
+ if(m>64||n>64||nrhs>8||m<1||n<1)throw std::runtime_error("unsupported device shape");
+ if(kind=="posv"&&n>32)throw std::runtime_error("unsupported POSV shared shape");
+ if(kind=="trsm"&&(m>48||n>48))throw std::runtime_error("unsupported TRSM shared shape");
+ Buffer<int> trace(std::vector<int>{0,0,0,1});
+ if(kind=="lu"){
+  auto av=read<C32>("A",lda*n);Buffer<C32>a(av);Buffer<int>piv(std::min(m,n)),info(1);
+  for(int r=0;r<repeat;++r){a.put(av);lu_block<<<1,threads>>>(a.p,m,n,lda,piv.p,info.p,trace.p);sync();}emit("output",a.get());emit("pivots",piv.get());emit("info",info.get());
+ }else if(kind=="posv"){
+  auto av=read<C64>("A",batch*lda*n),bv=read<C64>("B",batch*ldb*nrhs);Buffer<C64>a(av),b(bv);Buffer<int>info(batch);
+  for(int r=0;r<repeat;++r){a.put(av);b.put(bv);posv_block<<<batch,threads>>>(a.p,b.p,n,nrhs,lda,ldb,info.p,trace.p);sync();}emit("output",b.get());emit("factor",a.get());emit("info",info.get());
+ }else{
+  auto av=read<double>("A",lda*n),bv=read<double>("B",ldb*n);Buffer<double>a(av),b(bv);
+  for(int r=0;r<repeat;++r){a.put(av);b.put(bv);trsm_block<<<1,threads>>>(a.p,b.p,m,n,lda,ldb,trace.p);sync();}emit("output",b.get());emit("A_after",a.get());
+ }
+ emit("trace",trace.get());return 0;
+ }catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 1;}}
+}

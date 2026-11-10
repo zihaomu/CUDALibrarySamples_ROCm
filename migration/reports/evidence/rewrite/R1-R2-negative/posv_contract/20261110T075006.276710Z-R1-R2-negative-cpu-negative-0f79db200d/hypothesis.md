@@ -1,0 +1,1 @@
+Test cpu-negative for posv/contract, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T074844.206857Z-R2-rocm-1d2d4dbd2d.

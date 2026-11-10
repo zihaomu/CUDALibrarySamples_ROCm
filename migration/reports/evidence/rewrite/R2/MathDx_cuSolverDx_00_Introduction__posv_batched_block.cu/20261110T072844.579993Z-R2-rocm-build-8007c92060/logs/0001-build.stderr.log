@@ -1,0 +1,131 @@
+Warning: HIP version file: "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/share/hip/version" not found.  Cannot give HIP version information.
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/MathDx/cuSolverDx/00_Introduction/posv_batched_block.cu:1:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/device/solver/block_solvers.hpp:2:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:69:30: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   69 |  ~Blas(){RW_BLAS(Destroy)(h);RW_RT(StreamDestroy)(stream);}
+      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:6:18: note: expanded from macro 'RW_RT'
+    6 | #define RW_RT(n) hip##n
+      |                  ^
+<scratch space>:167:1: note: expanded from here
+  167 | hipStreamDestroy
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/MathDx/cuSolverDx/00_Introduction/posv_batched_block.cu:1:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/device/solver/block_solvers.hpp:2:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:72:24: error: unknown type name 'hipDeviceProp'
+   72 | inline void identity(){RW_RT(DeviceProp) p;RW_CHECK(RW_RT(GetDeviceProperties)(&p,0));std::cout<<"{\"device\":\""<<p.name<<"\",\"warp_size\":"<<p.warpSize<<"}\n";}
+      |                        ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:6:18: note: expanded from macro 'RW_RT'
+    6 | #define RW_RT(n) hip##n
+      |                  ^
+<scratch space>:172:1: note: expanded from here
+  172 | hipDeviceProp
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/MathDx/cuSolverDx/00_Introduction/posv_batched_block.cu:1:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/device/solver/block_solvers.hpp:6:94: error: no matching function for call to 'fabsf'
+    6 |   if(threadIdx.x==0){int pivot=k;float best=-1;for(int i=k;i<m;++i){auto v=a[i+k*ld];float z=fabsf(v.x)+fabsf(v.y);if(z>best){best=z;pivot=i;}}piv[k]=pivot+1;if(best==0&&*info==0)*info=k+1;}
+      |                                                                                              ^~~~~
+/usr/include/x86_64-linux-gnu/bits/mathcalls.h:162:1: note: candidate function not viable: call to __host__ function from __device__ function
+  162 | __MATHCALLX (fabs,, (_Mdouble_ __x), (__const__));
+      | ^
+/usr/include/math.h:292:3: note: expanded from macro '__MATHCALLX'
+  292 |   __MATHDECLX (_Mdouble_,function,suffix, args, attrib)
+      |   ^
+/usr/include/math.h:294:3: note: expanded from macro '__MATHDECLX'
+  294 |   __MATHDECL_1(type, function,suffix, args) __attribute__ (attrib); \
+      |   ^
+/usr/include/math.h:299:3: note: expanded from macro '__MATHDECL_1'
+  299 |   __MATHDECL_1_IMPL(type, function, suffix, args)
+      |   ^
+/usr/include/math.h:297:15: note: expanded from macro '__MATHDECL_1_IMPL'
+  297 |   extern type __MATH_PRECNAME(function,suffix) args __THROW
+      |               ^
+/usr/include/math.h:326:34: note: expanded from macro '__MATH_PRECNAME'
+  326 | # define __MATH_PRECNAME(name,r) name##f##r
+      |                                  ^
+<scratch space>:144:1: note: expanded from here
+  144 | fabsf
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/MathDx/cuSolverDx/00_Introduction/posv_batched_block.cu:1:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/device/solver/block_solvers.hpp:6:105: error: no matching function for call to 'fabsf'
+    6 |   if(threadIdx.x==0){int pivot=k;float best=-1;for(int i=k;i<m;++i){auto v=a[i+k*ld];float z=fabsf(v.x)+fabsf(v.y);if(z>best){best=z;pivot=i;}}piv[k]=pivot+1;if(best==0&&*info==0)*info=k+1;}
+      |                                                                                                         ^~~~~
+/usr/include/x86_64-linux-gnu/bits/mathcalls.h:162:1: note: candidate function not viable: call to __host__ function from __device__ function
+  162 | __MATHCALLX (fabs,, (_Mdouble_ __x), (__const__));
+      | ^
+/usr/include/math.h:292:3: note: expanded from macro '__MATHCALLX'
+  292 |   __MATHDECLX (_Mdouble_,function,suffix, args, attrib)
+      |   ^
+/usr/include/math.h:294:3: note: expanded from macro '__MATHDECLX'
+  294 |   __MATHDECL_1(type, function,suffix, args) __attribute__ (attrib); \
+      |   ^
+/usr/include/math.h:299:3: note: expanded from macro '__MATHDECL_1'
+  299 |   __MATHDECL_1_IMPL(type, function, suffix, args)
+      |   ^
+/usr/include/math.h:297:15: note: expanded from macro '__MATHDECL_1_IMPL'
+  297 |   extern type __MATH_PRECNAME(function,suffix) args __THROW
+      |               ^
+/usr/include/math.h:326:34: note: expanded from macro '__MATH_PRECNAME'
+  326 | # define __MATH_PRECNAME(name,r) name##f##r
+      |                                  ^
+<scratch space>:144:1: note: expanded from here
+  144 | fabsf
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/MathDx/cuSolverDx/00_Introduction/posv_batched_block.cu:1:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/device/solver/block_solvers.hpp:2:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:62:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   62 |  ~Buffer(){if(p)RW_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:6:18: note: expanded from macro 'RW_RT'
+    6 | #define RW_RT(n) hip##n
+      |                  ^
+<scratch space>:153:1: note: expanded from here
+  153 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/device/solver/block_solvers.hpp:68:14: note: in instantiation of member function 'rewrite::Buffer<int>::~Buffer' requested here
+   68 |  Buffer<int> trace(std::vector<int>{0,0,0,1});
+      |              ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/MathDx/cuSolverDx/00_Introduction/posv_batched_block.cu:1:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/device/solver/block_solvers.hpp:2:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:62:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   62 |  ~Buffer(){if(p)RW_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:6:18: note: expanded from macro 'RW_RT'
+    6 | #define RW_RT(n) hip##n
+      |                  ^
+<scratch space>:153:1: note: expanded from here
+  153 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/device/solver/block_solvers.hpp:70:43: note: in instantiation of member function 'rewrite::Buffer<rewrite::Complex<float>>::~Buffer' requested here
+   70 |   auto av=read<C32>("A",lda*n);Buffer<C32>a(av);Buffer<int>piv(std::min(m,n)),info(1);
+      |                                           ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/MathDx/cuSolverDx/00_Introduction/posv_batched_block.cu:1:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/device/solver/block_solvers.hpp:2:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:62:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   62 |  ~Buffer(){if(p)RW_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:6:18: note: expanded from macro 'RW_RT'
+    6 | #define RW_RT(n) hip##n
+      |                  ^
+<scratch space>:153:1: note: expanded from here
+  153 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/device/solver/block_solvers.hpp:73:82: note: in instantiation of member function 'rewrite::Buffer<rewrite::Complex<double>>::~Buffer' requested here
+   73 |   auto av=read<C64>("A",batch*lda*n),bv=read<C64>("B",batch*ldb*nrhs);Buffer<C64>a(av),b(bv);Buffer<int>info(batch);
+      |                                                                                  ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/MathDx/cuSolverDx/00_Introduction/posv_batched_block.cu:1:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/device/solver/block_solvers.hpp:2:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:62:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   62 |  ~Buffer(){if(p)RW_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:6:18: note: expanded from macro 'RW_RT'
+    6 | #define RW_RT(n) hip##n
+      |                  ^
+<scratch space>:153:1: note: expanded from here
+  153 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/device/solver/block_solvers.hpp:76:76: note: in instantiation of member function 'rewrite::Buffer<double>::~Buffer' requested here
+   76 |   auto av=read<double>("A",lda*n),bv=read<double>("B",ldb*n);Buffer<double>a(av),b(bv);
+      |                                                                            ^
+5 warnings and 3 errors generated when compiling for gfx1201.
+failed to execute:/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib/llvm/bin/clang++  --offload-arch=gfx1201 --driver-mode=g++ --hip-link  --rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --rocm-device-lib-path=/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode -std=c++17 -O2 -D__HIP_PLATFORM_AMD__ -x hip /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/MathDx/cuSolverDx/00_Introduction/posv_batched_block.cu -o "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/R2/MathDx_cuSolverDx_00_Introduction__posv_batched_block.cu/20261110T072844.579993Z-R2-rocm-build-8007c92060/sample" -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/blas -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/device/solver -I/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/include -I/opt/rocm/core-10.1/include -L/opt/rocm/core-10.1/lib -L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib -L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib -Wl,-rpath,/opt/rocm/core-10.1/lib -Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib -Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib -lhipblas -lamdhip64

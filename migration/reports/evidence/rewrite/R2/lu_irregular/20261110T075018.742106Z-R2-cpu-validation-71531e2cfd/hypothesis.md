@@ -1,0 +1,1 @@
+Test cpu-validation for lu/irregular, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T074837.766439Z-R2-rocm-f6227a8fc0.

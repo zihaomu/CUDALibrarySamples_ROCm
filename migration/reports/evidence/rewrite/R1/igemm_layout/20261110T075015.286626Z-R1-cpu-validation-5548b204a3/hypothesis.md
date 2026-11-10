@@ -1,0 +1,1 @@
+Test cpu-validation for igemm/layout, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T074714.643815Z-R1-cuda-3f23a017a1.

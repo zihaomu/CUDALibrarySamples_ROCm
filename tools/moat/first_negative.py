@@ -1,0 +1,26 @@
+#!/usr/bin/env python3
+import argparse,json,shutil,sys
+from pathlib import Path
+from experiment import Experiment,ROOT,write
+from first_reference import validate,np
+p=argparse.ArgumentParser();p.add_argument('--single',nargs=3,metavar=('KIND','OUTPUT','REPORT'));a=p.parse_args()
+if a.single:
+ kind,output,report=a.single;result=validate(kind,'changed-values',Path(output));write(report,result);print(json.dumps(result));raise SystemExit(0 if result['status']=='FAILED' else 1)
+records=json.loads((ROOT/'migration/reports/rewrite-first-rocm.json').read_text());results=[]
+for kind in ['gemm3m','herk3m','syrk3m','planar','igemm','lu','posv','trsm']:
+ original=records[kind+'/changed-values']
+ if validate(kind,'changed-values',ROOT/original['output'])['status']!='PASSED':raise RuntimeError('negative test requires a passing unchanged baseline: '+kind)
+ for mode in ['numerical','contract']:
+  e=Experiment('R1-R2-negative',kind+'/'+mode,'cpu-negative',sources=[Path(__file__),ROOT/'tools/moat/first_reference.py'],parent=original['experiment_id'])
+  out=e.path/'outputs';shutil.copytree(ROOT/original['output'],out)
+  if mode=='numerical':
+   dtype=np.float16 if kind=='planar' else np.int32 if kind=='igemm' else np.float32 if kind in ['gemm3m','herk3m','syrk3m','lu'] else np.float64
+   path=out/'output.bin';data=np.fromfile(path,dtype);data[0]+=10;data.tofile(path)
+  else:
+   name='packed_B' if kind=='igemm' else 'pivots' if kind=='lu' else 'info' if kind=='posv' else 'A_after' if kind=='trsm' else 'output' if kind=='planar' else 'trace'
+   dtype=np.int8 if kind=='igemm' else np.int32 if kind in ['lu','posv','gemm3m','herk3m','syrk3m'] else np.float16 if kind=='planar' else np.float64
+   path=out/(name+'.bin');data=np.fromfile(path,dtype);data[0]=np.inf if kind=='planar' else data[0]+1;data.tofile(path)
+  report=e.path/'injected-check.json';rc=e.command([sys.executable,str(Path(__file__).resolve()),'--single',kind,str(out),str(report)],'reject-injected-error',timeout=90)
+  check=dict(check='reject-'+kind+'-'+mode,passed=rc==0);evidence=e.finish('PASSED' if rc==0 else 'VALIDATOR_GAP',dict(checks=[check]),reason=None if rc==0 else 'corrupted output accepted')
+  results.append(dict(**check,evidence=evidence));print(kind,mode,rc,flush=True)
+write(ROOT/'migration/reports/rewrite-first-negative.json',dict(status='PASSED' if all(x['passed'] for x in results) else 'FAILED',checks=results))

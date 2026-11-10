@@ -1,0 +1,1 @@
+Run original MathDx source with SDK 26.06.1 with vendored CuTe, explicit SM120 dispatch and relocatable-device/LTO linking to libcusolverdx.a; retain native input/output and launch traits before the host reference changes buffers.

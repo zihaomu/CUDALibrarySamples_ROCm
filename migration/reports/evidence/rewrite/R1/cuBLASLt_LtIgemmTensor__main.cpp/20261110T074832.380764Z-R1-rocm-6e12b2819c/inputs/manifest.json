@@ -1,0 +1,60 @@
+{
+  "kind": "igemm",
+  "case": "repeat",
+  "config": {
+    "m": 4,
+    "n": 4,
+    "k": 4,
+    "lda": 4,
+    "ldb": 4,
+    "ldc": 4,
+    "opa": 0,
+    "opb": 0,
+    "repeat": 3,
+    "triangle": 0,
+    "alpha_r": 1,
+    "alpha_i": 0,
+    "beta_r": 0,
+    "beta_i": 0,
+    "batch": 1,
+    "nrhs": 1,
+    "threads": 256
+  },
+  "generator_sha256": "2939bf74d747166539f9c9a93f0096a530e346552db6b93c719e0342227d6988",
+  "files": {
+    "config.txt": {
+      "sha256": "b68cac64ff8aaf9240199e690ba284b284db681de21aac1022dd5da634d31c05",
+      "bytes": 127,
+      "dtype": "metadata"
+    },
+    "A.bin": {
+      "sha256": "be45cb2605bf36bebde684841a28f0fd43c69850a3dce5fedba69928ee3a8991",
+      "bytes": 16,
+      "dtype": "int8"
+    },
+    "config.json": {
+      "sha256": "7f1f48da09621dc699e7d6d2af6301130f075a767a99679218ff7f4a55076594",
+      "bytes": 232,
+      "dtype": "metadata"
+    },
+    "B.bin": {
+      "sha256": "be45cb2605bf36bebde684841a28f0fd43c69850a3dce5fedba69928ee3a8991",
+      "bytes": 16,
+      "dtype": "int8"
+    },
+    "C.bin": {
+      "sha256": "b18047b79b3b577496fb9dc2755d0f311b0e003a2a7109d3683445b4865e2183",
+      "bytes": 64,
+      "dtype": "int32"
+    }
+  },
+  "numerical_contract": {
+    "float32_atol": 2e-05,
+    "float32_rtol": 0.0001,
+    "float64_atol": 2e-12,
+    "float64_rtol": 5e-12,
+    "integers": "exact",
+    "half": "expected overflow masks and finite half error <= 2 ULP",
+    "untouched_storage": "exact including NaN placement"
+  }
+}

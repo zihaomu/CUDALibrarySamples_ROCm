@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+import argparse,json,os,shlex,tarfile
+from pathlib import Path
+from experiment import Experiment,ROOT,write,digest
+sdk=json.loads((ROOT/'migration/reports/rewrite-mathdx-sdk.json').read_text());host='nvidia-5090x2';sdkinclude=sdk['remote']+'/sdk/nvidia-mathdx-26.06.1-cuda13/nvidia/mathdx/26.06/include'
+parser=argparse.ArgumentParser();parser.add_argument('--only',nargs='*',default=[]);args=parser.parse_args()
+spec=[p for p in json.loads((ROOT/'migration/rewrite/first-eight.json').read_text())['profiles'] if p['batch']=='R2'];results={}
+history=ROOT/'migration/reports/rewrite-native-mathdx.json';previous=json.loads(history.read_text()) if history.exists() else {}
+results.update(previous)
+for profile in spec:
+ if args.only and profile['kind'] not in args.only:continue
+ kind=profile['kind'];original=ROOT/profile['source'];e=Experiment('R2',profile['sample_id'],'cuda-native-MathDx',sources=[original,Path(__file__),ROOT/'tools/moat/native_mathdx_capture.hpp'],parent=previous.get(kind,{}).get('experiment_id'),hypothesis='Run original MathDx source with SDK 26.06.1 with vendored CuTe, explicit SM120 dispatch and relocatable-device/LTO linking to libcusolverdx.a; retain native input/output and launch traits before the host reference changes buffers.')
+ generated=e.path/'src'/profile['source'];generated.parent.mkdir(parents=True);text='#include "native_mathdx_capture.hpp"\n'+original.read_text()
+ load='native_emit("input_A",A'+(',size_t(batches)*one_batch_size_A' if kind in ['posv','trsm'] else '')+');\n'
+ if kind in ['posv','trsm']:load+='native_emit("input_B",B,size_t(batches)*one_batch_size_B);\n'
+ marker='CUDA_CHECK_AND_EXIT(cudaMalloc';at=text.index(marker);text=text[:at]+load+text[at:]
+ if kind=='lu':
+  marker='// cuSolver reference';out='native_emit("output",L);native_emit("pivots",ipiv);native_emit("info",std::vector<int>{info});\n'
+ elif kind=='posv':
+  marker='if (std::accumulate(info.begin()';out='native_emit("factor",L,size_t(batches)*one_batch_size_A);native_emit("output",X,size_t(batches)*one_batch_size_B);native_emit("info",info,size_t(batches));\n'
+ else:
+  marker='// Reference using cuBLAS trsm';out='native_emit("output",X,size_t(batches)*one_batch_size_B);native_emit("A_after",A,size_t(batches)*one_batch_size_A);\n'
+ at=text.index(marker);text=text[:at]+out+text[at:];generated.write_text(text)
+ remote='/tmp/'+e.id;bundle=e.path/'source.tar.gz'
+ with tarfile.open(bundle,'w:gz') as f:
+  f.add(generated,arcname=profile['source']);f.add(ROOT/'tools/moat/native_mathdx_capture.hpp',arcname='native_mathdx_capture.hpp')
+  f.add(ROOT/'MathDx/cuSolverDx/common',arcname='MathDx/cuSolverDx/common')
+  if (ROOT/'MathDx/common').exists():f.add(ROOT/'MathDx/common',arcname='MathDx/common')
+ commands=[(['ssh',host,shlex.join(['mkdir','-p',remote+'/outputs'])],'prepare'),(['scp',str(bundle),host+':'+remote+'/source.tar.gz'],'upload'),(['ssh',host,shlex.join(['tar','-xzf',remote+'/source.tar.gz','-C',remote])],'unpack'),(['ssh',host,shlex.join(['/usr/local/cuda-13.4/bin/nvcc','-std=c++17','-O2','--expt-relaxed-constexpr','--extended-lambda','-arch=sm_120','-DCUSOLVERDX_EXAMPLE_ENABLE_SM_120','-rdc=true','-dlto','-I'+sdkinclude,'-I'+str(Path(sdkinclude).parent/'external/cutlass/include'),'-I'+remote,remote+'/'+profile['source'],str(Path(sdkinclude).parent/'lib/libcusolverdx.a'),'-lcublas','-lcusolver','-o',remote+'/native'])],'build')]
+ rc=0
+ for cmd,phase in commands:
+  rc=e.command(cmd,phase,timeout=240)
+  if rc:break
+ if rc==0:
+  rc=e.command(['ssh',host,shlex.join(['env','NATIVE_CAPTURE_OUTPUT='+remote+'/outputs',remote+'/native'])],'native-run',timeout=180)
+  copy=e.command(['scp','-r',host+':'+remote+'/outputs/.',str(e.path/'outputs')],'collect',timeout=60)
+  if rc==0:rc=copy
+ evidence=e.finish('EXECUTED' if rc==0 else 'NATIVE_SDK_FAILED',reason=None if rc==0 else f'{phase} or native run exit {rc}')
+ results[kind]=dict(return_code=rc,evidence=evidence,experiment_id=e.id,output=str((e.path/'outputs').relative_to(ROOT)),original_sha256=digest(original),instrumented_sha256=digest(generated),sdk=sdk)
+ write(ROOT/'migration/reports/rewrite-native-mathdx.json',results);print(kind,rc,evidence,flush=True)

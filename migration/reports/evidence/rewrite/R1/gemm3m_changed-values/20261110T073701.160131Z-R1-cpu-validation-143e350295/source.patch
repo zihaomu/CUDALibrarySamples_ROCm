@@ -1,0 +1,1085 @@
+diff --git a/README.md b/README.md
+index 31e9cc28..56f80436 100644
+--- a/README.md
++++ b/README.md
+@@ -2,6 +2,8 @@
+ 
+ # CUDA Library Samples on ROCm
+ 
++[MOAT 重写计划](migration/moat-rewrite-plan.md) · [重写实时进展与实验日志](migration/reports/rewrite-progress.md)
++
+ 对照 NVIDIA CUDA Library Samples，逐例选择 AMD/ROCm 生态中适合的库并实现。每例公开实际使用库、实现程度、正确性结果、CUDA 对照及失败原因。保留 CUDA 原始源码作为参考；AMD 实验固定 ROCm 10.1.0 / Radeon AI PRO R9700（gfx1201），CUDA 对照使用双 RTX 5090 机器。
+ 
+ [B12–B15 实施与缺口](migration/reports/batches12-15.md) · [B9–B11 验收](migration/reports/batches9-11.md) · [B4–B8 验收](migration/reports/batches4-8.md) · [后续批次计划与能力边界](migration/roadmap.md) · [支持方式与详细日志总表](migration/reports/support-log-index.md) · [模块支持矩阵](#模块支持矩阵) · [已验收算子](#已验收算子与验证范围) · [未通过的具体原因](#未通过和不支持的具体原因) · [设计与实施日志](migration/design.md) · [执行交付报告](migration/reports/plan-execution.md) · [逐例清单](migration/samples.yaml) · [环境锁](migration/environments/project.lock.json)
+diff --git a/rocm/ported/MathDx/cuSolverDx/00_Introduction/posv_batched_block.cu b/rocm/ported/MathDx/cuSolverDx/00_Introduction/posv_batched_block.cu
+index 1af0d5fa..2a70d1eb 100644
+--- a/rocm/ported/MathDx/cuSolverDx/00_Introduction/posv_batched_block.cu
++++ b/rocm/ported/MathDx/cuSolverDx/00_Introduction/posv_batched_block.cu
+@@ -1,213 +1,2 @@
+-/*
+- * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+- * SPDX-License-Identifier: Apache-2.0
+- *
+- * Licensed under the Apache License, Version 2.0 (the "License");
+- * you may not use this file except in compliance with the License.
+- * You may obtain a copy of the License at
+- *
+- * http://www.apache.org/licenses/LICENSE-2.0
+- *
+- * Unless required by applicable law or agreed to in writing, software
+- * distributed under the License is distributed on an "AS IS" BASIS,
+- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+- * See the License for the specific language governing permissions and
+- * limitations under the License.
+- */
+-
+-#include "hip/hip_runtime.h"
+-#include <cusolverdx.hpp>
+-
+-#include "../common/cudart.hpp"
+-#include "../common/error_checking.hpp"
+-#include "../common/random.hpp"
+-#include "../common/example_sm_runner.hpp"
+-#include "../common/device_io.hpp"
+-#include "../common/measure.hpp"
+-#include "../common/print.hpp"
+-#include "../common/cusolver_reference_cholesky.hpp"
+-
+-// This example demonstrates how to use cuSolverDx API with Block execution to solve a batched linear systems with multiple right hand side
+-// after performing Cholesky factorization of the batched symmetric, positive-definite matrix A.
+-// The results are compared with the reference values obtained with cuSolver host API.
+-
+-template<class POSV, unsigned int BatchesPerBlock, class DataType = typename POSV::a_data_type>
+-__global__ __launch_bounds__(POSV::max_threads_per_block) void posv_kernel(
+-        DataType* A, const unsigned int lda_gmem, DataType* B, const unsigned int ldb_gmem, typename POSV::status_type* info, const unsigned int batches) {
+-    CUSOLVERDX_SKIP_IF_NOT_APPLICABLE_SM(POSV);
+-
+-    using namespace cusolverdx;
+-    constexpr auto m                     = POSV::m_size;
+-    constexpr auto nrhs                  = POSV::k_size;
+-    const auto     one_batch_size_a_gmem = lda_gmem * m;
+-    const auto     one_batch_size_b_gmem = (arrangement_of_v_b<POSV> == arrangement::col_major) ? ldb_gmem * nrhs : m * ldb_gmem;
+-
+-    constexpr auto lda_smem              = POSV::lda;
+-    constexpr auto ldb_smem              = POSV::ldb;
+-    constexpr auto one_batch_size_a_smem = lda_smem * m;
+-    constexpr auto one_batch_size_b_smem = (arrangement_of_v_b<POSV> == arrangement::col_major) ? ldb_smem * nrhs : m * ldb_smem;
+-
+-    extern __shared__ __align__(sizeof(DataType)) cusolverdx::byte shared_mem[];
+-
+-    DataType* As = reinterpret_cast<DataType*>(shared_mem);
+-    DataType* Bs = As + one_batch_size_a_smem * BatchesPerBlock;
+-
+-    const auto batch_idx = blockIdx.x * BatchesPerBlock;
+-    if (batch_idx >= batches)
+-        return;
+-
+-    auto Ag = A + size_t(one_batch_size_a_gmem) * batch_idx;
+-    auto Bg = B + size_t(one_batch_size_b_gmem) * batch_idx;
+-
+-    // Load data from global memory to shared memory
+-    common::io<POSV, BatchesPerBlock>::load_a(Ag, lda_gmem, As, lda_smem);
+-    common::io<POSV, BatchesPerBlock>::load_b(Bg, ldb_gmem, Bs, ldb_smem);
+-
+-    POSV().execute(As, lda_smem, Bs, &info[batch_idx]);
+-
+-    // Store results back to global memory
+-    common::io<POSV, BatchesPerBlock>::store_a(As, lda_smem, Ag, lda_gmem);
+-    common::io<POSV, BatchesPerBlock>::store_b(Bs, ldb_smem, Bg, ldb_gmem);
+-}
+-
+-template<int Arch>
+-int simple_posv_batched() {
+-
+-    using namespace cusolverdx;
+-
+-    using POSV = decltype(Size<32 /* = m */, 32 /* = n */, 1 /* = k */>() + Precision<double>() + Type<type::complex>() + Function<function::posv>() +
+-                          FillMode<lower>() + Arrangement<col_major /* A, X, and B */>() + SM<Arch>() + Block());
+-
+-    constexpr unsigned bpb = POSV::batches_per_block;
+-    std::cout << "Using Suggested Batches per block = " << bpb << std::endl;
+-    std::cout << "Using Suggested BlockDim = " << POSV::suggested_block_dim.x << std::endl;
+-    std::cout << "Using Specified BlockDim = " << POSV::block_dim.x << std::endl;
+-
+-    using data_type      = typename POSV::a_data_type;
+-    using cuda_data_type = typename POSV::a_cuda_data_type;
+-
+-    constexpr auto m    = POSV::m_size;
+-    constexpr auto n    = POSV::n_size;
+-    constexpr auto nrhs = POSV::k_size;
+-    static_assert(m == n, "posv is for Hermitian positive-definite matrix matrix only");
+-    constexpr auto lda_smem = POSV::lda;
+-    constexpr auto ldb_smem = POSV::ldb;
+-
+-    constexpr bool is_col_maj_a = arrangement_of_v_a<POSV> == arrangement::col_major;
+-    constexpr bool is_col_maj_b = arrangement_of_v_b<POSV> == arrangement::col_major;
+-
+-    // no padding for global memory
+-    constexpr auto lda = m;
+-    constexpr auto ldb = is_col_maj_b ? m : nrhs;
+-
+-    printf("Size m = %d, n = %d, nrhs = %d\n", m, n, nrhs);
+-    std::cout << "Using leading dimension LDA = " << lda_smem << ", LDB = " << ldb_smem << std::endl;
+-
+-    const auto batches        = 2;
+-    const auto padded_batches = (batches + bpb - 1) / bpb * bpb;
+-
+-    const auto one_batch_size_A = lda * n; // no padding for global memory
+-    const auto one_batch_size_B = m * nrhs;
+-
+-    hipStream_t stream = nullptr;
+-    CUDA_CHECK_AND_EXIT(hipStreamCreateWithFlags(&stream, hipStreamNonBlocking));
+-
+-    std::vector<data_type> A(one_batch_size_A * padded_batches);
+-    std::vector<data_type> L(one_batch_size_A * padded_batches);
+-
+-    common::fillup_random_diagonal_dominant_matrix<data_type>(arrangement_of_v_a<POSV> == col_major, m, n, A.data(), lda, false, 2, 4, batches);
+-
+-    std::vector<data_type> B(one_batch_size_B * padded_batches);
+-    common::fillup_random_matrix<data_type>(arrangement_of_v_b<POSV> == col_major, m, nrhs, B.data(), ldb, false, false, -1, 1, batches);
+-    std::vector<data_type> X(one_batch_size_B * padded_batches);
+-
+-    std::vector<int> info(padded_batches, 0);
+-    data_type*       d_A    = nullptr; /* device copy of A */
+-    data_type*       d_B    = nullptr; /* device copy of B */
+-    int*             d_info = nullptr; /* error info */
+-
+-
+-    CUDA_CHECK_AND_EXIT(hipMalloc(reinterpret_cast<void**>(&d_A), sizeof(data_type) * A.size()));
+-    CUDA_CHECK_AND_EXIT(hipMalloc(reinterpret_cast<void**>(&d_B), sizeof(data_type) * B.size()));
+-    CUDA_CHECK_AND_EXIT(hipMalloc(reinterpret_cast<void**>(&d_info), sizeof(int) * padded_batches));
+-
+-    CUDA_CHECK_AND_EXIT(hipMemcpyAsync(d_A, A.data(), sizeof(data_type) * A.size(), hipMemcpyHostToDevice, stream));
+-    CUDA_CHECK_AND_EXIT(hipMemcpyAsync(d_B, B.data(), sizeof(data_type) * B.size(), hipMemcpyHostToDevice, stream));
+-
+-    // Increase max dynamic shared memory for the kernel if needed.
+-    const auto sm_size = POSV::shared_memory_size;
+-
+-    const auto kernel = posv_kernel<POSV, POSV::batches_per_block>;
+-    CUDA_CHECK_AND_EXIT(hipFuncSetAttribute(reinterpret_cast<const void*>(kernel), hipFuncAttributeMaxDynamicSharedMemorySize, sm_size));
+-
+-    //Invokes kernel
+-    kernel<<<(batches + bpb - 1) / bpb, POSV::block_dim, sm_size, stream>>>(d_A, lda, d_B, ldb, d_info, batches);
+-    CUDA_CHECK_AND_EXIT(hipGetLastError());
+-    CUDA_CHECK_AND_EXIT(hipStreamSynchronize(stream));
+-
+-    CUDA_CHECK_AND_EXIT(hipMemcpyAsync(L.data(), d_A, sizeof(data_type) * A.size(), hipMemcpyDeviceToHost, stream));
+-    CUDA_CHECK_AND_EXIT(hipMemcpyAsync(X.data(), d_B, sizeof(data_type) * B.size(), hipMemcpyDeviceToHost, stream));
+-    CUDA_CHECK_AND_EXIT(hipMemcpyAsync(info.data(), d_info, sizeof(int) * batches, hipMemcpyDeviceToHost, stream));
+-
+-    CUDA_CHECK_AND_EXIT(hipStreamSynchronize(stream));
+-    if (std::accumulate(info.begin(), info.end(), 0) != 0) {
+-        std::cout << "non-zero d_info returned for at least one of the batches after cuSolverDx kernel \n";
+-        for (int j = 0; j < batches; j++) {
+-            if (info[j] != 0)
+-                std::cout << "info[" << j << "]=" << info[j] << std::endl;
+-        }
+-        return -1;
+-    }
+-
+-    // Uncomment below to print the results after cuSolverDx execute
+-    //printf("after cuSolverDx execute\n");
+-    //printf("L = \n");
+-    //common::print_matrix<data_type, m, n, lda, is_col_maj_a>(L.data(), padded_batches);
+-    //printf("=====\n");
+-    //printf("X = \n");
+-    // common::print_matrix<data_type, n, nrhs, ldb, is_col_maj_b>(X.data(), padded_batches);
+-    // printf("=====\n");
+-
+-    //=======================================================
+-    // cuSolver reference with potrfBatched and portsBatched
+-    //=======================================================
+-    common::reference_cusolver_cholesky<data_type, cuda_data_type, true>(A, B, info.data(), m, nrhs, padded_batches,
+-            (fill_mode_of_v<POSV> == fill_mode::lower), /* is_lower? */
+-            is_col_maj_a, is_col_maj_b, batches);
+-
+-    auto total_relative_error = common::check_error<data_type, data_type>(L.data(), A.data(), batches * one_batch_size_A);
+-    printf("BATCHED POSV: relative error of A between cuSolverDx and cuSolver results: = %e\n", total_relative_error);
+-
+-    // Uncomment below to print the results after cuSolver reference execute
+-    // printf("after cuSolver API execute\n");
+-    // printf("A = \n");
+-    // common::print_matrix<data_type, m, n, lda, is_col_maj_a>(A.data(), padded_batches);
+-    // printf("B = \n");
+-    // common::print_matrix<data_type, n, nrhs, ldb, is_col_maj_b>(B.data(), padded_batches);
+-    // printf("=====\n");
+-
+-    total_relative_error = common::check_error<data_type, data_type>(X.data(), B.data(), batches * one_batch_size_B);
+-    printf("BATCHED POSV: relative error of B between cuSolverDx and cuSolver results: = %e\n", total_relative_error);
+-    if (common::is_error_acceptable<data_type>(total_relative_error)) {
+-        std::cout << "Success compared to cuSolver potrSBatched Result " << std::endl;
+-    } else {
+-        std::cout << "Failure compared to cuSolver potrSBatched Result " << std::endl;
+-        return 1;
+-    }
+-
+-    CUDA_CHECK_AND_EXIT(hipFree(d_A));
+-    CUDA_CHECK_AND_EXIT(hipFree(d_B));
+-    CUDA_CHECK_AND_EXIT(hipFree(d_info));
+-
+-    CUDA_CHECK_AND_EXIT(hipDeviceReset());
+-
+-    return 0;
+-}
+-
+-template<int Arch>
+-struct simple_posv_batched_functor {
+-    int operator()() { return simple_posv_batched<Arch>(); }
+-};
+-
+-
+-int main() { return common::run_example_with_sm<simple_posv_batched_functor>(); }
++#include "block_solvers.hpp"
++int main(){return rewrite::solver_main("posv");}
+diff --git a/rocm/ported/MathDx/cuSolverDx/01_Linear_Solve/getrf_partial_pivot_block.cu b/rocm/ported/MathDx/cuSolverDx/01_Linear_Solve/getrf_partial_pivot_block.cu
+index 62be7f27..53a2c6ab 100644
+--- a/rocm/ported/MathDx/cuSolverDx/01_Linear_Solve/getrf_partial_pivot_block.cu
++++ b/rocm/ported/MathDx/cuSolverDx/01_Linear_Solve/getrf_partial_pivot_block.cu
+@@ -1,164 +1,2 @@
+-/*
+- * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+- * SPDX-License-Identifier: Apache-2.0
+- *
+- * Licensed under the Apache License, Version 2.0 (the "License");
+- * you may not use this file except in compliance with the License.
+- * You may obtain a copy of the License at
+- *
+- * http://www.apache.org/licenses/LICENSE-2.0
+- *
+- * Unless required by applicable law or agreed to in writing, software
+- * distributed under the License is distributed on an "AS IS" BASIS,
+- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+- * See the License for the specific language governing permissions and
+- * limitations under the License.
+- */ 
+-
+-#include "hip/hip_runtime.h"
+-#include <cusolverdx.hpp>
+-#include <cusolverdx_io.hpp>
+-
+-#include "../common/cudart.hpp"
+-#include "../common/error_checking.hpp"
+-#include "../common/random.hpp"
+-#include "../common/example_sm_runner.hpp"
+-#include "../common/device_io.hpp"
+-#include "../common/cusolver_reference_lu.hpp"
+-
+-// This example demonstrates using cuSolverDx API to perform LU factorization with pivoting on a single-batch, general MxN matrix.
+-// The results are compared with the reference values obtained with cuSolver host API.
+-
+-template<class Solver, typename DataType = typename Solver::a_data_type>
+-__global__ __launch_bounds__(Solver::max_threads_per_block) void kernel(DataType* A, typename Solver::status_type* info, int* d_ipiv) {
+-    CUSOLVERDX_SKIP_IF_NOT_APPLICABLE_SM(Solver);
+-
+-    constexpr auto m        = Solver::m_size;
+-    constexpr auto n        = Solver::n_size;
+-    constexpr auto lda_smem = Solver::lda;
+-
+-    constexpr auto lda_gmem              = (cusolverdx::arrangement_of_v_a<Solver> == cusolverdx::col_major) ? m : n;
+-    constexpr auto one_batch_size_a_smem = (cusolverdx::arrangement_of_v_a<Solver> == cusolverdx::col_major) ? lda_smem * n : m * lda_smem;
+-
+-    extern __shared__ __align__(16) cusolverdx::byte shared_mem[];
+-    // Slice shared memory into pointers
+-    auto [As, ipivs] = cusolverdx::shared_memory::slice<DataType, int>(shared_mem, alignof(DataType), one_batch_size_a_smem,
+-            alignof(int) // the size (number of elements) may be omitted for the last pointer
+-    );
+-
+-    // Load data from global memory to shared memory
+-    common::io<Solver>::load_a(A, lda_gmem, As, lda_smem);
+-
+-    Solver().execute(As, ipivs, info);
+-
+-    // Store results back to global memory
+-    common::io<Solver>::store_a(As, lda_smem, A, lda_gmem);
+-    int thread_id = threadIdx.x + Solver::block_dim.x * (threadIdx.y + Solver::block_dim.y * threadIdx.z);
+-    for (int i = thread_id; i < min(m, n); i += Solver::max_threads_per_block) {
+-        d_ipiv[i] = ipivs[i];
+-    }
+-}
+-
+-template<int Arch>
+-int getrf_partial_pivot_block() {
+-
+-    using namespace cusolverdx;
+-    using Solver = decltype(Size<48, 32>() + Precision<float>() + Type<type::complex>() + Function<getrf_partial_pivot>() +
+-                            Arrangement<arrangement::col_major>() + SM<Arch>() + Block() + BlockDim<33, 1, 1>());
+-
+-    using data_type      = typename Solver::a_data_type;
+-    using cuda_data_type = typename Solver::a_cuda_data_type;
+-
+-    constexpr unsigned bpb = Solver::batches_per_block;
+-    std::cout << "Suggested Batches per block = " << bpb << std::endl;
+-    std::cout << "Suggested BlockDim = " << Solver::suggested_block_dim.x << std::endl;
+-    std::cout << "BlockDim Used = " << Solver::block_dim.x << std::endl;
+-
+-    constexpr auto m = Solver::m_size;
+-    constexpr auto n = Solver::n_size;
+-
+-    constexpr bool is_col_maj = arrangement_of_v_a<Solver> == arrangement::col_major;
+-    constexpr auto lda        = is_col_maj ? m : n;
+-    constexpr auto input_size = is_col_maj ? lda * n : m * lda;
+-
+-    hipStream_t stream = nullptr;
+-    CUDA_CHECK_AND_EXIT(hipStreamCreateWithFlags(&stream, hipStreamNonBlocking));
+-
+-    std::vector<data_type> A(input_size);
+-    common::fillup_random_matrix<data_type>(is_col_maj, m, n, A.data(), lda, false, false, 2, 4); // not symmetric and not diagonally dominant
+-
+-    std::vector<data_type> L(input_size);
+-    std::vector<int>       ipiv(min(m, n), 0);
+-    std::vector<int64_t>   ipiv_ref(min(m, n), 0);
+-    int                    info   = 0;
+-    data_type*             d_A    = nullptr; /* device copy of A */
+-    int*                   d_info = nullptr; /* error info */
+-    int*                   d_ipiv = nullptr;
+-
+-    CUDA_CHECK_AND_EXIT(hipMalloc(reinterpret_cast<void**>(&d_A), sizeof(data_type) * A.size()));
+-    CUDA_CHECK_AND_EXIT(hipMalloc(reinterpret_cast<void**>(&d_info), sizeof(int)));
+-    CUDA_CHECK_AND_EXIT(hipMalloc(reinterpret_cast<void**>(&d_ipiv), sizeof(int) * ipiv.size()));
+-
+-    CUDA_CHECK_AND_EXIT(hipMemcpyAsync(d_A, A.data(), sizeof(data_type) * A.size(), hipMemcpyHostToDevice, stream));
+-
+-    CUDA_CHECK_AND_EXIT(hipFuncSetAttribute(reinterpret_cast<const void*>(kernel<Solver>), hipFuncAttributeMaxDynamicSharedMemorySize, Solver::shared_memory_size));
+-
+-    //Invokes kernel
+-    kernel<Solver><<<1, Solver::block_dim, Solver::shared_memory_size, stream>>>(d_A, d_info, d_ipiv);
+-    CUDA_CHECK_AND_EXIT(hipGetLastError());
+-    CUDA_CHECK_AND_EXIT(hipDeviceSynchronize());
+-
+-    CUDA_CHECK_AND_EXIT(hipMemcpyAsync(L.data(), d_A, sizeof(data_type) * A.size(), hipMemcpyDeviceToHost, stream));
+-    CUDA_CHECK_AND_EXIT(hipMemcpyAsync(ipiv.data(), d_ipiv, sizeof(int) * ipiv.size(), hipMemcpyDeviceToHost, stream));
+-    CUDA_CHECK_AND_EXIT(hipMemcpyAsync(&info, d_info, sizeof(int), hipMemcpyDeviceToHost, stream));
+-
+-    CUDA_CHECK_AND_EXIT(hipStreamSynchronize(stream));
+-
+-    printf("after cuSolverDx getrf kernel: info = %d\n", info);
+-    if (0 > info) {
+-        std::printf("%d-th parameter is wrong \n", -info);
+-        exit(1);
+-    }
+-
+-    /* free resources */
+-    CUDA_CHECK_AND_EXIT(hipFree(d_A));
+-    CUDA_CHECK_AND_EXIT(hipFree(d_info));
+-    CUDA_CHECK_AND_EXIT(hipFree(d_ipiv));
+-
+-    //=========================
+-    // cuSolver reference
+-    //=========================
+-    std::vector<data_type> dummy_B;
+-    common::reference_cusolver_lu<data_type, cuda_data_type>(A, dummy_B, &info, m, n, 1, 1 /* padded_batches */, true /* is_pivot */, is_col_maj,
+-            true /* is_col_major_b */, false /* is_trans_a */, ipiv_ref.data());
+-
+-
+-    const auto total_relative_error = common::check_error<data_type, data_type>(L.data(), A.data(), A.size());
+-    std::cout << "GETRF partial pivoting: relative error of A between cuSolverDx and cuSolver results: " << total_relative_error << std::endl;
+-
+-
+-    if (!common::is_error_acceptable<data_type>(total_relative_error)) {
+-        std::cout << "Failure compared with cuSolver API results A" << std::endl;
+-        return 1;
+-    }
+-
+-    // check ipiv
+-    for (int i = 0; i < min(m, n); ++i) {
+-        if (ipiv[i] != ipiv_ref[i]) {
+-            printf("ipiv[%d] = %d, ipiv_ref[%d] = %ld differ! \n", i, ipiv[i], i, ipiv_ref[i]);
+-            std::cout << "Failure compared with cuSolver API results ipiv" << std::endl;
+-            return 1;
+-        }
+-    }
+-
+-    std::cout << "Success compared with cuSolver API results" << std::endl;
+-    return 0;
+-}
+-
+-template<int Arch>
+-struct getrf_partial_pivot_block_functor {
+-    int operator()() { return getrf_partial_pivot_block<Arch>(); }
+-};
+-
+-
+-int main() { return common::run_example_with_sm<getrf_partial_pivot_block_functor>(); }
++#include "block_solvers.hpp"
++int main(){return rewrite::solver_main("lu");}
+diff --git a/rocm/ported/MathDx/cuSolverDx/07_BLAS/trsm_batched_block.cu b/rocm/ported/MathDx/cuSolverDx/07_BLAS/trsm_batched_block.cu
+index 0ad93017..d65715c2 100644
+--- a/rocm/ported/MathDx/cuSolverDx/07_BLAS/trsm_batched_block.cu
++++ b/rocm/ported/MathDx/cuSolverDx/07_BLAS/trsm_batched_block.cu
+@@ -1,207 +1,2 @@
+-/*
+- * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+- * SPDX-License-Identifier: Apache-2.0
+- *
+- * Licensed under the Apache License, Version 2.0 (the "License");
+- * you may not use this file except in compliance with the License.
+- * You may obtain a copy of the License at
+- *
+- * http://www.apache.org/licenses/LICENSE-2.0
+- *
+- * Unless required by applicable law or agreed to in writing, software
+- * distributed under the License is distributed on an "AS IS" BASIS,
+- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+- * See the License for the specific language governing permissions and
+- * limitations under the License.
+- */ 
+-
+-#include "hip/hip_runtime.h"
+-#include <cusolverdx.hpp>
+-#include <cusolverdx_io.hpp>
+-
+-#include "../common/cudart.hpp"
+-#include "../common/error_checking.hpp"
+-#include "../common/random.hpp"
+-#include "../common/example_sm_runner.hpp"
+-#include "../common/device_io.hpp"
+-#include "../common/print.hpp"
+-#include "../common/cublas_reference_trsm.hpp"
+-
+-// This example demonstrates how to use cuSolverDx block execution API to solve triangular systems
+-// The results are compared with the reference values obtained with cublasXtrsm API.
+-
+-template<class TRSM, unsigned int BatchesPerBlock, class DataType = typename TRSM::a_data_type>
+-__global__ __launch_bounds__(TRSM::max_threads_per_block) void trsm_kernel(const DataType* A, const unsigned int lda_gmem, DataType* B, const unsigned int ldb_gmem, const unsigned int batches) {
+-    CUSOLVERDX_SKIP_IF_NOT_APPLICABLE_SM(TRSM);
+-
+-    constexpr auto a_m = (cusolverdx::side_of_v<TRSM> == cusolverdx::side::left) ? TRSM::m_size : TRSM::n_size;
+-
+-    constexpr auto one_batch_size_a = a_m * a_m;
+-    constexpr auto one_batch_size_b = TRSM::m_size * TRSM::n_size;
+-
+-    constexpr auto lda_smem              = TRSM::lda;
+-    constexpr auto ldb_smem              = TRSM::ldb;
+-    const auto     one_batch_size_a_smem = lda_smem * a_m;
+-    const auto     one_batch_size_b_smem = ldb_smem * (cusolverdx::arrangement_of_v_b<TRSM> == cusolverdx::col_major ? TRSM::n_size : TRSM::m_size);
+-
+-
+-    extern __shared__ __align__(16) cusolverdx::byte shared_mem[];
+-    // Slice shared memory into pointers
+-    auto [As, Bs] = cusolverdx::shared_memory::slice<DataType, DataType>(shared_mem,
+-                                                                         alignof(DataType),
+-                                                                         one_batch_size_a_smem * BatchesPerBlock,
+-                                                                         alignof(DataType) // the size (number of elements) may be omitted for the last pointer
+-    );
+-
+-    const auto batch_idx = blockIdx.x * BatchesPerBlock;
+-    if (batch_idx >= batches)
+-        return;
+-
+-    auto this_A = A + one_batch_size_a * batch_idx;
+-    auto this_B = B + one_batch_size_b * batch_idx;
+-
+-    // Load data from global memory to shared memory
+-    common::io<TRSM, BatchesPerBlock>::load_a<a_m, a_m, cusolverdx::arrangement_of_v_a<TRSM>>(this_A, lda_gmem, As, lda_smem);
+-    common::io<TRSM, BatchesPerBlock>::load_b<TRSM::m_size, TRSM::n_size>(this_B, ldb_gmem, Bs, ldb_smem);
+-
+-    TRSM().execute(As, lda_smem, Bs, ldb_smem);
+-
+-    // store
+-    common::io<TRSM, BatchesPerBlock>::store_b<TRSM::m_size, TRSM::n_size>(Bs, ldb_smem, this_B, ldb_gmem);
+-}
+-
+-template<int Arch>
+-int trsm_block_execution() {
+-    using namespace cusolverdx;
+-
+-    // The Size Operator for TRSM only takes M, N. If K is specified, it is ignored. 
+-    using TRSM = decltype(Size<32, 33>() + Precision<double>() + Type<type::real>() + Function<function::trsm>() + Side<side::right>() + FillMode<lower>() + TransposeMode<non_trans>() +
+-                          Diag<diag::non_unit>() + Arrangement<col_major, col_major>() + SM<Arch>() + Block());
+-
+-    constexpr unsigned bpb = TRSM::batches_per_block;
+-    std::cout << "Using Suggested Batches per block = " << bpb << std::endl;
+-    std::cout << "Using Suggested BlockDim = " << TRSM::suggested_block_dim.x << std::endl;
+-    std::cout << "Using Specified BlockDim = " << TRSM::block_dim.x << std::endl;
+-
+-
+-    using data_type      = typename TRSM::a_data_type;
+-    using cuda_data_type = typename TRSM::a_cuda_data_type;
+-
+-    constexpr auto m        = TRSM::m_size;
+-    constexpr auto n        = TRSM::n_size;
+-    constexpr auto lda_smem = TRSM::lda;
+-    constexpr auto ldb_smem = TRSM::ldb;
+-
+-    std::cout << "lda_smem = " << lda_smem << ", ldb_smem = " << ldb_smem << std::endl;
+-
+-    constexpr bool is_col_maj_a = arrangement_of_v_a<TRSM> == arrangement::col_major;
+-    constexpr bool is_col_maj_b = arrangement_of_v_b<TRSM> == arrangement::col_major;
+-
+-    // no padding for global memory
+-    constexpr auto a_m = (side_of_v<TRSM> == side::left) ? m : n;
+-    constexpr auto lda = a_m;
+-    constexpr auto ldb = is_col_maj_b ? m : n;
+-
+-    printf("TRSM Size m = %d, n = %d\n", m, n);
+-    std::cout << "Using leading dimension LDA = " << lda_smem << ", LDB = " << ldb_smem << std::endl;
+-
+-    const auto batches        = 1;
+-    const auto padded_batches = (batches + bpb - 1) / bpb * bpb;
+-
+-    const auto one_batch_size_A = lda * a_m; // no padding for global memory
+-    const auto one_batch_size_B = m * n;
+-
+-    hipStream_t stream = nullptr;
+-    CUDA_CHECK_AND_EXIT(hipStreamCreateWithFlags(&stream, hipStreamNonBlocking));
+-
+-    std::vector<data_type> A(one_batch_size_A * padded_batches);
+-    std::vector<data_type> B(one_batch_size_B * padded_batches);
+-    std::vector<data_type> X(one_batch_size_B * padded_batches);
+-
+-    // Fill A with a triangular matrix
+-    common::fillup_random_matrix<data_type>(is_col_maj_a, a_m, a_m, A.data(), lda, false /* symm */, true /* diag_dom */, 1, 2, batches);
+-
+-    // Fill B with random values
+-    common::fillup_random_matrix<data_type>(is_col_maj_b, m, n, B.data(), ldb, false, false, -2, 1, batches);
+-
+-    data_type* d_A = nullptr; /* device copy of A */
+-    data_type* d_B = nullptr; /* device copy of B */
+-
+-    CUDA_CHECK_AND_EXIT(hipMalloc(reinterpret_cast<void**>(&d_A), sizeof(data_type) * A.size()));
+-    CUDA_CHECK_AND_EXIT(hipMalloc(reinterpret_cast<void**>(&d_B), sizeof(data_type) * B.size()));
+-
+-    CUDA_CHECK_AND_EXIT(hipMemcpyAsync(d_A, A.data(), sizeof(data_type) * A.size(), hipMemcpyHostToDevice, stream));
+-    CUDA_CHECK_AND_EXIT(hipMemcpyAsync(d_B, B.data(), sizeof(data_type) * B.size(), hipMemcpyHostToDevice, stream));
+-
+-    // Increase max dynamic shared memory for the kernel if needed.
+-    const auto sm_size = TRSM::shared_memory_size;
+-    std::cout << "sm_size = " << sm_size << std::endl;
+-
+-    const auto kernel = trsm_kernel<TRSM, TRSM::batches_per_block>;
+-    CUDA_CHECK_AND_EXIT(hipFuncSetAttribute(reinterpret_cast<const void*>(kernel), hipFuncAttributeMaxDynamicSharedMemorySize, sm_size));
+-
+-    //Invokes kernel
+-    kernel<<<(batches + bpb - 1) / bpb, TRSM::block_dim, sm_size, stream>>>(d_A, lda, d_B, ldb, batches);
+-    CUDA_CHECK_AND_EXIT(hipGetLastError());
+-    CUDA_CHECK_AND_EXIT(hipStreamSynchronize(stream));
+-
+-    CUDA_CHECK_AND_EXIT(hipMemcpyAsync(X.data(), d_B, sizeof(data_type) * B.size(), hipMemcpyDeviceToHost, stream));
+-    CUDA_CHECK_AND_EXIT(hipStreamSynchronize(stream));
+-
+-    // // Uncomment below to print the results after cuSolverDx execute
+-    // // print A
+-    // printf("A = \n");
+-    // common::print_matrix<data_type, a_m, a_m, lda, is_col_maj_a>(A.data(), batches);
+-    // printf("=====\n");
+-    // // print B
+-    // printf("B = \n");
+-    // common::print_matrix<data_type, m, n, ldb, is_col_maj_b>(B.data(), batches);
+-    // printf("=====\n");
+-    // printf("after cuSolverDx execute\n");
+-    // printf("X = \n");
+-    // common::print_matrix<data_type, m, n, ldb, is_col_maj_b>(X.data(), padded_batches);
+-    // printf("=====\n");
+-
+-    //=======================================================
+-    // Reference using cuBLAS trsm
+-    //=======================================================
+-    common::reference_cublas_trsm<data_type, cuda_data_type, false /* check_blas_trsm_perf */>(A,
+-                                                                                               B,
+-                                                                                               m,
+-                                                                                               n,
+-                                                                                               padded_batches,
+-                                                                                               side_of_v<TRSM> == side::left,
+-                                                                                               fill_mode_of_v<TRSM> == fill_mode::lower,
+-                                                                                               diag_of_v<TRSM> == diag::unit,
+-                                                                                               (transpose_mode_of_v<TRSM> == transpose::non_transposed) ? false : true,
+-                                                                                               is_col_maj_a,
+-                                                                                               is_col_maj_b,
+-                                                                                               batches);
+-
+-    // printf("cuBlas TRSM referece results\n");
+-    // common::print_matrix<data_type, m, n, ldb, is_col_maj_b>(B.data(), padded_batches);
+-    // printf("=====\n");
+-
+-    auto total_relative_error = common::check_error<data_type, data_type>(X.data(), B.data(), batches * one_batch_size_B);
+-    printf("TRSM: relative error between cuSolverDx and reference results: = %e\n", total_relative_error);
+-    if (common::is_error_acceptable<data_type>(total_relative_error)) {
+-        std::cout << "Success compared to reference Result " << std::endl;
+-    } else {
+-        std::cout << "Failure compared to reference Result " << std::endl;
+-        return 1;
+-    }
+-
+-    CUDA_CHECK_AND_EXIT(hipFree(d_A));
+-    CUDA_CHECK_AND_EXIT(hipFree(d_B));
+-
+-    CUDA_CHECK_AND_EXIT(hipDeviceReset());
+-
+-    return 0;
+-}
+-
+-template<int Arch>
+-struct trsm_block_execution_functor {
+-    int operator()() { return trsm_block_execution<Arch>(); }
+-};
+-
+-int main() { return common::run_example_with_sm<trsm_block_execution_functor>(); }
++#include "block_solvers.hpp"
++int main(){return rewrite::solver_main("trsm");}
+diff --git a/rocm/ported/cuBLAS/Extensions/Cherk3mEx/cublas_Cherk3mEx_example.cu b/rocm/ported/cuBLAS/Extensions/Cherk3mEx/cublas_Cherk3mEx_example.cu
+index a95537e1..1559d468 100644
+--- a/rocm/ported/cuBLAS/Extensions/Cherk3mEx/cublas_Cherk3mEx_example.cu
++++ b/rocm/ported/cuBLAS/Extensions/Cherk3mEx/cublas_Cherk3mEx_example.cu
+@@ -1,113 +1,2 @@
+-#include "observe.hpp"
+-/*
+- * SPDX-FileCopyrightText: Copyright (c) 2020 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+- * SPDX-License-Identifier: Apache-2.0
+- *
+- * Licensed under the Apache License, Version 2.0 (the "License");
+- * you may not use this file except in compliance with the License.
+- * You may obtain a copy of the License at
+- *
+- * http://www.apache.org/licenses/LICENSE-2.0
+- *
+- * Unless required by applicable law or agreed to in writing, software
+- * distributed under the License is distributed on an "AS IS" BASIS,
+- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+- * See the License for the specific language governing permissions and
+- * limitations under the License.
+- */
+-
+-
+-#include <cstdio>
+-#include <cstdlib>
+-#include <vector>
+-
+-#include <hipblas.h>
+-#include <hip/hip_runtime.h>
+-
+-#include "cublas_utils.h"
+-
+-using data_type = hipComplex;
+-
+-int main(int argc, char *argv[]) {
+-    hipblasHandle_t cublasH = NULL;
+-    hipStream_t stream = NULL;
+-
+-    const int m = 2;
+-    const int n = 2;
+-    const int k = 2;
+-    const int lda = 2;
+-    const int ldc = 2;
+-
+-    /*
+-     *   A = | 1.1 + 1.2j | 2.3 + 2.4j |
+-     *       | 3.5 + 3.6j | 4.7 + 4.8j |
+-     */
+-
+-    const std::vector<data_type> A = {{1.1, 1.2}, {3.5, 3.6}, {2.3, 2.4}, {4.7, 4.8}};
+-    std::vector<data_type> C(m * n);
+-    const float alpha = 1.0;
+-    const float beta = 0.0;
+-
+-    hipblasFillMode_t uplo = HIPBLAS_FILL_MODE_UPPER;
+-    hipblasOperation_t trans = HIPBLAS_OP_N;
+-
+-    data_type *d_A = nullptr;
+-    data_type *d_C = nullptr;
+-
+-    printf("A\n");
+-    print_matrix(n, k, A.data(), lda);
+-    printf("=====\n");
+-
+-    /* step 1: create hipblas handle, bind a stream */
+-    CUBLAS_CHECK(hipblasCreate(&cublasH));
+-
+-    CUDA_CHECK(hipStreamCreateWithFlags(&stream, hipStreamNonBlocking));
+-    CUBLAS_CHECK(hipblasSetStream(cublasH, stream));
+-
+-    /* step 2: copy data to device */
+-    CUDA_CHECK(hipMalloc(reinterpret_cast<void **>(&d_A), sizeof(data_type) * A.size()));
+-    CUDA_CHECK(hipMalloc(reinterpret_cast<void **>(&d_C), sizeof(data_type) * C.size()));
+-
+-    CUDA_CHECK(hipMemcpyAsync(d_A, A.data(), sizeof(data_type) * A.size(), hipMemcpyHostToDevice,
+-                               stream));
+-
+-    /* step 3: compute */
+-    CUBLAS_CHECK(cublasCherk3mEx(cublasH, uplo, trans, n, k, &alpha, d_A,
+-                                 traits<data_type>::cuda_data_type, lda, &beta, d_C,
+-                                 traits<data_type>::cuda_data_type, ldc));
+-
+-    /* step 4: copy data to host */
+-    CUDA_CHECK(hipMemcpyAsync(C.data(), d_C, sizeof(data_type) * C.size(), hipMemcpyDeviceToHost,
+-                               stream));
+-
+-    CUDA_CHECK(hipStreamSynchronize(stream));
+-
+-      /*
+-     *   C = | 13.70 + 0.00j | 30.50 + 0.48j |
+-     *       |  0.00 + 0.00j | 70.34 + 0.00j |
+-     */
+-
+-    printf("C\n");
+-    print_matrix(n, k, C.data(), ldc);
+-    printf("=====\n");
+-
+-    
+-// MIGRATION_OBSERVE_ORIGINAL: host buffers after GPU synchronization.
+-migration_observer::emit("A",A.data(),A.size());
+-migration_observer::emit("C",C.data(),C.size());
+-
+-// MIGRATION_OBSERVE_SCALARS
+-migration_observer::emit("alpha",&alpha,1);
+-migration_observer::emit("beta",&beta,1);
+-/* free resources */
+-    CUDA_CHECK(hipFree(d_A));
+-    CUDA_CHECK(hipFree(d_C));
+-
+-    CUBLAS_CHECK(hipblasDestroy(cublasH));
+-
+-    CUDA_CHECK(hipStreamDestroy(stream));
+-
+-    CUDA_CHECK(hipDeviceReset());
+-
+-    return EXIT_SUCCESS;
+-}
+\ No newline at end of file
++#include "complex3m.hpp"
++int main(){return rewrite::blas_main("herk3m");}
+diff --git a/rocm/ported/cuBLAS/Extensions/Csyrk3mEx/cublas_Csyrk3mEx_example.cu b/rocm/ported/cuBLAS/Extensions/Csyrk3mEx/cublas_Csyrk3mEx_example.cu
+index cbce155d..7d8a4075 100644
+--- a/rocm/ported/cuBLAS/Extensions/Csyrk3mEx/cublas_Csyrk3mEx_example.cu
++++ b/rocm/ported/cuBLAS/Extensions/Csyrk3mEx/cublas_Csyrk3mEx_example.cu
+@@ -1,114 +1,2 @@
+-#include "observe.hpp"
+-/*
+- * SPDX-FileCopyrightText: Copyright (c) 2020 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+- * SPDX-License-Identifier: Apache-2.0
+- *
+- * Licensed under the Apache License, Version 2.0 (the "License");
+- * you may not use this file except in compliance with the License.
+- * You may obtain a copy of the License at
+- *
+- * http://www.apache.org/licenses/LICENSE-2.0
+- *
+- * Unless required by applicable law or agreed to in writing, software
+- * distributed under the License is distributed on an "AS IS" BASIS,
+- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+- * See the License for the specific language governing permissions and
+- * limitations under the License.
+- */
+-
+-
+-#include <cstdio>
+-#include <cstdlib>
+-#include <vector>
+-
+-#include <hipblas.h>
+-#include <hip/hip_runtime.h>
+-
+-#include "cublas_utils.h"
+-
+-using data_type = hipComplex;
+-
+-int main(int argc, char *argv[]) {
+-    hipblasHandle_t cublasH = NULL;
+-    hipStream_t stream = NULL;
+-
+-    const int m = 2;
+-    const int n = 2;
+-    const int k = 2;
+-    const int lda = 2;
+-    const int ldc = 2;
+-
+-    /*
+-     *   A = | 1.1 + 1.2j | 2.3 + 2.4j |
+-     *       | 3.5 + 3.6j | 4.7 + 4.8j |
+-     */
+-
+-    const std::vector<data_type> A = {{1.1, 1.2}, {3.5, 3.6}, {3.5, 3.6}, {4.7, 4.8}};
+-    std::vector<data_type> C(m * n);
+-
+-    const data_type alpha = {1.0, 1.0};
+-    const data_type beta = {0.0, 0.0};
+-
+-    hipblasFillMode_t uplo = HIPBLAS_FILL_MODE_UPPER;
+-    hipblasOperation_t trans = HIPBLAS_OP_N;
+-
+-    data_type *d_A = nullptr;
+-    data_type *d_C = nullptr;
+-
+-    printf("A\n");
+-    print_matrix(n, k, A.data(), lda);
+-    printf("=====\n");
+-
+-    /* step 1: create hipblas handle, bind a stream */
+-    CUBLAS_CHECK(hipblasCreate(&cublasH));
+-
+-    CUDA_CHECK(hipStreamCreateWithFlags(&stream, hipStreamNonBlocking));
+-    CUBLAS_CHECK(hipblasSetStream(cublasH, stream));
+-
+-    /* step 2: copy data to device */
+-    CUDA_CHECK(hipMalloc(reinterpret_cast<void **>(&d_A), sizeof(data_type) * A.size()));
+-    CUDA_CHECK(hipMalloc(reinterpret_cast<void **>(&d_C), sizeof(data_type) * C.size()));
+-
+-    CUDA_CHECK(hipMemcpyAsync(d_A, A.data(), sizeof(data_type) * A.size(), hipMemcpyHostToDevice,
+-                               stream));
+-
+-    /* step 3: compute */
+-    CUBLAS_CHECK(cublasCsyrk3mEx(cublasH, uplo, trans, n, k, &alpha, d_A,
+-                                 traits<data_type>::cuda_data_type, lda, &beta, d_C,
+-                                 traits<data_type>::cuda_data_type, ldc));
+-
+-    /* step 4: copy data to host */
+-    CUDA_CHECK(hipMemcpyAsync(C.data(), d_C, sizeof(data_type) * C.size(), hipMemcpyDeviceToHost,
+-                               stream));
+-
+-    CUDA_CHECK(hipStreamSynchronize(stream));
+-
+-    /*
+-     *   C = | -28.78 + 26.90j | -43.18 + 40.58j |
+-     *       |   0.00 +  0.00j | -71.98 + 68.66j |
+-     */
+-
+-    printf("C\n");
+-    print_matrix(n, k, C.data(), ldc);
+-    printf("=====\n");
+-
+-    
+-// MIGRATION_OBSERVE_ORIGINAL: host buffers after GPU synchronization.
+-migration_observer::emit("A",A.data(),A.size());
+-migration_observer::emit("C",C.data(),C.size());
+-
+-// MIGRATION_OBSERVE_SCALARS
+-migration_observer::emit("alpha",&alpha,1);
+-migration_observer::emit("beta",&beta,1);
+-/* free resources */
+-    CUDA_CHECK(hipFree(d_A));
+-    CUDA_CHECK(hipFree(d_C));
+-
+-    CUBLAS_CHECK(hipblasDestroy(cublasH));
+-
+-    CUDA_CHECK(hipStreamDestroy(stream));
+-
+-    CUDA_CHECK(hipDeviceReset());
+-
+-    return EXIT_SUCCESS;
+-}
+\ No newline at end of file
++#include "complex3m.hpp"
++int main(){return rewrite::blas_main("syrk3m");}
+diff --git a/rocm/ported/cuBLAS/Level-3/gemm3m/cublas_gemm3m_example.cu b/rocm/ported/cuBLAS/Level-3/gemm3m/cublas_gemm3m_example.cu
+index aeb6e17d..e75dad11 100644
+--- a/rocm/ported/cuBLAS/Level-3/gemm3m/cublas_gemm3m_example.cu
++++ b/rocm/ported/cuBLAS/Level-3/gemm3m/cublas_gemm3m_example.cu
+@@ -1,127 +1,2 @@
+-#include "observe.hpp"
+-/*
+- * SPDX-FileCopyrightText: Copyright (c) 2020 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+- * SPDX-License-Identifier: Apache-2.0
+- *
+- * Licensed under the Apache License, Version 2.0 (the "License");
+- * you may not use this file except in compliance with the License.
+- * You may obtain a copy of the License at
+- *
+- * http://www.apache.org/licenses/LICENSE-2.0
+- *
+- * Unless required by applicable law or agreed to in writing, software
+- * distributed under the License is distributed on an "AS IS" BASIS,
+- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+- * See the License for the specific language governing permissions and
+- * limitations under the License.
+- */
+-
+-
+-#include <cstdio>
+-#include <cstdlib>
+-#include <vector>
+-
+-#include <hipblas.h>
+-#include <hip/hip_runtime.h>
+-
+-#include "cublas_utils.h"
+-
+-using data_type = hipComplex;
+-
+-int main(int argc, char *argv[]) {
+-    hipblasHandle_t cublasH = NULL;
+-    hipStream_t stream = NULL;
+-
+-    const int m = 2;
+-    const int n = 2;
+-    const int k = 2;
+-    const int lda = 2;
+-    const int ldb = 2;
+-    const int ldc = 2;
+-
+-    /*
+-     *   A = | 1.1 + 1.2j | 2.3 + 2.4j |
+-     *       | 3.5 + 3.6j | 4.7 + 4.8j |
+-     *
+-     *   B = | 1.1 + 1.2j | 2.3 + 2.4j |
+-     *       | 3.5 + 3.6j | 4.7 + 4.8j |
+-     */
+-
+-    const std::vector<data_type> A = {{1.1, 1.2}, {3.5, 3.6}, {2.3, 2.4}, {4.7, 4.8}};
+-    const std::vector<data_type> B = {{1.1, 1.2}, {3.5, 3.6}, {2.3, 2.4}, {4.7, 4.8}};
+-    std::vector<data_type> C(m * n);
+-    const data_type alpha = {1.0, 1.0};
+-    const data_type beta = {0.0, 0.0};
+-
+-    data_type *d_A = nullptr;
+-    data_type *d_B = nullptr;
+-    data_type *d_C = nullptr;
+-
+-    hipblasOperation_t transa = HIPBLAS_OP_N;
+-    hipblasOperation_t transb = HIPBLAS_OP_N;
+-
+-    printf("A\n");
+-    print_matrix(m, k, A.data(), lda);
+-    printf("=====\n");
+-
+-    printf("B\n");
+-    print_matrix(k, n, B.data(), ldb);
+-    printf("=====\n");
+-
+-    /* step 1: create hipblas handle, bind a stream */
+-    CUBLAS_CHECK(hipblasCreate(&cublasH));
+-
+-    CUDA_CHECK(hipStreamCreateWithFlags(&stream, hipStreamNonBlocking));
+-    CUBLAS_CHECK(hipblasSetStream(cublasH, stream));
+-
+-    /* step 2: copy data to device */
+-    CUDA_CHECK(hipMalloc(reinterpret_cast<void **>(&d_A), sizeof(data_type) * A.size()));
+-    CUDA_CHECK(hipMalloc(reinterpret_cast<void **>(&d_B), sizeof(data_type) * B.size()));
+-    CUDA_CHECK(hipMalloc(reinterpret_cast<void **>(&d_C), sizeof(data_type) * C.size()));
+-
+-    CUDA_CHECK(hipMemcpyAsync(d_A, A.data(), sizeof(data_type) * A.size(), hipMemcpyHostToDevice,
+-                               stream));
+-    CUDA_CHECK(hipMemcpyAsync(d_B, B.data(), sizeof(data_type) * B.size(), hipMemcpyHostToDevice,
+-                               stream));
+-
+-    /* step 3: compute */
+-    CUBLAS_CHECK(cublasCgemm3m(cublasH, transa, transb, m, n, k, &alpha, d_A, lda, d_B, ldb, &beta,
+-                               d_C, ldc));
+-
+-    /* step 4: copy data to host */
+-    CUDA_CHECK(hipMemcpyAsync(C.data(), d_C, sizeof(data_type) * C.size(), hipMemcpyDeviceToHost,
+-                               stream));
+-
+-    CUDA_CHECK(hipStreamSynchronize(stream));
+-
+-    /*
+-     *   C = | -20.14 + 18.50j -28.78 + 26.66j |
+-     *       | -43.18 + 40.58j -63.34 + 60.26j |
+-     */
+-
+-    printf("C\n");
+-    print_matrix(m, n, C.data(), ldc);
+-    printf("=====\n");
+-
+-    
+-// MIGRATION_OBSERVE_ORIGINAL: host buffers after GPU synchronization.
+-migration_observer::emit("A",A.data(),A.size());
+-migration_observer::emit("B",B.data(),B.size());
+-migration_observer::emit("C",C.data(),C.size());
+-
+-// MIGRATION_OBSERVE_SCALARS
+-migration_observer::emit("alpha",&alpha,1);
+-migration_observer::emit("beta",&beta,1);
+-/* free resources */
+-    CUDA_CHECK(hipFree(d_A));
+-    CUDA_CHECK(hipFree(d_B));
+-    CUDA_CHECK(hipFree(d_C));
+-
+-    CUBLAS_CHECK(hipblasDestroy(cublasH));
+-
+-    CUDA_CHECK(hipStreamDestroy(stream));
+-
+-    CUDA_CHECK(hipDeviceReset());
+-
+-    return EXIT_SUCCESS;
+-}
+\ No newline at end of file
++#include "complex3m.hpp"
++int main(){return rewrite::blas_main("gemm3m");}
+diff --git a/rocm/ported/cuBLASLt/LtIgemmTensor/main.cpp b/rocm/ported/cuBLASLt/LtIgemmTensor/main.cpp
+index 47fe8457..ca27c5fd 100644
+--- a/rocm/ported/cuBLASLt/LtIgemmTensor/main.cpp
++++ b/rocm/ported/cuBLASLt/LtIgemmTensor/main.cpp
+@@ -1,32 +1,2 @@
+-/*
+- * SPDX-FileCopyrightText: Copyright (c) 2020 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+- * SPDX-License-Identifier: Apache-2.0
+- *
+- * Licensed under the Apache License, Version 2.0 (the "License");
+- * you may not use this file except in compliance with the License.
+- * You may obtain a copy of the License at
+- *
+- * http://www.apache.org/licenses/LICENSE-2.0
+- *
+- * Unless required by applicable law or agreed to in writing, software
+- * distributed under the License is distributed on an "AS IS" BASIS,
+- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+- * See the License for the specific language governing permissions and
+- * limitations under the License.
+- */
+-
+-#include "hip/hip_runtime.h"
+-#include "sample_cublasLt_LtIgemmTensor.h"
+-#include "helpers.h"
+-
+-int main() {
+-    // tensor op igemm kernels only support NT gemm
+-    TestBench<int8_t, int32_t, float> props(HIPBLAS_OP_N, HIPBLAS_OP_T, 4, 4, 4);
+-
+-    props.run([&props] {
+-        LtIgemmTensor(props.ltHandle, props.transa, props.transb, props.m, props.n, props.k, props.Adev, props.lda,
+-                      props.Bdev, props.ldb, props.Cdev, props.ldc);
+-    });
+-
+-    return 0;
+-}
+\ No newline at end of file
++#include "int8_packed.hpp"
++int main(){return rewrite::int8_main();}
+diff --git a/rocm/ported/cuBLASLt/LtPlanarComplex/main.cpp b/rocm/ported/cuBLASLt/LtPlanarComplex/main.cpp
+index 3e20b647..11afe487 100644
+--- a/rocm/ported/cuBLASLt/LtPlanarComplex/main.cpp
++++ b/rocm/ported/cuBLASLt/LtPlanarComplex/main.cpp
+@@ -1,41 +1,2 @@
+-/*
+- * SPDX-FileCopyrightText: Copyright (c) 2020 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+- * SPDX-License-Identifier: Apache-2.0
+- *
+- * Licensed under the Apache License, Version 2.0 (the "License");
+- * you may not use this file except in compliance with the License.
+- * You may obtain a copy of the License at
+- *
+- * http://www.apache.org/licenses/LICENSE-2.0
+- *
+- * Unless required by applicable law or agreed to in writing, software
+- * distributed under the License is distributed on an "AS IS" BASIS,
+- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+- * See the License for the specific language governing permissions and
+- * limitations under the License.
+- */
+-
+-#include "hip/hip_runtime.h"
+-#include <hip/hip_complex.h>
+-
+-#include "sample_cublasLt_LtPlanarComplex.h"
+-#include "helpers.h"
+-
+-int main() {
+-    TestBench<__half, __half, hipComplex, __half> props(HIPBLAS_OP_N, HIPBLAS_OP_N, 16, 16, 16, {1.0f, 0}, {0.0f, 0}, 0,
+-                                                       2);
+-
+-    // planar layout is ordered with imaginary first, to prove that this is arbitrary
+-
+-    // real and imaginary pointers are arbitrary. pointers are converted to pointer(64bit)+offset(int64_t) (negative
+-    // here) in the example function
+-    props.run([&props] {
+-        LtPlanarCgemm(props.ltHandle, props.transa, props.transb, props.m, props.n, props.k,
+-                      props.Adev +
+-                          props.m * props.k, // see comment above, real part follows after imaginary in this example;
+-                      props.Adev, props.lda, props.Bdev + props.n * props.k, props.Bdev, props.ldb,
+-                      props.Cdev + props.n * props.k, props.Cdev, props.ldc);
+-    });
+-
+-    return 0;
+-}
+\ No newline at end of file
++#include "complex3m.hpp"
++int main(){return rewrite::blas_main("planar");}

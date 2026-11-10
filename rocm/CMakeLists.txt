@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.21)
 project(cuda_library_samples_rocm LANGUAGES CXX)
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/../migration/environments/project.lock.json" _project_lock)
+string(JSON _locked_arch GET "${_project_lock}" gpu_architecture)
+set(MIGRATION_AMD_ARCH "${_locked_arch}" CACHE STRING "AMD architecture selected by the project profile")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # All current M1 programs call precompiled GPU libraries from C++ host code.
@@ -28,8 +31,7 @@ foreach(_i RANGE ${_last})
   string(JSON _lib GET "${_specs}" ${_i} libraries 0)
   file(GLOB _candidates "${ROCM_LIBRARIES_ROOT}/lib/lib${_lib}.so*")
   if(NOT _candidates)
-    message(WARNING "Skipping ${_name}: missing ${_lib}; runner records dependency status")
-    continue()
+    message(FATAL_ERROR "Required target ${_name} is missing ${_lib} in the locked environment")
   endif()
   list(SORT _candidates)
   list(GET _candidates 0 _shared)
@@ -49,7 +51,7 @@ set(_overlay "${CMAKE_CURRENT_SOURCE_DIR}/../build/rocm-sdk-overlay")
 add_custom_command(OUTPUT "${_scale_obj}"
  COMMAND "${MIGRATION_HIPCC}" "--rocm-path=${_overlay}" "--hip-path=${_overlay}"
  "--rocm-device-lib-path=${ROCM_CORE_ROOT}/lib/llvm/amdgcn/bitcode"
- --offload-arch=gfx1201 -c "${CMAKE_CURRENT_SOURCE_DIR}/common/scaling.hip" -o "${_scale_obj}"
+ "--offload-arch=${MIGRATION_AMD_ARCH}" -c "${CMAKE_CURRENT_SOURCE_DIR}/common/scaling.hip" -o "${_scale_obj}"
  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/common/scaling.hip" VERBATIM)
 set_source_files_properties("${_scale_obj}" PROPERTIES EXTERNAL_OBJECT TRUE GENERATED TRUE)
 foreach(_fft cuFFT_1d_c2c cuFFT_1d_r2c_c2r)
@@ -57,3 +59,8 @@ foreach(_fft cuFFT_1d_c2c cuFFT_1d_r2c_c2r)
   target_sources(${_fft} PRIVATE "${_scale_obj}")
  endif()
 endforeach()
+
+option(MIGRATION_ENABLE_REWRITES "Register explicit library/device rewrite targets" ON)
+if(MIGRATION_ENABLE_REWRITES)
+ include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/RewriteSamples.cmake")
+endif()

@@ -1,0 +1,78 @@
+#pragma once
+#ifdef __HIP_PLATFORM_AMD__
+#include <hip/hip_runtime.h>
+#include <hip/hip_fp16.h>
+#include <hipblas/hipblas.h>
+#define RW_RT(n) hip##n
+#define RW_BLAS(n) hipblas##n
+#define RW_H2D hipMemcpyHostToDevice
+#define RW_D2H hipMemcpyDeviceToHost
+#define RW_NONBLOCK hipStreamNonBlocking
+#define RW_N HIPBLAS_OP_N
+#define RW_DEVICE_PROP hipDeviceProp_t
+#else
+#include <cuda_runtime.h>
+#include <cuda_fp16.h>
+#include <cublas_v2.h>
+#define RW_RT(n) cuda##n
+#define RW_BLAS(n) cublas##n
+#define RW_H2D cudaMemcpyHostToDevice
+#define RW_D2H cudaMemcpyDeviceToHost
+#define RW_NONBLOCK cudaStreamNonBlocking
+#define RW_N CUBLAS_OP_N
+#define RW_DEVICE_PROP cudaDeviceProp
+#endif
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <link.h>
+#include <stdexcept>
+#include <string>
+#include <vector>
+#define RW_CHECK(x) do { int rc_=(int)(x); if(rc_)throw std::runtime_error(std::string(#x)+" status="+std::to_string(rc_)); } while(0)
+namespace rewrite {
+template<class T> struct Complex { T x,y; };
+using C32=Complex<float>; using C64=Complex<double>;
+template<class T> __host__ __device__ Complex<T> add(Complex<T>a,Complex<T>b){return {a.x+b.x,a.y+b.y};}
+template<class T> __host__ __device__ Complex<T> sub(Complex<T>a,Complex<T>b){return {a.x-b.x,a.y-b.y};}
+template<class T> __host__ __device__ Complex<T> mul(Complex<T>a,Complex<T>b){return {a.x*b.x-a.y*b.y,a.x*b.y+a.y*b.x};}
+template<class T> __host__ __device__ Complex<T> conj(Complex<T>a){return {a.x,-a.y};}
+template<class T> __host__ __device__ Complex<T> div(Complex<T>a,Complex<T>b){T d=b.x*b.x+b.y*b.y;return {(a.x*b.x+a.y*b.y)/d,(a.y*b.x-a.x*b.y)/d};}
+template<class T> __host__ __device__ Complex<T> scale(Complex<T>a,T b){return {a.x*b,a.y*b};}
+struct Config {
+ std::map<std::string,double> values;
+ Config(){const char*p=std::getenv("REWRITE_INPUT");if(!p)throw std::runtime_error("REWRITE_INPUT required");std::ifstream f(std::string(p)+"/config.txt");std::string k;double v;while(f>>k>>v)values[k]=v;if(values.empty())throw std::runtime_error("missing config");}
+ double get(const std::string&k,double fallback=0)const{auto p=values.find(k);return p==values.end()?fallback:p->second;}
+};
+template<class T> std::vector<T> read(const std::string&n,size_t count){
+ std::string path=std::string(std::getenv("REWRITE_INPUT"))+"/"+n+".bin";
+ std::ifstream f(path,std::ios::binary|std::ios::ate);if(!f||f.tellg()!=std::streamoff(count*sizeof(T)))throw std::runtime_error("input byte count: "+path);
+ std::vector<T> v(count);f.seekg(0);f.read(reinterpret_cast<char*>(v.data()),count*sizeof(T));return v;
+}
+template<class T> void emit(const std::string&n,const std::vector<T>&v){
+ const char*p=std::getenv("REWRITE_OUTPUT");if(!p)throw std::runtime_error("REWRITE_OUTPUT required");
+ std::ofstream f(std::string(p)+"/"+n+".bin",std::ios::binary);f.write(reinterpret_cast<const char*>(v.data()),v.size()*sizeof(T));if(!f)throw std::runtime_error("output write failed");
+}
+template<class T> struct Buffer {
+ T*p=nullptr;size_t size;
+ explicit Buffer(size_t n):size(n){if(n)RW_CHECK(RW_RT(Malloc)((void**)&p,n*sizeof(T)));}
+ explicit Buffer(const std::vector<T>&v):Buffer(v.size()){put(v);}
+ Buffer(const Buffer&)=delete;Buffer&operator=(const Buffer&)=delete;
+ ~Buffer(){if(p)RW_RT(Free)(p);}
+ void put(const std::vector<T>&v){if(v.size()!=size)throw std::runtime_error("buffer size");if(size)RW_CHECK(RW_RT(Memcpy)(p,v.data(),size*sizeof(T),RW_H2D));}
+ std::vector<T> get()const{std::vector<T>v(size);if(size)RW_CHECK(RW_RT(Memcpy)(v.data(),p,size*sizeof(T),RW_D2H));return v;}
+};
+struct Blas {
+ RW_BLAS(Handle_t) h;RW_RT(Stream_t) stream;
+ Blas(){RW_CHECK(RW_RT(StreamCreateWithFlags)(&stream,RW_NONBLOCK));RW_CHECK(RW_BLAS(Create)(&h));RW_CHECK(RW_BLAS(SetStream)(h,stream));}
+ ~Blas(){RW_BLAS(Destroy)(h);RW_RT(StreamDestroy)(stream);}
+};
+inline void sync(){RW_CHECK(RW_RT(GetLastError)());RW_CHECK(RW_RT(DeviceSynchronize)());}
+inline void identity(){RW_DEVICE_PROP p;RW_CHECK(RW_RT(GetDeviceProperties)(&p,0));std::cout<<"{\"device\":\""<<p.name<<"\",\"warp_size\":"<<p.warpSize<<"}\n";
+ dl_iterate_phdr([](dl_phdr_info*info,size_t,void*){if(info->dlpi_name&&info->dlpi_name[0])std::cout<<"loaded-library "<<info->dlpi_name<<'\n';return 0;},nullptr);
+}
+}

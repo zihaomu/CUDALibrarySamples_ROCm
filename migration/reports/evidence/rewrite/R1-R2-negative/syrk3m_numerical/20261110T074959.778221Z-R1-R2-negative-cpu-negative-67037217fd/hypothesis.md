@@ -1,0 +1,1 @@
+Test cpu-negative for syrk3m/numerical, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T074802.747955Z-R1-rocm-52c56bcc59.

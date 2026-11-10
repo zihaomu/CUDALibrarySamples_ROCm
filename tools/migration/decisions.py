@@ -37,6 +37,11 @@ RETRY={k:'实现并审查上列缺失的 AMD API/算法，保留原始 dtype/lay
 RETRY['cuSPARSELt']='使用有匹配 kernel bundle 的受支持 GPU，或新的 gfx1201 hipSPARSELt 实现/包；重新跑 prune/compress/matmul 与 CPU 参考。'
 RETRY['nvJPEG2000']='提供可在锁定 AMD 环境工作的 GPU JPEG2000 codec/实现，保留原例 bit depth、batch、输出与质量要求。'
 RETRY['nvTIFF']='补 GPU TIFF codec 及容器/元数据桥接；分别验收 encode/decode/multi-image/GeoTIFF/options。'
+current=ROOT/'migration/ecosystem-decisions.json'
+if current.exists():
+ recorded=json.loads(current.read_text())
+ NOTES={k:v['reason'] for k,v in recorded.items()}
+ RETRY={k:v['retry_condition'] for k,v in recorded.items()}
 assert set(NOTES)==set(CANDIDATES)
 (ROOT/'migration/ecosystem-decisions.json').write_text(json.dumps({k:{'reason':v,'retry_condition':RETRY[k]} for k,v in NOTES.items()},indent=2,ensure_ascii=False)+'\n')
 text='# AMD 生态库选择与范围结论\n\n各结论限定在项目环境锁和已记录源码版本。没有完成转换不等于硬件或整个 ROCm 不支持。逐例命令、错误和数值检查保存在 samples.yaml / sample-reports。\n\n| 子项目 | 已执行结果与失败边界 | 恢复条件 |\n| --- | --- | --- |\n'

@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "experiment_id",
+    "sample_id",
+    "case_id",
+    "batch_id",
+    "backend",
+    "started_at_utc",
+    "experiment_outcome",
+    "eligible_for_sample_pass"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "experiment_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sample_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "case_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "batch_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "backend": {
+      "type": "string",
+      "minLength": 1
+    },
+    "started_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "finished_at_utc": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "experiment_outcome": {
+      "enum": [
+        "RUNNING",
+        "EXECUTED",
+        "PASSED",
+        "COMMAND_FAILED",
+        "BUILD_ERROR",
+        "RUNTIME_ERROR",
+        "TIMEOUT",
+        "INTERRUPTED",
+        "ENV_BLOCKED",
+        "NUMERIC_MISMATCH",
+        "VALIDATOR_GAP",
+        "PROBE_FAILED",
+        "NATIVE_SDK_FAILED",
+        "SDK_UNAVAILABLE",
+        "INITIALIZATION_ERROR"
+      ]
+    },
+    "eligible_for_sample_pass": {
+      "const": false
+    }
+  }
+}

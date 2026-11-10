@@ -1,0 +1,235 @@
+#!/usr/bin/env python3
+"""Preserve each attempt, including failures and interruptions, as immutable evidence."""
+import argparse
+import datetime as dt
+import fcntl
+import hashlib
+import json
+import os
+from pathlib import Path
+import platform
+import re
+import shutil
+import signal
+import subprocess
+import time
+import uuid
+
+ROOT = Path(__file__).resolve().parents[2]
+INDEX = ROOT / 'migration/reports/rewrite-experiments.jsonl'
+ALLOWED_ENV = ('HIP_VISIBLE_DEVICES', 'CUDA_VISIBLE_DEVICES', 'OMP_NUM_THREADS',
+               'FI_PROVIDER', 'MPIR_CVAR_CH4_NETMOD', 'DEEPINFER_IMAGE_ID',
+               'DEEPINFER_ROCM_RELEASE', 'TRITON_CACHE_DIR', 'TORCH_EXTENSIONS_DIR')
+
+
+def now():
+    return dt.datetime.now(dt.timezone.utc).isoformat()
+
+
+def digest(path):
+    h = hashlib.sha256()
+    with Path(path).open('rb') as f:
+        for block in iter(lambda: f.read(1024 * 1024), b''):
+            h.update(block)
+    return h.hexdigest()
+
+
+def write(path, value):
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(path.name + '.tmp-' + uuid.uuid4().hex)
+    tmp.write_text(json.dumps(value, indent=2, ensure_ascii=False) + '\n')
+    os.replace(tmp, path)
+
+
+def append(path, value):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open('a') as f:
+        fcntl.flock(f, fcntl.LOCK_EX)
+        f.write(json.dumps(value, ensure_ascii=False) + '\n')
+        f.flush()
+        os.fsync(f.fileno())
+
+
+def git(*args):
+    return subprocess.check_output(['git', *args], cwd=ROOT, text=True)
+
+
+def environment():
+    return {k: os.environ[k] for k in ALLOWED_ENV if k in os.environ}
+
+
+class Experiment:
+    def __init__(self, batch, sample, backend, case='all', sources=(), parent=None,
+                 comparison_id=None, hypothesis=''):
+        self.started = time.monotonic()
+        slug = re.sub(r'[^a-zA-Z0-9_.-]', '_', sample)[-80:]
+        stamp = dt.datetime.now(dt.timezone.utc).strftime('%Y%m%dT%H%M%S.%fZ')
+        self.id = f'{stamp}-{batch}-{backend}-{uuid.uuid4().hex[:10]}'
+        self.path = ROOT / 'artifacts/rewrite' / batch / slug / self.id
+        self.path.mkdir(parents=True, exist_ok=False)
+        (self.path / 'logs').mkdir()
+        self.commands = []
+        self.sealed = False
+        self.meta = dict(schema_version=1, experiment_id=self.id, batch_id=batch,
+                         sample_id=sample, backend=backend, case_id=case,
+                         parent_experiment_id=parent, comparison_id=comparison_id,
+                         recorder_pid=os.getpid(), hostname=platform.node(),
+                         raw_artifact_dir=str(self.path.relative_to(ROOT)),
+                         started_at_utc=now(), finished_at_utc=None,
+                         experiment_outcome='RUNNING', eligible_for_sample_pass=False)
+        write(self.path / 'manifest.json', self.meta)
+        files = {str(Path(p).resolve().relative_to(ROOT)): digest(p) for p in sources}
+        objects = {}
+        for name, sha in files.items():
+            target = ROOT / 'migration/source-objects' / sha
+            if target.exists() and digest(target) != sha:
+                raise RuntimeError('source object hash collision: '+sha)
+            if not target.exists():
+                tmp=target.with_name(sha+'.tmp-'+uuid.uuid4().hex)
+                tmp.write_bytes((ROOT/name).read_bytes())
+                try:
+                    os.link(tmp,target)
+                except FileExistsError:
+                    if digest(target)!=sha:raise RuntimeError('source object mismatch: '+sha)
+                finally:
+                    tmp.unlink()
+            objects[name] = str(target.relative_to(ROOT))
+        write(self.path / 'source.json', dict(commit=git('rev-parse', 'HEAD').strip(),
+              tree=git('rev-parse', 'HEAD^{tree}').strip(),
+              status=git('status', '--porcelain'), dependencies=files, source_objects=objects,
+              recorder_sha256=digest(__file__)))
+        (self.path / 'source.patch').write_text(git('diff', '--binary', 'HEAD'))
+        lock = ROOT / 'migration/environments/project.lock.json'
+        shutil.copyfile(lock, self.path / 'environment.expected.json')
+        write(self.path / 'environment.observed.json', dict(hostname=platform.node(),
+              platform=platform.platform(), python=platform.python_version(),
+              environment=environment(), scope='Recorder process; backend snapshot separate'))
+        hypothesis = hypothesis or (f'Test {backend} for {sample}, case {case}. '
+            'Preserve the exact input and source identity. Process success is an observation; '
+            'numerical and execution-contract checks must independently establish correctness. '
+            f'Parent attempt: {parent or "none"}.')
+        (self.path / 'hypothesis.md').write_text(hypothesis + '\n')
+        self.event('start', **self.meta)
+        self.occupancy('before')
+
+    def event(self, event, **fields):
+        row = dict(fields, event=event, timestamp_utc=now(), experiment_id=self.id)
+        append(self.path / 'events.jsonl', row)
+        append(INDEX, dict(row, evidence=str(self.path.relative_to(ROOT))))
+
+    def occupancy(self, suffix):
+        try:
+            p = subprocess.run(['amd-smi', 'metric', '--gpu', 'all', '--json'],
+                               text=True, capture_output=True, timeout=15)
+            write(self.path / f'occupancy.{suffix}.json',
+                  dict(return_code=p.returncode, data=json.loads(p.stdout)))
+        except (OSError, ValueError, subprocess.TimeoutExpired) as e:
+            write(self.path / f'occupancy.{suffix}.json', dict(unavailable=str(e)))
+
+    def command(self, argv, phase, timeout=300, env=None, cwd=ROOT):
+        if self.sealed:
+            raise RuntimeError('sealed experiment')
+        number = len(self.commands) + 1
+        name = f'{number:04d}-{phase}'
+        out = self.path / 'logs' / (name + '.stdout.log')
+        err = self.path / 'logs' / (name + '.stderr.log')
+        rec = dict(command_id=number, phase=phase, argv=list(map(str, argv)),
+                   cwd=str(cwd), started_at_utc=now(), timeout_seconds=timeout,
+                   environment=environment(), stdout=str(out.relative_to(self.path)),
+                   stderr=str(err.relative_to(self.path)))
+        if env:
+            rec['environment_changes'] = {k: v for k, v in env.items()
+                if k.startswith(('MIGRATION_', 'REWRITE_')) or k in ALLOWED_ENV}
+        self.event('command-start', command=rec)
+        started = time.monotonic()
+        proc = None
+        with out.open('wb') as fo, err.open('wb') as fe:
+            try:
+                proc = subprocess.Popen(rec['argv'], cwd=cwd,
+                    env=dict(os.environ, **(env or {})), stdout=fo, stderr=fe,
+                    start_new_session=True)
+                rec['return_code'] = proc.wait(timeout=timeout)
+            except subprocess.TimeoutExpired:
+                os.killpg(proc.pid, signal.SIGKILL)
+                proc.wait()
+                rec.update(return_code=124, timed_out=True)
+            except (KeyboardInterrupt, BaseException) as e:
+                if proc and proc.poll() is None:
+                    os.killpg(proc.pid, signal.SIGTERM)
+                    try:
+                        proc.wait(timeout=5)
+                    except subprocess.TimeoutExpired:
+                        os.killpg(proc.pid, signal.SIGKILL)
+                        proc.wait()
+                rec.update(return_code=130 if isinstance(e, KeyboardInterrupt) else 127,
+                           exception=repr(e), interrupted=isinstance(e, KeyboardInterrupt))
+                if isinstance(e, KeyboardInterrupt):
+                    rec.update(finished_at_utc=now(), seconds=time.monotonic()-started)
+                    self.commands.append(rec)
+                    write(self.path / 'commands.json', self.commands)
+                    self.finish('INTERRUPTED', reason='KeyboardInterrupt')
+                    raise
+        rec.update(finished_at_utc=now(), seconds=time.monotonic()-started)
+        self.commands.append(rec)
+        write(self.path / 'commands.json', self.commands)
+        self.event('command-finish', command=rec)
+        return rec['return_code']
+
+    def finish(self, outcome, validation=None, reason=None, metrics=None):
+        if self.sealed:
+            raise RuntimeError('sealed experiment')
+        validation = validation or dict(checks=[], status='NOT_VALIDATED')
+        if outcome == 'PASSED':
+            checks = validation.get('checks', [])
+            if not checks or not all(c.get('passed') is True for c in checks):
+                raise ValueError('passing evidence requires nonempty successful checks')
+            if any(c['return_code'] != 0 for c in self.commands):
+                raise ValueError('failed command cannot be a passing experiment')
+        write(self.path / 'validation.json', validation)
+        write(self.path / 'metrics.json', metrics or {})
+        if reason:
+            write(self.path / 'failure.json', dict(reason=reason, outcome=outcome))
+        self.occupancy('after')
+        self.meta.update(finished_at_utc=now(), seconds=time.monotonic()-self.started,
+                         experiment_outcome=outcome, reason=reason)
+        write(self.path / 'manifest.json', self.meta)
+        write(self.path / 'reproduce.json', dict(commands=self.commands,
+              source='source.json', inputs='inputs/manifest.json',
+              expected_environment='environment.expected.json'))
+        (self.path / 'summary.md').write_text(
+            f'# {self.id}\n\nSample: `{self.meta["sample_id"]}`\n\n'
+            f'Outcome: **{outcome}**\n\n{reason or "See validation.json for individual checks."}\n')
+        self.event('finish', outcome=outcome)
+        files = {str(p.relative_to(self.path)): dict(sha256=digest(p), bytes=p.stat().st_size)
+                 for p in sorted(self.path.rglob('*')) if p.is_file()}
+        write(self.path / 'sealed.json', dict(schema_version=1, files=files))
+        archive = ROOT / 'migration/reports/evidence' / self.path.relative_to(ROOT / 'artifacts')
+        archive.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(self.path, archive,
+            ignore=lambda d, names: [n for n in names if Path(n).suffix in {'.bin', '.o', '.so'}
+                                     or (Path(d)/n).is_file() and (Path(d)/n).stat().st_size > 4*1024*1024])
+        self.sealed = True
+        return str(archive.relative_to(ROOT))
+
+
+def main():
+    p = argparse.ArgumentParser()
+    p.add_argument('--batch', required=True)
+    p.add_argument('--sample', required=True)
+    p.add_argument('--backend', required=True)
+    p.add_argument('--phase', default='run')
+    p.add_argument('--timeout', type=int, default=300)
+    p.add_argument('command', nargs=argparse.REMAINDER)
+    a = p.parse_args()
+    argv = a.command[1:] if a.command[:1] == ['--'] else a.command
+    if not argv:
+        p.error('command is required')
+    e = Experiment(a.batch, a.sample, a.backend, sources=[__file__])
+    rc = e.command(argv, a.phase, timeout=a.timeout)
+    print(e.finish('EXECUTED' if rc == 0 else 'COMMAND_FAILED', reason=None if rc == 0 else f'exit {rc}'))
+    return rc
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())
