@@ -1,8 +1,14 @@
 # CUDA Samples on ROCm：后续多批支持计划与能力边界
 
-日期：2026-11-10。文档状态：**计划已制定，B4–B15 尚未执行；不构成新增支持声明**。
+日期：2026-11-10。文档状态：**B4–B8 正在按实时表实施；B9–B15 尚未启动。以下正文保留原始计划基线**。
 
 [12 批总览](#batches) · [当前无法等价支持的项目与原因](#limits) · [验收与日志规则](#acceptance) · [473 项逐例去向](#inventory)
+
+<!-- B4B8_PROGRESS:START -->
+
+**B4–B8 实施更新：** B4 8/8；B5 0/4；B6 0/4；B7 0/5；B8 0/5。当前主表 174 个样例通过。[实时验收表](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/main/migration/reports/batches4-8.md)。以下 166/473 等数字为原始计划基线；本更新不改写历史计划。
+
+<!-- B4B8_PROGRESS:END -->
 
 ## 1. 当前基线与计划目标
 

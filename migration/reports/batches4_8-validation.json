@@ -1,0 +1,3460 @@
+[
+  {
+    "sample_id": "cuBLAS/Extensions/GemmBatchedEx::cublas_GemmBatchedEx_example.cu",
+    "source": "cuBLAS/Extensions/GemmBatchedEx/cublas_GemmBatchedEx_example.cu",
+    "implementation": "rocm/ported/cuBLAS/Extensions/GemmBatchedEx/cublas_GemmBatchedEx_example.cu",
+    "implementation_sha256": "95c108471011e18f334e3235ab2aaec774d59dc7c03cddc0b7da8d24598faeae",
+    "original_sha256": "ec0f3bd6cd2781a62f87fbd6103f8122473a64beb26fb39761c63b46d4331658",
+    "build_return_code": 0,
+    "runs": [
+      {
+        "case": "original",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024208.297154Z/batches4_8-rocm/cuBLAS_Extensions_GemmBatchedEx_cublas_GemmBatchedEx_example.cu/original"
+      },
+      {
+        "case": "nonzero-beta",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024208.297154Z/batches4_8-rocm/cuBLAS_Extensions_GemmBatchedEx_cublas_GemmBatchedEx_example.cu/nonzero-beta"
+      },
+      {
+        "case": "transpose",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024208.297154Z/batches4_8-rocm/cuBLAS_Extensions_GemmBatchedEx_cublas_GemmBatchedEx_example.cu/transpose"
+      },
+      {
+        "case": "changed-values",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024208.297154Z/batches4_8-rocm/cuBLAS_Extensions_GemmBatchedEx_cublas_GemmBatchedEx_example.cu/changed-values"
+      }
+    ],
+    "evidence": "migration/reports/evidence/20261110T024208.297154Z/batches4_8-rocm/cuBLAS_Extensions_GemmBatchedEx_cublas_GemmBatchedEx_example.cu",
+    "environment": {
+      "backend": "rocm",
+      "devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ],
+      "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+      "rocm_release": "10.1.0",
+      "visible_devices": "2"
+    },
+    "libraries": [
+      "hipblas",
+      "rocblas"
+    ],
+    "dependencies": {
+      "rocm/common/observe.hpp": "3bd452d352dfce533bfb51a6e32ea308d9ca5d85a3a22afeca109d1cae743410",
+      "rocm/ported/cuBLAS/utils/cublas_utils.h": "4242a2561ed3572b704c8cbab607ab1891ba189688e4838f314eb3fbb37121c9",
+      "tools/migration/batches4_8_reference.py": "6d6165aa2ec0f6ad10b9073b4f323446810073806b13902603b2a211877ec055",
+      "tools/migration/batch4_reference.py": "b5350543a289f766280f008202ee6f74ed8428a8b866ac4af1c254b0cedbb194"
+    },
+    "status": "PASSED",
+    "level": "L4",
+    "cases": [
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "case-beta",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "batch0",
+            "passed": true,
+            "error": 0.0,
+            "bound": 7.2069410986909005e-09
+          },
+          {
+            "check": "batch1",
+            "passed": true,
+            "error": 0.0,
+            "bound": 2.784995511666042e-08
+          }
+        ],
+        "input_sha256": "59e7f6ed54c9a027ec56c0d16a0c342d649858276f7277d0377c938680d7d402",
+        "output_values": {
+          "batch0": [
+            [
+              19,
+              22
+            ],
+            [
+              43,
+              50
+            ]
+          ],
+          "batch1": [
+            [
+              111,
+              122
+            ],
+            [
+              151,
+              166
+            ]
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "original"
+      },
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "case-beta",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "batch0",
+            "passed": true,
+            "error": 0.0,
+            "bound": 6.950179853787958e-09
+          },
+          {
+            "check": "batch1",
+            "passed": true,
+            "error": 0.0,
+            "bound": 2.759103115144485e-08
+          }
+        ],
+        "input_sha256": "e62684a4b9f9f7a32855a5ae9860da4e08ecd0113d028958490b17765d145e9c",
+        "output_values": {
+          "batch0": [
+            [
+              18.5,
+              20.5
+            ],
+            [
+              42.0,
+              48.0
+            ]
+          ],
+          "batch1": [
+            [
+              110.5,
+              120.5
+            ],
+            [
+              150.0,
+              164.0
+            ]
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "nonzero-beta"
+      },
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "case-beta",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "batch0",
+            "passed": true,
+            "error": 0.0,
+            "bound": 7.039886362719217e-09
+          },
+          {
+            "check": "batch1",
+            "passed": true,
+            "error": 0.0,
+            "bound": 2.7810070118573953e-08
+          }
+        ],
+        "input_sha256": "59e7f6ed54c9a027ec56c0d16a0c342d649858276f7277d0377c938680d7d402",
+        "output_values": {
+          "batch0": [
+            [
+              26,
+              30
+            ],
+            [
+              38,
+              44
+            ]
+          ],
+          "batch1": [
+            [
+              122,
+              134
+            ],
+            [
+              142,
+              156
+            ]
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "transpose"
+      },
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "case-beta",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "batch0",
+            "passed": true,
+            "error": 0.0,
+            "bound": 3.6034705493454503e-09
+          },
+          {
+            "check": "batch1",
+            "passed": true,
+            "error": 0.0,
+            "bound": 1.392497755833021e-08
+          }
+        ],
+        "input_sha256": "631a0064698d71985d229138d1f25bd80d99f9cc38782726758caac19b19b5b6",
+        "output_values": {
+          "batch0": [
+            [
+              -9.5,
+              -11.0
+            ],
+            [
+              -21.5,
+              -25.0
+            ]
+          ],
+          "batch1": [
+            [
+              -55.5,
+              -61.0
+            ],
+            [
+              -75.5,
+              -83.0
+            ]
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "changed-values"
+      }
+    ],
+    "cuda_comparison": "PASSED",
+    "cuda_cases": [
+      {
+        "case": "original",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "case-beta",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            },
+            {
+              "check": "batch0",
+              "passed": true,
+              "error": 0.0,
+              "bound": 7.2069410986909005e-09
+            },
+            {
+              "check": "batch1",
+              "passed": true,
+              "error": 0.0,
+              "bound": 2.784995511666042e-08
+            }
+          ],
+          "input_sha256": "59e7f6ed54c9a027ec56c0d16a0c342d649858276f7277d0377c938680d7d402",
+          "output_values": {
+            "batch0": [
+              [
+                19,
+                22
+              ],
+              [
+                43,
+                50
+              ]
+            ],
+            "batch1": [
+              [
+                111,
+                122
+              ],
+              [
+                151,
+                166
+              ]
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      },
+      {
+        "case": "nonzero-beta",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "case-beta",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            },
+            {
+              "check": "batch0",
+              "passed": true,
+              "error": 0.0,
+              "bound": 6.950179853787958e-09
+            },
+            {
+              "check": "batch1",
+              "passed": true,
+              "error": 0.0,
+              "bound": 2.759103115144485e-08
+            }
+          ],
+          "input_sha256": "e62684a4b9f9f7a32855a5ae9860da4e08ecd0113d028958490b17765d145e9c",
+          "output_values": {
+            "batch0": [
+              [
+                18.5,
+                20.5
+              ],
+              [
+                42.0,
+                48.0
+              ]
+            ],
+            "batch1": [
+              [
+                110.5,
+                120.5
+              ],
+              [
+                150.0,
+                164.0
+              ]
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      },
+      {
+        "case": "transpose",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "case-beta",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            },
+            {
+              "check": "batch0",
+              "passed": true,
+              "error": 0.0,
+              "bound": 7.039886362719217e-09
+            },
+            {
+              "check": "batch1",
+              "passed": true,
+              "error": 0.0,
+              "bound": 2.7810070118573953e-08
+            }
+          ],
+          "input_sha256": "59e7f6ed54c9a027ec56c0d16a0c342d649858276f7277d0377c938680d7d402",
+          "output_values": {
+            "batch0": [
+              [
+                26,
+                30
+              ],
+              [
+                38,
+                44
+              ]
+            ],
+            "batch1": [
+              [
+                122,
+                134
+              ],
+              [
+                142,
+                156
+              ]
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      },
+      {
+        "case": "changed-values",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "case-beta",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            },
+            {
+              "check": "batch0",
+              "passed": true,
+              "error": 0.0,
+              "bound": 3.6034705493454503e-09
+            },
+            {
+              "check": "batch1",
+              "passed": true,
+              "error": 0.0,
+              "bound": 1.392497755833021e-08
+            }
+          ],
+          "input_sha256": "631a0064698d71985d229138d1f25bd80d99f9cc38782726758caac19b19b5b6",
+          "output_values": {
+            "batch0": [
+              [
+                -9.5,
+                -11.0
+              ],
+              [
+                -21.5,
+                -25.0
+              ]
+            ],
+            "batch1": [
+              [
+                -55.5,
+                -61.0
+              ],
+              [
+                -75.5,
+                -83.0
+              ]
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      }
+    ],
+    "cuda_evidence": "migration/reports/evidence/20261110T024002.087060Z/batches4_8-cuda/cuBLAS_Extensions_GemmBatchedEx_cublas_GemmBatchedEx_example.cu",
+    "reference_library": {
+      "numpy": "2.3.4",
+      "scipy": "1.16.3"
+    },
+    "validation_source_sha256": "44896dcb6058c504fab96f9239ab6f181970147626a772ddd1c40c2464e72854",
+    "batch": "b4",
+    "cuda_implementation_sha256": "8f9f64b43c13ccc9b029142734c4cbd0b0c7ef46fac97c55d17b3dab33b0ff19",
+    "cuda_environment": {
+      "backend": "cuda",
+      "devices": "0, NVIDIA GeForce RTX 5090, GPU-5864d26e-25e9-041f-2901-2745fccf5e30, 615.71.09\n1, NVIDIA GeForce RTX 5090, GPU-17390cc0-bf3c-53e3-170c-21eb949de43b, 615.71.09\n",
+      "image_id": null,
+      "rocm_release": null,
+      "visible_devices": "0"
+    }
+  },
+  {
+    "sample_id": "cuBLAS/Extensions/CherkEx::cublas_CherkEx_example.cu",
+    "source": "cuBLAS/Extensions/CherkEx/cublas_CherkEx_example.cu",
+    "implementation": "rocm/ported/cuBLAS/Extensions/CherkEx/cublas_CherkEx_example.cu",
+    "implementation_sha256": "5f6714a9a68c1d2e56720c18f438a27433d87e59c3bc404708d7e2f1c1873e59",
+    "original_sha256": "f72a216b42bda4fac52f30e4ac979729376fcd1bc1a1a40839e96c91e2ca7ca9",
+    "build_return_code": 0,
+    "runs": [
+      {
+        "case": "original",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuBLAS_Extensions_CherkEx_cublas_CherkEx_example.cu/original"
+      },
+      {
+        "case": "nonzero-beta",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuBLAS_Extensions_CherkEx_cublas_CherkEx_example.cu/nonzero-beta"
+      },
+      {
+        "case": "lower",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuBLAS_Extensions_CherkEx_cublas_CherkEx_example.cu/lower"
+      },
+      {
+        "case": "conjugate",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuBLAS_Extensions_CherkEx_cublas_CherkEx_example.cu/conjugate"
+      }
+    ],
+    "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuBLAS_Extensions_CherkEx_cublas_CherkEx_example.cu",
+    "environment": {
+      "backend": "rocm",
+      "devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ],
+      "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+      "rocm_release": "10.1.0",
+      "visible_devices": "2"
+    },
+    "libraries": [
+      "hipblas",
+      "rocblas"
+    ],
+    "dependencies": {
+      "rocm/common/observe.hpp": "3bd452d352dfce533bfb51a6e32ea308d9ca5d85a3a22afeca109d1cae743410",
+      "rocm/ported/cuBLAS/utils/cublas_utils.h": "4242a2561ed3572b704c8cbab607ab1891ba189688e4838f314eb3fbb37121c9",
+      "tools/migration/batches4_8_reference.py": "6d6165aa2ec0f6ad10b9073b4f323446810073806b13902603b2a211877ec055",
+      "tools/migration/batch4_reference.py": "b5350543a289f766280f008202ee6f74ed8428a8b866ac4af1c254b0cedbb194"
+    },
+    "status": "PASSED",
+    "level": "L4",
+    "cases": [
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "case-beta",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "rank-k-selected-triangle",
+            "passed": true,
+            "error": 3.0649587804844527e-06,
+            "bound": 0.0001557675953956992
+          },
+          {
+            "check": "other-triangle-preserved",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          }
+        ],
+        "input_sha256": "339149fd2d330060a7ec648cc04013c29c139fe7b0bb28c248824e074e99441b",
+        "output_values": {
+          "triangle": [
+            [
+              13.700000762939453,
+              0.0
+            ],
+            [
+              30.5,
+              0.4800001382827759
+            ],
+            [
+              70.33999633789062,
+              0.0
+            ]
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "original"
+      },
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "case-beta",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "rank-k-selected-triangle",
+            "passed": true,
+            "error": 3.0649587804844527e-06,
+            "bound": 0.00015080883190115985
+          },
+          {
+            "check": "other-triangle-preserved",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          }
+        ],
+        "input_sha256": "1aa8d4d9a44c14f0d4635a824dc18b36d87cd893d0838ac2b74be3100230458a",
+        "output_values": {
+          "triangle": [
+            [
+              13.200000762939453,
+              0.0
+            ],
+            [
+              29.0,
+              0.4800001382827759
+            ],
+            [
+              68.33999633789062,
+              0.0
+            ]
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "nonzero-beta"
+      },
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "case-beta",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "rank-k-selected-triangle",
+            "passed": true,
+            "error": 3.062755623621242e-06,
+            "bound": 0.0001557675953956992
+          },
+          {
+            "check": "other-triangle-preserved",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          }
+        ],
+        "input_sha256": "339149fd2d330060a7ec648cc04013c29c139fe7b0bb28c248824e074e99441b",
+        "output_values": {
+          "triangle": [
+            [
+              13.700000762939453,
+              0.0
+            ],
+            [
+              30.5,
+              -0.479999840259552
+            ],
+            [
+              70.33999633789062,
+              0.0
+            ]
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "lower"
+      },
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "case-beta",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "rank-k-selected-triangle",
+            "passed": true,
+            "error": 3.910008992195558e-06,
+            "bound": 0.00014784274327756946
+          },
+          {
+            "check": "other-triangle-preserved",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          }
+        ],
+        "input_sha256": "339149fd2d330060a7ec648cc04013c29c139fe7b0bb28c248824e074e99441b",
+        "output_values": {
+          "triangle": [
+            [
+              27.85999870300293,
+              0.0
+            ],
+            [
+              39.13999938964844,
+              -0.23999765515327454
+            ],
+            [
+              56.179996490478516,
+              0.0
+            ]
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "conjugate"
+      }
+    ],
+    "cuda_comparison": "PASSED",
+    "cuda_cases": [
+      {
+        "case": "original",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "case-beta",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            },
+            {
+              "check": "rank-k-selected-triangle",
+              "passed": true,
+              "error": 3.064129883186371e-06,
+              "bound": 0.0001557675953956992
+            },
+            {
+              "check": "other-triangle-preserved",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            }
+          ],
+          "input_sha256": "339149fd2d330060a7ec648cc04013c29c139fe7b0bb28c248824e074e99441b",
+          "output_values": {
+            "triangle": [
+              [
+                13.700000762939453,
+                0.0
+              ],
+              [
+                30.5,
+                0.4799998104572296
+              ],
+              [
+                70.33999633789062,
+                0.0
+              ]
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      },
+      {
+        "case": "nonzero-beta",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "case-beta",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            },
+            {
+              "check": "rank-k-selected-triangle",
+              "passed": true,
+              "error": 3.064129883186371e-06,
+              "bound": 0.00015080883190115985
+            },
+            {
+              "check": "other-triangle-preserved",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            }
+          ],
+          "input_sha256": "1aa8d4d9a44c14f0d4635a824dc18b36d87cd893d0838ac2b74be3100230458a",
+          "output_values": {
+            "triangle": [
+              [
+                13.200000762939453,
+                0.0
+              ],
+              [
+                29.0,
+                0.4799998104572296
+              ],
+              [
+                68.33999633789062,
+                0.0
+              ]
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      },
+      {
+        "case": "lower",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "case-beta",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            },
+            {
+              "check": "rank-k-selected-triangle",
+              "passed": true,
+              "error": 3.073940540086947e-06,
+              "bound": 0.0001557675953956992
+            },
+            {
+              "check": "other-triangle-preserved",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            }
+          ],
+          "input_sha256": "339149fd2d330060a7ec648cc04013c29c139fe7b0bb28c248824e074e99441b",
+          "output_values": {
+            "triangle": [
+              [
+                13.700000762939453,
+                0.0
+              ],
+              [
+                30.5,
+                -0.48000025749206543
+              ],
+              [
+                70.33999633789062,
+                0.0
+              ]
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      },
+      {
+        "case": "conjugate",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "case-beta",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            },
+            {
+              "check": "rank-k-selected-triangle",
+              "passed": true,
+              "error": 9.97037480483663e-07,
+              "bound": 0.00014784274327756946
+            },
+            {
+              "check": "other-triangle-preserved",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            }
+          ],
+          "input_sha256": "339149fd2d330060a7ec648cc04013c29c139fe7b0bb28c248824e074e99441b",
+          "output_values": {
+            "triangle": [
+              [
+                27.85999870300293,
+                0.0
+              ],
+              [
+                39.13999938964844,
+                -0.23999856412410736
+              ],
+              [
+                56.18000030517578,
+                0.0
+              ]
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      }
+    ],
+    "cuda_evidence": "migration/reports/evidence/20261110T023758.405542Z/batches4_8-cuda/cuBLAS_Extensions_CherkEx_cublas_CherkEx_example.cu",
+    "reference_library": {
+      "numpy": "2.3.4",
+      "scipy": "1.16.3"
+    },
+    "validation_source_sha256": "44896dcb6058c504fab96f9239ab6f181970147626a772ddd1c40c2464e72854",
+    "batch": "b4",
+    "cuda_implementation_sha256": "fe5b1379f1991abe2d8f0376c1204904866e3aff60d20345335711bac32a87f7",
+    "cuda_environment": {
+      "backend": "cuda",
+      "devices": "0, NVIDIA GeForce RTX 5090, GPU-5864d26e-25e9-041f-2901-2745fccf5e30, 615.71.09\n1, NVIDIA GeForce RTX 5090, GPU-17390cc0-bf3c-53e3-170c-21eb949de43b, 615.71.09\n",
+      "image_id": null,
+      "rocm_release": null,
+      "visible_devices": "0"
+    }
+  },
+  {
+    "sample_id": "cuBLAS/Extensions/CsyrkEx::cublas_CsyrkEx_example.cu",
+    "source": "cuBLAS/Extensions/CsyrkEx/cublas_CsyrkEx_example.cu",
+    "implementation": "rocm/ported/cuBLAS/Extensions/CsyrkEx/cublas_CsyrkEx_example.cu",
+    "implementation_sha256": "9eeb88c86d7a9cffce0a55fba3d194171f9f40741d11fc5d05d0dd6f130d9f19",
+    "original_sha256": "321a3dad68f127831cebc7fb365cdf2aaf14e643f91ff0a07fdc3c04f1f41778",
+    "build_return_code": 0,
+    "runs": [
+      {
+        "case": "original",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuBLAS_Extensions_CsyrkEx_cublas_CsyrkEx_example.cu/original"
+      },
+      {
+        "case": "nonzero-beta",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuBLAS_Extensions_CsyrkEx_cublas_CsyrkEx_example.cu/nonzero-beta"
+      },
+      {
+        "case": "lower",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuBLAS_Extensions_CsyrkEx_cublas_CsyrkEx_example.cu/lower"
+      },
+      {
+        "case": "transpose",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuBLAS_Extensions_CsyrkEx_cublas_CsyrkEx_example.cu/transpose"
+      }
+    ],
+    "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuBLAS_Extensions_CsyrkEx_cublas_CsyrkEx_example.cu",
+    "environment": {
+      "backend": "rocm",
+      "devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ],
+      "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+      "rocm_release": "10.1.0",
+      "visible_devices": "2"
+    },
+    "libraries": [
+      "hipblas",
+      "rocblas"
+    ],
+    "dependencies": {
+      "rocm/common/observe.hpp": "3bd452d352dfce533bfb51a6e32ea308d9ca5d85a3a22afeca109d1cae743410",
+      "rocm/ported/cuBLAS/utils/cublas_utils.h": "4242a2561ed3572b704c8cbab607ab1891ba189688e4838f314eb3fbb37121c9",
+      "tools/migration/batches4_8_reference.py": "6d6165aa2ec0f6ad10b9073b4f323446810073806b13902603b2a211877ec055",
+      "tools/migration/batch4_reference.py": "b5350543a289f766280f008202ee6f74ed8428a8b866ac4af1c254b0cedbb194"
+    },
+    "status": "PASSED",
+    "level": "L4",
+    "cases": [
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "case-beta",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "rank-k-selected-triangle",
+            "passed": true,
+            "error": 4.3569467552480325e-06,
+            "bound": 0.00024460959027290457
+          },
+          {
+            "check": "other-triangle-preserved",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          }
+        ],
+        "input_sha256": "8bcc37945456dc4a714c6938b4251c77c846411b5190e0fdbd291e6c9e1b9d48",
+        "output_values": {
+          "triangle": [
+            [
+              -28.779996871948242,
+              26.899999618530273
+            ],
+            [
+              -43.18000411987305,
+              40.57999801635742
+            ],
+            [
+              -71.9800033569336,
+              68.65999603271484
+            ]
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "original"
+      },
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "case-beta",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "rank-k-selected-triangle",
+            "passed": true,
+            "error": 4.3569467552480325e-06,
+            "bound": 0.00024973674474186526
+          },
+          {
+            "check": "other-triangle-preserved",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          }
+        ],
+        "input_sha256": "7dff90704319497be2df1bf1337b20522655c55d38948faaa159c1578c3f1865",
+        "output_values": {
+          "triangle": [
+            [
+              -29.279996871948242,
+              27.149999618530273
+            ],
+            [
+              -44.68000411987305,
+              41.32999801635742
+            ],
+            [
+              -74.2300033569336,
+              69.15999603271484
+            ]
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "nonzero-beta"
+      },
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "case-beta",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "rank-k-selected-triangle",
+            "passed": true,
+            "error": 5.187849175755554e-06,
+            "bound": 0.00024460959027290457
+          },
+          {
+            "check": "other-triangle-preserved",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          }
+        ],
+        "input_sha256": "8bcc37945456dc4a714c6938b4251c77c846411b5190e0fdbd291e6c9e1b9d48",
+        "output_values": {
+          "triangle": [
+            [
+              -28.779996871948242,
+              26.899999618530273
+            ],
+            [
+              -43.18000030517578,
+              40.579994201660156
+            ],
+            [
+              -71.9800033569336,
+              68.65999603271484
+            ]
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "lower"
+      },
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "case-beta",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "rank-k-selected-triangle",
+            "passed": true,
+            "error": 4.3569467552480325e-06,
+            "bound": 0.00024460959027290457
+          },
+          {
+            "check": "other-triangle-preserved",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          }
+        ],
+        "input_sha256": "8bcc37945456dc4a714c6938b4251c77c846411b5190e0fdbd291e6c9e1b9d48",
+        "output_values": {
+          "triangle": [
+            [
+              -28.779996871948242,
+              26.899999618530273
+            ],
+            [
+              -43.18000411987305,
+              40.57999801635742
+            ],
+            [
+              -71.9800033569336,
+              68.65999603271484
+            ]
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "transpose"
+      }
+    ],
+    "cuda_comparison": "PASSED",
+    "cuda_cases": [
+      {
+        "case": "original",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "case-beta",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            },
+            {
+              "check": "rank-k-selected-triangle",
+              "passed": true,
+              "error": 3.756074144618576e-06,
+              "bound": 0.00024460959027290457
+            },
+            {
+              "check": "other-triangle-preserved",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            }
+          ],
+          "input_sha256": "8bcc37945456dc4a714c6938b4251c77c846411b5190e0fdbd291e6c9e1b9d48",
+          "output_values": {
+            "triangle": [
+              [
+                -28.780000686645508,
+                26.899999618530273
+              ],
+              [
+                -43.18000030517578,
+                40.58000183105469
+              ],
+              [
+                -71.9800033569336,
+                68.65999603271484
+              ]
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      },
+      {
+        "case": "nonzero-beta",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "case-beta",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            },
+            {
+              "check": "rank-k-selected-triangle",
+              "passed": true,
+              "error": 3.756074144618576e-06,
+              "bound": 0.00024973674474186526
+            },
+            {
+              "check": "other-triangle-preserved",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            }
+          ],
+          "input_sha256": "7dff90704319497be2df1bf1337b20522655c55d38948faaa159c1578c3f1865",
+          "output_values": {
+            "triangle": [
+              [
+                -29.280000686645508,
+                27.149999618530273
+              ],
+              [
+                -44.68000030517578,
+                41.33000183105469
+              ],
+              [
+                -74.2300033569336,
+                69.15999603271484
+              ]
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      },
+      {
+        "case": "lower",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "case-beta",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            },
+            {
+              "check": "rank-k-selected-triangle",
+              "passed": true,
+              "error": 4.694559300104045e-06,
+              "bound": 0.00024460959027290457
+            },
+            {
+              "check": "other-triangle-preserved",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            }
+          ],
+          "input_sha256": "8bcc37945456dc4a714c6938b4251c77c846411b5190e0fdbd291e6c9e1b9d48",
+          "output_values": {
+            "triangle": [
+              [
+                -28.780000686645508,
+                26.899999618530273
+              ],
+              [
+                -43.179996490478516,
+                40.57999801635742
+              ],
+              [
+                -71.9800033569336,
+                68.65999603271484
+              ]
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      },
+      {
+        "case": "transpose",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "case-beta",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            },
+            {
+              "check": "rank-k-selected-triangle",
+              "passed": true,
+              "error": 3.756074144618576e-06,
+              "bound": 0.00024460959027290457
+            },
+            {
+              "check": "other-triangle-preserved",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            }
+          ],
+          "input_sha256": "8bcc37945456dc4a714c6938b4251c77c846411b5190e0fdbd291e6c9e1b9d48",
+          "output_values": {
+            "triangle": [
+              [
+                -28.780000686645508,
+                26.899999618530273
+              ],
+              [
+                -43.18000030517578,
+                40.58000183105469
+              ],
+              [
+                -71.9800033569336,
+                68.65999603271484
+              ]
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      }
+    ],
+    "cuda_evidence": "migration/reports/evidence/20261110T023758.405542Z/batches4_8-cuda/cuBLAS_Extensions_CsyrkEx_cublas_CsyrkEx_example.cu",
+    "reference_library": {
+      "numpy": "2.3.4",
+      "scipy": "1.16.3"
+    },
+    "validation_source_sha256": "44896dcb6058c504fab96f9239ab6f181970147626a772ddd1c40c2464e72854",
+    "batch": "b4",
+    "cuda_implementation_sha256": "fc0e94c7f9539ef5713faa1ab4f251c4468a251ca1c12952419fcc95fac9c08c",
+    "cuda_environment": {
+      "backend": "cuda",
+      "devices": "0, NVIDIA GeForce RTX 5090, GPU-5864d26e-25e9-041f-2901-2745fccf5e30, 615.71.09\n1, NVIDIA GeForce RTX 5090, GPU-17390cc0-bf3c-53e3-170c-21eb949de43b, 615.71.09\n",
+      "image_id": null,
+      "rocm_release": null,
+      "visible_devices": "0"
+    }
+  },
+  {
+    "sample_id": "cuBLAS/Extensions/trttp::cublas_trttp_example.cu",
+    "source": "cuBLAS/Extensions/trttp/cublas_trttp_example.cu",
+    "implementation": "rocm/ported/cuBLAS/Extensions/trttp/cublas_trttp_example.cu",
+    "implementation_sha256": "3b11d8be5e80c69eefb8eb52160c5e66f0430ddb4c5f49fa8fe0e01b0266261a",
+    "original_sha256": "092599f465f97b9833bc0a59ebab6e7e897229526f949e3f597aa5987a76e64e",
+    "build_return_code": 0,
+    "runs": [
+      {
+        "case": "original",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuBLAS_Extensions_trttp_cublas_trttp_example.cu/original"
+      },
+      {
+        "case": "lower",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuBLAS_Extensions_trttp_cublas_trttp_example.cu/lower"
+      },
+      {
+        "case": "padded-lda",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuBLAS_Extensions_trttp_cublas_trttp_example.cu/padded-lda"
+      },
+      {
+        "case": "odd-size",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuBLAS_Extensions_trttp_cublas_trttp_example.cu/odd-size"
+      }
+    ],
+    "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuBLAS_Extensions_trttp_cublas_trttp_example.cu",
+    "environment": {
+      "backend": "rocm",
+      "devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ],
+      "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+      "rocm_release": "10.1.0",
+      "visible_devices": "2"
+    },
+    "libraries": [
+      "hipblas",
+      "rocblas"
+    ],
+    "dependencies": {
+      "rocm/common/batch4_packed.hpp": "d52961c3c70a3aa5abcf1e8815749383b25078338fabf8b742f43b99edbfba53",
+      "rocm/common/batches_runtime.hpp": "04dc008dae2ade89ea3ef3e349d4a2dd0a842601737c77f0c7f076187b34f26f",
+      "rocm/common/observe.hpp": "3bd452d352dfce533bfb51a6e32ea308d9ca5d85a3a22afeca109d1cae743410",
+      "rocm/common/binary_observe.hpp": "c932e3d979f33ea8c62b38e687be1a083dfec0481d5e9ffbb04ffe6865899e73",
+      "tools/migration/batches4_8_reference.py": "6d6165aa2ec0f6ad10b9073b4f323446810073806b13902603b2a211877ec055",
+      "tools/migration/batch4_reference.py": "b5350543a289f766280f008202ee6f74ed8428a8b866ac4af1c254b0cedbb194"
+    },
+    "status": "PASSED",
+    "level": "L4",
+    "cases": [
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "packed-column-major-layout",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "tail-canary",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          }
+        ],
+        "input_sha256": "8526e9ad2cf8b246b23691ad5f34149e055811b32dc46b0ea4ad6fff9e1f87fd",
+        "output_values": {
+          "defined-result": [
+            1,
+            2,
+            4
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "original"
+      },
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "packed-column-major-layout",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "tail-canary",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          }
+        ],
+        "input_sha256": "ca390ffc7d3c8bc15ce00ce9885693a0bd3e70a5c7203310cc3fb56c1dd7757b",
+        "output_values": {
+          "defined-result": [
+            1,
+            2,
+            5
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "lower"
+      },
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "packed-column-major-layout",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "tail-canary",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "lda-padding-canary",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          }
+        ],
+        "input_sha256": "4ed405e885d7d2c5c353bd1d42cf939146632f03b7e1fc53452bc37403c7bd90",
+        "output_values": {
+          "defined-result": [
+            1,
+            4,
+            5
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "padded-lda"
+      },
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "packed-column-major-layout",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "tail-canary",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          }
+        ],
+        "input_sha256": "d2889debaf8f7ddd0aea5aac9dcd96cc0a0f1edbeaf5285b9113ff70d2626683",
+        "output_values": {
+          "defined-result": [
+            1,
+            4,
+            5,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            13,
+            14,
+            15,
+            16,
+            17
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "odd-size"
+      }
+    ],
+    "cuda_comparison": "PASSED",
+    "cuda_cases": [
+      {
+        "case": "original",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "packed-column-major-layout",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            },
+            {
+              "check": "tail-canary",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            }
+          ],
+          "input_sha256": "8526e9ad2cf8b246b23691ad5f34149e055811b32dc46b0ea4ad6fff9e1f87fd",
+          "output_values": {
+            "defined-result": [
+              1,
+              2,
+              4
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      },
+      {
+        "case": "lower",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "packed-column-major-layout",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            },
+            {
+              "check": "tail-canary",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            }
+          ],
+          "input_sha256": "ca390ffc7d3c8bc15ce00ce9885693a0bd3e70a5c7203310cc3fb56c1dd7757b",
+          "output_values": {
+            "defined-result": [
+              1,
+              2,
+              5
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      },
+      {
+        "case": "padded-lda",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "packed-column-major-layout",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            },
+            {
+              "check": "tail-canary",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            },
+            {
+              "check": "lda-padding-canary",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            }
+          ],
+          "input_sha256": "4ed405e885d7d2c5c353bd1d42cf939146632f03b7e1fc53452bc37403c7bd90",
+          "output_values": {
+            "defined-result": [
+              1,
+              4,
+              5
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      },
+      {
+        "case": "odd-size",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "packed-column-major-layout",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            },
+            {
+              "check": "tail-canary",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            }
+          ],
+          "input_sha256": "d2889debaf8f7ddd0aea5aac9dcd96cc0a0f1edbeaf5285b9113ff70d2626683",
+          "output_values": {
+            "defined-result": [
+              1,
+              4,
+              5,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              13,
+              14,
+              15,
+              16,
+              17
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      }
+    ],
+    "cuda_evidence": "migration/reports/evidence/20261110T023758.405542Z/batches4_8-cuda/cuBLAS_Extensions_trttp_cublas_trttp_example.cu",
+    "reference_library": {
+      "numpy": "2.3.4",
+      "scipy": "1.16.3"
+    },
+    "validation_source_sha256": "44896dcb6058c504fab96f9239ab6f181970147626a772ddd1c40c2464e72854",
+    "batch": "b4",
+    "cuda_implementation_sha256": "3b11d8be5e80c69eefb8eb52160c5e66f0430ddb4c5f49fa8fe0e01b0266261a",
+    "cuda_environment": {
+      "backend": "cuda",
+      "devices": "0, NVIDIA GeForce RTX 5090, GPU-5864d26e-25e9-041f-2901-2745fccf5e30, 615.71.09\n1, NVIDIA GeForce RTX 5090, GPU-17390cc0-bf3c-53e3-170c-21eb949de43b, 615.71.09\n",
+      "image_id": null,
+      "rocm_release": null,
+      "visible_devices": "0"
+    }
+  },
+  {
+    "sample_id": "cuBLAS/Extensions/tpttr::cublas_tpttr_example.cu",
+    "source": "cuBLAS/Extensions/tpttr/cublas_tpttr_example.cu",
+    "implementation": "rocm/ported/cuBLAS/Extensions/tpttr/cublas_tpttr_example.cu",
+    "implementation_sha256": "45dd8c523cd2b269b403ee6757d05ac84297d9caf6010d12570391d6221c279c",
+    "original_sha256": "8591d285de518575f346fd987d3d9c97f7fad6e029922b5af167505fc04afc2d",
+    "build_return_code": 0,
+    "runs": [
+      {
+        "case": "original",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuBLAS_Extensions_tpttr_cublas_tpttr_example.cu/original"
+      },
+      {
+        "case": "lower",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuBLAS_Extensions_tpttr_cublas_tpttr_example.cu/lower"
+      },
+      {
+        "case": "padded-lda",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuBLAS_Extensions_tpttr_cublas_tpttr_example.cu/padded-lda"
+      },
+      {
+        "case": "odd-size",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuBLAS_Extensions_tpttr_cublas_tpttr_example.cu/odd-size"
+      }
+    ],
+    "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuBLAS_Extensions_tpttr_cublas_tpttr_example.cu",
+    "environment": {
+      "backend": "rocm",
+      "devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ],
+      "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+      "rocm_release": "10.1.0",
+      "visible_devices": "2"
+    },
+    "libraries": [
+      "hipblas",
+      "rocblas"
+    ],
+    "dependencies": {
+      "rocm/common/batch4_packed.hpp": "d52961c3c70a3aa5abcf1e8815749383b25078338fabf8b742f43b99edbfba53",
+      "rocm/common/batches_runtime.hpp": "04dc008dae2ade89ea3ef3e349d4a2dd0a842601737c77f0c7f076187b34f26f",
+      "rocm/common/observe.hpp": "3bd452d352dfce533bfb51a6e32ea308d9ca5d85a3a22afeca109d1cae743410",
+      "rocm/common/binary_observe.hpp": "c932e3d979f33ea8c62b38e687be1a083dfec0481d5e9ffbb04ffe6865899e73",
+      "tools/migration/batches4_8_reference.py": "6d6165aa2ec0f6ad10b9073b4f323446810073806b13902603b2a211877ec055",
+      "tools/migration/batch4_reference.py": "b5350543a289f766280f008202ee6f74ed8428a8b866ac4af1c254b0cedbb194"
+    },
+    "status": "PASSED",
+    "level": "L4",
+    "cases": [
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "packed-column-major-layout",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          }
+        ],
+        "input_sha256": "8526e9ad2cf8b246b23691ad5f34149e055811b32dc46b0ea4ad6fff9e1f87fd",
+        "output_values": {
+          "defined-result": [
+            1,
+            3,
+            2
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "original"
+      },
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "packed-column-major-layout",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          }
+        ],
+        "input_sha256": "ca390ffc7d3c8bc15ce00ce9885693a0bd3e70a5c7203310cc3fb56c1dd7757b",
+        "output_values": {
+          "defined-result": [
+            1,
+            2,
+            3
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "lower"
+      },
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "packed-column-major-layout",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "lda-padding-canary",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          }
+        ],
+        "input_sha256": "4ed405e885d7d2c5c353bd1d42cf939146632f03b7e1fc53452bc37403c7bd90",
+        "output_values": {
+          "defined-result": [
+            1,
+            2,
+            3
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "padded-lda"
+      },
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "packed-column-major-layout",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          }
+        ],
+        "input_sha256": "d2889debaf8f7ddd0aea5aac9dcd96cc0a0f1edbeaf5285b9113ff70d2626683",
+        "output_values": {
+          "defined-result": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "odd-size"
+      }
+    ],
+    "cuda_comparison": "PASSED",
+    "cuda_cases": [
+      {
+        "case": "original",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "packed-column-major-layout",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            }
+          ],
+          "input_sha256": "8526e9ad2cf8b246b23691ad5f34149e055811b32dc46b0ea4ad6fff9e1f87fd",
+          "output_values": {
+            "defined-result": [
+              1,
+              3,
+              2
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      },
+      {
+        "case": "lower",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "packed-column-major-layout",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            }
+          ],
+          "input_sha256": "ca390ffc7d3c8bc15ce00ce9885693a0bd3e70a5c7203310cc3fb56c1dd7757b",
+          "output_values": {
+            "defined-result": [
+              1,
+              2,
+              3
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      },
+      {
+        "case": "padded-lda",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "packed-column-major-layout",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            },
+            {
+              "check": "lda-padding-canary",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            }
+          ],
+          "input_sha256": "4ed405e885d7d2c5c353bd1d42cf939146632f03b7e1fc53452bc37403c7bd90",
+          "output_values": {
+            "defined-result": [
+              1,
+              2,
+              3
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      },
+      {
+        "case": "odd-size",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "packed-column-major-layout",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            }
+          ],
+          "input_sha256": "d2889debaf8f7ddd0aea5aac9dcd96cc0a0f1edbeaf5285b9113ff70d2626683",
+          "output_values": {
+            "defined-result": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      }
+    ],
+    "cuda_evidence": "migration/reports/evidence/20261110T023758.405542Z/batches4_8-cuda/cuBLAS_Extensions_tpttr_cublas_tpttr_example.cu",
+    "reference_library": {
+      "numpy": "2.3.4",
+      "scipy": "1.16.3"
+    },
+    "validation_source_sha256": "44896dcb6058c504fab96f9239ab6f181970147626a772ddd1c40c2464e72854",
+    "batch": "b4",
+    "cuda_implementation_sha256": "45dd8c523cd2b269b403ee6757d05ac84297d9caf6010d12570391d6221c279c",
+    "cuda_environment": {
+      "backend": "cuda",
+      "devices": "0, NVIDIA GeForce RTX 5090, GPU-5864d26e-25e9-041f-2901-2745fccf5e30, 615.71.09\n1, NVIDIA GeForce RTX 5090, GPU-17390cc0-bf3c-53e3-170c-21eb949de43b, 615.71.09\n",
+      "image_id": null,
+      "rocm_release": null,
+      "visible_devices": "0"
+    }
+  },
+  {
+    "sample_id": "cuSOLVER/ormqr::cusolver_ormqr_example.cu",
+    "source": "cuSOLVER/ormqr/cusolver_ormqr_example.cu",
+    "implementation": "rocm/ported/cuSOLVER/ormqr/cusolver_ormqr_example.cu",
+    "implementation_sha256": "4bdb2b17c2a498510750de4370d7d2d76cd80905ddbe64e0e590d3ec74b8d510",
+    "original_sha256": "cf9a6977ebd17f99467498248d97153ea84848a906c1362528ce0b16165476f2",
+    "build_return_code": 0,
+    "runs": [
+      {
+        "case": "original",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuSOLVER_ormqr_cusolver_ormqr_example.cu/original"
+      },
+      {
+        "case": "changed-matrix",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuSOLVER_ormqr_cusolver_ormqr_example.cu/changed-matrix"
+      },
+      {
+        "case": "multiple-rhs",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuSOLVER_ormqr_cusolver_ormqr_example.cu/multiple-rhs"
+      },
+      {
+        "case": "Q-application",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuSOLVER_ormqr_cusolver_ormqr_example.cu/Q-application"
+      }
+    ],
+    "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuSOLVER_ormqr_cusolver_ormqr_example.cu",
+    "environment": {
+      "backend": "rocm",
+      "devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ],
+      "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+      "rocm_release": "10.1.0",
+      "visible_devices": "2"
+    },
+    "libraries": [
+      "hipsolver",
+      "hipblas",
+      "rocsolver",
+      "rocblas"
+    ],
+    "dependencies": {
+      "rocm/common/observe.hpp": "3bd452d352dfce533bfb51a6e32ea308d9ca5d85a3a22afeca109d1cae743410",
+      "rocm/ported/cuSOLVER/utils/cusolver_utils.h": "f189bed0e1102c2a810462a9d1cb3998a663ad5f364803dee646f152c87e5286",
+      "tools/migration/batches4_8_reference.py": "6d6165aa2ec0f6ad10b9073b4f323446810073806b13902603b2a211877ec055",
+      "tools/migration/batch4_reference.py": "b5350543a289f766280f008202ee6f74ed8428a8b866ac4af1c254b0cedbb194"
+    },
+    "status": "PASSED",
+    "level": "L4",
+    "cases": [
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "info",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "QR-reconstruction",
+            "passed": true,
+            "error": 2.2452871135843694e-15,
+            "bound": 9.848857801796104e-10
+          },
+          {
+            "check": "Q-orthogonality",
+            "passed": true,
+            "error": 8.267792172788752e-16,
+            "bound": 1.7320508075688773e-10
+          },
+          {
+            "check": "Q-application",
+            "passed": true,
+            "error": 1.4217791915866692e-15,
+            "bound": 1.664331697709324e-09
+          },
+          {
+            "check": "solve-residual",
+            "passed": true,
+            "error": 2.5121479338940403e-15,
+            "bound": 1.664331697709324e-09
+          },
+          {
+            "check": "independent-CPU-solve",
+            "passed": true,
+            "error": 4.403262646735393e-15,
+            "bound": 1.7320508075688773e-10
+          }
+        ],
+        "input_sha256": "51aa4ffa55ef6ebb4881af6a377b59da7456a6a11bc0a3c3b80e8771a03c9f84",
+        "output_values": {
+          "solution": [
+            [
+              1.0000000000000007
+            ],
+            [
+              0.9999999999999966
+            ],
+            [
+              1.0000000000000027
+            ]
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "original"
+      },
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "info",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "QR-reconstruction",
+            "passed": true,
+            "error": 3.524848827571324e-15,
+            "bound": 1.0259142264341597e-09
+          },
+          {
+            "check": "Q-orthogonality",
+            "passed": true,
+            "error": 9.191266645971842e-16,
+            "bound": 1.7320508075688773e-10
+          },
+          {
+            "check": "Q-application",
+            "passed": true,
+            "error": 3.958939909178909e-15,
+            "bound": 1.664331697709324e-09
+          },
+          {
+            "check": "solve-residual",
+            "passed": true,
+            "error": 2.5121479338940403e-15,
+            "bound": 1.664331697709324e-09
+          },
+          {
+            "check": "independent-CPU-solve",
+            "passed": true,
+            "error": 2.5243264498952412e-15,
+            "bound": 2.23606797749979e-10
+          }
+        ],
+        "input_sha256": "4ad2252790ff32cc034fb9b893f2df18d41368c3fd655452b7f6e32fd668ce7d",
+        "output_values": {
+          "solution": [
+            [
+              1.0000000000000002
+            ],
+            [
+              1.9999999999999982
+            ],
+            [
+              1.6825960839102556e-15
+            ]
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "changed-matrix"
+      },
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "info",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "QR-reconstruction",
+            "passed": true,
+            "error": 2.2452871135843694e-15,
+            "bound": 9.848857801796104e-10
+          },
+          {
+            "check": "Q-orthogonality",
+            "passed": true,
+            "error": 8.267792172788752e-16,
+            "bound": 1.7320508075688773e-10
+          },
+          {
+            "check": "Q-application",
+            "passed": true,
+            "error": 1.4228624520802642e-15,
+            "bound": 1.7058722109231984e-09
+          },
+          {
+            "check": "solve-residual",
+            "passed": true,
+            "error": 1.7153574486020033e-14,
+            "bound": 1.705872210923198e-09
+          },
+          {
+            "check": "independent-CPU-solve",
+            "passed": true,
+            "error": 5.798946847048253e-14,
+            "bound": 1.4560219778561036e-09
+          }
+        ],
+        "input_sha256": "e458ae551c51d51c9de8d7621472c12599f6154a23daa413c3e10e37a7796909",
+        "output_values": {
+          "solution": [
+            [
+              1.0000000000000007,
+              3.9999999999999916
+            ],
+            [
+              0.9999999999999966,
+              -11.999999999999954
+            ],
+            [
+              1.0000000000000027,
+              6.999999999999966
+            ]
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "multiple-rhs"
+      },
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "info",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "QR-reconstruction",
+            "passed": true,
+            "error": 2.2452871135843694e-15,
+            "bound": 9.848857801796104e-10
+          },
+          {
+            "check": "Q-orthogonality",
+            "passed": true,
+            "error": 8.267792172788752e-16,
+            "bound": 1.7320508075688773e-10
+          },
+          {
+            "check": "Q-application",
+            "passed": true,
+            "error": 9.155133597044475e-16,
+            "bound": 5.477225575051662e-10
+          },
+          {
+            "check": "solve-residual",
+            "passed": true,
+            "error": 2.592507456591595e-14,
+            "bound": 5.477225575051662e-10
+          },
+          {
+            "check": "independent-CPU-solve",
+            "passed": true,
+            "error": 7.6450444385775e-14,
+            "bound": 2.0615528128088304e-09
+          }
+        ],
+        "input_sha256": "c8ef2fd12afce486ff730c56f2d91190f5f771ca6c1afe1d74561ccdd901af37",
+        "output_values": {
+          "solution": [
+            [
+              5.999999999999992
+            ],
+            [
+              -16.99999999999994
+            ],
+            [
+              9.999999999999954
+            ]
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "Q-application"
+      }
+    ],
+    "cuda_comparison": "PASSED",
+    "cuda_cases": [
+      {
+        "case": "original",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "info",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            },
+            {
+              "check": "QR-reconstruction",
+              "passed": true,
+              "error": 2.7307875685720004e-15,
+              "bound": 9.848857801796104e-10
+            },
+            {
+              "check": "Q-orthogonality",
+              "passed": true,
+              "error": 9.495547365880734e-16,
+              "bound": 1.7320508075688773e-10
+            },
+            {
+              "check": "Q-application",
+              "passed": true,
+              "error": 3.66205343881779e-15,
+              "bound": 1.6643316977093236e-09
+            },
+            {
+              "check": "solve-residual",
+              "passed": true,
+              "error": 3.3232593448441795e-15,
+              "bound": 1.664331697709324e-09
+            },
+            {
+              "check": "independent-CPU-solve",
+              "passed": true,
+              "error": 6.324374521249838e-15,
+              "bound": 1.7320508075688773e-10
+            }
+          ],
+          "input_sha256": "51aa4ffa55ef6ebb4881af6a377b59da7456a6a11bc0a3c3b80e8771a03c9f84",
+          "output_values": {
+            "solution": [
+              [
+                1.0000000000000009
+              ],
+              [
+                0.999999999999995
+              ],
+              [
+                1.0000000000000038
+              ]
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      },
+      {
+        "case": "changed-matrix",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "info",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            },
+            {
+              "check": "QR-reconstruction",
+              "passed": true,
+              "error": 2.6272671962866384e-15,
+              "bound": 1.0259142264341597e-09
+            },
+            {
+              "check": "Q-orthogonality",
+              "passed": true,
+              "error": 4.465436264189856e-16,
+              "bound": 1.7320508075688773e-10
+            },
+            {
+              "check": "Q-application",
+              "passed": true,
+              "error": 3.583979471974561e-15,
+              "bound": 1.664331697709324e-09
+            },
+            {
+              "check": "solve-residual",
+              "passed": true,
+              "error": 5.102196573270515e-15,
+              "bound": 1.664331697709324e-09
+            },
+            {
+              "check": "independent-CPU-solve",
+              "passed": true,
+              "error": 4.324119315578863e-15,
+              "bound": 2.23606797749979e-10
+            }
+          ],
+          "input_sha256": "4ad2252790ff32cc034fb9b893f2df18d41368c3fd655452b7f6e32fd668ce7d",
+          "output_values": {
+            "solution": [
+              [
+                1.0000000000000007
+              ],
+              [
+                1.999999999999997
+              ],
+              [
+                2.833849771797935e-15
+              ]
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      },
+      {
+        "case": "multiple-rhs",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "info",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            },
+            {
+              "check": "QR-reconstruction",
+              "passed": true,
+              "error": 2.7307875685720004e-15,
+              "bound": 9.848857801796104e-10
+            },
+            {
+              "check": "Q-orthogonality",
+              "passed": true,
+              "error": 9.495547365880734e-16,
+              "bound": 1.7320508075688773e-10
+            },
+            {
+              "check": "Q-application",
+              "passed": true,
+              "error": 3.66205343881779e-15,
+              "bound": 1.7058722109231976e-09
+            },
+            {
+              "check": "solve-residual",
+              "passed": true,
+              "error": 1.116422962075395e-14,
+              "bound": 1.705872210923198e-09
+            },
+            {
+              "check": "independent-CPU-solve",
+              "passed": true,
+              "error": 3.626012873559868e-14,
+              "bound": 1.4560219778561036e-09
+            }
+          ],
+          "input_sha256": "e458ae551c51d51c9de8d7621472c12599f6154a23daa413c3e10e37a7796909",
+          "output_values": {
+            "solution": [
+              [
+                1.0000000000000009,
+                3.9999999999999964
+              ],
+              [
+                0.999999999999995,
+                -11.999999999999972
+              ],
+              [
+                1.0000000000000038,
+                6.999999999999979
+              ]
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      },
+      {
+        "case": "Q-application",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "info",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0
+            },
+            {
+              "check": "QR-reconstruction",
+              "passed": true,
+              "error": 2.7307875685720004e-15,
+              "bound": 9.848857801796104e-10
+            },
+            {
+              "check": "Q-orthogonality",
+              "passed": true,
+              "error": 9.495547365880734e-16,
+              "bound": 1.7320508075688773e-10
+            },
+            {
+              "check": "Q-application",
+              "passed": true,
+              "error": 8.881784197001252e-16,
+              "bound": 5.477225575051662e-10
+            },
+            {
+              "check": "solve-residual",
+              "passed": true,
+              "error": 1.6473255640462455e-14,
+              "bound": 5.477225575051662e-10
+            },
+            {
+              "check": "independent-CPU-solve",
+              "passed": true,
+              "error": 4.9515449037920524e-14,
+              "bound": 2.0615528128088304e-09
+            }
+          ],
+          "input_sha256": "c8ef2fd12afce486ff730c56f2d91190f5f771ca6c1afe1d74561ccdd901af37",
+          "output_values": {
+            "solution": [
+              [
+                5.9999999999999964
+              ],
+              [
+                -16.99999999999996
+              ],
+              [
+                9.99999999999997
+              ]
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      }
+    ],
+    "cuda_evidence": "migration/reports/evidence/20261110T023758.405542Z/batches4_8-cuda/cuSOLVER_ormqr_cusolver_ormqr_example.cu",
+    "reference_library": {
+      "numpy": "2.3.4",
+      "scipy": "1.16.3"
+    },
+    "validation_source_sha256": "44896dcb6058c504fab96f9239ab6f181970147626a772ddd1c40c2464e72854",
+    "batch": "b4",
+    "cuda_implementation_sha256": "ff97f7cd6751396a317fa93b331f177ca16221f78defdfa359b736142701ef7a",
+    "cuda_environment": {
+      "backend": "cuda",
+      "devices": "0, NVIDIA GeForce RTX 5090, GPU-5864d26e-25e9-041f-2901-2745fccf5e30, 615.71.09\n1, NVIDIA GeForce RTX 5090, GPU-17390cc0-bf3c-53e3-170c-21eb949de43b, 615.71.09\n",
+      "image_id": null,
+      "rocm_release": null,
+      "visible_devices": "0"
+    }
+  },
+  {
+    "sample_id": "cuSPARSE/spsv_sell::spsv_sell_example.c",
+    "source": "cuSPARSE/spsv_sell/spsv_sell_example.c",
+    "implementation": "rocm/ported/cuSPARSE/spsv_sell/spsv_sell_example.c",
+    "implementation_sha256": "b1414927be7f79a9adb2ca301405370f679bf6138e652220b97213a4796259b4",
+    "original_sha256": "fa3d1179dcd4b59c39ffd29da69daec10a43e426ddf1871eb1b25126fec24ef0",
+    "build_return_code": 0,
+    "runs": [
+      {
+        "case": "original",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuSPARSE_spsv_sell_spsv_sell_example.c/original"
+      },
+      {
+        "case": "changed-values",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuSPARSE_spsv_sell_spsv_sell_example.c/changed-values"
+      },
+      {
+        "case": "unit-diagonal",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuSPARSE_spsv_sell_spsv_sell_example.c/unit-diagonal"
+      },
+      {
+        "case": "upper",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuSPARSE_spsv_sell_spsv_sell_example.c/upper"
+      }
+    ],
+    "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuSPARSE_spsv_sell_spsv_sell_example.c",
+    "environment": {
+      "backend": "rocm",
+      "devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ],
+      "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+      "rocm_release": "10.1.0",
+      "visible_devices": "2"
+    },
+    "libraries": [
+      "hipsparse",
+      "hipblas",
+      "rocsparse"
+    ],
+    "dependencies": {
+      "rocm/common/batch4_sparse.hpp": "a9e51a530457c0720f9b860d30a0660ac62200830609b465ca90a7d2a70dc463",
+      "rocm/common/batches_runtime.hpp": "04dc008dae2ade89ea3ef3e349d4a2dd0a842601737c77f0c7f076187b34f26f",
+      "rocm/common/observe.hpp": "3bd452d352dfce533bfb51a6e32ea308d9ca5d85a3a22afeca109d1cae743410",
+      "rocm/common/binary_observe.hpp": "c932e3d979f33ea8c62b38e687be1a083dfec0481d5e9ffbb04ffe6865899e73",
+      "tools/migration/batches4_8_reference.py": "6d6165aa2ec0f6ad10b9073b4f323446810073806b13902603b2a211877ec055",
+      "tools/migration/batch4_reference.py": "b5350543a289f766280f008202ee6f74ed8428a8b866ac4af1c254b0cedbb194"
+    },
+    "status": "PASSED",
+    "level": "L4",
+    "cases": [
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "triangular-solve",
+            "passed": true,
+            "error": 6.280369834735101e-16,
+            "bound": 1.0954451150103323e-05
+          },
+          {
+            "check": "true-residual",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.00011485643212288984
+          },
+          {
+            "check": "GPU-format-row-offsets",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "GPU-format-columns",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "GPU-format-values",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          }
+        ],
+        "input_sha256": "b4ed3583f3b2c81e9686a59cc9aba7040c3a3483f4f60435dfc69f3564620a81",
+        "output_values": {
+          "solution": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "original"
+      },
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "triangular-solve",
+            "passed": true,
+            "error": 5.495276724280744e-08,
+            "bound": 4.381780460041328e-06
+          },
+          {
+            "check": "true-residual",
+            "passed": true,
+            "error": 5.564541324924779e-07,
+            "bound": 5.742821606144492e-05
+          },
+          {
+            "check": "GPU-format-row-offsets",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "GPU-format-columns",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "GPU-format-values",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          }
+        ],
+        "input_sha256": "c72d680092c2c8a3cc6d8c45423e14d29a0a829ca4e470ec5c19351d90441ffe",
+        "output_values": {
+          "solution": [
+            -0.4000000059604645,
+            -0.800000011920929,
+            -1.2000000476837158,
+            -1.600000023841858
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "changed-values"
+      },
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "triangular-solve",
+            "passed": true,
+            "error": 0.0,
+            "bound": 4.6173585522460784e-05
+          },
+          {
+            "check": "true-residual",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.00011485643212288984
+          },
+          {
+            "check": "GPU-format-row-offsets",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "GPU-format-columns",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "GPU-format-values",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          }
+        ],
+        "input_sha256": "ac2be500aed8d7d52f65bc8fc07ff3335bc126189288de346451aa981b2be618",
+        "output_values": {
+          "solution": [
+            1,
+            8,
+            18,
+            -12
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "unit-diagonal"
+      },
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "triangular-solve",
+            "passed": true,
+            "error": 1.0371771117703264e-06,
+            "bound": 2.5017990783150206e-05
+          },
+          {
+            "check": "true-residual",
+            "passed": true,
+            "error": 1.3486991523486091e-06,
+            "bound": 0.00011485643212288984
+          },
+          {
+            "check": "GPU-format-row-offsets",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "GPU-format-columns",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "GPU-format-values",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          }
+        ],
+        "input_sha256": "2992ad639c3bbd43f2bb79577d3797285618d27ae824b1f3ea6828e9e3989383",
+        "output_values": {
+          "solution": [
+            -10.51851749420166,
+            2.0,
+            -2.907407283782959,
+            5.777777671813965
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "upper"
+      }
+    ],
+    "cuda_comparison": "PASSED",
+    "cuda_cases": [
+      {
+        "case": "original",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "triangular-solve",
+              "passed": true,
+              "error": 6.280369834735101e-16,
+              "bound": 1.0954451150103323e-05
+            },
+            {
+              "check": "true-residual",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.00011485643212288984
+            }
+          ],
+          "input_sha256": "b4ed3583f3b2c81e9686a59cc9aba7040c3a3483f4f60435dfc69f3564620a81",
+          "output_values": {
+            "solution": [
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      },
+      {
+        "case": "changed-values",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "triangular-solve",
+              "passed": true,
+              "error": 5.495276724280744e-08,
+              "bound": 4.381780460041328e-06
+            },
+            {
+              "check": "true-residual",
+              "passed": true,
+              "error": 5.564541324924779e-07,
+              "bound": 5.742821606144492e-05
+            }
+          ],
+          "input_sha256": "c72d680092c2c8a3cc6d8c45423e14d29a0a829ca4e470ec5c19351d90441ffe",
+          "output_values": {
+            "solution": [
+              -0.4000000059604645,
+              -0.800000011920929,
+              -1.2000000476837158,
+              -1.600000023841858
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      },
+      {
+        "case": "unit-diagonal",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "triangular-solve",
+              "passed": true,
+              "error": 0.0,
+              "bound": 4.6173585522460784e-05
+            },
+            {
+              "check": "true-residual",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.00011485643212288984
+            }
+          ],
+          "input_sha256": "ac2be500aed8d7d52f65bc8fc07ff3335bc126189288de346451aa981b2be618",
+          "output_values": {
+            "solution": [
+              1,
+              8,
+              18,
+              -12
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      },
+      {
+        "case": "upper",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "triangular-solve",
+              "passed": true,
+              "error": 1.7748718991861123e-07,
+              "bound": 2.5017990783150206e-05
+            },
+            {
+              "check": "true-residual",
+              "passed": true,
+              "error": 9.5367431640625e-07,
+              "bound": 0.00011485643212288984
+            }
+          ],
+          "input_sha256": "2992ad639c3bbd43f2bb79577d3797285618d27ae824b1f3ea6828e9e3989383",
+          "output_values": {
+            "solution": [
+              -10.518518447875977,
+              2.0,
+              -2.907407283782959,
+              5.777777671813965
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      }
+    ],
+    "cuda_evidence": "migration/reports/evidence/20261110T023758.405542Z/batches4_8-cuda/cuSPARSE_spsv_sell_spsv_sell_example.c",
+    "reference_library": {
+      "numpy": "2.3.4",
+      "scipy": "1.16.3"
+    },
+    "validation_source_sha256": "44896dcb6058c504fab96f9239ab6f181970147626a772ddd1c40c2464e72854",
+    "batch": "b4",
+    "cuda_implementation_sha256": "b1414927be7f79a9adb2ca301405370f679bf6138e652220b97213a4796259b4",
+    "cuda_environment": {
+      "backend": "cuda",
+      "devices": "0, NVIDIA GeForce RTX 5090, GPU-5864d26e-25e9-041f-2901-2745fccf5e30, 615.71.09\n1, NVIDIA GeForce RTX 5090, GPU-17390cc0-bf3c-53e3-170c-21eb949de43b, 615.71.09\n",
+      "image_id": null,
+      "rocm_release": null,
+      "visible_devices": "0"
+    }
+  },
+  {
+    "sample_id": "cuSPARSE/sddmm_bsr::sddmm_bsr_example.c",
+    "source": "cuSPARSE/sddmm_bsr/sddmm_bsr_example.c",
+    "implementation": "rocm/ported/cuSPARSE/sddmm_bsr/sddmm_bsr_example.c",
+    "implementation_sha256": "681e85242b661c93f7cd5991f25f08bbbdb9285db2fdbe6e93e2bc4ea6ab0f45",
+    "original_sha256": "f39d735007562eba7432b53921290af0d23d7f726bf8c5c7c77f16ac0f8bd73b",
+    "build_return_code": 0,
+    "runs": [
+      {
+        "case": "original",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuSPARSE_sddmm_bsr_sddmm_bsr_example.c/original"
+      },
+      {
+        "case": "nonzero-beta",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuSPARSE_sddmm_bsr_sddmm_bsr_example.c/nonzero-beta"
+      },
+      {
+        "case": "changed-pattern",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuSPARSE_sddmm_bsr_sddmm_bsr_example.c/changed-pattern"
+      },
+      {
+        "case": "block-column-order",
+        "return_code": 0,
+        "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuSPARSE_sddmm_bsr_sddmm_bsr_example.c/block-column-order"
+      }
+    ],
+    "evidence": "migration/reports/evidence/20261110T024004.667635Z/batches4_8-rocm/cuSPARSE_sddmm_bsr_sddmm_bsr_example.c",
+    "environment": {
+      "backend": "rocm",
+      "devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ],
+      "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+      "rocm_release": "10.1.0",
+      "visible_devices": "2"
+    },
+    "libraries": [
+      "hipsparse",
+      "hipblas",
+      "rocsparse"
+    ],
+    "dependencies": {
+      "rocm/common/batch4_sparse.hpp": "a9e51a530457c0720f9b860d30a0660ac62200830609b465ca90a7d2a70dc463",
+      "rocm/common/batches_runtime.hpp": "04dc008dae2ade89ea3ef3e349d4a2dd0a842601737c77f0c7f076187b34f26f",
+      "rocm/common/observe.hpp": "3bd452d352dfce533bfb51a6e32ea308d9ca5d85a3a22afeca109d1cae743410",
+      "rocm/common/binary_observe.hpp": "c932e3d979f33ea8c62b38e687be1a083dfec0481d5e9ffbb04ffe6865899e73",
+      "tools/migration/batches4_8_reference.py": "6d6165aa2ec0f6ad10b9073b4f323446810073806b13902603b2a211877ec055",
+      "tools/migration/batch4_reference.py": "b5350543a289f766280f008202ee6f74ed8428a8b866ac4af1c254b0cedbb194"
+    },
+    "status": "PASSED",
+    "level": "L4",
+    "cases": [
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "all-stored-block-values",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.002056731387420341
+          },
+          {
+            "check": "bridge-nnz",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "bridge-structure",
+            "passed": true
+          }
+        ],
+        "input_sha256": "56ef93dee8f3be62ef0927ef40c5b40b985d05ad653e1a1dadd250f39fa89b46",
+        "output_values": {
+          "blocks": [
+            36,
+            72,
+            108,
+            144,
+            36,
+            72,
+            108,
+            144,
+            36,
+            72,
+            108,
+            144,
+            36,
+            72,
+            108,
+            144,
+            180,
+            216,
+            252,
+            288,
+            180,
+            216,
+            252,
+            288,
+            180,
+            216,
+            252,
+            288,
+            180,
+            216,
+            252,
+            288
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "original"
+      },
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "all-stored-block-values",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0015426104397254672
+          },
+          {
+            "check": "bridge-nnz",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "bridge-structure",
+            "passed": true
+          }
+        ],
+        "input_sha256": "7f576043bdab0feb6806fc49f41c8481d2096c3add3e61cbb520513c01bc99e4",
+        "output_values": {
+          "blocks": [
+            -27.1875,
+            -54.125,
+            -81.0625,
+            -108.0,
+            -26.9375,
+            -53.875,
+            -80.8125,
+            -108.1875,
+            -27.125,
+            -54.0625,
+            -81.0,
+            -107.9375,
+            -26.875,
+            -53.8125,
+            -81.1875,
+            -108.125,
+            -135.0625,
+            -162.0,
+            -188.9375,
+            -215.875,
+            -134.8125,
+            -162.1875,
+            -189.125,
+            -216.0625,
+            -135.0,
+            -161.9375,
+            -188.875,
+            -215.8125,
+            -135.1875,
+            -162.125,
+            -189.0625,
+            -216.0
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "nonzero-beta"
+      },
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "all-stored-block-values",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.00016547205202087752
+          },
+          {
+            "check": "bridge-nnz",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "bridge-structure",
+            "passed": true
+          }
+        ],
+        "input_sha256": "b85fdb4d2ce97bd7890bbe1aac9d46c407985ab3cce86c6959291ef5ac249918",
+        "output_values": {
+          "blocks": [
+            -25.0,
+            -30.0,
+            -35.0,
+            -40.0,
+            6.25,
+            7.5,
+            8.75,
+            10.0,
+            5.0,
+            6.0,
+            7.0,
+            8.0,
+            -12.5,
+            -15.0,
+            -17.5,
+            -20.0,
+            3.75,
+            7.5,
+            11.25,
+            15.0,
+            -3.0,
+            -6.0,
+            -9.0,
+            -12.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            3.0,
+            6.0,
+            9.0,
+            12.0
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "changed-pattern"
+      },
+      {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "all-stored-block-values",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0020566443466846665
+          },
+          {
+            "check": "bridge-nnz",
+            "passed": true,
+            "error": 0.0,
+            "bound": 0.0
+          },
+          {
+            "check": "bridge-structure",
+            "passed": true
+          }
+        ],
+        "input_sha256": "fb21a80320d665e7b8f59721906a7e5ec76a5a4e8aefbb55c703f13abfc16401",
+        "output_values": {
+          "blocks": [
+            35.8125,
+            35.875,
+            35.9375,
+            36.0,
+            72.0625,
+            72.125,
+            72.1875,
+            71.8125,
+            107.875,
+            107.9375,
+            108.0,
+            108.0625,
+            144.125,
+            144.1875,
+            143.8125,
+            143.875,
+            179.9375,
+            180.0,
+            180.0625,
+            180.125,
+            216.1875,
+            215.8125,
+            215.875,
+            215.9375,
+            252.0,
+            252.0625,
+            252.125,
+            252.1875,
+            287.8125,
+            287.875,
+            287.9375,
+            288.0
+          ]
+        },
+        "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks",
+        "case": "block-column-order"
+      }
+    ],
+    "cuda_comparison": "PASSED",
+    "cuda_cases": [
+      {
+        "case": "original",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "all-stored-block-values",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.002056731387420341
+            }
+          ],
+          "input_sha256": "56ef93dee8f3be62ef0927ef40c5b40b985d05ad653e1a1dadd250f39fa89b46",
+          "output_values": {
+            "blocks": [
+              36,
+              72,
+              108,
+              144,
+              36,
+              72,
+              108,
+              144,
+              36,
+              72,
+              108,
+              144,
+              36,
+              72,
+              108,
+              144,
+              180,
+              216,
+              252,
+              288,
+              180,
+              216,
+              252,
+              288,
+              180,
+              216,
+              252,
+              288,
+              180,
+              216,
+              252,
+              288
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      },
+      {
+        "case": "nonzero-beta",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "all-stored-block-values",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0015426104397254672
+            }
+          ],
+          "input_sha256": "7f576043bdab0feb6806fc49f41c8481d2096c3add3e61cbb520513c01bc99e4",
+          "output_values": {
+            "blocks": [
+              -27.1875,
+              -54.125,
+              -81.0625,
+              -108.0,
+              -26.9375,
+              -53.875,
+              -80.8125,
+              -108.1875,
+              -27.125,
+              -54.0625,
+              -81.0,
+              -107.9375,
+              -26.875,
+              -53.8125,
+              -81.1875,
+              -108.125,
+              -135.0625,
+              -162.0,
+              -188.9375,
+              -215.875,
+              -134.8125,
+              -162.1875,
+              -189.125,
+              -216.0625,
+              -135.0,
+              -161.9375,
+              -188.875,
+              -215.8125,
+              -135.1875,
+              -162.125,
+              -189.0625,
+              -216.0
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      },
+      {
+        "case": "changed-pattern",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "all-stored-block-values",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.00016547205202087752
+            }
+          ],
+          "input_sha256": "b85fdb4d2ce97bd7890bbe1aac9d46c407985ab3cce86c6959291ef5ac249918",
+          "output_values": {
+            "blocks": [
+              -25.0,
+              -30.0,
+              -35.0,
+              -40.0,
+              6.25,
+              7.5,
+              8.75,
+              10.0,
+              5.0,
+              6.0,
+              7.0,
+              8.0,
+              -12.5,
+              -15.0,
+              -17.5,
+              -20.0,
+              3.75,
+              7.5,
+              11.25,
+              15.0,
+              -3.0,
+              -6.0,
+              -9.0,
+              -12.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              3.0,
+              6.0,
+              9.0,
+              12.0
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      },
+      {
+        "case": "block-column-order",
+        "status": "PASSED",
+        "identical_input": true,
+        "cuda_cpu_checks": {
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "all-stored-block-values",
+              "passed": true,
+              "error": 0.0,
+              "bound": 0.0020566443466846665
+            }
+          ],
+          "input_sha256": "fb21a80320d665e7b8f59721906a7e5ec76a5a4e8aefbb55c703f13abfc16401",
+          "output_values": {
+            "blocks": [
+              35.8125,
+              35.875,
+              35.9375,
+              36.0,
+              72.0625,
+              72.125,
+              72.1875,
+              71.8125,
+              107.875,
+              107.9375,
+              108.0,
+              108.0625,
+              144.125,
+              144.1875,
+              143.8125,
+              143.875,
+              179.9375,
+              180.0,
+              180.0625,
+              180.125,
+              216.1875,
+              215.8125,
+              215.875,
+              215.9375,
+              252.0,
+              252.0625,
+              252.125,
+              252.1875,
+              287.8125,
+              287.875,
+              287.9375,
+              288.0
+            ]
+          },
+          "oracle": "Independent NumPy/SciPy mathematical/structural reference; explicit execution-semantic checks"
+        }
+      }
+    ],
+    "cuda_evidence": "migration/reports/evidence/20261110T023758.405542Z/batches4_8-cuda/cuSPARSE_sddmm_bsr_sddmm_bsr_example.c",
+    "reference_library": {
+      "numpy": "2.3.4",
+      "scipy": "1.16.3"
+    },
+    "validation_source_sha256": "44896dcb6058c504fab96f9239ab6f181970147626a772ddd1c40c2464e72854",
+    "batch": "b4",
+    "cuda_implementation_sha256": "681e85242b661c93f7cd5991f25f08bbbdb9285db2fdbe6e93e2bc4ea6ab0f45",
+    "cuda_environment": {
+      "backend": "cuda",
+      "devices": "0, NVIDIA GeForce RTX 5090, GPU-5864d26e-25e9-041f-2901-2745fccf5e30, 615.71.09\n1, NVIDIA GeForce RTX 5090, GPU-17390cc0-bf3c-53e3-170c-21eb949de43b, 615.71.09\n",
+      "image_id": null,
+      "rocm_release": null,
+      "visible_devices": "0"
+    }
+  }
+]

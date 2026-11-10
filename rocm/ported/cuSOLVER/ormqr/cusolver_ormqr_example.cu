@@ -1,4 +1,6 @@
 #include "observe.hpp"
+#include <string>
+#include "observe.hpp"
 /*
  * SPDX-FileCopyrightText: Copyright (c) 2020 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
@@ -28,6 +30,9 @@
 #include "cusolver_utils.h"
 
 int main(int argc, char *argv[]) {
+// MIGRATION_BATCH4
+const std::string migration_case=std::getenv("MIGRATION_CASE")?std::getenv("MIGRATION_CASE"):"original";
+
     hipsolverHandle_t cusolverH = NULL;
     hipblasHandle_t cublasH = NULL;
     hipStream_t stream{};
@@ -35,7 +40,7 @@ int main(int argc, char *argv[]) {
     const int m = 3;
     const int lda = m;
     const int ldb = m;
-    const int nrhs = 1; // number of right hand side vectors
+    const int nrhs = migration_case=="multiple-rhs"?2:1; // number of right hand side vectors
 
     /*       | 1 2 3 |
      *   A = | 4 5 6 |
@@ -45,11 +50,14 @@ int main(int argc, char *argv[]) {
      *   b = (6 15 4)'
      */
 
-    const std::vector<double> A = {1.0, 4.0, 2.0, 2.0, 5.0, 1.0, 3.0, 6.0, 1.0};
+    std::vector<double> A = {1.0, 4.0, 2.0, 2.0, 5.0, 1.0, 3.0, 6.0, 1.0};
     // std::vector<double> X = {1.0, 1.0, 1.0}; // exact solution
-    const std::vector<double> B = {6.0, 15.0, 4.0};
+    std::vector<double> B = {6.0, 15.0, 4.0};
     std::vector<double> XC(ldb * nrhs, 0); // solution matrix from GPU
 
+if(migration_case=="changed-matrix"){A[0]+=1.;A[4]+=0.5;}if(migration_case=="Q-application"){B={2.,-1.,5.};}if(nrhs==2){B.insert(B.end(),{1.,-2.,3.});}
+migration_observer::emit("input_A",A.data(),A.size());
+migration_observer::emit("input_B",B.data(),B.size());
     /* device memory */
     double *d_A = nullptr;
     double *d_tau = nullptr;
@@ -129,6 +137,14 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
+std::vector<double> migration_QR(A.size()),migration_tau(m),migration_QTB(B.size());
+CUDA_CHECK(hipMemcpy(migration_QR.data(),d_A,A.size()*sizeof(double),hipMemcpyDeviceToHost));
+CUDA_CHECK(hipMemcpy(migration_tau.data(),d_tau,m*sizeof(double),hipMemcpyDeviceToHost));
+CUDA_CHECK(hipMemcpy(migration_QTB.data(),d_B,B.size()*sizeof(double),hipMemcpyDeviceToHost));
+migration_observer::emit("QR",migration_QR.data(),migration_QR.size());
+migration_observer::emit("tau",migration_tau.data(),migration_tau.size());
+migration_observer::emit("QTB",migration_QTB.data(),migration_QTB.size());
+migration_observer::emit("info",&info,1);
     /* step 6: compute x = R \ Q^T*B */
     CUBLAS_CHECK(hipblasDtrsm(cublasH, HIPBLAS_SIDE_LEFT, HIPBLAS_FILL_MODE_UPPER, HIPBLAS_OP_N,
                              HIPBLAS_DIAG_NON_UNIT, m, nrhs, &one, d_A, lda, d_B, ldb));
@@ -144,7 +160,7 @@ int main(int argc, char *argv[]) {
     
 // MIGRATION_OBSERVE_ORIGINAL: host buffers after GPU synchronization.
 migration_observer::emit("A",A.data(),A.size());
-migration_observer::emit("X",X.data(),X.size());
+
 migration_observer::emit("B",B.data(),B.size());
 migration_observer::emit("XC",XC.data(),XC.size());
 /* free resources */

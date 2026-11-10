@@ -2,12 +2,12 @@
   "schema_version": 1,
   "counting_rule": "Operator/functional families are deduplicated within each module; dtypes, sizes, language, batch, storage formats and algorithm variants do not create extra operators. At least one explicitly scoped PASSED source profile is required. Cross-module totals may include the same mathematical operation implemented through different library interfaces.",
   "qualification_rule": "A verified family proves only its linked PASSED source profiles/required cases, not every API configuration. PARTIAL examples and capability probes are excluded.",
-  "verified_operator_families": 91,
+  "verified_operator_families": 94,
   "modules_with_verified_operators": 9,
-  "passed_source_profiles": 166,
+  "passed_source_profiles": 174,
   "modules": {
     "cuBLAS": {
-      "verified_operator_family_count": 50,
+      "verified_operator_family_count": 52,
       "verified_operators": [
         {
           "name": "amax",
@@ -118,6 +118,7 @@
         {
           "name": "gemm",
           "sample_ids": [
+            "cuBLAS/Extensions/GemmBatchedEx::cublas_GemmBatchedEx_example.cu",
             "cuBLAS/Extensions/GemmEx::cublas_GemmEx_example.cu",
             "cuBLAS/Extensions/GemmStridedBatchedEx::cublas_GemmStridedBatchedEx_example.cu",
             "cuBLAS/Level-3/gemm::cublas_gemm_example.cu",
@@ -126,6 +127,7 @@
             "cuBLAS/Level-3/gemmStridedBatched::cublas_gemmStridedBatched_example.cu"
           ],
           "sample_reports": [
+            "migration/sample-reports/cuBLAS/Extensions/GemmBatchedEx/cublas_GemmBatchedEx_example.cu.md",
             "migration/sample-reports/cuBLAS/Extensions/GemmEx/cublas_GemmEx_example.cu.md",
             "migration/sample-reports/cuBLAS/Extensions/GemmStridedBatchedEx/cublas_GemmStridedBatchedEx_example.cu.md",
             "migration/sample-reports/cuBLAS/Level-3/gemm/cublas_gemm_example.cu.md",
@@ -133,7 +135,7 @@
             "migration/sample-reports/cuBLAS/Level-3/gemmGroupedBatched/cublas_gemmGroupedBatched_example.cu.md",
             "migration/sample-reports/cuBLAS/Level-3/gemmStridedBatched/cublas_gemmStridedBatched_example.cu.md"
           ],
-          "source_profiles": 6
+          "source_profiles": 7
         },
         {
           "name": "gemv",
@@ -218,12 +220,14 @@
         {
           "name": "herk",
           "sample_ids": [
+            "cuBLAS/Extensions/CherkEx::cublas_CherkEx_example.cu",
             "cuBLAS/Level-3/herk::cublas_herk_example.cu"
           ],
           "sample_reports": [
+            "migration/sample-reports/cuBLAS/Extensions/CherkEx/cublas_CherkEx_example.cu.md",
             "migration/sample-reports/cuBLAS/Level-3/herk/cublas_herk_example.cu.md"
           ],
-          "source_profiles": 1
+          "source_profiles": 2
         },
         {
           "name": "herkx",
@@ -434,12 +438,14 @@
         {
           "name": "syrk",
           "sample_ids": [
+            "cuBLAS/Extensions/CsyrkEx::cublas_CsyrkEx_example.cu",
             "cuBLAS/Level-3/syrk::cublas_syrk_example.cu"
           ],
           "sample_reports": [
+            "migration/sample-reports/cuBLAS/Extensions/CsyrkEx/cublas_CsyrkEx_example.cu.md",
             "migration/sample-reports/cuBLAS/Level-3/syrk/cublas_syrk_example.cu.md"
           ],
-          "source_profiles": 1
+          "source_profiles": 2
         },
         {
           "name": "syrkx",
@@ -492,6 +498,16 @@
           "source_profiles": 1
         },
         {
+          "name": "tpttr",
+          "sample_ids": [
+            "cuBLAS/Extensions/tpttr::cublas_tpttr_example.cu"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuBLAS/Extensions/tpttr/cublas_tpttr_example.cu.md"
+          ],
+          "source_profiles": 1
+        },
+        {
           "name": "trmm",
           "sample_ids": [
             "cuBLAS/Level-3/trmm::cublas_trmm_example.cu"
@@ -532,16 +548,26 @@
             "migration/sample-reports/cuBLAS/Level-2/trsv/cublas_trsv_example.cu.md"
           ],
           "source_profiles": 1
+        },
+        {
+          "name": "trttp",
+          "sample_ids": [
+            "cuBLAS/Extensions/trttp::cublas_trttp_example.cu"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuBLAS/Extensions/trttp/cublas_trttp_example.cu.md"
+          ],
+          "source_profiles": 1
         }
       ],
       "sample_count": 82,
       "sample_outcomes": {
-        "FAILED": 20,
-        "PASSED": 62
+        "FAILED": 15,
+        "PASSED": 67
       },
       "validation_scope": "固定教学输入与所列扩展 cases；第二批含并列/空索引、旋转 flags、batch/grouped 和正负 alpha；rotmg 极端缩放使用明确登记的 HIP 修正。其它精度/API 仍逐例管理。",
       "failure_reason_counts": {
-        "BUILD_ERROR": 20
+        "BUILD_ERROR": 15
       }
     },
     "cuBLASLt": {
@@ -844,7 +870,7 @@
       "failure_reason_counts": {}
     },
     "cuSOLVER": {
-      "verified_operator_family_count": 7,
+      "verified_operator_family_count": 8,
       "verified_operators": [
         {
           "name": "Cholesky 分解",
@@ -875,6 +901,16 @@
           ],
           "sample_reports": [
             "migration/sample-reports/cuSOLVER/Xgeqrf/cusolver_Xgeqrf_example.cu.md"
+          ],
+          "source_profiles": 1
+        },
+        {
+          "name": "QR 的 Q 应用",
+          "sample_ids": [
+            "cuSOLVER/ormqr::cusolver_ormqr_example.cu"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuSOLVER/ormqr/cusolver_ormqr_example.cu.md"
           ],
           "source_profiles": 1
         },
@@ -937,13 +973,13 @@
       ],
       "sample_count": 39,
       "sample_outcomes": {
-        "FAILED": 19,
+        "FAILED": 18,
         "PARTIAL": 4,
-        "PASSED": 16
+        "PASSED": 17
       },
       "validation_scope": "原始固定教学矩阵；检查 status/info、特征值/奇异值、重构、求解残差与正交性。第三批覆盖 batched SVD/未排序特征对、索引/值域/全量/空区间与实际 meig。",
       "failure_reason_counts": {
-        "BUILD_ERROR": 18,
+        "BUILD_ERROR": 17,
         "RUNTIME_ERROR": 1
       }
     },
@@ -1079,14 +1115,16 @@
         {
           "name": "sddmm",
           "sample_ids": [
+            "cuSPARSE/sddmm_bsr::sddmm_bsr_example.c",
             "cuSPARSE/sddmm_csr::sddmm_csr_example.c",
             "cuSPARSE/sddmm_csr_batched::sddmm_csr_batched_example.c"
           ],
           "sample_reports": [
+            "migration/sample-reports/cuSPARSE/sddmm_bsr/sddmm_bsr_example.c.md",
             "migration/sample-reports/cuSPARSE/sddmm_csr/sddmm_csr_example.c.md",
             "migration/sample-reports/cuSPARSE/sddmm_csr_batched/sddmm_csr_batched_example.c.md"
           ],
-          "source_profiles": 2
+          "source_profiles": 3
         },
         {
           "name": "sparse2dense",
@@ -1158,13 +1196,15 @@
           "name": "spsv",
           "sample_ids": [
             "cuSPARSE/spsv_coo::spsv_coo_example.c",
-            "cuSPARSE/spsv_csr::spsv_csr_example.c"
+            "cuSPARSE/spsv_csr::spsv_csr_example.c",
+            "cuSPARSE/spsv_sell::spsv_sell_example.c"
           ],
           "sample_reports": [
             "migration/sample-reports/cuSPARSE/spsv_coo/spsv_coo_example.c.md",
-            "migration/sample-reports/cuSPARSE/spsv_csr/spsv_csr_example.c.md"
+            "migration/sample-reports/cuSPARSE/spsv_csr/spsv_csr_example.c.md",
+            "migration/sample-reports/cuSPARSE/spsv_sell/spsv_sell_example.c.md"
           ],
-          "source_profiles": 2
+          "source_profiles": 3
         },
         {
           "name": "spvv",
@@ -1179,13 +1219,12 @@
       ],
       "sample_count": 37,
       "sample_outcomes": {
-        "PASSED": 29,
-        "FAILED": 8
+        "PASSED": 31,
+        "FAILED": 6
       },
       "validation_scope": "CSR/COO/SELL/blocked-ELL 等已登记格式与 batched 变体；SpVV/SpGEMM/reuse 数值变化与 CSR 结构；第三批 CG/BiCGSTAB 的独立求解、残差/收敛，gpsv 的逐 batch interleaved 布局，以及真实 GPU 图捕获/输入变化 replay。",
       "failure_reason_counts": {
-        "BUILD_ERROR": 6,
-        "RUNTIME_ERROR": 2
+        "BUILD_ERROR": 6
       }
     },
     "cuSPARSELt": {

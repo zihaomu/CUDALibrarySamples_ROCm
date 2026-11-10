@@ -24,7 +24,7 @@ def render():
   if s.get('original_port'):
    a=s['original_port'];lines+=['## 原始 API 自动移植稿最近一次尝试','', '该记录与上表选定的手写/替代实现分别保留。','',safe(a.get('reason')),'', '尝试库：'+safe(', '.join(a.get('attempted_libraries',[])))+'；实现 hash：`'+a.get('implementation_sha256','')+'`。','']
   lines+=['## 复现与证据','', '从仓库根目录，先核对物理 GPU 占用。HIP ordinal 与物理编号不同；项目 guard 根据 PCI 地址拒绝 GPU3 和被预约的卡。','']
-  if s.get('reproduce'):lines+=[('在仓库根目录运行：GPU 构建/执行由 launcher 进入锁定容器，CPU 验收在宿主 Python3.12；先按对应批次报告同步 CUDA 证据。' if s.get('reason_code') in {'VALIDATED_BATCH2','VALIDATED_BATCH3'} else '在已锁定并通过 guard 的 ROCm 10.1.0 容器中（多 GPU 用例须暴露两个允许的设备）：'),'', '```bash',s['reproduce'],'```','']
+  if s.get('reproduce'):lines+=[('在仓库根目录运行：GPU 构建/执行由 launcher 进入锁定容器，CPU 验收在宿主 Python3.12；先按对应批次报告同步 CUDA 证据。' if s.get('reason_code') in {'VALIDATED_BATCH2','VALIDATED_BATCH3','VALIDATED_B4_B8'} else '在已锁定并通过 guard 的 ROCm 10.1.0 容器中（多 GPU 用例须暴露两个允许的设备）：'),'', '```bash',s['reproduce'],'```','']
   elif s.get('implementation','') and not s['implementation'].startswith('rocm/ported/') and s['implementation'].endswith('sample.cpp') and s['family']!='cuDSS':
    f=str(pathlib.Path(s['implementation']).parent.relative_to('rocm'));lines+=['```bash','HIP_VISIBLE_DEVICES=2 tools/migration/run_rocm.sh --filter '+f,'```','']
   else:lines+=['具体命令见该入口证据目录中的 `commands.json`，运行环境见同批 `environment.json`。批量入口：`tools/migration/bulk_run.py --families <family>`；特殊驱动见专项报告。','']
@@ -50,7 +50,7 @@ def render():
 
 对照 NVIDIA CUDA Library Samples，逐例选择 AMD/ROCm 生态中适合的库并实现。每例公开实际使用库、实现程度、正确性结果、CUDA 对照及失败原因。保留 CUDA 原始源码作为参考；AMD 实验固定 ROCm 10.1.0 / Radeon AI PRO R9700（gfx1201），CUDA 对照使用双 RTX 5090 机器。
 
-[后续批次计划与能力边界](migration/roadmap.md) · [支持方式与详细日志总表](migration/reports/support-log-index.md) · [模块支持矩阵](#模块支持矩阵) · [已验收算子](#已验收算子与验证范围) · [未通过的具体原因](#未通过和不支持的具体原因) · [设计与实施日志](migration/design.md) · [执行交付报告](migration/reports/plan-execution.md) · [逐例清单](migration/samples.yaml) · [环境锁](migration/environments/project.lock.json)
+[B4–B8 实时验收](migration/reports/batches4-8.md) · [后续批次计划与能力边界](migration/roadmap.md) · [支持方式与详细日志总表](migration/reports/support-log-index.md) · [模块支持矩阵](#模块支持矩阵) · [已验收算子](#已验收算子与验证范围) · [未通过的具体原因](#未通过和不支持的具体原因) · [设计与实施日志](migration/design.md) · [执行交付报告](migration/reports/plan-execution.md) · [逐例清单](migration/samples.yaml) · [环境锁](migration/environments/project.lock.json)
 
 ## 当前结果
 

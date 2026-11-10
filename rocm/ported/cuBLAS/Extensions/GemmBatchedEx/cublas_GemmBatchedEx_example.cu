@@ -1,4 +1,6 @@
 #include "observe.hpp"
+#include <string>
+#include "observe.hpp"
 /*
  * SPDX-FileCopyrightText: Copyright (c) 2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
@@ -29,6 +31,9 @@
 using data_type = double;
 
 int main(int argc, char *argv[]) {
+// MIGRATION_BATCH4
+const std::string migration_case=std::getenv("MIGRATION_CASE")?std::getenv("MIGRATION_CASE"):"original";
+
     hipblasHandle_t cublasH = NULL;
     hipStream_t stream = NULL;
 
@@ -48,14 +53,14 @@ int main(int argc, char *argv[]) {
      *       | 7.0 | 8.0 | 11.0 | 12.0 |
      */
 
-    const std::vector<std::vector<data_type>> A_array = {{1.0, 3.0, 2.0, 4.0},
+    std::vector<std::vector<data_type>> A_array = {{1.0, 3.0, 2.0, 4.0},
                                                          {5.0, 7.0, 6.0, 8.0}};
     const std::vector<std::vector<data_type>> B_array = {{5.0, 7.0, 6.0, 8.0},
                                                          {9.0, 11.0, 10.0, 12.0}};
     std::vector<std::vector<data_type>> C_array(batch_count, std::vector<data_type>(m * n));
 
     const data_type alpha = 1.0;
-    const data_type beta = 0.0;
+    const data_type beta = migration_case=="nonzero-beta"?-0.5:0.0;
 
     data_type **d_A_array = nullptr;
     data_type **d_B_array = nullptr;
@@ -85,6 +90,14 @@ int main(int argc, char *argv[]) {
     print_matrix(k, n, B_array[1].data(), ldb);
     printf("=====\n");
 
+if(migration_case=="transpose")transa=HIPBLAS_OP_T;
+if(migration_case=="changed-values")for(auto& v:A_array)for(auto& x:v)x*=-0.5;
+if(migration_case=="nonzero-beta")for(auto& v:C_array)for(size_t i=0;i<v.size();++i)v[i]=i+1;
+for(size_t i=0;i<A_array.size();++i)migration_observer::emit(("input_A_"+std::to_string(i)).c_str(),A_array[i].data(),A_array[i].size());
+for(size_t i=0;i<B_array.size();++i)migration_observer::emit(("input_B_"+std::to_string(i)).c_str(),B_array[i].data(),B_array[i].size());
+for(size_t i=0;i<C_array.size();++i)migration_observer::emit(("input_C_"+std::to_string(i)).c_str(),C_array[i].data(),C_array[i].size());
+migration_observer::emit("input_beta",&beta,1);
+migration_observer::emit("input_alpha",&alpha,1);
     /* step 1: create hipblas handle, bind a stream */
     CUBLAS_CHECK(hipblasCreate(&cublasH));
 
@@ -122,9 +135,10 @@ int main(int argc, char *argv[]) {
     CUDA_CHECK(hipMemcpyAsync(d_C_array, d_C.data(), sizeof(data_type *) * batch_count,
                                hipMemcpyHostToDevice, stream));
 
+for(int i=0;i<batch_count;++i)CUDA_CHECK(hipMemcpyAsync(d_C[i],C_array[i].data(),sizeof(data_type)*C_array[i].size(),hipMemcpyHostToDevice,stream));
     /* step 3: compute */
-    CUBLAS_CHECK(hipblasGemmBatchedEx(cublasH, transa, transb, m, n, k, &alpha, (void **)d_A_array,
-                                     traits<data_type>::cuda_data_type, lda, (void **)d_B_array,
+    CUBLAS_CHECK(hipblasGemmBatchedEx(cublasH, transa, transb, m, n, k, &alpha, (const void **)d_A_array,
+                                     traits<data_type>::cuda_data_type, lda, (const void **)d_B_array,
                                      traits<data_type>::cuda_data_type, ldb, &beta, (void **)d_C_array,
                                      traits<data_type>::cuda_data_type, ldc, batch_count,
                                      compute_type, HIPBLAS_GEMM_DEFAULT));
@@ -156,6 +170,7 @@ int main(int argc, char *argv[]) {
 // MIGRATION_OBSERVE_SCALARS
 migration_observer::emit("alpha",&alpha,1);
 migration_observer::emit("beta",&beta,1);
+for(size_t i=0;i<C_array.size();++i)migration_observer::emit(("C_"+std::to_string(i)).c_str(),C_array[i].data(),C_array[i].size());
 /* free resources */
     CUDA_CHECK(hipFree(d_A_array));
     CUDA_CHECK(hipFree(d_B_array));

@@ -1,4 +1,6 @@
 #include "observe.hpp"
+#include <string>
+#include "observe.hpp"
 /*
  * SPDX-FileCopyrightText: Copyright (c) 2020 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
@@ -29,6 +31,9 @@
 using data_type = hipComplex;
 
 int main(int argc, char *argv[]) {
+// MIGRATION_BATCH4
+const std::string migration_case=std::getenv("MIGRATION_CASE")?std::getenv("MIGRATION_CASE"):"original";
+
     hipblasHandle_t cublasH = NULL;
     hipStream_t stream = NULL;
 
@@ -47,7 +52,7 @@ int main(int argc, char *argv[]) {
     std::vector<data_type> C(m * n);
 
     const data_type alpha = {1.0, 1.0};
-    const data_type beta = {0.0, 0.0};
+    const data_type beta = migration_case=="nonzero-beta"?data_type{-.5f,.25f}:data_type{0,0};
 
     hipblasFillMode_t uplo = HIPBLAS_FILL_MODE_UPPER;
     hipblasOperation_t trans = HIPBLAS_OP_N;
@@ -59,6 +64,13 @@ int main(int argc, char *argv[]) {
     print_matrix(n, k, A.data(), lda);
     printf("=====\n");
 
+if(migration_case=="nonzero-beta")for(size_t i=0;i<C.size();++i)C[i]=data_type{float(i+1),float(i%2)};
+if(migration_case=="lower")uplo=HIPBLAS_FILL_MODE_LOWER;
+if(migration_case=="transpose")trans=HIPBLAS_OP_T;
+migration_observer::emit("input_A",A.data(),A.size());
+migration_observer::emit("input_C",C.data(),C.size());
+migration_observer::emit("input_beta",&beta,1);
+migration_observer::emit("input_alpha",&alpha,1);
     /* step 1: create hipblas handle, bind a stream */
     CUBLAS_CHECK(hipblasCreate(&cublasH));
 
@@ -72,10 +84,9 @@ int main(int argc, char *argv[]) {
     CUDA_CHECK(hipMemcpyAsync(d_A, A.data(), sizeof(data_type) * A.size(), hipMemcpyHostToDevice,
                                stream));
 
+CUDA_CHECK(hipMemcpyAsync(d_C,C.data(),sizeof(data_type)*C.size(),hipMemcpyHostToDevice,stream));
     /* step 3: compute */
-    CUBLAS_CHECK(hipblasSyrkEx(cublasH, uplo, trans, n, k, &alpha, d_A,
-                               traits<data_type>::cuda_data_type, lda, &beta, d_C,
-                               traits<data_type>::cuda_data_type, ldc));
+    CUBLAS_CHECK(hipblasCsyrk(cublasH,uplo,trans,n,k,&alpha,d_A,lda,&beta,d_C,ldc));
 
     /* step 4: copy data to host */
     CUDA_CHECK(hipMemcpyAsync(C.data(), d_C, sizeof(data_type) * C.size(), hipMemcpyDeviceToHost,
