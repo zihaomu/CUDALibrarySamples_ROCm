@@ -1,0 +1,1 @@
+Test cpu-validation for cuDSS/fortran/uniform_batch::uniform_batch.f90, case singular-info. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T101052.108597Z-R5-rocm-fortran-21f39a9e12.

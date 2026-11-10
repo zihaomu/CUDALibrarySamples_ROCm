@@ -1,0 +1,1 @@
+Test rocm-profile for cuDSS/fortran/residual::residual.f90/backend-trace, case original. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T100941.661381Z-R5-rocm-build-635f517b1f.

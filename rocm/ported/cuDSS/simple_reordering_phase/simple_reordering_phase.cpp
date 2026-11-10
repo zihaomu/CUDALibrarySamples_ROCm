@@ -15,6 +15,6 @@
  * limitations under the License.
  */
 
-// MIGRATION_BATCH11: sparse CPU symbolic analysis and actual GPU numerical factorization/solve.
-#include "batch11_sparse.hpp"
-int main(){return migration_batch::sparse11_main("simple_reordering_phase");}
+// Complete analysis -> numeric factor -> solve; preserve the vendor permutation check.
+#include "reordering_cpp.hpp"
+int main(){return rewrite_sparse_cpp::run();}

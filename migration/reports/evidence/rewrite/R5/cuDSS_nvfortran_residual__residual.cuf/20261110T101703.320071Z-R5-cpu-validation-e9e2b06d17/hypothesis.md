@@ -1,0 +1,1 @@
+Test cpu-validation for cuDSS/nvfortran/residual::residual.cuf, case singular-info. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T101604.426185Z-R5-rocm-fortran-df1c09f111.

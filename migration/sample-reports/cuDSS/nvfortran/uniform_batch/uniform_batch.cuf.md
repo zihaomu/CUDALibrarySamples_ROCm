@@ -1,15 +1,15 @@
 # cuDSS/nvfortran/uniform_batch::uniform_batch.cuf
 
-**FAILED / L0**
+**PARTIAL / L3**
 
-Fortran 原始入口使用 iso_c_binding, cudafor, cudss, cudssutils, validation；当前 flang 编译失败，CUDA/cuDSS/cuFFT/NVFortran module 和 device 语法需用经验证的 ISO_C_BINDING 与 AMD API 重写。C ABI 探针另记，不代表该例已实现。 日志：_migra/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/nvfortran/uniform_batch/uniform_batch.cuf:131:15: error: No explicit type declared for 'cudssdestroy'     statusDSS = cudssDestroy(h)                 ^^^^^^^^^^^^ /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/nvfortran/uniform_batch/uniform_batch.cuf:132:12: error: No explicit type declared for 'cudastreamdestroy'     status = cudaStreamDestroy(stream)              ^^^^^^^^^^^^^^^^^
+真实标准Fortran入口7场景通过独立FP64 CPU检查；包含原始数组/leading-dimension、GPU分解求解与排列使用、padding和奇异info。native对照、负向、轨迹及独立复核仍待收口；不声称NVIDIA编译器或vendor内部排列完全相同。
 
 | 字段 | 当前记录 |
 | --- | --- |
 | 原始入口 | [cuDSS/nvfortran/uniform_batch/uniform_batch.cuf](../../../../../cuDSS/nvfortran/uniform_batch/uniform_batch.cuf) |
-| 实际库 / 后端 | — / — |
+| 实际库 / 后端 | standard Fortran ISO_C_BINDING + project HIP CSR pivot LU/solve; CPU symbolic min-degree only / — |
 | 候选路线 | rocSOLVER CSRRF, rocSPARSE/HIP, ISO_C_BINDING |
-| 代码 | 无实现 |
+| 代码 | [rocm/ported/cuDSS/nvfortran/uniform_batch/uniform_batch.f90](../../../../../rocm/ported/cuDSS/nvfortran/uniform_batch/uniform_batch.f90) |
 | required cases | 0/2 |
 | CUDA baseline / comparison | BLOCKED / BLOCKED |
 | 性能 | NOT_RUN |
@@ -33,3 +33,4 @@ CUDA 对照限制：CUDA 原始 SDK、绑定或输入前置条件未满足，见
 
 - [migration/reports/evidence/20261109T084354.110802Z/languages/cuDSS_nvfortran_uniform_batch_uniform_batch.cuf](../../../../reports/evidence/20261109T084354.110802Z/languages/cuDSS_nvfortran_uniform_batch_uniform_batch.cuf)
 - [migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_nvfortran_uniform_batch_uniform_batch.cuf](../../../../reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_nvfortran_uniform_batch_uniform_batch.cuf)
+- [migration/reports/evidence/rewrite/R5/cuDSS_nvfortran_uniform_batch__uniform_batch.cuf/20261110T101120.786409Z-R5-rocm-fortran-a20e4918ca](../../../../reports/evidence/rewrite/R5/cuDSS_nvfortran_uniform_batch__uniform_batch.cuf/20261110T101120.786409Z-R5-rocm-fortran-a20e4918ca)

@@ -1,0 +1,1 @@
+Test cpu-validation for cuDSS/fortran/residual::residual.f90, case base0. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T101521.527209Z-R5-rocm-fortran-21cc2e54d2.

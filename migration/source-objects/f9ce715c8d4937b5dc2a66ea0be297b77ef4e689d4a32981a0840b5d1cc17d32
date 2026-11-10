@@ -1,0 +1,64 @@
+// SPDX-License-Identifier: Apache-2.0
+// CPU symbolic ordering only. All factor/solve arithmetic executes on GPU.
+#include "sparse_bridge.h"
+#include "batch11_sparse.hpp"
+#include "rewrite_runtime.hpp"
+#include <memory>
+#include <mutex>
+namespace {
+using migration_batch::Sparse11;
+using migration_batch::Symbolic11;
+using rewrite::Buffer;
+static_assert(sizeof(int)==4 && sizeof(double)==8 && sizeof(size_t)==8,"C ABI requires 32-bit int, FP64 and 64-bit size_t");
+struct Context {
+ Sparse11 input; Symbolic11 symbolic; int base=0; bool analyzed=false,solved=false;
+ std::vector<int> row_perm,column_perm,pivots,info,phase;
+ std::vector<double> solution,values,before,after,residual;
+ int ldb=0,ldx=0,nrhs=0;
+};
+std::set<Context*> live;
+std::mutex lock;
+Context& get(void*p){auto*c=static_cast<Context*>(p);if(!c||!live.count(c))throw std::invalid_argument("invalid sparse handle");return *c;}
+void require(bool v,const char*message){if(!v)throw std::invalid_argument(message);}
+}
+extern "C" int rw_sparse_create(int n,int nnz,const int*r,const int*c,const double*v,int base,int type,int reorder,void**out){
+ std::lock_guard<std::mutex> guard(lock);
+ try {
+  require(out,"null handle output");*out=nullptr;
+  require(n>0&&n<=64&&nnz>=n&&nnz<=n*n&&r&&c&&v,"CSR shape/pointer");
+  require((base==0||base==1)&&(type==0||type==1)&&(reorder==0||reorder==1),"descriptor enum");
+  require(r[0]==base&&r[n]==nnz+base,"CSR endpoints");
+  auto h=std::make_unique<Context>();auto&a=h->input;a.n=n;a.mtype=type;a.r.resize(n+1);a.c.resize(nnz);a.v.resize(nnz);
+  for(int i=0;i<=n;++i){require(r[i]>=base&&r[i]<=nnz+base&&(i==0||r[i]>=r[i-1]),"CSR offsets");a.r[i]=r[i]-base;}
+  for(int i=0;i<n;++i)for(int p=a.r[i];p<a.r[i+1];++p){require(c[p]>=base&&c[p]<n+base&&(p==a.r[i]||c[p]>c[p-1]),"CSR columns");require(std::isfinite(v[p])&&(!type||c[p]-base>=i),"CSR values/view");a.c[p]=c[p]-base;a.v[p]=v[p];}
+  static bool observed=false;if(!observed){rewrite::identity();observed=true;}
+  h->base=base;h->symbolic=migration_batch::symbolic11(a,reorder);
+  // Numerical pivoting may fill within an undirected connected component.
+  // Store that symbolic fill as CSR, never a host dense numerical solve.
+  auto full=migration_batch::full11(a);std::vector<std::set<int>> graph(n);for(int i=0;i<n;++i)for(auto[j,value]:full[i])if(i!=j){graph[i].insert(j);graph[j].insert(i);}
+  std::vector<int>component(n,-1);for(int start=0;start<n;++start)if(component[start]<0){std::vector<int>q={start};component[start]=start;for(size_t k=0;k<q.size();++k)for(int j:graph[q[k]])if(component[j]<0){component[j]=start;q.push_back(j);}}
+  auto&s=h->symbolic;s.r={0};s.c.clear();for(int i=0;i<n;++i){for(int j=0;j<n;++j)if(component[s.perm[i]]==component[s.perm[j]])s.c.push_back(j);s.r.push_back(s.c.size());}
+  h->phase={0};*out=h.release();live.insert(static_cast<Context*>(*out));return 0;
+ }catch(const std::invalid_argument&e){std::cerr<<e.what()<<'\n';return 1;}catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 2;}
+}
+extern "C" int rw_sparse_analyze(void*p,int*rp,int*cp,size_t*bytes){
+ std::lock_guard<std::mutex> guard(lock);
+ try{auto&h=get(p);require(rp&&cp&&bytes,"query pointers");h.row_perm=h.symbolic.perm;h.column_perm=h.row_perm;for(int i=0;i<h.input.n;++i)rp[i]=cp[i]=h.row_perm[i]+h.base;*bytes=h.input.n*sizeof(int);h.analyzed=true;h.phase.push_back(1);return 0;}catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 1;}
+}
+extern "C" int rw_sparse_solve(void*p,int nrhs,const double*b,int ldb,double*x,int ldx,int*info){
+ std::lock_guard<std::mutex> guard(lock);
+ try{
+  auto&h=get(p);int n=h.input.n;require(h.analyzed,"analysis required before numeric phases");require(b&&x&&info&&nrhs>0&&nrhs<=32&&ldb>=n&&ldb<=n+64&&ldx>=n&&ldx<=n+64,"dense descriptor");
+  std::vector<double>hv(b,b+ldb*nrhs),initial(x,x+ldx*nrhs);for(double value:hv)require(std::isfinite(value),"nonfinite RHS");for(double value:initial)require(std::isfinite(value),"nonfinite initial X");
+  auto&s=h.symbolic;Buffer<int>ar(s.ar),ac(s.ac),fr(s.r),fc(s.c),perm(s.perm),pivot(n),status(std::vector<int>{0});Buffer<double>av(s.a),factor(s.c.size()),rhs(n*nrhs),compact(n*nrhs),scale(std::vector<double>(n,1)),db(hv),output(initial);
+  migration_batch::prepare11<<<(n+255)/256,256>>>(n,ar.p,ac.p,av.p,fr.p,fc.p,factor.p,perm.p,db.p,ldb,nrhs,rhs.p,scale.p);
+  migration_batch::lu11<<<1,1>>>(n,fr.p,fc.p,factor.p,pivot.p,status.p,0,n);rewrite::sync();h.phase.push_back(2);h.info=status.get();*info=h.info[0];
+  if(!*info){migration_batch::solve11<<<1,nrhs>>>(n,nrhs,fr.p,fc.p,factor.p,pivot.p,rhs.p,compact.p);migration_batch::scatter11<<<(n*nrhs+255)/256,256>>>(n,nrhs,perm.p,scale.p,compact.p,output.p,ldx,false);rewrite::sync();h.phase.push_back(3);}
+  h.solution=output.get();std::copy(h.solution.begin(),h.solution.end(),x);h.pivots=pivot.get();h.values=factor.get();h.before=initial;h.after=db.get();h.ldb=ldb;h.ldx=ldx;h.nrhs=nrhs;h.input.b=hv;h.input.nrhs=nrhs;h.solved=true;return 0;
+ }catch(const std::invalid_argument&e){std::cerr<<e.what()<<'\n';return 1;}catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 2;}
+}
+extern "C" int rw_sparse_export(void*p,const char*label){
+ std::lock_guard<std::mutex> guard(lock);
+ try{auto&h=get(p);require(label&&*label&&h.solved,"export requires solved handle");std::string s(label);auto emit=[&](const std::string&name,const auto&v){rewrite::emit(s+"_"+name,v);};emit("permutation",h.row_perm);emit("column_permutation",h.column_perm);emit("factor_rows",h.symbolic.r);emit("factor_columns",h.symbolic.c);emit("factor_values",h.values);emit("factor_pivots",h.pivots);emit("info",h.info);emit("phase",h.phase);emit("solution",h.solution);emit("B_after",h.after);emit("X_initial",h.before);emit("dimensions",std::vector<int>{h.input.n,int(h.input.v.size()),h.nrhs,h.ldb,h.ldx,h.base,h.input.mtype});return 0;}catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 1;}
+}
+extern "C" int rw_sparse_destroy(void*p){std::lock_guard<std::mutex> guard(lock);try{auto&h=get(p);live.erase(&h);delete &h;return 0;}catch(...){return 1;}}

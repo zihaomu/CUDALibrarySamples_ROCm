@@ -64,4 +64,5 @@ option(MIGRATION_ENABLE_REWRITES "Register explicit library/device rewrite targe
 if(MIGRATION_ENABLE_REWRITES)
  include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/RewriteSamples.cmake")
  include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/RewriteExtensions.cmake")
+ include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/RewriteBindings.cmake")
 endif()

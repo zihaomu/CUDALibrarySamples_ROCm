@@ -2,22 +2,22 @@
 
 **PARTIAL / L4**
 
-历史B11仅验收分析/排列；原始例取回row/col permutation后继续数值分解与求解。当前端口在analysis_only分支提前返回，缺少原始后半阶段，已撤回整例资格，待R5共享稀疏适配补齐并重新验收。
+历史analysis-only漏项已修正为完整CPU重排→HIP CSR分解/求解；原始解精度、阶段顺序及排列双射实测通过。项目最小度排列[3,0,1,2,4]与原例严格要求的METIS[4,3,1,0,2]不同，原C++检查仍返回1；因此保持PARTIAL，不改期望向量刷通过。
 
 | 字段 | 当前记录 |
 | --- | --- |
 | 原始入口 | [cuDSS/simple_reordering_phase/simple_reordering_phase.cpp](../../../../cuDSS/simple_reordering_phase/simple_reordering_phase.cpp) |
-| 实际库 / 后端 | CPU sparse symbolic/min-degree analysis + HIP data preparation; numeric factor/solve missing / CPU analysis + HIP preparation |
+| 实际库 / 后端 | CPU symbolic min-degree + project HIP CSR pivot LU/solve via shared C ABI / CPU analysis + HIP preparation |
 | 候选路线 | rocSOLVER CSRRF, rocSPARSE/HIP, ISO_C_BINDING |
 | 代码 | [rocm/ported/cuDSS/simple_reordering_phase/simple_reordering_phase.cpp](../../../../rocm/ported/cuDSS/simple_reordering_phase/simple_reordering_phase.cpp) |
-| required cases | 8/9 |
+| required cases | 1/2 |
 | CUDA baseline / comparison | PASSED / PASSED |
 | 性能 | NOT_RUN |
 | 原始源码 SHA256 | `a108c459ce8211ef19b5694abe442c8d008b321e114fa8f89e1e29539eb9b7e5` |
 
 编译/运行返回 0 仅对应 L3；通过独立参考检查后才记 L4。失败的候选库不列为已使用库。
 
-必需用例：`batches9_11/original`, `batches9_11/changed-values`, `batches9_11/varied-pattern`, `batches9_11/reorder-natural`, `batches9_11/pivot-required`, `batches9_11/singular-info`, `batches9_11/indefinite`, `batches9_11/configuration`, `rewrite/full-factor-solve-after-isolated-reordering`。
+必需用例：`rewrite/full-factor-solve-after-isolated-reordering`, `rewrite/exact-vendor-permutation`。
 
 实现方式：`HYBRID_HIP`。
 
@@ -51,3 +51,4 @@ OPENBLAS_NUM_THREADS=1 python3 tools/migration/batches9_11_validate.py b11 --qua
 - [migration/reports/batches9_11-validation.json](../../../reports/batches9_11-validation.json)
 - [migration/reports/evidence/20261110T043816.470698Z/batches9_11-cuda/cuDSS_simple_reordering_phase_simple_reordering_phase.cpp](../../../reports/evidence/20261110T043816.470698Z/batches9_11-cuda/cuDSS_simple_reordering_phase_simple_reordering_phase.cpp)
 - [migration/reports/evidence/rewrite/R5/cuDSS_simple_reordering_phase__simple_reordering_phase.cpp/20261110T094452.257460Z-R5-host-contract-review-54565fa16d](../../../reports/evidence/rewrite/R5/cuDSS_simple_reordering_phase__simple_reordering_phase.cpp/20261110T094452.257460Z-R5-host-contract-review-54565fa16d)
+- [migration/reports/evidence/rewrite/R5/cuDSS_simple_reordering_phase__simple_reordering_phase.cpp/20261110T101950.027352Z-R5-rocm-contract-repair-17f17216e0](../../../reports/evidence/rewrite/R5/cuDSS_simple_reordering_phase__simple_reordering_phase.cpp/20261110T101950.027352Z-R5-rocm-contract-repair-17f17216e0)

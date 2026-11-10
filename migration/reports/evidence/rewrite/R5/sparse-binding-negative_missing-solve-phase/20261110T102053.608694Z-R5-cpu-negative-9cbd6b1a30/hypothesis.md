@@ -1,0 +1,1 @@
+Test cpu-negative for sparse-binding-negative/missing-solve-phase, case layout. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T101849.198408Z-R5-rocm-fortran-43707f347a.

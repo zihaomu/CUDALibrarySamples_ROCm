@@ -542,8 +542,12 @@ PLAN-01 至 PLAN-03 是规划阶段记录，不代表实验结果。实施中的
 
 <!-- MOAT_EXEC_PROGRESS:START -->
 
-最近更新：2026-11-10T10:05:43.451119+00:00。首批 AMD 51/51 已运行，独立 CPU 51/51 通过；CUDA 51/51 已运行，独立 CPU 51/51 通过。已签发首批整例资格 8/8。R3–R8仍待完成。
+最近更新：2026-11-10T10:21:43.561025+00:00。首批 AMD 51/51 已运行，独立 CPU 51/51 通过；CUDA 51/51 已运行，独立 CPU 51/51 通过。已签发首批整例资格 8/8。R3–R8仍待完成。
 
 <!-- MOAT_EXEC_PROGRESS:END -->
 
 | 2026-11-10 | EXEC-15 | R4 CRC32通过固定提交d85635c7三方独立复审和复合资格：6数值+1原生零chunk拒绝、8注入、5CLI、5次实际GPU CRC kernel；CRC32C区别与早期空操作更正已归档。当前221 PASSED；功能族115。 | 继续R4其它候选去向、R5真实语言入口、R6专题与R7/R8；全计划未完成 |
+
+| 2026-11-10 | EXEC-16 | R5完成8个真实标准Fortran入口与共享C ABI/HIP CSR pivot LU/solve的构建，冻结4组×7输入。首轮CPU端numpy与路径前置失败、两次头文件探测失败及CUDA链接参数失败均保留；实际HIP已运行batch/uniform各6数值+奇异info场景，未提前升级资格。 | 完成全部语言入口、独立CPU/native cuDSS、故障注入与GPU轨迹，再复核 |
+
+| 2026-11-10 | EXEC-17 | R5：8入口×7场景的当前共享库重建和AMD/独立CPU复验完成；24不同正向输入通过真实native cuDSS。10项输出故障、8个真实Fortran非法descriptor、10项C ABI阶段/类型/生命周期及4组实际factor/solve GPU trace通过。GENERAL奇异输入的native扰动差异单列。CPP原始5阶全求解已恢复，精度通过，但严格METIS排列不同仍PARTIAL。 | 固定内容独立复审和资格；随后R6/R7与R8 |

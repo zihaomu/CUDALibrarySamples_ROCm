@@ -1,0 +1,131 @@
+Warning: HIP version file: "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/share/hip/version" not found.  Cannot give HIP version information.
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/adapters/fortran/sparse_bridge.cpp:5:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:72:30: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   72 |  ~Blas(){RW_BLAS(Destroy)(h);RW_RT(StreamDestroy)(stream);}
+      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:6:18: note: expanded from macro 'RW_RT'
+    6 | #define RW_RT(n) hip##n
+      |                  ^
+<scratch space>:451:1: note: expanded from here
+  451 | hipStreamDestroy
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/adapters/fortran/sparse_bridge.cpp:4:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch11_sparse.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:236:1: note: expanded from here
+  236 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch11_sparse.hpp:40:13: note: in instantiation of member function 'migration_batch::Buffer<int>::~Buffer' requested here
+   40 |  Buffer<int>ar(s.ar),ac(s.ac),fr(s.r),fc(s.c),perm(s.perm),colperm(column_perm),piv(n),info(std::vector<int>{0});Buffer<double>av(s.a),fv(s.c.size()),rhs(n*nrhs),x(n*nrhs),ds(scale),db(b),output(initial),residual(n*nrhs);Buffer<int>orig_r(rr),orig_c(cc);Buffer<double>orig_v(vv);
+      |             ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/adapters/fortran/sparse_bridge.cpp:4:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch11_sparse.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:236:1: note: expanded from here
+  236 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch11_sparse.hpp:40:128: note: in instantiation of member function 'migration_batch::Buffer<double>::~Buffer' requested here
+   40 |  Buffer<int>ar(s.ar),ac(s.ac),fr(s.r),fc(s.c),perm(s.perm),colperm(column_perm),piv(n),info(std::vector<int>{0});Buffer<double>av(s.a),fv(s.c.size()),rhs(n*nrhs),x(n*nrhs),ds(scale),db(b),output(initial),residual(n*nrhs);Buffer<int>orig_r(rr),orig_c(cc);Buffer<double>orig_v(vv);
+      |                                                                                                                                ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/adapters/fortran/sparse_bridge.cpp:5:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:65:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   65 |  ~Buffer(){if(p)RW_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:6:18: note: expanded from macro 'RW_RT'
+    6 | #define RW_RT(n) hip##n
+      |                  ^
+<scratch space>:437:1: note: expanded from here
+  437 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/adapters/fortran/sparse_bridge.cpp:53:32: note: in instantiation of member function 'rewrite::Buffer<int>::~Buffer' requested here
+   53 |   auto&s=h.symbolic;Buffer<int>ar(s.ar),ac(s.ac),fr(s.r),fc(s.c),perm(s.perm),pivot(n),status(std::vector<int>{0});Buffer<double>av(s.a),factor(s.c.size()),rhs(n*nrhs),compact(n*nrhs),scale(std::vector<double>(n,1)),db(hv),output(initial);
+      |                                ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/adapters/fortran/sparse_bridge.cpp:5:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:65:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   65 |  ~Buffer(){if(p)RW_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:6:18: note: expanded from macro 'RW_RT'
+    6 | #define RW_RT(n) hip##n
+      |                  ^
+<scratch space>:437:1: note: expanded from here
+  437 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/adapters/fortran/sparse_bridge.cpp:53:130: note: in instantiation of member function 'rewrite::Buffer<double>::~Buffer' requested here
+   53 |   auto&s=h.symbolic;Buffer<int>ar(s.ar),ac(s.ac),fr(s.r),fc(s.c),perm(s.perm),pivot(n),status(std::vector<int>{0});Buffer<double>av(s.a),factor(s.c.size()),rhs(n*nrhs),compact(n*nrhs),scale(std::vector<double>(n,1)),db(hv),output(initial);
+      |                                                                                                                                  ^
+5 warnings generated when compiling for gfx1201.
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/adapters/fortran/sparse_bridge.cpp:5:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:72:30: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   72 |  ~Blas(){RW_BLAS(Destroy)(h);RW_RT(StreamDestroy)(stream);}
+      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:6:18: note: expanded from macro 'RW_RT'
+    6 | #define RW_RT(n) hip##n
+      |                  ^
+<scratch space>:452:1: note: expanded from here
+  452 | hipStreamDestroy
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/adapters/fortran/sparse_bridge.cpp:4:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch11_sparse.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:237:1: note: expanded from here
+  237 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch11_sparse.hpp:40:13: note: in instantiation of member function 'migration_batch::Buffer<int>::~Buffer' requested here
+   40 |  Buffer<int>ar(s.ar),ac(s.ac),fr(s.r),fc(s.c),perm(s.perm),colperm(column_perm),piv(n),info(std::vector<int>{0});Buffer<double>av(s.a),fv(s.c.size()),rhs(n*nrhs),x(n*nrhs),ds(scale),db(b),output(initial),residual(n*nrhs);Buffer<int>orig_r(rr),orig_c(cc);Buffer<double>orig_v(vv);
+      |             ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/adapters/fortran/sparse_bridge.cpp:4:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch11_sparse.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:237:1: note: expanded from here
+  237 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch11_sparse.hpp:40:128: note: in instantiation of member function 'migration_batch::Buffer<double>::~Buffer' requested here
+   40 |  Buffer<int>ar(s.ar),ac(s.ac),fr(s.r),fc(s.c),perm(s.perm),colperm(column_perm),piv(n),info(std::vector<int>{0});Buffer<double>av(s.a),fv(s.c.size()),rhs(n*nrhs),x(n*nrhs),ds(scale),db(b),output(initial),residual(n*nrhs);Buffer<int>orig_r(rr),orig_c(cc);Buffer<double>orig_v(vv);
+      |                                                                                                                                ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/adapters/fortran/sparse_bridge.cpp:5:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:65:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   65 |  ~Buffer(){if(p)RW_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:6:18: note: expanded from macro 'RW_RT'
+    6 | #define RW_RT(n) hip##n
+      |                  ^
+<scratch space>:438:1: note: expanded from here
+  438 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/adapters/fortran/sparse_bridge.cpp:53:32: note: in instantiation of member function 'rewrite::Buffer<int>::~Buffer' requested here
+   53 |   auto&s=h.symbolic;Buffer<int>ar(s.ar),ac(s.ac),fr(s.r),fc(s.c),perm(s.perm),pivot(n),status(std::vector<int>{0});Buffer<double>av(s.a),factor(s.c.size()),rhs(n*nrhs),compact(n*nrhs),scale(std::vector<double>(n,1)),db(hv),output(initial);
+      |                                ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/adapters/fortran/sparse_bridge.cpp:5:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:65:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   65 |  ~Buffer(){if(p)RW_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:6:18: note: expanded from macro 'RW_RT'
+    6 | #define RW_RT(n) hip##n
+      |                  ^
+<scratch space>:438:1: note: expanded from here
+  438 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/adapters/fortran/sparse_bridge.cpp:53:130: note: in instantiation of member function 'rewrite::Buffer<double>::~Buffer' requested here
+   53 |   auto&s=h.symbolic;Buffer<int>ar(s.ar),ac(s.ac),fr(s.r),fc(s.c),perm(s.perm),pivot(n),status(std::vector<int>{0});Buffer<double>av(s.a),factor(s.c.size()),rhs(n*nrhs),compact(n*nrhs),scale(std::vector<double>(n,1)),db(hv),output(initial);
+      |                                                                                                                                  ^
+5 warnings generated when compiling for host.

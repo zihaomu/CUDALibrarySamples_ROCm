@@ -1,0 +1,44 @@
+{
+  "commands": [
+    {
+      "command_id": 1,
+      "phase": "native-cuDSS-solve",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "mkdir -p /tmp/20261110T101115.554314Z-R5-cuda-build-afa7891e2f/outputs/residual/changed-values && REWRITE_INPUT=/tmp/20261110T101115.554314Z-R5-cuda-build-afa7891e2f/inputs/residual/changed-values REWRITE_OUTPUT=/tmp/20261110T101115.554314Z-R5-cuda-build-afa7891e2f/outputs/residual/changed-values /tmp/20261110T101115.554314Z-R5-cuda-build-afa7891e2f/reference"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-10T10:12:11.393595+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0001-native-cuDSS-solve.stdout.log",
+      "stderr": "logs/0001-native-cuDSS-solve.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-10T10:12:12.361879+00:00",
+      "seconds": 0.9668905479484238
+    },
+    {
+      "command_id": 2,
+      "phase": "collect",
+      "argv": [
+        "scp",
+        "-r",
+        "nvidia-5090x2:/tmp/20261110T101115.554314Z-R5-cuda-build-afa7891e2f/outputs/residual/changed-values/.",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/R5/cuDSS_fortran_residual__residual.f90/20261110T101210.949482Z-R5-cuda-native-fa86db2e84/outputs"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-10T10:12:12.362802+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0002-collect.stdout.log",
+      "stderr": "logs/0002-collect.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-10T10:12:12.678218+00:00",
+      "seconds": 0.31485054997028783
+    }
+  ],
+  "source": "source.json",
+  "inputs": "inputs/manifest.json",
+  "expected_environment": "environment.expected.json"
+}

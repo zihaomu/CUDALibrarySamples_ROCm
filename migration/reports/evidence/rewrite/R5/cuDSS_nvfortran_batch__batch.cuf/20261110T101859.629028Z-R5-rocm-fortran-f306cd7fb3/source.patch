@@ -1,0 +1,1000 @@
+diff --git a/rocm/CMakeLists.txt b/rocm/CMakeLists.txt
+index 58a791b6..bd7857af 100644
+--- a/rocm/CMakeLists.txt
++++ b/rocm/CMakeLists.txt
+@@ -64,4 +64,5 @@ option(MIGRATION_ENABLE_REWRITES "Register explicit library/device rewrite targe
+ if(MIGRATION_ENABLE_REWRITES)
+  include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/RewriteSamples.cmake")
+  include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/RewriteExtensions.cmake")
++ include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/RewriteBindings.cmake")
+ endif()
+diff --git a/rocm/ported/cuDSS/fortran/batch/batch.f90 b/rocm/ported/cuDSS/fortran/batch/batch.f90
+index 98a58992..8dbd91a9 100644
+--- a/rocm/ported/cuDSS/fortran/batch/batch.f90
++++ b/rocm/ported/cuDSS/fortran/batch/batch.f90
+@@ -1,293 +1,8 @@
+-! SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ ! SPDX-License-Identifier: Apache-2.0
+-!
+-! Licensed under the Apache License, Version 2.0 (the "License");
+-! you may not use this file except in compliance with the License.
+-! You may obtain a copy of the License at
+-!
+-! http://www.apache.org/licenses/LICENSE-2.0
+-!
+-! Unless required by applicable law or agreed to in writing, software
+-! distributed under the License is distributed on an "AS IS" BASIS,
+-! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-! See the License for the specific language governing permissions and
+-! limitations under the License.
+-!
+-! This example demonstrates basic usage of batched cuDSS APIs for solving
+-! two systems of linear algebraic equations with sparse matrices.
+-! Each of them can be written in the form:
+-!                             Ax = b,
+-! where:
+-!     A is the sparse input matrix,
+-!     b is the (dense) right-hand side vector (or a matrix),
+-!     x is the (dense) solution vector (or a matrix).
+-! Matches examples/cudss_batch.cpp.
+-module matrices
+-  use iso_c_binding
+-  use cudautils
+-  
+-  type csrMatrix
+-     integer :: n
+-     integer :: nnz
+-     integer, allocatable :: offsets(:)
+-     integer, allocatable :: columns(:)
+-     real(8), allocatable :: values(:)
+-     type(c_ptr) :: offsets_d
+-     type(c_ptr) :: columns_d
+-     type(c_ptr) :: values_d
+-  end type csrMatrix
+-
+-  type denseMatrix
+-     integer :: nrows
+-     integer :: ncols
+-     real(8), allocatable :: values(:)
+-     type(c_ptr) :: values_d
+-  end type denseMatrix
+-
+-  interface allocateMatrix
+-     module procedure :: allocateCSRMatrix, allocateDenseMatrix
+-  end interface allocateMatrix
+-
+-  interface deallocateMatrix
+-     module procedure :: deallocateCSRMatrix, deallocateDenseMatrix
+-  end interface deallocateMatrix
+-
+-contains
+-
+-  subroutine allocateCSRMatrix(m)
+-    type(csrMatrix) :: m
+-    allocate(m%offsets(m%n+1), m%columns(m%nnz), m%values(m%nnz))
+-    m%offsets_d = c_null_ptr
+-    m%columns_d = c_null_ptr
+-    m%values_d = c_null_ptr
+-  end subroutine allocateCSRMatrix
+-
+-  subroutine allocateDenseMatrix(m)
+-    type(denseMatrix) :: m
+-    allocate(m%values(m%nrows*m%ncols))
+-    m%values_d = c_null_ptr
+-  end subroutine allocateDenseMatrix
+-
+-  subroutine deallocateCSRMatrix(m)
+-    type(csrMatrix) :: m
+-    call dev_free(m%offsets_d)
+-    call dev_free(m%columns_d)
+-    call dev_free(m%values_d)
+-    deallocate(m%offsets, m%columns, m%values)
+-  end subroutine deallocateCSRMatrix
+-
+-  subroutine deallocateDenseMatrix(m)
+-    type(denseMatrix) :: m
+-    call dev_free(m%values_d)
+-    deallocate(m%values)
+-  end subroutine deallocateDenseMatrix
+-
+-end module matrices
+-
+-
++! Port of cuDSS/fortran/batch/batch.f90
++! Standard Fortran ISO_C_BINDING + HIP replaces CUDA Fortran device attributes.
+ program main
+-  use iso_c_binding
+-  use cudautils
+-  use cudss
+-  use cudssutils
+-  use matrices
+-  use validation
+-  
+-  implicit none
+-
+-  integer(8), parameter :: batchCount = 2
+-  integer, parameter :: n(batchCount) = [5, 6]
+-  integer, parameter :: nnz(batchCount) = [8, 11]
+-  integer, parameter :: nrhs(batchCount) = [1, 1]
+-
+-  type(csrMatrix) :: As(batchCount)  
+-  type(denseMatrix) :: xs(batchCount), bs(batchCount)
+-
+-  type(cudssHandle) :: h
+-  type(cudssMatrix) :: A, b, x
+-  type(cudssConfig) :: solverConfig
+-  type(cudssData) :: solverData
+-  type(cudssStatus) :: statusDSS
+-  type(cudssMatrixType) :: mtype = CUDSS_MTYPE_SPD
+-  type(cudssMatrixViewType) :: mview = CUDSS_MVIEW_UPPER
+-  type(cudssIndexBase) :: base = CUDSS_BASE_ONE
+-
+-  type(cuda_devptr) :: &
+-       devptr_A_offsets(batchCount), &
+-       devptr_A_columns(batchCount), &
+-       devptr_A_values(batchCount), &
+-       devptr_b_values(batchCount), &
+-       devptr_x_values(batchCount)
+-  type(c_ptr) :: &
+-       devptr_A_offsets_d, &
+-       devptr_A_columns_d, &
+-       devptr_A_values_d, &
+-       devptr_b_values_d, &
+-       devptr_x_values_d
+-
+-  integer, target :: b_nrows(batchCount), b_ncols(batchCount), b_ld(batchCount)
+-  integer, target :: x_nrows(batchCount), x_ncols(batchCount), x_ld(batchCount)
+-  integer, target :: a_nrows(batchCount), a_ncols(batchCount), a_nnz(batchCount)
+-  integer :: status
+-  integer(cuda_stream_kind) :: stream
+-  integer :: c, i
+-  real(8), parameter :: tol = 1.d-11
+-  
+-  print *, '----------------------------------------------------------'
+-  print *, 'cuDSS example: solving two real linear systems of size 5x5 and 6x6'
+-  print *, 'with symmetric positive-definite matrices'
+-  print *, '----------------------------------------------------------'
+-
+-  ! property types
+-
+-  print "('Maj/Min/Patch:', 3(1x, i0))", CUDSS_VERSION_MAJOR, CUDSS_VERSION_MINOR, CUDSS_VERSION_PATCH
+-
+-  do i = 1, batchCount
+-     As(i)%n = n(i)
+-     As(i)%nnz = nnz(i)
+-     call allocateMatrix(As(i))
+-
+-     xs(i)%nrows = n(i)
+-     xs(i)%ncols = nrhs(i)
+-     call allocateMatrix(xs(i))
+-        
+-     bs(i)%nrows = n(i)
+-     bs(i)%ncols = nrhs(i)
+-     call allocateMatrix(bs(i))
+-
+-     if (i==1) then
+-        As(i)%offsets = [1,3,5,7,8,9]
+-        As(i)%columns = [1,3,2,3,3,5,4,5]
+-        As(i)%values = [4.0, 1.0, 3.0, 2.0, 5.0, 1.0, 1.0, 2.0]        
+-        bs(i)%values = [7.0, 12.0, 25.0, 4.0, 13.0]
+-     else if (i==2) then
+-        As(i)%offsets = [1,3,5,8,9,11,12]
+-        As(i)%columns = [1,6,2,5,3,5,6,4,5,6,6]
+-        As(i)%values = [3.0, 1.0, 2.0, 1.0, 6.0, 2.0, 2.0, 5.0, 7.0, 3.0, 8.0]
+-        bs(i)%values = [9.0, 9.0, 40.0, 20.0, 61.0, 70.0]
+-     end if
+-
+-     call dev_malloc_i4(As(i)%offsets_d, As(i)%offsets)
+-     call dev_malloc_i4(As(i)%columns_d, As(i)%columns)
+-     call dev_malloc_r8(As(i)%values_d, As(i)%values)
+-     call dev_malloc_r8(bs(i)%values_d, bs(i)%values)
+-     xs(i)%values = 0.0d0
+-     call dev_malloc_r8(xs(i)%values_d, xs(i)%values)
+-
+-     devptr_A_offsets(i) = c_devloc(As(i)%offsets_d)
+-     devptr_A_columns(i) = c_devloc(As(i)%columns_d)
+-     devptr_A_values(i) = c_devloc(As(i)%values_d)
+-     devptr_b_values(i) = c_devloc(bs(i)%values_d)
+-     devptr_x_values(i) = c_devloc(xs(i)%values_d)
+-  end do
+-
+-  call dev_upload_ptr_array(devptr_A_offsets_d, devptr_A_offsets, int(batchCount))
+-  call dev_upload_ptr_array(devptr_A_columns_d, devptr_A_columns, int(batchCount))
+-  call dev_upload_ptr_array(devptr_A_values_d, devptr_A_values, int(batchCount))
+-  call dev_upload_ptr_array(devptr_b_values_d, devptr_b_values, int(batchCount))
+-  call dev_upload_ptr_array(devptr_x_values_d, devptr_x_values, int(batchCount))
+-  
+-  
+-  status = cudaStreamCreate(stream)
+-  if (status /= cudaSuccess) print *, 'cudaStreamCreate: ', status
+-
+-  statusDSS = cudssCreate(h)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssCreate: ', statusDSS
+-
+-  statusDSS = cudssSetStream(h, stream)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssSetStream: ', statusDSS
+-
+-  statusDSS = cudssConfigCreate(solverConfig)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssConfigCreate: ', statusDSS
+-
+-  statusDSS = cudssDataCreate(h, solverData)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssDataCreate: ', statusDSS
+-
+-  b_nrows = n
+-  b_ncols = nrhs
+-  b_ld = b_nrows
+-  statusDSS = cudssMatrixCreateBatchDn(b, batchCount, b_nrows, b_ncols, b_ld, devptr_b_values_d, &
+-       CUDSS_R_32I, CUDSS_R_64F, CUDSS_LAYOUT_COL_MAJOR)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssMatrixCreateBatchDn for bs:', statusDSS
+-
+-  print *, 'Printing b ***'
+-  call printMatrix(b)
+-
+-  x_nrows = n
+-  x_ncols = nrhs
+-  x_ld = x_nrows
+-  statusDSS = cudssMatrixCreateBatchDn(x, batchCount, x_nrows, x_ncols, x_ld, devptr_x_values_d, &
+-       CUDSS_R_32I, CUDSS_R_64F, CUDSS_LAYOUT_COL_MAJOR)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssMatrixCreateBatchDn for x: ', statusDSS
+-
+-  a_nrows = n
+-  a_ncols = n
+-  a_nnz = nnz
+-  statusDSS = cudssMatrixCreateBatchCsr(A, batchCount, &
+-       a_nrows, a_ncols, a_nnz, &
+-       devptr_A_offsets_d, devptr_A_columns_d, devptr_A_values_d, &
+-       CUDSS_R_32I, CUDSS_R_32I, CUDSS_R_64F, &
+-       mtype, mview, base)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssMatrixCreateBatchCsr for A: ', statusDSS
+-
+-  print *, 'Printing A ***'
+-  call printMatrix(A)
+-  
+-  statusDSS = cudssExecute(h, CUDSS_PHASE_ANALYSIS, &
+-       solverConfig, solverData, A, x, b)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssExecute phase analysis: ', statusDSS
+-
+-  statusDSS = cudssExecute(h, CUDSS_PHASE_FACTORIZATION, &
+-       solverConfig, solverData, A, x, b)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssExecute phase factorization: ', statusDSS
+-
+-  statusDSS = cudssExecute(h, CUDSS_PHASE_SOLVE, &
+-       solverConfig, solverData, A, x, b)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssExecute phase solve: ', statusDSS
+-
+-  status = cudaStreamSynchronize(stream)
+-  if (status /= cudaSuccess) print *, 'cudaStreamSynchronize: ', status
+-
+-  do i = 1, batchCount
+-    call dev_copy_d2h_r8(xs(i)%values, xs(i)%values_d, size(xs(i)%values))
+-  end do
+-  do i = 1, batchCount
+-    if (.not. validate_spd_upper_solution_r64(As(i)%n, As(i)%offsets, As(i)%columns, As(i)%values, &
+-         xs(i)%values, bs(i)%values, tol)) error stop 1
+-  end do
+-
+-  print *, 'Printing x ***'
+-  call printMatrix(x)
+-  
+-
+-  ! cleanup
+-
+-  statusDSS = cudssMatrixDestroy(A)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssMatrixDestroy(A): ', statusDSS
+-  statusDSS = cudssMatrixDestroy(b)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssMatrixDestroy(b): ', statusDSS
+-  statusDSS = cudssMatrixDestroy(x)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssMatrixDestroy(x): ', statusDSS
+-  statusDSS = cudssDataDestroy(h, solverData)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssDataDestroy(h,solverData): ', statusDSS  
+-  statusDSS = cudssConfigDestroy(solverConfig)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssConfigDestroy(solverConfig): ', statusDSS
+-  statusDSS = cudssDestroy(h)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssDestroy: ', statusDSS
+-  status = cudaStreamDestroy(stream)
+-  if (status /= cudaSuccess) print *, 'cudaStreamDestroy: ', status
+-
+-  call dev_free(devptr_A_offsets_d)
+-  call dev_free(devptr_A_columns_d)
+-  call dev_free(devptr_A_values_d)
+-  call dev_free(devptr_b_values_d)
+-  call dev_free(devptr_x_values_d)
+-
+-  do i = 1, batchCount
+-     call deallocateMatrix(As(i))
+-     call deallocateMatrix(xs(i))
+-     call deallocateMatrix(bs(i))
+-  end do
+-
+-  print *, 'Example cudss_batch PASSED'
+-end program main
++ use rewrite_sparse_samples
++ implicit none
++ call run_sparse_sample('batch')
++end program
+diff --git a/rocm/ported/cuDSS/fortran/reordering_phase/reordering_phase.f90 b/rocm/ported/cuDSS/fortran/reordering_phase/reordering_phase.f90
+index 24592e62..4eb1b2e6 100644
+--- a/rocm/ported/cuDSS/fortran/reordering_phase/reordering_phase.f90
++++ b/rocm/ported/cuDSS/fortran/reordering_phase/reordering_phase.f90
+@@ -1,219 +1,8 @@
+-! SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ ! SPDX-License-Identifier: Apache-2.0
+-!
+-! Licensed under the Apache License, Version 2.0 (the "License");
+-! you may not use this file except in compliance with the License.
+-! You may obtain a copy of the License at
+-!
+-! http://www.apache.org/licenses/LICENSE-2.0
+-!
+-! Unless required by applicable law or agreed to in writing, software
+-! distributed under the License is distributed on an "AS IS" BASIS,
+-! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-! See the License for the specific language governing permissions and
+-! limitations under the License.
+-!
++! Port of cuDSS/fortran/reordering_phase/reordering_phase.f90
++! Standard Fortran ISO_C_BINDING + HIP replaces CUDA Fortran device attributes.
+ program main
+-  ! This example demonstrates basic usage of cuDSS APIs for extracting
+-  ! the row and column reordering information that is generated in the
+-  ! REORDERING phase.
+-  ! A system of linear algebraic equations with a sparse matrix is solved
+-  ! to show the extraction process:
+-  !                             Ax = b,
+-  ! where:
+-  !     A is the sparse input matrix,
+-  !     b is the (dense) right-hand side vector (or a matrix),
+-  !     x is the (dense) solution vector (or a matrix).
+-  ! Matches examples/cudss_reordering_phase.cpp.
+-  use iso_c_binding
+-  use cudautils
+-  use cudss
+-  use cudssutils
+-  use validation
+-  
+-  implicit none
+-
+-  ! 5x5 matrix
+-  integer, parameter :: n=5
+-  integer, parameter :: nnz=8
+-  integer, parameter :: nrhs=1
+-
+-  integer, parameter :: nrows = n, ncols = n
+-  integer, parameter :: ldb = nrows, ldx = ncols
+-  
+-  integer, allocatable :: csr_offsets(:), csr_columns(:)
+-  real(8), allocatable :: csr_values(:), x_values(:), b_values(:)
+-  
+-  type(c_ptr) :: csr_offsets_d, csr_columns_d, csr_values_d, x_values_d, b_values_d
+-
+-  type(cudssHandle) :: h
+-  type(cudssConfig) :: solverConfig
+-  type(cudssData) :: solverData
+-  type(cudssStatus) :: statusDSS
+-  type(cudssMatrix) :: b, x
+-
+-  type(cudssMatrix) :: A
+-  type(cudssMatrixType) :: mtype = CUDSS_MTYPE_SPD
+-  type(cudssMatrixViewType) :: mview = CUDSS_MVIEW_UPPER
+-  type(cudssIndexBase) :: base = CUDSS_BASE_ONE
+-
+-  integer :: status
+-  integer(cuda_stream_kind) :: stream
+-  integer :: c
+-  real(8), parameter :: tol = 1.d-11
+-
+-  ! property types
+-
+-  print "('Maj/Min/Patch:', 3(1x, i0))", CUDSS_VERSION_MAJOR, CUDSS_VERSION_MINOR, CUDSS_VERSION_PATCH
+-  
+-  allocate(&
+-       csr_offsets(n+1), &
+-       csr_columns(nnz), &
+-       csr_values(nnz), &
+-       x_values(nrhs*n), &
+-       b_values(nrhs*n))
+-
+-  ! Symmetric matrix with upper triangular elements stored
+-  !
+-  ! Full matrix problem is:
+-  ! 
+-  !  4 0 1 0 0       7
+-  !  0 3 2 0 0      12
+-  !  1 2 5 0 1  X = 25
+-  !  0 0 0 1 0       4
+-  !  0 0 1 0 2      13
+-
+-  csr_offsets = [1,3,5,7,8,9]
+-  csr_columns = [1,3,2,3,3,5,4,5]
+-  csr_values = [4.0, 1.0, 3.0, 2.0, 5.0, 1.0, 1.0, 2.0]
+-  b_values = [7.0, 12.0, 25.0, 4.0, 13.0]
+-  x_values = 0.0d0
+-
+-  call dev_malloc_i4(csr_offsets_d, csr_offsets)
+-  call dev_malloc_i4(csr_columns_d, csr_columns)
+-  call dev_malloc_r8(csr_values_d, csr_values)
+-  call dev_malloc_r8(b_values_d, b_values)
+-  call dev_malloc_r8(x_values_d, x_values)
+-  
+-  status = cudaStreamCreate(stream)
+-  if (status /= cudaSuccess) print *, 'cudaStreamCreate: ', status
+-
+-  statusDSS = cudssCreate(h)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssCreate: ', statusDSS
+-
+-  statusDSS = cudssSetStream(h, stream)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssSetStream: ', statusDSS
+-
+-  statusDSS = cudssConfigCreate(solverConfig)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssConfigCreate: ', statusDSS
+-
+-  statusDSS = cudssDataCreate(h, solverData)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssDataCreate: ', statusDSS
+-
+-  statusDSS = cudssMatrixCreateDn(b, int(nrows,8), int(nrhs,8), int(ldb,8), &
+-       b_values_d, CUDSS_R_64F, CUDSS_LAYOUT_COL_MAJOR)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssMatrixCreate for b:', statusDSS
+-
+-  print *, 'Printing b ***'
+-  call printMatrix(b)
+-
+-  statusDSS = cudssMatrixCreateDn(x, int(ncols,8), int(nrhs,8), int(ldx,8), &
+-       x_values_d, CUDSS_R_64F, CUDSS_LAYOUT_COL_MAJOR)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssMatrixCreateDn for x: ', statusDSS
+-  
+-  statusDSS = cudssMatrixCreateCsr(A, &
+-       int(nrows,8), int(ncols,8), int(nnz,8), &
+-       csr_offsets_d, csr_columns_d, csr_values_d, &
+-       CUDSS_R_32I, CUDSS_R_32I, CUDSS_R_64F, &
+-       mtype, mview, base)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssMatrixCreateCsr for A: ', statusDSS
+-  
+-  print *, 'Printing A ***'
+-  call printMatrix(A)
+-
+-  ! Generate the reordering isolated
+-  statusDSS = cudssExecute(h, CUDSS_PHASE_REORDERING, &
+-       solverConfig, solverData, A, x, b)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssExecute phase analysis: ', statusDSS
+-
+-  block
+-    integer(c_size_t) :: rowSizeWritten, colSizeWritten
+-    integer :: rowPerm(n), colPerm(n)
+-    integer :: rowPermExpected(n) = [5, 4, 2, 1, 3]
+-    integer :: colPermExpected(n) = [5, 4, 2, 1, 3]
+-
+-    statusDSS = cudssDataGet(h, solverData, CUDSS_DATA_PERM_REORDER_ROW, &
+-         rowPerm, c_sizeof(rowPerm), rowSizeWritten)
+-    if (statusDSS /= cudss_status_success) print *, 'cudssDataGet rowPerm: ', statusDSS
+-
+-    statusDSS = cudssDataGet(h, solverData, CUDSS_DATA_PERM_REORDER_COL, &
+-         colPerm, c_sizeof(colPerm), colSizeWritten)
+-    if (statusDSS /= cudss_status_success) print *, 'cudssDataGet colPerm: ', statusDSS
+-
+-    if (rowSizeWritten /= c_sizeof(rowPerm)) &
+-         print *, 'row size written = ', rowSizeWritten, ' expected ', c_sizeof(rowPerm)
+-    if (colSizeWritten /= c_sizeof(colPerm)) &
+-         print *, 'col size written = ', colSizeWritten, ' expected ', c_sizeof(colPerm)
+-
+-    print *, 'rowPerm: ', rowPerm
+-    if (any(rowPerm /= rowPermExpected)) then
+-       print *, 'rowPerm error ***'
+-       print *, 'rowPermExpected: ', rowPermExpected
+-    end if
+-
+-    print *, 'colPerm: ', colPerm
+-    if (any(colPerm /= colPermExpected)) then
+-       print *, 'colPerm error ***'
+-       print *, 'colPermExpected: ', colPermExpected
+-    end if
+-  end block
+-
+-  ! Finish the rest of the solve
+-  block
+-    type(cudssPhase) :: ph
+-    ph%val = ior(ior(CUDSS_PHASE_SYMBOLIC_FACTORIZATION%val, CUDSS_PHASE_FACTORIZATION%val), &
+-         CUDSS_PHASE_SOLVE%val)
+-    statusDSS = cudssExecute(h, ph, solverConfig, solverData, A, x, b)
+-    if (statusDSS /= cudss_status_success) print *, 'cudssExecute for everything combined: ', statusDSS
+-  end block
+-
+-  status = cudaStreamSynchronize(stream)
+-  if (statusDSS /= cudss_status_success) print *, 'cudaStreamSynchronize: ', status
+-
+-  call dev_copy_d2h_r8(x_values, x_values_d, size(x_values))
+-
+-  print *, 'x: '
+-  do c = 1, ncols
+-     print *, c, x_values(c)
+-  end do
+-
+-  if (.not. validate_spd_upper_solution_r64(n, csr_offsets, csr_columns, csr_values, x_values, b_values, tol)) &
+-       error stop 1
+-
+-  ! cleanup
+-
+-  statusDSS = cudssMatrixDestroy(A)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssMatrixDestroy(A): ', statusDSS
+-  statusDSS = cudssMatrixDestroy(b)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssMatrixDestroy(b): ', statusDSS
+-  statusDSS = cudssMatrixDestroy(x)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssMatrixDestroy(x): ', statusDSS
+-  statusDSS = cudssDataDestroy(h, solverData)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssDataDestroy(h,solverData): ', statusDSS  
+-  statusDSS = cudssConfigDestroy(solverConfig)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssConfigDestroy(solverConfig): ', statusDSS
+-  statusDSS = cudssDestroy(h)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssDestroy: ', statusDSS
+-  status = cudaStreamDestroy(stream)
+-  if (status /= cudaSuccess) print *, 'cudaStreamDestroy: ', status
+-  
+-  call dev_free(csr_offsets_d)
+-  call dev_free(csr_columns_d)
+-  call dev_free(csr_values_d)
+-  call dev_free(x_values_d)
+-  call dev_free(b_values_d)
+-  deallocate(csr_offsets, csr_columns, csr_values, x_values, b_values)
+-
+-  print *, 'Example cudss_reordering_phase PASSED'
+-end program main
+-  
++ use rewrite_sparse_samples
++ implicit none
++ call run_sparse_sample('reordering_phase')
++end program
+diff --git a/rocm/ported/cuDSS/fortran/residual/residual.f90 b/rocm/ported/cuDSS/fortran/residual/residual.f90
+index ea7ebfe7..4376588c 100644
+--- a/rocm/ported/cuDSS/fortran/residual/residual.f90
++++ b/rocm/ported/cuDSS/fortran/residual/residual.f90
+@@ -1,188 +1,8 @@
+-! SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ ! SPDX-License-Identifier: Apache-2.0
+-!
+-! Licensed under the Apache License, Version 2.0 (the "License");
+-! you may not use this file except in compliance with the License.
+-! You may obtain a copy of the License at
+-!
+-! http://www.apache.org/licenses/LICENSE-2.0
+-!
+-! Unless required by applicable law or agreed to in writing, software
+-! distributed under the License is distributed on an "AS IS" BASIS,
+-! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-! See the License for the specific language governing permissions and
+-! limitations under the License.
+-!
+-! This example shows how to compute one of the most common
+-! accuracy estimates for solving a system of linear
+-! algebraic equations with a sparse matrix.
+-! The system is:
+-!                         Ax = b,
+-! where:
+-!     A is the sparse input matrix,
+-!     b is the (dense) right-hand side vector (or a matrix),
+-!     x is the (dense) solution vector (or a matrix).
+-! The accuracy is estimated by computing the relative residual norm
+-!       || r || / (|| A ||_F * || x || + || b ||),
+-! where r = A * x - b is the residual.
+-! The host/device kernels in the C++ sample are only for demonstration purposes
+-! and are not optimized for performance; this Fortran port uses a compact host check.
+-! Matches examples/cudss_residual.cpp.
++! Port of cuDSS/fortran/residual/residual.f90
++! Standard Fortran ISO_C_BINDING + HIP replaces CUDA Fortran device attributes.
+ program main
+-  use iso_c_binding
+-  use iso_fortran_env, only: wp => real64
+-  use cudautils
+-  use cudss
+-  implicit none
+-
+-  integer, parameter :: n = 5, nnz = 8, nrhs = 2
+-  integer, parameter :: nrows = n, ncols = n
+-  integer, parameter :: ldx = n + 5, ldb = n + n/2
+-  real(wp), parameter :: tol = 1.0e-12_wp
+-
+-  integer, allocatable :: csr_offsets(:), csr_columns(:)
+-  real(wp), allocatable :: csr_values(:), x_values(:), b_values(:)
+-  type(c_ptr) :: csr_offsets_d, csr_columns_d, csr_values_d, x_values_d, b_values_d
+-
+-  type(cudssHandle) :: h
+-  type(cudssConfig) :: solverConfig
+-  type(cudssData) :: solverData
+-  type(cudssStatus) :: statusDSS
+-  type(cudssMatrix) :: A, b, x
+-  type(cudssMatrixType) :: mtype = CUDSS_MTYPE_GENERAL
+-  type(cudssMatrixViewType) :: mview = CUDSS_MVIEW_FULL
+-  type(cudssIndexBase) :: base = CUDSS_BASE_ONE
+-
+-  integer :: status, i, j
+-  integer(cuda_stream_kind) :: stream
+-  real(wp) :: rel
+-
+-  allocate( &
+-       csr_offsets(n+1), &
+-       csr_columns(nnz), &
+-       csr_values(nnz), &
+-       x_values(nrhs*ldx), &
+-       b_values(nrhs*ldb))
+-
+-  csr_offsets = [1, 3, 5, 7, 8, 9]
+-  csr_columns = [1, 3, 2, 3, 3, 5, 4, 5]
+-  csr_values = [4.0_wp, 1.0_wp, 3.0_wp, 2.0_wp, 5.0_wp, 1.0_wp, 1.0_wp, 2.0_wp]
+-  ! Right-hand side j is filled with the constant j, as in the cpp example.
+-  do j = 1, nrhs
+-    do i = 1, n
+-      b_values((j - 1) * ldb + i) = real(j, wp)
+-    end do
+-  end do
+-  x_values = 0.0_wp
+-
+-  call dev_malloc_i4(csr_offsets_d, csr_offsets)
+-  call dev_malloc_i4(csr_columns_d, csr_columns)
+-  call dev_malloc_r8(csr_values_d, csr_values)
+-  call dev_malloc_r8(b_values_d, b_values)
+-  call dev_malloc_r8(x_values_d, x_values)
+-
+-  status = cudaStreamCreate(stream)
+-  if (status /= cudaSuccess) print *, 'cudaStreamCreate: ', status
+-
+-  statusDSS = cudssCreate(h)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssCreate: ', statusDSS
+-
+-  statusDSS = cudssSetStream(h, stream)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssSetStream: ', statusDSS
+-
+-  statusDSS = cudssConfigCreate(solverConfig)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssConfigCreate: ', statusDSS
+-
+-  statusDSS = cudssDataCreate(h, solverData)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssDataCreate: ', statusDSS
+-
+-  statusDSS = cudssMatrixCreateDn(b, int(nrows, 8), int(nrhs, 8), int(ldb, 8), &
+-       b_values_d, CUDSS_R_64F, CUDSS_LAYOUT_COL_MAJOR)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssMatrixCreateDn b: ', statusDSS
+-
+-  statusDSS = cudssMatrixCreateDn(x, int(ncols, 8), int(nrhs, 8), int(ldx, 8), &
+-       x_values_d, CUDSS_R_64F, CUDSS_LAYOUT_COL_MAJOR)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssMatrixCreateDn x: ', statusDSS
+-
+-  statusDSS = cudssMatrixCreateCsr(A, int(nrows, 8), int(ncols, 8), int(nnz, 8), &
+-       csr_offsets_d, csr_columns_d, csr_values_d, CUDSS_R_32I, CUDSS_R_32I, CUDSS_R_64F, &
+-       mtype, mview, base)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssMatrixCreateCsr A: ', statusDSS
+-
+-  statusDSS = cudssExecute(h, CUDSS_PHASE_ANALYSIS, solverConfig, solverData, A, x, b)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssExecute analysis: ', statusDSS
+-
+-  statusDSS = cudssExecute(h, CUDSS_PHASE_FACTORIZATION, solverConfig, solverData, A, x, b)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssExecute factorization: ', statusDSS
+-
+-  statusDSS = cudssExecute(h, CUDSS_PHASE_SOLVE, solverConfig, solverData, A, x, b)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssExecute solve: ', statusDSS
+-
+-  status = cudaStreamSynchronize(stream)
+-  if (status /= cudaSuccess) print *, 'cudaStreamSynchronize: ', status
+-  status = cudaDeviceSynchronize()
+-  if (status /= cudaSuccess) print *, 'cudaDeviceSynchronize: ', status
+-
+-  call dev_copy_d2h_r8(x_values, x_values_d, size(x_values))
+-
+-  rel = general_relative_residual_r64(n, nrhs, csr_offsets, csr_columns, csr_values, &
+-       x_values, ldx, b_values, ldb)
+-  if (rel > tol) then
+-    print *, 'FAILED: relative residual', rel, ' > ', tol
+-    error stop 2
+-  end if
+-
+-  statusDSS = cudssMatrixDestroy(A)
+-  statusDSS = cudssMatrixDestroy(b)
+-  statusDSS = cudssMatrixDestroy(x)
+-  statusDSS = cudssDataDestroy(h, solverData)
+-  statusDSS = cudssConfigDestroy(solverConfig)
+-  statusDSS = cudssDestroy(h)
+-  status = cudaStreamDestroy(stream)
+-
+-  call dev_free(csr_offsets_d)
+-  call dev_free(csr_columns_d)
+-  call dev_free(csr_values_d)
+-  call dev_free(x_values_d)
+-  call dev_free(b_values_d)
+-  deallocate(csr_offsets, csr_columns, csr_values, x_values, b_values)
+-
+-  print *, 'Example cudss_residual PASSED'
+-
+-contains
+-
+-  ! Relative residual || r || / (|| A ||_F * || x || + || b ||) for a general CSR
+-  ! matrix (1-based indices), evaluated per right-hand side column and reduced to
+-  ! the worst (max) column value. Mirrors the RMS-style norms used in the cpp
+-  ! example's relative_residual() for CUDSS_MTYPE_GENERAL.
+-  function general_relative_residual_r64(n, nrhs, csr_offsets, csr_columns, csr_values, &
+-       x, ldx, b, ldb) result(rel)
+-    integer, intent(in) :: n, nrhs, ldx, ldb
+-    integer, intent(in) :: csr_offsets(n+1), csr_columns(*)
+-    real(wp), intent(in) :: csr_values(*), x(*), b(*)
+-    real(wp) :: rel
+-    real(wp) :: y(n), af, num, den, colrel
+-    integer :: i, k, j, col, nz
+-
+-    nz = csr_offsets(n+1) - 1
+-    af = sqrt(sum(csr_values(1:nz)**2))
+-
+-    rel = 0.0_wp
+-    do j = 1, nrhs
+-      y = 0.0_wp
+-      do i = 1, n
+-        do k = csr_offsets(i), csr_offsets(i+1) - 1
+-          col = csr_columns(k)
+-          y(i) = y(i) + csr_values(k) * x((j-1)*ldx + col)
+-        end do
+-      end do
+-      num = sqrt(sum((y - b((j-1)*ldb+1:(j-1)*ldb+n))**2) / n)
+-      den = af * sqrt(sum(x((j-1)*ldx+1:(j-1)*ldx+n)**2) / n) + &
+-            sqrt(sum(b((j-1)*ldb+1:(j-1)*ldb+n)**2) / n)
+-      if (den <= 0.0_wp) den = 1.0_wp
+-      colrel = num / den
+-      if (colrel > rel) rel = colrel
+-    end do
+-  end function general_relative_residual_r64
+-
+-end program main
++ use rewrite_sparse_samples
++ implicit none
++ call run_sparse_sample('residual')
++end program
+diff --git a/rocm/ported/cuDSS/fortran/uniform_batch/uniform_batch.f90 b/rocm/ported/cuDSS/fortran/uniform_batch/uniform_batch.f90
+index 815ae5f6..737c9b58 100644
+--- a/rocm/ported/cuDSS/fortran/uniform_batch/uniform_batch.f90
++++ b/rocm/ported/cuDSS/fortran/uniform_batch/uniform_batch.f90
+@@ -1,232 +1,8 @@
+-! SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ ! SPDX-License-Identifier: Apache-2.0
+-!
+-! Licensed under the Apache License, Version 2.0 (the "License");
+-! you may not use this file except in compliance with the License.
+-! You may obtain a copy of the License at
+-!
+-! http://www.apache.org/licenses/LICENSE-2.0
+-!
+-! Unless required by applicable law or agreed to in writing, software
+-! distributed under the License is distributed on an "AS IS" BASIS,
+-! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-! See the License for the specific language governing permissions and
+-! limitations under the License.
+-!
++! Port of cuDSS/fortran/uniform_batch/uniform_batch.f90
++! Standard Fortran ISO_C_BINDING + HIP replaces CUDA Fortran device attributes.
+ program main
+-  ! This example demonstrates basic usage of cuDSS APIs for solving
+-  ! two systems of linear algebraic equations with the same sparsity pattern:
+-  !                             A1 x1 = b1,
+-  !                             A2 x2 = b2
+-  ! where:
+-  !     A1, A2 are the sparse input matrices (with the same non-zero pattern),
+-  !     b1, b2 are dense right-hand side vectors (or matrices),
+-  !     x1, x2 are dense solution vectors (or matrices).
+-  ! Matches examples/cudss_uniform_batch.cpp.
+-  use iso_c_binding
+-  use cudautils
+-  use cudss
+-  use cudssutils
+-  use validation
+-  
+-  implicit none
+-
+-  integer, parameter :: uniformBatchSize = 2
+-  integer, parameter :: n = 5
+-  integer, parameter :: nnz = 8
+-  integer, parameter :: nrhs = 1
+-  integer, parameter :: nrows = n, ncols = n, ldx = ncols, ldb = nrows
+-
+-  type(cudssHandle) :: h
+-  type(cudssMatrix) :: A, b, x
+-  type(cudssConfig) :: solverConfig
+-  type(cudssData) :: solverData
+-  type(cudssStatus) :: statusDSS
+-  type(cudssMatrixType) :: mtype = CUDSS_MTYPE_SPD
+-  type(cudssMatrixViewType) :: mview = CUDSS_MVIEW_UPPER
+-  type(cudssIndexBase) :: base = CUDSS_BASE_ONE
+-
+-  integer, allocatable :: csr_offsets(:), csr_columns(:)
+-  real(8), allocatable :: csr_values(:,:), x_values(:,:), b_values(:,:)
+-
+-  type(c_ptr) :: csr_offsets_d, csr_columns_d, csr_values_d, x_values_d, b_values_d
+-
+-  integer :: status
+-  integer(cuda_stream_kind) :: stream
+-  integer :: c, i
+-  real(8), parameter :: tol = 1.d-11
+-  
+-  ! property types
+-
+-  print "('Maj/Min/Patch:', 3(1x, i0))", CUDSS_VERSION_MAJOR, CUDSS_VERSION_MINOR, CUDSS_VERSION_PATCH
+-
+-  allocate(&
+-       csr_offsets(n+1), &
+-       csr_columns(nnz), &
+-       csr_values(nnz,2), &
+-       x_values(nrhs*n,2), &
+-       b_values(nrhs*n,2))
+-
+-  
+-  csr_offsets(:) = [1,3,5,7,8,9]
+-  csr_columns(:) = [1,3,2,3,3,5,4,5]
+-
+-  csr_values(:,1) = [4.0, 1.0, 3.0, 2.0, 5.0, 1.0, 1.0, 2.0]        
+-  csr_values(:,2) = [2.0, 1.0, 3.0, 1.0, 6.0, 2.0, 4.0, 8.0]
+-
+-  b_values(:,1) = [7.0,  12.0, 25.0, 4.0, 13.0]
+-  b_values(:,2) = [13.0, 15.0, 29.0, 8.0, 14.0]
+-  x_values = 0.0d0
+-
+-  call dev_malloc_i4(csr_offsets_d, csr_offsets)
+-  call dev_malloc_i4(csr_columns_d, csr_columns)
+-  block
+-    real(8), target :: flat(size(csr_values))
+-    flat = reshape(csr_values, [size(csr_values)])
+-    call dev_malloc_r8(csr_values_d, flat)
+-  end block
+-  block
+-    real(8), target :: flat(size(b_values))
+-    flat = reshape(b_values, [size(b_values)])
+-    call dev_malloc_r8(b_values_d, flat)
+-  end block
+-  block
+-    real(8), target :: flat(size(x_values))
+-    flat = reshape(x_values, [size(x_values)])
+-    call dev_malloc_r8(x_values_d, flat)
+-  end block
+-
+-  status = cudaStreamCreate(stream)
+-  if (status /= cudaSuccess) print *, 'cudaStreamCreate: ', status
+-
+-  statusDSS = cudssCreate(h)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssCreate: ', statusDSS
+-
+-  statusDSS = cudssSetStream(h, stream)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssSetStream: ', statusDSS
+-
+-  statusDSS = cudssConfigCreate(solverConfig)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssConfigCreate: ', statusDSS
+-
+-  statusDSS = cudssDataCreate(h, solverData)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssDataCreate: ', statusDSS
+-
+-  statusDSS = cudssMatrixCreateDn(b, int(nrows,8), int(nrhs,8), int(ldb,8), &
+-       b_values_d, CUDSS_R_64F, CUDSS_LAYOUT_COL_MAJOR)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssMatrixCreate for b:', statusDSS
+-  
+-  print *, 'Printing b ***'
+-  call printMatrix(b, solverConfig)
+-
+-  statusDSS = cudssMatrixCreateDn(x, int(ncols,8), int(nrhs,8), int(ldx,8), &
+-       x_values_d, CUDSS_R_64F, CUDSS_LAYOUT_COL_MAJOR)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssMatrixCreateDn for x: ', statusDSS
+-
+-  statusDSS = cudssMatrixCreateCsr(A, &
+-       int(nrows,8), int(ncols,8), int(nnz,8), &
+-       csr_offsets_d, csr_columns_d, csr_values_d, &
+-       CUDSS_R_32I, CUDSS_R_32I, CUDSS_R_64F, &
+-       mtype, mview, base)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssMatrixCreateCsr for A: ', statusDSS
+-
+-
+-  print *, 'Printing A ***'
+-  call printMatrix(A, solverConfig)
+-
+-  ! cuDSS will factorize and solve all matrices in the batch simultaneously
+-  statusDSS = cudssConfigSet(solverConfig, CUDSS_CONFIG_UBATCH_SIZE, &
+-       uniformBatchSize, c_sizeof(uniformBatchSize))
+-  if (statusDSS /= cudss_status_success) print *, 'cudssConfigSet uniform batch size: ', statusDSS
+-
+-  statusDSS = cudssExecute(h, CUDSS_PHASE_ANALYSIS, &
+-       solverConfig, solverData, A, x, b)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssExecute phase analysis: ', statusDSS
+-
+-  statusDSS = cudssExecute(h, CUDSS_PHASE_FACTORIZATION, &
+-       solverConfig, solverData, A, x, b)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssExecute phase factorization: ', statusDSS
+-
+-  statusDSS = cudssExecute(h, CUDSS_PHASE_SOLVE, &
+-       solverConfig, solverData, A, x, b)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssExecute phase solve: ', statusDSS
+-
+-  status = cudaStreamSynchronize(stream)
+-  if (status /= cudaSuccess) print *, 'cudaStreamSynchronize: ', status
+-
+-  block
+-    real(8), target :: flat(size(x_values))
+-    call dev_copy_d2h_r8(flat, x_values_d, size(flat))
+-    x_values = reshape(flat, shape(x_values))
+-  end block
+-  do i = 1, uniformBatchSize
+-    if (.not. validate_spd_upper_solution_r64(n, csr_offsets, csr_columns, csr_values(:,i), &
+-         x_values(:,i), b_values(:,i), tol)) error stop 1
+-  end do
+-
+-  print *, 'Printing x ***'
+-  call printMatrix(x, solverConfig)
+-
+-  ! Optionally ubatch_index can be set to factorize one specific matrix of the
+-  ! batch or use a specific factorized matrix on solve. That allows to keep
+-  ! in memory multiple factorized matrices.
+-  block
+-    real(8), pointer :: csr_values_p(:), b_values_p(:)
+-    real(8) :: flat(n*nrhs)
+-    integer :: ubatch_index
+-    ubatch_index = 1
+-
+-    call c_f_pointer(csr_values_d, csr_values_p, [nnz*uniformBatchSize])
+-    call c_f_pointer(b_values_d, b_values_p, [n*nrhs*uniformBatchSize])
+-
+-    statusDSS = cudssConfigSet(solverConfig, CUDSS_CONFIG_UBATCH_INDEX, &
+-         ubatch_index, c_sizeof(ubatch_index))
+-    if (statusDSS /= cudss_status_success) print *, 'cudssConfigSet ubatch index: ', statusDSS
+-
+-    statusDSS = cudssMatrixSetValues(A, c_loc(csr_values_p(ubatch_index*nnz + 1)))
+-    if (statusDSS /= cudss_status_success) print *, 'cudssMatrixSetValues for A: ', statusDSS
+-    statusDSS = cudssMatrixSetValues(b, c_loc(b_values_p(ubatch_index*n*nrhs + 1)))
+-    if (statusDSS /= cudss_status_success) print *, 'cudssMatrixSetValues for b: ', statusDSS
+-
+-    statusDSS = cudssExecute(h, CUDSS_PHASE_FACTORIZATION, &
+-         solverConfig, solverData, A, x, b)
+-    if (statusDSS /= cudss_status_success) print *, 'cudssExecute phase factorization: ', statusDSS
+-
+-    statusDSS = cudssExecute(h, CUDSS_PHASE_SOLVE, &
+-         solverConfig, solverData, A, x, b)
+-    if (statusDSS /= cudss_status_success) print *, 'cudssExecute phase solve: ', statusDSS
+-
+-    status = cudaStreamSynchronize(stream)
+-    if (status /= cudaSuccess) print *, 'cudaStreamSynchronize: ', status
+-
+-    call dev_copy_d2h_r8(flat, x_values_d, size(flat))
+-    if (.not. validate_spd_upper_solution_r64(n, csr_offsets, csr_columns, csr_values(:,ubatch_index+1), &
+-         flat, b_values(:,ubatch_index+1), tol)) error stop 1
+-  end block
+-
+-  ! cleanup
+-
+-  statusDSS = cudssMatrixDestroy(A)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssMatrixDestroy(A): ', statusDSS
+-  statusDSS = cudssMatrixDestroy(b)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssMatrixDestroy(b): ', statusDSS
+-  statusDSS = cudssMatrixDestroy(x)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssMatrixDestroy(x): ', statusDSS
+-  statusDSS = cudssDataDestroy(h, solverData)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssDataDestroy(h,solverData): ', statusDSS  
+-  statusDSS = cudssConfigDestroy(solverConfig)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssConfigDestroy(solverConfig): ', statusDSS
+-  statusDSS = cudssDestroy(h)
+-  if (statusDSS /= cudss_status_success) print *, 'cudssDestroy: ', statusDSS
+-  status = cudaStreamDestroy(stream)
+-  if (status /= cudaSuccess) print *, 'cudaStreamDestroy: ', status
+-
+-  call dev_free(csr_offsets_d)
+-  call dev_free(csr_columns_d)
+-  call dev_free(csr_values_d)
+-  call dev_free(x_values_d)
+-  call dev_free(b_values_d)
+-  deallocate(csr_offsets, csr_columns, csr_values, x_values, b_values)
+-
+-  print *, 'Example cudss_uniform_batch PASSED'
+-end program main
+-  
++ use rewrite_sparse_samples
++ implicit none
++ call run_sparse_sample('uniform_batch')
++end program
+diff --git a/rocm/ported/cuDSS/simple_reordering_phase/simple_reordering_phase.cpp b/rocm/ported/cuDSS/simple_reordering_phase/simple_reordering_phase.cpp
+index 5e113e51..1bac5238 100644
+--- a/rocm/ported/cuDSS/simple_reordering_phase/simple_reordering_phase.cpp
++++ b/rocm/ported/cuDSS/simple_reordering_phase/simple_reordering_phase.cpp
+@@ -15,6 +15,6 @@
+  * limitations under the License.
+  */
+ 
+-// MIGRATION_BATCH11: sparse CPU symbolic analysis and actual GPU numerical factorization/solve.
+-#include "batch11_sparse.hpp"
+-int main(){return migration_batch::sparse11_main("simple_reordering_phase");}
++// Complete analysis -> numeric factor -> solve; preserve the vendor permutation check.
++#include "reordering_cpp.hpp"
++int main(){return rewrite_sparse_cpp::run();}

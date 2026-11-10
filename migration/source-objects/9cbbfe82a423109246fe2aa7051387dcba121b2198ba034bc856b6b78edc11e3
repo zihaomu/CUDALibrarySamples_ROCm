@@ -1,0 +1,20 @@
+#!/usr/bin/env python3
+"""Invalid descriptors really traverse the Fortran entry and C ABI."""
+import json,shutil,struct
+from experiment import ROOT,Experiment,write
+from snapshot import capture
+build=json.loads((ROOT/'migration/reports/rewrite-sparse-binding-build.json').read_text());binary=next(b for b in build['binaries'] if b['sample_id']=='cuDSS/fortran/uniform_batch::uniform_batch.f90');results=[];observed=capture()
+for mode in ['CSR-endpoint','CSR-column-range','CSR-column-order','index-base','matrix-type','leading-dimension','uniform-pattern','nonfinite-RHS']:
+ src=ROOT/'tests/fixtures/rewrite-bindings/uniform_batch/original';e=Experiment('R5','sparse-binding-invalid/'+mode,'rocm-invalid-descriptor',sources=[__file__,ROOT/'rocm/adapters/fortran/sparse_bridge.cpp',ROOT/'rocm/adapters/fortran/sparse_samples.f90'],parent=build['experiment_id']);shutil.copytree(src,e.path/'inputs');write(e.path/'backend.observed.json',observed);out=e.path/'outputs';out.mkdir();root=e.path/'inputs'
+ if mode in ['index-base','matrix-type','leading-dimension']:
+  lines=(root/'config.txt').read_text().splitlines();values=lines[1].split();values[{'index-base':5,'matrix-type':6,'leading-dimension':3}[mode]]={'index-base':'2','matrix-type':'7','leading-dimension':'4'}[mode];lines[1]=' '.join(values);(root/'config.txt').write_text('\n'.join(lines)+'\n')
+ else:
+  name='b1_columns.bin' if mode=='uniform-pattern' else 'b0_rows.bin' if mode=='CSR-endpoint' else 'b0_B.bin' if mode=='nonfinite-RHS' else 'b0_columns.bin';path=root/name;data=bytearray(path.read_bytes())
+  if mode=='nonfinite-RHS':struct.pack_into('<d',data,0,float('nan'))
+  elif mode=='CSR-endpoint':struct.pack_into('<i',data,len(data)-4,100)
+  elif mode=='CSR-column-range':struct.pack_into('<i',data,0,99)
+  elif mode=='CSR-column-order':struct.pack_into('<i',data,4,1)
+  else:struct.pack_into('<i',data,0,2)
+  path.write_bytes(data)
+ rc=e.command([str(ROOT/binary['binary'])],'actual-Fortran-error-propagation',env=dict(REWRITE_INPUT=str(root),REWRITE_OUTPUT=str(out)));passed=rc==1 and not (out/('b1_solution.bin' if mode=='uniform-pattern' else 'b0_solution.bin')).exists();row=dict(test=mode,passed=passed,return_code=rc);row['evidence']=e.finish('EXPECTED_REJECTION' if passed else 'VALIDATOR_GAP',dict(checks=[dict(check=mode,passed=passed)]));results.append(row);print(mode,rc,passed,flush=True)
+write(ROOT/'migration/reports/rewrite-sparse-binding-runtime.json',dict(tests=results,status='PASSED' if all(r['passed'] for r in results) else 'FAILED'))

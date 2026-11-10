@@ -1,0 +1,1 @@
+Test cpu-validation for cuDSS/fortran/reordering_phase::reordering_phase.f90, case repeat. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T101513.637303Z-R5-rocm-fortran-4f59e940d8.

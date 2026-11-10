@@ -265623,24 +265623,25 @@
         "rocSPARSE/HIP",
         "ISO_C_BINDING"
       ],
-      "actual_library": null,
+      "actual_library": "standard Fortran ISO_C_BINDING + project HIP CSR pivot LU/solve; CPU symbolic min-degree only",
       "backend_library": null,
-      "implementation": null,
-      "status": "FAILED",
-      "level": "L0",
+      "implementation": "rocm/ported/cuDSS/fortran/batch/batch.f90",
+      "status": "PARTIAL",
+      "level": "L3",
       "required_cases": [
         "original-functional-contract",
         "independent-numerical-or-semantic-reference"
       ],
       "passed_cases": [],
-      "reason_code": "BINDING_OR_FRONTEND_MIGRATION_REQUIRED",
-      "reason": "Fortran 原始入口使用 iso_c_binding, cudautils, cudss, cudssutils, matrices, validation；当前 flang 编译失败，CUDA/cuDSS/cuFFT/NVFortran module 和 device 语法需用经验证的 ISO_C_BINDING 与 AMD API 重写。C ABI 探针另记，不代表该例已实现。 日志：igra/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/fortran/batch/batch.f90:277:12: error: No explicit type declared for 'cudastreamdestroy'     status = cudaStreamDestroy(stream)              ^^^^^^^^^^^^^^^^^ /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/fortran/batch/batch.f90:278:17: error: No explicit type declared for 'cudasuccess'     if (status /= cudaSuccess) print *, 'cudaStreamDestroy: ', status                   ^^^^^^^^^^^ ",
+      "reason_code": "REWRITE_REVIEW_PENDING",
+      "reason": "真实标准Fortran入口7场景通过独立FP64 CPU检查；包含原始数组/leading-dimension、GPU分解求解与排列使用、padding和奇异info。native对照、负向、轨迹及独立复核仍待收口；不声称NVIDIA编译器或vendor内部排列完全相同。",
       "cuda_baseline": "BLOCKED",
       "cuda_comparison": "BLOCKED",
       "benchmark": "NOT_RUN",
       "evidence": [
         "migration/reports/evidence/20261109T084354.110802Z/languages/cuDSS_fortran_batch_batch.f90",
-        "migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_fortran_batch_batch.f90"
+        "migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_fortran_batch_batch.f90",
+        "migration/reports/evidence/rewrite/R5/cuDSS_fortran_batch__batch.f90/20261110T101034.862819Z-R5-rocm-fortran-4ece2509ee"
       ],
       "attempts": [
         {
@@ -266878,24 +266879,25 @@
         "rocSPARSE/HIP",
         "ISO_C_BINDING"
       ],
-      "actual_library": null,
+      "actual_library": "standard Fortran ISO_C_BINDING + project HIP CSR pivot LU/solve; CPU symbolic min-degree only",
       "backend_library": null,
-      "implementation": null,
-      "status": "FAILED",
-      "level": "L0",
+      "implementation": "rocm/ported/cuDSS/fortran/reordering_phase/reordering_phase.f90",
+      "status": "PARTIAL",
+      "level": "L3",
       "required_cases": [
         "original-functional-contract",
         "independent-numerical-or-semantic-reference"
       ],
       "passed_cases": [],
-      "reason_code": "BINDING_OR_FRONTEND_MIGRATION_REQUIRED",
-      "reason": "Fortran 原始入口使用 iso_c_binding, cudautils, cudss, cudssutils, validation；当前 flang 编译失败，CUDA/cuDSS/cuFFT/NVFortran module 和 device 语法需用经验证的 ISO_C_BINDING 与 AMD API 重写。C ABI 探针另记，不代表该例已实现。 日志：SS/fortran/reordering_phase/reordering_phase.f90:207:12: error: No explicit type declared for 'cudastreamdestroy'     status = cudaStreamDestroy(stream)              ^^^^^^^^^^^^^^^^^ /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/fortran/reordering_phase/reordering_phase.f90:208:17: error: No explicit type declared for 'cudasuccess'     if (status /= cudaSuccess) print *, 'cudaStreamDestroy: ', status                   ^^^^^^^^^^^ ",
+      "reason_code": "REWRITE_REVIEW_PENDING",
+      "reason": "真实标准Fortran入口7场景通过独立FP64 CPU检查；包含原始数组/leading-dimension、GPU分解求解与排列使用、padding和奇异info。native对照、负向、轨迹及独立复核仍待收口；不声称NVIDIA编译器或vendor内部排列完全相同。",
       "cuda_baseline": "BLOCKED",
       "cuda_comparison": "BLOCKED",
       "benchmark": "NOT_RUN",
       "evidence": [
         "migration/reports/evidence/20261109T084354.110802Z/languages/cuDSS_fortran_reordering_phase_reordering_phase.f90",
-        "migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_fortran_reordering_phase_reordering_phase.f90"
+        "migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_fortran_reordering_phase_reordering_phase.f90",
+        "migration/reports/evidence/rewrite/R5/cuDSS_fortran_reordering_phase__reordering_phase.f90/20261110T101053.439324Z-R5-rocm-fortran-cfd97f7c35"
       ],
       "attempts": [
         {
@@ -266993,24 +266995,25 @@
         "rocSPARSE/HIP",
         "ISO_C_BINDING"
       ],
-      "actual_library": null,
+      "actual_library": "standard Fortran ISO_C_BINDING + project HIP CSR pivot LU/solve; CPU symbolic min-degree only",
       "backend_library": null,
-      "implementation": null,
-      "status": "FAILED",
-      "level": "L0",
+      "implementation": "rocm/ported/cuDSS/fortran/residual/residual.f90",
+      "status": "PARTIAL",
+      "level": "L3",
       "required_cases": [
         "original-functional-contract",
         "independent-numerical-or-semantic-reference"
       ],
       "passed_cases": [],
-      "reason_code": "BINDING_OR_FRONTEND_MIGRATION_REQUIRED",
-      "reason": "Fortran 原始入口使用 iso_c_binding, iso_fortran_env, cudautils, cudss；当前 flang 编译失败，CUDA/cuDSS/cuFFT/NVFortran module 和 device 语法需用经验证的 ISO_C_BINDING 与 AMD API 重写。C ABI 探针另记，不代表该例已实现。 日志：ibraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/fortran/residual/residual.f90:140:15: error: No explicit type declared for 'cudssdestroy'     statusDSS = cudssDestroy(h)                 ^^^^^^^^^^^^ /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/fortran/residual/residual.f90:141:12: error: No explicit type declared for 'cudastreamdestroy'     status = cudaStreamDestroy(stream)              ^^^^^^^^^^^^^^^^^ ",
+      "reason_code": "REWRITE_REVIEW_PENDING",
+      "reason": "真实标准Fortran入口7场景通过独立FP64 CPU检查；包含原始数组/leading-dimension、GPU分解求解与排列使用、padding和奇异info。native对照、负向、轨迹及独立复核仍待收口；不声称NVIDIA编译器或vendor内部排列完全相同。",
       "cuda_baseline": "BLOCKED",
       "cuda_comparison": "BLOCKED",
       "benchmark": "NOT_RUN",
       "evidence": [
         "migration/reports/evidence/20261109T084354.110802Z/languages/cuDSS_fortran_residual_residual.f90",
-        "migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_fortran_residual_residual.f90"
+        "migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_fortran_residual_residual.f90",
+        "migration/reports/evidence/rewrite/R5/cuDSS_fortran_residual__residual.f90/20261110T101102.553072Z-R5-rocm-fortran-51a1888ee9"
       ],
       "attempts": [
         {
@@ -267599,24 +267602,25 @@
         "rocSPARSE/HIP",
         "ISO_C_BINDING"
       ],
-      "actual_library": null,
+      "actual_library": "standard Fortran ISO_C_BINDING + project HIP CSR pivot LU/solve; CPU symbolic min-degree only",
       "backend_library": null,
-      "implementation": null,
-      "status": "FAILED",
-      "level": "L0",
+      "implementation": "rocm/ported/cuDSS/fortran/uniform_batch/uniform_batch.f90",
+      "status": "PARTIAL",
+      "level": "L3",
       "required_cases": [
         "original-functional-contract",
         "independent-numerical-or-semantic-reference"
       ],
       "passed_cases": [],
-      "reason_code": "BINDING_OR_FRONTEND_MIGRATION_REQUIRED",
-      "reason": "Fortran 原始入口使用 iso_c_binding, cudautils, cudss, cudssutils, validation；当前 flang 编译失败，CUDA/cuDSS/cuFFT/NVFortran module 和 device 语法需用经验证的 ISO_C_BINDING 与 AMD API 重写。C ABI 探针另记，不代表该例已实现。 日志：m/ported/cuDSS/fortran/uniform_batch/uniform_batch.f90:220:12: error: No explicit type declared for 'cudastreamdestroy'     status = cudaStreamDestroy(stream)              ^^^^^^^^^^^^^^^^^ /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/fortran/uniform_batch/uniform_batch.f90:221:17: error: No explicit type declared for 'cudasuccess'     if (status /= cudaSuccess) print *, 'cudaStreamDestroy: ', status                   ^^^^^^^^^^^ ",
+      "reason_code": "REWRITE_REVIEW_PENDING",
+      "reason": "真实标准Fortran入口7场景通过独立FP64 CPU检查；包含原始数组/leading-dimension、GPU分解求解与排列使用、padding和奇异info。native对照、负向、轨迹及独立复核仍待收口；不声称NVIDIA编译器或vendor内部排列完全相同。",
       "cuda_baseline": "BLOCKED",
       "cuda_comparison": "BLOCKED",
       "benchmark": "NOT_RUN",
       "evidence": [
         "migration/reports/evidence/20261109T084354.110802Z/languages/cuDSS_fortran_uniform_batch_uniform_batch.f90",
-        "migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_fortran_uniform_batch_uniform_batch.f90"
+        "migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_fortran_uniform_batch_uniform_batch.f90",
+        "migration/reports/evidence/rewrite/R5/cuDSS_fortran_uniform_batch__uniform_batch.f90/20261110T101044.242527Z-R5-rocm-fortran-35fb4c28e4"
       ],
       "attempts": [
         {
@@ -267714,24 +267718,25 @@
         "rocSPARSE/HIP",
         "ISO_C_BINDING"
       ],
-      "actual_library": null,
+      "actual_library": "standard Fortran ISO_C_BINDING + project HIP CSR pivot LU/solve; CPU symbolic min-degree only",
       "backend_library": null,
-      "implementation": null,
-      "status": "FAILED",
-      "level": "L0",
+      "implementation": "rocm/ported/cuDSS/nvfortran/batch/batch.f90",
+      "status": "PARTIAL",
+      "level": "L3",
       "required_cases": [
         "original-functional-contract",
         "independent-numerical-or-semantic-reference"
       ],
       "passed_cases": [],
-      "reason_code": "BINDING_OR_FRONTEND_MIGRATION_REQUIRED",
-      "reason": "Fortran 原始入口使用 iso_c_binding, cudafor, cudss, cudssutils, matrices, validation；当前 flang 编译失败，CUDA/cuDSS/cuFFT/NVFortran module 和 device 语法需用经验证的 ISO_C_BINDING 与 AMD API 重写。C ABI 探针另记，不代表该例已实现。 日志：/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/nvfortran/batch/batch.cuf:239:12: error: No explicit type declared for 'cudastreamdestroy'     status = cudaStreamDestroy(stream)              ^^^^^^^^^^^^^^^^^ /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/nvfortran/batch/batch.cuf:240:17: error: No explicit type declared for 'cudasuccess'     if (status /= cudaSuccess) print *, 'cudaStreamDestroy: ', status                   ^^^^^^^^^^^ ",
+      "reason_code": "REWRITE_REVIEW_PENDING",
+      "reason": "真实标准Fortran入口7场景通过独立FP64 CPU检查；包含原始数组/leading-dimension、GPU分解求解与排列使用、padding和奇异info。native对照、负向、轨迹及独立复核仍待收口；不声称NVIDIA编译器或vendor内部排列完全相同。",
       "cuda_baseline": "BLOCKED",
       "cuda_comparison": "BLOCKED",
       "benchmark": "NOT_RUN",
       "evidence": [
         "migration/reports/evidence/20261109T084354.110802Z/languages/cuDSS_nvfortran_batch_batch.cuf",
-        "migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_nvfortran_batch_batch.cuf"
+        "migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_nvfortran_batch_batch.cuf",
+        "migration/reports/evidence/rewrite/R5/cuDSS_nvfortran_batch__batch.cuf/20261110T101111.632772Z-R5-rocm-fortran-96891a33e3"
       ],
       "attempts": [
         {
@@ -268968,24 +268973,25 @@
         "rocSPARSE/HIP",
         "ISO_C_BINDING"
       ],
-      "actual_library": null,
+      "actual_library": "standard Fortran ISO_C_BINDING + project HIP CSR pivot LU/solve; CPU symbolic min-degree only",
       "backend_library": null,
-      "implementation": null,
-      "status": "FAILED",
-      "level": "L0",
+      "implementation": "rocm/ported/cuDSS/nvfortran/reordering_phase/reordering_phase.f90",
+      "status": "PARTIAL",
+      "level": "L3",
       "required_cases": [
         "original-functional-contract",
         "independent-numerical-or-semantic-reference"
       ],
       "passed_cases": [],
-      "reason_code": "BINDING_OR_FRONTEND_MIGRATION_REQUIRED",
-      "reason": "Fortran 原始入口使用 iso_c_binding, cudafor, cudss, cudssutils, validation；当前 flang 编译失败，CUDA/cuDSS/cuFFT/NVFortran module 和 device 语法需用经验证的 ISO_C_BINDING 与 AMD API 重写。C ABI 探针另记，不代表该例已实现。 日志：vfortran/reordering_phase/reordering_phase.cuf:213:12: error: No explicit type declared for 'cudastreamdestroy'     status = cudaStreamDestroy(stream)              ^^^^^^^^^^^^^^^^^ /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/nvfortran/reordering_phase/reordering_phase.cuf:214:17: error: No explicit type declared for 'cudasuccess'     if (status /= cudaSuccess) print *, 'cudaStreamDestroy: ', status                   ^^^^^^^^^^^ ",
+      "reason_code": "REWRITE_REVIEW_PENDING",
+      "reason": "真实标准Fortran入口7场景通过独立FP64 CPU检查；包含原始数组/leading-dimension、GPU分解求解与排列使用、padding和奇异info。native对照、负向、轨迹及独立复核仍待收口；不声称NVIDIA编译器或vendor内部排列完全相同。",
       "cuda_baseline": "BLOCKED",
       "cuda_comparison": "BLOCKED",
       "benchmark": "NOT_RUN",
       "evidence": [
         "migration/reports/evidence/20261109T084354.110802Z/languages/cuDSS_nvfortran_reordering_phase_reordering_phase.cuf",
-        "migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_nvfortran_reordering_phase_reordering_phase.cuf"
+        "migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_nvfortran_reordering_phase_reordering_phase.cuf",
+        "migration/reports/evidence/rewrite/R5/cuDSS_nvfortran_reordering_phase__reordering_phase.cuf/20261110T101129.897966Z-R5-rocm-fortran-9c754192c3"
       ],
       "attempts": [
         {
@@ -269083,24 +269089,25 @@
         "rocSPARSE/HIP",
         "ISO_C_BINDING"
       ],
-      "actual_library": null,
+      "actual_library": "standard Fortran ISO_C_BINDING + project HIP CSR pivot LU/solve; CPU symbolic min-degree only",
       "backend_library": null,
-      "implementation": null,
-      "status": "FAILED",
-      "level": "L0",
+      "implementation": "rocm/ported/cuDSS/nvfortran/residual/residual.f90",
+      "status": "PARTIAL",
+      "level": "L3",
       "required_cases": [
         "original-functional-contract",
         "independent-numerical-or-semantic-reference"
       ],
       "passed_cases": [],
-      "reason_code": "BINDING_OR_FRONTEND_MIGRATION_REQUIRED",
-      "reason": "Fortran 原始入口使用 iso_c_binding, iso_fortran_env, cudafor, cudss；当前 flang 编译失败，CUDA/cuDSS/cuFFT/NVFortran module 和 device 语法需用经验证的 ISO_C_BINDING 与 AMD API 重写。C ABI 探针另记，不代表该例已实现。 日志：ray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/nvfortran/residual/residual.cuf:151:15: error: No explicit type declared for 'cudssdestroy'     statusDSS = cudssDestroy(h)                 ^^^^^^^^^^^^ /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/nvfortran/residual/residual.cuf:152:12: error: No explicit type declared for 'cudastreamdestroy'     status = cudaStreamDestroy(stream)              ^^^^^^^^^^^^^^^^^ ",
+      "reason_code": "REWRITE_REVIEW_PENDING",
+      "reason": "真实标准Fortran入口7场景通过独立FP64 CPU检查；包含原始数组/leading-dimension、GPU分解求解与排列使用、padding和奇异info。native对照、负向、轨迹及独立复核仍待收口；不声称NVIDIA编译器或vendor内部排列完全相同。",
       "cuda_baseline": "BLOCKED",
       "cuda_comparison": "BLOCKED",
       "benchmark": "NOT_RUN",
       "evidence": [
         "migration/reports/evidence/20261109T084354.110802Z/languages/cuDSS_nvfortran_residual_residual.cuf",
-        "migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_nvfortran_residual_residual.cuf"
+        "migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_nvfortran_residual_residual.cuf",
+        "migration/reports/evidence/rewrite/R5/cuDSS_nvfortran_residual__residual.cuf/20261110T101139.017498Z-R5-rocm-fortran-d9171de83f"
       ],
       "attempts": [
         {
@@ -269685,24 +269692,25 @@
         "rocSPARSE/HIP",
         "ISO_C_BINDING"
       ],
-      "actual_library": null,
+      "actual_library": "standard Fortran ISO_C_BINDING + project HIP CSR pivot LU/solve; CPU symbolic min-degree only",
       "backend_library": null,
-      "implementation": null,
-      "status": "FAILED",
-      "level": "L0",
+      "implementation": "rocm/ported/cuDSS/nvfortran/uniform_batch/uniform_batch.f90",
+      "status": "PARTIAL",
+      "level": "L3",
       "required_cases": [
         "original-functional-contract",
         "independent-numerical-or-semantic-reference"
       ],
       "passed_cases": [],
-      "reason_code": "BINDING_OR_FRONTEND_MIGRATION_REQUIRED",
-      "reason": "Fortran 原始入口使用 iso_c_binding, cudafor, cudss, cudssutils, validation；当前 flang 编译失败，CUDA/cuDSS/cuFFT/NVFortran module 和 device 语法需用经验证的 ISO_C_BINDING 与 AMD API 重写。C ABI 探针另记，不代表该例已实现。 日志：_migra/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/nvfortran/uniform_batch/uniform_batch.cuf:131:15: error: No explicit type declared for 'cudssdestroy'     statusDSS = cudssDestroy(h)                 ^^^^^^^^^^^^ /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/nvfortran/uniform_batch/uniform_batch.cuf:132:12: error: No explicit type declared for 'cudastreamdestroy'     status = cudaStreamDestroy(stream)              ^^^^^^^^^^^^^^^^^ ",
+      "reason_code": "REWRITE_REVIEW_PENDING",
+      "reason": "真实标准Fortran入口7场景通过独立FP64 CPU检查；包含原始数组/leading-dimension、GPU分解求解与排列使用、padding和奇异info。native对照、负向、轨迹及独立复核仍待收口；不声称NVIDIA编译器或vendor内部排列完全相同。",
       "cuda_baseline": "BLOCKED",
       "cuda_comparison": "BLOCKED",
       "benchmark": "NOT_RUN",
       "evidence": [
         "migration/reports/evidence/20261109T084354.110802Z/languages/cuDSS_nvfortran_uniform_batch_uniform_batch.cuf",
-        "migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_nvfortran_uniform_batch_uniform_batch.cuf"
+        "migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_nvfortran_uniform_batch_uniform_batch.cuf",
+        "migration/reports/evidence/rewrite/R5/cuDSS_nvfortran_uniform_batch__uniform_batch.cuf/20261110T101120.786409Z-R5-rocm-fortran-a20e4918ca"
       ],
       "attempts": [
         {
@@ -286517,34 +286525,20 @@
         "rocSPARSE/HIP",
         "ISO_C_BINDING"
       ],
-      "actual_library": "CPU sparse symbolic/min-degree analysis + HIP data preparation; numeric factor/solve missing",
+      "actual_library": "CPU symbolic min-degree + project HIP CSR pivot LU/solve via shared C ABI",
       "backend_library": "CPU analysis + HIP preparation",
       "implementation": "rocm/ported/cuDSS/simple_reordering_phase/simple_reordering_phase.cpp",
       "status": "PARTIAL",
       "level": "L4",
       "required_cases": [
-        "batches9_11/original",
-        "batches9_11/changed-values",
-        "batches9_11/varied-pattern",
-        "batches9_11/reorder-natural",
-        "batches9_11/pivot-required",
-        "batches9_11/singular-info",
-        "batches9_11/indefinite",
-        "batches9_11/configuration",
-        "rewrite/full-factor-solve-after-isolated-reordering"
+        "rewrite/full-factor-solve-after-isolated-reordering",
+        "rewrite/exact-vendor-permutation"
       ],
       "passed_cases": [
-        "batches9_11/original",
-        "batches9_11/changed-values",
-        "batches9_11/varied-pattern",
-        "batches9_11/reorder-natural",
-        "batches9_11/pivot-required",
-        "batches9_11/singular-info",
-        "batches9_11/indefinite",
-        "batches9_11/configuration"
+        "rewrite/full-factor-solve-after-isolated-reordering"
       ],
-      "reason_code": "ORIGINAL_POST_REORDERING_SOLVE_MISSING",
-      "reason": "历史B11仅验收分析/排列；原始例取回row/col permutation后继续数值分解与求解。当前端口在analysis_only分支提前返回，缺少原始后半阶段，已撤回整例资格，待R5共享稀疏适配补齐并重新验收。",
+      "reason_code": "VENDOR_PERMUTATION_POLICY_DIFFERS",
+      "reason": "历史analysis-only漏项已修正为完整CPU重排→HIP CSR分解/求解；原始解精度、阶段顺序及排列双射实测通过。项目最小度排列[3,0,1,2,4]与原例严格要求的METIS[4,3,1,0,2]不同，原C++检查仍返回1；因此保持PARTIAL，不改期望向量刷通过。",
       "cuda_baseline": "PASSED",
       "cuda_comparison": "PASSED",
       "benchmark": "NOT_RUN",
@@ -286555,7 +286549,8 @@
         "migration/reports/evidence/20261110T043650.167709Z/batches9_11-rocm/cuDSS_simple_reordering_phase_simple_reordering_phase.cpp",
         "migration/reports/batches9_11-validation.json",
         "migration/reports/evidence/20261110T043816.470698Z/batches9_11-cuda/cuDSS_simple_reordering_phase_simple_reordering_phase.cpp",
-        "migration/reports/evidence/rewrite/R5/cuDSS_simple_reordering_phase__simple_reordering_phase.cpp/20261110T094452.257460Z-R5-host-contract-review-54565fa16d"
+        "migration/reports/evidence/rewrite/R5/cuDSS_simple_reordering_phase__simple_reordering_phase.cpp/20261110T094452.257460Z-R5-host-contract-review-54565fa16d",
+        "migration/reports/evidence/rewrite/R5/cuDSS_simple_reordering_phase__simple_reordering_phase.cpp/20261110T101950.027352Z-R5-rocm-contract-repair-17f17216e0"
       ],
       "attempts": [
         {

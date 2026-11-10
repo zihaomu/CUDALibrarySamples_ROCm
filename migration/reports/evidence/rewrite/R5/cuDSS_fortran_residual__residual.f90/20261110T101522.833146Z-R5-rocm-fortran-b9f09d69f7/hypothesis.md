@@ -1,0 +1,1 @@
+Test rocm-fortran for cuDSS/fortran/residual::residual.f90, case repeat. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T101443.321834Z-R5-rocm-build-d38947ff8c.

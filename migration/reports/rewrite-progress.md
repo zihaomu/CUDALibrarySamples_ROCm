@@ -1,6 +1,6 @@
 # MOAT 重写实时进展
 
-更新时间：2026-11-10T10:05:43.447562+00:00。样例支持结论仍以 samples.yaml 为准。
+更新时间：2026-11-10T10:21:43.557520+00:00。样例支持结论仍以 samples.yaml 为准。
 
 | 批次 / 样例 | AMD 已运行 / CPU通过 | CUDA 已运行 / CPU通过 | 当前验收结论 |
 | --- | ---: | ---: | --- |
@@ -15,7 +15,7 @@
 
 反向检查：27/27；原生与兼容 CUDA 数学对照分别登记。
 
-当前全项目状态：221 PASSED、393 FAILED、23 PARTIAL、2 UNSUPPORTED。
+当前全项目状态：221 PASSED、385 FAILED、31 PARTIAL、2 UNSUPPORTED。
 
 日志：[实验事件索引](rewrite-experiments.jsonl)；[AMD运行](rewrite-first-rocm.json)；[独立CPU验收](rewrite-first-rocm-validation.json)；[CUDA运行](rewrite-first-cuda.json)。
 
