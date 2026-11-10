@@ -22,7 +22,7 @@ class SparseBindingQualification(unittest.TestCase):
    return value
   self.assertFalse(next(c['passed'] for c in self.checks(mutate) if c['check']=='fortran/batch/changed-values/AMD-frozen-case'))
  def test_unique_fault_lists(self):
-  for target,gate in [('rewrite-sparse-binding-negative.json','fourteen-unique-output-faults'),('rewrite-sparse-binding-runtime.json','eight-unique-Fortran-runtime-rejections')]:
+  for target,gate in [('rewrite-sparse-binding-negative.json','seventeen-unique-output-faults'),('rewrite-sparse-binding-runtime.json','eight-unique-Fortran-runtime-rejections')]:
    def mutate(name,value):
     if name==target:value['tests']=[copy.deepcopy(value['tests'][0]) for _ in value['tests']]
     return value

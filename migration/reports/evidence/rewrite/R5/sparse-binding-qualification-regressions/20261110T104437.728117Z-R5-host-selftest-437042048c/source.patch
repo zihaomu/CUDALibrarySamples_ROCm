@@ -1,0 +1,140 @@
+diff --git a/tools/moat/cuda_uniform_binding.hpp b/tools/moat/cuda_uniform_binding.hpp
+index a15187d5..b7ab93c1 100644
+--- a/tools/moat/cuda_uniform_binding.hpp
++++ b/tools/moat/cuda_uniform_binding.hpp
+@@ -5,6 +5,6 @@ inline void native_uniform_selected(){
+  const char*path=std::getenv("REWRITE_INPUT");std::ifstream cfg(std::string(path)+"/config.txt");std::string kind;int count;cfg>>kind>>count;if(kind!="uniform_batch"||count!=2)throw std::runtime_error("uniform profile");
+  int n,nnz,nrhs,ldb,ldx,base,typ,reorder;cfg>>n>>nnz>>nrhs>>ldb>>ldx>>base>>typ>>reorder;
+  auto rows=rewrite::read<int>("b0_rows",n+1),columns=rewrite::read<int>("b0_columns",nnz);auto v0=rewrite::read<double>("b0_values",nnz),v1=rewrite::read<double>("b1_values",nnz),b0=rewrite::read<double>("b0_B",ldb*nrhs),b1=rewrite::read<double>("b1_B",ldb*nrhs),x0=rewrite::read<double>("b0_X",ldx*nrhs),x1=rewrite::read<double>("b1_X",ldx*nrhs);v0.insert(v0.end(),v1.begin(),v1.end());b0.insert(b0.end(),b1.begin(),b1.end());x0.insert(x0.end(),x1.begin(),x1.end());
+- rewrite::Buffer<int>dr(rows),dc(columns);rewrite::Buffer<double>dv(v0),db(b0),dx(x0);cudssHandle_t h;cudssConfig_t conf;cudssData_t data;cudssMatrix_t a,b,x;RW_CHECK(cudssCreate(&h));RW_CHECK(cudssConfigCreate(&conf));RW_CHECK(cudssDataCreate(h,&data));RW_CHECK(cudssMatrixCreateCsr(&a,n,n,nnz,dr.p,nullptr,dc.p,dv.p,CUDA_R_32I,CUDA_R_32I,CUDA_R_64F,CUDSS_MTYPE_SPD,CUDSS_MVIEW_UPPER,base?CUDSS_BASE_ONE:CUDSS_BASE_ZERO));RW_CHECK(cudssMatrixCreateDn(&b,n,nrhs,ldb,db.p,CUDA_R_64F,CUDSS_LAYOUT_COL_MAJOR));RW_CHECK(cudssMatrixCreateDn(&x,n,nrhs,ldx,dx.p,CUDA_R_64F,CUDSS_LAYOUT_COL_MAJOR));RW_CHECK(cudssConfigSet(conf,CUDSS_CONFIG_UBATCH_SIZE,&count,sizeof(count)));RW_CHECK(cudssExecute(h,CUDSS_PHASE_ANALYSIS,conf,data,a,x,b));RW_CHECK(cudssExecute(h,CUDSS_PHASE_FACTORIZATION,conf,data,a,x,b));rewrite::sync();int first=0;size_t bytes=0;RW_CHECK(cudssDataGet(h,data,CUDSS_DATA_INFO,&first,sizeof(first),&bytes));if(first)throw std::runtime_error("uniform initial factor info");RW_CHECK(cudssExecute(h,CUDSS_PHASE_SOLVE,conf,data,a,x,b));rewrite::sync();auto initial=dx.get();rewrite::emit("uniform_initial_X",initial);
+- int index=1;RW_CHECK(cudssConfigSet(conf,CUDSS_CONFIG_UBATCH_INDEX,&index,sizeof(index)));RW_CHECK(cudssMatrixSetValues(a,dv.p+nnz));RW_CHECK(cudssMatrixSetValues(b,db.p+ldb*nrhs));RW_CHECK(cudssExecute(h,CUDSS_PHASE_FACTORIZATION,conf,data,a,x,b));rewrite::sync();int selected=0;RW_CHECK(cudssDataGet(h,data,CUDSS_DATA_INFO,&selected,sizeof(selected),&bytes));if(selected)throw std::runtime_error("selected factor info");RW_CHECK(cudssExecute(h,CUDSS_PHASE_SOLVE,conf,data,a,x,b));rewrite::sync();auto final=dx.get();rewrite::emit("uniform_final_X",final);rewrite::emit("uniform_selected_solution",std::vector<double>(final.begin(),final.begin()+ldx*nrhs));rewrite::emit("uniform_selection",std::vector<int>{1,0,2});rewrite::emit("uniform_native_info",std::vector<int>{first,selected});RW_CHECK(cudssMatrixDestroy(a));RW_CHECK(cudssMatrixDestroy(b));RW_CHECK(cudssMatrixDestroy(x));RW_CHECK(cudssDataDestroy(h,data));RW_CHECK(cudssConfigDestroy(conf));RW_CHECK(cudssDestroy(h));
++ rewrite::Buffer<int>dr(rows),dc(columns);rewrite::Buffer<double>dv(v0),db(b0),dx(x0);cudssHandle_t h;cudssConfig_t conf;cudssData_t data;cudssMatrix_t a,b,x;RW_CHECK(cudssCreate(&h));RW_CHECK(cudssConfigCreate(&conf));RW_CHECK(cudssDataCreate(h,&data));RW_CHECK(cudssMatrixCreateCsr(&a,n,n,nnz,dr.p,nullptr,dc.p,dv.p,CUDA_R_32I,CUDA_R_32I,CUDA_R_64F,CUDSS_MTYPE_SPD,CUDSS_MVIEW_UPPER,base?CUDSS_BASE_ONE:CUDSS_BASE_ZERO));RW_CHECK(cudssMatrixCreateDn(&b,n,nrhs,ldb,db.p,CUDA_R_64F,CUDSS_LAYOUT_COL_MAJOR));RW_CHECK(cudssMatrixCreateDn(&x,n,nrhs,ldx,dx.p,CUDA_R_64F,CUDSS_LAYOUT_COL_MAJOR));RW_CHECK(cudssConfigSet(conf,CUDSS_CONFIG_UBATCH_SIZE,&count,sizeof(count)));RW_CHECK(cudssExecute(h,CUDSS_PHASE_ANALYSIS,conf,data,a,x,b));RW_CHECK(cudssExecute(h,CUDSS_PHASE_FACTORIZATION,conf,data,a,x,b));rewrite::sync();int first=0;size_t bytes=0;RW_CHECK(cudssDataGet(h,data,CUDSS_DATA_INFO,&first,sizeof(first),&bytes));if(first)throw std::runtime_error("uniform initial factor info");RW_CHECK(cudssExecute(h,CUDSS_PHASE_SOLVE,conf,data,a,x,b));rewrite::sync();auto initial=dx.get();rewrite::emit("uniform_initial_X",initial);rewrite::emit("uniform_initial_B_after",db.get());rewrite::emit("uniform_initial_values_after",dv.get());
++ int index=1;RW_CHECK(cudssConfigSet(conf,CUDSS_CONFIG_UBATCH_INDEX,&index,sizeof(index)));RW_CHECK(cudssMatrixSetValues(a,dv.p+nnz));RW_CHECK(cudssMatrixSetValues(b,db.p+ldb*nrhs));RW_CHECK(cudssExecute(h,CUDSS_PHASE_FACTORIZATION,conf,data,a,x,b));rewrite::sync();int selected=0;RW_CHECK(cudssDataGet(h,data,CUDSS_DATA_INFO,&selected,sizeof(selected),&bytes));if(selected)throw std::runtime_error("selected factor info");RW_CHECK(cudssExecute(h,CUDSS_PHASE_SOLVE,conf,data,a,x,b));rewrite::sync();auto final=dx.get();rewrite::emit("uniform_selected_B_after",db.get());rewrite::emit("uniform_selected_values_after",dv.get());rewrite::emit("uniform_final_X",final);rewrite::emit("uniform_selected_solution",std::vector<double>(final.begin(),final.begin()+ldx*nrhs));rewrite::emit("uniform_selection",std::vector<int>{1,0,2});rewrite::emit("uniform_native_info",std::vector<int>{first,selected});RW_CHECK(cudssMatrixDestroy(a));RW_CHECK(cudssMatrixDestroy(b));RW_CHECK(cudssMatrixDestroy(x));RW_CHECK(cudssDataDestroy(h,data));RW_CHECK(cudssConfigDestroy(conf));RW_CHECK(cudssDestroy(h));
+ }
+diff --git a/tools/moat/qualify_sparse_bindings.py b/tools/moat/qualify_sparse_bindings.py
+index 39db34b2..88ea0c9d 100644
+--- a/tools/moat/qualify_sparse_bindings.py
++++ b/tools/moat/qualify_sparse_bindings.py
+@@ -29,14 +29,20 @@ def collect():
+   import shlex,tarfile,hashlib
+   names=['tools/moat/cuda_sparse_bindings.py','tools/moat/cuda_sparse_binding_reference.cu','tools/moat/cuda_uniform_binding.hpp','rocm/common/rewrite_runtime.hpp'];directory,raw,meta=evidence(native_build['evidence'],sources=names,backend='cuda-build',sample='sparse-binding-native-cuDSS',outcome='EXECUTED');commands=read(directory/'commands.json');cmd=next(c for c in commands if c['phase']=='native-build');argv=shlex.split(cmd['argv'][2]);remote='/tmp/'+meta['experiment_id']
+   if meta['experiment_id']!=native_build['experiment_id'] or native_build['remote']!=remote or not all(c['return_code']==0 for c in commands) or cmd['argv'][:2]!=['ssh','nvidia-5090x2'] or argv[0]!='/usr/local/cuda-13.4/bin/nvcc' or remote+'/tools/moat/cuda_sparse_binding_reference.cu' not in argv or argv[-2:]!=['-o',remote+'/reference']:return False
+-  with tarfile.open(raw/'native.tar.gz') as archive:
+-   for name in names:
+-    if hashlib.sha256(archive.extractfile(name).read()).hexdigest()!=digest(ROOT/name):return False
+-   sdk=read(directory/'sdk-identity.json')
+-   for name,sha in sdk['headers'].items():
+-    if hashlib.sha256(archive.extractfile('sdk/include/'+name).read()).hexdigest()!=sha:return False
+-   if hashlib.sha256(archive.extractfile('sdk/lib/'+sdk['library']['name']).read()).hexdigest()!=sdk['library']['sha256']:return False
+-  return True
++  expected={name:digest(ROOT/name) for name in names};sdk=read(directory/'sdk-identity.json');expected.update({'sdk/include/'+name:sha for name,sha in sdk['headers'].items()});expected['sdk/lib/'+sdk['library']['name']]=sdk['library']['sha256']
++  for kind in KINDS:
++   p=next(p for p in profiles if p['kind']==kind)
++   for case in CASES:
++    mf=fixture(ROOT/p['fixture_root']/case,kind='sparse-binding',case=case)
++    for name in ['manifest.json']+list(mf['files']):expected['inputs/'+kind+'/'+case+'/'+name]=digest(ROOT/p['fixture_root']/case/name)
++  seen=set()
++  # Stream gzip once: random extraction would repeatedly decompress the SDK.
++  with tarfile.open(raw/'native.tar.gz','r|gz') as archive:
++   for member in archive:
++    if member.name in expected:
++     if member.name in seen or hashlib.file_digest(archive.extractfile(member),'sha256').hexdigest()!=expected[member.name]:return False
++     seen.add(member.name)
++  return seen==set(expected)
+  gate('current-native-cuDSS-build',guarded(native_build_identity));refs.append(native_build['evidence'])
+  for p in profiles:
+   sid=p['sample_id'];tag=p['language']+'/'+p['kind'];gate(tag+'/seven-fixed-cases',len(p['cases'])==7 and set(p['cases'])==CASES);gate(tag+'/unchanged-original',digest(ROOT/p['source'])==p['original_sha256']);binary=next(b for b in build['binaries'] if b['sample_id']==sid);gate(tag+'/current-actual-Fortran-binary',digest(ROOT/binary['binary'])==binary['binary_sha256'] and digest(ROOT/p['implementation'])==binary['implementation_sha256'])
+@@ -56,9 +62,9 @@ def collect():
+  def native_failure():
+   directory,raw,meta=evidence(observation['evidence'],sources=['tools/moat/observe_sparse_native_failure.py','tools/moat/cuda_sparse_binding_reference.cu'],parent=native['experiment_id'],case='singular-info',backend='cpu-native-failure-observation',sample=native['sample_id'],comparison=native['comparison_id'],outcome='OBSERVED',check_names=observation_names);fixture(raw/'inputs',native['input_manifest_sha256'],'sparse-binding','singular-info');return observation['run']==native and observation['numeric_baseline_passed'] is False and observation['observation_valid'] is True and read(directory/'observation.json')=={k:v for k,v in observation.items() if k not in ['run','evidence']}
+  gate('synchronized-native-GENERAL-failure-never-a-numeric-pass',guarded(native_failure));refs.append(observation['evidence'])
+- modes={'solution','padding','permutation','query-byte-count','missing-solve-phase','factor-values','RHS-mutated','info','trailing-byte','truncated-Fortran-X','application-residual','selected-index','retained-factor','selected-output'};negative=load('rewrite-sparse-binding-negative.json')['tests'];gate('fourteen-unique-output-faults',len(negative)==len(modes) and {r['mode'] for r in negative}==modes)
++ modes={'solution','padding','permutation','query-byte-count','missing-solve-phase','factor-values','RHS-mutated','info','trailing-byte','truncated-Fortran-X','application-residual','selected-index','retained-factor','selected-output','native-coupled-padding','native-UBATCH-RHS','native-UBATCH-values'};negative=load('rewrite-sparse-binding-negative.json')['tests'];gate('seventeen-unique-output-faults',len(negative)==len(modes) and {r['mode'] for r in negative}==modes)
+  for r in negative:
+-  parent=amd['cuDSS/fortran/uniform_batch::uniform_batch.f90/layout' if r['mode'] in ['selected-index','retained-factor','selected-output'] else 'cuDSS/fortran/residual::residual.f90/layout'];gate('negative/'+r['mode'],r['passed'] and proof(r['evidence'],sources=['tools/moat/sparse_binding_negative.py','tools/moat/sparse_binding_reference.py'],parent=parent['experiment_id'],comparison=parent['comparison_id'],backend='cpu-negative',case='layout',outcome='PASSED',check_names={r['mode']}))
++  backend='cuda' if r['mode'].startswith('native-') else 'rocm';parent=cuda['uniform_batch/layout'] if backend=='cuda' else amd['cuDSS/fortran/uniform_batch::uniform_batch.f90/layout' if r['mode'] in ['selected-index','retained-factor','selected-output'] else 'cuDSS/fortran/residual::residual.f90/layout'];gate('negative/'+r['mode'],r['passed'] and r['validation_backend']==backend and proof(r['evidence'],sources=['tools/moat/sparse_binding_negative.py','tools/moat/sparse_binding_reference.py'],parent=parent['experiment_id'],comparison=parent['comparison_id'],backend='cpu-negative-native' if backend=='cuda' else 'cpu-negative',case='layout',outcome='PASSED',check_names={r['mode']}))
+  tests={'CSR-endpoint','CSR-column-range','CSR-column-order','index-base','matrix-type','leading-dimension','uniform-pattern','nonfinite-RHS'};runtime=load('rewrite-sparse-binding-runtime.json')['tests'];gate('eight-unique-Fortran-runtime-rejections',len(runtime)==len(tests) and {r['test'] for r in runtime}==tests)
+  for r in runtime:gate('runtime/'+r['test'],r['passed'] and proof(r['evidence'],sources=['tools/moat/sparse_binding_runtime.py',spec['core'],'rocm/adapters/fortran/sparse_samples.f90'],parent=build['experiment_id'],backend='rocm-invalid-descriptor',outcome='EXPECTED_REJECTION',check_names={r['test']}))
+  abi=load('rewrite-sparse-binding-abi.json');abi_names={'C-widths','create','solve-before-analysis-rejected','query','bad-stride-rejected','solve','destroy','double-destroy-rejected','stale-handle-rejected','null-handle-rejected','set-values-requires-retained-factor','updated-value-shape-rejected','selected-values-reuse'};gate('actual-C-ABI-phase-width-and-lifetime',abi['status']=='PASSED' and proof(abi['evidence'],sources=['tools/moat/sparse_binding_abi.py',spec['core']],parent=build['experiment_id'],backend='rocm-ABI',outcome='PASSED',check_names=abi_names))
+@@ -74,7 +80,7 @@ def main():
+   if not ok:raise SystemExit('Qualification refused: '+str([c['check'] for c in checks if not c['passed']]))
+   cat=read(ROOT/'migration/samples.yaml');qualified=[]
+   for p in profiles:
+-   s=next(s for s in cat['samples'] if s['id']==p['sample_id']);e=Experiment('R5',p['sample_id'],'composite-qualification',sources=[__file__,ROOT/'tools/moat/qualification_common.py',ROOT/'migration/reports/rewrite-R5-review.json']);r=dict(sample_id=p['sample_id'],status='PASSED',kind='sparse-binding',implementation=p['implementation'],implementation_sha256=digest(ROOT/p['implementation']),dependencies=dict(build['dependencies'],**{p['implementation']:digest(ROOT/p['implementation'])}),checks=checks,case_count=7,case_ids=p['cases'],source_commit=report['source_commit'],scope=p['route']);write(e.path/'qualification.json',r);r.update(qualification_id=e.id,evidence=e.finish('PASSED',dict(checks=checks)));run=load('rewrite-sparse-binding-rocm.json')[p['sample_id']+'/original'];r.update(rocm_evidence=run['evidence'],cuda_evidence=load('rewrite-sparse-binding-cuda.json')[p['kind']+'/original']['evidence'],environment=read(ROOT/run['evidence']/'backend.observed.json'));r['devices']=r['environment']['devices'];cases=['rewrite/R5/'+case for case in p['cases']]+['rewrite/R5/negative','rewrite/R5/runtime','rewrite/R5/C-ABI','rewrite/R5/GPU-trace','rewrite/R5/review'];s.update(status='PASSED',level='L4',required_cases=cases,passed_cases=cases,selected_validation=r,reason_code='VALIDATED_MOAT_REWRITE',reason='标准Fortran ISO_C_BINDING真实入口；CPU符号分析+HIP CSR pivot LU/solve，6数值场景通过独立FP64与同输入native cuDSS；奇异info单列（GENERAL native经同步仍info0/NaN，是原生数值失败，非通过基线）。排列实际用于factor/solve、leading dimensions/padding、14注入/8运行边界、C ABI生命周期及GPU轨迹与独立复核通过。nvfortran来源改写为标准Fortran，不声称NVIDIA编译器或内部排列等价。',equivalence='ALGORITHM_REWRITE_WITH_STANDARD_FORTRAN_C_ABI',cuda_baseline='BLOCKED',cuda_comparison='PASSED',cuda_comparison_reason='真实CUDA C++ cuDSS核心使用相同冻结Fortran数组；CUDA主机缺少Fortran编译器及vendor module，原语言原生基线仍BLOCKED。');s['attempts'].append(r);s['evidence'] += [r['evidence'],'migration/reports/rewrite-R5-qualification.json'];qualified.append(r)
++   s=next(s for s in cat['samples'] if s['id']==p['sample_id']);e=Experiment('R5',p['sample_id'],'composite-qualification',sources=[__file__,ROOT/'tools/moat/qualification_common.py',ROOT/'migration/reports/rewrite-R5-review.json']);r=dict(sample_id=p['sample_id'],status='PASSED',kind='sparse-binding',implementation=p['implementation'],implementation_sha256=digest(ROOT/p['implementation']),dependencies=dict(build['dependencies'],**{p['implementation']:digest(ROOT/p['implementation'])}),checks=checks,case_count=7,case_ids=p['cases'],source_commit=report['source_commit'],scope=p['route']);write(e.path/'qualification.json',r);r.update(qualification_id=e.id,evidence=e.finish('PASSED',dict(checks=checks)));run=load('rewrite-sparse-binding-rocm.json')[p['sample_id']+'/original'];r.update(rocm_evidence=run['evidence'],cuda_evidence=load('rewrite-sparse-binding-cuda.json')[p['kind']+'/original']['evidence'],environment=read(ROOT/run['evidence']/'backend.observed.json'));r['devices']=r['environment']['devices'];cases=['rewrite/R5/'+case for case in p['cases']]+['rewrite/R5/negative','rewrite/R5/runtime','rewrite/R5/C-ABI','rewrite/R5/GPU-trace','rewrite/R5/review'];s.update(status='PASSED',level='L4',required_cases=cases,passed_cases=cases,selected_validation=r,reason_code='VALIDATED_MOAT_REWRITE',reason='标准Fortran ISO_C_BINDING真实入口；CPU符号分析+HIP CSR pivot LU/solve，6数值场景通过独立FP64与同输入native cuDSS；奇异info单列（GENERAL native经同步仍info0/NaN，是原生数值失败，非通过基线）。排列实际用于factor/solve、leading dimensions/padding、17注入/8运行边界、C ABI生命周期及GPU轨迹与独立复核通过。nvfortran来源改写为标准Fortran，不声称NVIDIA编译器或内部排列等价。',equivalence='ALGORITHM_REWRITE_WITH_STANDARD_FORTRAN_C_ABI',cuda_baseline='BLOCKED',cuda_comparison='PASSED',cuda_comparison_reason='真实CUDA C++ cuDSS核心使用相同冻结Fortran数组；CUDA主机缺少Fortran编译器及vendor module，原语言原生基线仍BLOCKED。');s['attempts'].append(r);s['evidence'] += [r['evidence'],'migration/reports/rewrite-R5-qualification.json'];qualified.append(r)
+   write(ROOT/'migration/samples.yaml',cat);report['qualified_profiles']=qualified
+  write(ROOT/'migration/reports/rewrite-R5-qualification.json',report);print(report['status'],[c['check'] for c in checks if not c['passed']]);return int(not ok)
+ if __name__=='__main__':raise SystemExit(main())
+diff --git a/tools/moat/sparse_binding_negative.py b/tools/moat/sparse_binding_negative.py
+index 6120e6d6..03e20653 100644
+--- a/tools/moat/sparse_binding_negative.py
++++ b/tools/moat/sparse_binding_negative.py
+@@ -3,17 +3,25 @@ import argparse,json,shutil,struct,sys
+ from pathlib import Path
+ from experiment import ROOT,Experiment,write
+ from sparse_binding_reference import validate
+-p=argparse.ArgumentParser();p.add_argument('--single',nargs=3);args=p.parse_args()
++p=argparse.ArgumentParser();p.add_argument('--single',nargs=4);args=p.parse_args()
+ if args.single:
+- src,out,report=args.single
+- try:r=validate(src,out)
++ src,out,report,backend=args.single
++ try:r=validate(src,out,backend)
+  except Exception as error:r=dict(status='FAILED',error=str(error),checks=[dict(check='complete-parse',passed=False)])
+  write(report,r);raise SystemExit(0 if r['status']=='FAILED' else 1)
+-runs=json.loads((ROOT/'migration/reports/rewrite-sparse-binding-rocm.json').read_text());modes=['solution','padding','permutation','query-byte-count','missing-solve-phase','factor-values','RHS-mutated','info','trailing-byte','truncated-Fortran-X','application-residual','selected-index','retained-factor','selected-output'];results=[]
++runs=json.loads((ROOT/'migration/reports/rewrite-sparse-binding-rocm.json').read_text());native=json.loads((ROOT/'migration/reports/rewrite-sparse-binding-cuda.json').read_text());modes=['solution','padding','permutation','query-byte-count','missing-solve-phase','factor-values','RHS-mutated','info','trailing-byte','truncated-Fortran-X','application-residual','selected-index','retained-factor','selected-output','native-coupled-padding','native-UBATCH-RHS','native-UBATCH-values'];results=[]
+ for mode in modes:
+- run=runs['cuDSS/fortran/uniform_batch::uniform_batch.f90/layout' if mode in ['selected-index','retained-factor','selected-output'] else 'cuDSS/fortran/residual::residual.f90/layout']
+- e=Experiment('R5','sparse-binding-negative/'+mode,'cpu-negative',case=run['case'],sources=[__file__,ROOT/'tools/moat/sparse_binding_reference.py'],parent=run['experiment_id'],comparison_id=run['comparison_id']);shutil.copytree(ROOT/run['input_snapshot'],e.path/'inputs');shutil.copytree(ROOT/run['output'],e.path/'outputs');out=e.path/'outputs'
+- if validate(e.path/'inputs',out)['status']!='PASSED':raise RuntimeError('injection needs valid baseline')
++ backend='cuda' if mode.startswith('native-') else 'rocm';run=native['uniform_batch/layout'] if backend=='cuda' else runs['cuDSS/fortran/uniform_batch::uniform_batch.f90/layout' if mode in ['selected-index','retained-factor','selected-output'] else 'cuDSS/fortran/residual::residual.f90/layout']
++ e=Experiment('R5','sparse-binding-negative/'+mode,'cpu-negative-native' if backend=='cuda' else 'cpu-negative',case=run['case'],sources=[__file__,ROOT/'tools/moat/sparse_binding_reference.py'],parent=run['experiment_id'],comparison_id=run['comparison_id']);shutil.copytree(ROOT/run['input_snapshot'],e.path/'inputs');shutil.copytree(ROOT/run['output'],e.path/'outputs');out=e.path/'outputs'
++ if validate(e.path/'inputs',out,backend)['status']!='PASSED':raise RuntimeError('injection needs valid baseline')
++ if backend=='cuda':
++  s=json.loads((e.path/'inputs/manifest.json').read_text())['systems'][0]
++  if mode=='native-coupled-padding':
++   for name in ['uniform_initial_X.bin','uniform_final_X.bin']:
++    path=out/name;data=bytearray(path.read_bytes());struct.pack_into('<d',data,(s['ldx']*s['nrhs']+s['n'])*8,1234567);path.write_bytes(data)
++  else:
++   path=out/('uniform_selected_B_after.bin' if mode=='native-UBATCH-RHS' else 'uniform_initial_values_after.bin');data=bytearray(path.read_bytes());struct.pack_into('<d',data,0,struct.unpack_from('<d',data,0)[0]+1);path.write_bytes(data)
++  report=e.path/'rejection.json';rc=e.command([sys.executable,__file__,'--single',str(e.path/'inputs'),str(out),str(report),backend],'reject-'+mode);row=dict(mode=mode,passed=rc==0,parent_run=run['experiment_id'],validation_backend=backend);row['evidence']=e.finish('PASSED' if rc==0 else 'VALIDATOR_GAP',dict(checks=[dict(check=mode,passed=rc==0)]));results.append(row);print(mode,rc,flush=True);continue
+  field={'solution':'solution','padding':'solution','permutation':'permutation','query-byte-count':'fortran_query_bytes','missing-solve-phase':'phase','factor-values':'factor_values','RHS-mutated':'B_after','info':'info','trailing-byte':'solution','truncated-Fortran-X':'fortran_X','application-residual':'fortran_residual','selected-index':'unused','retained-factor':'unused','selected-output':'unused'}[mode];filename={'selected-index':'selection.bin','retained-factor':'retained_b0_factor_values.bin','selected-output':'selected_solution.bin'}.get(mode,'b0_'+field+'.bin');path=out/filename;data=bytearray(path.read_bytes())
+  if mode in ['solution','padding','factor-values','RHS-mutated','application-residual','retained-factor','selected-output']:
+   offset=5*8 if mode=='padding' else 0;struct.pack_into('<d',data,offset,struct.unpack_from('<d',data,offset)[0]+1)
+@@ -24,5 +32,5 @@ for mode in modes:
+  elif mode=='info':struct.pack_into('<i',data,0,1)
+  elif mode=='selected-index':struct.pack_into('<i',data,0,0)
+  else:struct.pack_into('<i',data,0,-1)
+- path.write_bytes(data);rc=e.command([sys.executable,__file__,'--single',str(e.path/'inputs'),str(out),str(e.path/'rejection.json')],'reject-'+mode);row=dict(mode=mode,passed=rc==0,parent_run=run['experiment_id']);row['evidence']=e.finish('PASSED' if rc==0 else 'VALIDATOR_GAP',dict(checks=[dict(check=mode,passed=rc==0)]));results.append(row);print(mode,rc,flush=True)
++ path.write_bytes(data);rc=e.command([sys.executable,__file__,'--single',str(e.path/'inputs'),str(out),str(e.path/'rejection.json'),backend],'reject-'+mode);row=dict(mode=mode,passed=rc==0,parent_run=run['experiment_id'],validation_backend=backend);row['evidence']=e.finish('PASSED' if rc==0 else 'VALIDATOR_GAP',dict(checks=[dict(check=mode,passed=rc==0)]));results.append(row);print(mode,rc,flush=True)
+ write(ROOT/'migration/reports/rewrite-sparse-binding-negative.json',dict(tests=results,status='PASSED' if all(r['passed'] for r in results) else 'FAILED'))
+diff --git a/tools/moat/sparse_binding_reference.py b/tools/moat/sparse_binding_reference.py
+index df95355a..bfb61642 100644
+--- a/tools/moat/sparse_binding_reference.py
++++ b/tools/moat/sparse_binding_reference.py
+@@ -50,6 +50,11 @@ def validate(src,out,backend='rocm'):
+   prefix='selected' if backend=='rocm' else 'uniform_selected';selected=read(out,prefix+'_solution.bin','<f8',nrhs*ldx).reshape(nrhs,ldx);check('uniform/selected-index-one-numerical-solve',np.isfinite(selected).all() and np.allclose(selected[:,:n],np.linalg.solve(a,b[:,:n].T).T,atol=2e-11,rtol=2e-11));final=read(out,'uniform_final_X.bin','<f8',2*nrhs*ldx).reshape(2,nrhs,ldx);before0=read(out,'b0_solution.bin','<f8',nrhs*ldx).reshape(nrhs,ldx);before1=read(out,'b1_solution.bin','<f8',nrhs*ldx).reshape(nrhs,ldx);check('uniform/selected-destination-slot-zero',np.array_equal(final[0],selected));check('uniform/other-output-slot-preserved',np.array_equal(final[1],before1));check('uniform/selected-output-padding',np.array_equal(selected[:,n:],before0[:,n:]));check('uniform/selection-descriptor',np.array_equal(read(out,'selection.bin' if backend=='rocm' else 'uniform_selection.bin','<i4',3),[1,0,2]))
+   if backend=='cuda':
+    initial_uniform=read(out,'uniform_initial_X.bin','<f8',2*nrhs*ldx).reshape(2,nrhs,ldx);check('uniform/native-full-batch-initial-solve',np.allclose(initial_uniform[0,:,:n],before0[:,:n],atol=2e-11,rtol=2e-11) and np.allclose(initial_uniform[1,:,:n],before1[:,:n],atol=2e-11,rtol=2e-11));checks=[c for c in checks if c['check']!='uniform/other-output-slot-preserved'];check('uniform/other-output-slot-preserved',np.array_equal(final[1],initial_uniform[1]))
++   expected_b=np.concatenate([read(src,'b'+str(i)+'_B.bin','<f8',nrhs*ldb) for i in range(2)]);expected_v=np.concatenate([read(src,'b'+str(i)+'_values.bin','<f8',nnz) for i in range(2)])
++   for stage in ['initial','selected']:
++    check('uniform/native-'+stage+'-RHS-unchanged',np.array_equal(read(out,'uniform_'+stage+'_B_after.bin','<f8',2*nrhs*ldb),expected_b));check('uniform/native-'+stage+'-matrix-values-unchanged',np.array_equal(read(out,'uniform_'+stage+'_values_after.bin','<f8',2*nnz),expected_v))
++   for slot in range(2):
++    frozen_x=read(src,'b'+str(slot)+'_X.bin','<f8',nrhs*ldx).reshape(nrhs,ldx);check('uniform/native-initial-padding-'+str(slot),np.array_equal(initial_uniform[slot,:,n:],frozen_x[:,n:]));check('uniform/native-final-padding-'+str(slot),np.array_equal(final[slot,:,n:],frozen_x[:,n:]))
+   if backend=='rocm':
+    check('uniform/actual-Fortran-selected-X',np.array_equal(read(out,'selected_fortran_X.bin','<f8',nrhs*ldx).reshape(nrhs,ldx),selected));check('uniform/selected-refactor-phase',np.array_equal(read(out,'selected_phase.bin','<i4',7),[0,1,2,3,4,2,3]));check('uniform/selected-RHS-pointer',np.array_equal(read(out,'selected_B_after.bin','<f8',nrhs*ldb).reshape(nrhs,ldb),b));check('uniform/selected-output-initial-slot-zero',np.array_equal(read(out,'selected_X_initial.bin','<f8',nrhs*ldx).reshape(nrhs,ldx),before0))
+    stores=[read(out,'b'+str(i)+'_factor_storage.bin','<u8',3) for i in range(2)];check('uniform/distinct-resident-GPU-factors',stores[0][0]>0 and stores[1][0]>0 and stores[0][0]!=stores[1][0] and stores[0][1]!=stores[1][1]);check('uniform/selected-GPU-factor-storage-reused',np.array_equal(read(out,'selected_factor_storage.bin','<u8',3),stores[1]) and np.array_equal(read(out,'retained_b1_factor_storage.bin','<u8',3),stores[1]))
+diff --git a/tools/moat/test_sparse_binding_qualification.py b/tools/moat/test_sparse_binding_qualification.py
+index 06a26d3e..9afb6a82 100644
+--- a/tools/moat/test_sparse_binding_qualification.py
++++ b/tools/moat/test_sparse_binding_qualification.py
+@@ -22,7 +22,7 @@ class SparseBindingQualification(unittest.TestCase):
+    return value
+   self.assertFalse(next(c['passed'] for c in self.checks(mutate) if c['check']=='fortran/batch/changed-values/AMD-frozen-case'))
+  def test_unique_fault_lists(self):
+-  for target,gate in [('rewrite-sparse-binding-negative.json','fourteen-unique-output-faults'),('rewrite-sparse-binding-runtime.json','eight-unique-Fortran-runtime-rejections')]:
++  for target,gate in [('rewrite-sparse-binding-negative.json','seventeen-unique-output-faults'),('rewrite-sparse-binding-runtime.json','eight-unique-Fortran-runtime-rejections')]:
+    def mutate(name,value):
+     if name==target:value['tests']=[copy.deepcopy(value['tests'][0]) for _ in value['tests']]
+     return value

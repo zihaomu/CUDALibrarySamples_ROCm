@@ -1,0 +1,1 @@
+Test cpu-validation for cuDSS/fortran/batch::batch.f90, case repeat. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T103145.294374Z-R5-rocm-fortran-0afeebb11e.

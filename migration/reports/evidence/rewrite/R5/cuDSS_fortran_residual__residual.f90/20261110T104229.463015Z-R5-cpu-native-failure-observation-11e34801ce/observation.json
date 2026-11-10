@@ -1,0 +1,33 @@
+{
+  "status": "OBSERVED_NATIVE_NUMERIC_FAILURE",
+  "observation_valid": true,
+  "numeric_baseline_passed": false,
+  "checks": [
+    {
+      "check": "frozen-GENERAL-singular-input",
+      "passed": true
+    },
+    {
+      "check": "native-info-zero-observed",
+      "passed": true
+    },
+    {
+      "check": "native-factor-and-solve-executed",
+      "passed": true
+    },
+    {
+      "check": "native-nonfinite-active-solution-observed",
+      "passed": true
+    },
+    {
+      "check": "native-padding-preserved",
+      "passed": true
+    },
+    {
+      "check": "native-RHS-preserved",
+      "passed": true
+    }
+  ],
+  "nonfinite_active_count": 8,
+  "reason": "After explicit factor completion synchronization the locked native SDK still returned INFO=0 and nonfinite active X. Observed numerical failure; internal cause is not inferred. HIP rejects the singular input with INFO>0. This extra negative input is not a three-way passing numerical case."
+}

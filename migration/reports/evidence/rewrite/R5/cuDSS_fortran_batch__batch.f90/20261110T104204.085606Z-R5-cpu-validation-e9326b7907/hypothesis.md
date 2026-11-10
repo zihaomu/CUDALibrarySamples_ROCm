@@ -1,0 +1,1 @@
+Test cpu-validation for cuDSS/fortran/batch::batch.f90, case irregular. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T103947.010611Z-R5-cuda-native-e6d3ecff87.
