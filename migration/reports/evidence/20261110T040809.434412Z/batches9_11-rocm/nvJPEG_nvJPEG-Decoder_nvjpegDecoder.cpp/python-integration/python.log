@@ -1,0 +1,28 @@
+test_cli_errors_and_help (__main__.HardwareDecodeTest.test_cli_errors_and_help) ... ok
+test_default_mode_bmp_and_mixed_batch (__main__.HardwareDecodeTest.test_default_mode_bmp_and_mixed_batch) ... ok
+test_default_mode_raw_and_partial_batch (__main__.HardwareDecodeTest.test_default_mode_raw_and_partial_batch) ... FAIL
+test_failures_never_report_pass (__main__.HardwareDecodeTest.test_failures_never_report_pass) ... ok
+test_goldens_repetition_and_mismatch (__main__.HardwareDecodeTest.test_goldens_repetition_and_mismatch) ... ok
+test_grayscale_geometry_and_independent_pixels (__main__.HardwareDecodeTest.test_grayscale_geometry_and_independent_pixels) ... ok
+test_nv12_matches_planar_yuv (__main__.HardwareDecodeTest.test_nv12_matches_planar_yuv) ... ok
+test_recursive_paths_and_exact_counts (__main__.HardwareDecodeTest.test_recursive_paths_and_exact_counts) ... ok
+test_rgb_interleaving_and_luma (__main__.HardwareDecodeTest.test_rgb_interleaving_and_luma) ... ok
+test_yuy2_matches_planar_yuv_with_odd_width (__main__.HardwareDecodeTest.test_yuy2_matches_planar_yuv_with_odd_width) ... ok
+
+======================================================================
+FAIL: test_default_mode_raw_and_partial_batch (__main__.HardwareDecodeTest.test_default_mode_raw_and_partial_batch)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG/nvJPEG-Decoder/tests/test_decoder.py", line 152, in test_default_mode_raw_and_partial_batch
+    log = self.invoke("-backend", "default", "-i", self.inputs / "420.jpg",
+                      "-fmt", "nv12", "-b", 2, "-t", 3, "-reference", self.root / "out")
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG/nvJPEG-Decoder/tests/test_decoder.py", line 38, in invoke
+    self.assertEqual(result.returncode, code, log)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 4 != 0 : RESULT status=FAIL reason=golden pixel mismatch
+
+
+----------------------------------------------------------------------
+Ran 10 tests in 9.941s
+
+FAILED (failures=1)

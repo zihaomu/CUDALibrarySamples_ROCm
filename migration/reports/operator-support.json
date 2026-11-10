@@ -2,9 +2,9 @@
   "schema_version": 1,
   "counting_rule": "Operator/functional families are deduplicated within each module; dtypes, sizes, language, batch, storage formats and algorithm variants do not create extra operators. At least one explicitly scoped PASSED source profile is required. Cross-module totals may include the same mathematical operation implemented through different library interfaces.",
   "qualification_rule": "A verified family proves only its linked PASSED source profiles/required cases, not every API configuration. PARTIAL examples and capability probes are excluded.",
-  "verified_operator_families": 99,
-  "modules_with_verified_operators": 9,
-  "passed_source_profiles": 192,
+  "verified_operator_families": 102,
+  "modules_with_verified_operators": 10,
+  "passed_source_profiles": 202,
   "modules": {
     "cuBLAS": {
       "verified_operator_family_count": 52,
@@ -621,32 +621,49 @@
       }
     },
     "cuDSS": {
-      "verified_operator_family_count": 1,
+      "verified_operator_family_count": 2,
       "verified_operators": [
         {
-          "name": "稀疏 SPD 直接求解",
+          "name": "稀疏直接求解",
           "sample_ids": [
             "cuDSS/fortran/simple::simple.f90",
             "cuDSS/nvfortran/simple::simple.cuf",
-            "cuDSS/simple::simple.cpp"
+            "cuDSS/simple::simple.cpp",
+            "cuDSS/simple_batch::simple_batch.cpp",
+            "cuDSS/simple_residual::simple_residual.cpp",
+            "cuDSS/simple_uniform_batch::simple_uniform_batch.cpp"
           ],
           "sample_reports": [
             "migration/sample-reports/cuDSS/fortran/simple/simple.f90.md",
             "migration/sample-reports/cuDSS/nvfortran/simple/simple.cuf.md",
-            "migration/sample-reports/cuDSS/simple/simple.cpp.md"
+            "migration/sample-reports/cuDSS/simple/simple.cpp.md",
+            "migration/sample-reports/cuDSS/simple_batch/simple_batch.cpp.md",
+            "migration/sample-reports/cuDSS/simple_residual/simple_residual.cpp.md",
+            "migration/sample-reports/cuDSS/simple_uniform_batch/simple_uniform_batch.cpp.md"
           ],
-          "source_profiles": 3
+          "source_profiles": 6
+        },
+        {
+          "name": "稀疏重排序分析",
+          "sample_ids": [
+            "cuDSS/simple_reordering_phase::simple_reordering_phase.cpp"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuDSS/simple_reordering_phase/simple_reordering_phase.cpp.md"
+          ],
+          "source_profiles": 1
         }
       ],
       "sample_count": 59,
       "sample_outcomes": {
-        "FAILED": 56,
-        "PASSED": 3
+        "FAILED": 51,
+        "PASSED": 7,
+        "PARTIAL": 1
       },
-      "validation_scope": "原始 FP64 5×5 SPD/CSR：C++、Fortran、CUDA Fortran 改写共 3 入口；CPU 稀疏符号分析 + GPU CSRRF 数值分解/求解。",
+      "validation_scope": "FP64 CSR：原始simple三语言、异构/均匀batch、analysis-only、1000阶GENERAL/双RHS残差；CPU稀疏符号/matching + rocSOLVER CSRRF或项目HIP CSR pivot LU。get_set仅部分配置/查询验收；大例固定pivot、小例分量CSR fill，未外推任意大规模动态pivot。",
       "failure_reason_counts": {
         "BINDING_OR_FRONTEND_MIGRATION_REQUIRED": 34,
-        "BUILD_ERROR": 22
+        "BUILD_ERROR": 17
       }
     },
     "cuEST": {
@@ -1506,14 +1523,12 @@
       "verified_operators": [],
       "sample_count": 7,
       "sample_outcomes": {
-        "FAILED": 5,
-        "BLOCKED": 1,
-        "PARTIAL": 1
+        "PARTIAL": 6,
+        "FAILED": 1
       },
       "validation_scope": "尚无通过整例验收的算子族。",
       "failure_reason_counts": {
-        "BUILD_ERROR": 5,
-        "ENV_MISSING_DEP": 1
+        "BUILD_ERROR": 1
       }
     },
     "nvJPEG2000": {
@@ -1541,16 +1556,46 @@
       }
     },
     "nvCOMP": {
-      "verified_operator_family_count": 0,
-      "verified_operators": [],
+      "verified_operator_family_count": 2,
+      "verified_operators": [
+        {
+          "name": "LZ4",
+          "sample_ids": [
+            "nvCOMP/examples::high_level_quickstart_example.cpp",
+            "nvCOMP/examples::low_level_quickstart_example.cpp",
+            "nvCOMP/examples::lz4_cpu_compression.cu",
+            "nvCOMP/examples::lz4_cpu_decompression.cu"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/nvCOMP/examples/high_level_quickstart_example.cpp.md",
+            "migration/sample-reports/nvCOMP/examples/low_level_quickstart_example.cpp.md",
+            "migration/sample-reports/nvCOMP/examples/lz4_cpu_compression.cu.md",
+            "migration/sample-reports/nvCOMP/examples/lz4_cpu_decompression.cu.md"
+          ],
+          "source_profiles": 4
+        },
+        {
+          "name": "Snappy",
+          "sample_ids": [
+            "nvCOMP/examples::snappy_cpu_compression.cu",
+            "nvCOMP/examples::snappy_cpu_decompression.cu"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/nvCOMP/examples/snappy_cpu_compression.cu.md",
+            "migration/sample-reports/nvCOMP/examples/snappy_cpu_decompression.cu.md"
+          ],
+          "source_profiles": 2
+        }
+      ],
       "sample_count": 32,
       "sample_outcomes": {
-        "FAILED": 31,
-        "PARTIAL": 1
+        "FAILED": 24,
+        "PARTIAL": 2,
+        "PASSED": 6
       },
-      "validation_scope": "尚无通过整例验收的算子族。",
+      "validation_scope": "hipCOMP LZ4/Snappy原生批处理；CPU↔GPU与hipCOMP↔nvCOMP双向互解、逐chunk status/实际长度、空/边界/损坏流；LZ4 native manager/factory +项目CRC32C及100 raw buffers。完整NVBENCH框架仍单列PARTIAL。",
       "failure_reason_counts": {
-        "BUILD_ERROR": 30,
+        "BUILD_ERROR": 23,
         "BINDING_OR_FRONTEND_MIGRATION_REQUIRED": 1
       }
     },

@@ -15,51 +15,6 @@
  * limitations under the License.
  */
 
-#include "benchmark_template_chunked.cuh"
-#include "hipcomp.h"
-
-NVBENCH_REGISTER_CRITERION(total_time_criterion);
-
-const std::vector<parameter_type> custom_params;
-
-template <bool DO_COMPRESSION>
-void run_benchmark(nvbench::state &state)
-{
-  if constexpr (DO_COMPRESSION)
-  {
-    run_compression(
-      hipcompBatchedSnappyCompressGetTempSize,
-      nvcompBatchedSnappyCompressGetTempSizeSync,
-      hipcompBatchedSnappyCompressGetMaxOutputChunkSize,
-      hipcompBatchedSnappyCompressAsync,
-      nvcompBatchedSnappyCompressGetRequiredAlignments,
-      inputAlwaysValid,
-      nvcompBatchedSnappyCompressDefaultOpts,
-      nvcompBatchedSnappyDecompressDefaultOpts,
-      state
-    );
-  }
-  else
-  {
-    run_decompression(
-      hipcompBatchedSnappyDecompressGetTempSize,
-      nvcompBatchedSnappyDecompressGetTempSizeSync,
-      hipcompBatchedSnappyDecompressAsync,
-      hipcompBatchedSnappyGetDecompressSizeAsync,
-      nvcompBatchedSnappyDecompressGetRequiredAlignments,
-      nvcompBatchedSnappyDecompressDefaultOpts,
-      state
-    );
-  }
-}
-
-static void run_benchmark_compress(nvbench::state &state) { run_benchmark<true>(state); }
-static void run_benchmark_decompress(nvbench::state &state) { run_benchmark<false>(state); }
-NVBENCH_BENCH(run_benchmark_compress)
-  .set_name("Snappy Chunked Compression")
-  .set_stopping_criterion("total-time-criterion")
-  .set_timeout(30.0);
-NVBENCH_BENCH(run_benchmark_decompress)
-  .set_name("Snappy Chunked Decompression")
-  .set_stopping_criterion("total-time-criterion")
-  .set_timeout(30.0);
+// MIGRATION_BATCH9: native codec batch with explicit CPU/GPU stage and manager adaptation.
+#include "batch9_codec.hpp"
+int main(int argc,char**argv){return migration_batch::codec9_main("benchmark_snappy_chunked",argc,argv);}

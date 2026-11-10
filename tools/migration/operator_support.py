@@ -12,8 +12,9 @@ def operator_name(sample):
    normalized=re.sub(r'(stridedbatched|groupedbatched|batched|autotuning|3m|ex)$','',kind)
    if normalized==kind:return kind
    kind=normalized
+ if family=='nvCOMP':return 'Snappy' if 'snappy' in path.name.lower() else 'LZ4'
  if family=='cuBLASLt':return 'GEMM'
- if family=='cuDSS':return '稀疏 SPD 直接求解'
+ if family=='cuDSS':return '稀疏重排序分析' if kind=='simple_reordering_phase' else '稀疏直接求解'
  if family=='cuFFT':
   if 'callback' in sample['source']:return 'FFT 窗口过滤 callback'
   return 'R2C/C2R 实数 FFT' if 'r2c' in sample['source'] or 'c2r' in sample['source'] else 'C2C 复数 FFT'
@@ -35,7 +36,7 @@ def operator_name(sample):
 SCOPES={
  'cuBLAS':'固定教学输入与所列扩展 cases；第二批含并列/空索引、旋转 flags、batch/grouped 和正负 alpha；rotmg 极端缩放使用明确登记的 HIP 修正。其它精度/API 仍逐例管理。',
  'cuBLASLt':'3 个 profile：FP32 SGEMM、HSH FP16 input/output + FP32 compute 的 pointer-array 与 strided batch。',
- 'cuDSS':'原始 FP64 5×5 SPD/CSR：C++、Fortran、CUDA Fortran 改写共 3 入口；CPU 稀疏符号分析 + GPU CSRRF 数值分解/求解。',
+ 'cuDSS':'FP64 CSR：原始simple三语言、异构/均匀batch、analysis-only、1000阶GENERAL/双RHS残差；CPU稀疏符号/matching + rocSOLVER CSRRF或项目HIP CSR pivot LU。get_set仅部分配置/查询验收；大例固定pivot、小例分量CSR fill，未外推任意大规模动态pivot。',
  'cuFFT':'10 个 profile：原始单卡/双卡 C2C、实数正逆变换和 legacy/离线 SPIR-V/HIPRTC callback。1D 多卡使用 hipFFT + RCCL + HIP。',
  'cuPQC':'SHA-256 单线程与 SHA3-256 的 32-lane 协作 GPU kernel；各 14 输入与 hashlib 精确一致，PQC 其它算法未实现。',
  'cuRAND':'4 种分布 × 9 个 generator = 36 个 profile；原始参数、库内重复性和解析分布矩通过，跨库不要求逐位同序列。',
@@ -44,6 +45,7 @@ SCOPES={
  'cuTENSOR':'FP32：contraction 用 rocBLAS + HIP；其它已通过的逐元素/permutation/reduction 使用 hipTensor。逐例记录原始 extents 与扩展小尺寸、全部输出 CPU 检查；contraction 的原始规模另为抽样验收。'}
 
 SCOPES.update({
+ 'nvCOMP':'hipCOMP LZ4/Snappy原生批处理；CPU↔GPU与hipCOMP↔nvCOMP双向互解、逐chunk status/实际长度、空/边界/损坏流；LZ4 native manager/factory +项目CRC32C及100 raw buffers。完整NVBENCH框架仍单列PARTIAL。',
  'cuBLAS':'固定教学profile与所列扩展cases；含复杂rank-k类型化适配、HIP GPU packed转换、FP32分组batched及FP64项目策略调优。rotmg极端缩放使用HIP修正；调优/批量变体按同一数学族去重。',
  'cuBLASLt':'6个profile：原FP32 SGEMM、HSH pointer-array/strided batch，以及B7 HSH grouped分发与SGEMM custom-find/autotune。FP16输入/输出、FP32累加、bias、候选全输出、workspace=0及所选方案重放通过；分发适配不等于原生device-grouped API。',
  'cuSOLVER':'原始FP64教学矩阵；status/info、全量分解/重构、残差、正交性、未排序配对及实际meig检查。B6增加64位LU/三角求逆；SVD/eigen typed接口显式INT_MAX限制。',
@@ -69,8 +71,8 @@ def render_overview(report,prefix=''):
   if not row['verified_operator_family_count']:continue
   names='、'.join('`'+v['name']+'`' for v in row['verified_operators']);text+=f'| [{family}]({prefix}{family}/README.md) | {row["verified_operator_family_count"]} | {names} | {row["sample_outcomes"].get("PASSED",0)} | {row["validation_scope"]} |\n'
  text+='\n以下仅有子集/能力探针，**不计入上述整例支持数**：\n\n| 模块 | 已验证子集 | 原始样例尚缺什么 |\n| --- | --- | --- |\n'
- text+='| nvCOMP | hipCOMP LZ4 单 chunk，128/32768/65536 字节 GPU byte-exact 往返 | 现代 status/options、完整 batch/manager 与其它 codec；1 PARTIAL、0 PASSED |\n'
- text+='| nvJPEG | rocJPEG hardware backend：64×64 baseline JPEG → RGB，CPU libjpeg 最大像素差 2 | 全部原始输入/格式、CLI、batch、多实例、ROI、编码；1 PARTIAL、0 PASSED |\n'
+ if not report['modules']['nvCOMP']['verified_operator_family_count']:text+='| nvCOMP | hipCOMP LZ4 单 chunk 往返 | 完整 batch/manager 待验收 |\n'
+ text+='| nvJPEG | rocJPEG baseline 解码；B10真实CLI/布局/缩放/ROI/多实例/后处理逐例验收 | progressive缺少原生GPU后端；显式CPU fallback/encode另标注；'+str(report['modules']['nvJPEG']['sample_outcomes'].get('PARTIAL',0))+' PARTIAL、0 PASSED |\n'
  text+='| NPP | RPP HIP U8 c1/c3、32×24 identity resize 探针 | 原始 Canny、distance transform、label/watershed 等算子未实现；0 PASSED |\n'
  text+=f'\n逐个算子族与样例的可追溯映射见 [operator-support.json]({prefix}migration/reports/operator-support.json)；失败仍按具体入口和原因保留。\n\n'
  return text

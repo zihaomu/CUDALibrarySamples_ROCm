@@ -1,6 +1,6 @@
 # 样例支持方式与详细日志总表
 
-覆盖 **639 个样例入口**：192 PASSED、6 PARTIAL、438 FAILED、2 UNSUPPORTED、1 BLOCKED。全部 30 个模块逐项列出实现方式、范围/原因、AMD 日志、CUDA 日志与验收报告。数据直接来自 [逐例清单](../samples.yaml)，[JSON 索引](support-log-index.json) 另含全部历史证据路径、源码 SHA256、已通过/必需用例及恢复条件。
+覆盖 **639 个样例入口**：202 PASSED、13 PARTIAL、422 FAILED、2 UNSUPPORTED、0 BLOCKED。全部 30 个模块逐项列出实现方式、范围/原因、AMD 日志、CUDA 日志与验收报告。数据直接来自 [逐例清单](../samples.yaml)，[JSON 索引](support-log-index.json) 另含全部历史证据路径、源码 SHA256、已通过/必需用例及恢复条件。
 
 **查阅方式：** 先看状态和“支持范围/失败原因”，再看实际库与实现源码。AMD 栏优先链接与当前源码 hash 匹配的选定验收日志；未通过项链接实际尝试。`build.log` 是编译/链接记录，`run.log` 是程序输出，`<case>/run.log` 是对应输入的输出。命令与环境位于同目录的 `commands.json` 和 `*.environment.json`，从“证据目录”进入。缺少运行日志时会明确标注，不将编译/import 成功视作 GPU 通过。
 
@@ -156,6 +156,11 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 | [fortran/simple/simple.f90](../sample-reports/cuDSS/fortran/simple/simple.f90.md) | PASSED / 2/2 | rocSOLVER + rocBLAS via ISO_C_BINDING/C ABI / GPU CSRRF sparse Cholesky; CPU sparse symbolic graph；改用 AMD 库重写算法流程 | [日志、范围、源码](support-log-index/cuDSS.md#sample-59fa745f5910) |
 | [nvfortran/simple/simple.cuf](../sample-reports/cuDSS/nvfortran/simple/simple.cuf.md) | PASSED / 2/2 | rocSOLVER + rocBLAS via ISO_C_BINDING/C ABI / GPU CSRRF sparse Cholesky; CPU sparse symbolic graph；改用 AMD 库重写算法流程 | [日志、范围、源码](support-log-index/cuDSS.md#sample-8d0ee8da6664) |
 | [simple/simple.cpp](../sample-reports/cuDSS/simple/simple.cpp.md) | PASSED / 3/3 | rocSOLVER CSRRF + rocBLAS / GPU sparse Cholesky; CPU sparse symbolic analysis；改用 AMD 库重写算法流程 | [日志、范围、源码](support-log-index/cuDSS.md#sample-f495b401e674) |
+| [simple_batch/simple_batch.cpp](../sample-reports/cuDSS/simple_batch/simple_batch.cpp.md) | PASSED / 8/8 | CPU sparse symbolic/matching + rocSOLVER CSRRF LU / HIP CSR pivot LU and GPU query adapter / rocSOLVER/HIP runtime；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/cuDSS.md#sample-84cae1939da0) |
+| [simple_reordering_phase/simple_reordering_phase.cpp](../sample-reports/cuDSS/simple_reordering_phase/simple_reordering_phase.cpp.md) | PASSED / 8/8 | CPU sparse symbolic/matching + rocSOLVER CSRRF LU / HIP CSR pivot LU and GPU query adapter / rocSOLVER/HIP runtime；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/cuDSS.md#sample-97a634ce0b2f) |
+| [simple_residual/simple_residual.cpp](../sample-reports/cuDSS/simple_residual/simple_residual.cpp.md) | PASSED / 8/8 | CPU sparse symbolic/matching + rocSOLVER CSRRF LU / HIP CSR pivot LU and GPU query adapter / rocSOLVER/HIP runtime；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/cuDSS.md#sample-a2698a05926c) |
+| [simple_uniform_batch/simple_uniform_batch.cpp](../sample-reports/cuDSS/simple_uniform_batch/simple_uniform_batch.cpp.md) | PASSED / 8/8 | CPU sparse symbolic/matching + rocSOLVER CSRRF LU / HIP CSR pivot LU and GPU query adapter / rocSOLVER/HIP runtime；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/cuDSS.md#sample-c683e166ec18) |
+| [simple_get_set/simple_get_set.cpp](../sample-reports/cuDSS/simple_get_set/simple_get_set.cpp.md) | PARTIAL / 8/9 | CPU sparse symbolic/matching + rocSOLVER CSRRF LU / HIP CSR pivot LU and GPU query adapter / rocSOLVER/HIP runtime；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/cuDSS.md#sample-c93d8086c25d) |
 | [fortran/batch/batch.f90](../sample-reports/cuDSS/fortran/batch/batch.f90.md) | FAILED / 0/2 | 尚无已验证使用库；语言绑定尚未实现 | [日志、范围、源码](support-log-index/cuDSS.md#sample-ed8e99db11a7) |
 | [fortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.f90](../sample-reports/cuDSS/fortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.f90.md) | FAILED / 0/2 | 尚无已验证使用库；语言绑定尚未实现 | [日志、范围、源码](support-log-index/cuDSS.md#sample-c1497026978d) |
 | [fortran/dense_matrix_helpers/dense_matrix_helpers.f90](../sample-reports/cuDSS/fortran/dense_matrix_helpers/dense_matrix_helpers.f90.md) | FAILED / 0/2 | 尚无已验证使用库；语言绑定尚未实现 | [日志、范围、源码](support-log-index/cuDSS.md#sample-fbaecb35f9cf) |
@@ -190,11 +195,9 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 | [nvfortran/simple_complex/simple_complex.cuf](../sample-reports/cuDSS/nvfortran/simple_complex/simple_complex.cuf.md) | FAILED / 0/2 | 尚无已验证使用库；语言绑定尚未实现 | [日志、范围、源码](support-log-index/cuDSS.md#sample-8103d003119d) |
 | [nvfortran/sparse_matrix_helpers/sparse_matrix_helpers.cuf](../sample-reports/cuDSS/nvfortran/sparse_matrix_helpers/sparse_matrix_helpers.cuf.md) | FAILED / 0/2 | 尚无已验证使用库；语言绑定尚未实现 | [日志、范围、源码](support-log-index/cuDSS.md#sample-110c494de4cb) |
 | [nvfortran/uniform_batch/uniform_batch.cuf](../sample-reports/cuDSS/nvfortran/uniform_batch/uniform_batch.cuf.md) | FAILED / 0/2 | 尚无已验证使用库；语言绑定尚未实现 | [日志、范围、源码](support-log-index/cuDSS.md#sample-1ecfa60d4a88) |
-| [simple_batch/simple_batch.cpp](../sample-reports/cuDSS/simple_batch/simple_batch.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuDSS.md#sample-84cae1939da0) |
 | [simple_batch_sparse_matrix_helpers/simple_batch_sparse_matrix_helpers.cpp](../sample-reports/cuDSS/simple_batch_sparse_matrix_helpers/simple_batch_sparse_matrix_helpers.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuDSS.md#sample-7d78c16b5bd9) |
 | [simple_complex/simple_complex.cpp](../sample-reports/cuDSS/simple_complex/simple_complex.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuDSS.md#sample-dcab38ce4193) |
 | [simple_dense_matrix_helpers/simple_dense_matrix_helpers.cpp](../sample-reports/cuDSS/simple_dense_matrix_helpers/simple_dense_matrix_helpers.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuDSS.md#sample-a0b16fa26f6c) |
-| [simple_get_set/simple_get_set.cpp](../sample-reports/cuDSS/simple_get_set/simple_get_set.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuDSS.md#sample-c93d8086c25d) |
 | [simple_high_precision/simple_high_precision.cpp](../sample-reports/cuDSS/simple_high_precision/simple_high_precision.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuDSS.md#sample-2c6713ca7eba) |
 | [simple_hybrid_execute_mode/simple_hybrid_execute_mode.cpp](../sample-reports/cuDSS/simple_hybrid_execute_mode/simple_hybrid_execute_mode.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuDSS.md#sample-f994102ee9ca) |
 | [simple_hybrid_memory_mode/simple_hybrid_memory_mode.cpp](../sample-reports/cuDSS/simple_hybrid_memory_mode/simple_hybrid_memory_mode.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuDSS.md#sample-d2cfc3a0766b) |
@@ -205,11 +208,8 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 | [simple_mgmn_mode/simple_mgmn_mode.cpp](../sample-reports/cuDSS/simple_mgmn_mode/simple_mgmn_mode.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuDSS.md#sample-7fd921fe840a) |
 | [simple_multithreaded_mode/simple_multithreaded_mode.cpp](../sample-reports/cuDSS/simple_multithreaded_mode/simple_multithreaded_mode.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuDSS.md#sample-7b70b60b8a13) |
 | [simple_pinned_memory_handler/simple_pinned_memory_handler.cpp](../sample-reports/cuDSS/simple_pinned_memory_handler/simple_pinned_memory_handler.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuDSS.md#sample-2762bcab426e) |
-| [simple_reordering_phase/simple_reordering_phase.cpp](../sample-reports/cuDSS/simple_reordering_phase/simple_reordering_phase.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuDSS.md#sample-97a634ce0b2f) |
-| [simple_residual/simple_residual.cpp](../sample-reports/cuDSS/simple_residual/simple_residual.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuDSS.md#sample-a2698a05926c) |
 | [simple_schur_complement/simple_schur_complement.cpp](../sample-reports/cuDSS/simple_schur_complement/simple_schur_complement.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuDSS.md#sample-f446ddb35cd0) |
 | [simple_sparse_matrix_helpers/simple_sparse_matrix_helpers.cpp](../sample-reports/cuDSS/simple_sparse_matrix_helpers/simple_sparse_matrix_helpers.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuDSS.md#sample-d58b5f8ba98a) |
-| [simple_uniform_batch/simple_uniform_batch.cpp](../sample-reports/cuDSS/simple_uniform_batch/simple_uniform_batch.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuDSS.md#sample-c683e166ec18) |
 | [test_communication_layer/test_communication_layer.cu](../sample-reports/cuDSS/test_communication_layer/test_communication_layer.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuDSS.md#sample-e5bd84a18efb) |
 | [test_threading_layer/test_threading_layer.cu](../sample-reports/cuDSS/test_threading_layer/test_threading_layer.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuDSS.md#sample-710b413588c4) |
 
@@ -774,13 +774,13 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 
 | 样例 / 详情 | 状态 / 用例 | 实际库与实现方式 | 详细日志与范围 |
 | --- | --- | --- | --- |
-| [nvJPEG-Decoder/nvjpegDecoder.cpp](../sample-reports/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp.md) | PARTIAL / 1/2 | rocJPEG / rocJPEG；库 API 迁移 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-340e3057571d) |
-| [Image-Resize-WaterMark/imageResizeWatermark.cpp](../sample-reports/nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-9e68524b388a) |
-| [Image-Resize/imageResize.cpp](../sample-reports/nvJPEG/Image-Resize/imageResize.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-ba8320f54095) |
-| [nvJPEG-Decoder-Backend-ROI/nvJPEGROIDecode.cpp](../sample-reports/nvJPEG/nvJPEG-Decoder-Backend-ROI/nvJPEGROIDecode.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-c19023c1e1d4) |
-| [nvJPEG-Decoder-MultipleInstances/nvJPEGDecMultipleInstances.cpp](../sample-reports/nvJPEG/nvJPEG-Decoder-MultipleInstances/nvJPEGDecMultipleInstances.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-f846e59c86c3) |
+| [Image-Resize-WaterMark/imageResizeWatermark.cpp](../sample-reports/nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp.md) | PARTIAL / 7/8 | rocJPEG + HIP layout/ROI/Lanczos/watermark + explicit libjpeg CPU fallback/encode / rocJPEG/HIP runtime + libjpeg-turbo；GPU 实现 + 明确标注的 CPU 阶段 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-9e68524b388a) |
+| [Image-Resize/imageResize.cpp](../sample-reports/nvJPEG/Image-Resize/imageResize.cpp.md) | PARTIAL / 7/8 | rocJPEG + HIP layout/ROI/Lanczos/watermark + explicit libjpeg CPU fallback/encode / rocJPEG/HIP runtime + libjpeg-turbo；GPU 实现 + 明确标注的 CPU 阶段 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-ba8320f54095) |
+| [nvJPEG-Decoder-Backend-ROI/nvJPEGROIDecode.cpp](../sample-reports/nvJPEG/nvJPEG-Decoder-Backend-ROI/nvJPEGROIDecode.cpp.md) | PARTIAL / 7/9 | rocJPEG + HIP layout/ROI/Lanczos/watermark + explicit libjpeg CPU fallback/encode / rocJPEG/HIP runtime + libjpeg-turbo；GPU 实现 + 明确标注的 CPU 阶段 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-c19023c1e1d4) |
+| [nvJPEG-Decoder-MultipleInstances/nvJPEGDecMultipleInstances.cpp](../sample-reports/nvJPEG/nvJPEG-Decoder-MultipleInstances/nvJPEGDecMultipleInstances.cpp.md) | PARTIAL / 7/9 | rocJPEG + HIP layout/ROI/Lanczos/watermark + explicit libjpeg CPU fallback/encode / rocJPEG/HIP runtime + libjpeg-turbo；GPU 实现 + 明确标注的 CPU 阶段 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-f846e59c86c3) |
+| [nvJPEG-Decoder/nvjpegDecoder.cpp](../sample-reports/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp.md) | PARTIAL / 7/8 | rocJPEG + HIP layout/ROI/Lanczos/watermark + explicit libjpeg CPU fallback/encode / rocJPEG/HIP runtime + libjpeg-turbo；GPU 实现 + 明确标注的 CPU 阶段 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-340e3057571d) |
+| [nvJPEG-Decoder/tests/test_decoder.py](../sample-reports/nvJPEG/nvJPEG-Decoder/tests/test_decoder.py.md) | PARTIAL / 7/8 | rocJPEG + HIP layout/ROI/Lanczos/watermark + explicit libjpeg CPU fallback/encode / rocJPEG/HIP runtime + libjpeg-turbo；GPU 实现 + 明确标注的 CPU 阶段 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-682072b0c8fa) |
 | [nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp](../sample-reports/nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-1745f35191ec) |
-| [nvJPEG-Decoder/tests/test_decoder.py](../sample-reports/nvJPEG/nvJPEG-Decoder/tests/test_decoder.py.md) | BLOCKED / 0/2 | 尚无已验证使用库；语言绑定尚未实现 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-682072b0c8fa) |
 
 <a id="module-26"></a>
 
@@ -812,7 +812,14 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 
 | 样例 / 详情 | 状态 / 用例 | 实际库与实现方式 | 详细日志与范围 |
 | --- | --- | --- | --- |
-| [examples/low_level_quickstart_example.cpp](../sample-reports/nvCOMP/examples/low_level_quickstart_example.cpp.md) | PARTIAL / 1/2 | hipCOMP / hipCOMP；库 API 迁移 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-ca0296bde2fe) |
+| [examples/high_level_quickstart_example.cpp](../sample-reports/nvCOMP/examples/high_level_quickstart_example.cpp.md) | PASSED / 8/8 | hipCOMP LZ4/Snappy + CPU liblz4/Snappy + HIP checked stream/CRC manager adapter / hipCOMP/HIP runtime + independent CPU codecs；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-eb626e77bd0e) |
+| [examples/low_level_quickstart_example.cpp](../sample-reports/nvCOMP/examples/low_level_quickstart_example.cpp.md) | PASSED / 8/8 | hipCOMP LZ4/Snappy + CPU liblz4/Snappy + HIP checked stream/CRC manager adapter / hipCOMP/HIP runtime + independent CPU codecs；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-ca0296bde2fe) |
+| [examples/lz4_cpu_compression.cu](../sample-reports/nvCOMP/examples/lz4_cpu_compression.cu.md) | PASSED / 8/8 | hipCOMP LZ4/Snappy + CPU liblz4/Snappy + HIP checked stream/CRC manager adapter / hipCOMP/HIP runtime + independent CPU codecs；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-9b0a4172fece) |
+| [examples/lz4_cpu_decompression.cu](../sample-reports/nvCOMP/examples/lz4_cpu_decompression.cu.md) | PASSED / 8/8 | hipCOMP LZ4/Snappy + CPU liblz4/Snappy + HIP checked stream/CRC manager adapter / hipCOMP/HIP runtime + independent CPU codecs；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-226ac6261a50) |
+| [examples/snappy_cpu_compression.cu](../sample-reports/nvCOMP/examples/snappy_cpu_compression.cu.md) | PASSED / 8/8 | hipCOMP LZ4/Snappy + CPU liblz4/Snappy + HIP checked stream/CRC manager adapter / hipCOMP/HIP runtime + independent CPU codecs；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-26bca052ac7c) |
+| [examples/snappy_cpu_decompression.cu](../sample-reports/nvCOMP/examples/snappy_cpu_decompression.cu.md) | PASSED / 8/8 | hipCOMP LZ4/Snappy + CPU liblz4/Snappy + HIP checked stream/CRC manager adapter / hipCOMP/HIP runtime + independent CPU codecs；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-2701f65abaac) |
+| [benchmarks/benchmark_lz4_chunked.cu](../sample-reports/nvCOMP/benchmarks/benchmark_lz4_chunked.cu.md) | PARTIAL / 8/9 | hipCOMP LZ4/Snappy + CPU liblz4/Snappy + HIP checked stream/CRC manager adapter / hipCOMP/HIP runtime + independent CPU codecs；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-92d2430eb6bf) |
+| [benchmarks/benchmark_snappy_chunked.cu](../sample-reports/nvCOMP/benchmarks/benchmark_snappy_chunked.cu.md) | PARTIAL / 8/9 | hipCOMP LZ4/Snappy + CPU liblz4/Snappy + HIP checked stream/CRC manager adapter / hipCOMP/HIP runtime + independent CPU codecs；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-702c69271dba) |
 | [benchmarks/benchmark_ans_chunked.cu](../sample-reports/nvCOMP/benchmarks/benchmark_ans_chunked.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-af9cbb05aa19) |
 | [benchmarks/benchmark_bitcomp_chunked.cu](../sample-reports/nvCOMP/benchmarks/benchmark_bitcomp_chunked.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-7ae591d8f16f) |
 | [benchmarks/benchmark_bitcomp_cpu.cu](../sample-reports/nvCOMP/benchmarks/benchmark_bitcomp_cpu.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-46ab73461b73) |
@@ -823,9 +830,7 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 | [benchmarks/benchmark_gdeflate_cpu.cpp](../sample-reports/nvCOMP/benchmarks/benchmark_gdeflate_cpu.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-545f82fca028) |
 | [benchmarks/benchmark_gzip_chunked.cu](../sample-reports/nvCOMP/benchmarks/benchmark_gzip_chunked.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-493118e8aafe) |
 | [benchmarks/benchmark_gzip_streaming.cpp](../sample-reports/nvCOMP/benchmarks/benchmark_gzip_streaming.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-a2dc2173aaa9) |
-| [benchmarks/benchmark_lz4_chunked.cu](../sample-reports/nvCOMP/benchmarks/benchmark_lz4_chunked.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-92d2430eb6bf) |
 | [benchmarks/benchmark_python.py](../sample-reports/nvCOMP/benchmarks/benchmark_python.py.md) | FAILED / 0/2 | 尚无已验证使用库；语言绑定尚未实现 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-55c95f36fe4e) |
-| [benchmarks/benchmark_snappy_chunked.cu](../sample-reports/nvCOMP/benchmarks/benchmark_snappy_chunked.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-702c69271dba) |
 | [benchmarks/benchmark_zstd_chunked.cu](../sample-reports/nvCOMP/benchmarks/benchmark_zstd_chunked.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-aa18045b6d63) |
 | [examples/bitcomp_native_lossy.cu](../sample-reports/nvCOMP/examples/bitcomp_native_lossy.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-fef17aae178b) |
 | [examples/deflate_cpu_compression.cu](../sample-reports/nvCOMP/examples/deflate_cpu_compression.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-6ac99d07d634) |
@@ -834,14 +839,9 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 | [examples/gdeflate_cpu_decompression.cu](../sample-reports/nvCOMP/examples/gdeflate_cpu_decompression.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-200fefb61fbc) |
 | [examples/gzip_gpu_compression.cu](../sample-reports/nvCOMP/examples/gzip_gpu_compression.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-a92b60029444) |
 | [examples/gzip_gpu_decompression.cu](../sample-reports/nvCOMP/examples/gzip_gpu_decompression.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-6c531650299a) |
-| [examples/high_level_quickstart_example.cpp](../sample-reports/nvCOMP/examples/high_level_quickstart_example.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-eb626e77bd0e) |
-| [examples/lz4_cpu_compression.cu](../sample-reports/nvCOMP/examples/lz4_cpu_compression.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-9b0a4172fece) |
 | [examples/lz4_cpu_compression_high_level.cpp](../sample-reports/nvCOMP/examples/lz4_cpu_compression_high_level.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-d1108ee6ec78) |
-| [examples/lz4_cpu_decompression.cu](../sample-reports/nvCOMP/examples/lz4_cpu_decompression.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-226ac6261a50) |
 | [examples/nvcomp_crc32.cu](../sample-reports/nvCOMP/examples/nvcomp_crc32.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-1dbba0759725) |
 | [examples/nvcomp_gds.cu](../sample-reports/nvCOMP/examples/nvcomp_gds.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-7ff325d427c4) |
-| [examples/snappy_cpu_compression.cu](../sample-reports/nvCOMP/examples/snappy_cpu_compression.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-26bca052ac7c) |
-| [examples/snappy_cpu_decompression.cu](../sample-reports/nvCOMP/examples/snappy_cpu_decompression.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-2701f65abaac) |
 | [examples/zstd_cpu_compression.cu](../sample-reports/nvCOMP/examples/zstd_cpu_compression.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-8622e37d2998) |
 | [examples/zstd_cpu_decompression.cu](../sample-reports/nvCOMP/examples/zstd_cpu_decompression.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-7373ea9b50c3) |
 

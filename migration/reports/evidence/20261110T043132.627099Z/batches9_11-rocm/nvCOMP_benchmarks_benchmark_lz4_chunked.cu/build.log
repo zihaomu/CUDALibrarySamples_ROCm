@@ -1,0 +1,227 @@
+Warning: HIP version file: "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/share/hip/version" not found.  Cannot give HIP version information.
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvCOMP/benchmarks/benchmark_lz4_chunked.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:36:23: note: in instantiation of member function 'migration_batch::Buffer<unsigned char>::~Buffer' requested here
+   36 |  Buffer<unsigned char>temp(workspace);if(snappy)MB_CHECK(hipcompBatchedSnappyCompressAsync(in,lengths,65536,count,temp.p,workspace,out,sizes,hipcompBatchedSnappyDefaultOpts,0));else MB_CHECK(hipcompBatchedLZ4CompressAsync(in,lengths,65536,count,temp.p,workspace,out,sizes,hipcompBatchedLZ4DefaultOpts,0));
+      |                       ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvCOMP/benchmarks/benchmark_lz4_chunked.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:50:89: note: in instantiation of member function 'migration_batch::Buffer<const unsigned char *>::~Buffer' requested here
+   50 | inline uint32_t device_crc9(const unsigned char*p,size_t n){Buffer<const unsigned char*>ptr(std::vector<const unsigned char*>{p});Buffer<size_t>sizes(std::vector<size_t>{n});Buffer<uint32_t>out(1);checksums9<<<1,1>>>(ptr.p,sizes.p,out.p,1);MB_CHECK(MB_RT(GetLastError)());return out.get()[0];}
+      |                                                                                         ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvCOMP/benchmarks/benchmark_lz4_chunked.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:50:145: note: in instantiation of member function 'migration_batch::Buffer<unsigned long>::~Buffer' requested here
+   50 | inline uint32_t device_crc9(const unsigned char*p,size_t n){Buffer<const unsigned char*>ptr(std::vector<const unsigned char*>{p});Buffer<size_t>sizes(std::vector<size_t>{n});Buffer<uint32_t>out(1);checksums9<<<1,1>>>(ptr.p,sizes.p,out.p,1);MB_CHECK(MB_RT(GetLastError)());return out.get()[0];}
+      |                                                                                                                                                 ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvCOMP/benchmarks/benchmark_lz4_chunked.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:50:191: note: in instantiation of member function 'migration_batch::Buffer<unsigned int>::~Buffer' requested here
+   50 | inline uint32_t device_crc9(const unsigned char*p,size_t n){Buffer<const unsigned char*>ptr(std::vector<const unsigned char*>{p});Buffer<size_t>sizes(std::vector<size_t>{n});Buffer<uint32_t>out(1);checksums9<<<1,1>>>(ptr.p,sizes.p,out.p,1);MB_CHECK(MB_RT(GetLastError)());return out.get()[0];}
+      |                                                                                                                                                                                               ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvCOMP/benchmarks/benchmark_lz4_chunked.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:59:588: note: in instantiation of member function 'migration_batch::Buffer<const void *>::~Buffer' requested here
+   59 | inline void raw100_9(){std::vector<std::unique_ptr<Buffer<unsigned char>>>in,out,encoded;std::vector<const void*>ip;std::vector<void*>ep,op;std::vector<size_t>lens(100,65536);for(int i=0;i<100;++i){std::vector<unsigned char>v(65536);for(size_t j=0;j<v.size();++j)v[j]=(j*13+i*7)%251;bytes9("raw100_input_"+std::to_string(i),v);in.emplace_back(new Buffer<unsigned char>(v));out.emplace_back(new Buffer<unsigned char>(65536));encoded.emplace_back(new Buffer<unsigned char>(131200));ip.push_back(in.back()->p);ep.push_back(encoded.back()->p);op.push_back(out.back()->p);}Buffer<const void*>di(ip);Buffer<void*>de(ep),dout(op);Buffer<size_t>dl(lens),sizes(100),actual(100);Buffer<C9(Status_t)>statuses(100);compress9(false,di.p,dl.p,100,de.p,sizes.p);decompress9(false,(const void*const*)de.p,sizes.p,dl.p,100,dout.p,actual.p,statuses.p);emit("raw100_status",statuses.get());emit("raw100_actual",actual.get());auto cs=sizes.get();for(int i=0;i<100;++i){bytes9("raw100_output_"+std::to_string(i),out[i]->get());auto stream=encoded[i]->get();stream.resize(cs[i]);bytes9("raw100_compressed_"+std::to_string(i),stream);}scalar("raw_batch_buffers",100);}
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvCOMP/benchmarks/benchmark_lz4_chunked.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:59:608: note: in instantiation of member function 'migration_batch::Buffer<void *>::~Buffer' requested here
+   59 | inline void raw100_9(){std::vector<std::unique_ptr<Buffer<unsigned char>>>in,out,encoded;std::vector<const void*>ip;std::vector<void*>ep,op;std::vector<size_t>lens(100,65536);for(int i=0;i<100;++i){std::vector<unsigned char>v(65536);for(size_t j=0;j<v.size();++j)v[j]=(j*13+i*7)%251;bytes9("raw100_input_"+std::to_string(i),v);in.emplace_back(new Buffer<unsigned char>(v));out.emplace_back(new Buffer<unsigned char>(65536));encoded.emplace_back(new Buffer<unsigned char>(131200));ip.push_back(in.back()->p);ep.push_back(encoded.back()->p);op.push_back(out.back()->p);}Buffer<const void*>di(ip);Buffer<void*>de(ep),dout(op);Buffer<size_t>dl(lens),sizes(100),actual(100);Buffer<C9(Status_t)>statuses(100);compress9(false,di.p,dl.p,100,de.p,sizes.p);decompress9(false,(const void*const*)de.p,sizes.p,dl.p,100,dout.p,actual.p,statuses.p);emit("raw100_status",statuses.get());emit("raw100_actual",actual.get());auto cs=sizes.get();for(int i=0;i<100;++i){bytes9("raw100_output_"+std::to_string(i),out[i]->get());auto stream=encoded[i]->get();stream.resize(cs[i]);bytes9("raw100_compressed_"+std::to_string(i),stream);}scalar("raw_batch_buffers",100);}
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvCOMP/benchmarks/benchmark_lz4_chunked.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:59:690: note: in instantiation of member function 'migration_batch::Buffer<hipcompStatus_t>::~Buffer' requested here
+   59 | inline void raw100_9(){std::vector<std::unique_ptr<Buffer<unsigned char>>>in,out,encoded;std::vector<const void*>ip;std::vector<void*>ep,op;std::vector<size_t>lens(100,65536);for(int i=0;i<100;++i){std::vector<unsigned char>v(65536);for(size_t j=0;j<v.size();++j)v[j]=(j*13+i*7)%251;bytes9("raw100_input_"+std::to_string(i),v);in.emplace_back(new Buffer<unsigned char>(v));out.emplace_back(new Buffer<unsigned char>(65536));encoded.emplace_back(new Buffer<unsigned char>(131200));ip.push_back(in.back()->p);ep.push_back(encoded.back()->p);op.push_back(out.back()->p);}Buffer<const void*>di(ip);Buffer<void*>de(ep),dout(op);Buffer<size_t>dl(lens),sizes(100),actual(100);Buffer<C9(Status_t)>statuses(100);compress9(false,di.p,dl.p,100,de.p,sizes.p);decompress9(false,(const void*const*)de.p,sizes.p,dl.p,100,dout.p,actual.p,statuses.p);emit("raw100_status",statuses.get());emit("raw100_actual",actual.get());auto cs=sizes.get();for(int i=0;i<100;++i){bytes9("raw100_output_"+std::to_string(i),out[i]->get());auto stream=encoded[i]->get();stream.resize(cs[i]);bytes9("raw100_compressed_"+std::to_string(i),stream);}scalar("raw_batch_buffers",100);}
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvCOMP/benchmarks/benchmark_lz4_chunked.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:229:1: note: expanded from here
+  229 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:71:92: note: in instantiation of member function 'migration_batch::Buffer<int>::~Buffer' requested here
+   71 |  Buffer<const unsigned char*>vp(validate_ptrs);Buffer<size_t>sl(stream_lengths);Buffer<int>preflight(nonempty.size());preflight9<<<(nonempty.size()+127)/128,128>>>(vp.p,sl.p,lens.p,preflight.p,nonempty.size(),snappy);MB_CHECK(MB_RT(GetLastError)());auto codes=preflight.get();emit("preflight_status",codes);
+      |                                                                                            ^
+8 warnings generated when compiling for gfx1201.
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvCOMP/benchmarks/benchmark_lz4_chunked.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:230:1: note: expanded from here
+  230 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:36:23: note: in instantiation of member function 'migration_batch::Buffer<unsigned char>::~Buffer' requested here
+   36 |  Buffer<unsigned char>temp(workspace);if(snappy)MB_CHECK(hipcompBatchedSnappyCompressAsync(in,lengths,65536,count,temp.p,workspace,out,sizes,hipcompBatchedSnappyDefaultOpts,0));else MB_CHECK(hipcompBatchedLZ4CompressAsync(in,lengths,65536,count,temp.p,workspace,out,sizes,hipcompBatchedLZ4DefaultOpts,0));
+      |                       ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvCOMP/benchmarks/benchmark_lz4_chunked.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:230:1: note: expanded from here
+  230 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:50:89: note: in instantiation of member function 'migration_batch::Buffer<const unsigned char *>::~Buffer' requested here
+   50 | inline uint32_t device_crc9(const unsigned char*p,size_t n){Buffer<const unsigned char*>ptr(std::vector<const unsigned char*>{p});Buffer<size_t>sizes(std::vector<size_t>{n});Buffer<uint32_t>out(1);checksums9<<<1,1>>>(ptr.p,sizes.p,out.p,1);MB_CHECK(MB_RT(GetLastError)());return out.get()[0];}
+      |                                                                                         ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvCOMP/benchmarks/benchmark_lz4_chunked.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:230:1: note: expanded from here
+  230 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:50:145: note: in instantiation of member function 'migration_batch::Buffer<unsigned long>::~Buffer' requested here
+   50 | inline uint32_t device_crc9(const unsigned char*p,size_t n){Buffer<const unsigned char*>ptr(std::vector<const unsigned char*>{p});Buffer<size_t>sizes(std::vector<size_t>{n});Buffer<uint32_t>out(1);checksums9<<<1,1>>>(ptr.p,sizes.p,out.p,1);MB_CHECK(MB_RT(GetLastError)());return out.get()[0];}
+      |                                                                                                                                                 ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvCOMP/benchmarks/benchmark_lz4_chunked.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:230:1: note: expanded from here
+  230 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:50:191: note: in instantiation of member function 'migration_batch::Buffer<unsigned int>::~Buffer' requested here
+   50 | inline uint32_t device_crc9(const unsigned char*p,size_t n){Buffer<const unsigned char*>ptr(std::vector<const unsigned char*>{p});Buffer<size_t>sizes(std::vector<size_t>{n});Buffer<uint32_t>out(1);checksums9<<<1,1>>>(ptr.p,sizes.p,out.p,1);MB_CHECK(MB_RT(GetLastError)());return out.get()[0];}
+      |                                                                                                                                                                                               ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvCOMP/benchmarks/benchmark_lz4_chunked.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:230:1: note: expanded from here
+  230 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:59:588: note: in instantiation of member function 'migration_batch::Buffer<const void *>::~Buffer' requested here
+   59 | inline void raw100_9(){std::vector<std::unique_ptr<Buffer<unsigned char>>>in,out,encoded;std::vector<const void*>ip;std::vector<void*>ep,op;std::vector<size_t>lens(100,65536);for(int i=0;i<100;++i){std::vector<unsigned char>v(65536);for(size_t j=0;j<v.size();++j)v[j]=(j*13+i*7)%251;bytes9("raw100_input_"+std::to_string(i),v);in.emplace_back(new Buffer<unsigned char>(v));out.emplace_back(new Buffer<unsigned char>(65536));encoded.emplace_back(new Buffer<unsigned char>(131200));ip.push_back(in.back()->p);ep.push_back(encoded.back()->p);op.push_back(out.back()->p);}Buffer<const void*>di(ip);Buffer<void*>de(ep),dout(op);Buffer<size_t>dl(lens),sizes(100),actual(100);Buffer<C9(Status_t)>statuses(100);compress9(false,di.p,dl.p,100,de.p,sizes.p);decompress9(false,(const void*const*)de.p,sizes.p,dl.p,100,dout.p,actual.p,statuses.p);emit("raw100_status",statuses.get());emit("raw100_actual",actual.get());auto cs=sizes.get();for(int i=0;i<100;++i){bytes9("raw100_output_"+std::to_string(i),out[i]->get());auto stream=encoded[i]->get();stream.resize(cs[i]);bytes9("raw100_compressed_"+std::to_string(i),stream);}scalar("raw_batch_buffers",100);}
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvCOMP/benchmarks/benchmark_lz4_chunked.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:230:1: note: expanded from here
+  230 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:59:608: note: in instantiation of member function 'migration_batch::Buffer<void *>::~Buffer' requested here
+   59 | inline void raw100_9(){std::vector<std::unique_ptr<Buffer<unsigned char>>>in,out,encoded;std::vector<const void*>ip;std::vector<void*>ep,op;std::vector<size_t>lens(100,65536);for(int i=0;i<100;++i){std::vector<unsigned char>v(65536);for(size_t j=0;j<v.size();++j)v[j]=(j*13+i*7)%251;bytes9("raw100_input_"+std::to_string(i),v);in.emplace_back(new Buffer<unsigned char>(v));out.emplace_back(new Buffer<unsigned char>(65536));encoded.emplace_back(new Buffer<unsigned char>(131200));ip.push_back(in.back()->p);ep.push_back(encoded.back()->p);op.push_back(out.back()->p);}Buffer<const void*>di(ip);Buffer<void*>de(ep),dout(op);Buffer<size_t>dl(lens),sizes(100),actual(100);Buffer<C9(Status_t)>statuses(100);compress9(false,di.p,dl.p,100,de.p,sizes.p);decompress9(false,(const void*const*)de.p,sizes.p,dl.p,100,dout.p,actual.p,statuses.p);emit("raw100_status",statuses.get());emit("raw100_actual",actual.get());auto cs=sizes.get();for(int i=0;i<100;++i){bytes9("raw100_output_"+std::to_string(i),out[i]->get());auto stream=encoded[i]->get();stream.resize(cs[i]);bytes9("raw100_compressed_"+std::to_string(i),stream);}scalar("raw_batch_buffers",100);}
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvCOMP/benchmarks/benchmark_lz4_chunked.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:230:1: note: expanded from here
+  230 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:59:690: note: in instantiation of member function 'migration_batch::Buffer<hipcompStatus_t>::~Buffer' requested here
+   59 | inline void raw100_9(){std::vector<std::unique_ptr<Buffer<unsigned char>>>in,out,encoded;std::vector<const void*>ip;std::vector<void*>ep,op;std::vector<size_t>lens(100,65536);for(int i=0;i<100;++i){std::vector<unsigned char>v(65536);for(size_t j=0;j<v.size();++j)v[j]=(j*13+i*7)%251;bytes9("raw100_input_"+std::to_string(i),v);in.emplace_back(new Buffer<unsigned char>(v));out.emplace_back(new Buffer<unsigned char>(65536));encoded.emplace_back(new Buffer<unsigned char>(131200));ip.push_back(in.back()->p);ep.push_back(encoded.back()->p);op.push_back(out.back()->p);}Buffer<const void*>di(ip);Buffer<void*>de(ep),dout(op);Buffer<size_t>dl(lens),sizes(100),actual(100);Buffer<C9(Status_t)>statuses(100);compress9(false,di.p,dl.p,100,de.p,sizes.p);decompress9(false,(const void*const*)de.p,sizes.p,dl.p,100,dout.p,actual.p,statuses.p);emit("raw100_status",statuses.get());emit("raw100_actual",actual.get());auto cs=sizes.get();for(int i=0;i<100;++i){bytes9("raw100_output_"+std::to_string(i),out[i]->get());auto stream=encoded[i]->get();stream.resize(cs[i]);bytes9("raw100_compressed_"+std::to_string(i),stream);}scalar("raw_batch_buffers",100);}
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvCOMP/benchmarks/benchmark_lz4_chunked.cu:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:230:1: note: expanded from here
+  230 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch9_codec.hpp:71:92: note: in instantiation of member function 'migration_batch::Buffer<int>::~Buffer' requested here
+   71 |  Buffer<const unsigned char*>vp(validate_ptrs);Buffer<size_t>sl(stream_lengths);Buffer<int>preflight(nonempty.size());preflight9<<<(nonempty.size()+127)/128,128>>>(vp.p,sl.p,lens.p,preflight.p,nonempty.size(),snappy);MB_CHECK(MB_RT(GetLastError)());auto codes=preflight.get();emit("preflight_status",codes);
+      |                                                                                            ^
+8 warnings generated when compiling for host.

@@ -1,0 +1,199 @@
+Warning: HIP version file: "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/share/hip/version" not found.  Cannot give HIP version information.
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp:21:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch10_jpeg.hpp:49:41: error: no matching function for call to 'fabsf'
+   49 | __device__ float sinc10(float x){return fabsf(x)<1e-7f?1:sinf(3.14159265358979323846f*x)/(3.14159265358979323846f*x);}
+      |                                         ^~~~~
+/usr/include/x86_64-linux-gnu/bits/mathcalls.h:162:1: note: candidate function not viable: call to __host__ function from __device__ function
+  162 | __MATHCALLX (fabs,, (_Mdouble_ __x), (__const__));
+      | ^
+/usr/include/math.h:292:3: note: expanded from macro '__MATHCALLX'
+  292 |   __MATHDECLX (_Mdouble_,function,suffix, args, attrib)
+      |   ^
+/usr/include/math.h:294:3: note: expanded from macro '__MATHDECLX'
+  294 |   __MATHDECL_1(type, function,suffix, args) __attribute__ (attrib); \
+      |   ^
+/usr/include/math.h:299:3: note: expanded from macro '__MATHDECL_1'
+  299 |   __MATHDECL_1_IMPL(type, function, suffix, args)
+      |   ^
+/usr/include/math.h:297:15: note: expanded from macro '__MATHDECL_1_IMPL'
+  297 |   extern type __MATH_PRECNAME(function,suffix) args __THROW
+      |               ^
+/usr/include/math.h:326:34: note: expanded from macro '__MATH_PRECNAME'
+  326 | # define __MATH_PRECNAME(name,r) name##f##r
+      |                                  ^
+<scratch space>:144:1: note: expanded from here
+  144 | fabsf
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp:21:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch10_jpeg.hpp:49:58: error: no matching function for call to 'sinf'
+   49 | __device__ float sinc10(float x){return fabsf(x)<1e-7f?1:sinf(3.14159265358979323846f*x)/(3.14159265358979323846f*x);}
+      |                                                          ^~~~
+/usr/include/x86_64-linux-gnu/bits/mathcalls.h:64:1: note: candidate function not viable: call to __host__ function from __device__ function
+   64 | __MATHCALL_VEC (sin,, (_Mdouble_ __x));
+      | ^
+/usr/include/math.h:280:3: note: expanded from macro '__MATHCALL_VEC'
+  280 |   __MATHCALL (function, suffix, args)
+      |   ^
+/usr/include/math.h:287:3: note: expanded from macro '__MATHCALL'
+  287 |   __MATHDECL (_Mdouble_,function,suffix, args)
+      |   ^
+/usr/include/math.h:289:3: note: expanded from macro '__MATHDECL'
+  289 |   __MATHDECL_1(type, function,suffix, args); \
+      |   ^
+note: (skipping 1 expansions in backtrace; use -fmacro-backtrace-limit=0 to see all)
+/usr/include/math.h:297:15: note: expanded from macro '__MATHDECL_1_IMPL'
+  297 |   extern type __MATH_PRECNAME(function,suffix) args __THROW
+      |               ^
+/usr/include/math.h:326:34: note: expanded from macro '__MATH_PRECNAME'
+  326 | # define __MATH_PRECNAME(name,r) name##f##r
+      |                                  ^
+<scratch space>:27:1: note: expanded from here
+   27 | sinf
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp:21:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch10_jpeg.hpp:50:259: error: no matching function for call to 'floorf'
+   50 | __global__ void lanczos10(const unsigned char*in,unsigned char*out,int sw,int sh,int dw,int dh){int t=blockIdx.x*blockDim.x+threadIdx.x;if(t>=dw*dh*3)return;int ch=t%3,x=t/3%dw,y=t/(3*dw);float sx=(x+.5f)*sw/dw-.5f,sy=(y+.5f)*sh/dh-.5f,sum=0,weight=0;int bx=floorf(sx),by=floorf(sy);for(int j=by-2;j<=by+3;++j)for(int i=bx-2;i<=bx+3;++i){float dx=sx-i,dy=sy-j,w=sinc10(dx)*sinc10(dx/3)*sinc10(dy)*sinc10(dy/3);int xx=max(0,min(sw-1,i)),yy=max(0,min(sh-1,j));sum+=w*in[(yy*sw+xx)*3+ch];weight+=w;}out[t]=(unsigned char)max(0,min(255,int(floorf(sum/weight+.5f))));}
+      |                                                                                                                                                                                                                                                                   ^~~~~~
+/usr/include/x86_64-linux-gnu/bits/mathcalls.h:165:1: note: candidate function not viable: call to __host__ function from __global__ function
+  165 | __MATHCALLX (floor,, (_Mdouble_ __x), (__const__));
+      | ^
+/usr/include/math.h:292:3: note: expanded from macro '__MATHCALLX'
+  292 |   __MATHDECLX (_Mdouble_,function,suffix, args, attrib)
+      |   ^
+/usr/include/math.h:294:3: note: expanded from macro '__MATHDECLX'
+  294 |   __MATHDECL_1(type, function,suffix, args) __attribute__ (attrib); \
+      |   ^
+/usr/include/math.h:299:3: note: expanded from macro '__MATHDECL_1'
+  299 |   __MATHDECL_1_IMPL(type, function, suffix, args)
+      |   ^
+/usr/include/math.h:297:15: note: expanded from macro '__MATHDECL_1_IMPL'
+  297 |   extern type __MATH_PRECNAME(function,suffix) args __THROW
+      |               ^
+/usr/include/math.h:326:34: note: expanded from macro '__MATH_PRECNAME'
+  326 | # define __MATH_PRECNAME(name,r) name##f##r
+      |                                  ^
+<scratch space>:147:1: note: expanded from here
+  147 | floorf
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp:21:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch10_jpeg.hpp:50:273: error: no matching function for call to 'floorf'
+   50 | __global__ void lanczos10(const unsigned char*in,unsigned char*out,int sw,int sh,int dw,int dh){int t=blockIdx.x*blockDim.x+threadIdx.x;if(t>=dw*dh*3)return;int ch=t%3,x=t/3%dw,y=t/(3*dw);float sx=(x+.5f)*sw/dw-.5f,sy=(y+.5f)*sh/dh-.5f,sum=0,weight=0;int bx=floorf(sx),by=floorf(sy);for(int j=by-2;j<=by+3;++j)for(int i=bx-2;i<=bx+3;++i){float dx=sx-i,dy=sy-j,w=sinc10(dx)*sinc10(dx/3)*sinc10(dy)*sinc10(dy/3);int xx=max(0,min(sw-1,i)),yy=max(0,min(sh-1,j));sum+=w*in[(yy*sw+xx)*3+ch];weight+=w;}out[t]=(unsigned char)max(0,min(255,int(floorf(sum/weight+.5f))));}
+      |                                                                                                                                                                                                                                                                                 ^~~~~~
+/usr/include/x86_64-linux-gnu/bits/mathcalls.h:165:1: note: candidate function not viable: call to __host__ function from __global__ function
+  165 | __MATHCALLX (floor,, (_Mdouble_ __x), (__const__));
+      | ^
+/usr/include/math.h:292:3: note: expanded from macro '__MATHCALLX'
+  292 |   __MATHDECLX (_Mdouble_,function,suffix, args, attrib)
+      |   ^
+/usr/include/math.h:294:3: note: expanded from macro '__MATHDECLX'
+  294 |   __MATHDECL_1(type, function,suffix, args) __attribute__ (attrib); \
+      |   ^
+/usr/include/math.h:299:3: note: expanded from macro '__MATHDECL_1'
+  299 |   __MATHDECL_1_IMPL(type, function, suffix, args)
+      |   ^
+/usr/include/math.h:297:15: note: expanded from macro '__MATHDECL_1_IMPL'
+  297 |   extern type __MATH_PRECNAME(function,suffix) args __THROW
+      |               ^
+/usr/include/math.h:326:34: note: expanded from macro '__MATH_PRECNAME'
+  326 | # define __MATH_PRECNAME(name,r) name##f##r
+      |                                  ^
+<scratch space>:147:1: note: expanded from here
+  147 | floorf
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp:21:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch10_jpeg.hpp:50:424: error: use of undeclared identifier 'min'; did you mean 'fmin'?
+   50 | __global__ void lanczos10(const unsigned char*in,unsigned char*out,int sw,int sh,int dw,int dh){int t=blockIdx.x*blockDim.x+threadIdx.x;if(t>=dw*dh*3)return;int ch=t%3,x=t/3%dw,y=t/(3*dw);float sx=(x+.5f)*sw/dw-.5f,sy=(y+.5f)*sh/dh-.5f,sum=0,weight=0;int bx=floorf(sx),by=floorf(sy);for(int j=by-2;j<=by+3;++j)for(int i=bx-2;i<=bx+3;++i){float dx=sx-i,dy=sy-j,w=sinc10(dx)*sinc10(dx/3)*sinc10(dy)*sinc10(dy/3);int xx=max(0,min(sw-1,i)),yy=max(0,min(sh-1,j));sum+=w*in[(yy*sw+xx)*3+ch];weight+=w;}out[t]=(unsigned char)max(0,min(255,int(floorf(sum/weight+.5f))));}
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                        ^~~
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                        fmin
+/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/clang/24/include/__clang_cuda_math_forward_declares.h:81:18: note: 'fmin' declared here
+   81 | __DEVICE__ float fmin(float, float);
+      |                  ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp:21:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch10_jpeg.hpp:50:418: error: use of undeclared identifier 'max'; did you mean 'fmax'?
+   50 | __global__ void lanczos10(const unsigned char*in,unsigned char*out,int sw,int sh,int dw,int dh){int t=blockIdx.x*blockDim.x+threadIdx.x;if(t>=dw*dh*3)return;int ch=t%3,x=t/3%dw,y=t/(3*dw);float sx=(x+.5f)*sw/dw-.5f,sy=(y+.5f)*sh/dh-.5f,sum=0,weight=0;int bx=floorf(sx),by=floorf(sy);for(int j=by-2;j<=by+3;++j)for(int i=bx-2;i<=bx+3;++i){float dx=sx-i,dy=sy-j,w=sinc10(dx)*sinc10(dx/3)*sinc10(dy)*sinc10(dy/3);int xx=max(0,min(sw-1,i)),yy=max(0,min(sh-1,j));sum+=w*in[(yy*sw+xx)*3+ch];weight+=w;}out[t]=(unsigned char)max(0,min(255,int(floorf(sum/weight+.5f))));}
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                  ^~~
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                  fmax
+/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/clang/24/include/__clang_cuda_math_forward_declares.h:79:18: note: 'fmax' declared here
+   79 | __DEVICE__ float fmax(float, float);
+      |                  ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp:21:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch10_jpeg.hpp:50:446: error: use of undeclared identifier 'min'; did you mean 'fmin'?
+   50 | __global__ void lanczos10(const unsigned char*in,unsigned char*out,int sw,int sh,int dw,int dh){int t=blockIdx.x*blockDim.x+threadIdx.x;if(t>=dw*dh*3)return;int ch=t%3,x=t/3%dw,y=t/(3*dw);float sx=(x+.5f)*sw/dw-.5f,sy=(y+.5f)*sh/dh-.5f,sum=0,weight=0;int bx=floorf(sx),by=floorf(sy);for(int j=by-2;j<=by+3;++j)for(int i=bx-2;i<=bx+3;++i){float dx=sx-i,dy=sy-j,w=sinc10(dx)*sinc10(dx/3)*sinc10(dy)*sinc10(dy/3);int xx=max(0,min(sw-1,i)),yy=max(0,min(sh-1,j));sum+=w*in[(yy*sw+xx)*3+ch];weight+=w;}out[t]=(unsigned char)max(0,min(255,int(floorf(sum/weight+.5f))));}
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                              ^~~
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                              fmin
+/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/clang/24/include/__clang_cuda_math_forward_declares.h:81:18: note: 'fmin' declared here
+   81 | __DEVICE__ float fmin(float, float);
+      |                  ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp:21:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch10_jpeg.hpp:50:440: error: use of undeclared identifier 'max'; did you mean 'fmax'?
+   50 | __global__ void lanczos10(const unsigned char*in,unsigned char*out,int sw,int sh,int dw,int dh){int t=blockIdx.x*blockDim.x+threadIdx.x;if(t>=dw*dh*3)return;int ch=t%3,x=t/3%dw,y=t/(3*dw);float sx=(x+.5f)*sw/dw-.5f,sy=(y+.5f)*sh/dh-.5f,sum=0,weight=0;int bx=floorf(sx),by=floorf(sy);for(int j=by-2;j<=by+3;++j)for(int i=bx-2;i<=bx+3;++i){float dx=sx-i,dy=sy-j,w=sinc10(dx)*sinc10(dx/3)*sinc10(dy)*sinc10(dy/3);int xx=max(0,min(sw-1,i)),yy=max(0,min(sh-1,j));sum+=w*in[(yy*sw+xx)*3+ch];weight+=w;}out[t]=(unsigned char)max(0,min(255,int(floorf(sum/weight+.5f))));}
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                        ^~~
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                        fmax
+/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/clang/24/include/__clang_cuda_math_forward_declares.h:79:18: note: 'fmax' declared here
+   79 | __DEVICE__ float fmax(float, float);
+      |                  ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp:21:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch10_jpeg.hpp:50:537: error: no matching function for call to 'floorf'
+   50 | __global__ void lanczos10(const unsigned char*in,unsigned char*out,int sw,int sh,int dw,int dh){int t=blockIdx.x*blockDim.x+threadIdx.x;if(t>=dw*dh*3)return;int ch=t%3,x=t/3%dw,y=t/(3*dw);float sx=(x+.5f)*sw/dw-.5f,sy=(y+.5f)*sh/dh-.5f,sum=0,weight=0;int bx=floorf(sx),by=floorf(sy);for(int j=by-2;j<=by+3;++j)for(int i=bx-2;i<=bx+3;++i){float dx=sx-i,dy=sy-j,w=sinc10(dx)*sinc10(dx/3)*sinc10(dy)*sinc10(dy/3);int xx=max(0,min(sw-1,i)),yy=max(0,min(sh-1,j));sum+=w*in[(yy*sw+xx)*3+ch];weight+=w;}out[t]=(unsigned char)max(0,min(255,int(floorf(sum/weight+.5f))));}
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         ^~~~~~
+/usr/include/x86_64-linux-gnu/bits/mathcalls.h:165:1: note: candidate function not viable: call to __host__ function from __global__ function
+  165 | __MATHCALLX (floor,, (_Mdouble_ __x), (__const__));
+      | ^
+/usr/include/math.h:292:3: note: expanded from macro '__MATHCALLX'
+  292 |   __MATHDECLX (_Mdouble_,function,suffix, args, attrib)
+      |   ^
+/usr/include/math.h:294:3: note: expanded from macro '__MATHDECLX'
+  294 |   __MATHDECL_1(type, function,suffix, args) __attribute__ (attrib); \
+      |   ^
+/usr/include/math.h:299:3: note: expanded from macro '__MATHDECL_1'
+  299 |   __MATHDECL_1_IMPL(type, function, suffix, args)
+      |   ^
+/usr/include/math.h:297:15: note: expanded from macro '__MATHDECL_1_IMPL'
+  297 |   extern type __MATH_PRECNAME(function,suffix) args __THROW
+      |               ^
+/usr/include/math.h:326:34: note: expanded from macro '__MATH_PRECNAME'
+  326 | # define __MATH_PRECNAME(name,r) name##f##r
+      |                                  ^
+<scratch space>:147:1: note: expanded from here
+  147 | floorf
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp:21:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch10_jpeg.hpp:50:525: error: use of undeclared identifier 'min'; did you mean 'fmin'?
+   50 | __global__ void lanczos10(const unsigned char*in,unsigned char*out,int sw,int sh,int dw,int dh){int t=blockIdx.x*blockDim.x+threadIdx.x;if(t>=dw*dh*3)return;int ch=t%3,x=t/3%dw,y=t/(3*dw);float sx=(x+.5f)*sw/dw-.5f,sy=(y+.5f)*sh/dh-.5f,sum=0,weight=0;int bx=floorf(sx),by=floorf(sy);for(int j=by-2;j<=by+3;++j)for(int i=bx-2;i<=bx+3;++i){float dx=sx-i,dy=sy-j,w=sinc10(dx)*sinc10(dx/3)*sinc10(dy)*sinc10(dy/3);int xx=max(0,min(sw-1,i)),yy=max(0,min(sh-1,j));sum+=w*in[(yy*sw+xx)*3+ch];weight+=w;}out[t]=(unsigned char)max(0,min(255,int(floorf(sum/weight+.5f))));}
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             ^~~
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             fmin
+/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/clang/24/include/__clang_cuda_math_forward_declares.h:81:18: note: 'fmin' declared here
+   81 | __DEVICE__ float fmin(float, float);
+      |                  ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp:21:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch10_jpeg.hpp:50:519: error: use of undeclared identifier 'max'; did you mean 'fmax'?
+   50 | __global__ void lanczos10(const unsigned char*in,unsigned char*out,int sw,int sh,int dw,int dh){int t=blockIdx.x*blockDim.x+threadIdx.x;if(t>=dw*dh*3)return;int ch=t%3,x=t/3%dw,y=t/(3*dw);float sx=(x+.5f)*sw/dw-.5f,sy=(y+.5f)*sh/dh-.5f,sum=0,weight=0;int bx=floorf(sx),by=floorf(sy);for(int j=by-2;j<=by+3;++j)for(int i=bx-2;i<=bx+3;++i){float dx=sx-i,dy=sy-j,w=sinc10(dx)*sinc10(dx/3)*sinc10(dy)*sinc10(dy/3);int xx=max(0,min(sw-1,i)),yy=max(0,min(sh-1,j));sum+=w*in[(yy*sw+xx)*3+ch];weight+=w;}out[t]=(unsigned char)max(0,min(255,int(floorf(sum/weight+.5f))));}
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       ^~~
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       fmax
+/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/clang/24/include/__clang_cuda_math_forward_declares.h:79:18: note: 'fmax' declared here
+   79 | __DEVICE__ float fmax(float, float);
+      |                  ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp:21:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch10_jpeg.hpp:51:151: error: use of undeclared identifier 'min'; did you mean 'fmin'?
+   51 | __global__ void watermark10(unsigned char*base,const unsigned char*wm,int count,int alpha){int t=blockIdx.x*blockDim.x+threadIdx.x;if(t<count)base[t]=min(255,int(base[t])+int(wm[t])*alpha/255);}
+      |                                                                                                                                                       ^~~
+      |                                                                                                                                                       fmin
+/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/clang/24/include/__clang_cuda_math_forward_declares.h:81:18: note: 'fmin' declared here
+   81 | __DEVICE__ float fmin(float, float);
+      |                  ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp:21:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch10_jpeg.hpp:8:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:96:1: note: expanded from here
+   96 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batch10_jpeg.hpp:67:424: note: in instantiation of member function 'migration_batch::Buffer<unsigned char>::~Buffer' requested here
+   67 |     if(post){int dw=o.rw?o.rw:std::max(1,w/2),dh=o.rh?o.rh:std::max(1,he/2);final.reset(new Buffer<unsigned char>(size_t(dw)*dh*3));lanczos10<<<(final->n+255)/256,256>>>(scaled[0]->p,final->p,w,he,dw,dh);w=dw;he=dh;if(kind=="Image-Resize-WaterMark"){auto wm=o.watermark.empty()?fs::path("nvJPEG/Image-Resize-WaterMark/NVLogo.jpg"):fs::path(o.watermark);auto water=decode_batch10({wm},"rgbi",o.backend);Buffer<unsigned char>resized(size_t(w)*he*3);lanczos10<<<(resized.n+255)/256,256>>>(water[0].planes[0]->p,resized.p,water[0].h.w,water[0].h.h,w,he);watermark10<<<(final->n+255)/256,256>>>(final->p,resized.p,final->n,o.alpha);}}
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                        ^
+1 warning and 12 errors generated when compiling for gfx1201.
+failed to execute:/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib/llvm/bin/clang++  --offload-arch=gfx1201 --driver-mode=g++ --hip-link  --rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --rocm-device-lib-path=/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode -std=c++17 -O2 -D__HIP_PLATFORM_AMD__ -x hip /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp -o "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/20261110T035143.455304Z/batches9_11-rocm/nvJPEG_nvJPEG-Decoder_nvjpegDecoder.cpp/sample" -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG/nvJPEG-Decoder -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/cpu-codecs/include -I/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/include -I/opt/rocm/core-10.1/include -I/opt/rocm/core-10.1/include/hipblas -I/opt/rocm/core-10.1/include/hipsolver -I/opt/rocm/core-10.1/include/hipsparse -I/opt/rocm/core-10.1/include/rocblas -I/opt/rocm/core-10.1/include/rocsolver -I/opt/rocm/core-10.1/include/rocsparse -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/hipcomp/include -L/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/cpu-codecs/lib -L/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/cpu-codecs/lib64 -L/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/hipcomp/lib -L/opt/rocm/core-10.1/lib -L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib -L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib -Wl,-rpath,/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/cpu-codecs/lib -Wl,-rpath,/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/cpu-codecs/lib64 -Wl,-rpath,/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/hipcomp/lib -Wl,-rpath,/opt/rocm/core-10.1/lib -Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries/lib -Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib -lamdhip64 -lrocjpeg -ljpeg

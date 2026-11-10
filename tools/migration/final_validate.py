@@ -7,6 +7,7 @@ from operator_support import summarize
 from batch2_spec import ALL
 from batch3_spec import ALL as BATCH3
 from batches4_8_spec import ALL as BATCHES4_8
+from batches9_11_spec import ALL as BATCHES9_11
 
 def main():
  errors=[];checks={};cat=json.loads((ROOT/'migration/samples.yaml').read_text());samples=cat['samples'];counts=collections.Counter(s['status'] for s in samples);proofs={}
@@ -104,6 +105,28 @@ def main():
  ctest=(ROOT/'migration/reports/ctest-final.log').read_text();require('100% tests passed, 0 tests failed out of 16' in ctest,'Final 16 CTest checks not passed')
  perf=json.loads((ROOT/'migration/reports/performance-comparison.json').read_text());require(perf['status']=='BLOCKED' and len(perf['profiles'])==6 and all(v['qualified_speed_ratio'] is None for v in perf['profiles']),'Performance ratio incorrectly qualified')
  manifest=json.loads((ROOT/'migration/source-tree.json').read_text())
+ cohort911=json.loads((ROOT/'migration/reports/batches9_11-validation.json').read_text());require(len(cohort911)==19 and {r['source'] for r in cohort911}==set(BATCHES9_11),'B9-B11 inventory incomplete')
+ def sealed_hash(name):
+  p=ROOT/name
+  return digest(p) if p.exists() else manifest['files'].get(name,{}).get('sha256')
+ for r in cohort911:
+  require(r['status']==r['cuda_comparison']=='PASSED' and r.get('current_source_proof') and r.get('current_cuda_source_proof'),'B9-B11 execution/source gate failed '+r['source'])
+  require({c['case'] for c in r['cases']}==set(BATCHES9_11[r['source']]) and len(r['cuda_cases'])==len(r['cases']) and all(c['status']=='PASSED' and c['checks'] and all(v['passed'] for v in c['checks']) for c in r['cases']) and all(c['status']=='PASSED' and c['identical_input'] and c['cuda_cpu_checks']['status']=='PASSED' and all(v['passed'] for v in c['cuda_cpu_checks']['checks']) for c in r['cuda_cases']),'B9-B11 independent numerical/CLI checks incomplete '+r['source'])
+  require(r['validation_source_sha256']==digest(ROOT/'tools/migration/batches9_11_validate.py') and sealed_hash(r['implementation'])==r['implementation_sha256'],'B9-B11 qualifier/implementation stale '+r['source'])
+  require(manifest['files'].get('build/cuda-observed/'+r['source'],{}).get('sha256')==r['cuda_implementation_sha256'],'B9-B11 CUDA observation stale '+r['source'])
+  for name,sha in dict(r['dependencies'],**r['cuda_dependencies']).items():require(sealed_hash(name)==sha,'B9-B11 helper/oracle stale '+name)
+  require(r['environment']['rocm_release']=='10.1.0' and r['environment']['image_id']=='sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03' and all(d['physical_id']==0 for d in r['environment']['devices']),'B9-B11 environment/device identity changed '+r['source'])
+  for c in r['cases']+[c['cuda_cpu_checks'] for c in r['cuda_cases']]:
+   m=c['output_manifest'];require((ROOT/m['path']).exists() and digest(ROOT/m['path'])==m['sha256'] and m['files']>0,'B9-B11 output manifest missing '+r['source']+' '+c.get('case','CUDA'))
+   if (ROOT/m['path']).exists():
+    for n,v in json.loads((ROOT/m['path']).read_text()).items():
+     if pathlib.Path(n).suffix in {'.log','.json'}:require((ROOT/m['path']).parent.joinpath(n).exists() and digest((ROOT/m['path']).parent/n)==v['sha256'],'B9-B11 archived payload altered '+r['source']+' '+n)
+  s=next(s for s in samples if s['source']==r['source']);partial=r['batch']=='b10' or '/benchmarks/' in r['source'] or '/simple_get_set/' in r['source'];require(r['contract_status']==s['status']==('PARTIAL' if partial else 'PASSED'),'B9-B11 original-profile contract incorrectly promoted '+r['source'])
+  if partial:require(bool(r['missing_contract']) and set(s['passed_cases'])<set(s['required_cases']),'B9-B11 partial missing contract absent '+r['source'])
+ neg911=json.loads((ROOT/'migration/reports/batches9_11-negative.json').read_text());require(neg911['status']=='PASSED' and neg911['oracles']==19 and neg911['output_faults']==38 and neg911['semantic_faults']==9 and len(neg911['tests'])==47 and all(x['rejected'] for x in neg911['tests']) and neg911['generator_sha256']==digest(ROOT/'tools/migration/batches9_11_negative.py'),'B9-B11 independent rejection gates incomplete')
+ runtime911=json.loads((ROOT/'migration/reports/batches9_11-runtime-checks.json').read_text());require(runtime911['status']=='PASSED' and len(runtime911['tests'])==23 and all(x['passed'] for x in runtime911['tests']) and runtime911['generator_sha256']==digest(ROOT/'tools/migration/batches9_11_runtime_checks.py'),'B9-B11 runtime/file CLI gates incomplete')
+ interop=json.loads((ROOT/'migration/reports/b9-cross-interop-inputs.json').read_text());require(len(interop)==16 and {x['producer_backend'] for x in interop}=={'rocm','cuda'} and all((ROOT/x['producer_evidence']).exists() and len(x['streams'])==16 for x in interop),'B9 cross-vendor stream provenance missing')
+ checks.update(batches9_11_profiles=len(cohort911),batches9_11_complete_profiles=sum(r['contract_status']=='PASSED' for r in cohort911),batches9_11_partial_profiles=sum(r['contract_status']=='PARTIAL' for r in cohort911),batches9_11_cases=sum(len(r['cases']) for r in cohort911),batches9_11_faults_rejected=len(neg911['tests']),batches9_11_runtime_checks=len(runtime911['tests']),b9_cross_vendor_producers=len(interop))
  for r in cohort:require(manifest['files'].get('build/cuda-observed/'+r['source'],{}).get('sha256')==r['cuda_implementation_sha256'],'B4-B8 CUDA source identity stale '+r['source'])
  for r in batch3:require(manifest['files'].get('build/cuda-observed/'+r['source'],{}).get('sha256')==r['cuda_implementation_sha256'],'Batch3 CUDA source identity stale '+r['source'])
  for name,r in manifest['files'].items():

@@ -1,0 +1,42 @@
+{
+  "build": [
+    "/usr/local/cuda-13.4/bin/nvcc",
+    "-std=c++17",
+    "-O2",
+    "-x",
+    "cu",
+    "-arch=sm_120",
+    "/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/nvCOMP/benchmarks/benchmark_lz4_chunked.cu",
+    "-o",
+    "/home/zihaomu/cuda_samples_on_rocm_compare/artifacts/20261110T035402.245975Z/batches9_11-cuda/nvCOMP_benchmarks_benchmark_lz4_chunked.cu/sample",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/nvCOMP/benchmarks",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/rocm/common",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/build/cpu-codecs/include",
+    "-I/usr/local/cuda-13.4/include",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-sdk/include",
+    "-L/home/zihaomu/cuda_samples_on_rocm_compare/build/cpu-codecs/lib",
+    "-L/home/zihaomu/cuda_samples_on_rocm_compare/build/cpu-codecs/lib64",
+    "-L/usr/local/cuda-13.4/lib64",
+    "-L/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-sdk/lib",
+    "-Xlinker=-rpath=/home/zihaomu/cuda_samples_on_rocm_compare/build/cpu-codecs/lib",
+    "-Xlinker=-rpath=/home/zihaomu/cuda_samples_on_rocm_compare/build/cpu-codecs/lib64",
+    "-Xlinker=-rpath=/usr/local/cuda-13.4/lib64",
+    "-Xlinker=-rpath=/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-sdk/lib",
+    "-lnvcomp",
+    "-llz4",
+    "-lsnappy"
+  ],
+  "cwd": "/home/zihaomu/cuda_samples_on_rocm_compare",
+  "cases": [
+    "original",
+    "variable-batch",
+    "boundary-lengths",
+    "random",
+    "repeat",
+    "corrupt-stream",
+    "truncated-stream"
+  ],
+  "run": [
+    "/home/zihaomu/cuda_samples_on_rocm_compare/artifacts/20261110T035402.245975Z/batches9_11-cuda/nvCOMP_benchmarks_benchmark_lz4_chunked.cu/sample"
+  ]
+}

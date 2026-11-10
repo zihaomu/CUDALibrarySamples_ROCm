@@ -537,14 +537,20 @@ artifacts/<run-id>/<sample-id>/<backend>/<case-id>/
 | S61 | 已完成 | 52/52有限错误与NaN拒绝，8/8缓存/搜索/workspace/分块/对称/custom语义错误拒绝；4/4真实进程边界通过；54输入buffer按seed20261110完整重建hash一致。去重GEMM autotune后全项目99功能族、192样例通过。 | 封存源代码/日志、最终一致性审计并推送fork |
 | S62 | 已完成 | 最终一致性审计PASSED：26/26样例92/92cases；60次输出/语义故障拒绝、4运行边界、54输入重建；192个当前源码证明与1147个封存文件匹配，上游866源/477构建文件未改。 | 提交并推送fork，校验远端README及干净检出 |
 | S63 | 已完成 | 实现提交27424292已推送fork/main，GitHub API核对commit和README blob一致；无build输出/CPU依赖/外部设计文档的干净检出审计PASSED。B4-B8全部登记范围收口，真实CUDA新API缺失与适配边界继续保留。 | 本轮完成；B9-B15保留后续计划 |
+| S64 | 已完成 | 启动B9-B11共19入口：预登记compression7cases、JPEG7类集成检查、稀疏直接求解8cases；B4-B8冻结证明保留不变。 | B9 codec互操作与损坏流门槛；B10完整CLI；B11矩阵类型/配置门槛 |
+| S65 | 已完成 | B9原生GPU/CPU/CUDA核心验证通过：LZ4/Snappy共8入口64cases（含新增8次真实双向跨库GPU互解）；6个examples可提升，2个benchmark核心通过但原始NVBENCH注册/CLI框架保留PARTIAL。 | 继续B10奇数尺寸chroma边界修复与完整Python集成，B11配置查询验收 |
+| S66 | 已完成 | B10 六个入口完成真实文件/CLI、9布局、4缩放、RGB ROI、native batch、多实例和后处理；AMD 42个case逐像素/退出码CPU检查通过，原始Python 10项测试通过。硬件10/12原始JPEG可解；2张progressive明确CPU fallback，完整GPU合同继续PARTIAL。 | 最终CUDA源码一致性复测与证据绑定。 |
+| S67 | 已完成 | B11 五个入口AMD 40个case通过独立SciPy稀疏求解/因子/残差/排列/配置查询检查。原始1000阶GENERAL双RHS经rocSOLVER CSRRF，未转dense；uniform未选batch真实GPU缓冲区保持canary。get_set完整vendor查询仍PARTIAL。 | 核验CUDA奇异矩阵真实NPIVOTS与反向检查。 |
+| S68 | 已完成 | 19入口/146预登记case完成AMD、独立CPU与同输入CUDA验收。整例10通过、9部分；47次数值/语义错误全部拒绝，23项真实文件CLI边界通过。ROI元数据独立几何检查已加固并复核。CUDA奇异例NPIVOTS=1为扰动系统，未算作原奇异系统有效解。 | 归档、主表/算子支持表同步、干净checkout审计与fork发布。 |
+| S69 | 已完成 | B9–B11源码、日志、逐case输出/日志hash与数值参考归档；一致性审计通过202个当前整例证明。fork默认分支已从main变为rocm，远端起点791dca20一致；发布目标改为默认rocm。 | 提交实现后，在无build产物的干净checkout审计，并核对fork提交与README blob。 |
 
 ## 12. 当前实施快照（工具刷新）
 
 本节替代设计阶段的未开始快照。逐步过程保留在第 11 节；整例成功、部分功能、路线失败分别报告，不将执行过计划解释为所有功能均已迁移成功。
 
-更新时间：2026-11-10T03:32:37.786093+00:00。
+更新时间：2026-11-10T04:50:53.569317+00:00。
 
-清单为 **639 个独立可执行/脚本源入口**（563 C/C++、76 Fortran/Python），逐例均有实际尝试记录。当前：`PASSED` 192；`PARTIAL` 6；`FAILED` 438；`BLOCKED` 1；`UNSUPPORTED` 2；`NOT_STARTED` 0；`IN_PROGRESS` 0。
+清单为 **639 个独立可执行/脚本源入口**（563 C/C++、76 Fortran/Python），逐例均有实际尝试记录。当前：`PASSED` 202；`PARTIAL` 13；`FAILED` 422；`BLOCKED` 0；`UNSUPPORTED` 2；`NOT_STARTED` 0；`IN_PROGRESS` 0。
 
 M0 静态审计覆盖全部 477 个构建定义和 866 个源文件，记录 863 个声明、682 个源文件构建绑定；53 个 SDK/测试生成输入/条件变体表达式逐项归类，不重复膨胀入口数量。这不是全部 SDK 条件配置均已生成运行的声明。
 
@@ -581,6 +587,8 @@ python3 tools/migration/render.py
 第三批：8/8 样例、26 个输入 case 三方通过。稀疏3项 → solver4项 → Graph Capture1项依次完成。CG/BiCGSTAB 保留原始700×700网格，独立CSR/CPU求解/真实残差/收敛检查；BiCG变体共享捕获RHS消除生成顺序造成的末位差异，36个输入buffer可重建或按固定fixture核对hash。solver按batch和实际meig检查，含秩亏、未排序配对及索引/值域/全量/空区间。原规模SpVV图含2000个GPU kernel节点，三次输入变化replay通过；24个数值/图语义反向检查全部拒绝。AMD稀疏用物理GPU0，之后该卡被预约，guard阻止启动，solver/graph改用HIP ordinal1→物理GPU2。报告：`migration/reports/batch3.md`。
 
 第四至第八批实时结果：B4 8/8 样例、32/32 cases；B5 4/4 样例、12/12 cases；B6 4/4 样例、15/15 cases；B7 5/5 样例、15/15 cases；B8 5/5 样例、18/18 cases。完整逐例路线、限制和日志入口见 `migration/reports/batches4-8.md`；B8三项CUDA原生新API缺失，兼容数学对照与原始API基线分开记录。
+
+第九至第十一批：B9 6/8 整例、2 部分支持、64/64 cases三方验收；B10 0/6 整例、6 部分支持、42/42 cases三方验收；B11 4/5 整例、1 部分支持、40/40 cases三方验收。B9两个benchmark缺完整NVBENCH框架；B10六项含明确CPU progressive fallback，原生GPU后端和部分原例控制仍缺；B11 get_set完整vendor配置/查询未等价。主表与支持日志保持PARTIAL及恢复条件。详见 `migration/reports/batches9-11.md`。
 
 ## 附录 A：按目录核对的初始范围
 

@@ -3,7 +3,7 @@
 import collections, hashlib, json, pathlib, subprocess
 from catalog import ROOT, CANDIDATES
 
-WEB='https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/main/'
+WEB='https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/'
 def link(label,path):return '['+label+']('+WEB+path.replace(' ','%20')+')'
 def targets(family,names):return [family+'/'+name for name in names]
 
@@ -189,7 +189,7 @@ AMD 固定 ROCm 10.1.0 immutable foundation（镜像 `sha256:a79c374ab2bc93c0e43
 
 **“不可能支持”的准确边界：** 现有证据能够证明某个锁定版本/硬件/现成 API 路线不可用，或某种 NVIDIA 专属执行/二进制契约不能原样搬到 AMD；不能由此证明一个通用数学、图像或压缩算法在 AMD 上永远无法实现。第 4 节逐项说明“无法保持的是什么、证据是什么、改变什么条件可以恢复”。
 
-本次只制定与发布计划，不启动新 GPU 实验，不改变逐例 status/required cases，不把 65 个候选预先算作通过。支持范围与全部 log 见[统一索引](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/main/migration/reports/support-log-index.md)，机读计划见[roadmap.json](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/main/migration/roadmap.json)。
+本次只制定与发布计划，不启动新 GPU 实验，不改变逐例 status/required cases，不把 65 个候选预先算作通过。支持范围与全部 log 见[统一索引](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/reports/support-log-index.md)，机读计划见[roadmap.json](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/roadmap.json)。
 '''
 
 BOUNDARIES='''
@@ -218,11 +218,11 @@ BOUNDARIES='''
 
 | 编号 | 不能直接支持的内容 | 证据及原因 | 保留/替代方式与恢复条件 |
 | --- | --- | --- | --- |
-| U1 | 锁定 hipSPARSELt 在 gfx1201 上的原生 prune/compress/matmul 两个样例 | 已实际运行缺 kernel；锁定源码目标检查也拒绝 gfx1201。[实测与架构检查](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/main/migration/reports/upstream-support/hipsparselt-gfx1201-configure.log)、[归档目标列表](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/main/migration/reports/upstream-support/hipsparselt_supported_architectures.cmake)。 | 当前保持 2 UNSUPPORTED。换有匹配 kernel 的 GPU/SDK，或实现真实结构化稀疏 GPU 路线后重验；dense GEMM 不能冒充原生结构化稀疏。 |
+| U1 | 锁定 hipSPARSELt 在 gfx1201 上的原生 prune/compress/matmul 两个样例 | 已实际运行缺 kernel；锁定源码目标检查也拒绝 gfx1201。[实测与架构检查](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/reports/upstream-support/hipsparselt-gfx1201-configure.log)、[归档目标列表](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/reports/upstream-support/hipsparselt_supported_architectures.cmake)。 | 当前保持 2 UNSUPPORTED。换有匹配 kernel 的 GPU/SDK，或实现真实结构化稀疏 GPU 路线后重验；dense GEMM 不能冒充原生结构化稀疏。 |
 | U2 | 通过当前 hipSOLVER `Xgeev` 兼容路径获得纯 GPU 一般特征分解 | AMD 官方说明该路线转 CPU LAPACK；AMD 上能运行不是 GPU 算法证据。[hipSOLVER General eigensolvers](https://rocm.docs.amd.com/projects/hipSOLVER/en/latest/reference/intro.html#general-eigensolvers)。 | Xgeev 三例保持 PARTIAL，第四例保留现有构建失败。可以另记“CPU 功能可用”，但不计 GPU；恢复需原生/自有 GPU 一般特征求解并验证左右特征向量等契约。 |
 | U3 | 用当前 `gesvdaStridedBatched` 包装实现原始近似 SVD + residual norm 契约 | 官方说明其 partial SVD 为精确算法且不计算残差范数。[hipSOLVER Partial SVD](https://rocm.docs.amd.com/projects/hipSOLVER/en/latest/reference/intro.html#partial-svd-functions)。 | 保持 PARTIAL；另写满足原始算法与残差语义的 GPU 实现，或明确只交付“数学子集”。不能仅补打印一个残差就宣称算法语义等价。 |
 | U4 | 用锁定 hipCOMP 直接完成 Bitcomp、ANS、GDeflate 的原 codec/bitstream 互操作 | 固定 commit 支持表把三者标为未支持；Deflate/GZIP/ZSTD 也只有实验性解码，不能推成双向。[固定 hipCOMP 支持表](https://github.com/ROCm/hipCOMP-core/blob/03df9f7369211ee15d370817165224c73fdc9a46/README.md#algorithm-support)。 | 当前是“库路线缺失”，原例仍 FAILED，不扩大为硬件 UNSUPPORTED。通用算法并非永远不可做；需独立兼容 GPU codec、公开格式与 CUDA/CPU 互解证据。 |
-| U5 | 在 AMD 上原样复现 CUDA Green Context 的 NVIDIA SM 资源契约/ABI | 原例使用 cudaDevSmResourceSplitByCount、cudaGreenCtxCreate 和专属 stream/context；普通 SGEMM 不包含这些功能。[原始样例](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/main/cuBLASLt/LtSgemmGreenContext/sample_cublasLt_LtSgemmGreenCtx.cu)。 | 原 NVIDIA 对象/SM 资源语义不能原样成为 AMD 对象；可研究 AMD CU 资源控制的功能替代，但需单列语义适配证据，不能默认 stream 顶替。 |
+| U5 | 在 AMD 上原样复现 CUDA Green Context 的 NVIDIA SM 资源契约/ABI | 原例使用 cudaDevSmResourceSplitByCount、cudaGreenCtxCreate 和专属 stream/context；普通 SGEMM 不包含这些功能。[原始样例](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/cuBLASLt/LtSgemmGreenContext/sample_cublasLt_LtSgemmGreenCtx.cu)。 | 原 NVIDIA 对象/SM 资源语义不能原样成为 AMD 对象；可研究 AMD CU 资源控制的功能替代，但需单列语义适配证据，不能默认 stream 顶替。 |
 
 ### 4.2 尚无充分证据判成“不可能”的内容
 
@@ -265,9 +265,9 @@ ACCEPTANCE='''
 
 参考依据：本仓库的逐例/环境锁/原生失败日志优先于浮动文档。hipCOMP 使用固定 commit `03df9f7369211ee15d370817165224c73fdc9a46`，hipTensor 与架构材料来自固定 `380ea3ec237d03c4a384b4ed4c49fda82d9f81dd`；其它 AMD 官方文档于 2026-11-10 核对，latest 内容不能替代锁定镜像中的实际能力。hipBLAS Ex/hipBLASLt/rocSOLVER 的 API 是候选路线依据，不是本批新增成功证据。
 
-- [实际库选择、成功边界与恢复条件](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/main/migration/reports/ecosystem-decisions.md)
-- [完整样例支持方式与日志](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/main/migration/reports/support-log-index.md)
-- [项目环境锁](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/main/migration/environments/project.lock.json) · [可选库固定版本](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/main/migration/environments/optional-dependencies.lock.json)
+- [实际库选择、成功边界与恢复条件](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/reports/ecosystem-decisions.md)
+- [完整样例支持方式与日志](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/reports/support-log-index.md)
+- [项目环境锁](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/environments/project.lock.json) · [可选库固定版本](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/environments/optional-dependencies.lock.json)
 - [hipBLAS Ex API](https://rocm.docs.amd.com/projects/hipBLAS/en/latest/reference/hipblas-api-functions.html#blas-extensions) · [hipBLASLt](https://rocm.docs.amd.com/projects/hipBLASLt/en/latest/index.html) · [rocSOLVER LAPACK](https://rocm.docs.amd.com/projects/rocSOLVER/en/latest/reference/lapack.html)
 '''
 

@@ -25,7 +25,7 @@ text+='本批源码与输入草案见 `tools/migration/batches4_8_spec.py`；数
 marker='<!-- B4B8_PROGRESS:START -->';end='<!-- B4B8_PROGRESS:END -->'
 canonical=ROOT.parent/'doc/cuda_samples_on_rocm_roadmap.md'
 if canonical.exists():
- body=canonical.read_text();banner=marker+'\n\n**B4–B8 实施更新：** '+'；'.join(r['batch']+' '+str(r['samples_passed'])+'/'+str(r['samples_required']) for r in summary)+'。当前主表 '+str(totals['PASSED'])+' 个样例通过。[实时验收表](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/main/migration/reports/batches4-8.md)。以下 166/473 等数字为原始计划基线；本更新不改写历史计划。\n\n'+end+'\n\n'
+ body=canonical.read_text();banner=marker+'\n\n**B4–B8 实施更新：** '+'；'.join(r['batch']+' '+str(r['samples_passed'])+'/'+str(r['samples_required']) for r in summary)+'。当前主表 '+str(totals['PASSED'])+' 个样例通过。[实时验收表](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/reports/batches4-8.md)。以下 166/473 等数字为原始计划基线；本更新不改写历史计划。\n\n'+end+'\n\n'
  if marker in body:body=body.split(marker)[0]+banner+body.split(end,1)[1].lstrip('\n')
  else:body=body.replace('## 1. 当前基线与计划目标',banner+'## 1. 当前基线与计划目标',1)
  if all(x['samples_passed']==x['samples_required'] for x in summary):body=body.replace('**B4–B8 正在按实时表实施；B9–B15 尚未启动。以下正文保留原始计划基线**','**B4–B8 已完成登记范围验收；B9–B15 尚未启动。以下正文保留原始计划基线**')

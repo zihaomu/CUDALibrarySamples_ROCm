@@ -1,0 +1,50 @@
+#!/usr/bin/env python3
+"""Numerical/byte/pixel/CLI qualification with explicit original-profile contract limits."""
+import argparse,fcntl,importlib,json,pathlib
+from catalog import ROOT
+from run import digest,evidence_directory
+from batches9_11_spec import GROUPS,kind
+from validate_blas import np
+p=argparse.ArgumentParser();p.add_argument('groups',nargs='+',choices=list(GROUPS));p.add_argument('--qualify',action='store_true');a=p.parse_args()
+amd={r['source']:r for r in json.loads((ROOT/'migration/reports/batches9_11-rocm.json').read_text())};cp=ROOT/'migration/reports/batches9_11-cuda.json';cuda={r['source']:r for r in json.loads(cp.read_text())} if cp.exists() else {};results=[]
+for group in a.groups:
+ reference=importlib.import_module('batch'+group[1:]+'_reference')
+ for source,cases in GROUPS[group].items():
+  r=amd.get(source);cr=cuda.get(source)
+  if not r:continue
+  checks=[];comparisons=[]
+  for case in cases:
+   def one(record):
+    if not record or record['build_return_code']:raise ValueError('build missing or failed')
+    c=next(x for x in record['runs'] if x['case']==case)
+    if c['return_code']:raise ValueError('run failed '+str(c['return_code']))
+    directory=evidence_directory(c['evidence']);checked=reference.validate(source,case,directory,backend=record['environment']['backend']) if group=='b9' else reference.validate(source,case,directory);manifest={str(f.relative_to(directory)):dict(sha256=digest(f),bytes=f.stat().st_size) for f in directory.rglob('*') if f.is_file() and f.name!='outputs-manifest.json' and f.suffix.lower() in ['.bin','.raw','.bmp','.jpg','.json','.log']};(directory/'outputs-manifest.json').write_text(json.dumps(manifest,indent=2)+'\n');checked['output_manifest']=dict(path=str((directory/'outputs-manifest.json').relative_to(ROOT)),sha256=digest(directory/'outputs-manifest.json'),files=len(manifest));return checked
+   try:v=one(r)
+   except Exception as e:v=dict(status='FAILED',reason=str(e))
+   v['case']=case;checks.append(v)
+   try:
+    cv=one(cr);same=v.get('input_sha256')==cv.get('input_sha256');yes=v['status']==cv['status']=='PASSED' and same
+    for name,vals in v.get('output_values',{}).items():yes=bool(yes and name in cv.get('output_values',{}) and np.allclose(vals,cv['output_values'][name],rtol=3e-7,atol=3e-7))
+    comparisons.append(dict(case=case,status='PASSED' if yes else 'FAILED',identical_input=same,cuda_cpu_checks=cv))
+   except Exception as e:comparisons.append(dict(case=case,status='BLOCKED',reason=str(e)))
+  passed=bool(r['build_return_code']==0 and len(checks)==len(cases) and all(c['status']=='PASSED' for c in checks));comparison='PASSED' if all(c['status']=='PASSED' for c in comparisons) else 'FAILED';row=dict(r,status='PASSED' if passed else 'FAILED',level='L4' if passed else 'L3' if not r['build_return_code'] else 'L1',cases=checks,cuda_cases=comparisons,cuda_comparison=comparison,cuda_evidence=cr.get('evidence') if cr else None,cuda_implementation_sha256=cr.get('implementation_sha256') if cr else None,validation_source_sha256=digest(pathlib.Path(__file__)))
+  row['dependencies']=dict(r['dependencies'],**{'tools/migration/batch'+group[1:]+'_reference.py':digest(ROOT/('tools/migration/batch'+group[1:]+'_reference.py'))})
+  row['dependencies']['tools/migration/batches9_11_spec.py']=digest(ROOT/'tools/migration/batches9_11_spec.py');row['dependencies']['tools/migration/batches9_11_run.py']=digest(ROOT/'tools/migration/batches9_11_run.py')
+  if group=='b9':row['dependencies']['migration/reports/b9-cross-interop-inputs.json']=digest(ROOT/'migration/reports/b9-cross-interop-inputs.json')
+  row['cuda_dependencies']=cr.get('dependencies',{}) if cr else {};row['current_cuda_source_proof']=bool(cr and digest(ROOT/cr['implementation'])==cr['implementation_sha256'] and all(digest(ROOT/n)==h for n,h in row['cuda_dependencies'].items()))
+  if group=='b10':row['dependencies']['tools/migration/batch10_case.py']=digest(ROOT/'tools/migration/batch10_case.py');row['dependencies']['nvJPEG/nvJPEG-Decoder/tests/test_decoder.py']=digest(ROOT/'nvJPEG/nvJPEG-Decoder/tests/test_decoder.py')
+  row['current_source_proof']=digest(ROOT/r['implementation'])==r['implementation_sha256'] and all(digest(ROOT/n)==h for n,h in r['dependencies'].items()) and row['current_cuda_source_proof'];row['contract_status']='PASSED' if passed and comparison=='PASSED' and row['current_source_proof'] else 'FAILED'
+  if group=='b10' and passed:row['contract_status']='PARTIAL';row['missing_contract']=['native-progressive-GPU-backend']+(['original-multiple-instance-auto-scheduling-controls'] if 'MultipleInstances' in source else [])+(['decoupled-pipeline-and-native-backend-enums'] if 'Backend-ROI' in source else []);row['limitation']='锁定rocJPEG的HYBRID创建返回-12；原始12图中2张progressive由明确标注的libjpeg CPU fallback解码。GPU格式/ROI/缩放/Lanczos/水印和真实CLI已验证，CPU编码不声称AMDGPU JPEG encoder支持。'
+  if '/benchmarks/' in source and passed:row['contract_status']='PARTIAL';row['missing_contract']=['original-nvbench-CLI-and-measurement-harness'];row['limitation']='默认uint8 LZ4/Snappy batch核心及互操作已验证；原始NVBENCH注册/控制参数与完整benchmark CLI未移植，不将codec driver当成完整benchmark。'
+  if group=='b11' and kind(source)=='simple_get_set' and passed:row['contract_status']='PARTIAL';row['missing_contract']=['full-cuDSS-config-query-semantics'];row['limitation']='稀疏求解、实际Hungarian matching/缩放、分步/融合GPU数值策略、IR、排列/LU/LDL对角/惯性查询已验证；完整cuDSS超级面板策略、16项host/peak内存估计和原矩阵顺序DIAG查询尚未逐项等价。项目核心内存用量与因子顺序对角明确标注，不填造vendor查询。'
+  results.append(row);failed=[(c['case'],c.get('reason'),[x['check'] for x in c.get('checks',[]) if not x['passed']][:3]) for c in checks if c['status']!='PASSED'];print(source,row['status'],'CUDA',comparison,'CONTRACT',row['contract_status'],failed,flush=True)
+report=ROOT/'migration/reports/batches9_11-validation.json';old=json.loads(report.read_text()) if report.exists() else [];merged={r['source']:r for r in old};merged.update({r['source']:r for r in results});report.write_text(json.dumps(list(merged.values()),indent=2,ensure_ascii=False)+'\n')
+if a.qualify:
+ with (ROOT/'migration/.state.lock').open('w') as lock:
+  fcntl.flock(lock,fcntl.LOCK_EX);path=ROOT/'migration/samples.yaml';cat=json.loads(path.read_text())
+  for r in results:
+   s=next(x for x in cat['samples'] if x['source']==r['source']);s['attempts'].append(r);s['evidence']=list(dict.fromkeys(s['evidence']+[r['evidence'],'migration/reports/batches9_11-validation.json']+([r['cuda_evidence']] if r['cuda_evidence'] else [])))
+   if r['status']!='PASSED' or r['cuda_comparison']!='PASSED' or not r['current_source_proof']:continue
+   labels=['batches9_11/'+c['case'] for c in r['cases']];group=r['batch'];k=kind(s['source']);route={'b9':'hipCOMP LZ4/Snappy + CPU liblz4/Snappy + HIP checked stream/CRC manager adapter','b10':'rocJPEG + HIP layout/ROI/Lanczos/watermark + explicit libjpeg CPU fallback/encode','b11':'CPU sparse symbolic/matching + rocSOLVER CSRRF LU / HIP CSR pivot LU and GPU query adapter'}[group]
+   s.update(status=r['contract_status'],level='L4',implementation=r['implementation'],actual_library=route,backend_library={'b9':'hipCOMP/HIP runtime + independent CPU codecs','b10':'rocJPEG/HIP runtime + libjpeg-turbo','b11':'rocSOLVER/HIP runtime'}[group],equivalence='HYBRID_HIP' if group!='b10' else 'HYBRID_CPU_GPU',required_cases=labels+['batches9_11/'+x for x in r.get('missing_contract',[])],passed_cases=labels,reason_code='VALIDATED_B9_B11' if r['contract_status']=='PASSED' else 'VALIDATED_B9_B11_SUBSET',reason='使用 '+route+'；'+str(len(labels))+' 个预登记case通过独立CPU与同输入CUDA。'+r.get('limitation','保留原始规模、矩阵类别/CPU-GPU阶段分工；适配范围与实际GPU执行、status/返回长度及配置查询逐例记录。'),cuda_baseline='PASSED',cuda_comparison='PASSED',cuda_baseline_reason='Native CUDA codec/cuDSS/nvJPEG library numerical baseline; project execution adapters separately identified.',selected_validation=r,retry_condition='缺失范围：'+','.join(r['missing_contract'])+'；需要真实后端/完整harness并重做验收。' if r.get('missing_contract') else '扩展其它精度/规模/参数需要新增预登记case并重新验收。',reproduce='HIP_VISIBLE_DEVICES=2 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh python tools/migration/batches9_11_run.py '+group+'\nOPENBLAS_NUM_THREADS=1 python3 tools/migration/batches9_11_validate.py '+group+' --qualify')
+  path.write_text(json.dumps(cat,indent=2,ensure_ascii=False)+'\n')

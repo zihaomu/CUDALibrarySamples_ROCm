@@ -1,0 +1,41 @@
+{
+  "build": [
+    "/usr/local/cuda-13.4/bin/nvcc",
+    "-std=c++17",
+    "-O2",
+    "-x",
+    "cu",
+    "-arch=sm_120",
+    "/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp",
+    "-o",
+    "/home/zihaomu/cuda_samples_on_rocm_compare/artifacts/20261110T043816.470698Z/batches9_11-cuda/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp/sample",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-observed/nvJPEG/Image-Resize-WaterMark",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/rocm/common",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/build/cpu-codecs/include",
+    "-I/usr/local/cuda-13.4/include",
+    "-I/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-sdk/include",
+    "-L/home/zihaomu/cuda_samples_on_rocm_compare/build/cpu-codecs/lib",
+    "-L/home/zihaomu/cuda_samples_on_rocm_compare/build/cpu-codecs/lib64",
+    "-L/usr/local/cuda-13.4/lib64",
+    "-L/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-sdk/lib",
+    "-Xlinker=-rpath=/home/zihaomu/cuda_samples_on_rocm_compare/build/cpu-codecs/lib",
+    "-Xlinker=-rpath=/home/zihaomu/cuda_samples_on_rocm_compare/build/cpu-codecs/lib64",
+    "-Xlinker=-rpath=/usr/local/cuda-13.4/lib64",
+    "-Xlinker=-rpath=/home/zihaomu/cuda_samples_on_rocm_compare/build/cuda-sdk/lib",
+    "-lnvjpeg",
+    "-ljpeg"
+  ],
+  "cwd": "/home/zihaomu/cuda_samples_on_rocm_compare",
+  "cases": [
+    "original-corpus",
+    "formats-scale",
+    "roi-boundary",
+    "batch-multi-instance",
+    "invalid-cli",
+    "postprocess",
+    "python-integration"
+  ],
+  "run": [
+    "/home/zihaomu/cuda_samples_on_rocm_compare/artifacts/20261110T043816.470698Z/batches9_11-cuda/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp/sample"
+  ]
+}

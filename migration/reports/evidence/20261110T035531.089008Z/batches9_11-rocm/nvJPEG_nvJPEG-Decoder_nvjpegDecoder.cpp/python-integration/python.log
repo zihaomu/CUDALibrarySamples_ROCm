@@ -1,0 +1,77 @@
+test_cli_errors_and_help (__main__.HardwareDecodeTest.test_cli_errors_and_help) ... ok
+test_default_mode_bmp_and_mixed_batch (__main__.HardwareDecodeTest.test_default_mode_bmp_and_mixed_batch) ... ok
+test_default_mode_raw_and_partial_batch (__main__.HardwareDecodeTest.test_default_mode_raw_and_partial_batch) ... ok
+test_failures_never_report_pass (__main__.HardwareDecodeTest.test_failures_never_report_pass) ... ok
+test_goldens_repetition_and_mismatch (__main__.HardwareDecodeTest.test_goldens_repetition_and_mismatch) ... FAIL
+test_grayscale_geometry_and_independent_pixels (__main__.HardwareDecodeTest.test_grayscale_geometry_and_independent_pixels) ... ok
+test_nv12_matches_planar_yuv (__main__.HardwareDecodeTest.test_nv12_matches_planar_yuv) ... ok
+test_recursive_paths_and_exact_counts (__main__.HardwareDecodeTest.test_recursive_paths_and_exact_counts) ... ok
+test_rgb_interleaving_and_luma (__main__.HardwareDecodeTest.test_rgb_interleaving_and_luma) ... FAIL
+test_yuy2_matches_planar_yuv_with_odd_width (__main__.HardwareDecodeTest.test_yuy2_matches_planar_yuv_with_odd_width) ... 
+  test_yuy2_matches_planar_yuv_with_odd_width (__main__.HardwareDecodeTest.test_yuy2_matches_planar_yuv_with_odd_width) (scale=1) ... FAIL
+  test_yuy2_matches_planar_yuv_with_odd_width (__main__.HardwareDecodeTest.test_yuy2_matches_planar_yuv_with_odd_width) (scale=2) ... FAIL
+  test_yuy2_matches_planar_yuv_with_odd_width (__main__.HardwareDecodeTest.test_yuy2_matches_planar_yuv_with_odd_width) (scale=4) ... FAIL
+  test_yuy2_matches_planar_yuv_with_odd_width (__main__.HardwareDecodeTest.test_yuy2_matches_planar_yuv_with_odd_width) (scale=8) ... FAIL
+
+======================================================================
+FAIL: test_goldens_repetition_and_mismatch (__main__.HardwareDecodeTest.test_goldens_repetition_and_mismatch)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG/nvJPEG-Decoder/tests/test_decoder.py", line 124, in test_goldens_repetition_and_mismatch
+    self.invoke("-i", image, "-fmt", "yuy2", "-t", 3, "-reference", golden)
+    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG/nvJPEG-Decoder/tests/test_decoder.py", line 38, in invoke
+    self.assertEqual(result.returncode, code, log)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 4 != 0 : RESULT status=FAIL reason=golden pixel mismatch
+
+
+======================================================================
+FAIL: test_rgb_interleaving_and_luma (__main__.HardwareDecodeTest.test_rgb_interleaving_and_luma)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG/nvJPEG-Decoder/tests/test_decoder.py", line 105, in test_rgb_interleaving_and_luma
+    self.assertEqual(packed[c::3], planar[c * size:(c + 1) * size])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: b'\x0[1280 chars]x80\x01\x02\x06\x08\x0c\x0e\x12\x13\x18\x1b\x1[29886 chars]\x80' != b'\x0[1280 chars]x80\x80\x80\x80\x80\x80\x80\x80\x13\x18\x1b\x1[29837 chars]\x80'
+
+======================================================================
+FAIL: test_yuy2_matches_planar_yuv_with_odd_width (__main__.HardwareDecodeTest.test_yuy2_matches_planar_yuv_with_odd_width) (scale=1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG/nvJPEG-Decoder/tests/test_decoder.py", line 93, in test_yuy2_matches_planar_yuv_with_odd_width
+    self.assertEqual(line[::2][:w], planar[row * w:(row + 1) * w])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: b'\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0[224 chars]5678' != b'5555555\n\x0b\x0c\r\x0e\x0e\x0f\x11\x12\x[205 chars]5678'
+
+======================================================================
+FAIL: test_yuy2_matches_planar_yuv_with_odd_width (__main__.HardwareDecodeTest.test_yuy2_matches_planar_yuv_with_odd_width) (scale=2)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG/nvJPEG-Decoder/tests/test_decoder.py", line 93, in test_yuy2_matches_planar_yuv_with_odd_width
+    self.assertEqual(line[::2][:w], planar[row * w:(row + 1) * w])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: b":::$\x10\x12\x14\x16\x18\x1a\x1c\x1e #$')[65 chars]79;=" != b"\x08\n\x0c\x0e\x10\x12\x14\x16\x18\x1a\x1[75 chars]79;="
+
+======================================================================
+FAIL: test_yuy2_matches_planar_yuv_with_odd_width (__main__.HardwareDecodeTest.test_yuy2_matches_planar_yuv_with_odd_width) (scale=4)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG/nvJPEG-Decoder/tests/test_decoder.py", line 93, in test_yuy2_matches_planar_yuv_with_odd_width
+    self.assertEqual(line[::2][:w], planar[row * w:(row + 1) * w])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: b'\x12\x12\x0e\x12\x16\x1a\x1e"&*/37;?CGKOSW5\x13\x17\x1b\x1f#\'+/37:' != b'\x1e\x1b\x0e\x12\x16\x1a\x1e"&*/37;?CGKOSW5\x13\x17\x1b\x1f#\'+/37:'
+
+======================================================================
+FAIL: test_yuy2_matches_planar_yuv_with_odd_width (__main__.HardwareDecodeTest.test_yuy2_matches_planar_yuv_with_odd_width) (scale=8)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG/nvJPEG-Decoder/tests/test_decoder.py", line 93, in test_yuy2_matches_planar_yuv_with_odd_width
+    self.assertEqual(line[::2][:w], planar[row * w:(row + 1) * w])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: b'\x18\x16\x1e&/7?GOWL\x1b#+3;@' != b'\x1d\x16\x1e&/7?GOWL\x1b#+3;@'
+
+----------------------------------------------------------------------
+Ran 10 tests in 9.189s
+
+FAILED (failures=6)

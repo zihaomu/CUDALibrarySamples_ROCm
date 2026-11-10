@@ -1,7 +1,7 @@
 {
   "status": "PASSED",
   "scope": "Consistency and proof integrity of the recorded execution outcomes; not a claim that failed/unimplemented samples were successfully migrated.",
-  "timestamp": "2026-11-10T03:32:38.687861+00:00",
+  "timestamp": "2026-11-10T04:53:34.100436+00:00",
   "checks": {
     "batches4_8_semantic_faults_rejected": 8,
     "batches4_8_samples": 26,
@@ -10,22 +10,28 @@
     "batches4_8_runtime_guards": 4,
     "batches4_8_input_buffers_verified": 54,
     "batches4_8_compatible_cuda_baselines": 3,
+    "batches9_11_profiles": 19,
+    "batches9_11_complete_profiles": 10,
+    "batches9_11_partial_profiles": 9,
+    "batches9_11_cases": 146,
+    "batches9_11_faults_rejected": 47,
+    "batches9_11_runtime_checks": 23,
+    "b9_cross_vendor_producers": 16,
     "unique_entrypoints": 639,
     "terminal_counts": {
-      "FAILED": 438,
-      "PASSED": 192,
-      "PARTIAL": 6,
-      "UNSUPPORTED": 2,
-      "BLOCKED": 1
+      "FAILED": 422,
+      "PASSED": 202,
+      "PARTIAL": 13,
+      "UNSUPPORTED": 2
     },
     "families": 30,
-    "verified_operator_families": 99,
-    "modules_with_verified_operators": 9,
+    "verified_operator_families": 102,
+    "modules_with_verified_operators": 10,
     "upstream_sources_unchanged": 866,
     "upstream_build_definitions_unchanged": 477,
-    "current_qualified_proofs": 192,
+    "current_qualified_proofs": 202,
     "detail_pages": 639,
-    "generated_relative_links": 7019,
+    "generated_relative_links": 7096,
     "m1_samples": 16,
     "m1_required_cases": 95,
     "additional_comparisons": 54,
@@ -35,8 +41,8 @@
     "ctest_samples": 16,
     "performance_profiles": 6,
     "performance_qualification": "BLOCKED",
-    "source_files_sealed": 1147,
-    "source_tree_sha256": "c8ba8d23abf376293bf7a2df6711433e4c9cb53df93c61b969e632eb5c73bb65",
+    "source_files_sealed": 1186,
+    "source_tree_sha256": "bf64583b853e47cfd6cd714a4d4850b03b506e03e7b7471bd4c03f7e4a3f1a20",
     "batch3_samples": 8,
     "batch3_cases": 26,
     "batch3_corruptions_rejected": 24,
@@ -977,6 +983,54 @@
           "logical_id": 0,
           "pci_bdf": "0000:e3:00.0",
           "physical_id": 7
+        }
+      ]
+    },
+    "cuDSS/simple_batch::simple_batch.cpp": {
+      "implementation": "rocm/ported/cuDSS/simple_batch/simple_batch.cpp",
+      "sha256": "d881e3ae7d033405b2813489b1b93cc3ea8b8f645c8f6431a85390e8e9b2d40a",
+      "evidence": "migration/reports/evidence/20261110T043650.167709Z/batches9_11-rocm/cuDSS_simple_batch_simple_batch.cpp",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
+    "cuDSS/simple_reordering_phase::simple_reordering_phase.cpp": {
+      "implementation": "rocm/ported/cuDSS/simple_reordering_phase/simple_reordering_phase.cpp",
+      "sha256": "a3dc4c03b8215a67bf5b00fd3080ec0284687f5dcad2dad31309feadf2c62b39",
+      "evidence": "migration/reports/evidence/20261110T043650.167709Z/batches9_11-rocm/cuDSS_simple_reordering_phase_simple_reordering_phase.cpp",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
+    "cuDSS/simple_residual::simple_residual.cpp": {
+      "implementation": "rocm/ported/cuDSS/simple_residual/simple_residual.cpp",
+      "sha256": "389896986b74600ae2012e0b816a9fe764696aaf5c2bcf76e6ffe02336352b93",
+      "evidence": "migration/reports/evidence/20261110T043650.167709Z/batches9_11-rocm/cuDSS_simple_residual_simple_residual.cpp",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
+    "cuDSS/simple_uniform_batch::simple_uniform_batch.cpp": {
+      "implementation": "rocm/ported/cuDSS/simple_uniform_batch/simple_uniform_batch.cpp",
+      "sha256": "90bcb18ba8f253595f1f25d30a0fb7fcadf1ed6e19c03fcbf80e9b17b7fc9a4e",
+      "evidence": "migration/reports/evidence/20261110T043650.167709Z/batches9_11-rocm/cuDSS_simple_uniform_batch_simple_uniform_batch.cpp",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
         }
       ]
     },
@@ -2365,6 +2419,78 @@
       "implementation": "rocm/ported/cuTENSOR/reduction.cu",
       "sha256": "8bf134a71342ed866292b11c6d59912982e43ea5918b840923562a8f1754a2e2",
       "evidence": "migration/reports/evidence/20261109T120640.677903Z/batch2-rocm/cuTENSOR_reduction.cu",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
+    "nvCOMP/examples::high_level_quickstart_example.cpp": {
+      "implementation": "rocm/ported/nvCOMP/examples/high_level_quickstart_example.cpp",
+      "sha256": "20f8a790568225ee140d842fb58a87eb8f2e60c152e27c7d1ed64d9b29155fd6",
+      "evidence": "migration/reports/evidence/20261110T043427.533946Z/batches9_11-rocm/nvCOMP_examples_high_level_quickstart_example.cpp",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
+    "nvCOMP/examples::low_level_quickstart_example.cpp": {
+      "implementation": "rocm/ported/nvCOMP/examples/low_level_quickstart_example.cpp",
+      "sha256": "c2237c34a97d99d44878c375586b7c50635f87938e272563ce1cef209a619ebb",
+      "evidence": "migration/reports/evidence/20261110T043427.533946Z/batches9_11-rocm/nvCOMP_examples_low_level_quickstart_example.cpp",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
+    "nvCOMP/examples::lz4_cpu_compression.cu": {
+      "implementation": "rocm/ported/nvCOMP/examples/lz4_cpu_compression.cu",
+      "sha256": "85549b5bcc5f1b7b606d41744d2b2414524820ebed0b4f52f56db8ef6736ac68",
+      "evidence": "migration/reports/evidence/20261110T043427.533946Z/batches9_11-rocm/nvCOMP_examples_lz4_cpu_compression.cu",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
+    "nvCOMP/examples::lz4_cpu_decompression.cu": {
+      "implementation": "rocm/ported/nvCOMP/examples/lz4_cpu_decompression.cu",
+      "sha256": "5a304ed9b286818424205d6291d48a41d30d035f0a6fa8d76e7cafc1cd1a42b5",
+      "evidence": "migration/reports/evidence/20261110T043427.533946Z/batches9_11-rocm/nvCOMP_examples_lz4_cpu_decompression.cu",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
+    "nvCOMP/examples::snappy_cpu_compression.cu": {
+      "implementation": "rocm/ported/nvCOMP/examples/snappy_cpu_compression.cu",
+      "sha256": "de712a22fb1d0b3a2b8b8225ee7d714e642ea0635ad464c9f7f455f8cc39c371",
+      "evidence": "migration/reports/evidence/20261110T043427.533946Z/batches9_11-rocm/nvCOMP_examples_snappy_cpu_compression.cu",
+      "physical_devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:03:00.0",
+          "physical_id": 0
+        }
+      ]
+    },
+    "nvCOMP/examples::snappy_cpu_decompression.cu": {
+      "implementation": "rocm/ported/nvCOMP/examples/snappy_cpu_decompression.cu",
+      "sha256": "68d8745a401a236c76471343d4535208149b6487b681f83b015383ec4a7e4553",
+      "evidence": "migration/reports/evidence/20261110T043427.533946Z/batches9_11-rocm/nvCOMP_examples_snappy_cpu_decompression.cu",
       "physical_devices": [
         {
           "logical_id": 0,

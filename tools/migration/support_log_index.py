@@ -7,6 +7,7 @@ from run import digest
 METHODS={
     'API_PORT':'库 API 迁移',
     'HYBRID_HIP':'生态库 + 项目 HIP 实现',
+    'HYBRID_CPU_GPU':'GPU 实现 + 明确标注的 CPU 阶段',
     'LIBRARY_REWRITE':'改用 AMD 库重写算法流程',
     'API_PORT_WITH_EXECUTION_ADAPTER':'库 API 迁移 + 执行语义适配',
     'UNIMPLEMENTED_BINDING':'语言绑定尚未实现',

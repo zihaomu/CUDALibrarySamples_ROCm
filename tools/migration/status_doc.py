@@ -50,6 +50,9 @@ if batch.exists():
 live=r/'batches4-8-progress.json'
 if live.exists():
  summary=json.loads(live.read_text());text+='第四至第八批实时结果：'+'；'.join(x['batch']+' '+str(x['samples_passed'])+'/'+str(x['samples_required'])+' 样例、'+str(x['cases_passed'])+'/'+str(x['cases_required'])+' cases' for x in summary['batches'])+'。完整逐例路线、限制和日志入口见 `migration/reports/batches4-8.md`；B8三项CUDA原生新API缺失，兼容数学对照与原始API基线分开记录。\n\n'
+live=r/'batches9-11-progress.json'
+if live.exists():
+ summary=json.loads(live.read_text());text+='第九至第十一批：'+'；'.join(x['batch']+' '+str(x['samples_passed'])+'/'+str(x['samples_required'])+' 整例、'+str(x['samples_partial'])+' 部分支持、'+str(x['cases_verified'])+'/'+str(x['cases_required'])+' cases三方验收' for x in summary['batches'])+'。B9两个benchmark缺完整NVBENCH框架；B10六项含明确CPU progressive fallback，原生GPU后端和部分原例控制仍缺；B11 get_set完整vendor配置/查询未等价。主表与支持日志保持PARTIAL及恢复条件。详见 `migration/reports/batches9-11.md`。\n\n'
 with DOC.with_suffix('.lock').open('w') as lock:
  fcntl.flock(lock,fcntl.LOCK_EX);body=DOC.read_text();start=body.index('## 12.');end=body.index('## 附录 A',start);body=body[:start]+text+body[end:];body=body.replace('HIP_VISIBLE_DEVICES=0 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh','HIP_VISIBLE_DEVICES=2 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh');DOC.write_text(body.rstrip()+'\n')
 print('Current design snapshot refreshed')

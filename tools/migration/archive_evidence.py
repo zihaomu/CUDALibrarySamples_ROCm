@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """Keep text/JSON evidence in Git; leave binaries and large outputs in artifacts/."""
-import hashlib,json,pathlib,shutil
+import argparse,hashlib,json,pathlib,shutil
 from catalog import ROOT
+p=argparse.ArgumentParser();p.add_argument('--text-only',action='store_true',help='Refresh text/JSON evidence while retaining the existing large binary hash index');args=p.parse_args()
 cat=json.loads((ROOT/'migration/samples.yaml').read_text());base=ROOT/'migration/reports/evidence';outputs={}
+if args.text_only:outputs=json.loads((ROOT/'migration/reports/binary-outputs.json').read_text())
 # Preserve successful and unsuccessful attempts, with their original relative structure.
 for src in (ROOT/'artifacts').rglob('*'):
  if src.is_file() and src.suffix in {'.json','.log','.txt','.csv'}:
   dest=base/src.relative_to(ROOT/'artifacts');dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(src,dest)
- elif src.is_file() and src.suffix=='.bin':
+ elif not args.text_only and src.is_file() and src.suffix=='.bin':
   outputs[str(src.relative_to(ROOT))]={'sha256':hashlib.sha256(src.read_bytes()).hexdigest(),'bytes':src.stat().st_size,'storage':'Local artifacts; regenerate with recorded source, commands and input recipe/fixture.'}
 def saved(path):
  if isinstance(path,str) and path.startswith('artifacts/'):
