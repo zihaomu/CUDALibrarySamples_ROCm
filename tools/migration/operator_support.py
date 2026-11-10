@@ -29,7 +29,7 @@ def operator_name(sample):
   if kind=='mggetrf':return '多 GPU LU 分解/求解'
   if kind in {'syevd','xsyevd','syevj','syevjbatched','syevdx','xsyevdx'}:return '对称特征分解'
   if kind in {'sygvd','sygvj','sygvdx'}:return '广义对称特征分解'
-  if kind in {'gesvd','gesvdj','gesvdjbatched','xgesvd'}:return 'SVD'
+  if kind in {'gesvd','gesvdj','gesvdjbatched','xgesvd','gesvdastridedbatched'}:return 'SVD'
   return {'getrf':'LU 分解/求解','xgetrf':'LU 分解/求解','ormqr':'QR 的 Q 应用','xtrtri':'三角矩阵求逆','orgqr':'QR 的 Q 生成','xgeqrf':'QR 分解','xpotrf':'Cholesky 分解','potrfbatched':'Cholesky 分解'}[kind]
  if family=='cuSPARSE':
   if kind=='graph_capture':return 'SpVV Graph Capture/Replay'

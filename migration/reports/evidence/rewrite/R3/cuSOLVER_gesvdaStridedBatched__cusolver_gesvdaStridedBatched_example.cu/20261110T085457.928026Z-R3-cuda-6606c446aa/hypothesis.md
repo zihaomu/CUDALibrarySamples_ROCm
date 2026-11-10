@@ -1,0 +1,1 @@
+Test cuda for cuSOLVER/gesvdaStridedBatched::cusolver_gesvdaStridedBatched_example.cu, case original. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T085452.637296Z-R3-R7-cuda-build-c871d5ece7.

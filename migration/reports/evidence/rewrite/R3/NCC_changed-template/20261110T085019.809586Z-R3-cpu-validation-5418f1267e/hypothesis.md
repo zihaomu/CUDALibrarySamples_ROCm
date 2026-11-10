@@ -1,0 +1,1 @@
+Test cpu-validation for NCC/changed-template, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T084549.557463Z-R3-cuda-native-f6f2d2acc4.

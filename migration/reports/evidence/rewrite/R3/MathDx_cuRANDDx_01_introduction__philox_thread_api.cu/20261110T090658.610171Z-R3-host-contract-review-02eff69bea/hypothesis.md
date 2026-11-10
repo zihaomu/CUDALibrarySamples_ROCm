@@ -1,0 +1,1 @@
+Test host-contract-review for MathDx/cuRANDDx/01_introduction::philox_thread_api.cu, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: none.

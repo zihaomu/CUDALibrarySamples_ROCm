@@ -1,0 +1,1 @@
+Test native-comparison for NCC/repeat, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T084832.783237Z-R3-rocm-45dd676880.

@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+"""Run original native NPP harness with observation-only output on identical files."""
+import json,shlex,shutil
+from pathlib import Path
+from experiment import ROOT,Experiment,write,digest
+host='nvidia-5090x2';original=ROOT/'NPP/templateMatching/templateMatching.cpp';ported=(ROOT/'rocm/ported/NPP/templateMatching/templateMatching.cpp').read_text();start=ported.index('    if (const char* directory=');end=ported.index('    printf("Image %dx%d, template',start);capture=ported[start:end]
+e=Experiment('R3','NPP/templateMatching::templateMatching.cpp','cuda-native-build',sources=[__file__,original]);src=e.path/'original-observed.cu';text=original.read_text();marker='    printf("Image %dx%d, template';src.write_text(text.replace(marker,capture+marker));remote='/tmp/'+e.id
+steps=[(['ssh',host,shlex.join(['mkdir','-p',remote])],'prepare'),(['scp',str(src),host+':'+remote+'/original.cu'],'upload'),(['ssh',host,shlex.join(['/usr/local/cuda-13.4/bin/nvcc','-std=c++17','-O2','-arch=sm_120',remote+'/original.cu','-lnppif','-lnppist','-lnppisu','-lnppc','-o',remote+'/native'])],'native-build'),(['ssh',host,shlex.join(['ldd',remote+'/native'])],'links'),(['ssh',host,'nvidia-smi --query-gpu=index,name,uuid,driver_version --format=csv,noheader'],'device')]
+rc=0
+for cmd,phase in steps:
+ rc=e.command(cmd,phase,timeout=240)
+ if rc:break
+build=dict(return_code=rc,evidence=e.finish('EXECUTED' if rc==0 else 'NATIVE_BUILD_FAILED'),experiment_id=e.id,remote=remote,instrumented_sha256=digest(src),original_sha256=digest(original));write(ROOT/'migration/reports/rewrite-ncc-native-build.json',build)
+if rc:raise SystemExit(rc)
+amd=json.loads((ROOT/'migration/reports/rewrite-ncc-rocm.json').read_text());results={}
+for case,a in amd.items():
+ e=Experiment('R3','NPP/templateMatching::templateMatching.cpp','cuda-native',case=case,sources=[__file__,original],parent=build['experiment_id'],comparison_id=a['input_manifest_sha256']);src=e.path/'inputs';shutil.copytree((ROOT/a['output']).parent/'inputs',src);out=e.path/'outputs';out.mkdir();where=remote+'/'+case
+ e.command(['ssh',host,shlex.join(['mkdir','-p',where+'/outputs'])],'prepare')
+ e.command(['scp',str(src/'image.raw'),host+':'+where+'/image.raw'],'upload-identical-input')
+ argv=[remote+'/native','-i',where+'/image.raw']+a['argv'][2:]
+ code='import subprocess,os;raise SystemExit(subprocess.run('+repr(argv)+',cwd='+repr(where)+',env=dict(os.environ,REWRITE_OUTPUT='+repr(where+'/outputs')+')).returncode)'
+ rc=e.command(['ssh',host,shlex.join(['python3','-c',code])],'native-original-harness',timeout=300)
+ e.command(['scp','-r',host+':'+where+'/outputs/.',str(out)],'collect-binary-outputs')
+ e.command(['scp',host+':'+where+'/match_result.pgm',str(out/'match_result.pgm')],'collect-annotation')
+ write(out/'manifest.json',dict(files={q.name:dict(sha256=digest(q),bytes=q.stat().st_size) for q in out.iterdir() if q.is_file()}))
+ r=dict(case=case,return_code=rc,input_manifest_sha256=a['input_manifest_sha256'],output=str(out.relative_to(ROOT)),experiment_id=e.id,build=build)
+ r['evidence']=e.finish('EXECUTED' if rc==0 else 'NATIVE_HARNESS_NONZERO',reason=None if rc==0 else 'Original NPP harness returned nonzero; preserve vendor behavior independently of numerical validation');results[case]=r;write(ROOT/'migration/reports/rewrite-ncc-cuda.json',results);print(case,rc,flush=True)

@@ -1,0 +1,31 @@
+// SPDX-License-Identifier: Apache-2.0
+#pragma once
+#include "rewrite_runtime.hpp"
+#include <hipsolver/hipsolver.h>
+namespace rewrite {
+// Full native GPU SVD followed by a rank-r projection. This implements the
+// approximate-SVD result contract without claiming NVIDIA's internal algorithm.
+__global__ void svd_extract(const float*s,const float*u,const float*vt,float*so,float*uo,float*vo,int m,int n,int rank,int ldu,int ldv){
+ int t=blockIdx.x*blockDim.x+threadIdx.x;
+ if(t<rank)so[t]=s[t];
+ if(t<m*rank)uo[t%m+(t/m)*ldu]=u[t];
+ if(t<n*rank)vo[t%n+(t/n)*ldv]=vt[t/n+(t%n)*n];
+}
+__global__ void svd_residual(const float*a,const float*s,const float*u,const float*v,double*out,int m,int n,int rank,int lda,int ldu,int ldv){
+ __shared__ double sums[256];double local=0;
+ for(int t=threadIdx.x;t<m*n;t+=blockDim.x){int i=t%m,j=t/m;double z=a[i+j*lda];for(int k=0;k<rank;++k)z-=double(u[i+k*ldu])*s[k]*v[j+k*ldv];local+=z*z;}
+ sums[threadIdx.x]=local;__syncthreads();for(int d=128;d;d/=2){if(threadIdx.x<d)sums[threadIdx.x]+=sums[threadIdx.x+d];__syncthreads();}if(!threadIdx.x)*out=__builtin_sqrt(sums[0]);
+}
+inline int rank_svd_main(){try{
+ Config c;int m=c.get("m"),n=c.get("n"),rank=c.get("rank"),batch=c.get("batch"),lda=c.get("lda"),ldu=c.get("ldu"),ldv=c.get("ldv"),sa=c.get("strideA"),ss=c.get("strideS"),su=c.get("strideU"),sv=c.get("strideV"),repeat=c.get("repeat",1);
+ if(m<1||m>256||n<1||n>m||rank<1||rank>n||batch<1||batch>32||lda<m||ldu<m||ldv<n||sa<lda*n||ss<rank||su<ldu*rank||sv<ldv*rank||repeat<1)throw std::runtime_error("invalid rank-SVD descriptor");
+ identity();auto av=read<float>("A",batch*sa);Buffer<float>a(av),copy(av),s(n),u(m*n),vt(n*n),so(std::vector<float>(batch*ss,-97)),uo(std::vector<float>(batch*su,-97)),vo(std::vector<float>(batch*sv,-97));Buffer<double>res(batch);Buffer<int>info(batch);
+ hipsolverHandle_t solver;RW_CHECK(hipsolverDnCreate(&solver));int lwork=0;RW_CHECK(hipsolverDnSgesvd_bufferSize(solver,m,n,&lwork));Buffer<float>work(lwork),rwork(std::max(1,n-1));
+ for(int rep=0;rep<repeat;++rep){copy.put(av);for(int h=0;h<batch;++h){
+  RW_CHECK(hipsolverDnSgesvd(solver,'S','A',m,n,copy.p+h*sa,lda,s.p,u.p,m,vt.p,n,work.p,lwork,rwork.p,info.p+h));
+  svd_extract<<<(std::max(m,n)*rank+255)/256,256>>>(s.p,u.p,vt.p,so.p+h*ss,uo.p+h*su,vo.p+h*sv,m,n,rank,ldu,ldv);
+  svd_residual<<<1,256>>>(a.p+h*sa,so.p+h*ss,uo.p+h*su,vo.p+h*sv,res.p+h,m,n,rank,lda,ldu,ldv);sync();
+ }}
+ RW_CHECK(hipsolverDnDestroy(solver));emit("S",so.get());emit("U",uo.get());emit("V",vo.get());emit("RnrmF",res.get());emit("info",info.get());emit("A_after",a.get());emit("trace",std::vector<int>{batch*repeat,batch*repeat,batch*repeat,0});return 0;
+ }catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 1;}}
+}

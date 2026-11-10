@@ -1,0 +1,1 @@
+Test rocm-invalid-cli for NCC/CLI/missing-file, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T084741.290726Z-R3-rocm-build-7d1663ed11.

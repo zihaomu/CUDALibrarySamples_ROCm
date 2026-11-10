@@ -1,0 +1,140 @@
+{
+  "sample_id": "cuBLASMp::gemm.cu",
+  "source": "cuBLASMp/gemm.cu",
+  "status": "PARTIAL",
+  "observation": "STATIC_CONTRACT_REVIEW; no new GPU result claimed",
+  "original_sha256": "d44714cf598486dc665036d5e9a5e78ad2194489f3b8ec233f1e743020ebe1a0",
+  "implementation_sha256": "f6fde82af7e6b83aa21b9b254a5c82a0755e36178afd443fc5b5b0b416797753",
+  "current_missing_contract": [
+    "batches12_15/original-B-submatrix-offset-and-full-transpose-controls"
+  ],
+  "current_reason": "使用MPI + RCCL distribution + hipBLAS FP32 local GEMM；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。本轮GEMM保持FP32/尺寸与A/C分布；原例B的IB=3子矩阵描述符及完整transpose/CLI控制未逐项等价，保留部分支持。",
+  "actual_library": "MPI + RCCL distribution + hipBLAS FP32 local GEMM",
+  "previous_evidence": [
+    "migration/reports/evidence/20261109T083217.050455Z/original-rocm/cuBLASMp_gemm.cu",
+    "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuBLASMp_gemm.cu",
+    "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuBLASMp_gemm.cu",
+    "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_gemm.cu",
+    "migration/reports/batches12_15-validation.json",
+    "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_gemm.cu",
+    "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/cuBLASMp_gemm.cu"
+  ],
+  "current_proof_dependencies_stale": {},
+  "source_contract_lines": [
+    {
+      "line": 2,
+      "text": " * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+    },
+    {
+      "line": 32,
+      "text": "    int rank,"
+    },
+    {
+      "line": 33,
+      "text": "    cublasMpGrid_t grid,"
+    },
+    {
+      "line": 84,
+      "text": "        grid,"
+    },
+    {
+      "line": 101,
+      "text": "        grid,"
+    },
+    {
+      "line": 118,
+      "text": "        grid,"
+    },
+    {
+      "line": 135,
+      "text": "        grid,"
+    },
+    {
+      "line": 145,
+      "text": "    if (rank == 0)"
+    },
+    {
+      "line": 170,
+      "text": "            CUBLAS_GEMM_DEFAULT));"
+    },
+    {
+      "line": 187,
+      "text": "    const int rank = get_nccl_rank(comm);"
+    },
+    {
+      "line": 219,
+      "text": "    const int myprow = (opts.grid_layout == 'c' ? rank % nprow : rank / npcol);"
+    },
+    {
+      "line": 220,
+      "text": "    const int mypcol = (opts.grid_layout == 'c' ? rank / nprow : rank % npcol);"
+    },
+    {
+      "line": 228,
+      "text": "    cublasMpGrid_t grid = nullptr;"
+    },
+    {
+      "line": 229,
+      "text": "    CUBLASMP_CHECK(cublasMpGridCreate(nprow, npcol, char_to_grid_layout(opts.grid_layout), comm, &grid));"
+    },
+    {
+      "line": 256,
+      "text": "    generate_random_matrix(a_rows, a_cols, h_A.data(), mbA, nbA, ia, ja, llda, nprow, npcol, myprow, mypcol, rank);"
+    },
+    {
+      "line": 257,
+      "text": "    generate_random_matrix(b_rows, b_cols, h_B.data(), mbB, nbB, ib, jb, lldb, nprow, npcol, myprow, mypcol, rank);"
+    },
+    {
+      "line": 258,
+      "text": "    generate_random_matrix(m, n, h_C.data(), mbC, nbC, ic, jc, lldc, nprow, npcol, myprow, mypcol, rank);"
+    },
+    {
+      "line": 279,
+      "text": "        cublasMpMatrixDescriptorCreate(global_m_a, global_n_a, mbA, nbA, 0, 0, llda, cuda_input_type, grid, &descA));"
+    },
+    {
+      "line": 281,
+      "text": "        cublasMpMatrixDescriptorCreate(global_m_b, global_n_b, mbB, nbB, 0, 0, lldb, cuda_input_type, grid, &descB));"
+    },
+    {
+      "line": 283,
+      "text": "        cublasMpMatrixDescriptorCreate(global_m_c, global_n_c, mbC, nbC, 0, 0, lldc, cuda_output_type, grid, &descC));"
+    },
+    {
+      "line": 412,
+      "text": "                                                  rank,"
+    },
+    {
+      "line": 413,
+      "text": "                                                  grid,"
+    },
+    {
+      "line": 445,
+      "text": "    CUBLASMP_CHECK(cublasMpGridDestroy(grid));"
+    },
+    {
+      "line": 481,
+      "text": "                     .grid_layout = 'c',"
+    },
+    {
+      "line": 495,
+      "text": "    const int nranks = opts.p * opts.q;"
+    },
+    {
+      "line": 496,
+      "text": "    Comm comm(nranks, opts.gpus_per_process);"
+    }
+  ],
+  "next_condition": "未完成合同：original-B-submatrix-offset-and-full-transpose-controls；补实现/真实后端并重验。",
+  "checks": [
+    {
+      "check": "original-source-identity",
+      "passed": true
+    },
+    {
+      "check": "explicit-unfulfilled-contract",
+      "passed": true
+    }
+  ]
+}

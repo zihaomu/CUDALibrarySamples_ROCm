@@ -1,0 +1,1 @@
+Test native-comparison for NCC/constant-image, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T084835.786279Z-R3-rocm-a806fff60a.

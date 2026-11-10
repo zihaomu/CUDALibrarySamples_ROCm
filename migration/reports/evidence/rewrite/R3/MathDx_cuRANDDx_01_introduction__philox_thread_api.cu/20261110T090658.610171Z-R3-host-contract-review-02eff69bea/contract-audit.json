@@ -1,0 +1,72 @@
+{
+  "sample_id": "MathDx/cuRANDDx/01_introduction::philox_thread_api.cu",
+  "source": "MathDx/cuRANDDx/01_introduction/philox_thread_api.cu",
+  "status": "PARTIAL",
+  "observation": "STATIC_CONTRACT_REVIEW; no new GPU result claimed",
+  "original_sha256": "a983f749cf1cc449d8143db346837aa06e5383603bc56bfcea543ea88f1a4f22",
+  "implementation_sha256": "74879d529676297f343ff7b58001129b30c974697c041288c4c795eee4f004ad",
+  "current_missing_contract": [
+    "batches12_15/NVIDIA-LEGACY-bitwise-host-device-lognormal-contract"
+  ],
+  "current_reason": "使用rocRAND device Philox4x32-10 + HIP/OCML explicit 53-bit Box-Muller lognormal；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。使用真实rocRAND Philox设备引擎，CPU整数oracle逐word验证counter/subsequence；分布使用显式53-bit Box-Muller。ROCm normal头与当前overlay不兼容，且不声称原例NVIDIA LEGACY host/device逐位相等。",
+  "actual_library": "rocRAND device Philox4x32-10 + HIP/OCML explicit 53-bit Box-Muller lognormal",
+  "previous_evidence": [
+    "migration/reports/evidence/20261109T083217.050455Z/original-rocm/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu",
+    "migration/reports/evidence/20261109T084256.329631Z/original-rocm/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu",
+    "migration/reports/evidence/20261109T084857.451692Z/original-cuda/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu",
+    "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu",
+    "migration/reports/batches12_15-validation.json",
+    "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu",
+    "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu"
+  ],
+  "current_proof_dependencies_stale": {},
+  "source_contract_lines": [
+    {
+      "line": 2,
+      "text": " * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+    },
+    {
+      "line": 28,
+      "text": "// with CURAND_ORDERING_PSEUDO_LEGACY ordering. "
+    },
+    {
+      "line": 29,
+      "text": "// The ordering is that using subsequences different sequences each thread generates 4 32-bit random values, "
+    },
+    {
+      "line": 74,
+      "text": "    const unsigned int grid_size = (size / 4 + block_dim - 1) / block_dim;"
+    },
+    {
+      "line": 75,
+      "text": "    generate_kernel<RNG, DataType><<<grid_size, block_dim, 0>>>((double4*)d_out, seed, offset, size, mean, stddev);"
+    },
+    {
+      "line": 90,
+      "text": "    CURAND_CHECK_AND_EXIT(curandSetGeneratorOrdering(gen_curand, CURAND_ORDERING_PSEUDO_LEGACY));"
+    },
+    {
+      "line": 103,
+      "text": "        std::cout << \"SUCCESS: Same sequence is generated with cuRANDDx and cuRAND Host API using LEGACY ordering.\\n\";"
+    },
+    {
+      "line": 114,
+      "text": "        std::cout << \"FAILED: Different sequence is generated with cuRANDDx and cuRAND Host API using LEGACY \""
+    },
+    {
+      "line": 115,
+      "text": "                     \"ordering.\\n\";"
+    }
+  ],
+  "next_condition": "未完成合同：NVIDIA-LEGACY-bitwise-host-device-lognormal-contract；补实现/真实后端并重验。",
+  "checks": [
+    {
+      "check": "original-source-identity",
+      "passed": true
+    },
+    {
+      "check": "explicit-unfulfilled-contract",
+      "passed": true
+    }
+  ]
+}

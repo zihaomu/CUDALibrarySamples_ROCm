@@ -2,24 +2,24 @@
 
 **PARTIAL / L3**
 
-原始教学输入构建运行通过；独立正确性验证待完成
+已完成GPU重写与独立数值复核；候选尚需独立审查及完整资格，未升级整例。
 
 | 字段 | 当前记录 |
 | --- | --- |
 | 原始入口 | [cuSOLVER/gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu](../../../../cuSOLVER/gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu) |
-| 实际库 / 后端 | hipsolver / rocSOLVER |
+| 实际库 / 后端 | hipSOLVER/rocSOLVER native full GPU SVD + HIP rank projection and FP64 residual / rocSOLVER + project HIP |
 | 候选路线 | hipSOLVER, rocSOLVER |
 | 代码 | [rocm/ported/cuSOLVER/gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu](../../../../rocm/ported/cuSOLVER/gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu) |
-| required cases | 1/3 |
+| required cases | 7/8 |
 | CUDA baseline / comparison | PASSED / BLOCKED |
 | 性能 | NOT_RUN |
 | 原始源码 SHA256 | `c3afaca538159c5f139b72fbcf97ca28237373a813c901c74d2da2814f9d1916` |
 
 编译/运行返回 0 仅对应 L3；通过独立参考检查后才记 L4。失败的候选库不列为已使用库。
 
-必需用例：`build-and-original-profile-execution`, `original-functional-contract`, `independent-numerical-or-semantic-reference`。
+必需用例：`rewrite/R3/svd/original`, `rewrite/R3/svd/changed-values`, `rewrite/R3/svd/irregular`, `rewrite/R3/svd/layout`, `rewrite/R3/svd/repeat`, `rewrite/R3/svd/rank-deficient`, `rewrite/R3/svd/rank-truncated`, `rewrite/R3/svd/independent-review-and-qualification`。
 
-实现方式：`API_PORT`。
+实现方式：`LIBRARY_REWRITE`。
 
 恢复/扩展条件：实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。
 
@@ -46,3 +46,5 @@ CUDA 对照限制：当前 AMD 路线尚未通过正确性验收。
 - [migration/reports/evidence/20261109T084753.304309Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu](../../../reports/evidence/20261109T084753.304309Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu)
 - [migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu](../../../reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu)
 - [migration/reports/evidence/20261109T100720.422147Z/original-cuda/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu](../../../reports/evidence/20261109T100720.422147Z/original-cuda/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu)
+- [migration/reports/rewrite-extension-rocm.json](../../../reports/rewrite-extension-rocm.json)
+- [migration/reports/rewrite-extension-rocm-validation.json](../../../reports/rewrite-extension-rocm-validation.json)

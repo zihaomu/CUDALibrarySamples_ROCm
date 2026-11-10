@@ -1,0 +1,1 @@
+Test rocm for NPP/templateMatching::templateMatching.cpp, case original. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T090127.679703Z-R3-rocm-build-24fd1d719c.

@@ -1,0 +1,1 @@
+Test cpu-validation for svd/irregular, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T085504.330185Z-R3-cuda-3ff5807b06.

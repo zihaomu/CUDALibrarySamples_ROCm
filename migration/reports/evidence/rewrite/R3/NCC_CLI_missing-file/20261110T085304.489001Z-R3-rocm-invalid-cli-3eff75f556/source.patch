@@ -1,0 +1,485 @@
+diff --git a/rocm/ported/NPP/templateMatching/templateMatching.cpp b/rocm/ported/NPP/templateMatching/templateMatching.cpp
+index d5d2258f..9dd3005f 100644
+--- a/rocm/ported/NPP/templateMatching/templateMatching.cpp
++++ b/rocm/ported/NPP/templateMatching/templateMatching.cpp
+@@ -30,5 +30,238 @@
+ // The sample checks the GPU scores against a CPU computation, reports how clearly the best match stands out from the
+ // next best one, writes an annotated copy of the image, and times the GPU search.
+ 
+-#include "batch15_image.hpp"
+-int main(){return migration_image::main15("ncc");}
++#include <hip/hip_runtime.h>
++#include "ncc_contract.hpp"
++
++#include <algorithm>
++#include <cmath>
++#include <cstdio>
++#include <cstdlib>
++#include <cstring>
++#include <fstream>
++#include <string>
++#include <vector>
++
++#define CHECK_CUDA(call)                                                                      \
++    do {                                                                                      \
++        hipError_t e_ = (call);                                                              \
++        if (e_ != hipSuccess) {                                                              \
++            fprintf(stderr, "CUDA error %s at %s:%d\n", hipGetErrorString(e_), __FILE__, __LINE__); \
++            exit(EXIT_FAILURE);                                                               \
++        }                                                                                     \
++    } while (0)
++
++#define CHECK_NPP(call)                                                                       \
++    do {                                                                                      \
++        NppStatus s_ = (call);                                                                \
++        if (s_ != NPP_SUCCESS) {                                                              \
++            fprintf(stderr, "NPP error %d at %s:%d\n", (int)s_, __FILE__, __LINE__);          \
++            exit(EXIT_FAILURE);                                                               \
++        }                                                                                     \
++    } while (0)
++
++static const int kImageWidth = 2048, kImageHeight = 1024;
++
++static NppStreamContext makeStreamContext(hipStream_t stream)
++{
++    NppStreamContext ctx = {}; // zero-initialize: hWorkspace (formerly nReserved0) must be 0 unless a workspace is created
++    int dev = 0;
++    CHECK_CUDA(hipGetDevice(&dev));
++    hipDeviceProp_t prop;
++    CHECK_CUDA(hipGetDeviceProperties(&prop, dev));
++    ctx.hStream                            = stream;
++    ctx.nCudaDeviceId                      = dev;
++    ctx.nMultiProcessorCount               = prop.multiProcessorCount;
++    ctx.nMaxThreadsPerMultiProcessor       = prop.maxThreadsPerMultiProcessor;
++    ctx.nMaxThreadsPerBlock                = prop.maxThreadsPerBlock;
++    ctx.nSharedMemPerBlock                 = prop.sharedMemPerBlock;
++    ctx.nCudaDevAttrComputeCapabilityMajor = prop.major;
++    ctx.nCudaDevAttrComputeCapabilityMinor = prop.minor;
++    CHECK_CUDA(hipStreamGetFlags(stream, &ctx.nStreamFlags));
++    return ctx;
++}
++
++// Zero-mean normalized cross-correlation of the template against the image patch at (px, py).
++static double cpuNCC(const std::vector<Npp8u>& img, int px, int py, const std::vector<Npp8u>& tpl, int tw, int th)
++{
++    double sa = 0, sb = 0;
++    for (int y = 0; y < th; ++y)
++        for (int x = 0; x < tw; ++x) {
++            sa += img[(size_t)(py + y) * kImageWidth + px + x];
++            sb += tpl[(size_t)y * tw + x];
++        }
++    const double ma = sa / (tw * th), mb = sb / (tw * th);
++    double sab = 0, saa = 0, sbb = 0;
++    for (int y = 0; y < th; ++y)
++        for (int x = 0; x < tw; ++x) {
++            const double a = img[(size_t)(py + y) * kImageWidth + px + x] - ma, b = tpl[(size_t)y * tw + x] - mb;
++            sab += a * b; saa += a * a; sbb += b * b;
++        }
++    return sab / std::sqrt(saa * sbb);
++}
++
++int main(int argc, char** argv)
++{
++    std::string imagePath = "../images/CircuitBoard_2048x1024_8u.raw";
++    int    tx = 1300, ty = 850, tw = 96, th = 64, iterations = 50;
++    double gain = 0.6, offset = 30.0;
++    int    noise = 3;
++    for (int i = 1; i < argc; ++i) {
++        std::string a = argv[i];
++        auto next = [&]() { return (i + 1 < argc) ? argv[++i] : (char*)"0"; };
++        if (a == "-x") tx = atoi(next());
++        else if (a == "-y") ty = atoi(next());
++        else if (a == "-tw") tw = atoi(next());
++        else if (a == "-th") th = atoi(next());
++        else if (a == "-g") gain = atof(next());
++        else if (a == "-o") offset = atof(next());
++        else if (a == "-noise") noise = atoi(next());
++        else if (a == "-n") iterations = atoi(next());
++        else if (a == "-i") imagePath = next();
++        else {
++            printf("Usage: %s [-x tpl-x] [-y tpl-y] [-tw tpl-width] [-th tpl-height] [-g gain] [-o offset] [-noise amplitude] "
++                   "[-n timing-iterations] [-i image.raw]\n"
++                   "  The template is cut from the image at (x,y), then degraded: pixel = gain*pixel + offset + noise.\n"
++                   "  The image must be %dx%d 8-bit gray RAW.\n", argv[0], kImageWidth, kImageHeight);
++            return 0;
++        }
++    }
++    // Compare with subtraction so that huge values cannot overflow int and slip past the bounds check.
++    if (tx < 0 || ty < 0 || tw < 8 || th < 8 || tw > kImageWidth || th > kImageHeight || tx > kImageWidth - tw ||
++        ty > kImageHeight - th) {
++        fprintf(stderr, "Template must lie inside the %dx%d image and be at least 8x8\n", kImageWidth, kImageHeight);
++        return EXIT_FAILURE;
++    }
++    if (noise < 0 || noise > 255) {
++        fprintf(stderr, "-noise must be between 0 and 255\n");
++        return EXIT_FAILURE;
++    }
++    if (iterations < 0) {
++        fprintf(stderr, "-n must not be negative\n");
++        return EXIT_FAILURE;
++    }
++
++    const int W = kImageWidth, H = kImageHeight;
++    std::vector<Npp8u> image((size_t)W * H);
++    {
++        std::ifstream f(imagePath, std::ios::binary);
++        if (!f || !f.read(reinterpret_cast<char*>(image.data()), image.size())) {
++            fprintf(stderr, "Cannot read %zu bytes from %s (run from the build directory)\n", image.size(), imagePath.c_str());
++            return EXIT_FAILURE;
++        }
++    }
++
++    // Template: crop, then change its brightness/contrast and add noise.
++    srand(1234);
++    std::vector<Npp8u> tpl((size_t)tw * th);
++    for (int y = 0; y < th; ++y)
++        for (int x = 0; x < tw; ++x) {
++            double v = gain * image[(size_t)(ty + y) * W + tx + x] + offset;
++            if (noise > 0) v += (rand() % (2 * noise + 1)) - noise;
++            tpl[(size_t)y * tw + x] = (Npp8u)std::min(255.0, std::max(0.0, v + 0.5));
++        }
++
++    hipStream_t stream;
++    CHECK_CUDA(hipStreamCreate(&stream));
++    NppStreamContext ctx = makeStreamContext(stream);
++
++    const NppiSize srcSize = {W, H}, tplSize = {tw, th};
++    const int      outW = W - tw + 1, outH = H - th + 1; // "Valid" mode: template fully inside the image
++    const size_t   outBytes = (size_t)outW * outH * sizeof(Npp32f);
++
++    Npp8u *d_src, *d_tpl, *d_corrBuf, *d_maxBuf;
++    Npp32f *d_score, *d_max;
++    int *d_maxX, *d_maxY;
++    size_t corrBufSize = 0, maxBufSize = 0;
++    CHECK_NPP(nppiValidNormLevelGetBufferHostSize_8u32f_C1R_Ctx(srcSize, &corrBufSize, ctx));
++    CHECK_NPP(nppiMaxIndxGetBufferHostSize_32f_C1R_Ctx({outW, outH}, &maxBufSize, ctx));
++    CHECK_CUDA(hipMalloc(&d_src, image.size()));
++    CHECK_CUDA(hipMalloc(&d_tpl, tpl.size()));
++    CHECK_CUDA(hipMalloc(&d_score, outBytes));
++    CHECK_CUDA(hipMalloc(&d_corrBuf, std::max<size_t>(corrBufSize, 1))); // never pass NPP a null buffer
++    CHECK_CUDA(hipMalloc(&d_maxBuf, std::max<size_t>(maxBufSize, 1)));
++    CHECK_CUDA(hipMalloc(&d_max, sizeof(Npp32f)));
++    CHECK_CUDA(hipMalloc(&d_maxX, sizeof(int)));
++    CHECK_CUDA(hipMalloc(&d_maxY, sizeof(int)));
++    CHECK_CUDA(hipMemcpyAsync(d_src, image.data(), image.size(), hipMemcpyHostToDevice, stream));
++    CHECK_CUDA(hipMemcpyAsync(d_tpl, tpl.data(), tpl.size(), hipMemcpyHostToDevice, stream));
++
++    auto search = [&]() {
++        CHECK_NPP(nppiCrossCorrValid_NormLevel_8u32f_C1R_Ctx(d_src, W, srcSize, d_tpl, tw, tplSize, d_score,
++                                                             outW * (int)sizeof(Npp32f), d_corrBuf, ctx));
++        CHECK_NPP(nppiMaxIndx_32f_C1R_Ctx(d_score, outW * (int)sizeof(Npp32f), {outW, outH}, d_maxBuf, d_max, d_maxX,
++                                          d_maxY, ctx));
++    };
++
++    search();
++    float bestScore = 0.f;
++    int   bestX = 0, bestY = 0;
++    CHECK_CUDA(hipMemcpyAsync(&bestScore, d_max, sizeof(float), hipMemcpyDeviceToHost, stream));
++    CHECK_CUDA(hipMemcpyAsync(&bestX, d_maxX, sizeof(int), hipMemcpyDeviceToHost, stream));
++    CHECK_CUDA(hipMemcpyAsync(&bestY, d_maxY, sizeof(int), hipMemcpyDeviceToHost, stream));
++    std::vector<Npp32f> score((size_t)outW * outH);
++    CHECK_CUDA(hipMemcpyAsync(score.data(), d_score, outBytes, hipMemcpyDeviceToHost, stream));
++    CHECK_CUDA(hipStreamSynchronize(stream));
++
++    if (const char* directory=std::getenv("REWRITE_OUTPUT")) {
++        auto save=[&](const char*name,const void*data,size_t bytes){std::ofstream file(std::string(directory)+"/"+name,std::ios::binary);file.write(static_cast<const char*>(data),bytes);};
++        save("input.bin",image.data(),image.size());save("template.bin",tpl.data(),tpl.size());save("scores.bin",score.data(),score.size()*sizeof(float));
++        int config[]={W,H,tx,ty,tw,th,iterations,bestX,bestY};save("config.bin",config,sizeof(config));save("best.bin",&bestScore,sizeof(bestScore));
++    }
++
++    printf("Image %dx%d, template %dx%d cut from (%d,%d), degraded with gain %.2f, offset %.1f, noise +/-%d\n", W, H, tw, th,
++           tx, ty, gain, offset, noise);
++    printf("Best match at (%d,%d), NCC score %.5f   [expected (%d,%d)]\n", bestX, bestY, bestScore, tx, ty);
++
++    // How clearly does the best match stand out?  Best score outside a window around the peak.
++    float second = -2.f;
++    for (int y = 0; y < outH; ++y)
++        for (int x = 0; x < outW; ++x)
++            if (std::abs(x - bestX) >= tw / 2 || std::abs(y - bestY) >= th / 2) second = std::max(second, score[(size_t)y * outW + x]);
++    printf("Best score outside the peak neighbourhood: %.5f  (margin %.5f)\n", second, bestScore - second);
++
++    // Verify against the CPU at the match, at the true location, and at a few other positions.
++    double maxDiff = 0.0;
++    const int checks[][2] = {{bestX, bestY}, {tx, ty}, {0, 0}, {outW - 1, outH - 1}, {outW / 2, outH / 3}, {outW / 5, outH / 2}};
++    for (const auto& p : checks) {
++        const double ref = cpuNCC(image, p[0], p[1], tpl, tw, th);
++        maxDiff = std::max(maxDiff, std::fabs(ref - score[(size_t)p[1] * outW + p[0]]));
++    }
++    printf("Max |GPU - CPU| NCC over %zu checked positions: %.2e  [%s]\n", sizeof(checks) / sizeof(checks[0]), maxDiff,
++           maxDiff < 1e-3 ? "PASS" : "FAIL");
++    const bool located = (std::abs(bestX - tx) <= 1 && std::abs(bestY - ty) <= 1);
++    printf("Located the template within 1 pixel: %s\n", located ? "YES" : "NO (template may be ambiguous in this image)");
++
++    // Annotated output: draw a box around the match.
++    {
++        std::vector<Npp8u> out(image);
++        for (int x = bestX; x < bestX + tw; ++x) { out[(size_t)bestY * W + x] = 255; out[(size_t)(bestY + th - 1) * W + x] = 255; }
++        for (int y = bestY; y < bestY + th; ++y) { out[(size_t)y * W + bestX] = 255; out[(size_t)y * W + bestX + tw - 1] = 255; }
++        std::ofstream pgm("match_result.pgm", std::ios::binary);
++        pgm << "P5\n" << W << " " << H << "\n255\n";
++        pgm.write(reinterpret_cast<const char*>(out.data()), out.size());
++    }
++
++    // Time the GPU search (scores for all positions + argmax). -n 0 skips the timing.
++    if (iterations == 0) {
++        printf("Timing skipped (-n 0)\n");
++    } else {
++        hipEvent_t t0, t1;
++        CHECK_CUDA(hipEventCreate(&t0));
++        CHECK_CUDA(hipEventCreate(&t1));
++        CHECK_CUDA(hipEventRecord(t0, stream));
++        for (int i = 0; i < iterations; ++i) search();
++        CHECK_CUDA(hipEventRecord(t1, stream));
++        CHECK_CUDA(hipEventSynchronize(t1));
++        float ms = 0.f;
++        CHECK_CUDA(hipEventElapsedTime(&ms, t0, t1));
++        printf("GPU search over %d x %d positions: %.3f ms per match (average of %d runs)\n", outW, outH, ms / iterations, iterations);
++
++        hipEventDestroy(t0);
++        hipEventDestroy(t1);
++    }
++    hipFree(d_src); hipFree(d_tpl); hipFree(d_score); hipFree(d_corrBuf); hipFree(d_maxBuf);
++    hipFree(d_max); hipFree(d_maxX); hipFree(d_maxY);
++    hipStreamDestroy(stream);
++    return (maxDiff < 1e-3 && located) ? EXIT_SUCCESS : EXIT_FAILURE;
++}
+diff --git a/rocm/ported/cuSOLVER/gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu b/rocm/ported/cuSOLVER/gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu
+index a8d08bac..8910c191 100644
+--- a/rocm/ported/cuSOLVER/gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu
++++ b/rocm/ported/cuSOLVER/gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu
+@@ -1,232 +1,2 @@
+-#include "observe.hpp"
+-/*
+- * SPDX-FileCopyrightText: Copyright (c) 2020 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+- * SPDX-License-Identifier: Apache-2.0
+- *
+- * Licensed under the Apache License, Version 2.0 (the "License");
+- * you may not use this file except in compliance with the License.
+- * You may obtain a copy of the License at
+- *
+- * http://www.apache.org/licenses/LICENSE-2.0
+- *
+- * Unless required by applicable law or agreed to in writing, software
+- * distributed under the License is distributed on an "AS IS" BASIS,
+- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+- * See the License for the specific language governing permissions and
+- * limitations under the License.
+- */
+-
+-
+-#include <cstdio>
+-#include <cstdlib>
+-#include <vector>
+-
+-#include <hip/hip_runtime.h>
+-#include <hipsolver.h>
+-
+-#include "cusolver_utils.h"
+-
+-int main(int argc, char *argv[]) {
+-    hipsolverHandle_t cusolverH = NULL;
+-    hipStream_t stream = NULL;
+-
+-    const int batchSize = 2;
+-    const int m = 3;
+-    const int n = 2;
+-    const int lda = m;
+-    const int ldu = m;
+-    const int ldv = n;
+-    const int rank = n;
+-    const long long int strideA = static_cast<long long int>(lda * n);
+-    const long long int strideS = n;
+-    const long long int strideU = static_cast<long long int>(ldu * n);
+-    const long long int strideV = static_cast<long long int>(ldv * n);
+-
+-    /*
+-     *        | 1 2  |       | 10 9 |
+-     *   A0 = | 4 5  |, A1 = |  8 7 |
+-     *        | 2 1  |       |  6 5 |
+-     */
+-
+-    const std::vector<float> A = {1.0, 4.0, 2.0, 2.0, 5.0, 1.0, 10.0, 8.0, 6.0, 9.0, 7.0, 5.0};
+-    std::vector<float> U(strideU * batchSize, 0); /* left singular vectors  */
+-    std::vector<float> V(strideV * batchSize, 0); /* right singular vectors */
+-    std::vector<float> S(strideS * batchSize, 0); /* numerical singular value */
+-
+-    /* exact singular values */
+-    const std::vector<float> S_exact = {7.065283497082729, 1.040081297712078, 18.839649186929730,
+-                                        0.260035600289472};
+-
+-    float *d_A = nullptr;  /* device copy of A */
+-    float *d_S = nullptr;  /* singular values */
+-    float *d_U = nullptr;  /* left singular vectors */
+-    float *d_V = nullptr;  /* right singular vectors */
+-    int *d_info = nullptr; /* error info */
+-
+-    int lwork = 0;           /* size of workspace */
+-    float *d_work = nullptr; /* device workspace for getrf */
+-
+-    std::vector<int> info(batchSize, 0);     /* host copy of error info */
+-    std::vector<double> RnrmF(batchSize, 0); /* residual norm */
+-
+-    const hipsolverEigMode_t jobz = HIPSOLVER_EIG_MODE_VECTOR; /* compute eigenvectors */
+-
+-    std::printf("A0 = (matlab base-1)\n");
+-    print_matrix(m, n, A.data(), lda);
+-    std::printf("=====\n");
+-
+-    std::printf("A1 = (matlab base-1)\n");
+-    print_matrix(m, n, A.data() + strideA, lda);
+-    std::printf("=====\n");
+-
+-    /* step 1: create hipsolver handle, bind a stream */
+-    CUSOLVER_CHECK(hipsolverDnCreate(&cusolverH));
+-
+-    CUDA_CHECK(hipStreamCreateWithFlags(&stream, hipStreamNonBlocking));
+-    CUSOLVER_CHECK(hipsolverSetStream(cusolverH, stream));
+-
+-    /* step 2: copy A to device */
+-    CUDA_CHECK(hipMalloc(reinterpret_cast<void **>(&d_A), sizeof(float) * A.size()));
+-    CUDA_CHECK(hipMalloc(reinterpret_cast<void **>(&d_S), sizeof(float) * S.size()));
+-    CUDA_CHECK(hipMalloc(reinterpret_cast<void **>(&d_U), sizeof(float) * U.size()));
+-    CUDA_CHECK(hipMalloc(reinterpret_cast<void **>(&d_V), sizeof(float) * V.size()));
+-    CUDA_CHECK(hipMalloc(reinterpret_cast<void **>(&d_info), sizeof(int) * info.size()));
+-
+-    CUDA_CHECK(
+-        hipMemcpyAsync(d_A, A.data(), sizeof(float) * A.size(), hipMemcpyHostToDevice, stream));
+-
+-    /* step 3: query working space of SVD */
+-    CUSOLVER_CHECK(hipsolverDnSgesvdaStridedBatched_bufferSize(
+-        cusolverH, jobz, /* HIPSOLVER_EIG_MODE_NOVECTOR: compute singular values only */
+-                         /* HIPSOLVER_EIG_MODE_VECTOR: compute singular value and singular vectors */
+-        rank,            /* number of singular values */
+-        m,               /* number of rows of Aj, 0 <= m */
+-        n,               /* number of columns of Aj, 0 <= n  */
+-        d_A,             /* Aj is m-by-n */
+-        lda,             /* leading dimension of Aj */
+-        strideA,         /* >= lda*n */
+-        d_S,             /* Sj is rank-by-1, singular values in descending order */
+-        strideS,         /* >= rank */
+-        d_U,             /* Uj is m-by-rank */
+-        ldu,             /* leading dimension of Uj, ldu >= max(1,m) */
+-        strideU,         /* >= ldu*rank */
+-        d_V,             /* Vj is n-by-rank */
+-        ldv,             /* leading dimension of Vj, ldv >= max(1,n) */
+-        strideV,         /* >= ldv*rank */
+-        &lwork, batchSize /* number of matrices */
+-        ));
+-
+-    CUDA_CHECK(hipMalloc(reinterpret_cast<void **>(&d_work), sizeof(float) * lwork));
+-
+-    /* step 4: compute SVD */
+-    CUSOLVER_CHECK(hipsolverDnSgesvdaStridedBatched(
+-        cusolverH, jobz, /* HIPSOLVER_EIG_MODE_NOVECTOR: compute singular values only */
+-                         /* HIPSOLVER_EIG_MODE_VECTOR: compute singular value and singular vectors */
+-        rank,            /* number of singular values */
+-        m,               /* number of rows of Aj, 0 <= m */
+-        n,               /* number of columns of Aj, 0 <= n  */
+-        d_A,             /* Aj is m-by-n */
+-        lda,             /* leading dimension of Aj */
+-        strideA,         /* >= lda*n */
+-        d_S,             /* Sj is rank-by-1 */
+-                         /* the singular values in descending order */
+-        strideS,         /* >= rank */
+-        d_U,             /* Uj is m-by-rank */
+-        ldu,             /* leading dimension of Uj, ldu >= max(1,m) */
+-        strideU,         /* >= ldu*rank */
+-        d_V,             /* Vj is n-by-rank */
+-        ldv,             /* leading dimension of Vj, ldv >= max(1,n) */
+-        strideV,         /* >= ldv*rank */
+-        d_work, lwork, d_info, RnrmF.data(), batchSize /* number of matrices */
+-        ));
+-
+-    CUDA_CHECK(
+-        hipMemcpyAsync(U.data(), d_U, sizeof(float) * U.size(), hipMemcpyDeviceToHost, stream));
+-    CUDA_CHECK(
+-        hipMemcpyAsync(V.data(), d_V, sizeof(float) * V.size(), hipMemcpyDeviceToHost, stream));
+-    CUDA_CHECK(
+-        hipMemcpyAsync(S.data(), d_S, sizeof(float) * S.size(), hipMemcpyDeviceToHost, stream));
+-    CUDA_CHECK(hipMemcpyAsync(info.data(), d_info, sizeof(int) * info.size(),
+-                               hipMemcpyDeviceToHost, stream));
+-
+-    CUDA_CHECK(hipStreamSynchronize(stream));
+-
+-    if (0 > info[0]) {
+-        std::printf("%d-th parameter is wrong \n", -info[0]);
+-        exit(1);
+-    }
+-    for (int idx = 0; idx < batchSize; idx++) {
+-        if (0 == info[idx]) {
+-            std::printf("%d-th matrix, gesvda converges \n", idx);
+-        } else {
+-            std::printf("WARNING: info[%d] = %d : gesvda does not converge \n", idx, info[idx]);
+-        }
+-    }
+-
+-    std::printf("S0 = (matlab base-1)\n");
+-    print_matrix(rank, 1, S.data(), n);
+-    std::printf("=====\n");
+-
+-    std::printf("U0 = (matlab base-1)\n");
+-    print_matrix(m, rank, U.data(), ldu);
+-    std::printf("=====\n");
+-
+-    std::printf("V) = (matlab base-1)\n");
+-    print_matrix(n, rank, V.data(), ldv);
+-    std::printf("=====\n");
+-
+-    float ds_sup = 0;
+-    for (int j = 0; j < n; j++) {
+-        float err = fabs(S[j] - S_exact[j]);
+-        ds_sup = (ds_sup > err) ? ds_sup : err;
+-    }
+-    std::printf("|S0 - S0_exact|_sup = %E \n", ds_sup);
+-
+-    std::printf("residual |A0 - U0*S0*V0**H|_F = %E \n", RnrmF[0]);
+-
+-    std::printf("S1 = (matlab base-1)\n");
+-    print_matrix(rank, 1, S.data() + strideS, n);
+-    std::printf("=====\n");
+-
+-    std::printf("U1 = (matlab base-1)\n");
+-    print_matrix(m, rank, U.data() + strideU, ldu);
+-    std::printf("=====\n");
+-
+-    std::printf("V1 = (matlab base-1)\n");
+-    print_matrix(n, rank, V.data() + strideV, ldv);
+-    std::printf("=====\n");
+-
+-    ds_sup = 0;
+-    for (int j = 0; j < n; j++) {
+-        float err = fabs(S[strideS + j] - S_exact[strideS + j]);
+-        ds_sup = (ds_sup > err) ? ds_sup : err;
+-    }
+-    std::printf("|S1 - S1_exact|_sup = %E \n", ds_sup);
+-
+-    std::printf("residual |A1 - U1*S1*V1**H|_F = %E \n", RnrmF[1]);
+-
+-    
+-// MIGRATION_OBSERVE_ORIGINAL: host buffers after GPU synchronization.
+-migration_observer::emit("A",A.data(),A.size());
+-migration_observer::emit("U",U.data(),U.size());
+-migration_observer::emit("V",V.data(),V.size());
+-migration_observer::emit("S",S.data(),S.size());
+-migration_observer::emit("S_exact",S_exact.data(),S_exact.size());
+-migration_observer::emit("info",info.data(),info.size());
+-migration_observer::emit("RnrmF",RnrmF.data(),RnrmF.size());
+-/* free resources */
+-    CUDA_CHECK(hipFree(d_A));
+-    CUDA_CHECK(hipFree(d_S));
+-    CUDA_CHECK(hipFree(d_U));
+-    CUDA_CHECK(hipFree(d_V));
+-    CUDA_CHECK(hipFree(d_info));
+-    CUDA_CHECK(hipFree(d_work));
+-
+-    CUSOLVER_CHECK(hipsolverDnDestroy(cusolverH));
+-
+-    CUDA_CHECK(hipStreamDestroy(stream));
+-
+-    CUDA_CHECK(hipDeviceReset());
+-
+-    return EXIT_SUCCESS;
+-}
+\ No newline at end of file
++#include "rank_svd.hpp"
++int main(){return rewrite::rank_svd_main();}

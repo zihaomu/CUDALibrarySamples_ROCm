@@ -1,0 +1,3208 @@
+{
+  "scope": "24 PARTIAL source contracts; static review is not GPU qualification",
+  "entries": [
+    {
+      "sample_id": "MathDx/cuRANDDx/01_introduction::philox_thread_api.cu",
+      "source": "MathDx/cuRANDDx/01_introduction/philox_thread_api.cu",
+      "status": "PARTIAL",
+      "observation": "STATIC_CONTRACT_REVIEW; no new GPU result claimed",
+      "original_sha256": "a983f749cf1cc449d8143db346837aa06e5383603bc56bfcea543ea88f1a4f22",
+      "implementation_sha256": "74879d529676297f343ff7b58001129b30c974697c041288c4c795eee4f004ad",
+      "current_missing_contract": [
+        "batches12_15/NVIDIA-LEGACY-bitwise-host-device-lognormal-contract"
+      ],
+      "current_reason": "使用rocRAND device Philox4x32-10 + HIP/OCML explicit 53-bit Box-Muller lognormal；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。使用真实rocRAND Philox设备引擎，CPU整数oracle逐word验证counter/subsequence；分布使用显式53-bit Box-Muller。ROCm normal头与当前overlay不兼容，且不声称原例NVIDIA LEGACY host/device逐位相等。",
+      "actual_library": "rocRAND device Philox4x32-10 + HIP/OCML explicit 53-bit Box-Muller lognormal",
+      "previous_evidence": [
+        "migration/reports/evidence/20261109T083217.050455Z/original-rocm/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu",
+        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu",
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu",
+        "migration/reports/evidence/20261110T051610.903463Z/batches12_15-rocm/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu",
+        "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/MathDx_cuRANDDx_01_introduction_philox_thread_api.cu"
+      ],
+      "current_proof_dependencies_stale": {},
+      "source_contract_lines": [
+        {
+          "line": 2,
+          "text": " * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+        },
+        {
+          "line": 28,
+          "text": "// with CURAND_ORDERING_PSEUDO_LEGACY ordering. "
+        },
+        {
+          "line": 29,
+          "text": "// The ordering is that using subsequences different sequences each thread generates 4 32-bit random values, "
+        },
+        {
+          "line": 74,
+          "text": "    const unsigned int grid_size = (size / 4 + block_dim - 1) / block_dim;"
+        },
+        {
+          "line": 75,
+          "text": "    generate_kernel<RNG, DataType><<<grid_size, block_dim, 0>>>((double4*)d_out, seed, offset, size, mean, stddev);"
+        },
+        {
+          "line": 90,
+          "text": "    CURAND_CHECK_AND_EXIT(curandSetGeneratorOrdering(gen_curand, CURAND_ORDERING_PSEUDO_LEGACY));"
+        },
+        {
+          "line": 103,
+          "text": "        std::cout << \"SUCCESS: Same sequence is generated with cuRANDDx and cuRAND Host API using LEGACY ordering.\\n\";"
+        },
+        {
+          "line": 114,
+          "text": "        std::cout << \"FAILED: Different sequence is generated with cuRANDDx and cuRAND Host API using LEGACY \""
+        },
+        {
+          "line": 115,
+          "text": "                     \"ordering.\\n\";"
+        }
+      ],
+      "next_condition": "未完成合同：NVIDIA-LEGACY-bitwise-host-device-lognormal-contract；补实现/真实后端并重验。",
+      "checks": [
+        {
+          "check": "original-source-identity",
+          "passed": true
+        },
+        {
+          "check": "explicit-unfulfilled-contract",
+          "passed": true
+        }
+      ],
+      "experiment_id": "20261110T090658.610171Z-R3-host-contract-review-02eff69bea",
+      "evidence": "migration/reports/evidence/rewrite/R3/MathDx_cuRANDDx_01_introduction__philox_thread_api.cu/20261110T090658.610171Z-R3-host-contract-review-02eff69bea"
+    },
+    {
+      "sample_id": "NPP+/floodFill::floodFillVariousRegionTypesNPPPlus.cpp",
+      "source": "NPP+/floodFill/floodFillVariousRegionTypesNPPPlus.cpp",
+      "status": "PARTIAL",
+      "observation": "STATIC_CONTRACT_REVIEW; no new GPU result claimed",
+      "original_sha256": "b607b3cc985c64e4504fa62a9e08f0fd296821737726f87d90d74653c683eb5c",
+      "implementation_sha256": "7b266c87722393ed12c3baf36169bd1456120e8066cc5820d90e3537c2cc9dcd",
+      "current_missing_contract": [
+        "batches12_15/native-NPPPlus-five-mode-metadata-and-paint-contract"
+      ],
+      "current_reason": "使用HIP connected-region equal/gradient/range/boundary kernels + GPU area/bbox metadata；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。五种GPU连接/gradient/range/boundary路径及区域统计已验收；原生NPP+ SDK缺失，原例完整paint值/metadata结构和边界策略未逐项等价。",
+      "actual_library": "HIP connected-region equal/gradient/range/boundary kernels + GPU area/bbox metadata",
+      "previous_evidence": [
+        "migration/reports/evidence/20261109T083217.050455Z/original-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp",
+        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp",
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp",
+        "migration/reports/evidence/20261110T051547.561861Z/batches12_15-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp",
+        "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp"
+      ],
+      "current_proof_dependencies_stale": {},
+      "source_contract_lines": [
+        {
+          "line": 2,
+          "text": " * SPDX-FileCopyrightText: Copyright (c) 2020-2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+        }
+      ],
+      "next_condition": "未完成合同：native-NPPPlus-five-mode-metadata-and-paint-contract；补实现/真实后端并重验。",
+      "checks": [
+        {
+          "check": "original-source-identity",
+          "passed": true
+        },
+        {
+          "check": "explicit-unfulfilled-contract",
+          "passed": true
+        }
+      ],
+      "experiment_id": "20261110T090659.627848Z-R3-host-contract-review-6e5a45758c",
+      "evidence": "migration/reports/evidence/rewrite/R3/NPP__floodFill__floodFillVariousRegionTypesNPPPlus.cpp/20261110T090659.627848Z-R3-host-contract-review-6e5a45758c"
+    },
+    {
+      "sample_id": "NPP/nppCanny::npp_canny_simple.cpp",
+      "source": "NPP/nppCanny/npp_canny_simple.cpp",
+      "status": "PARTIAL",
+      "observation": "STATIC_CONTRACT_REVIEW; no new GPU result claimed",
+      "original_sha256": "baf56fa10d093239368ac3feb40874b3d76f9a9d97824697ea8851d196a68eb4",
+      "implementation_sha256": "642803273a59f28e98a40c02e70c759628f9d0c29eed50ecba7daa3619c18abf",
+      "current_missing_contract": [
+        "batches12_15/native-NPP-C3-gradient-tie-and-file-CLI-equivalence"
+      ],
+      "current_reason": "使用HIP three-channel Sobel/NMS/connected hysteresis kernels；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。GPU三通道最大梯度/Sobel/NMS/滞后连接已全像素验收；原生NPP C3梯度与NMS tie策略及原例OpenCV文件CLI未完成逐像素等价。",
+      "actual_library": "HIP three-channel Sobel/NMS/connected hysteresis kernels",
+      "previous_evidence": [
+        "migration/reports/evidence/20261109T083217.050455Z/original-rocm/NPP_nppCanny_npp_canny_simple.cpp",
+        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/NPP_nppCanny_npp_canny_simple.cpp",
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP_nppCanny_npp_canny_simple.cpp",
+        "migration/reports/evidence/20261110T051547.561861Z/batches12_15-rocm/NPP_nppCanny_npp_canny_simple.cpp",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/NPP_nppCanny_npp_canny_simple.cpp",
+        "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/NPP_nppCanny_npp_canny_simple.cpp",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_nppCanny_npp_canny_simple.cpp",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_nppCanny_npp_canny_simple.cpp"
+      ],
+      "current_proof_dependencies_stale": {},
+      "source_contract_lines": [
+        {
+          "line": 2,
+          "text": " * SPDX-FileCopyrightText: Copyright (c) 2021-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+        },
+        {
+          "line": 22,
+          "text": " * Detects edges in color images using NVIDIA NPP."
+        },
+        {
+          "line": 98,
+          "text": "        CHECK_NPP(nppiFilterCannyBorderGetBufferSize(roi, &buffer_size));"
+        },
+        {
+          "line": 130,
+          "text": "        CHECK_NPP(nppiFilterCannyBorder_8u_C3C1R_Ctx("
+        }
+      ],
+      "next_condition": "未完成合同：native-NPP-C3-gradient-tie-and-file-CLI-equivalence；补实现/真实后端并重验。",
+      "checks": [
+        {
+          "check": "original-source-identity",
+          "passed": true
+        },
+        {
+          "check": "explicit-unfulfilled-contract",
+          "passed": true
+        }
+      ],
+      "experiment_id": "20261110T090700.671622Z-R3-host-contract-review-164b3370e4",
+      "evidence": "migration/reports/evidence/rewrite/R3/NPP_nppCanny__npp_canny_simple.cpp/20261110T090700.671622Z-R3-host-contract-review-164b3370e4"
+    },
+    {
+      "sample_id": "NPP/templateMatching::templateMatching.cpp",
+      "source": "NPP/templateMatching/templateMatching.cpp",
+      "status": "PARTIAL",
+      "observation": "STATIC_CONTRACT_REVIEW; no new GPU result claimed",
+      "original_sha256": "812ed394222f764ce9fb4ec0cac1c5d0cad6f1620cc15a367dc1be9ce92c2cfb",
+      "implementation_sha256": "c1a315319e0436d6e831d2c09a02034a9385b7607e38bcd07dd189d17bd39c43",
+      "current_missing_contract": [
+        "rewrite/R3/ncc/independent-review-and-qualification"
+      ],
+      "current_reason": "已完成GPU重写与独立数值复核；候选尚需独立审查及完整资格，未升级整例。",
+      "actual_library": "HIP NCC/full original CLI/RAW input/PGM annotation/HIP-event timing",
+      "previous_evidence": [
+        "migration/reports/evidence/20261109T083217.050455Z/original-rocm/NPP_templateMatching_templateMatching.cpp",
+        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/NPP_templateMatching_templateMatching.cpp",
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP_templateMatching_templateMatching.cpp",
+        "migration/reports/evidence/20261110T051547.561861Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp",
+        "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/NPP_templateMatching_templateMatching.cpp",
+        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp",
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp",
+        "migration/reports/rewrite-ncc-rocm.json",
+        "migration/reports/rewrite-ncc-native-comparison.json"
+      ],
+      "current_proof_dependencies_stale": {},
+      "source_contract_lines": [
+        {
+          "line": 2,
+          "text": " * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+        },
+        {
+          "line": 118,
+          "text": "        else if (a == \"-noise\") noise = atoi(next());"
+        },
+        {
+          "line": 122,
+          "text": "            printf(\"Usage: %s [-x tpl-x] [-y tpl-y] [-tw tpl-width] [-th tpl-height] [-g gain] [-o offset] [-noise amplitude] \""
+        },
+        {
+          "line": 136,
+          "text": "        fprintf(stderr, \"-noise must be between 0 and 255\\n\");"
+        }
+      ],
+      "next_condition": "未完成合同：original-annotation-file-CLI-and-timing-harness；补实现/真实后端并重验。",
+      "checks": [
+        {
+          "check": "original-source-identity",
+          "passed": true
+        },
+        {
+          "check": "explicit-unfulfilled-contract",
+          "passed": true
+        }
+      ],
+      "experiment_id": "20261110T090701.687702Z-R3-host-contract-review-c74d32e998",
+      "evidence": "migration/reports/evidence/rewrite/R3/NPP_templateMatching__templateMatching.cpp/20261110T090701.687702Z-R3-host-contract-review-c74d32e998"
+    },
+    {
+      "sample_id": "cuBLASMp::gemm.cu",
+      "source": "cuBLASMp/gemm.cu",
+      "status": "PARTIAL",
+      "observation": "STATIC_CONTRACT_REVIEW; no new GPU result claimed",
+      "original_sha256": "d44714cf598486dc665036d5e9a5e78ad2194489f3b8ec233f1e743020ebe1a0",
+      "implementation_sha256": "f6fde82af7e6b83aa21b9b254a5c82a0755e36178afd443fc5b5b0b416797753",
+      "current_missing_contract": [
+        "batches12_15/original-B-submatrix-offset-and-full-transpose-controls"
+      ],
+      "current_reason": "使用MPI + RCCL distribution + hipBLAS FP32 local GEMM；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。本轮GEMM保持FP32/尺寸与A/C分布；原例B的IB=3子矩阵描述符及完整transpose/CLI控制未逐项等价，保留部分支持。",
+      "actual_library": "MPI + RCCL distribution + hipBLAS FP32 local GEMM",
+      "previous_evidence": [
+        "migration/reports/evidence/20261109T083217.050455Z/original-rocm/cuBLASMp_gemm.cu",
+        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuBLASMp_gemm.cu",
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuBLASMp_gemm.cu",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_gemm.cu",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_gemm.cu",
+        "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/cuBLASMp_gemm.cu"
+      ],
+      "current_proof_dependencies_stale": {},
+      "source_contract_lines": [
+        {
+          "line": 2,
+          "text": " * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+        },
+        {
+          "line": 32,
+          "text": "    int rank,"
+        },
+        {
+          "line": 33,
+          "text": "    cublasMpGrid_t grid,"
+        },
+        {
+          "line": 84,
+          "text": "        grid,"
+        },
+        {
+          "line": 101,
+          "text": "        grid,"
+        },
+        {
+          "line": 118,
+          "text": "        grid,"
+        },
+        {
+          "line": 135,
+          "text": "        grid,"
+        },
+        {
+          "line": 145,
+          "text": "    if (rank == 0)"
+        },
+        {
+          "line": 170,
+          "text": "            CUBLAS_GEMM_DEFAULT));"
+        },
+        {
+          "line": 187,
+          "text": "    const int rank = get_nccl_rank(comm);"
+        },
+        {
+          "line": 219,
+          "text": "    const int myprow = (opts.grid_layout == 'c' ? rank % nprow : rank / npcol);"
+        },
+        {
+          "line": 220,
+          "text": "    const int mypcol = (opts.grid_layout == 'c' ? rank / nprow : rank % npcol);"
+        },
+        {
+          "line": 228,
+          "text": "    cublasMpGrid_t grid = nullptr;"
+        },
+        {
+          "line": 229,
+          "text": "    CUBLASMP_CHECK(cublasMpGridCreate(nprow, npcol, char_to_grid_layout(opts.grid_layout), comm, &grid));"
+        },
+        {
+          "line": 256,
+          "text": "    generate_random_matrix(a_rows, a_cols, h_A.data(), mbA, nbA, ia, ja, llda, nprow, npcol, myprow, mypcol, rank);"
+        },
+        {
+          "line": 257,
+          "text": "    generate_random_matrix(b_rows, b_cols, h_B.data(), mbB, nbB, ib, jb, lldb, nprow, npcol, myprow, mypcol, rank);"
+        },
+        {
+          "line": 258,
+          "text": "    generate_random_matrix(m, n, h_C.data(), mbC, nbC, ic, jc, lldc, nprow, npcol, myprow, mypcol, rank);"
+        },
+        {
+          "line": 279,
+          "text": "        cublasMpMatrixDescriptorCreate(global_m_a, global_n_a, mbA, nbA, 0, 0, llda, cuda_input_type, grid, &descA));"
+        },
+        {
+          "line": 281,
+          "text": "        cublasMpMatrixDescriptorCreate(global_m_b, global_n_b, mbB, nbB, 0, 0, lldb, cuda_input_type, grid, &descB));"
+        },
+        {
+          "line": 283,
+          "text": "        cublasMpMatrixDescriptorCreate(global_m_c, global_n_c, mbC, nbC, 0, 0, lldc, cuda_output_type, grid, &descC));"
+        },
+        {
+          "line": 412,
+          "text": "                                                  rank,"
+        },
+        {
+          "line": 413,
+          "text": "                                                  grid,"
+        },
+        {
+          "line": 445,
+          "text": "    CUBLASMP_CHECK(cublasMpGridDestroy(grid));"
+        },
+        {
+          "line": 481,
+          "text": "                     .grid_layout = 'c',"
+        },
+        {
+          "line": 495,
+          "text": "    const int nranks = opts.p * opts.q;"
+        },
+        {
+          "line": 496,
+          "text": "    Comm comm(nranks, opts.gpus_per_process);"
+        }
+      ],
+      "next_condition": "未完成合同：original-B-submatrix-offset-and-full-transpose-controls；补实现/真实后端并重验。",
+      "checks": [
+        {
+          "check": "original-source-identity",
+          "passed": true
+        },
+        {
+          "check": "explicit-unfulfilled-contract",
+          "passed": true
+        }
+      ],
+      "experiment_id": "20261110T090702.702731Z-R3-host-contract-review-c04fdf742f",
+      "evidence": "migration/reports/evidence/rewrite/R3/cuBLASMp__gemm.cu/20261110T090702.702731Z-R3-host-contract-review-c04fdf742f"
+    },
+    {
+      "sample_id": "cuBLASMp::matmul_ag.cu",
+      "source": "cuBLASMp/matmul_ag.cu",
+      "status": "PARTIAL",
+      "observation": "STATIC_CONTRACT_REVIEW; no new GPU result claimed",
+      "original_sha256": "62a9284877e0ac4640ac77c4e04f3bcd2ce444edafc94773bfdcee1d6ac2e6d7",
+      "implementation_sha256": "efdaec2f80a2479c7ba4efcdcae53b8f96d1a5dd62dbbf6340db98fd0bfaf294",
+      "current_missing_contract": [
+        "batches12_15/original-half-collective-and-quantized-scale-modes"
+      ],
+      "current_reason": "使用MPI + RCCL AllGather + hipBLAS GemmEx FP16 inputs/FP32 accumulation + HIP FP16 quantization；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。FP16输入用native GemmEx计算，项目FP32通信/累加后GPU量化FP16；原始FP16 collective舍入、FP8/FP4/scale模式与完整CLI尚未等价。",
+      "actual_library": "MPI + RCCL AllGather + hipBLAS GemmEx FP16 inputs/FP32 accumulation + HIP FP16 quantization",
+      "previous_evidence": [
+        "migration/reports/evidence/20261109T083217.050455Z/original-rocm/cuBLASMp_matmul_ag.cu",
+        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuBLASMp_matmul_ag.cu",
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuBLASMp_matmul_ag.cu",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_matmul_ag.cu",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_matmul_ag.cu",
+        "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/cuBLASMp_matmul_ag.cu"
+      ],
+      "current_proof_dependencies_stale": {},
+      "source_contract_lines": [
+        {
+          "line": 2,
+          "text": " * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+        },
+        {
+          "line": 32,
+          "text": "    const int rank = get_nccl_rank(comm);"
+        },
+        {
+          "line": 33,
+          "text": "    const int nranks = opts.p * opts.q;"
+        },
+        {
+          "line": 44,
+          "text": "    cublasMpGrid_t grid_col_major = nullptr;"
+        },
+        {
+          "line": 45,
+          "text": "    cublasMpGrid_t grid_row_major = nullptr;"
+        },
+        {
+          "line": 47,
+          "text": "    CUBLASMP_CHECK(cublasMpGridCreate(nranks, 1, CUBLASMP_GRID_LAYOUT_COL_MAJOR, comm, &grid_col_major));"
+        },
+        {
+          "line": 48,
+          "text": "    CUBLASMP_CHECK(cublasMpGridCreate(1, nranks, CUBLASMP_GRID_LAYOUT_ROW_MAJOR, comm, &grid_row_major));"
+        },
+        {
+          "line": 60,
+          "text": "    const int64_t loc_a_m = ta ? k : m / nranks;"
+        },
+        {
+          "line": 61,
+          "text": "    const int64_t loc_a_n = ta ? m / nranks : k;"
+        },
+        {
+          "line": 62,
+          "text": "    const int64_t loc_b_m = tb ? n / nranks : k;"
+        },
+        {
+          "line": 63,
+          "text": "    const int64_t loc_b_n = tb ? k : n / nranks;"
+        },
+        {
+          "line": 64,
+          "text": "    const int64_t loc_d_m = m / nranks;"
+        },
+        {
+          "line": 65,
+          "text": "    const int64_t loc_d_n = n / nranks;"
+        },
+        {
+          "line": 69,
+          "text": "    std::vector<TypeD> h_D(loc_d_m * loc_d_n * nranks, TypeD(0));"
+        },
+        {
+          "line": 80,
+          "text": "        ta ? 1 : nranks,"
+        },
+        {
+          "line": 81,
+          "text": "        ta ? nranks : 1,"
+        },
+        {
+          "line": 82,
+          "text": "        ta ? 0 : rank,"
+        },
+        {
+          "line": 83,
+          "text": "        ta ? rank : 0,"
+        },
+        {
+          "line": 84,
+          "text": "        rank);"
+        },
+        {
+          "line": 94,
+          "text": "        tb ? nranks : 1,"
+        },
+        {
+          "line": 95,
+          "text": "        tb ? 1 : nranks,"
+        },
+        {
+          "line": 96,
+          "text": "        tb ? rank : 0,"
+        },
+        {
+          "line": 97,
+          "text": "        tb ? 0 : rank,"
+        },
+        {
+          "line": 98,
+          "text": "        rank);"
+        },
+        {
+          "line": 99,
+          "text": "    generate_random_matrix(m, n, h_D.data(), loc_d_m, loc_d_n, 1, 1, loc_d_m, nranks, 1, rank, 0, rank);"
+        },
+        {
+          "line": 108,
+          "text": "    CUDA_CHECK(cudaMalloc((void**)&d_D, loc_d_m * loc_d_n * nranks * sizeof(TypeD)));"
+        },
+        {
+          "line": 113,
+          "text": "        cudaMemcpyAsync(d_D, h_D.data(), loc_d_m * loc_d_n * nranks * sizeof(TypeD), cudaMemcpyHostToDevice, stream));"
+        },
+        {
+          "line": 128,
+          "text": "        ta ? grid_row_major : grid_col_major,"
+        },
+        {
+          "line": 139,
+          "text": "        tb ? grid_col_major : grid_row_major,"
+        },
+        {
+          "line": 142,
+          "text": "        m, n, loc_d_m, loc_d_n, 0, 0, loc_d_m, CudaTypeTraits<TypeD>::typeEnum, grid_col_major, &descD));"
+        },
+        {
+          "line": 150,
+          "text": "        matmulDesc, CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_TRANSA, &transA, sizeof(transA)));"
+        },
+        {
+          "line": 152,
+          "text": "        matmulDesc, CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_TRANSB, &transB, sizeof(transB)));"
+        },
+        {
+          "line": 154,
+          "text": "        matmulDesc, CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_ALGO_TYPE, &algoType, sizeof(algoType)));"
+        },
+        {
+          "line": 197,
+          "text": "                CUBLASMP_CHECK(cublasMpBufferDeregister(grid_col_major, d_work));"
+        },
+        {
+          "line": 202,
+          "text": "        if (grid_col_major) CUBLASMP_CHECK(cublasMpGridDestroy(grid_col_major));"
+        },
+        {
+          "line": 203,
+          "text": "        if (grid_row_major) CUBLASMP_CHECK(cublasMpGridDestroy(grid_row_major));"
+        },
+        {
+          "line": 211,
+          "text": "        d_a_scale = allocate_and_init_scaling_factors(a_scale_rows, a_scale_cols, a_scale_mode, rank);"
+        },
+        {
+          "line": 213,
+          "text": "            matmulDesc, CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_A_SCALE_MODE, &a_scale_mode, sizeof(a_scale_mode)));"
+        },
+        {
+          "line": 215,
+          "text": "            matmulDesc, CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_A_SCALE_POINTER, &d_a_scale, sizeof(d_a_scale)));"
+        },
+        {
+          "line": 220,
+          "text": "        d_b_scale = allocate_and_init_scaling_factors(b_scale_rows, b_scale_cols, b_scale_mode, rank);"
+        },
+        {
+          "line": 222,
+          "text": "            matmulDesc, CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_B_SCALE_MODE, &b_scale_mode, sizeof(b_scale_mode)));"
+        },
+        {
+          "line": 224,
+          "text": "            matmulDesc, CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_B_SCALE_POINTER, &d_b_scale, sizeof(d_b_scale)));"
+        },
+        {
+          "line": 229,
+          "text": "        d_d_scale = allocate_and_init_scaling_factors(m, n, d_scale_mode, rank);"
+        },
+        {
+          "line": 231,
+          "text": "            matmulDesc, CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_D_SCALE_MODE, &d_scale_mode, sizeof(d_scale_mode)));"
+        },
+        {
+          "line": 233,
+          "text": "            matmulDesc, CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_D_SCALE_POINTER, &d_d_scale, sizeof(d_d_scale)));"
+        },
+        {
+          "line": 238,
+          "text": "        d_d_out_scale = allocate_and_init_scaling_factors(m, n, d_out_scale_mode, rank);"
+        },
+        {
+          "line": 241,
+          "text": "            CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_D_OUT_SCALE_MODE,"
+        },
+        {
+          "line": 246,
+          "text": "            CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_D_OUT_SCALE_POINTER,"
+        },
+        {
+          "line": 280,
+          "text": "    if (skip_if_cublasmp_not_supported(\"matmul_ag\", \"cublasMpMatmul_bufferSize\", status, rank))"
+        },
+        {
+          "line": 289,
+          "text": "    register_status = cublasMpBufferRegister(grid_col_major, d_work, workspaceInBytesOnDevice);"
+        },
+        {
+          "line": 290,
+          "text": "    if (register_status != CUBLASMP_STATUS_SUCCESS && rank == 0)"
+        },
+        {
+          "line": 341,
+          "text": "        if (skip_if_cublasmp_not_supported(\"matmul_ag\", \"cublasMpMatmul\", status, rank))"
+        },
+        {
+          "line": 363,
+          "text": "                                                  rank,"
+        },
+        {
+          "line": 364,
+          "text": "                                                  nranks,"
+        },
+        {
+          "line": 365,
+          "text": "                                                  ta ? grid_row_major : grid_col_major,"
+        },
+        {
+          "line": 366,
+          "text": "                                                  ta ? 1 : nranks,"
+        },
+        {
+          "line": 367,
+          "text": "                                                  ta ? nranks : 1,"
+        },
+        {
+          "line": 368,
+          "text": "                                                  ta ? 0 : rank,"
+        },
+        {
+          "line": 369,
+          "text": "                                                  ta ? rank : 0,"
+        },
+        {
+          "line": 370,
+          "text": "                                                  tb ? grid_col_major : grid_row_major,"
+        },
+        {
+          "line": 371,
+          "text": "                                                  tb ? nranks : 1,"
+        },
+        {
+          "line": 372,
+          "text": "                                                  tb ? 1 : nranks,"
+        },
+        {
+          "line": 373,
+          "text": "                                                  tb ? rank : 0,"
+        },
+        {
+          "line": 374,
+          "text": "                                                  tb ? 0 : rank,"
+        },
+        {
+          "line": 375,
+          "text": "                                                  grid_col_major,"
+        },
+        {
+          "line": 376,
+          "text": "                                                  nranks,"
+        },
+        {
+          "line": 378,
+          "text": "                                                  rank,"
+        },
+        {
+          "line": 432,
+          "text": "        .grid_layout = 'c',"
+        },
+        {
+          "line": 451,
+          "text": "    const int nranks = opts.p * opts.q;"
+        },
+        {
+          "line": 452,
+          "text": "    Comm comm(nranks, opts.gpus_per_process);"
+        }
+      ],
+      "next_condition": "未完成合同：original-half-collective-and-quantized-scale-modes；补实现/真实后端并重验。",
+      "checks": [
+        {
+          "check": "original-source-identity",
+          "passed": true
+        },
+        {
+          "check": "explicit-unfulfilled-contract",
+          "passed": true
+        }
+      ],
+      "experiment_id": "20261110T090703.730084Z-R3-host-contract-review-3a4f3f7df3",
+      "evidence": "migration/reports/evidence/rewrite/R3/cuBLASMp__matmul_ag.cu/20261110T090703.730084Z-R3-host-contract-review-3a4f3f7df3"
+    },
+    {
+      "sample_id": "cuBLASMp::matmul_ar.cu",
+      "source": "cuBLASMp/matmul_ar.cu",
+      "status": "PARTIAL",
+      "observation": "STATIC_CONTRACT_REVIEW; no new GPU result claimed",
+      "original_sha256": "0eb77ba84aa6bc8a7d7e9206682ba4e6884bb31aef53f2fa827fdfd62cc4acca",
+      "implementation_sha256": "5de17c403c2a572b7e78d73f836fe0c3be75da67ffd9e75dc11076559bdad74e",
+      "current_missing_contract": [
+        "batches12_15/original-half-collective-and-quantized-scale-modes"
+      ],
+      "current_reason": "使用MPI + RCCL AllReduce + hipBLAS GemmEx FP16 inputs/FP32 accumulation + HIP FP16 quantization；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。FP16输入用native GemmEx计算，项目FP32通信/累加后GPU量化FP16；原始FP16 collective舍入、FP8/FP4/scale模式与完整CLI尚未等价。",
+      "actual_library": "MPI + RCCL AllReduce + hipBLAS GemmEx FP16 inputs/FP32 accumulation + HIP FP16 quantization",
+      "previous_evidence": [
+        "migration/reports/evidence/20261109T083217.050455Z/original-rocm/cuBLASMp_matmul_ar.cu",
+        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuBLASMp_matmul_ar.cu",
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuBLASMp_matmul_ar.cu",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_matmul_ar.cu",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_matmul_ar.cu",
+        "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/cuBLASMp_matmul_ar.cu"
+      ],
+      "current_proof_dependencies_stale": {},
+      "source_contract_lines": [
+        {
+          "line": 2,
+          "text": " * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+        },
+        {
+          "line": 32,
+          "text": "    const int rank = get_nccl_rank(comm);"
+        },
+        {
+          "line": 33,
+          "text": "    const int nranks = opts.p * opts.q;"
+        },
+        {
+          "line": 44,
+          "text": "    cublasMpGrid_t grid_col_major = nullptr;"
+        },
+        {
+          "line": 45,
+          "text": "    cublasMpGrid_t grid_row_major = nullptr;"
+        },
+        {
+          "line": 47,
+          "text": "    CUBLASMP_CHECK(cublasMpGridCreate(nranks, 1, CUBLASMP_GRID_LAYOUT_COL_MAJOR, comm, &grid_col_major));"
+        },
+        {
+          "line": 48,
+          "text": "    CUBLASMP_CHECK(cublasMpGridCreate(1, nranks, CUBLASMP_GRID_LAYOUT_ROW_MAJOR, comm, &grid_row_major));"
+        },
+        {
+          "line": 66,
+          "text": "    const int64_t loc_a_m = k / nranks;"
+        },
+        {
+          "line": 68,
+          "text": "    const int64_t loc_b_m = k / nranks;"
+        },
+        {
+          "line": 86,
+          "text": "        ta ? nranks : 1,"
+        },
+        {
+          "line": 87,
+          "text": "        ta ? 1 : nranks,"
+        },
+        {
+          "line": 88,
+          "text": "        ta ? rank : 0,"
+        },
+        {
+          "line": 89,
+          "text": "        ta ? 0 : rank,"
+        },
+        {
+          "line": 90,
+          "text": "        rank);"
+        },
+        {
+          "line": 100,
+          "text": "        tb ? 1 : nranks,"
+        },
+        {
+          "line": 101,
+          "text": "        tb ? nranks : 1,"
+        },
+        {
+          "line": 102,
+          "text": "        tb ? 0 : rank,"
+        },
+        {
+          "line": 103,
+          "text": "        tb ? rank : 0,"
+        },
+        {
+          "line": 104,
+          "text": "        rank);"
+        },
+        {
+          "line": 105,
+          "text": "    generate_random_matrix(m, n * nranks, h_D.data(), loc_d_m, loc_d_n, 1, 1, loc_d_m, 1, nranks, 0, rank, rank);"
+        },
+        {
+          "line": 124,
+          "text": "        k, m, loc_a_m, loc_a_n, 0, 0, loc_a_m, CudaTypeTraits<TypeA>::typeEnum, grid_col_major, &descA));"
+        },
+        {
+          "line": 126,
+          "text": "        k, n, loc_b_m, loc_b_n, 0, 0, loc_b_m, CudaTypeTraits<TypeB>::typeEnum, grid_col_major, &descB));"
+        },
+        {
+          "line": 128,
+          "text": "        m, n * nranks, loc_d_m, loc_d_n, 0, 0, loc_d_m, CudaTypeTraits<TypeD>::typeEnum, grid_row_major, &descD));"
+        },
+        {
+          "line": 137,
+          "text": "        matmulDesc, CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_TRANSA, &transA, sizeof(transA)));"
+        },
+        {
+          "line": 139,
+          "text": "        matmulDesc, CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_TRANSB, &transB, sizeof(transB)));"
+        },
+        {
+          "line": 141,
+          "text": "        matmulDesc, CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_ALGO_TYPE, &algoType, sizeof(algoType)));"
+        },
+        {
+          "line": 184,
+          "text": "                CUBLASMP_CHECK(cublasMpBufferDeregister(grid_row_major, d_work));"
+        },
+        {
+          "line": 189,
+          "text": "        if (grid_col_major) CUBLASMP_CHECK(cublasMpGridDestroy(grid_col_major));"
+        },
+        {
+          "line": 190,
+          "text": "        if (grid_row_major) CUBLASMP_CHECK(cublasMpGridDestroy(grid_row_major));"
+        },
+        {
+          "line": 198,
+          "text": "        d_a_scale = allocate_and_init_scaling_factors(a_scale_rows, a_scale_cols, a_scale_mode, rank);"
+        },
+        {
+          "line": 200,
+          "text": "            matmulDesc, CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_A_SCALE_MODE, &a_scale_mode, sizeof(a_scale_mode)));"
+        },
+        {
+          "line": 202,
+          "text": "            matmulDesc, CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_A_SCALE_POINTER, &d_a_scale, sizeof(d_a_scale)));"
+        },
+        {
+          "line": 207,
+          "text": "        d_b_scale = allocate_and_init_scaling_factors(b_scale_rows, b_scale_cols, b_scale_mode, rank);"
+        },
+        {
+          "line": 209,
+          "text": "            matmulDesc, CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_B_SCALE_MODE, &b_scale_mode, sizeof(b_scale_mode)));"
+        },
+        {
+          "line": 211,
+          "text": "            matmulDesc, CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_B_SCALE_POINTER, &d_b_scale, sizeof(d_b_scale)));"
+        },
+        {
+          "line": 216,
+          "text": "        d_d_scale = allocate_and_init_scaling_factors(m, n, d_scale_mode, rank);"
+        },
+        {
+          "line": 218,
+          "text": "            matmulDesc, CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_D_SCALE_MODE, &d_scale_mode, sizeof(d_scale_mode)));"
+        },
+        {
+          "line": 220,
+          "text": "            matmulDesc, CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_D_SCALE_POINTER, &d_d_scale, sizeof(d_d_scale)));"
+        },
+        {
+          "line": 225,
+          "text": "        d_d_out_scale = allocate_and_init_scaling_factors(m, n, d_out_scale_mode, rank);"
+        },
+        {
+          "line": 228,
+          "text": "            CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_D_OUT_SCALE_MODE,"
+        },
+        {
+          "line": 233,
+          "text": "            CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_D_OUT_SCALE_POINTER,"
+        },
+        {
+          "line": 239,
+          "text": "        matmulDesc, CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_EPILOGUE, &epilogue, sizeof(epilogue)));"
+        },
+        {
+          "line": 270,
+          "text": "    if (skip_if_cublasmp_not_supported(\"matmul_ar\", \"cublasMpMatmul_bufferSize\", status, rank))"
+        },
+        {
+          "line": 279,
+          "text": "    register_status = cublasMpBufferRegister(grid_row_major, d_work, workspaceInBytesOnDevice);"
+        },
+        {
+          "line": 280,
+          "text": "    if (register_status != CUBLASMP_STATUS_SUCCESS && rank == 0)"
+        },
+        {
+          "line": 331,
+          "text": "        if (skip_if_cublasmp_not_supported(\"matmul_ar\", \"cublasMpMatmul\", status, rank))"
+        },
+        {
+          "line": 353,
+          "text": "                                                  rank,"
+        },
+        {
+          "line": 354,
+          "text": "                                                  nranks,"
+        },
+        {
+          "line": 355,
+          "text": "                                                  grid_col_major,"
+        },
+        {
+          "line": 356,
+          "text": "                                                  nranks,"
+        },
+        {
+          "line": 358,
+          "text": "                                                  rank,"
+        },
+        {
+          "line": 360,
+          "text": "                                                  grid_col_major,"
+        },
+        {
+          "line": 361,
+          "text": "                                                  nranks,"
+        },
+        {
+          "line": 363,
+          "text": "                                                  rank,"
+        },
+        {
+          "line": 365,
+          "text": "                                                  grid_row_major,"
+        },
+        {
+          "line": 367,
+          "text": "                                                  nranks,"
+        },
+        {
+          "line": 369,
+          "text": "                                                  rank,"
+        },
+        {
+          "line": 422,
+          "text": "        .grid_layout = 'c',"
+        },
+        {
+          "line": 441,
+          "text": "    const int nranks = opts.p * opts.q;"
+        },
+        {
+          "line": 442,
+          "text": "    Comm comm(nranks, opts.gpus_per_process);"
+        }
+      ],
+      "next_condition": "未完成合同：original-half-collective-and-quantized-scale-modes；补实现/真实后端并重验。",
+      "checks": [
+        {
+          "check": "original-source-identity",
+          "passed": true
+        },
+        {
+          "check": "explicit-unfulfilled-contract",
+          "passed": true
+        }
+      ],
+      "experiment_id": "20261110T090704.761618Z-R3-host-contract-review-0a1f71527d",
+      "evidence": "migration/reports/evidence/rewrite/R3/cuBLASMp__matmul_ar.cu/20261110T090704.761618Z-R3-host-contract-review-0a1f71527d"
+    },
+    {
+      "sample_id": "cuBLASMp::matmul_rs.cu",
+      "source": "cuBLASMp/matmul_rs.cu",
+      "status": "PARTIAL",
+      "observation": "STATIC_CONTRACT_REVIEW; no new GPU result claimed",
+      "original_sha256": "51ed02b07c6899b8f70f1520f5f13bada11880fdbf902f9737eef9193c87dafa",
+      "implementation_sha256": "527de7797fcfb472042993b027c8fa803543250804ddd33d7e9bdad9a6139ce4",
+      "current_missing_contract": [
+        "batches12_15/original-half-collective-and-quantized-scale-modes"
+      ],
+      "current_reason": "使用MPI + RCCL ReduceScatter + hipBLAS GemmEx FP16 inputs/FP32 accumulation + HIP FP16 quantization；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。FP16输入用native GemmEx计算，项目FP32通信/累加后GPU量化FP16；原始FP16 collective舍入、FP8/FP4/scale模式与完整CLI尚未等价。",
+      "actual_library": "MPI + RCCL ReduceScatter + hipBLAS GemmEx FP16 inputs/FP32 accumulation + HIP FP16 quantization",
+      "previous_evidence": [
+        "migration/reports/evidence/20261109T083217.050455Z/original-rocm/cuBLASMp_matmul_rs.cu",
+        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuBLASMp_matmul_rs.cu",
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuBLASMp_matmul_rs.cu",
+        "migration/reports/evidence/20261110T050427.265443Z/batches12_15-rocm/cuBLASMp_matmul_rs.cu",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuBLASMp_matmul_rs.cu",
+        "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/cuBLASMp_matmul_rs.cu"
+      ],
+      "current_proof_dependencies_stale": {},
+      "source_contract_lines": [
+        {
+          "line": 2,
+          "text": " * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+        },
+        {
+          "line": 32,
+          "text": "    const int rank = get_nccl_rank(comm);"
+        },
+        {
+          "line": 33,
+          "text": "    const int nranks = opts.p * opts.q;"
+        },
+        {
+          "line": 44,
+          "text": "    cublasMpGrid_t grid_col_major = nullptr;"
+        },
+        {
+          "line": 45,
+          "text": "    cublasMpGrid_t grid_row_major = nullptr;"
+        },
+        {
+          "line": 47,
+          "text": "    CUBLASMP_CHECK(cublasMpGridCreate(nranks, 1, CUBLASMP_GRID_LAYOUT_COL_MAJOR, comm, &grid_col_major));"
+        },
+        {
+          "line": 48,
+          "text": "    CUBLASMP_CHECK(cublasMpGridCreate(1, nranks, CUBLASMP_GRID_LAYOUT_ROW_MAJOR, comm, &grid_row_major));"
+        },
+        {
+          "line": 60,
+          "text": "    const int64_t loc_a_m = ta ? k / nranks : m;"
+        },
+        {
+          "line": 61,
+          "text": "    const int64_t loc_a_n = ta ? m : k / nranks;"
+        },
+        {
+          "line": 62,
+          "text": "    const int64_t mb_b = tb ? n / nranks : k / nranks;"
+        },
+        {
+          "line": 63,
+          "text": "    const int64_t nb_b = tb ? k / nranks : n / nranks;"
+        },
+        {
+          "line": 64,
+          "text": "    const int64_t loc_b_m = tb ? n : k / nranks;"
+        },
+        {
+          "line": 65,
+          "text": "    const int64_t loc_b_n = tb ? k / nranks : n;"
+        },
+        {
+          "line": 67,
+          "text": "    const int64_t loc_d_n = n / nranks;"
+        },
+        {
+          "line": 82,
+          "text": "        ta ? nranks : 1,"
+        },
+        {
+          "line": 83,
+          "text": "        ta ? 1 : nranks,"
+        },
+        {
+          "line": 84,
+          "text": "        ta ? rank : 0,"
+        },
+        {
+          "line": 85,
+          "text": "        ta ? 0 : rank,"
+        },
+        {
+          "line": 86,
+          "text": "        rank);"
+        },
+        {
+          "line": 96,
+          "text": "        tb ? 1 : nranks,"
+        },
+        {
+          "line": 97,
+          "text": "        tb ? nranks : 1,"
+        },
+        {
+          "line": 98,
+          "text": "        tb ? 0 : rank,"
+        },
+        {
+          "line": 99,
+          "text": "        tb ? rank : 0,"
+        },
+        {
+          "line": 100,
+          "text": "        rank);"
+        },
+        {
+          "line": 101,
+          "text": "    generate_random_matrix(m, n, h_D.data(), loc_d_m, loc_d_n, 1, 1, loc_d_m, 1, nranks, 0, rank, rank);"
+        },
+        {
+          "line": 128,
+          "text": "        ta ? grid_col_major : grid_row_major,"
+        },
+        {
+          "line": 139,
+          "text": "        tb ? grid_row_major : grid_col_major,"
+        },
+        {
+          "line": 142,
+          "text": "        m, n, loc_d_m, loc_d_n, 0, 0, loc_d_m, CudaTypeTraits<TypeD>::typeEnum, grid_row_major, &descD));"
+        },
+        {
+          "line": 150,
+          "text": "        matmulDesc, CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_TRANSA, &transA, sizeof(transA)));"
+        },
+        {
+          "line": 152,
+          "text": "        matmulDesc, CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_TRANSB, &transB, sizeof(transB)));"
+        },
+        {
+          "line": 154,
+          "text": "        matmulDesc, CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_ALGO_TYPE, &algoType, sizeof(algoType)));"
+        },
+        {
+          "line": 197,
+          "text": "                CUBLASMP_CHECK(cublasMpBufferDeregister(grid_row_major, d_work));"
+        },
+        {
+          "line": 202,
+          "text": "        if (grid_col_major) CUBLASMP_CHECK(cublasMpGridDestroy(grid_col_major));"
+        },
+        {
+          "line": 203,
+          "text": "        if (grid_row_major) CUBLASMP_CHECK(cublasMpGridDestroy(grid_row_major));"
+        },
+        {
+          "line": 211,
+          "text": "        d_a_scale = allocate_and_init_scaling_factors(a_scale_rows, a_scale_cols, a_scale_mode, rank);"
+        },
+        {
+          "line": 213,
+          "text": "            matmulDesc, CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_A_SCALE_MODE, &a_scale_mode, sizeof(a_scale_mode)));"
+        },
+        {
+          "line": 215,
+          "text": "            matmulDesc, CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_A_SCALE_POINTER, &d_a_scale, sizeof(d_a_scale)));"
+        },
+        {
+          "line": 220,
+          "text": "        d_b_scale = allocate_and_init_scaling_factors(b_scale_rows, b_scale_cols, b_scale_mode, rank);"
+        },
+        {
+          "line": 222,
+          "text": "            matmulDesc, CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_B_SCALE_MODE, &b_scale_mode, sizeof(b_scale_mode)));"
+        },
+        {
+          "line": 224,
+          "text": "            matmulDesc, CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_B_SCALE_POINTER, &d_b_scale, sizeof(d_b_scale)));"
+        },
+        {
+          "line": 229,
+          "text": "        d_d_scale = allocate_and_init_scaling_factors(m, n, d_scale_mode, rank);"
+        },
+        {
+          "line": 231,
+          "text": "            matmulDesc, CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_D_SCALE_MODE, &d_scale_mode, sizeof(d_scale_mode)));"
+        },
+        {
+          "line": 233,
+          "text": "            matmulDesc, CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_D_SCALE_POINTER, &d_d_scale, sizeof(d_d_scale)));"
+        },
+        {
+          "line": 238,
+          "text": "        d_d_out_scale = allocate_and_init_scaling_factors(m, n, d_out_scale_mode, rank);"
+        },
+        {
+          "line": 241,
+          "text": "            CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_D_OUT_SCALE_MODE,"
+        },
+        {
+          "line": 246,
+          "text": "            CUBLASMP_MATMUL_DESCRIPTOR_ATTRIBUTE_D_OUT_SCALE_POINTER,"
+        },
+        {
+          "line": 280,
+          "text": "    if (skip_if_cublasmp_not_supported(\"matmul_rs\", \"cublasMpMatmul_bufferSize\", status, rank))"
+        },
+        {
+          "line": 289,
+          "text": "    register_status = cublasMpBufferRegister(grid_row_major, d_work, workspaceInBytesOnDevice);"
+        },
+        {
+          "line": 290,
+          "text": "    if (register_status != CUBLASMP_STATUS_SUCCESS && rank == 0)"
+        },
+        {
+          "line": 341,
+          "text": "        if (skip_if_cublasmp_not_supported(\"matmul_rs\", \"cublasMpMatmul\", status, rank))"
+        },
+        {
+          "line": 363,
+          "text": "                                                  rank,"
+        },
+        {
+          "line": 364,
+          "text": "                                                  nranks,"
+        },
+        {
+          "line": 365,
+          "text": "                                                  ta ? grid_col_major : grid_row_major,"
+        },
+        {
+          "line": 366,
+          "text": "                                                  ta ? nranks : 1,"
+        },
+        {
+          "line": 367,
+          "text": "                                                  ta ? 1 : nranks,"
+        },
+        {
+          "line": 368,
+          "text": "                                                  ta ? rank : 0,"
+        },
+        {
+          "line": 369,
+          "text": "                                                  ta ? 0 : rank,"
+        },
+        {
+          "line": 370,
+          "text": "                                                  tb ? grid_row_major : grid_col_major,"
+        },
+        {
+          "line": 371,
+          "text": "                                                  tb ? 1 : nranks,"
+        },
+        {
+          "line": 372,
+          "text": "                                                  tb ? nranks : 1,"
+        },
+        {
+          "line": 373,
+          "text": "                                                  tb ? 0 : rank,"
+        },
+        {
+          "line": 374,
+          "text": "                                                  tb ? rank : 0,"
+        },
+        {
+          "line": 375,
+          "text": "                                                  grid_row_major,"
+        },
+        {
+          "line": 377,
+          "text": "                                                  nranks,"
+        },
+        {
+          "line": 379,
+          "text": "                                                  rank,"
+        },
+        {
+          "line": 432,
+          "text": "        .grid_layout = 'c',"
+        },
+        {
+          "line": 451,
+          "text": "    const int nranks = opts.p * opts.q;"
+        },
+        {
+          "line": 452,
+          "text": "    Comm comm(nranks, opts.gpus_per_process);"
+        }
+      ],
+      "next_condition": "未完成合同：original-half-collective-and-quantized-scale-modes；补实现/真实后端并重验。",
+      "checks": [
+        {
+          "check": "original-source-identity",
+          "passed": true
+        },
+        {
+          "check": "explicit-unfulfilled-contract",
+          "passed": true
+        }
+      ],
+      "experiment_id": "20261110T090705.779390Z-R3-host-contract-review-2bf115c09d",
+      "evidence": "migration/reports/evidence/rewrite/R3/cuBLASMp__matmul_rs.cu/20261110T090705.779390Z-R3-host-contract-review-2bf115c09d"
+    },
+    {
+      "sample_id": "cuDSS/simple_get_set::simple_get_set.cpp",
+      "source": "cuDSS/simple_get_set/simple_get_set.cpp",
+      "status": "PARTIAL",
+      "observation": "STATIC_CONTRACT_REVIEW; no new GPU result claimed",
+      "original_sha256": "e621d1f3e3d3a5aa76bd4749d0e48bcbbf6e504113e4a2909ae8ed2718282a64",
+      "implementation_sha256": "35a003ebf124ada901957943bad7ddb1f60d17e7ecafc06d9dbbd686a7e037ff",
+      "current_missing_contract": [
+        "batches9_11/full-cuDSS-config-query-semantics"
+      ],
+      "current_reason": "使用 CPU sparse symbolic/matching + rocSOLVER CSRRF LU / HIP CSR pivot LU and GPU query adapter；8 个预登记case通过独立CPU与同输入CUDA。稀疏求解、实际Hungarian matching/缩放、分步/融合GPU数值策略、IR、排列/LU/LDL对角/惯性查询已验证；完整cuDSS超级面板策略、16项host/peak内存估计和原矩阵顺序DIAG查询尚未逐项等价。项目核心内存用量与因子顺序对角明确标注，不填造vendor查询。",
+      "actual_library": "CPU sparse symbolic/matching + rocSOLVER CSRRF LU / HIP CSR pivot LU and GPU query adapter",
+      "previous_evidence": [
+        "migration/reports/evidence/20261109T083217.050455Z/original-rocm/cuDSS_simple_get_set_simple_get_set.cpp",
+        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuDSS_simple_get_set_simple_get_set.cpp",
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuDSS_simple_get_set_simple_get_set.cpp",
+        "migration/reports/evidence/20261110T043650.167709Z/batches9_11-rocm/cuDSS_simple_get_set_simple_get_set.cpp",
+        "migration/reports/batches9_11-validation.json",
+        "migration/reports/evidence/20261110T043816.470698Z/batches9_11-cuda/cuDSS_simple_get_set_simple_get_set.cpp"
+      ],
+      "current_proof_dependencies_stale": {},
+      "source_contract_lines": [
+        {
+          "line": 2,
+          "text": " * SPDX-FileCopyrightText: Copyright (c) 2023-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+        },
+        {
+          "line": 98,
+          "text": "    constexpr cudaDataType_t cuda_error_type = CUDSS_DATA_TYPE_UNSET;"
+        },
+        {
+          "line": 247,
+          "text": "    cudssReorderingAlg_t reorder_alg = CUDSS_REORDERING_ALG_DEFAULT;"
+        },
+        {
+          "line": 248,
+          "text": "    CUDSS_CALL_AND_CHECK(cudssConfigSet(solverConfig, CUDSS_CONFIG_REORDERING_ALG,"
+        },
+        {
+          "line": 249,
+          "text": "                                        &reorder_alg, sizeof(cudssReorderingAlg_t)),"
+        },
+        {
+          "line": 250,
+          "text": "                         status, \"cudssConfigSet for reordering alg\");"
+        },
+        {
+          "line": 253,
+          "text": "    CUDSS_CALL_AND_CHECK(cudssConfigSet(solverConfig, CUDSS_CONFIG_MATCHING_ALG,"
+        },
+        {
+          "line": 258,
+          "text": "    CUDSS_CALL_AND_CHECK(cudssConfigSet(solverConfig, CUDSS_CONFIG_USE_SUPERPANELS,"
+        },
+        {
+          "line": 295,
+          "text": "    CUDSS_CALL_AND_CHECK(cudssDataGet(handle, solverData, CUDSS_DATA_PERM_REORDER_ROW,"
+        },
+        {
+          "line": 301,
+          "text": "    CUDSS_CALL_AND_CHECK(cudssDataGet(handle, solverData, CUDSS_DATA_PERM_REORDER_COL,"
+        },
+        {
+          "line": 307,
+          "text": "    CUDSS_CALL_AND_CHECK(cudssConfigGet(solverConfig, CUDSS_CONFIG_MATCHING_ALG,"
+        },
+        {
+          "line": 311,
+          "text": "    CUDSS_CALL_AND_CHECK(cudssConfigGet(solverConfig, CUDSS_CONFIG_FORCE_NONSYMMETRIC_MATCHING,"
+        },
+        {
+          "line": 320,
+          "text": "        CUDSS_CALL_AND_CHECK(cudssDataGet(handle, solverData, CUDSS_DATA_PERM_MATCHING,"
+        },
+        {
+          "line": 328,
+          "text": "        reordering algorithms. */"
+        },
+        {
+          "line": 330,
+          "text": "        CUDSS_CALL_AND_CHECK(cudssDataGet(handle, solverData, CUDSS_DATA_PERM_ROW, &perm,"
+        },
+        {
+          "line": 336,
+          "text": "        CUDSS_CALL_AND_CHECK(cudssDataGet(handle, solverData, CUDSS_DATA_PERM_COL, &perm,"
+        },
+        {
+          "line": 344,
+          "text": "    CUDSS_CALL_AND_CHECK(cudssDataGet(handle, solverData, CUDSS_DATA_MEMORY_ESTIMATES,"
+        },
+        {
+          "line": 363,
+          "text": "        Note: per cuDSS documentation, CUDSS_DATA_INFO is always returned"
+        },
+        {
+          "line": 367,
+          "text": "    CUDSS_CALL_AND_CHECK(cudssDataGet(handle, solverData, CUDSS_DATA_INFO, &info,"
+        },
+        {
+          "line": 373,
+          "text": "    CUDSS_CALL_AND_CHECK(cudssDataGet(handle, solverData, CUDSS_DATA_NPIVOTS, &npivots,"
+        },
+        {
+          "line": 379,
+          "text": "    CUDSS_CALL_AND_CHECK(cudssDataGet(handle, solverData, CUDSS_DATA_INERTIA, &inertia,"
+        },
+        {
+          "line": 388,
+          "text": "        cudssDataGet(handle, solverData, CUDSS_DATA_LU_NNZ, NULL, 0, &sizeWritten),"
+        },
+        {
+          "line": 392,
+          "text": "    /* Note: per cuDSS documentation, CUDSS_DATA_LU_NNZ is always returned as a"
+        },
+        {
+          "line": 399,
+          "text": "    CUDSS_CALL_AND_CHECK(cudssDataGet(handle, solverData, CUDSS_DATA_LU_NNZ, &lu_nnz,"
+        },
+        {
+          "line": 406,
+          "text": "    CUDSS_CALL_AND_CHECK(cudssDataGet(handle, solverData, CUDSS_DATA_DIAG, diag_d,"
+        },
+        {
+          "line": 416,
+          "text": "    if (matching_alg == CUDSS_MATCHING_ALG_AUTO || matching_alg == CUDSS_MATCHING_ALG_MAX_DIAG_PRODUCT) {"
+        },
+        {
+          "line": 417,
+          "text": "        CUDSS_CALL_AND_CHECK(cudssDataGet(handle, solverData, CUDSS_DATA_SCALE_ROW,"
+        },
+        {
+          "line": 427,
+          "text": "        CUDSS_CALL_AND_CHECK(cudssDataGet(handle, solverData, CUDSS_DATA_SCALE_COL,"
+        },
+        {
+          "line": 439,
+          "text": "    CUDSS_CALL_AND_CHECK(cudssConfigSet(solverConfig, CUDSS_CONFIG_IR_N_STEPS,"
+        }
+      ],
+      "next_condition": "缺失范围：full-cuDSS-config-query-semantics；需要真实后端/完整harness并重做验收。",
+      "checks": [
+        {
+          "check": "original-source-identity",
+          "passed": true
+        },
+        {
+          "check": "explicit-unfulfilled-contract",
+          "passed": true
+        }
+      ],
+      "experiment_id": "20261110T090706.800781Z-R3-host-contract-review-c03b9dfdfe",
+      "evidence": "migration/reports/evidence/rewrite/R3/cuDSS_simple_get_set__simple_get_set.cpp/20261110T090706.800781Z-R3-host-contract-review-c03b9dfdfe"
+    },
+    {
+      "sample_id": "cuSOLVER/MgPotrf::cusolver_MgPotrf_example1.cu",
+      "source": "cuSOLVER/MgPotrf/cusolver_MgPotrf_example1.cu",
+      "status": "PARTIAL",
+      "observation": "STATIC_CONTRACT_REVIEW; no new GPU result claimed",
+      "original_sha256": "61487e5427c3ae4649052dbada90a53e4005921d45342be5a5f7e32641957571",
+      "implementation_sha256": "250ed049de84cbc9d22176010be15d3b98a1ff73ac4d0b9c8d2fae3dd3d5f12c",
+      "current_missing_contract": [
+        "batches12_15/original-Mg-input-distribution-descriptor"
+      ],
+      "current_reason": "使用HIP multi-device Cholesky/solve + RCCL broadcast/AllReduce; single process with two GPU threads；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。8阶/2RHS与单进程多GPU数值通过；项目按列重分配让两卡计算，未实现原始tile256输入/输出描述符的完整转换契约。",
+      "actual_library": "HIP multi-device Cholesky/solve + RCCL broadcast/AllReduce; single process with two GPU threads",
+      "previous_evidence": [
+        "migration/reports/evidence/20261109T080822.795958Z/original-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
+        "migration/reports/evidence/20261109T081329.986729Z/original-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
+        "migration/reports/evidence/20261109T081449.022777Z/original-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
+        "migration/reports/evidence/20261109T081655.531829Z/original-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
+        "migration/reports/evidence/20261109T081929.210831Z/original-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
+        "migration/reports/evidence/20261109T084753.304309Z/original-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
+        "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
+        "migration/reports/evidence/20261109T100720.422147Z/original-cuda/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
+        "migration/reports/evidence/20261110T051849.336070Z/batches12_15-native-cuda/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu"
+      ],
+      "current_proof_dependencies_stale": {},
+      "source_contract_lines": [
+        {
+          "line": 2,
+          "text": " * SPDX-FileCopyrightText: Copyright (c) 2020 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+        },
+        {
+          "line": 80,
+          "text": "    const int IA = 1;"
+        },
+        {
+          "line": 81,
+          "text": "    const int JA = 1;"
+        },
+        {
+          "line": 82,
+          "text": "    const int T_A = 256; /* tile size of A */"
+        },
+        {
+          "line": 85,
+          "text": "    const int IB = 1;"
+        },
+        {
+          "line": 86,
+          "text": "    const int JB = 1;"
+        },
+        {
+          "line": 87,
+          "text": "    const int T_B = 10; /* tile size of B */"
+        },
+        {
+          "line": 94,
+          "text": "    cudaLibMgGrid_t gridA;"
+        },
+        {
+          "line": 95,
+          "text": "    cudaLibMgGrid_t gridB;"
+        },
+        {
+          "line": 96,
+          "text": "    cusolverMgGridMapping_t mapping = CUDALIBMG_GRID_MAPPING_COL_MAJOR;"
+        },
+        {
+          "line": 129,
+          "text": "    gen_1d_laplacian<data_type>(N, &A[IDX2F(IA, JA, lda)], lda);"
+        },
+        {
+          "line": 163,
+          "text": "    CUSOLVER_CHECK(cusolverMgCreateDeviceGrid(&gridA, 1, nbGpus, deviceList.data(), mapping));"
+        },
+        {
+          "line": 164,
+          "text": "    CUSOLVER_CHECK(cusolverMgCreateDeviceGrid(&gridB, 1, nbGpus, deviceList.data(), mapping));"
+        },
+        {
+          "line": 169,
+          "text": "                                              N,          /* number or rows in a tile */"
+        },
+        {
+          "line": 170,
+          "text": "                                              T_A,        /* number of columns in a tile */"
+        },
+        {
+          "line": 171,
+          "text": "                                              traits<data_type>::cuda_data_type, gridA));"
+        },
+        {
+          "line": 176,
+          "text": "                                              N,          /* number or rows in a tile */"
+        },
+        {
+          "line": 177,
+          "text": "                                              T_B,        /* number of columns in a tile */"
+        },
+        {
+          "line": 178,
+          "text": "                                              traits<data_type>::cuda_data_type, gridB));"
+        },
+        {
+          "line": 187,
+          "text": "                         T_A,                          /* number of columns per column tile */"
+        },
+        {
+          "line": 193,
+          "text": "                         T_B,                             /* number of columns per column tile */"
+        },
+        {
+          "line": 203,
+          "text": "                         T_A,              /* number of columns per column tile */"
+        },
+        {
+          "line": 206,
+          "text": "                         IA, JA);"
+        },
+        {
+          "line": 213,
+          "text": "                         T_B,              /* number of columns per column tile */"
+        },
+        {
+          "line": 216,
+          "text": "                         IB, JB);"
+        },
+        {
+          "line": 221,
+          "text": "                                   reinterpret_cast<void **>(array_d_A.data()), IA, /* base-1 */"
+        },
+        {
+          "line": 222,
+          "text": "                                   JA,                                              /* base-1 */"
+        },
+        {
+          "line": 226,
+          "text": "                                              reinterpret_cast<void **>(array_d_A.data()), IA, JA,"
+        },
+        {
+          "line": 228,
+          "text": "                                              IB, JB, descrB, traits<data_type>::cuda_data_type,"
+        },
+        {
+          "line": 246,
+          "text": "        cusolverH, CUBLAS_FILL_MODE_LOWER, N, reinterpret_cast<void **>(array_d_A.data()), IA, JA,"
+        },
+        {
+          "line": 261,
+          "text": "                                   reinterpret_cast<void **>(array_d_A.data()), IA, JA, descrA,"
+        },
+        {
+          "line": 262,
+          "text": "                                   reinterpret_cast<void **>(array_d_B.data()), IB, JB, descrB,"
+        },
+        {
+          "line": 282,
+          "text": "                         T_B,  /* number of columns per column tile */"
+        },
+        {
+          "line": 284,
+          "text": "                         array_d_B.data(), IB, JB,"
+        },
+        {
+          "line": 325,
+          "text": "               T_A,                          /* number of columns per column tile */"
+        },
+        {
+          "line": 328,
+          "text": "               T_B,                          /* number of columns per column tile */"
+        },
+        {
+          "line": 334,
+          "text": "    CUSOLVER_CHECK(cusolverMgDestroyGrid(gridA));"
+        },
+        {
+          "line": 335,
+          "text": "    CUSOLVER_CHECK(cusolverMgDestroyGrid(gridB));"
+        }
+      ],
+      "next_condition": "未完成合同：original-Mg-input-distribution-descriptor；补实现/真实后端并重验。",
+      "checks": [
+        {
+          "check": "original-source-identity",
+          "passed": true
+        },
+        {
+          "check": "explicit-unfulfilled-contract",
+          "passed": true
+        }
+      ],
+      "experiment_id": "20261110T090707.823820Z-R3-host-contract-review-5f856236bb",
+      "evidence": "migration/reports/evidence/rewrite/R3/cuSOLVER_MgPotrf__cusolver_MgPotrf_example1.cu/20261110T090707.823820Z-R3-host-contract-review-5f856236bb"
+    },
+    {
+      "sample_id": "cuSOLVER/Xgeev::cusolver_Xgeev_example1.cu",
+      "source": "cuSOLVER/Xgeev/cusolver_Xgeev_example1.cu",
+      "status": "PARTIAL",
+      "observation": "STATIC_CONTRACT_REVIEW; no new GPU result claimed",
+      "original_sha256": "7b93c8800b244b39bc8d1428c78dd9dceb1470ab9064af08bcffcf2e317fceeb",
+      "implementation_sha256": "95eb8a95af69f14b4d43006bf5b59b5843b64f4e675a4125331f6ae862e7f27d",
+      "current_missing_contract": [
+        "independent-numerical-or-semantic-reference",
+        "original-functional-contract"
+      ],
+      "current_reason": "原始教学输入构建运行通过；独立正确性验证待完成",
+      "actual_library": "hipsolver",
+      "previous_evidence": [
+        "migration/reports/evidence/20261109T080822.795958Z/original-rocm/cuSOLVER_Xgeev_cusolver_Xgeev_example1.cu",
+        "migration/reports/evidence/20261109T081329.986729Z/original-rocm/cuSOLVER_Xgeev_cusolver_Xgeev_example1.cu",
+        "migration/reports/evidence/20261109T081449.022777Z/original-rocm/cuSOLVER_Xgeev_cusolver_Xgeev_example1.cu",
+        "migration/reports/evidence/20261109T081655.531829Z/original-rocm/cuSOLVER_Xgeev_cusolver_Xgeev_example1.cu",
+        "migration/reports/evidence/20261109T081929.210831Z/original-rocm/cuSOLVER_Xgeev_cusolver_Xgeev_example1.cu",
+        "migration/reports/evidence/20261109T084753.304309Z/original-rocm/cuSOLVER_Xgeev_cusolver_Xgeev_example1.cu",
+        "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_Xgeev_cusolver_Xgeev_example1.cu",
+        "migration/reports/evidence/20261109T100720.422147Z/original-cuda/cuSOLVER_Xgeev_cusolver_Xgeev_example1.cu"
+      ],
+      "current_proof_dependencies_stale": {},
+      "source_contract_lines": [
+        {
+          "line": 2,
+          "text": " * SPDX-FileCopyrightText: Copyright (c) 2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+        }
+      ],
+      "next_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
+      "checks": [
+        {
+          "check": "original-source-identity",
+          "passed": true
+        },
+        {
+          "check": "explicit-unfulfilled-contract",
+          "passed": true
+        }
+      ],
+      "experiment_id": "20261110T090708.844376Z-R3-host-contract-review-e9488b0aad",
+      "evidence": "migration/reports/evidence/rewrite/R3/cuSOLVER_Xgeev__cusolver_Xgeev_example1.cu/20261110T090708.844376Z-R3-host-contract-review-e9488b0aad"
+    },
+    {
+      "sample_id": "cuSOLVER/Xgeev::cusolver_Xgeev_example2.cu",
+      "source": "cuSOLVER/Xgeev/cusolver_Xgeev_example2.cu",
+      "status": "PARTIAL",
+      "observation": "STATIC_CONTRACT_REVIEW; no new GPU result claimed",
+      "original_sha256": "48ac4ef5b42ffed029ed22a625d7ca5336398cba21bc1d5d64e5291c2276ec2e",
+      "implementation_sha256": "da08cfc762e9b570a1ee7ef002de1f15fe71055ea4584228cd0d8ebc2ea41de8",
+      "current_missing_contract": [
+        "independent-numerical-or-semantic-reference",
+        "original-functional-contract"
+      ],
+      "current_reason": "原始教学输入构建运行通过；独立正确性验证待完成",
+      "actual_library": "hipsolver",
+      "previous_evidence": [
+        "migration/reports/evidence/20261109T080822.795958Z/original-rocm/cuSOLVER_Xgeev_cusolver_Xgeev_example2.cu",
+        "migration/reports/evidence/20261109T081329.986729Z/original-rocm/cuSOLVER_Xgeev_cusolver_Xgeev_example2.cu",
+        "migration/reports/evidence/20261109T081449.022777Z/original-rocm/cuSOLVER_Xgeev_cusolver_Xgeev_example2.cu",
+        "migration/reports/evidence/20261109T081655.531829Z/original-rocm/cuSOLVER_Xgeev_cusolver_Xgeev_example2.cu",
+        "migration/reports/evidence/20261109T081929.210831Z/original-rocm/cuSOLVER_Xgeev_cusolver_Xgeev_example2.cu",
+        "migration/reports/evidence/20261109T084753.304309Z/original-rocm/cuSOLVER_Xgeev_cusolver_Xgeev_example2.cu",
+        "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_Xgeev_cusolver_Xgeev_example2.cu",
+        "migration/reports/evidence/20261109T100720.422147Z/original-cuda/cuSOLVER_Xgeev_cusolver_Xgeev_example2.cu"
+      ],
+      "current_proof_dependencies_stale": {},
+      "source_contract_lines": [
+        {
+          "line": 2,
+          "text": " * SPDX-FileCopyrightText: Copyright (c) 2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+        }
+      ],
+      "next_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
+      "checks": [
+        {
+          "check": "original-source-identity",
+          "passed": true
+        },
+        {
+          "check": "explicit-unfulfilled-contract",
+          "passed": true
+        }
+      ],
+      "experiment_id": "20261110T090709.865096Z-R3-host-contract-review-9281a26aa8",
+      "evidence": "migration/reports/evidence/rewrite/R3/cuSOLVER_Xgeev__cusolver_Xgeev_example2.cu/20261110T090709.865096Z-R3-host-contract-review-9281a26aa8"
+    },
+    {
+      "sample_id": "cuSOLVER/Xgeev::cusolver_Xgeev_example3.cu",
+      "source": "cuSOLVER/Xgeev/cusolver_Xgeev_example3.cu",
+      "status": "PARTIAL",
+      "observation": "STATIC_CONTRACT_REVIEW; no new GPU result claimed",
+      "original_sha256": "32495bf30f45aef8d4e3fd4c7982901064eae4bdde724d8e9245a31d1770ae77",
+      "implementation_sha256": "61f23bada480d56a0c4dbe076f61c1c00eeee078e50f49c81d1ced96e01910da",
+      "current_missing_contract": [
+        "independent-numerical-or-semantic-reference",
+        "original-functional-contract"
+      ],
+      "current_reason": "原始教学输入构建运行通过；独立正确性验证待完成",
+      "actual_library": "hipsolver",
+      "previous_evidence": [
+        "migration/reports/evidence/20261109T080822.795958Z/original-rocm/cuSOLVER_Xgeev_cusolver_Xgeev_example3.cu",
+        "migration/reports/evidence/20261109T081329.986729Z/original-rocm/cuSOLVER_Xgeev_cusolver_Xgeev_example3.cu",
+        "migration/reports/evidence/20261109T081449.022777Z/original-rocm/cuSOLVER_Xgeev_cusolver_Xgeev_example3.cu",
+        "migration/reports/evidence/20261109T081655.531829Z/original-rocm/cuSOLVER_Xgeev_cusolver_Xgeev_example3.cu",
+        "migration/reports/evidence/20261109T081929.210831Z/original-rocm/cuSOLVER_Xgeev_cusolver_Xgeev_example3.cu",
+        "migration/reports/evidence/20261109T084753.304309Z/original-rocm/cuSOLVER_Xgeev_cusolver_Xgeev_example3.cu",
+        "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_Xgeev_cusolver_Xgeev_example3.cu",
+        "migration/reports/evidence/20261109T100720.422147Z/original-cuda/cuSOLVER_Xgeev_cusolver_Xgeev_example3.cu"
+      ],
+      "current_proof_dependencies_stale": {},
+      "source_contract_lines": [
+        {
+          "line": 2,
+          "text": " * SPDX-FileCopyrightText: Copyright (c) 2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+        }
+      ],
+      "next_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
+      "checks": [
+        {
+          "check": "original-source-identity",
+          "passed": true
+        },
+        {
+          "check": "explicit-unfulfilled-contract",
+          "passed": true
+        }
+      ],
+      "experiment_id": "20261110T090710.894176Z-R3-host-contract-review-0438516280",
+      "evidence": "migration/reports/evidence/rewrite/R3/cuSOLVER_Xgeev__cusolver_Xgeev_example3.cu/20261110T090710.894176Z-R3-host-contract-review-0438516280"
+    },
+    {
+      "sample_id": "cuSOLVER/gesvdaStridedBatched::cusolver_gesvdaStridedBatched_example.cu",
+      "source": "cuSOLVER/gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu",
+      "status": "PARTIAL",
+      "observation": "STATIC_CONTRACT_REVIEW; no new GPU result claimed",
+      "original_sha256": "c3afaca538159c5f139b72fbcf97ca28237373a813c901c74d2da2814f9d1916",
+      "implementation_sha256": "850bfa71addf73c7c0e2c5b3ad9f7f439886ea08a087832d51794d9a995bfa70",
+      "current_missing_contract": [
+        "rewrite/R3/svd/independent-review-and-qualification"
+      ],
+      "current_reason": "已完成GPU重写与独立数值复核；候选尚需独立审查及完整资格，未升级整例。",
+      "actual_library": "hipSOLVER/rocSOLVER native full GPU SVD + HIP rank projection and FP64 residual",
+      "previous_evidence": [
+        "migration/reports/evidence/20261109T080822.795958Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
+        "migration/reports/evidence/20261109T081329.986729Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
+        "migration/reports/evidence/20261109T081449.022777Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
+        "migration/reports/evidence/20261109T081929.210831Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
+        "migration/reports/evidence/20261109T084753.304309Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
+        "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
+        "migration/reports/evidence/20261109T100720.422147Z/original-cuda/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
+        "migration/reports/rewrite-extension-rocm.json",
+        "migration/reports/rewrite-extension-rocm-validation.json"
+      ],
+      "current_proof_dependencies_stale": {},
+      "source_contract_lines": [
+        {
+          "line": 2,
+          "text": " * SPDX-FileCopyrightText: Copyright (c) 2020 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+        },
+        {
+          "line": 38,
+          "text": "    const int rank = n;"
+        },
+        {
+          "line": 69,
+          "text": "    std::vector<double> RnrmF(batchSize, 0); /* residual norm */"
+        },
+        {
+          "line": 101,
+          "text": "        rank,            /* number of singular values */"
+        },
+        {
+          "line": 107,
+          "text": "        d_S,             /* Sj is rank-by-1, singular values in descending order */"
+        },
+        {
+          "line": 108,
+          "text": "        strideS,         /* >= rank */"
+        },
+        {
+          "line": 109,
+          "text": "        d_U,             /* Uj is m-by-rank */"
+        },
+        {
+          "line": 111,
+          "text": "        strideU,         /* >= ldu*rank */"
+        },
+        {
+          "line": 112,
+          "text": "        d_V,             /* Vj is n-by-rank */"
+        },
+        {
+          "line": 114,
+          "text": "        strideV,         /* >= ldv*rank */"
+        },
+        {
+          "line": 124,
+          "text": "        rank,            /* number of singular values */"
+        },
+        {
+          "line": 130,
+          "text": "        d_S,             /* Sj is rank-by-1 */"
+        },
+        {
+          "line": 132,
+          "text": "        strideS,         /* >= rank */"
+        },
+        {
+          "line": 133,
+          "text": "        d_U,             /* Uj is m-by-rank */"
+        },
+        {
+          "line": 135,
+          "text": "        strideU,         /* >= ldu*rank */"
+        },
+        {
+          "line": 136,
+          "text": "        d_V,             /* Vj is n-by-rank */"
+        },
+        {
+          "line": 138,
+          "text": "        strideV,         /* >= ldv*rank */"
+        },
+        {
+          "line": 139,
+          "text": "        d_work, lwork, d_info, RnrmF.data(), batchSize /* number of matrices */"
+        },
+        {
+          "line": 166,
+          "text": "    print_matrix(rank, 1, S.data(), n);"
+        },
+        {
+          "line": 170,
+          "text": "    print_matrix(m, rank, U.data(), ldu);"
+        },
+        {
+          "line": 174,
+          "text": "    print_matrix(n, rank, V.data(), ldv);"
+        },
+        {
+          "line": 184,
+          "text": "    std::printf(\"residual |A0 - U0*S0*V0**H|_F = %E \\n\", RnrmF[0]);"
+        },
+        {
+          "line": 187,
+          "text": "    print_matrix(rank, 1, S.data() + strideS, n);"
+        },
+        {
+          "line": 191,
+          "text": "    print_matrix(m, rank, U.data() + strideU, ldu);"
+        },
+        {
+          "line": 195,
+          "text": "    print_matrix(n, rank, V.data() + strideV, ldv);"
+        },
+        {
+          "line": 205,
+          "text": "    std::printf(\"residual |A1 - U1*S1*V1**H|_F = %E \\n\", RnrmF[1]);"
+        }
+      ],
+      "next_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
+      "checks": [
+        {
+          "check": "original-source-identity",
+          "passed": true
+        },
+        {
+          "check": "explicit-unfulfilled-contract",
+          "passed": true
+        }
+      ],
+      "experiment_id": "20261110T090711.907190Z-R3-host-contract-review-4cc9b3d820",
+      "evidence": "migration/reports/evidence/rewrite/R3/cuSOLVER_gesvdaStridedBatched__cusolver_gesvdaStridedBatched_example.cu/20261110T090711.907190Z-R3-host-contract-review-4cc9b3d820"
+    },
+    {
+      "sample_id": "cuSOLVERMp::mp_getrf_getrs.c",
+      "source": "cuSOLVERMp/mp_getrf_getrs.c",
+      "status": "PARTIAL",
+      "observation": "STATIC_CONTRACT_REVIEW; no new GPU result claimed",
+      "original_sha256": "305294df67e1748acf35767b698ef5762faab124547d3a7979f66730cf20623b",
+      "implementation_sha256": "7c86c353cad83f537f3bde47cdb2f5bdb476d497093d2ad08292f57e253dec9e",
+      "current_missing_contract": [
+        "batches12_15/original-Mp-2D-grid-and-submatrix-offsets"
+      ],
+      "current_reason": "使用MPI + RCCL + HIP column-distributed partial-row-pivot LU/solve；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。保留MPI双rank/10阶LU+solve和真实分布数值；原例二维block-cyclic网格及IA/JA=3等子矩阵描述符尚未等价，当前为项目列分布。",
+      "actual_library": "MPI + RCCL + HIP column-distributed partial-row-pivot LU/solve",
+      "previous_evidence": [
+        "migration/reports/evidence/20261109T083217.050455Z/original-rocm/cuSOLVERMp_mp_getrf_getrs.c",
+        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuSOLVERMp_mp_getrf_getrs.c",
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSOLVERMp_mp_getrf_getrs.c",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVERMp_mp_getrf_getrs.c",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVERMp_mp_getrf_getrs.c",
+        "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/cuSOLVERMp_mp_getrf_getrs.c"
+      ],
+      "current_proof_dependencies_stale": {},
+      "source_contract_lines": [
+        {
+          "line": 2,
+          "text": " * SPDX-FileCopyrightText: Copyright (c) 2025-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+        },
+        {
+          "line": 108,
+          "text": "                     .grid_layout = 'C',"
+        },
+        {
+          "line": 127,
+          "text": "    const int64_t IA = opts.ia;"
+        },
+        {
+          "line": 128,
+          "text": "    const int64_t JA = opts.ja;"
+        },
+        {
+          "line": 129,
+          "text": "    const int64_t IB = opts.ib;"
+        },
+        {
+          "line": 130,
+          "text": "    const int64_t JB = opts.jb;"
+        },
+        {
+          "line": 138,
+          "text": "    /* Define grid of processors */"
+        },
+        {
+          "line": 142,
+          "text": "    /* Convert grid layout to cusolverMp grid mapping */"
+        },
+        {
+          "line": 143,
+          "text": "    const cusolverMpGridMapping_t gridLayout ="
+        },
+        {
+          "line": 144,
+          "text": "            (opts.grid_layout == 'C' || opts.grid_layout == 'c' ? CUSOLVERMP_GRID_MAPPING_COL_MAJOR"
+        },
+        {
+          "line": 153,
+          "text": "    /* Get MPI rank id and communicator size. */"
+        },
+        {
+          "line": 154,
+          "text": "    int commSize, rank;"
+        },
+        {
+          "line": 156,
+          "text": "    MPI_Comm_rank(MPI_COMM_WORLD, &rank);"
+        },
+        {
+          "line": 158,
+          "text": "    if (rank == 0) print(&opts);"
+        },
+        {
+          "line": 180,
+          "text": "    ncclComm_t ncclComm = createNcclComm(commSize, rank);"
+        },
+        {
+          "line": 190,
+          "text": "    /* cusolverMp grids */"
+        },
+        {
+          "line": 191,
+          "text": "    cusolverMpGrid_t gridA = NULL;"
+        },
+        {
+          "line": 192,
+          "text": "    cusolverMpGrid_t gridB = NULL;"
+        },
+        {
+          "line": 228,
+          "text": "    /*          Create inputs on master rank       */"
+        },
+        {
+          "line": 238,
+          "text": "    /*          Create inputs on master rank       */"
+        },
+        {
+          "line": 241,
+          "text": "    const int64_t lda   = (IA - 1) + N;"
+        },
+        {
+          "line": 242,
+          "text": "    const int64_t colsA = (JA - 1) + N;"
+        },
+        {
+          "line": 243,
+          "text": "    const int64_t ldb   = (IB - 1) + N;"
+        },
+        {
+          "line": 244,
+          "text": "    const int64_t colsB = (JB - 1) + NRHS;"
+        },
+        {
+          "line": 250,
+          "text": "    if (rank == 0)"
+        },
+        {
+          "line": 263,
+          "text": "        double* _A = &h_A[(IA - 1) + (JA - 1) * lda];"
+        },
+        {
+          "line": 264,
+          "text": "        double* _X = &h_X[(IB - 1) + (JB - 1) * ldb];"
+        },
+        {
+          "line": 265,
+          "text": "        double* _B = &h_B[(IB - 1) + (JB - 1) * ldb];"
+        },
+        {
+          "line": 267,
+          "text": "        /* Set B[IB:IB+N, JB] = 1 */"
+        },
+        {
+          "line": 273,
+          "text": "        /* Set X[IB:IB+N, JB] = 1 */"
+        },
+        {
+          "line": 279,
+          "text": "        /* Set A[IA:IA+N, JA:JA+N] = permuted laplacian */"
+        },
+        {
+          "line": 295,
+          "text": "    /* compute process grid index */"
+        },
+        {
+          "line": 297,
+          "text": "    if (gridLayout == CUSOLVERMP_GRID_MAPPING_COL_MAJOR)"
+        },
+        {
+          "line": 299,
+          "text": "        myRowRank = rank % nprow;"
+        },
+        {
+          "line": 300,
+          "text": "        myColRank = rank / nprow;"
+        },
+        {
+          "line": 304,
+          "text": "        myRowRank = rank / npcol;"
+        },
+        {
+          "line": 305,
+          "text": "        myColRank = rank % npcol;"
+        },
+        {
+          "line": 309,
+          "text": "     * Compute number of tiles per rank to store local portion of A"
+        },
+        {
+          "line": 322,
+          "text": "     * Compute number of tiles per rank to store local portion of B"
+        },
+        {
+          "line": 346,
+          "text": "    cusolverStat = cusolverMpCreateDeviceGrid(handle, &gridA, ncclComm, nprow, npcol, gridLayout);"
+        },
+        {
+          "line": 349,
+          "text": "    cusolverStat = cusolverMpCreateDeviceGrid(handle, &gridB, ncclComm, nprow, npcol, gridLayout);"
+        },
+        {
+          "line": 356,
+          "text": "            &descrA, gridA, CUDA_R_64F, (IA - 1) + N, (JA - 1) + N, MA, NA, RSRCA, CSRCA, LLDA);"
+        },
+        {
+          "line": 361,
+          "text": "            &descrB, gridB, CUDA_R_64F, (IB - 1) + N, (JB - 1) + 1, MB, NB, RSRCB, CSRCB, LLDB);"
+        },
+        {
+          "line": 367,
+          "text": "        /* REMARK : ipiv overlaps A[IA, JA:JA+N] as in Netlib's ScaLAPACK */"
+        },
+        {
+          "line": 402,
+          "text": "                                              IA,"
+        },
+        {
+          "line": 403,
+          "text": "                                              JA,"
+        },
+        {
+          "line": 416,
+          "text": "                                              IA,"
+        },
+        {
+          "line": 417,
+          "text": "                                              JA,"
+        },
+        {
+          "line": 421,
+          "text": "                                              IB,"
+        },
+        {
+          "line": 422,
+          "text": "                                              JB,"
+        },
+        {
+          "line": 460,
+          "text": "                                              0, /* root rank */"
+        },
+        {
+          "line": 472,
+          "text": "                                              0, /* root rank */"
+        },
+        {
+          "line": 490,
+          "text": "                                   IA,"
+        },
+        {
+          "line": 491,
+          "text": "                                   JA,"
+        },
+        {
+          "line": 528,
+          "text": "                                   IA,"
+        },
+        {
+          "line": 529,
+          "text": "                                   JA,"
+        },
+        {
+          "line": 533,
+          "text": "                                   IB,"
+        },
+        {
+          "line": 534,
+          "text": "                                   JB,"
+        },
+        {
+          "line": 571,
+          "text": "                                             0, /* master rank, destination */"
+        },
+        {
+          "line": 584,
+          "text": "    if (rank == 0)"
+        },
+        {
+          "line": 593,
+          "text": "        double* _A = &h_A[(IA - 1) + (JA - 1) * lda];"
+        },
+        {
+          "line": 594,
+          "text": "        double* _X = &h_X[(IB - 1) + (JB - 1) * ldb];"
+        },
+        {
+          "line": 595,
+          "text": "        double* _B = &h_B[(IB - 1) + (JB - 1) * ldb];"
+        },
+        {
+          "line": 636,
+          "text": "    if (rank == 0)"
+        },
+        {
+          "line": 670,
+          "text": "    cusolverStat = cusolverMpDestroyGrid(gridA);"
+        },
+        {
+          "line": 673,
+          "text": "    cusolverStat = cusolverMpDestroyGrid(gridB);"
+        },
+        {
+          "line": 766,
+          "text": "    sample_ok = sample_all_ranks_succeeded(sample_ok);"
+        },
+        {
+          "line": 771,
+          "text": "    if (rank == 0)"
+        }
+      ],
+      "next_condition": "未完成合同：original-Mp-2D-grid-and-submatrix-offsets；补实现/真实后端并重验。",
+      "checks": [
+        {
+          "check": "original-source-identity",
+          "passed": true
+        },
+        {
+          "check": "explicit-unfulfilled-contract",
+          "passed": true
+        }
+      ],
+      "experiment_id": "20261110T090712.923895Z-R3-host-contract-review-83467d2a03",
+      "evidence": "migration/reports/evidence/rewrite/R3/cuSOLVERMp__mp_getrf_getrs.c/20261110T090712.923895Z-R3-host-contract-review-83467d2a03"
+    },
+    {
+      "sample_id": "cuSOLVERMp::mp_potrf_potrs.c",
+      "source": "cuSOLVERMp/mp_potrf_potrs.c",
+      "status": "PARTIAL",
+      "observation": "STATIC_CONTRACT_REVIEW; no new GPU result claimed",
+      "original_sha256": "34d54b821fc3ba83c906f323815c33beebc688ef4c32384d65d8df6de2006e48",
+      "implementation_sha256": "e9acfdb211bc2a7e5fd447b21ce4da1f2a2e22e5e1c6c7e2a22818398679e8ac",
+      "current_missing_contract": [
+        "batches12_15/original-Mp-2D-grid-offsets-and-random-SPD-profile"
+      ],
+      "current_reason": "使用MPI + RCCL + HIP distributed column Cholesky/solve；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。保留MPI双rank/Cholesky+solve和真实分布数值；原例二维网格/子矩阵offset及随机对角占优生成profile尚未等价，当前为已登记Laplacian列分布。",
+      "actual_library": "MPI + RCCL + HIP distributed column Cholesky/solve",
+      "previous_evidence": [
+        "migration/reports/evidence/20261109T083217.050455Z/original-rocm/cuSOLVERMp_mp_potrf_potrs.c",
+        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuSOLVERMp_mp_potrf_potrs.c",
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSOLVERMp_mp_potrf_potrs.c",
+        "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVERMp_mp_potrf_potrs.c",
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVERMp_mp_potrf_potrs.c",
+        "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/cuSOLVERMp_mp_potrf_potrs.c"
+      ],
+      "current_proof_dependencies_stale": {},
+      "source_contract_lines": [
+        {
+          "line": 2,
+          "text": " * SPDX-FileCopyrightText: Copyright (c) 2025-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+        },
+        {
+          "line": 106,
+          "text": "                     .grid_layout = 'C',"
+        },
+        {
+          "line": 133,
+          "text": "    /* Define grid of processors */"
+        },
+        {
+          "line": 137,
+          "text": "    /* Convert grid layout to cusolverMp grid mapping */"
+        },
+        {
+          "line": 138,
+          "text": "    const cusolverMpGridMapping_t gridLayout ="
+        },
+        {
+          "line": 139,
+          "text": "            (opts.grid_layout == 'C' || opts.grid_layout == 'c' ? CUSOLVERMP_GRID_MAPPING_COL_MAJOR"
+        },
+        {
+          "line": 148,
+          "text": "    /* Get MPI rank id and communicator size. */"
+        },
+        {
+          "line": 149,
+          "text": "    int commSize, rank;"
+        },
+        {
+          "line": 151,
+          "text": "    MPI_Comm_rank(MPI_COMM_WORLD, &rank);"
+        },
+        {
+          "line": 153,
+          "text": "    if (rank == 0) print(&opts);"
+        },
+        {
+          "line": 169,
+          "text": "    ncclComm_t ncclComm = createNcclComm(commSize, rank);"
+        },
+        {
+          "line": 181,
+          "text": "    /* cusolverMp grids */"
+        },
+        {
+          "line": 182,
+          "text": "    cusolverMpGrid_t gridA = NULL;"
+        },
+        {
+          "line": 183,
+          "text": "    cusolverMpGrid_t gridB = NULL;"
+        },
+        {
+          "line": 218,
+          "text": "    /*          Create inputs on master rank       */"
+        },
+        {
+          "line": 228,
+          "text": "    /*          Create inputs on master rank       */"
+        },
+        {
+          "line": 240,
+          "text": "    if (rank == 0)"
+        },
+        {
+          "line": 274,
+          "text": "    /* compute process grid index */"
+        },
+        {
+          "line": 276,
+          "text": "    if (gridLayout == CUSOLVERMP_GRID_MAPPING_COL_MAJOR)"
+        },
+        {
+          "line": 278,
+          "text": "        myRowRank = rank % nprow;"
+        },
+        {
+          "line": 279,
+          "text": "        myColRank = rank / nprow;"
+        },
+        {
+          "line": 283,
+          "text": "        myRowRank = rank / npcol;"
+        },
+        {
+          "line": 284,
+          "text": "        myColRank = rank % npcol;"
+        },
+        {
+          "line": 305,
+          "text": "    cusolverStat = cusolverMpCreateDeviceGrid(handle, &gridA, ncclComm, nprow, npcol, gridLayout);"
+        },
+        {
+          "line": 308,
+          "text": "    cusolverStat = cusolverMpCreateDeviceGrid(handle, &gridB, ncclComm, nprow, npcol, gridLayout);"
+        },
+        {
+          "line": 314,
+          "text": "    cusolverStat = cusolverMpCreateMatrixDesc(&descA, gridA, CUDA_R_64F, lda, colsA, mbA, nbA, rsrca, csrca, llda);"
+        },
+        {
+          "line": 318,
+          "text": "    cusolverStat = cusolverMpCreateMatrixDesc(&descB, gridB, CUDA_R_64F, ldb, colsB, mbB, nbB, rsrcb, csrcb, lldb);"
+        },
+        {
+          "line": 405,
+          "text": "                                              0, /* root rank */"
+        },
+        {
+          "line": 417,
+          "text": "                                              0, /* root rank */"
+        },
+        {
+          "line": 512,
+          "text": "                                             0, /* master rank, destination */"
+        },
+        {
+          "line": 524,
+          "text": "    if (rank == 0)"
+        },
+        {
+          "line": 576,
+          "text": "    if (rank == 0)"
+        },
+        {
+          "line": 609,
+          "text": "    cusolverStat = cusolverMpDestroyGrid(gridA);"
+        },
+        {
+          "line": 612,
+          "text": "    cusolverStat = cusolverMpDestroyGrid(gridB);"
+        },
+        {
+          "line": 697,
+          "text": "    sample_ok = sample_all_ranks_succeeded(sample_ok);"
+        },
+        {
+          "line": 702,
+          "text": "    if (rank == 0)"
+        }
+      ],
+      "next_condition": "未完成合同：original-Mp-2D-grid-offsets-and-random-SPD-profile；补实现/真实后端并重验。",
+      "checks": [
+        {
+          "check": "original-source-identity",
+          "passed": true
+        },
+        {
+          "check": "explicit-unfulfilled-contract",
+          "passed": true
+        }
+      ],
+      "experiment_id": "20261110T090713.950414Z-R3-host-contract-review-ec9e15d32e",
+      "evidence": "migration/reports/evidence/rewrite/R3/cuSOLVERMp__mp_potrf_potrs.c/20261110T090713.950414Z-R3-host-contract-review-ec9e15d32e"
+    },
+    {
+      "sample_id": "nvCOMP/benchmarks::benchmark_lz4_chunked.cu",
+      "source": "nvCOMP/benchmarks/benchmark_lz4_chunked.cu",
+      "status": "PARTIAL",
+      "observation": "STATIC_CONTRACT_REVIEW; no new GPU result claimed",
+      "original_sha256": "f3a33a146c336c726c36f0e78628bb3c86c8de67f6ee47e714f1c0606302c5b0",
+      "implementation_sha256": "db6f6b93118570ac6238c3f0ee5fe2f7a867271e67aba54dacb91c76a737eb56",
+      "current_missing_contract": [
+        "batches9_11/original-nvbench-CLI-and-measurement-harness"
+      ],
+      "current_reason": "使用 hipCOMP LZ4/Snappy + CPU liblz4/Snappy + HIP checked stream/CRC manager adapter；8 个预登记case通过独立CPU与同输入CUDA。默认uint8 LZ4/Snappy batch核心及互操作已验证；原始NVBENCH注册/控制参数与完整benchmark CLI未移植，不将codec driver当成完整benchmark。",
+      "actual_library": "hipCOMP LZ4/Snappy + CPU liblz4/Snappy + HIP checked stream/CRC manager adapter",
+      "previous_evidence": [
+        "migration/reports/evidence/20261109T083217.050455Z/original-rocm/nvCOMP_benchmarks_benchmark_lz4_chunked.cu",
+        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/nvCOMP_benchmarks_benchmark_lz4_chunked.cu",
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/nvCOMP_benchmarks_benchmark_lz4_chunked.cu",
+        "migration/reports/evidence/20261110T040459.173461Z/batches9_11-rocm/nvCOMP_benchmarks_benchmark_lz4_chunked.cu",
+        "migration/reports/batches9_11-validation.json",
+        "migration/reports/evidence/20261110T040252.903898Z/batches9_11-cuda/nvCOMP_benchmarks_benchmark_lz4_chunked.cu",
+        "migration/reports/evidence/20261110T043427.533946Z/batches9_11-rocm/nvCOMP_benchmarks_benchmark_lz4_chunked.cu",
+        "migration/reports/evidence/20261110T043816.470698Z/batches9_11-cuda/nvCOMP_benchmarks_benchmark_lz4_chunked.cu"
+      ],
+      "current_proof_dependencies_stale": {},
+      "source_contract_lines": [
+        {
+          "line": 2,
+          "text": " * SPDX-FileCopyrightText: Copyright (c) 2020-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+        },
+        {
+          "line": 21,
+          "text": "NVBENCH_REGISTER_CRITERION(total_time_criterion);"
+        },
+        {
+          "line": 97,
+          "text": "void run_benchmark(nvbench::state &state)"
+        },
+        {
+          "line": 127,
+          "text": "static void run_benchmark_compress(nvbench::state &state) { run_benchmark<true>(state); }"
+        },
+        {
+          "line": 128,
+          "text": "static void run_benchmark_decompress(nvbench::state &state) { run_benchmark<false>(state); }"
+        },
+        {
+          "line": 129,
+          "text": "NVBENCH_BENCH(run_benchmark_compress)"
+        },
+        {
+          "line": 133,
+          "text": "NVBENCH_BENCH(run_benchmark_decompress)"
+        }
+      ],
+      "next_condition": "缺失范围：original-nvbench-CLI-and-measurement-harness；需要真实后端/完整harness并重做验收。",
+      "checks": [
+        {
+          "check": "original-source-identity",
+          "passed": true
+        },
+        {
+          "check": "explicit-unfulfilled-contract",
+          "passed": true
+        }
+      ],
+      "experiment_id": "20261110T090714.969613Z-R3-host-contract-review-e50fdfe402",
+      "evidence": "migration/reports/evidence/rewrite/R3/nvCOMP_benchmarks__benchmark_lz4_chunked.cu/20261110T090714.969613Z-R3-host-contract-review-e50fdfe402"
+    },
+    {
+      "sample_id": "nvCOMP/benchmarks::benchmark_snappy_chunked.cu",
+      "source": "nvCOMP/benchmarks/benchmark_snappy_chunked.cu",
+      "status": "PARTIAL",
+      "observation": "STATIC_CONTRACT_REVIEW; no new GPU result claimed",
+      "original_sha256": "b0024bd40fe4be04e414876849cd46aeb9f0e76354b2a720424568d4716a7374",
+      "implementation_sha256": "110955b01de529fb3ae85b2aa38d4d357ce90f0e5a0e560c6b70cafab54d8d1e",
+      "current_missing_contract": [
+        "batches9_11/original-nvbench-CLI-and-measurement-harness"
+      ],
+      "current_reason": "使用 hipCOMP LZ4/Snappy + CPU liblz4/Snappy + HIP checked stream/CRC manager adapter；8 个预登记case通过独立CPU与同输入CUDA。默认uint8 LZ4/Snappy batch核心及互操作已验证；原始NVBENCH注册/控制参数与完整benchmark CLI未移植，不将codec driver当成完整benchmark。",
+      "actual_library": "hipCOMP LZ4/Snappy + CPU liblz4/Snappy + HIP checked stream/CRC manager adapter",
+      "previous_evidence": [
+        "migration/reports/evidence/20261109T083217.050455Z/original-rocm/nvCOMP_benchmarks_benchmark_snappy_chunked.cu",
+        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/nvCOMP_benchmarks_benchmark_snappy_chunked.cu",
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/nvCOMP_benchmarks_benchmark_snappy_chunked.cu",
+        "migration/reports/evidence/20261110T040459.173461Z/batches9_11-rocm/nvCOMP_benchmarks_benchmark_snappy_chunked.cu",
+        "migration/reports/batches9_11-validation.json",
+        "migration/reports/evidence/20261110T040252.903898Z/batches9_11-cuda/nvCOMP_benchmarks_benchmark_snappy_chunked.cu",
+        "migration/reports/evidence/20261110T043427.533946Z/batches9_11-rocm/nvCOMP_benchmarks_benchmark_snappy_chunked.cu",
+        "migration/reports/evidence/20261110T043816.470698Z/batches9_11-cuda/nvCOMP_benchmarks_benchmark_snappy_chunked.cu"
+      ],
+      "current_proof_dependencies_stale": {},
+      "source_contract_lines": [
+        {
+          "line": 2,
+          "text": " * SPDX-FileCopyrightText: Copyright (c) 2021-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+        },
+        {
+          "line": 21,
+          "text": "NVBENCH_REGISTER_CRITERION(total_time_criterion);"
+        },
+        {
+          "line": 26,
+          "text": "void run_benchmark(nvbench::state &state)"
+        },
+        {
+          "line": 56,
+          "text": "static void run_benchmark_compress(nvbench::state &state) { run_benchmark<true>(state); }"
+        },
+        {
+          "line": 57,
+          "text": "static void run_benchmark_decompress(nvbench::state &state) { run_benchmark<false>(state); }"
+        },
+        {
+          "line": 58,
+          "text": "NVBENCH_BENCH(run_benchmark_compress)"
+        },
+        {
+          "line": 62,
+          "text": "NVBENCH_BENCH(run_benchmark_decompress)"
+        }
+      ],
+      "next_condition": "缺失范围：original-nvbench-CLI-and-measurement-harness；需要真实后端/完整harness并重做验收。",
+      "checks": [
+        {
+          "check": "original-source-identity",
+          "passed": true
+        },
+        {
+          "check": "explicit-unfulfilled-contract",
+          "passed": true
+        }
+      ],
+      "experiment_id": "20261110T090715.990613Z-R3-host-contract-review-0abdbc651c",
+      "evidence": "migration/reports/evidence/rewrite/R3/nvCOMP_benchmarks__benchmark_snappy_chunked.cu/20261110T090715.990613Z-R3-host-contract-review-0abdbc651c"
+    },
+    {
+      "sample_id": "nvJPEG/Image-Resize-WaterMark::imageResizeWatermark.cpp",
+      "source": "nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp",
+      "status": "PARTIAL",
+      "observation": "STATIC_CONTRACT_REVIEW; no new GPU result claimed",
+      "original_sha256": "e4f336ff2598fdcc5d0899d168eaf7785ed4b277fb494cd6f23960d181fe405b",
+      "implementation_sha256": "90eb46a2a285b558e5549b8e00657a142b06cbdeb8baae61073d8b384e09d993",
+      "current_missing_contract": [
+        "batches9_11/native-progressive-GPU-backend"
+      ],
+      "current_reason": "使用 rocJPEG + HIP layout/ROI/Lanczos/watermark + explicit libjpeg CPU fallback/encode；7 个预登记case通过独立CPU与同输入CUDA。锁定rocJPEG的HYBRID创建返回-12；原始12图中2张progressive由明确标注的libjpeg CPU fallback解码。GPU格式/ROI/缩放/Lanczos/水印和真实CLI已验证，CPU编码不声称AMDGPU JPEG encoder支持。",
+      "actual_library": "rocJPEG + HIP layout/ROI/Lanczos/watermark + explicit libjpeg CPU fallback/encode",
+      "previous_evidence": [
+        "migration/reports/evidence/20261109T083217.050455Z/original-rocm/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp",
+        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp",
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp",
+        "migration/reports/evidence/20261110T043132.627099Z/batches9_11-rocm/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp",
+        "migration/reports/batches9_11-validation.json",
+        "migration/reports/evidence/20261110T043816.470698Z/batches9_11-cuda/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp"
+      ],
+      "current_proof_dependencies_stale": {},
+      "source_contract_lines": [
+        {
+          "line": 2,
+          "text": " * SPDX-FileCopyrightText: Copyright (c) 2019-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+        }
+      ],
+      "next_condition": "缺失范围：native-progressive-GPU-backend；需要真实后端/完整harness并重做验收。",
+      "checks": [
+        {
+          "check": "original-source-identity",
+          "passed": true
+        },
+        {
+          "check": "explicit-unfulfilled-contract",
+          "passed": true
+        }
+      ],
+      "experiment_id": "20261110T090717.013909Z-R3-host-contract-review-e2e2568e29",
+      "evidence": "migration/reports/evidence/rewrite/R3/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261110T090717.013909Z-R3-host-contract-review-e2e2568e29"
+    },
+    {
+      "sample_id": "nvJPEG/Image-Resize::imageResize.cpp",
+      "source": "nvJPEG/Image-Resize/imageResize.cpp",
+      "status": "PARTIAL",
+      "observation": "STATIC_CONTRACT_REVIEW; no new GPU result claimed",
+      "original_sha256": "2fe18e4c075972ba4612b3fcf71d37baffb47c14ebe952f79b527846603b6ca1",
+      "implementation_sha256": "b52d46f915abeb669010559dfb1af8d4d11a933baa5fe3b1b60ad21ba6459831",
+      "current_missing_contract": [
+        "batches9_11/native-progressive-GPU-backend"
+      ],
+      "current_reason": "使用 rocJPEG + HIP layout/ROI/Lanczos/watermark + explicit libjpeg CPU fallback/encode；7 个预登记case通过独立CPU与同输入CUDA。锁定rocJPEG的HYBRID创建返回-12；原始12图中2张progressive由明确标注的libjpeg CPU fallback解码。GPU格式/ROI/缩放/Lanczos/水印和真实CLI已验证，CPU编码不声称AMDGPU JPEG encoder支持。",
+      "actual_library": "rocJPEG + HIP layout/ROI/Lanczos/watermark + explicit libjpeg CPU fallback/encode",
+      "previous_evidence": [
+        "migration/reports/evidence/20261109T083217.050455Z/original-rocm/nvJPEG_Image-Resize_imageResize.cpp",
+        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/nvJPEG_Image-Resize_imageResize.cpp",
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/nvJPEG_Image-Resize_imageResize.cpp",
+        "migration/reports/evidence/20261110T043132.627099Z/batches9_11-rocm/nvJPEG_Image-Resize_imageResize.cpp",
+        "migration/reports/batches9_11-validation.json",
+        "migration/reports/evidence/20261110T043816.470698Z/batches9_11-cuda/nvJPEG_Image-Resize_imageResize.cpp"
+      ],
+      "current_proof_dependencies_stale": {},
+      "source_contract_lines": [
+        {
+          "line": 2,
+          "text": " * SPDX-FileCopyrightText: Copyright (c) 2019-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+        }
+      ],
+      "next_condition": "缺失范围：native-progressive-GPU-backend；需要真实后端/完整harness并重做验收。",
+      "checks": [
+        {
+          "check": "original-source-identity",
+          "passed": true
+        },
+        {
+          "check": "explicit-unfulfilled-contract",
+          "passed": true
+        }
+      ],
+      "experiment_id": "20261110T090718.039626Z-R3-host-contract-review-289b5e99d9",
+      "evidence": "migration/reports/evidence/rewrite/R3/nvJPEG_Image-Resize__imageResize.cpp/20261110T090718.039626Z-R3-host-contract-review-289b5e99d9"
+    },
+    {
+      "sample_id": "nvJPEG/nvJPEG-Decoder-Backend-ROI::nvJPEGROIDecode.cpp",
+      "source": "nvJPEG/nvJPEG-Decoder-Backend-ROI/nvJPEGROIDecode.cpp",
+      "status": "PARTIAL",
+      "observation": "STATIC_CONTRACT_REVIEW; no new GPU result claimed",
+      "original_sha256": "47fa1a5507565755fbc431714c54f1db61727eba775c064ef2b6f69df4516166",
+      "implementation_sha256": "123d7fe1d49f27ce3cbd06046ee4919d967d07adc4888ecc22c5c62371db978d",
+      "current_missing_contract": [
+        "batches9_11/decoupled-pipeline-and-native-backend-enums",
+        "batches9_11/native-progressive-GPU-backend"
+      ],
+      "current_reason": "使用 rocJPEG + HIP layout/ROI/Lanczos/watermark + explicit libjpeg CPU fallback/encode；7 个预登记case通过独立CPU与同输入CUDA。锁定rocJPEG的HYBRID创建返回-12；原始12图中2张progressive由明确标注的libjpeg CPU fallback解码。GPU格式/ROI/缩放/Lanczos/水印和真实CLI已验证，CPU编码不声称AMDGPU JPEG encoder支持。",
+      "actual_library": "rocJPEG + HIP layout/ROI/Lanczos/watermark + explicit libjpeg CPU fallback/encode",
+      "previous_evidence": [
+        "migration/reports/evidence/20261109T083217.050455Z/original-rocm/nvJPEG_nvJPEG-Decoder-Backend-ROI_nvJPEGROIDecode.cpp",
+        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/nvJPEG_nvJPEG-Decoder-Backend-ROI_nvJPEGROIDecode.cpp",
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/nvJPEG_nvJPEG-Decoder-Backend-ROI_nvJPEGROIDecode.cpp",
+        "migration/reports/evidence/20261110T043132.627099Z/batches9_11-rocm/nvJPEG_nvJPEG-Decoder-Backend-ROI_nvJPEGROIDecode.cpp",
+        "migration/reports/batches9_11-validation.json",
+        "migration/reports/evidence/20261110T043816.470698Z/batches9_11-cuda/nvJPEG_nvJPEG-Decoder-Backend-ROI_nvJPEGROIDecode.cpp"
+      ],
+      "current_proof_dependencies_stale": {},
+      "source_contract_lines": [
+        {
+          "line": 2,
+          "text": " * SPDX-FileCopyrightText: Copyright (c) 2021 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+        },
+        {
+          "line": 79,
+          "text": "bool pick_gpu_backend(nvjpegJpegStream_t&  jpeg_stream)"
+        },
+        {
+          "line": 89,
+          "text": "  bool use_gpu_backend = false;"
+        },
+        {
+          "line": 93,
+          "text": "    use_gpu_backend = true;"
+        },
+        {
+          "line": 95,
+          "text": "  return use_gpu_backend;"
+        },
+        {
+          "line": 129,
+          "text": "void select_backend(nvjpegJpegDecoder_t& decoder, nvjpegJpegState_t& decoder_state, "
+        },
+        {
+          "line": 132,
+          "text": "  bool use_gpu_backend =  pick_gpu_backend(per_thread_params.jpeg_streams[buffer_index]);"
+        },
+        {
+          "line": 133,
+          "text": "  decoder = use_gpu_backend ?  per_thread_params.nvjpeg_dec_gpu: per_thread_params.nvjpeg_dec_cpu;"
+        },
+        {
+          "line": 134,
+          "text": "  decoder_state = use_gpu_backend ? per_thread_params.dec_state_gpu:per_thread_params.dec_state_cpu;"
+        },
+        {
+          "line": 136,
+          "text": "  switch(params.backend_enum){"
+        },
+        {
+          "line": 191,
+          "text": "        select_backend(decoder, decoder_state, per_thread_params, params, buffer_index);"
+        },
+        {
+          "line": 248,
+          "text": "                  select_backend(decoder, decoder_state, per_thread_params, params, buffer_indices[thread_idx]);"
+        },
+        {
+          "line": 393,
+          "text": "              << \" -i images_dir [-roi roi_regions] [-backend backend_enum] [-b batch_size] [-t total_images] \""
+        },
+        {
+          "line": 401,
+          "text": "    std::cout << \"\\tbackend_eum\\t:\\tType of backend for the nvJPEG (0 - NVJPEG_BACKEND_DEFAULT\""
+        },
+        {
+          "line": 510,
+          "text": "  params.backend_enum = 0;"
+        },
+        {
+          "line": 511,
+          "text": "  if ((pidx = findParamIndex(argv, argc, \"-backend\")) != -1) {"
+        },
+        {
+          "line": 512,
+          "text": "    params.backend_enum = std::atoi(argv[pidx + 1]);"
+        },
+        {
+          "line": 513,
+          "text": "    if (params.backend_enum < 0 || params.backend_enum > 2) {"
+        },
+        {
+          "line": 514,
+          "text": "      std::cout << \"backend_enum must be a valid backnend type (i.e. 0 to 2). Note that ROI function is not supported in hardware backend.\""
+        }
+      ],
+      "next_condition": "缺失范围：native-progressive-GPU-backend,decoupled-pipeline-and-native-backend-enums；需要真实后端/完整harness并重做验收。",
+      "checks": [
+        {
+          "check": "original-source-identity",
+          "passed": true
+        },
+        {
+          "check": "explicit-unfulfilled-contract",
+          "passed": true
+        }
+      ],
+      "experiment_id": "20261110T090719.064374Z-R3-host-contract-review-7aa00fb3b4",
+      "evidence": "migration/reports/evidence/rewrite/R3/nvJPEG_nvJPEG-Decoder-Backend-ROI__nvJPEGROIDecode.cpp/20261110T090719.064374Z-R3-host-contract-review-7aa00fb3b4"
+    },
+    {
+      "sample_id": "nvJPEG/nvJPEG-Decoder-MultipleInstances::nvJPEGDecMultipleInstances.cpp",
+      "source": "nvJPEG/nvJPEG-Decoder-MultipleInstances/nvJPEGDecMultipleInstances.cpp",
+      "status": "PARTIAL",
+      "observation": "STATIC_CONTRACT_REVIEW; no new GPU result claimed",
+      "original_sha256": "a86d7317b33a3a667f3b9b502f7bf289e86d0204625d091bed623df56377fa30",
+      "implementation_sha256": "ed529632e18dca66733655164948b0424f2feef3f6f355567aa0fd798a49cbfd",
+      "current_missing_contract": [
+        "batches9_11/native-progressive-GPU-backend",
+        "batches9_11/original-multiple-instance-auto-scheduling-controls"
+      ],
+      "current_reason": "使用 rocJPEG + HIP layout/ROI/Lanczos/watermark + explicit libjpeg CPU fallback/encode；7 个预登记case通过独立CPU与同输入CUDA。锁定rocJPEG的HYBRID创建返回-12；原始12图中2张progressive由明确标注的libjpeg CPU fallback解码。GPU格式/ROI/缩放/Lanczos/水印和真实CLI已验证，CPU编码不声称AMDGPU JPEG encoder支持。",
+      "actual_library": "rocJPEG + HIP layout/ROI/Lanczos/watermark + explicit libjpeg CPU fallback/encode",
+      "previous_evidence": [
+        "migration/reports/evidence/20261109T083217.050455Z/original-rocm/nvJPEG_nvJPEG-Decoder-MultipleInstances_nvJPEGDecMultipleInstances.cpp",
+        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/nvJPEG_nvJPEG-Decoder-MultipleInstances_nvJPEGDecMultipleInstances.cpp",
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/nvJPEG_nvJPEG-Decoder-MultipleInstances_nvJPEGDecMultipleInstances.cpp",
+        "migration/reports/evidence/20261110T043132.627099Z/batches9_11-rocm/nvJPEG_nvJPEG-Decoder-MultipleInstances_nvJPEGDecMultipleInstances.cpp",
+        "migration/reports/batches9_11-validation.json",
+        "migration/reports/evidence/20261110T043816.470698Z/batches9_11-cuda/nvJPEG_nvJPEG-Decoder-MultipleInstances_nvJPEGDecMultipleInstances.cpp"
+      ],
+      "current_proof_dependencies_stale": {},
+      "source_contract_lines": [
+        {
+          "line": 2,
+          "text": " * SPDX-FileCopyrightText: Copyright (c) 2021-2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+        },
+        {
+          "line": 68,
+          "text": "    bool backend_enabled[NUM_BACKENDS] = {};"
+        },
+        {
+          "line": 69,
+          "text": "    int only_backend = 0;"
+        },
+        {
+          "line": 70,
+          "text": "    nvjpegBackend_t backend = NVJPEG_BACKEND_DEFAULT;"
+        },
+        {
+          "line": 142,
+          "text": "    nvjpegBackend_t backend = NVJPEG_BACKEND_DEFAULT;"
+        },
+        {
+          "line": 165,
+          "text": "// Keep track of throughput and latency for each backend."
+        },
+        {
+          "line": 166,
+          "text": "struct backend_t "
+        },
+        {
+          "line": 173,
+          "text": "    nvjpegBackend_t backend = NVJPEG_BACKEND_DEFAULT;"
+        },
+        {
+          "line": 193,
+          "text": "    std::array<backend_t, NUM_BACKENDS> backends = {};"
+        },
+        {
+          "line": 194,
+          "text": "    std::array<int, NUM_BACKENDS> backend_order = {};"
+        },
+        {
+          "line": 202,
+          "text": "    int min_backend = 0;"
+        },
+        {
+          "line": 234,
+          "text": "        if (p.backend_enabled[b]) {"
+        },
+        {
+          "line": 235,
+          "text": "            // Sometimes the user can request a backend but it's not available on the platform"
+        },
+        {
+          "line": 237,
+          "text": "            bool be = NVJPEG_STATUS_SUCCESS == nvjpegDecoderCreate(handle, nvjpegBackend_t(b), &backends[b].decoder);"
+        },
+        {
+          "line": 238,
+          "text": "            p.backend_enabled[b] = backends[b].enabled = be;"
+        },
+        {
+          "line": 254,
+          "text": "            if (backends[b].enabled) {"
+        },
+        {
+          "line": 257,
+          "text": "                ds.decoder = backends[b].decoder;"
+        },
+        {
+          "line": 258,
+          "text": "                ds.backend = backends[b].backend = nvjpegBackend_t(b);"
+        },
+        {
+          "line": 282,
+          "text": "            if (backends[b].enabled) {"
+        },
+        {
+          "line": 290,
+          "text": "        if (backends[b].enabled)"
+        },
+        {
+          "line": 291,
+          "text": "            CHECK_NVJPEG(nvjpegDecoderDestroy(backends[b].decoder));"
+        },
+        {
+          "line": 321,
+          "text": "void backend_t::update(per_thread_decode_slot& ds)"
+        },
+        {
+          "line": 323,
+          "text": "    assert(backend == ds.backend);"
+        },
+        {
+          "line": 324,
+          "text": "    //std::cerr << \"backend \" << backend << \"\\n\";"
+        },
+        {
+          "line": 352,
+          "text": "// Return true if the backend supports the given image."
+        },
+        {
+          "line": 353,
+          "text": "bool backend_t::isSupported(const img_t& img) const"
+        },
+        {
+          "line": 355,
+          "text": "    if (backend == NVJPEG_BACKEND_HARDWARE) {"
+        },
+        {
+          "line": 358,
+          "text": "             img.encoding != NVJPEG_ENCODING_EXTENDED_SEQUENTIAL_DCT_HUFFMAN) ||"
+        },
+        {
+          "line": 374,
+          "text": "// Find a backend to decode the given image."
+        },
+        {
+          "line": 377,
+          "text": "    if (p.only_backend)"
+        },
+        {
+          "line": 378,
+          "text": "        return p.only_backend;"
+        },
+        {
+          "line": 380,
+          "text": "    // Phase 1: calibration, determine the best throughput for each backend"
+        },
+        {
+          "line": 382,
+          "text": "        // return the first enabled backend that is not yet fully estimated"
+        },
+        {
+          "line": 384,
+          "text": "            backend_t& be = pg.backends[b];"
+        },
+        {
+          "line": 388,
+          "text": "        // if we reach here, all enabled backends are calibrated"
+        },
+        {
+          "line": 393,
+          "text": "                pg.backends[1].max_throughput,"
+        },
+        {
+          "line": 394,
+          "text": "                pg.backends[2].max_throughput,"
+        },
+        {
+          "line": 395,
+          "text": "                pg.backends[3].max_throughput"
+        },
+        {
+          "line": 401,
+          "text": "            pg.backend_order[0] = imx + 1;"
+        },
+        {
+          "line": 402,
+          "text": "            pg.backend_order[1] = imm + 1;"
+        },
+        {
+          "line": 403,
+          "text": "            pg.backend_order[2] = imn + 1;"
+        },
+        {
+          "line": 407,
+          "text": "    // Phase 2: calibration is done, now try to allocate backend"
+        },
+        {
+          "line": 410,
+          "text": "    // to the next backend."
+        },
+        {
+          "line": 413,
+          "text": "        int b = pg.backend_order[i];"
+        },
+        {
+          "line": 414,
+          "text": "        backend_t& be = pg.backends[b];"
+        },
+        {
+          "line": 421,
+          "text": "    // If all backends have long backlogs, pick the backend"
+        },
+        {
+          "line": 427,
+          "text": "            backend_t& be = pg.backends[b];"
+        },
+        {
+          "line": 664,
+          "text": "    backend_t& be = ds.pt->pg->backends[ds.backend];"
+        },
+        {
+          "line": 809,
+          "text": "                    pt.pg->backends[pt.prevDs->backend].update(*pt.prevDs);"
+        },
+        {
+          "line": 823,
+          "text": "                    pt.pg->backends[pt.prevDs->backend].update(*pt.prevDs);"
+        },
+        {
+          "line": 841,
+          "text": "        result.throughput[b] = pg.backends[b].throughput;"
+        },
+        {
+          "line": 842,
+          "text": "        if (pg.backends[b].num_jobs_done > 0)"
+        },
+        {
+          "line": 843,
+          "text": "            result.latency[b] = pg.backends[b].total_latency / pg.backends[b].num_jobs_done;"
+        },
+        {
+          "line": 844,
+          "text": "        result.percentage[b] = pg.backends[b].num_jobs_done * 100.f / p.total_images;"
+        },
+        {
+          "line": 892,
+          "text": "// Use only the hardware backend (add -b)"
+        },
+        {
+          "line": 894,
+          "text": "// Use both gpu and hardware backends (with automatic load-balancing)"
+        },
+        {
+          "line": 896,
+          "text": "// Use cpu, gpu and hardware backends (with automatic load-balancing)"
+        },
+        {
+          "line": 898,
+          "text": "// Use all supported backends (omit -b)"
+        },
+        {
+          "line": 913,
+          "text": "// Benchmark individual backends (add -r to run multiple times and pick the best)"
+        },
+        {
+          "line": 917,
+          "text": "// Benchmark automatic load-balancing among backends"
+        },
+        {
+          "line": 923,
+          "text": "        std::cerr << \"Usage: \" << argv[0] << \"-i indir [-n nimages] [-s nstates] [-j nthreads] [-b backends] [-r nruns] [-o outdir]\\n\";"
+        },
+        {
+          "line": 935,
+          "text": "        std::cerr << \"  (OPTIONAL)  -b backends: any of\\n\""
+        },
+        {
+          "line": 987,
+          "text": "    // (OPTIONAL) Get the backends"
+        },
+        {
+          "line": 989,
+          "text": "        CHECK(pidx + 1 < argc, \"No backends provided after -b\\n\");"
+        },
+        {
+          "line": 992,
+          "text": "            const char* backend = argv[i];"
+        },
+        {
+          "line": 993,
+          "text": "            if (strcmp(backend, \"cpu\") == 0)"
+        },
+        {
+          "line": 994,
+          "text": "                p.backend_enabled[NVJPEG_BACKEND_HYBRID] = true;"
+        },
+        {
+          "line": 995,
+          "text": "            else if (strcmp(backend, \"gpu\") == 0)"
+        },
+        {
+          "line": 996,
+          "text": "                p.backend_enabled[NVJPEG_BACKEND_GPU_HYBRID] = true;"
+        },
+        {
+          "line": 997,
+          "text": "            else if (strcmp(backend, \"hardware\") == 0)"
+        }
+      ],
+      "next_condition": "缺失范围：native-progressive-GPU-backend,original-multiple-instance-auto-scheduling-controls；需要真实后端/完整harness并重做验收。",
+      "checks": [
+        {
+          "check": "original-source-identity",
+          "passed": true
+        },
+        {
+          "check": "explicit-unfulfilled-contract",
+          "passed": true
+        }
+      ],
+      "experiment_id": "20261110T090720.088735Z-R3-host-contract-review-745d5be52b",
+      "evidence": "migration/reports/evidence/rewrite/R3/nvJPEG_nvJPEG-Decoder-MultipleInstances__nvJPEGDecMultipleInstances.cpp/20261110T090720.088735Z-R3-host-contract-review-745d5be52b"
+    },
+    {
+      "sample_id": "nvJPEG/nvJPEG-Decoder/tests::test_decoder.py",
+      "source": "nvJPEG/nvJPEG-Decoder/tests/test_decoder.py",
+      "status": "PARTIAL",
+      "observation": "STATIC_CONTRACT_REVIEW; no new GPU result claimed",
+      "original_sha256": "b430c3b46f5698b0e54aa4b23ed80c165371f4fdc02d132c6d75a7701264ca33",
+      "implementation_sha256": "8b90de66b1d2422b7cd524e1f636e1fe03fab77296bac1b59424d260caae76b9",
+      "current_missing_contract": [
+        "batches9_11/native-progressive-GPU-backend"
+      ],
+      "current_reason": "使用 rocJPEG + HIP layout/ROI/Lanczos/watermark + explicit libjpeg CPU fallback/encode；7 个预登记case通过独立CPU与同输入CUDA。锁定rocJPEG的HYBRID创建返回-12；原始12图中2张progressive由明确标注的libjpeg CPU fallback解码。GPU格式/ROI/缩放/Lanczos/水印和真实CLI已验证，CPU编码不声称AMDGPU JPEG encoder支持。",
+      "actual_library": "rocJPEG + HIP layout/ROI/Lanczos/watermark + explicit libjpeg CPU fallback/encode",
+      "previous_evidence": [
+        "migration/reports/evidence/20261109T084354.110802Z/languages/nvJPEG_nvJPEG-Decoder_tests_test_decoder.py",
+        "migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/nvJPEG_nvJPEG-Decoder_tests_test_decoder.py",
+        "migration/reports/evidence/20261110T043132.627099Z/batches9_11-rocm/nvJPEG_nvJPEG-Decoder_tests_test_decoder.py",
+        "migration/reports/batches9_11-validation.json",
+        "migration/reports/evidence/20261110T043816.470698Z/batches9_11-cuda/nvJPEG_nvJPEG-Decoder_tests_test_decoder.py"
+      ],
+      "current_proof_dependencies_stale": {},
+      "source_contract_lines": [
+        {
+          "line": 1,
+          "text": "# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+        },
+        {
+          "line": 32,
+          "text": "        rgb.save(self.root / \"progressive.jpg\", progressive=True)"
+        },
+        {
+          "line": 35,
+          "text": "        result = subprocess.run([EXE, \"-backend\", \"hardware\", *map(str, args)], capture_output=True, text=True, timeout=60)"
+        },
+        {
+          "line": 139,
+          "text": "        (mixed / \"z_progressive.jpg\").write_bytes((self.root / \"progressive.jpg\").read_bytes())"
+        },
+        {
+          "line": 141,
+          "text": "        log = self.invoke(\"-backend\", \"default\", \"-i\", mixed, \"-b\", 3, \"-t\", 5, \"-w\", 1, \"-o\", out)"
+        },
+        {
+          "line": 143,
+          "text": "        for name in [\"a_baseline.bmp\", \"z_progressive.bmp\"]:"
+        },
+        {
+          "line": 148,
+          "text": "        # Goldens belong to a backend/configuration; CPU and HW rounding can differ."
+        },
+        {
+          "line": 149,
+          "text": "        self.invoke(\"-backend\", \"default\", \"-i\", self.inputs / \"420.jpg\","
+        },
+        {
+          "line": 151,
+          "text": "        log = self.invoke(\"-backend\", \"default\", \"-i\", self.inputs / \"420.jpg\","
+        },
+        {
+          "line": 156,
+          "text": "        self.invoke(\"-i\", self.root / \"progressive.jpg\", code=3)"
+        },
+        {
+          "line": 166,
+          "text": "        result = subprocess.run([EXE, \"-backend\", \"hardware\", \"-i\", str(self.inputs / \"444.jpg\"), \"-fmt\", \"nv12\"],"
+        }
+      ],
+      "next_condition": "缺失范围：native-progressive-GPU-backend；需要真实后端/完整harness并重做验收。",
+      "checks": [
+        {
+          "check": "original-source-identity",
+          "passed": true
+        },
+        {
+          "check": "explicit-unfulfilled-contract",
+          "passed": true
+        }
+      ],
+      "experiment_id": "20261110T090721.107531Z-R3-host-contract-review-e06b010491",
+      "evidence": "migration/reports/evidence/rewrite/R3/nvJPEG_nvJPEG-Decoder_tests__test_decoder.py/20261110T090721.107531Z-R3-host-contract-review-e06b010491"
+    },
+    {
+      "sample_id": "nvJPEG/nvJPEG-Decoder::nvjpegDecoder.cpp",
+      "source": "nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp",
+      "status": "PARTIAL",
+      "observation": "STATIC_CONTRACT_REVIEW; no new GPU result claimed",
+      "original_sha256": "6f39206e88ab6d10d43a06bd766166ccca415e42bafe911b03192da47b63b36d",
+      "implementation_sha256": "7ac9edb09b95347cf6f94b6f856e57c270deb93e545a4cce1f031888dbfdc903",
+      "current_missing_contract": [
+        "batches9_11/native-progressive-GPU-backend"
+      ],
+      "current_reason": "使用 rocJPEG + HIP layout/ROI/Lanczos/watermark + explicit libjpeg CPU fallback/encode；7 个预登记case通过独立CPU与同输入CUDA。锁定rocJPEG的HYBRID创建返回-12；原始12图中2张progressive由明确标注的libjpeg CPU fallback解码。GPU格式/ROI/缩放/Lanczos/水印和真实CLI已验证，CPU编码不声称AMDGPU JPEG encoder支持。",
+      "actual_library": "rocJPEG + HIP layout/ROI/Lanczos/watermark + explicit libjpeg CPU fallback/encode",
+      "previous_evidence": [
+        "migration/reports/evidence/20261109T083217.050455Z/original-rocm/nvJPEG_nvJPEG-Decoder_nvjpegDecoder.cpp",
+        "migration/reports/evidence/20261109T084256.329631Z/original-rocm/nvJPEG_nvJPEG-Decoder_nvjpegDecoder.cpp",
+        "migration/reports/native-probes.json",
+        "migration/reports/evidence/20261109T084040.925641Z/native-probes/rocjpeg_decode",
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/nvJPEG_nvJPEG-Decoder_nvjpegDecoder.cpp",
+        "migration/reports/evidence/20261110T043132.627099Z/batches9_11-rocm/nvJPEG_nvJPEG-Decoder_nvjpegDecoder.cpp",
+        "migration/reports/batches9_11-validation.json",
+        "migration/reports/evidence/20261110T043816.470698Z/batches9_11-cuda/nvJPEG_nvJPEG-Decoder_nvjpegDecoder.cpp"
+      ],
+      "current_proof_dependencies_stale": {},
+      "source_contract_lines": [
+        {
+          "line": 2,
+          "text": " * SPDX-FileCopyrightText: Copyright (c) 2019 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+        },
+        {
+          "line": 305,
+          "text": "                 \"[-fmt output_format] [-backend default|hardware] \""
+        },
+        {
+          "line": 327,
+          "text": "    std::cout << \"\\t-backend hardware requires hardware; unsupported inputs fail without fallback.\\n\""
+        },
+        {
+          "line": 328,
+          "text": "              << \"\\t-scale sets the hardware downscale divisor; requires -backend hardware.\\n\""
+        },
+        {
+          "line": 341,
+          "text": "    // Retain these previously accepted flags; backend routing selects the API."
+        },
+        {
+          "line": 354,
+          "text": "    else if (key == \"-backend\") {"
+        },
+        {
+          "line": 356,
+          "text": "        throw sample_error(2, \"-backend must be default or hardware\");"
+        },
+        {
+          "line": 363,
+          "text": "    throw sample_error(2, \"Hardware scaling requires -backend hardware\");"
+        },
+        {
+          "line": 412,
+          "text": "    std::cout<<\"Hardware Decoder not supported. Falling back to default backend\"<<std::endl;"
+        },
+        {
+          "line": 426,
+          "text": "  std::cout << \"CONFIG backend=\" << (params.require_hardware ? \"hardware\" : \"default\")"
+        }
+      ],
+      "next_condition": "缺失范围：native-progressive-GPU-backend；需要真实后端/完整harness并重做验收。",
+      "checks": [
+        {
+          "check": "original-source-identity",
+          "passed": true
+        },
+        {
+          "check": "explicit-unfulfilled-contract",
+          "passed": true
+        }
+      ],
+      "experiment_id": "20261110T090722.123707Z-R3-host-contract-review-35c85aa381",
+      "evidence": "migration/reports/evidence/rewrite/R3/nvJPEG_nvJPEG-Decoder__nvjpegDecoder.cpp/20261110T090722.123707Z-R3-host-contract-review-35c85aa381"
+    }
+  ]
+}

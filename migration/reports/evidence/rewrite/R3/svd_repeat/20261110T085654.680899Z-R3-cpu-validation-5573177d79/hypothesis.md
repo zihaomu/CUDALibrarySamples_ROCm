@@ -1,0 +1,1 @@
+Test cpu-validation for svd/repeat, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T085510.875290Z-R3-cuda-b4047e2337.

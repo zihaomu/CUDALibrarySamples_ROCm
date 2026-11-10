@@ -1,0 +1,1 @@
+Test native-approx for cuSOLVER/gesvdaStridedBatched::cusolver_gesvdaStridedBatched_example.cu, case original. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T085543.536332Z-R3-R7-cuda-build-f060e0e3d8.

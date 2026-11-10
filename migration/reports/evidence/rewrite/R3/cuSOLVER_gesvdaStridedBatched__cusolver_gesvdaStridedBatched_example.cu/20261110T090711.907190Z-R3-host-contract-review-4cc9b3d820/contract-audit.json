@@ -1,0 +1,142 @@
+{
+  "sample_id": "cuSOLVER/gesvdaStridedBatched::cusolver_gesvdaStridedBatched_example.cu",
+  "source": "cuSOLVER/gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu",
+  "status": "PARTIAL",
+  "observation": "STATIC_CONTRACT_REVIEW; no new GPU result claimed",
+  "original_sha256": "c3afaca538159c5f139b72fbcf97ca28237373a813c901c74d2da2814f9d1916",
+  "implementation_sha256": "850bfa71addf73c7c0e2c5b3ad9f7f439886ea08a087832d51794d9a995bfa70",
+  "current_missing_contract": [
+    "rewrite/R3/svd/independent-review-and-qualification"
+  ],
+  "current_reason": "已完成GPU重写与独立数值复核；候选尚需独立审查及完整资格，未升级整例。",
+  "actual_library": "hipSOLVER/rocSOLVER native full GPU SVD + HIP rank projection and FP64 residual",
+  "previous_evidence": [
+    "migration/reports/evidence/20261109T080822.795958Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
+    "migration/reports/evidence/20261109T081329.986729Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
+    "migration/reports/evidence/20261109T081449.022777Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
+    "migration/reports/evidence/20261109T081929.210831Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
+    "migration/reports/evidence/20261109T084753.304309Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
+    "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
+    "migration/reports/evidence/20261109T100720.422147Z/original-cuda/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
+    "migration/reports/rewrite-extension-rocm.json",
+    "migration/reports/rewrite-extension-rocm-validation.json"
+  ],
+  "current_proof_dependencies_stale": {},
+  "source_contract_lines": [
+    {
+      "line": 2,
+      "text": " * SPDX-FileCopyrightText: Copyright (c) 2020 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+    },
+    {
+      "line": 38,
+      "text": "    const int rank = n;"
+    },
+    {
+      "line": 69,
+      "text": "    std::vector<double> RnrmF(batchSize, 0); /* residual norm */"
+    },
+    {
+      "line": 101,
+      "text": "        rank,            /* number of singular values */"
+    },
+    {
+      "line": 107,
+      "text": "        d_S,             /* Sj is rank-by-1, singular values in descending order */"
+    },
+    {
+      "line": 108,
+      "text": "        strideS,         /* >= rank */"
+    },
+    {
+      "line": 109,
+      "text": "        d_U,             /* Uj is m-by-rank */"
+    },
+    {
+      "line": 111,
+      "text": "        strideU,         /* >= ldu*rank */"
+    },
+    {
+      "line": 112,
+      "text": "        d_V,             /* Vj is n-by-rank */"
+    },
+    {
+      "line": 114,
+      "text": "        strideV,         /* >= ldv*rank */"
+    },
+    {
+      "line": 124,
+      "text": "        rank,            /* number of singular values */"
+    },
+    {
+      "line": 130,
+      "text": "        d_S,             /* Sj is rank-by-1 */"
+    },
+    {
+      "line": 132,
+      "text": "        strideS,         /* >= rank */"
+    },
+    {
+      "line": 133,
+      "text": "        d_U,             /* Uj is m-by-rank */"
+    },
+    {
+      "line": 135,
+      "text": "        strideU,         /* >= ldu*rank */"
+    },
+    {
+      "line": 136,
+      "text": "        d_V,             /* Vj is n-by-rank */"
+    },
+    {
+      "line": 138,
+      "text": "        strideV,         /* >= ldv*rank */"
+    },
+    {
+      "line": 139,
+      "text": "        d_work, lwork, d_info, RnrmF.data(), batchSize /* number of matrices */"
+    },
+    {
+      "line": 166,
+      "text": "    print_matrix(rank, 1, S.data(), n);"
+    },
+    {
+      "line": 170,
+      "text": "    print_matrix(m, rank, U.data(), ldu);"
+    },
+    {
+      "line": 174,
+      "text": "    print_matrix(n, rank, V.data(), ldv);"
+    },
+    {
+      "line": 184,
+      "text": "    std::printf(\"residual |A0 - U0*S0*V0**H|_F = %E \\n\", RnrmF[0]);"
+    },
+    {
+      "line": 187,
+      "text": "    print_matrix(rank, 1, S.data() + strideS, n);"
+    },
+    {
+      "line": 191,
+      "text": "    print_matrix(m, rank, U.data() + strideU, ldu);"
+    },
+    {
+      "line": 195,
+      "text": "    print_matrix(n, rank, V.data() + strideV, ldv);"
+    },
+    {
+      "line": 205,
+      "text": "    std::printf(\"residual |A1 - U1*S1*V1**H|_F = %E \\n\", RnrmF[1]);"
+    }
+  ],
+  "next_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
+  "checks": [
+    {
+      "check": "original-source-identity",
+      "passed": true
+    },
+    {
+      "check": "explicit-unfulfilled-contract",
+      "passed": true
+    }
+  ]
+}

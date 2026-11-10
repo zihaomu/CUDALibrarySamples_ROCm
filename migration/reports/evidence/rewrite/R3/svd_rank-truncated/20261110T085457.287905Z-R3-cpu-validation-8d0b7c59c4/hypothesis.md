@@ -1,0 +1,1 @@
+Test cpu-validation for svd/rank-truncated, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T085229.801418Z-R3-rocm-b74fce82e7.

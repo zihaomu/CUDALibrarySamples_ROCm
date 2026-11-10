@@ -1,0 +1,308 @@
+{
+  "sample_id": "cuSOLVERMp::mp_getrf_getrs.c",
+  "source": "cuSOLVERMp/mp_getrf_getrs.c",
+  "status": "PARTIAL",
+  "observation": "STATIC_CONTRACT_REVIEW; no new GPU result claimed",
+  "original_sha256": "305294df67e1748acf35767b698ef5762faab124547d3a7979f66730cf20623b",
+  "implementation_sha256": "7c86c353cad83f537f3bde47cdb2f5bdb476d497093d2ad08292f57e253dec9e",
+  "current_missing_contract": [
+    "batches12_15/original-Mp-2D-grid-and-submatrix-offsets"
+  ],
+  "current_reason": "使用MPI + RCCL + HIP column-distributed partial-row-pivot LU/solve；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。保留MPI双rank/10阶LU+solve和真实分布数值；原例二维block-cyclic网格及IA/JA=3等子矩阵描述符尚未等价，当前为项目列分布。",
+  "actual_library": "MPI + RCCL + HIP column-distributed partial-row-pivot LU/solve",
+  "previous_evidence": [
+    "migration/reports/evidence/20261109T083217.050455Z/original-rocm/cuSOLVERMp_mp_getrf_getrs.c",
+    "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuSOLVERMp_mp_getrf_getrs.c",
+    "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSOLVERMp_mp_getrf_getrs.c",
+    "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVERMp_mp_getrf_getrs.c",
+    "migration/reports/batches12_15-validation.json",
+    "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVERMp_mp_getrf_getrs.c",
+    "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/cuSOLVERMp_mp_getrf_getrs.c"
+  ],
+  "current_proof_dependencies_stale": {},
+  "source_contract_lines": [
+    {
+      "line": 2,
+      "text": " * SPDX-FileCopyrightText: Copyright (c) 2025-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+    },
+    {
+      "line": 108,
+      "text": "                     .grid_layout = 'C',"
+    },
+    {
+      "line": 127,
+      "text": "    const int64_t IA = opts.ia;"
+    },
+    {
+      "line": 128,
+      "text": "    const int64_t JA = opts.ja;"
+    },
+    {
+      "line": 129,
+      "text": "    const int64_t IB = opts.ib;"
+    },
+    {
+      "line": 130,
+      "text": "    const int64_t JB = opts.jb;"
+    },
+    {
+      "line": 138,
+      "text": "    /* Define grid of processors */"
+    },
+    {
+      "line": 142,
+      "text": "    /* Convert grid layout to cusolverMp grid mapping */"
+    },
+    {
+      "line": 143,
+      "text": "    const cusolverMpGridMapping_t gridLayout ="
+    },
+    {
+      "line": 144,
+      "text": "            (opts.grid_layout == 'C' || opts.grid_layout == 'c' ? CUSOLVERMP_GRID_MAPPING_COL_MAJOR"
+    },
+    {
+      "line": 153,
+      "text": "    /* Get MPI rank id and communicator size. */"
+    },
+    {
+      "line": 154,
+      "text": "    int commSize, rank;"
+    },
+    {
+      "line": 156,
+      "text": "    MPI_Comm_rank(MPI_COMM_WORLD, &rank);"
+    },
+    {
+      "line": 158,
+      "text": "    if (rank == 0) print(&opts);"
+    },
+    {
+      "line": 180,
+      "text": "    ncclComm_t ncclComm = createNcclComm(commSize, rank);"
+    },
+    {
+      "line": 190,
+      "text": "    /* cusolverMp grids */"
+    },
+    {
+      "line": 191,
+      "text": "    cusolverMpGrid_t gridA = NULL;"
+    },
+    {
+      "line": 192,
+      "text": "    cusolverMpGrid_t gridB = NULL;"
+    },
+    {
+      "line": 228,
+      "text": "    /*          Create inputs on master rank       */"
+    },
+    {
+      "line": 238,
+      "text": "    /*          Create inputs on master rank       */"
+    },
+    {
+      "line": 241,
+      "text": "    const int64_t lda   = (IA - 1) + N;"
+    },
+    {
+      "line": 242,
+      "text": "    const int64_t colsA = (JA - 1) + N;"
+    },
+    {
+      "line": 243,
+      "text": "    const int64_t ldb   = (IB - 1) + N;"
+    },
+    {
+      "line": 244,
+      "text": "    const int64_t colsB = (JB - 1) + NRHS;"
+    },
+    {
+      "line": 250,
+      "text": "    if (rank == 0)"
+    },
+    {
+      "line": 263,
+      "text": "        double* _A = &h_A[(IA - 1) + (JA - 1) * lda];"
+    },
+    {
+      "line": 264,
+      "text": "        double* _X = &h_X[(IB - 1) + (JB - 1) * ldb];"
+    },
+    {
+      "line": 265,
+      "text": "        double* _B = &h_B[(IB - 1) + (JB - 1) * ldb];"
+    },
+    {
+      "line": 267,
+      "text": "        /* Set B[IB:IB+N, JB] = 1 */"
+    },
+    {
+      "line": 273,
+      "text": "        /* Set X[IB:IB+N, JB] = 1 */"
+    },
+    {
+      "line": 279,
+      "text": "        /* Set A[IA:IA+N, JA:JA+N] = permuted laplacian */"
+    },
+    {
+      "line": 295,
+      "text": "    /* compute process grid index */"
+    },
+    {
+      "line": 297,
+      "text": "    if (gridLayout == CUSOLVERMP_GRID_MAPPING_COL_MAJOR)"
+    },
+    {
+      "line": 299,
+      "text": "        myRowRank = rank % nprow;"
+    },
+    {
+      "line": 300,
+      "text": "        myColRank = rank / nprow;"
+    },
+    {
+      "line": 304,
+      "text": "        myRowRank = rank / npcol;"
+    },
+    {
+      "line": 305,
+      "text": "        myColRank = rank % npcol;"
+    },
+    {
+      "line": 309,
+      "text": "     * Compute number of tiles per rank to store local portion of A"
+    },
+    {
+      "line": 322,
+      "text": "     * Compute number of tiles per rank to store local portion of B"
+    },
+    {
+      "line": 346,
+      "text": "    cusolverStat = cusolverMpCreateDeviceGrid(handle, &gridA, ncclComm, nprow, npcol, gridLayout);"
+    },
+    {
+      "line": 349,
+      "text": "    cusolverStat = cusolverMpCreateDeviceGrid(handle, &gridB, ncclComm, nprow, npcol, gridLayout);"
+    },
+    {
+      "line": 356,
+      "text": "            &descrA, gridA, CUDA_R_64F, (IA - 1) + N, (JA - 1) + N, MA, NA, RSRCA, CSRCA, LLDA);"
+    },
+    {
+      "line": 361,
+      "text": "            &descrB, gridB, CUDA_R_64F, (IB - 1) + N, (JB - 1) + 1, MB, NB, RSRCB, CSRCB, LLDB);"
+    },
+    {
+      "line": 367,
+      "text": "        /* REMARK : ipiv overlaps A[IA, JA:JA+N] as in Netlib's ScaLAPACK */"
+    },
+    {
+      "line": 402,
+      "text": "                                              IA,"
+    },
+    {
+      "line": 403,
+      "text": "                                              JA,"
+    },
+    {
+      "line": 416,
+      "text": "                                              IA,"
+    },
+    {
+      "line": 417,
+      "text": "                                              JA,"
+    },
+    {
+      "line": 421,
+      "text": "                                              IB,"
+    },
+    {
+      "line": 422,
+      "text": "                                              JB,"
+    },
+    {
+      "line": 460,
+      "text": "                                              0, /* root rank */"
+    },
+    {
+      "line": 472,
+      "text": "                                              0, /* root rank */"
+    },
+    {
+      "line": 490,
+      "text": "                                   IA,"
+    },
+    {
+      "line": 491,
+      "text": "                                   JA,"
+    },
+    {
+      "line": 528,
+      "text": "                                   IA,"
+    },
+    {
+      "line": 529,
+      "text": "                                   JA,"
+    },
+    {
+      "line": 533,
+      "text": "                                   IB,"
+    },
+    {
+      "line": 534,
+      "text": "                                   JB,"
+    },
+    {
+      "line": 571,
+      "text": "                                             0, /* master rank, destination */"
+    },
+    {
+      "line": 584,
+      "text": "    if (rank == 0)"
+    },
+    {
+      "line": 593,
+      "text": "        double* _A = &h_A[(IA - 1) + (JA - 1) * lda];"
+    },
+    {
+      "line": 594,
+      "text": "        double* _X = &h_X[(IB - 1) + (JB - 1) * ldb];"
+    },
+    {
+      "line": 595,
+      "text": "        double* _B = &h_B[(IB - 1) + (JB - 1) * ldb];"
+    },
+    {
+      "line": 636,
+      "text": "    if (rank == 0)"
+    },
+    {
+      "line": 670,
+      "text": "    cusolverStat = cusolverMpDestroyGrid(gridA);"
+    },
+    {
+      "line": 673,
+      "text": "    cusolverStat = cusolverMpDestroyGrid(gridB);"
+    },
+    {
+      "line": 766,
+      "text": "    sample_ok = sample_all_ranks_succeeded(sample_ok);"
+    },
+    {
+      "line": 771,
+      "text": "    if (rank == 0)"
+    }
+  ],
+  "next_condition": "未完成合同：original-Mp-2D-grid-and-submatrix-offsets；补实现/真实后端并重验。",
+  "checks": [
+    {
+      "check": "original-source-identity",
+      "passed": true
+    },
+    {
+      "check": "explicit-unfulfilled-contract",
+      "passed": true
+    }
+  ]
+}

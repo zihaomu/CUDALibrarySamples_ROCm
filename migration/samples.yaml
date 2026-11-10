@@ -68853,30 +68853,34 @@
         "RPP HIP",
         "rocPRIM"
       ],
-      "actual_library": "HIP zero-mean normalized correlation + GPU argmax kernels",
-      "backend_library": "HIP zero-mean normalized correlation + GPU argmax kernels",
+      "actual_library": "HIP NCC/full original CLI/RAW input/PGM annotation/HIP-event timing",
+      "backend_library": "project HIP kernels",
       "implementation": "rocm/ported/NPP/templateMatching/templateMatching.cpp",
       "status": "PARTIAL",
       "level": "L4",
       "required_cases": [
-        "batches12_15/original",
-        "batches12_15/irregular",
-        "batches12_15/changed-values",
-        "batches12_15/boundary",
-        "batches12_15/repeat",
-        "batches12_15/singular-or-empty",
-        "batches12_15/original-annotation-file-CLI-and-timing-harness"
+        "rewrite/R3/ncc/original",
+        "rewrite/R3/ncc/changed-values",
+        "rewrite/R3/ncc/changed-template",
+        "rewrite/R3/ncc/no-timing",
+        "rewrite/R3/ncc/repeat",
+        "rewrite/R3/ncc/constant-template",
+        "rewrite/R3/ncc/constant-image",
+        "rewrite/R3/ncc/constant-both",
+        "rewrite/R3/ncc/independent-review-and-qualification"
       ],
       "passed_cases": [
-        "batches12_15/original",
-        "batches12_15/irregular",
-        "batches12_15/changed-values",
-        "batches12_15/boundary",
-        "batches12_15/repeat",
-        "batches12_15/singular-or-empty"
+        "rewrite/R3/ncc/original",
+        "rewrite/R3/ncc/changed-values",
+        "rewrite/R3/ncc/changed-template",
+        "rewrite/R3/ncc/no-timing",
+        "rewrite/R3/ncc/repeat",
+        "rewrite/R3/ncc/constant-template",
+        "rewrite/R3/ncc/constant-image",
+        "rewrite/R3/ncc/constant-both"
       ],
-      "reason_code": "VALIDATED_B12_B15_SUBSET",
-      "reason": "使用HIP zero-mean normalized correlation + GPU argmax kernels；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。原始2048x1024/96x64、seed1234退化模板、完整score与GPU argmax均验收；原例注释图文件、全部CLI和计时harness尚未移植。",
+      "reason_code": "REWRITE_REVIEW_PENDING",
+      "reason": "已完成GPU重写与独立数值复核；候选尚需独立审查及完整资格，未升级整例。",
       "cuda_baseline": "PASSED",
       "cuda_comparison": "PASSED",
       "benchmark": "NOT_RUN",
@@ -68889,7 +68893,9 @@
         "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp",
         "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/NPP_templateMatching_templateMatching.cpp",
         "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp",
-        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp"
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp",
+        "migration/reports/rewrite-ncc-rocm.json",
+        "migration/reports/rewrite-ncc-native-comparison.json"
       ],
       "attempts": [
         {
@@ -70390,6 +70396,20 @@
             "scope": "Original vendor program; success does not provide shared-input equivalence without additional numerical observations."
           },
           "validation_source_sha256": "b1f9658af04bdff00e3d836178a8361fd1465ff64a505c723db1d374c45b1083"
+        },
+        {
+          "status": "PARTIAL",
+          "scope": "MOAT R3 candidate, independent review pending",
+          "implementation": "rocm/ported/NPP/templateMatching/templateMatching.cpp",
+          "implementation_sha256": "c1a315319e0436d6e831d2c09a02034a9385b7607e38bcd07dd189d17bd39c43",
+          "evidence": "migration/reports/evidence/rewrite/R3/NPP_templateMatching__templateMatching.cpp/20261110T084822.760320Z-R3-rocm-ddced41a44",
+          "environment": "migration/reports/evidence/rewrite/R3/NPP_templateMatching__templateMatching.cpp/20261110T084822.760320Z-R3-rocm-ddced41a44/backend.observed.json",
+          "dependencies": {
+            "rocm/ported/NPP/templateMatching/templateMatching.cpp": "c1a315319e0436d6e831d2c09a02034a9385b7607e38bcd07dd189d17bd39c43",
+            "rocm/backends/image/ncc_contract.hpp": "5dbfd4eaaacbaf0e7c43197e35b07d20750ceda6f0a07e53c29dbd841ab84de8"
+          },
+          "reason_code": "REWRITE_REVIEW_PENDING",
+          "reason": "已完成GPU重写与独立数值复核；候选尚需独立审查及完整资格，未升级整例。"
         }
       ],
       "milestone": "M3",
@@ -70436,7 +70456,7 @@
         "api_tokens": [],
         "review_scope": "Original source is the authoritative dtype/layout/batch/API contract; qualified subset and deviations are explicit in reason and required_cases."
       },
-      "equivalence": "API_PORT_WITH_EXECUTION_ADAPTER",
+      "equivalence": "HYBRID_HIP",
       "next_step": "按当前逐例错误和 retry_condition 改写/补齐，再运行原始 profile 与独立参考。",
       "original_cuda": {
         "sample_id": "NPP/templateMatching::templateMatching.cpp",
@@ -70979,7 +70999,26 @@
         },
         "validation_source_sha256": "b1f9658af04bdff00e3d836178a8361fd1465ff64a505c723db1d374c45b1083"
       },
-      "reproduce": "HIP_VISIBLE_DEVICES=2,1 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh python tools/migration/batches12_15_run.py b15\nOPENBLAS_NUM_THREADS=2 python3 tools/migration/batches12_15_validate.py b15 --qualify"
+      "reproduce": "HIP_VISIBLE_DEVICES=2,1 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh python tools/migration/batches12_15_run.py b15\nOPENBLAS_NUM_THREADS=2 python3 tools/migration/batches12_15_validate.py b15 --qualify",
+      "pre_rewrite_contract": {
+        "required_cases": [
+          "batches12_15/original",
+          "batches12_15/irregular",
+          "batches12_15/changed-values",
+          "batches12_15/boundary",
+          "batches12_15/repeat",
+          "batches12_15/singular-or-empty",
+          "batches12_15/original-annotation-file-CLI-and-timing-harness"
+        ],
+        "passed_cases": [
+          "batches12_15/original",
+          "batches12_15/irregular",
+          "batches12_15/changed-values",
+          "batches12_15/boundary",
+          "batches12_15/repeat",
+          "batches12_15/singular-or-empty"
+        ]
+      }
     },
     {
       "id": "NPP/watershedSegmentation::watershedSegmentation.cpp",
@@ -397813,21 +397852,32 @@
         "hipSOLVER",
         "rocSOLVER"
       ],
-      "actual_library": "hipsolver",
-      "backend_library": "rocSOLVER",
+      "actual_library": "hipSOLVER/rocSOLVER native full GPU SVD + HIP rank projection and FP64 residual",
+      "backend_library": "rocSOLVER + project HIP",
       "implementation": "rocm/ported/cuSOLVER/gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu",
       "status": "PARTIAL",
       "level": "L3",
       "required_cases": [
-        "build-and-original-profile-execution",
-        "original-functional-contract",
-        "independent-numerical-or-semantic-reference"
+        "rewrite/R3/svd/original",
+        "rewrite/R3/svd/changed-values",
+        "rewrite/R3/svd/irregular",
+        "rewrite/R3/svd/layout",
+        "rewrite/R3/svd/repeat",
+        "rewrite/R3/svd/rank-deficient",
+        "rewrite/R3/svd/rank-truncated",
+        "rewrite/R3/svd/independent-review-and-qualification"
       ],
       "passed_cases": [
-        "build-and-original-profile-execution"
+        "rewrite/R3/svd/original",
+        "rewrite/R3/svd/changed-values",
+        "rewrite/R3/svd/irregular",
+        "rewrite/R3/svd/layout",
+        "rewrite/R3/svd/repeat",
+        "rewrite/R3/svd/rank-deficient",
+        "rewrite/R3/svd/rank-truncated"
       ],
-      "reason_code": "INDEPENDENT_VALIDATION_PENDING",
-      "reason": "原始教学输入构建运行通过；独立正确性验证待完成",
+      "reason_code": "REWRITE_REVIEW_PENDING",
+      "reason": "已完成GPU重写与独立数值复核；候选尚需独立审查及完整资格，未升级整例。",
       "cuda_baseline": "PASSED",
       "cuda_comparison": "BLOCKED",
       "benchmark": "NOT_RUN",
@@ -397838,7 +397888,9 @@
         "migration/reports/evidence/20261109T081929.210831Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
         "migration/reports/evidence/20261109T084753.304309Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
         "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
-        "migration/reports/evidence/20261109T100720.422147Z/original-cuda/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu"
+        "migration/reports/evidence/20261109T100720.422147Z/original-cuda/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
+        "migration/reports/rewrite-extension-rocm.json",
+        "migration/reports/rewrite-extension-rocm-validation.json"
       ],
       "attempts": [
         {
@@ -397972,6 +398024,21 @@
             }
           ],
           "qualified_physical_devices": true
+        },
+        {
+          "status": "PARTIAL",
+          "scope": "MOAT R3 candidate, independent review pending",
+          "implementation": "rocm/ported/cuSOLVER/gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu",
+          "implementation_sha256": "850bfa71addf73c7c0e2c5b3ad9f7f439886ea08a087832d51794d9a995bfa70",
+          "evidence": "migration/reports/evidence/rewrite/R3/cuSOLVER_gesvdaStridedBatched__cusolver_gesvdaStridedBatched_example.cu/20261110T085723.846931Z-R3-rocm-9da2dde1fe",
+          "environment": "migration/reports/evidence/rewrite/R3/cuSOLVER_gesvdaStridedBatched__cusolver_gesvdaStridedBatched_example.cu/20261110T085723.846931Z-R3-rocm-9da2dde1fe/backend.observed.json",
+          "dependencies": {
+            "rocm/ported/cuSOLVER/gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu": "850bfa71addf73c7c0e2c5b3ad9f7f439886ea08a087832d51794d9a995bfa70",
+            "rocm/backends/solver/rank_svd.hpp": "ab4317fec2c4a2a6cb921082e8e46c6be0f0ac1b92112ec6483bcb37844c4364",
+            "rocm/common/rewrite_runtime.hpp": "f2b97f13b7f4c89f24827e96ba82bb6d2d6d692f909e80625fc16e81ffe5572c"
+          },
+          "reason_code": "REWRITE_REVIEW_PENDING",
+          "reason": "已完成GPU重写与独立数值复核；候选尚需独立审查及完整资格，未升级整例。"
         }
       ],
       "milestone": "M2",
@@ -398032,7 +398099,7 @@
         ],
         "review_scope": "Original source is the authoritative dtype/layout/batch/API contract; qualified subset and deviations are explicit in reason and required_cases."
       },
-      "equivalence": "API_PORT",
+      "equivalence": "LIBRARY_REWRITE",
       "original_cuda": {
         "sample_id": "cuSOLVER/gesvdaStridedBatched::cusolver_gesvdaStridedBatched_example.cu",
         "scope": "original_profile",
@@ -398058,7 +398125,17 @@
       },
       "cuda_baseline_scope": "Original source with observation-only output where present; build/run qualification, separate from independent correctness comparison.",
       "cuda_baseline_reason": "原始教学输入构建运行通过；独立正确性验证待完成",
-      "cuda_comparison_reason": "当前 AMD 路线尚未通过正确性验收。"
+      "cuda_comparison_reason": "当前 AMD 路线尚未通过正确性验收。",
+      "pre_rewrite_contract": {
+        "required_cases": [
+          "build-and-original-profile-execution",
+          "original-functional-contract",
+          "independent-numerical-or-semantic-reference"
+        ],
+        "passed_cases": [
+          "build-and-original-profile-execution"
+        ]
+      }
     },
     {
       "id": "cuSOLVER/gesvdj::cusolver_gesvdj_example.cu",

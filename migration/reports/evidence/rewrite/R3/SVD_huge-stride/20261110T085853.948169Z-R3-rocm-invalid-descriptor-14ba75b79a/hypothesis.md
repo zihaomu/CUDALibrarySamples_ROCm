@@ -1,0 +1,1 @@
+Test rocm-invalid-descriptor for SVD/huge-stride, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T085653.150750Z-R3-rocm-build-9729c5ba72.

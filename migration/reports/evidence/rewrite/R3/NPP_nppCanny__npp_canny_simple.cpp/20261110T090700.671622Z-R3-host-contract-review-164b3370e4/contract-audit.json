@@ -1,0 +1,54 @@
+{
+  "sample_id": "NPP/nppCanny::npp_canny_simple.cpp",
+  "source": "NPP/nppCanny/npp_canny_simple.cpp",
+  "status": "PARTIAL",
+  "observation": "STATIC_CONTRACT_REVIEW; no new GPU result claimed",
+  "original_sha256": "baf56fa10d093239368ac3feb40874b3d76f9a9d97824697ea8851d196a68eb4",
+  "implementation_sha256": "642803273a59f28e98a40c02e70c759628f9d0c29eed50ecba7daa3619c18abf",
+  "current_missing_contract": [
+    "batches12_15/native-NPP-C3-gradient-tie-and-file-CLI-equivalence"
+  ],
+  "current_reason": "使用HIP three-channel Sobel/NMS/connected hysteresis kernels；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。GPU三通道最大梯度/Sobel/NMS/滞后连接已全像素验收；原生NPP C3梯度与NMS tie策略及原例OpenCV文件CLI未完成逐像素等价。",
+  "actual_library": "HIP three-channel Sobel/NMS/connected hysteresis kernels",
+  "previous_evidence": [
+    "migration/reports/evidence/20261109T083217.050455Z/original-rocm/NPP_nppCanny_npp_canny_simple.cpp",
+    "migration/reports/evidence/20261109T084256.329631Z/original-rocm/NPP_nppCanny_npp_canny_simple.cpp",
+    "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP_nppCanny_npp_canny_simple.cpp",
+    "migration/reports/evidence/20261110T051547.561861Z/batches12_15-rocm/NPP_nppCanny_npp_canny_simple.cpp",
+    "migration/reports/batches12_15-validation.json",
+    "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/NPP_nppCanny_npp_canny_simple.cpp",
+    "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/NPP_nppCanny_npp_canny_simple.cpp",
+    "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_nppCanny_npp_canny_simple.cpp",
+    "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_nppCanny_npp_canny_simple.cpp"
+  ],
+  "current_proof_dependencies_stale": {},
+  "source_contract_lines": [
+    {
+      "line": 2,
+      "text": " * SPDX-FileCopyrightText: Copyright (c) 2021-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+    },
+    {
+      "line": 22,
+      "text": " * Detects edges in color images using NVIDIA NPP."
+    },
+    {
+      "line": 98,
+      "text": "        CHECK_NPP(nppiFilterCannyBorderGetBufferSize(roi, &buffer_size));"
+    },
+    {
+      "line": 130,
+      "text": "        CHECK_NPP(nppiFilterCannyBorder_8u_C3C1R_Ctx("
+    }
+  ],
+  "next_condition": "未完成合同：native-NPP-C3-gradient-tie-and-file-CLI-equivalence；补实现/真实后端并重验。",
+  "checks": [
+    {
+      "check": "original-source-identity",
+      "passed": true
+    },
+    {
+      "check": "explicit-unfulfilled-contract",
+      "passed": true
+    }
+  ]
+}

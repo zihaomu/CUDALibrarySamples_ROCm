@@ -1,0 +1,25 @@
+#!/usr/bin/env python3
+"""Run registered binary-fixture extensions; special file harnesses have own runners."""
+import argparse,json,shutil
+from experiment import ROOT,Experiment,write,digest
+from inputs import verify
+from snapshot import capture
+p=argparse.ArgumentParser();p.add_argument('--only',nargs='+',required=True);args=p.parse_args()
+profiles=json.loads((ROOT/'migration/rewrite/extensions.json').read_text())['profiles'];builds=json.loads((ROOT/'migration/reports/rewrite-extension-builds.json').read_text());observed=capture();report=ROOT/'migration/reports/rewrite-extension-rocm.json';records=json.loads(report.read_text()) if report.exists() else {}
+for profile in profiles:
+ if profile['kind'] not in args.only:continue
+ build=builds[profile['kind']]
+ if any(digest(ROOT/n)!=sha for n,sha in build['dependencies'].items()):raise RuntimeError('stale extension binary')
+ for case in profile['cases']:
+  src=ROOT/'tests/fixtures/rewrite-extensions'/profile['kind']/case;mh=digest(src/'manifest.json');verify(src,mh)
+  e=Experiment(profile['batch'],profile['sample_id'],'rocm',case=case,sources=[__file__]+[ROOT/n for n in build['dependencies']],parent=build['experiment_id'],comparison_id=profile['kind']+'/'+case+'/'+mh);shutil.copytree(src,e.path/'inputs');write(e.path/'backend.observed.json',observed);out=e.path/'outputs';out.mkdir()
+  rc=e.command([str(ROOT/build['binary'])],'run',env=dict(REWRITE_INPUT=str(e.path/'inputs'),REWRITE_OUTPUT=str(out)))
+  loaded={}
+  from pathlib import Path
+  for line in (e.path/e.commands[-1]['stdout']).read_text().splitlines():
+   if line.startswith('loaded-library '):
+    path=Path(line.removeprefix('loaded-library '))
+    if path.is_file():loaded[str(path)]=digest(path)
+  write(e.path/'libraries.loaded.json',loaded)
+  write(out/'manifest.json',dict(files={q.name:dict(sha256=digest(q),bytes=q.stat().st_size) for q in out.iterdir() if q.is_file()}));r=dict(kind=profile['kind'],case=case,return_code=rc,output=str(out.relative_to(ROOT)),input_snapshot=str((e.path/'inputs').relative_to(ROOT)),input_manifest_sha256=mh,comparison_id=e.meta['comparison_id'],experiment_id=e.id,build=build)
+  r['evidence']=e.finish('EXECUTED' if rc==0 else 'RUNTIME_ERROR');records[profile['kind']+'/'+case]=r;write(report,records);print(profile['kind'],case,rc,flush=True)

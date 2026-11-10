@@ -1,0 +1,1 @@
+Test cpu-validation for svd/layout, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T085732.987379Z-R3-rocm-6db7202a88.

@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "profiles": [
+    {
+      "batch": "R3",
+      "kind": "ncc",
+      "source": "NPP/templateMatching/templateMatching.cpp",
+      "sample_id": "NPP/templateMatching::templateMatching.cpp",
+      "implementation": "rocm/ported/NPP/templateMatching/templateMatching.cpp",
+      "cases": [
+        "original",
+        "changed-values",
+        "changed-template",
+        "no-timing",
+        "repeat",
+        "constant-template",
+        "constant-image",
+        "constant-both"
+      ],
+      "contract": "Original 2048x1024 RAW input, full CLI, srand(1234) template degradation, GPU full-score/argmax, match_result.pgm, HIP-event timing and bounds checks; undefined variance follows separately observed native NPP behavior",
+      "threshold": "Full FP64 CPU score atol=2e-4; native NPP atol=2e-4; exact input/template/annotation bytes; native degeneracy and argmax validity separately checked"
+    },
+    {
+      "batch": "R3",
+      "kind": "svd",
+      "source": "cuSOLVER/gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu",
+      "sample_id": "cuSOLVER/gesvdaStridedBatched::cusolver_gesvdaStridedBatched_example.cu",
+      "implementation": "rocm/ported/cuSOLVER/gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu",
+      "cases": [
+        "original",
+        "changed-values",
+        "irregular",
+        "layout",
+        "repeat",
+        "rank-deficient",
+        "rank-truncated"
+      ],
+      "contract": "Original FP32 3x2 two-batch SVD; rank selection, descending singular values, U/V rather than VT, strides and GPU residual norm; native full SVD plus GPU truncation is the explicit replacement algorithm",
+      "threshold": "Singular values atol=2e-5 rtol=3e-4; reconstruction/optimal rank residual 5e-4; returned Frobenius residual compared with FP64 recomputation; padding exact"
+    }
+  ]
+}

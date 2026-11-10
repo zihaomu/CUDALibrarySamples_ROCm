@@ -1,0 +1,1 @@
+Test cpu-validation for svd/rank-deficient, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T085514.072236Z-R3-cuda-28d6cda2a2.

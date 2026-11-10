@@ -6395,56 +6395,51 @@
       "source": "NPP/templateMatching/templateMatching.cpp",
       "status": "PARTIAL",
       "level": "L4",
-      "actual_library": "HIP zero-mean normalized correlation + GPU argmax kernels",
-      "backend_library": "HIP zero-mean normalized correlation + GPU argmax kernels",
-      "implementation_method": "API_PORT_WITH_EXECUTION_ADAPTER",
+      "actual_library": "HIP NCC/full original CLI/RAW input/PGM annotation/HIP-event timing",
+      "backend_library": "project HIP kernels",
+      "implementation_method": "HYBRID_HIP",
       "implementation": "rocm/ported/NPP/templateMatching/templateMatching.cpp",
-      "implementation_sha256": "e7d1f6bc6a7229963605d97c28632701583aba5b257cdcb36115f54b5a3bb8e0",
+      "implementation_sha256": "c1a315319e0436d6e831d2c09a02034a9385b7607e38bcd07dd189d17bd39c43",
       "passed_cases": [
-        "batches12_15/original",
-        "batches12_15/irregular",
-        "batches12_15/changed-values",
-        "batches12_15/boundary",
-        "batches12_15/repeat",
-        "batches12_15/singular-or-empty"
+        "rewrite/R3/ncc/original",
+        "rewrite/R3/ncc/changed-values",
+        "rewrite/R3/ncc/changed-template",
+        "rewrite/R3/ncc/no-timing",
+        "rewrite/R3/ncc/repeat",
+        "rewrite/R3/ncc/constant-template",
+        "rewrite/R3/ncc/constant-image",
+        "rewrite/R3/ncc/constant-both"
       ],
       "required_cases": [
-        "batches12_15/original",
-        "batches12_15/irregular",
-        "batches12_15/changed-values",
-        "batches12_15/boundary",
-        "batches12_15/repeat",
-        "batches12_15/singular-or-empty",
-        "batches12_15/original-annotation-file-CLI-and-timing-harness"
+        "rewrite/R3/ncc/original",
+        "rewrite/R3/ncc/changed-values",
+        "rewrite/R3/ncc/changed-template",
+        "rewrite/R3/ncc/no-timing",
+        "rewrite/R3/ncc/repeat",
+        "rewrite/R3/ncc/constant-template",
+        "rewrite/R3/ncc/constant-image",
+        "rewrite/R3/ncc/constant-both",
+        "rewrite/R3/ncc/independent-review-and-qualification"
       ],
-      "scope_and_reason": "使用HIP zero-mean normalized correlation + GPU argmax kernels；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。原始2048x1024/96x64、seed1234退化模板、完整score与GPU argmax均验收；原例注释图文件、全部CLI和计时harness尚未移植。",
+      "scope_and_reason": "已完成GPU重写与独立数值复核；候选尚需独立审查及完整资格，未升级整例。",
       "retry_condition": "未完成合同：original-annotation-file-CLI-and-timing-harness；补实现/真实后端并重验。",
       "detail": "migration/sample-reports/NPP/templateMatching/templateMatching.cpp.md",
-      "record_field": "selected_validation",
-      "amd_evidence": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp",
+      "record_field": "attempts/5",
+      "amd_evidence": "migration/reports/evidence/rewrite/R3/NPP_templateMatching__templateMatching.cpp/20261110T084822.760320Z-R3-rocm-ddced41a44",
       "amd_logs": [
-        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp/boundary/run.log",
-        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp/build.log",
-        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp/changed-values/run.log",
-        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp/irregular/run.log",
-        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp/original/run.log",
-        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp/repeat/run.log",
-        "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp/singular-or-empty/run.log"
+        "migration/reports/evidence/rewrite/R3/NPP_templateMatching__templateMatching.cpp/20261110T084822.760320Z-R3-rocm-ddced41a44/logs/0001-original-harness.stderr.log",
+        "migration/reports/evidence/rewrite/R3/NPP_templateMatching__templateMatching.cpp/20261110T084822.760320Z-R3-rocm-ddced41a44/logs/0001-original-harness.stdout.log"
       ],
       "cuda_comparison": "PASSED",
-      "cuda_evidence": "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp",
-      "cuda_evidence_basis": "当前验收记录",
+      "cuda_evidence": "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP_templateMatching_templateMatching.cpp",
+      "cuda_evidence_basis": "原始 CUDA 尝试",
       "cuda_logs": [
-        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp/boundary/run.log",
-        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp/build.log",
-        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp/changed-values/run.log",
-        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp/irregular/run.log",
-        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp/original/run.log",
-        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp/repeat/run.log",
-        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp/singular-or-empty/run.log"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP_templateMatching_templateMatching.cpp/build.log"
       ],
       "validation_reports": [
-        "migration/reports/batches12_15-validation.json"
+        "migration/reports/batches12_15-validation.json",
+        "migration/reports/rewrite-ncc-rocm.json",
+        "migration/reports/rewrite-ncc-native-comparison.json"
       ],
       "all_evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/NPP_templateMatching_templateMatching.cpp",
@@ -6455,7 +6450,9 @@
         "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp",
         "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/NPP_templateMatching_templateMatching.cpp",
         "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp",
-        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp"
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp",
+        "migration/reports/rewrite-ncc-rocm.json",
+        "migration/reports/rewrite-ncc-native-comparison.json"
       ]
     },
     {
@@ -21757,27 +21754,38 @@
       "source": "cuSOLVER/gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu",
       "status": "PARTIAL",
       "level": "L3",
-      "actual_library": "hipsolver",
-      "backend_library": "rocSOLVER",
-      "implementation_method": "API_PORT",
+      "actual_library": "hipSOLVER/rocSOLVER native full GPU SVD + HIP rank projection and FP64 residual",
+      "backend_library": "rocSOLVER + project HIP",
+      "implementation_method": "LIBRARY_REWRITE",
       "implementation": "rocm/ported/cuSOLVER/gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu",
-      "implementation_sha256": "0b19a1a4db2e4e618ee17f64047b4e6fcb61dc1fd531458c6b5ad414f5453b62",
+      "implementation_sha256": "850bfa71addf73c7c0e2c5b3ad9f7f439886ea08a087832d51794d9a995bfa70",
       "passed_cases": [
-        "build-and-original-profile-execution"
+        "rewrite/R3/svd/original",
+        "rewrite/R3/svd/changed-values",
+        "rewrite/R3/svd/irregular",
+        "rewrite/R3/svd/layout",
+        "rewrite/R3/svd/repeat",
+        "rewrite/R3/svd/rank-deficient",
+        "rewrite/R3/svd/rank-truncated"
       ],
       "required_cases": [
-        "build-and-original-profile-execution",
-        "original-functional-contract",
-        "independent-numerical-or-semantic-reference"
+        "rewrite/R3/svd/original",
+        "rewrite/R3/svd/changed-values",
+        "rewrite/R3/svd/irregular",
+        "rewrite/R3/svd/layout",
+        "rewrite/R3/svd/repeat",
+        "rewrite/R3/svd/rank-deficient",
+        "rewrite/R3/svd/rank-truncated",
+        "rewrite/R3/svd/independent-review-and-qualification"
       ],
-      "scope_and_reason": "原始教学输入构建运行通过；独立正确性验证待完成",
+      "scope_and_reason": "已完成GPU重写与独立数值复核；候选尚需独立审查及完整资格，未升级整例。",
       "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
       "detail": "migration/sample-reports/cuSOLVER/gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu.md",
-      "record_field": "attempts/5",
-      "amd_evidence": "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
+      "record_field": "attempts/6",
+      "amd_evidence": "migration/reports/evidence/rewrite/R3/cuSOLVER_gesvdaStridedBatched__cusolver_gesvdaStridedBatched_example.cu/20261110T085723.846931Z-R3-rocm-9da2dde1fe",
       "amd_logs": [
-        "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu/build.log",
-        "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu/run.log"
+        "migration/reports/evidence/rewrite/R3/cuSOLVER_gesvdaStridedBatched__cusolver_gesvdaStridedBatched_example.cu/20261110T085723.846931Z-R3-rocm-9da2dde1fe/logs/0001-run.stderr.log",
+        "migration/reports/evidence/rewrite/R3/cuSOLVER_gesvdaStridedBatched__cusolver_gesvdaStridedBatched_example.cu/20261110T085723.846931Z-R3-rocm-9da2dde1fe/logs/0001-run.stdout.log"
       ],
       "cuda_comparison": "BLOCKED",
       "cuda_evidence": "migration/reports/evidence/20261109T100720.422147Z/original-cuda/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
@@ -21786,7 +21794,10 @@
         "migration/reports/evidence/20261109T100720.422147Z/original-cuda/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu/build.log",
         "migration/reports/evidence/20261109T100720.422147Z/original-cuda/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu/run.log"
       ],
-      "validation_reports": [],
+      "validation_reports": [
+        "migration/reports/rewrite-extension-rocm.json",
+        "migration/reports/rewrite-extension-rocm-validation.json"
+      ],
       "all_evidence": [
         "migration/reports/evidence/20261109T080822.795958Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
         "migration/reports/evidence/20261109T081329.986729Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
@@ -21794,7 +21805,9 @@
         "migration/reports/evidence/20261109T081929.210831Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
         "migration/reports/evidence/20261109T084753.304309Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
         "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
-        "migration/reports/evidence/20261109T100720.422147Z/original-cuda/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu"
+        "migration/reports/evidence/20261109T100720.422147Z/original-cuda/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
+        "migration/reports/rewrite-extension-rocm.json",
+        "migration/reports/rewrite-extension-rocm-validation.json"
       ]
     },
     {

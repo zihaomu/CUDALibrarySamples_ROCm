@@ -1,0 +1,193 @@
+{
+  "sample_id": "cuSOLVER/MgPotrf::cusolver_MgPotrf_example1.cu",
+  "source": "cuSOLVER/MgPotrf/cusolver_MgPotrf_example1.cu",
+  "status": "PARTIAL",
+  "observation": "STATIC_CONTRACT_REVIEW; no new GPU result claimed",
+  "original_sha256": "61487e5427c3ae4649052dbada90a53e4005921d45342be5a5f7e32641957571",
+  "implementation_sha256": "250ed049de84cbc9d22176010be15d3b98a1ff73ac4d0b9c8d2fae3dd3d5f12c",
+  "current_missing_contract": [
+    "batches12_15/original-Mg-input-distribution-descriptor"
+  ],
+  "current_reason": "使用HIP multi-device Cholesky/solve + RCCL broadcast/AllReduce; single process with two GPU threads；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。8阶/2RHS与单进程多GPU数值通过；项目按列重分配让两卡计算，未实现原始tile256输入/输出描述符的完整转换契约。",
+  "actual_library": "HIP multi-device Cholesky/solve + RCCL broadcast/AllReduce; single process with two GPU threads",
+  "previous_evidence": [
+    "migration/reports/evidence/20261109T080822.795958Z/original-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
+    "migration/reports/evidence/20261109T081329.986729Z/original-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
+    "migration/reports/evidence/20261109T081449.022777Z/original-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
+    "migration/reports/evidence/20261109T081655.531829Z/original-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
+    "migration/reports/evidence/20261109T081929.210831Z/original-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
+    "migration/reports/evidence/20261109T084753.304309Z/original-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
+    "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
+    "migration/reports/evidence/20261109T100720.422147Z/original-cuda/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
+    "migration/reports/evidence/20261110T051040.812262Z/batches12_15-rocm/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
+    "migration/reports/batches12_15-validation.json",
+    "migration/reports/evidence/20261110T052304.022239Z/batches12_15-cuda/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu",
+    "migration/reports/evidence/20261110T051849.336070Z/batches12_15-native-cuda/cuSOLVER_MgPotrf_cusolver_MgPotrf_example1.cu"
+  ],
+  "current_proof_dependencies_stale": {},
+  "source_contract_lines": [
+    {
+      "line": 2,
+      "text": " * SPDX-FileCopyrightText: Copyright (c) 2020 NVIDIA CORPORATION & AFFILIATES. All rights reserved."
+    },
+    {
+      "line": 80,
+      "text": "    const int IA = 1;"
+    },
+    {
+      "line": 81,
+      "text": "    const int JA = 1;"
+    },
+    {
+      "line": 82,
+      "text": "    const int T_A = 256; /* tile size of A */"
+    },
+    {
+      "line": 85,
+      "text": "    const int IB = 1;"
+    },
+    {
+      "line": 86,
+      "text": "    const int JB = 1;"
+    },
+    {
+      "line": 87,
+      "text": "    const int T_B = 10; /* tile size of B */"
+    },
+    {
+      "line": 94,
+      "text": "    cudaLibMgGrid_t gridA;"
+    },
+    {
+      "line": 95,
+      "text": "    cudaLibMgGrid_t gridB;"
+    },
+    {
+      "line": 96,
+      "text": "    cusolverMgGridMapping_t mapping = CUDALIBMG_GRID_MAPPING_COL_MAJOR;"
+    },
+    {
+      "line": 129,
+      "text": "    gen_1d_laplacian<data_type>(N, &A[IDX2F(IA, JA, lda)], lda);"
+    },
+    {
+      "line": 163,
+      "text": "    CUSOLVER_CHECK(cusolverMgCreateDeviceGrid(&gridA, 1, nbGpus, deviceList.data(), mapping));"
+    },
+    {
+      "line": 164,
+      "text": "    CUSOLVER_CHECK(cusolverMgCreateDeviceGrid(&gridB, 1, nbGpus, deviceList.data(), mapping));"
+    },
+    {
+      "line": 169,
+      "text": "                                              N,          /* number or rows in a tile */"
+    },
+    {
+      "line": 170,
+      "text": "                                              T_A,        /* number of columns in a tile */"
+    },
+    {
+      "line": 171,
+      "text": "                                              traits<data_type>::cuda_data_type, gridA));"
+    },
+    {
+      "line": 176,
+      "text": "                                              N,          /* number or rows in a tile */"
+    },
+    {
+      "line": 177,
+      "text": "                                              T_B,        /* number of columns in a tile */"
+    },
+    {
+      "line": 178,
+      "text": "                                              traits<data_type>::cuda_data_type, gridB));"
+    },
+    {
+      "line": 187,
+      "text": "                         T_A,                          /* number of columns per column tile */"
+    },
+    {
+      "line": 193,
+      "text": "                         T_B,                             /* number of columns per column tile */"
+    },
+    {
+      "line": 203,
+      "text": "                         T_A,              /* number of columns per column tile */"
+    },
+    {
+      "line": 206,
+      "text": "                         IA, JA);"
+    },
+    {
+      "line": 213,
+      "text": "                         T_B,              /* number of columns per column tile */"
+    },
+    {
+      "line": 216,
+      "text": "                         IB, JB);"
+    },
+    {
+      "line": 221,
+      "text": "                                   reinterpret_cast<void **>(array_d_A.data()), IA, /* base-1 */"
+    },
+    {
+      "line": 222,
+      "text": "                                   JA,                                              /* base-1 */"
+    },
+    {
+      "line": 226,
+      "text": "                                              reinterpret_cast<void **>(array_d_A.data()), IA, JA,"
+    },
+    {
+      "line": 228,
+      "text": "                                              IB, JB, descrB, traits<data_type>::cuda_data_type,"
+    },
+    {
+      "line": 246,
+      "text": "        cusolverH, CUBLAS_FILL_MODE_LOWER, N, reinterpret_cast<void **>(array_d_A.data()), IA, JA,"
+    },
+    {
+      "line": 261,
+      "text": "                                   reinterpret_cast<void **>(array_d_A.data()), IA, JA, descrA,"
+    },
+    {
+      "line": 262,
+      "text": "                                   reinterpret_cast<void **>(array_d_B.data()), IB, JB, descrB,"
+    },
+    {
+      "line": 282,
+      "text": "                         T_B,  /* number of columns per column tile */"
+    },
+    {
+      "line": 284,
+      "text": "                         array_d_B.data(), IB, JB,"
+    },
+    {
+      "line": 325,
+      "text": "               T_A,                          /* number of columns per column tile */"
+    },
+    {
+      "line": 328,
+      "text": "               T_B,                          /* number of columns per column tile */"
+    },
+    {
+      "line": 334,
+      "text": "    CUSOLVER_CHECK(cusolverMgDestroyGrid(gridA));"
+    },
+    {
+      "line": 335,
+      "text": "    CUSOLVER_CHECK(cusolverMgDestroyGrid(gridB));"
+    }
+  ],
+  "next_condition": "未完成合同：original-Mg-input-distribution-descriptor；补实现/真实后端并重验。",
+  "checks": [
+    {
+      "check": "original-source-identity",
+      "passed": true
+    },
+    {
+      "check": "explicit-unfulfilled-contract",
+      "passed": true
+    }
+  ]
+}

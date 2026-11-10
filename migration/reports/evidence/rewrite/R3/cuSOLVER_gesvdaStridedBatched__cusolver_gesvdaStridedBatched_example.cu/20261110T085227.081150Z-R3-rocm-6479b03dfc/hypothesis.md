@@ -1,0 +1,1 @@
+Test rocm for cuSOLVER/gesvdaStridedBatched::cusolver_gesvdaStridedBatched_example.cu, case repeat. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T085107.632249Z-R3-rocm-build-443831e0ee.
