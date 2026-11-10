@@ -1,15 +1,59 @@
 #!/usr/bin/env python3
 """Qualify the two completed R3 candidates without clearing other PARTIAL gaps."""
 import argparse,fcntl,json
+from pathlib import Path
 from experiment import ROOT,Experiment,write,digest,git
 import qualify_first as gates
-gates.REVIEW_PATHS += ['migration/rewrite/extensions.json','tests/fixtures/rewrite-extensions']
+gates.REVIEW_PATHS += ['migration/rewrite','tests/fixtures/rewrite-extensions']
 def load(name):return json.loads((ROOT/'migration/reports'/name).read_text())
+
+def run_identity(record,kind,case,backend,sample_id):
+ try:
+  directory=ROOT/record['evidence'];manifest=json.loads((directory/'manifest.json').read_text());raw=ROOT/manifest['raw_artifact_dir'];inputs=raw/'inputs'
+  expected_backend='cuda-native' if kind=='ncc' and backend=='cuda' else backend
+  if record['case']!=case or record.get('kind',kind)!=kind or manifest['case_id']!=case or manifest['backend']!=expected_backend or manifest['sample_id']!=sample_id or manifest['experiment_id']!=record['experiment_id'] or manifest['experiment_id']!=directory.name:return False
+  if (ROOT/record['output']).resolve()!=(raw/'outputs').resolve():return False
+  if backend=='rocm':
+   command=next(c for c in json.loads((directory/'commands.json').read_text()) if c['phase'] in ['run','original-harness'])
+   if manifest['parent_experiment_id']!=record['build']['experiment_id'] or command['argv'][0]!=str(ROOT/record['build']['binary']):return False
+  if kind=='svd':
+   expected=digest(ROOT/'tests/fixtures/rewrite-extensions/svd'/case/'manifest.json');m=gates.verify(inputs,expected)
+   return m['kind']==kind and m['case']==case and record['input_manifest_sha256']==expected and record['comparison_id']==manifest['comparison_id']==kind+'/'+case+'/'+expected
+  frozen=json.loads((ROOT/'migration/rewrite/ncc-cases.json').read_text())['cases'][case];m=json.loads((inputs/'manifest.json').read_text())
+  if digest(inputs/'manifest.json')!=frozen['manifest_sha256'] or record['input_manifest_sha256']!=frozen['manifest_sha256'] or m!=frozen['manifest'] or m['case']!=case:return False
+  if backend=='cuda' and manifest['comparison_id']!=frozen['manifest_sha256']:return False
+  if backend=='rocm':
+   expected_args=[] if case=='original' else ['-i',str(inputs/'image.raw')]+m['argv']
+   if record['argv']!=expected_args or command['argv'][1:]!=expected_args:return False
+  image=inputs/'image.raw';info=m['files']['image.raw']
+  return image.stat().st_size==info['bytes'] and digest(image)==info['sha256'] and digest(raw/'outputs/input.bin')==info['sha256']
+ except (OSError,KeyError,ValueError,TypeError,StopIteration):return False
+
+def trace_identity(row,build):
+ try:
+  directory=ROOT/row['evidence'];sealed=json.loads((directory/'kernel-summary.json').read_text());m=json.loads((directory/'manifest.json').read_text());source=json.loads((directory/'source.json').read_text())['dependencies'];raw=ROOT/m['raw_artifact_dir'];commands=json.loads((directory/'commands.json').read_text());expected=digest(ROOT/'tests/fixtures/rewrite-extensions/svd/original/manifest.json')
+  if {k:v for k,v in row.items() if k!='evidence'}!=sealed or gates.check(directory):return False
+  if sealed['name']!='rank-svd' or sealed['return_code']!=0 or sealed['binary_sha256']!=build['binary_sha256'] or sealed['binary']!=str(ROOT/build['binary']) or sealed['build_experiment_id']!=build['experiment_id'] or sealed['input_manifest_sha256']!=expected:return False
+  for name in ['tools/moat/profile_solver_backends.py','rocm/backends/solver/rank_svd.hpp']:
+   if source.get(name)!=digest(ROOT/name):return False
+  if m['experiment_outcome']!='PROFILE_OBSERVED' or m['parent_experiment_id']!=build['experiment_id'] or m['case_id']!='original' or m['comparison_id']!='svd/original/'+expected:return False
+  gates.verify(raw/'inputs',expected)
+  command=next(c for c in commands if c['phase']=='profile')
+  if command['return_code']!=0 or command['argv'][-1]!=str(ROOT/build['binary']) or command['environment_changes']['REWRITE_INPUT']!=str(raw/'inputs'):return False
+  return any('bdsqr_compute' in name for name in sealed['solver_algorithm_kernel_names'])
+ except (OSError,KeyError,ValueError,TypeError,StopIteration):return False
+
 def collect(kind):
  profiles=json.loads((ROOT/'migration/rewrite/extensions.json').read_text())['profiles'];p=next(p for p in profiles if p['kind']==kind);checks=[];references=[]
  def gate(name,value):checks.append(dict(check=name,passed=bool(value)))
- def proof(evidence,sources,**identity):
-  references.append(evidence);return gates.auxiliary(evidence,sources,**identity)
+ def proof(evidence,sources,check_names=None,**identity):
+  references.append(evidence)
+  if not gates.auxiliary(evidence,sources,**identity):return False
+  if check_names is not None:
+   names=[c['check'] for c in json.loads((ROOT/evidence/'validation.json').read_text())['checks']]
+   if set(names)!=set(check_names) or len(names)!=len(check_names):return False
+  return True
+ def complete(rows,key,expected):return len(rows)==len(expected) and {r[key] for r in rows}==set(expected)
  review=load('rewrite-R3-review.json');gate('current-independent-review',review.get('verdict')=='APPROVED' and gates.review_identity(review))
  required={'ncc':{'original','changed-values','changed-template','no-timing','repeat','constant-template','constant-image','constant-both'},'svd':{'original','changed-values','irregular','layout','repeat','rank-deficient','rank-truncated'}}[kind]
  gate('frozen-complete-cases',set(p['cases'])==required and len(p['cases'])==len(required));build=load('rewrite-extension-builds.json')[kind]
@@ -21,29 +65,31 @@ def collect(kind):
  if kind=='ncc':
   records={backend:load(f'rewrite-ncc-{backend}.json') for backend in ['rocm','cuda']};values=load('rewrite-ncc-validation.json');comparisons=load('rewrite-ncc-native-comparison.json')
   for case in p['cases']:
-   a=records['rocm'][case];b=records['cuda'][case];gate(case+'/same-manifest',a['input_manifest_sha256']==b['input_manifest_sha256']);gate(case+'/current-build',a['build']['experiment_id']==build['experiment_id'])
+   a=records['rocm'][case];b=records['cuda'][case];gate(case+'/same-manifest',a['input_manifest_sha256']==b['input_manifest_sha256']);gate(case+'/current-build',a['build']==build)
    environment_gate(case,a)
    for backend,r in [('rocm',a),('cuda',b)]:
+    gate(case+'/'+backend+'/frozen-case-identity',run_identity(r,kind,case,backend,p['sample_id']))
     gate(case+'/'+backend+'/sealed-run',not gates.check(ROOT/r['evidence']));v=values[backend+'/'+case];gate(case+'/'+backend+'/current-CPU',v['status']=='PASSED' and v['run']['experiment_id']==r['experiment_id'] and proof(v['evidence'],['tools/moat/ncc_reference.py','tools/moat/validate_ncc.py'],parent=r['experiment_id'],comparison=r['input_manifest_sha256']))
    comp=next(c for c in comparisons['cases'] if c['case']==case);gate(case+'/native-comparison',comp['status']=='PASSED' and comp['rocm']['experiment_id']==a['experiment_id'] and comp['cuda']['experiment_id']==b['experiment_id'] and proof(comp['evidence'],['tools/moat/compare_ncc.py'],parent=a['experiment_id'],comparison=a['input_manifest_sha256']))
-  negative=load('rewrite-ncc-negative.json');runtime=load('rewrite-ncc-runtime.json');gate('negative-count',len(negative['tests'])==3)
-  for r in negative['tests']:gate('negative/'+r['mode'],r['passed'] and proof(r['evidence'],['tools/moat/ncc_negative.py','tools/moat/ncc_reference.py'],parent=records['rocm']['original']['experiment_id']))
-  gate('runtime-count',len(runtime['tests'])==7)
-  for r in runtime['tests']:gate('CLI/'+r['test'],r['passed'] and proof(r['evidence'],['tools/moat/ncc_runtime.py',p['implementation']],parent=build['experiment_id'],expected_outcome='EXPECTED_REJECTION'))
+  negative=load('rewrite-ncc-negative.json');runtime=load('rewrite-ncc-runtime.json');gate('negative-complete-unique-modes',complete(negative['tests'],'mode',{'scores','annotation','argmax','max-value'}))
+  for r in negative['tests']:gate('negative/'+r['mode'],r['passed'] and proof(r['evidence'],['tools/moat/ncc_negative.py','tools/moat/ncc_reference.py'],parent=records['rocm']['original']['experiment_id'],check_names={'reject-'+r['mode']}))
+  gate('runtime-complete-unique-tests',complete(runtime['tests'],'test',{'negative-x','short-template','huge-template','bad-noise','negative-timing','missing-file','help'}))
+  for r in runtime['tests']:gate('CLI/'+r['test'],r['passed'] and proof(r['evidence'],['tools/moat/ncc_runtime.py',p['implementation']],parent=build['experiment_id'],expected_outcome='EXPECTED_REJECTION',check_names={r['test']}))
  else:
   records={backend:load(f'rewrite-extension-{backend}.json') for backend in ['rocm','cuda','native-approx']};values={backend:load(f'rewrite-extension-{backend}-validation.json') for backend in records}
   for case in p['cases']:
-   key=kind+'/'+case;a=records['rocm'][key];b=records['cuda'][key];gate(case+'/same-input',a['comparison_id']==b['comparison_id']);gate(case+'/current-build',a['build']['experiment_id']==build['experiment_id'])
+   key=kind+'/'+case;a=records['rocm'][key];b=records['cuda'][key];gate(case+'/same-input',a['comparison_id']==b['comparison_id']);gate(case+'/current-build',a['build']==build)
    environment_gate(case,a)
    for backend,r in [('rocm',a),('cuda',b)]:
+    gate(case+'/'+backend+'/frozen-case-identity',run_identity(r,kind,case,backend,p['sample_id']))
     gate(case+'/'+backend+'/sealed-run',r['return_code']==0 and not gates.check(ROOT/r['evidence']));v=values[backend][key];gate(case+'/'+backend+'/CPU',v['status']=='PASSED' and v['run']['experiment_id']==r['experiment_id'] and proof(v['evidence'],['tools/moat/svd_reference.py','tools/moat/validate_extensions.py','tools/moat/inputs.py'],parent=r['experiment_id'],comparison=r['comparison_id'],input_hash=r['input_manifest_sha256']))
-  key='svd/original';r=records['native-approx'][key];v=values['native-approx'][key];gate('native-original-gesvda',v['status']=='PASSED' and r['comparison_id']==records['rocm'][key]['comparison_id'] and proof(v['evidence'],['tools/moat/svd_reference.py','tools/moat/validate_extensions.py'],parent=r['experiment_id'],comparison=r['comparison_id'],input_hash=r['input_manifest_sha256']) and not gates.check(ROOT/r['evidence']))
-  trace=next(r for r in load('rewrite-solver-backend-traces.json')['profiles'] if r['name']=='rank-svd');references.append(trace['evidence']);gate('actual-native-GPU-SVD-kernels',trace['return_code']==0 and trace['binary_sha256']==build['binary_sha256'] and any('bdsqr_compute' in n for n in trace.get('solver_algorithm_kernel_names',[])) and not gates.check(ROOT/trace['evidence']))
-  negative=load('rewrite-svd-negative.json');runtime=load('rewrite-svd-runtime.json');gate('negative-count',len(negative['tests'])==5)
+  key='svd/original';r=records['native-approx'][key];v=values['native-approx'][key];gate('native-original-gesvda',run_identity(r,kind,'original','native-approx',p['sample_id']) and v['status']=='PASSED' and r['comparison_id']==records['rocm'][key]['comparison_id'] and proof(v['evidence'],['tools/moat/svd_reference.py','tools/moat/validate_extensions.py'],parent=r['experiment_id'],comparison=r['comparison_id'],input_hash=r['input_manifest_sha256']) and not gates.check(ROOT/r['evidence']))
+  trace=next(r for r in load('rewrite-solver-backend-traces.json')['profiles'] if r['name']=='rank-svd');references.append(trace['evidence']);gate('actual-native-GPU-SVD-kernels',trace_identity(trace,build))
+  negative=load('rewrite-svd-negative.json');runtime=load('rewrite-svd-runtime.json');files=['S','U','V','RnrmF','info','A_after'];modes={'singular-value','residual-norm','V-vector','info','stride-padding','partial-tail-S','partial-tail-RnrmF','negative-residual'}|{'oversize-'+f for f in files}|{'undersize-'+f for f in files};gate('negative-complete-unique-modes',complete(negative['tests'],'mode',modes))
   for r in negative['tests']:
-   run=records['rocm']['svd/'+r['case']];gate('negative/'+r['mode'],r['passed'] and proof(r['evidence'],['tools/moat/extensions_negative.py','tools/moat/svd_reference.py','tools/moat/inputs.py'],parent=run['experiment_id'],comparison=run['comparison_id'],input_hash=run['input_manifest_sha256']))
-  gate('runtime-count',len(runtime['tests'])==11)
-  for r in runtime['tests']:gate('descriptor/'+r['test'],r['passed'] and proof(r['evidence'],['tools/moat/svd_runtime.py','rocm/backends/solver/rank_svd.hpp'],parent=build['experiment_id'],expected_outcome='EXPECTED_REJECTION'))
+   run=records['rocm']['svd/'+r['case']];gate('negative/'+r['mode'],r['case']==('layout' if r['mode']=='stride-padding' else 'original') and r['passed'] and proof(r['evidence'],['tools/moat/extensions_negative.py','tools/moat/svd_reference.py','tools/moat/inputs.py'],parent=run['experiment_id'],comparison=run['comparison_id'],input_hash=run['input_manifest_sha256'],check_names={r['mode']}))
+  gate('runtime-complete-unique-tests',complete(runtime['tests'],'test',{'zero-m','wide-shape','short-lda','short-U','short-V','zero-rank','oversize-rank','short-stride','bad-batch','fractional-rank','huge-stride'}))
+  for r in runtime['tests']:gate('descriptor/'+r['test'],r['passed'] and proof(r['evidence'],['tools/moat/svd_runtime.py','rocm/backends/solver/rank_svd.hpp'],parent=build['experiment_id'],expected_outcome='EXPECTED_REJECTION',check_names={r['test']}))
  return p,build,checks,sorted(set(references))
 
 def main():

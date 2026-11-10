@@ -1,0 +1,1 @@
+Test cpu-negative for NCC/max-value, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T090234.713336Z-R3-rocm-46071a1d9e.

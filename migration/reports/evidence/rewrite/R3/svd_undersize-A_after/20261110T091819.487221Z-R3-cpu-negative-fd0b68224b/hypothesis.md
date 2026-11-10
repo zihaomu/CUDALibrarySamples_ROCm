@@ -1,0 +1,1 @@
+Test cpu-negative for svd/undersize-A_after, case original. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T085723.846931Z-R3-rocm-9da2dde1fe.

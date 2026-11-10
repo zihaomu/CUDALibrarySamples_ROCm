@@ -7,8 +7,18 @@ sys.path.insert(0,str(ROOT/'build/python-reference'))
 import numpy as np
 
 def validate(out,log):
- c=np.fromfile(out/'config.bin',np.int32);W,H,tx,ty,tw,th,iterations,bestx,besty=map(int,c);image=np.fromfile(out/'input.bin',np.uint8).reshape(H,W);tpl=np.fromfile(out/'template.bin',np.uint8).reshape(th,tw);actual=np.fromfile(out/'scores.bin',np.float32).reshape(H-th+1,W-tw+1);checks=[]
+ checks=[]
  def gate(name,value,**fields):checks.append(dict(check=name,passed=bool(value),**fields))
+ def failure():return dict(status='FAILED',checks=checks,oracle='Strict NCC output shape and value validation')
+ gate('config-exact-bytes',(out/'config.bin').is_file() and (out/'config.bin').stat().st_size==9*4)
+ if not checks[-1]['passed']:return failure()
+ c=np.fromfile(out/'config.bin',np.int32);W,H,tx,ty,tw,th,iterations,bestx,besty=map(int,c)
+ gate('valid-fixed-profile-config',W==2048 and H==1024 and 8<=tw<=W and 8<=th<=H and 0<=tx<=W-tw and 0<=ty<=H-th and iterations>=0 and 0<=bestx<W-tw+1 and 0<=besty<H-th+1)
+ if not checks[-1]['passed']:return failure()
+ for name,expected in [('input.bin',W*H),('template.bin',tw*th),('scores.bin',(H-th+1)*(W-tw+1)*4),('best.bin',4)]:gate(name+'-exact-bytes',(out/name).is_file() and (out/name).stat().st_size==expected)
+ if not all(c['passed'] for c in checks):return failure()
+ image=np.fromfile(out/'input.bin',np.uint8).reshape(H,W);tpl=np.fromfile(out/'template.bin',np.uint8).reshape(th,tw);actual=np.fromfile(out/'scores.bin',np.float32).reshape(H-th+1,W-tw+1);best=np.fromfile(out/'best.bin',np.float32)
+ gate('maximum-value-scalar-exact',np.isfinite(best[0]) and best[0]==actual[besty,bestx])
  def moments(x):
   s=np.pad(x.astype(np.float64).cumsum(0).cumsum(1),((1,0),(1,0)));return s[th:,tw:]-s[:-th,tw:]-s[th:,:-tw]+s[:-th,:-tw]
  sa=moments(image);saa=moments(image.astype(np.float64)**2);sb=float(tpl.sum());sbb=float((tpl.astype(np.float64)**2).sum());count=tw*th;aa=count*saa-sa*sa;bb=count*sbb-sb*sb

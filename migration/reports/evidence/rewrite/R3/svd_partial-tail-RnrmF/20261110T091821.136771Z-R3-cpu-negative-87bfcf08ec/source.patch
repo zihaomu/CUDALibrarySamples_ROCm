@@ -1,0 +1,265 @@
+diff --git a/tools/moat/experiment.py b/tools/moat/experiment.py
+index 070997f3..87aea9e4 100644
+--- a/tools/moat/experiment.py
++++ b/tools/moat/experiment.py
+@@ -20,6 +20,13 @@ INDEX = ROOT / 'migration/reports/rewrite-experiments.jsonl'
+ ALLOWED_ENV = ('HIP_VISIBLE_DEVICES', 'CUDA_VISIBLE_DEVICES', 'OMP_NUM_THREADS',
+                'FI_PROVIDER', 'MPIR_CVAR_CH4_NETMOD', 'DEEPINFER_IMAGE_ID',
+                'DEEPINFER_ROCM_RELEASE', 'TRITON_CACHE_DIR', 'TORCH_EXTENSIONS_DIR')
++OUTCOMES = frozenset(['RUNNING','EXECUTED','PASSED','COMMAND_FAILED','BUILD_ERROR',
++ 'RUNTIME_ERROR','TIMEOUT','INTERRUPTED','ENV_BLOCKED','NUMERIC_MISMATCH',
++ 'VALIDATOR_GAP','PROBE_FAILED','NATIVE_SDK_FAILED','SDK_UNAVAILABLE',
++ 'INITIALIZATION_ERROR','SELF_TEST_FAILED','EXPECTED_REJECTION','GUARD_FAILED',
++ 'NATIVE_BUILD_FAILED','NUMERIC_OR_HARNESS_MISMATCH','NATIVE_MISMATCH',
++ 'HARNESS_NONZERO','NATIVE_HARNESS_NONZERO','CLI_GAP','OBSERVED',
++ 'PROFILE_OBSERVED','PROFILER_FAILED','CONTRACT_GAP_RECORDED','CONTRACT_AUDIT_FAILED'])
+ 
+ 
+ def now():
+@@ -203,6 +210,8 @@ class Experiment:
+     def finish(self, outcome, validation=None, reason=None, metrics=None):
+         if self.sealed:
+             raise RuntimeError('sealed experiment')
++        if outcome not in OUTCOMES or outcome=='RUNNING':
++            raise ValueError('unknown or nonterminal experiment outcome: '+outcome)
+         validation = validation or dict(checks=[], status='NOT_VALIDATED')
+         if outcome == 'PASSED':
+             checks = validation.get('checks', [])
+diff --git a/tools/moat/extensions_negative.py b/tools/moat/extensions_negative.py
+index e848c5d6..6f728c60 100644
+--- a/tools/moat/extensions_negative.py
++++ b/tools/moat/extensions_negative.py
+@@ -8,9 +8,21 @@ p=argparse.ArgumentParser();p.add_argument('--single',nargs=3);args=p.parse_args
+ if args.single:
+  inputs,out,report=args.single;v=validate(Path(inputs),Path(out));write(report,v);raise SystemExit(0 if v['status']=='FAILED' else 1)
+ records=json.loads((ROOT/'migration/reports/rewrite-extension-rocm.json').read_text());results=[]
+-for mode in ['singular-value','residual-norm','V-vector','info','stride-padding']:
++files=['S','U','V','RnrmF','info','A_after']
++modes=['singular-value','residual-norm','V-vector','info','stride-padding']+['oversize-'+f for f in files]+['undersize-'+f for f in files]+['partial-tail-S','partial-tail-RnrmF','negative-residual']
++for mode in modes:
+  case='layout' if mode=='stride-padding' else 'original';run=records['svd/'+case];e=Experiment('R3','svd/'+mode,'cpu-negative',case=case,sources=[__file__,ROOT/'tools/moat/svd_reference.py',ROOT/'tools/moat/inputs.py'],parent=run['experiment_id'],comparison_id=run['comparison_id']);inputs=copy_run_inputs(run,e.path/'inputs');out=e.path/'outputs';shutil.copytree(ROOT/run['output'],out)
+  if validate(inputs,out)['status']!='PASSED':raise RuntimeError('negative injection requires passing unchanged output')
+- name='S' if mode=='singular-value' else 'RnrmF' if mode=='residual-norm' else 'info' if mode=='info' else 'U' if mode=='stride-padding' else 'V';dtype=np.float64 if name=='RnrmF' else np.int32 if name=='info' else np.float32;path=out/(name+'.bin');data=np.fromfile(path,dtype);index=json.loads((inputs/'config.json').read_text())['m'] if mode=='stride-padding' else 0;data[index]+=.001 if mode=='stride-padding' else 1;data.tofile(path)
++ if mode.startswith(('oversize-','undersize-','partial-tail-')):
++  name=mode.split('-',1)[1] if not mode.startswith('partial-tail-') else mode.removeprefix('partial-tail-');path=out/(name+'.bin');dtype=np.float64 if name=='RnrmF' else np.int32 if name=='info' else np.float32;raw=path.read_bytes()
++  if mode.startswith('oversize-'):raw+=np.array([99 if name=='info' else np.nan],dtype).tobytes()
++  elif mode.startswith('undersize-'):raw=raw[:-np.dtype(dtype).itemsize]
++  else:raw+=b'\0'
++  path.write_bytes(raw)
++ else:
++  name='S' if mode=='singular-value' else 'RnrmF' if mode in ['residual-norm','negative-residual'] else 'info' if mode=='info' else 'U' if mode=='stride-padding' else 'V';dtype=np.float64 if name=='RnrmF' else np.int32 if name=='info' else np.float32;path=out/(name+'.bin');data=np.fromfile(path,dtype);index=json.loads((inputs/'config.json').read_text())['m'] if mode=='stride-padding' else 0
++  if mode=='negative-residual':data[0]=-1
++  else:data[index]+=.001 if mode=='stride-padding' else 1
++  data.tofile(path)
+  report=e.path/'rejected.json';rc=e.command([sys.executable,__file__,'--single',str(inputs),str(out),str(report)],'reject-'+mode);v=dict(checks=[dict(check=mode,passed=rc==0)]);evidence=e.finish('PASSED' if rc==0 else 'VALIDATOR_GAP',v);results.append(dict(mode=mode,case=case,passed=rc==0,evidence=evidence));print(mode,rc,flush=True)
+ write(ROOT/'migration/reports/rewrite-svd-negative.json',dict(status='PASSED' if all(r['passed'] for r in results) else 'FAILED',tests=results))
+diff --git a/tools/moat/ncc_negative.py b/tools/moat/ncc_negative.py
+index 727b1959..703ce615 100644
+--- a/tools/moat/ncc_negative.py
++++ b/tools/moat/ncc_negative.py
+@@ -7,11 +7,12 @@ if args.single:
+  from ncc_reference import validate
+  out,log,report=args.single;v=validate(Path(out),Path(log));write(report,v);raise SystemExit(0 if v['status']=='FAILED' else 1)
+ r=json.loads((ROOT/'migration/reports/rewrite-ncc-rocm.json').read_text())['original'];log=ROOT/r['evidence']/'logs/0001-original-harness.stdout.log';results=[]
+-for mode in ['scores','annotation','argmax']:
++for mode in ['scores','annotation','argmax','max-value']:
+  e=Experiment('R3','NCC/'+mode,'cpu-negative',sources=[__file__,ROOT/'tools/moat/ncc_reference.py'],parent=r['experiment_id']);out=e.path/'outputs';shutil.copytree(ROOT/r['output'],out);config=list(struct.unpack('9i',(out/'config.bin').read_bytes()))
+  if mode=='annotation':
+   path=out/'match_result.pgm';data=bytearray(path.read_bytes());data[-1]^=1;path.write_bytes(data)
+  elif mode=='argmax':config[-2:]=[0,0];(out/'config.bin').write_bytes(struct.pack('9i',*config))
++ elif mode=='max-value':(out/'best.bin').write_bytes(struct.pack('f',-12345))
+  else:
+   path=out/'scores.bin';data=bytearray(path.read_bytes());index=(config[-1]*(config[0]-config[4]+1)+config[-2])*4;value=struct.unpack_from('f',data,index)[0];struct.pack_into('f',data,index,value+.1);path.write_bytes(data)
+  report=e.path/'rejected.json';rc=e.command([sys.executable,__file__,'--single',str(out),str(log),str(report)],'reject-'+mode,timeout=120);v=dict(checks=[dict(check='reject-'+mode,passed=rc==0)]);evidence=e.finish('PASSED' if rc==0 else 'VALIDATOR_GAP',v);results.append(dict(mode=mode,passed=rc==0,evidence=evidence));print(mode,rc,flush=True)
+diff --git a/tools/moat/ncc_reference.py b/tools/moat/ncc_reference.py
+index 37cba9e4..6662b848 100644
+--- a/tools/moat/ncc_reference.py
++++ b/tools/moat/ncc_reference.py
+@@ -7,8 +7,18 @@ sys.path.insert(0,str(ROOT/'build/python-reference'))
+ import numpy as np
+ 
+ def validate(out,log):
+- c=np.fromfile(out/'config.bin',np.int32);W,H,tx,ty,tw,th,iterations,bestx,besty=map(int,c);image=np.fromfile(out/'input.bin',np.uint8).reshape(H,W);tpl=np.fromfile(out/'template.bin',np.uint8).reshape(th,tw);actual=np.fromfile(out/'scores.bin',np.float32).reshape(H-th+1,W-tw+1);checks=[]
++ checks=[]
+  def gate(name,value,**fields):checks.append(dict(check=name,passed=bool(value),**fields))
++ def failure():return dict(status='FAILED',checks=checks,oracle='Strict NCC output shape and value validation')
++ gate('config-exact-bytes',(out/'config.bin').is_file() and (out/'config.bin').stat().st_size==9*4)
++ if not checks[-1]['passed']:return failure()
++ c=np.fromfile(out/'config.bin',np.int32);W,H,tx,ty,tw,th,iterations,bestx,besty=map(int,c)
++ gate('valid-fixed-profile-config',W==2048 and H==1024 and 8<=tw<=W and 8<=th<=H and 0<=tx<=W-tw and 0<=ty<=H-th and iterations>=0 and 0<=bestx<W-tw+1 and 0<=besty<H-th+1)
++ if not checks[-1]['passed']:return failure()
++ for name,expected in [('input.bin',W*H),('template.bin',tw*th),('scores.bin',(H-th+1)*(W-tw+1)*4),('best.bin',4)]:gate(name+'-exact-bytes',(out/name).is_file() and (out/name).stat().st_size==expected)
++ if not all(c['passed'] for c in checks):return failure()
++ image=np.fromfile(out/'input.bin',np.uint8).reshape(H,W);tpl=np.fromfile(out/'template.bin',np.uint8).reshape(th,tw);actual=np.fromfile(out/'scores.bin',np.float32).reshape(H-th+1,W-tw+1);best=np.fromfile(out/'best.bin',np.float32)
++ gate('maximum-value-scalar-exact',np.isfinite(best[0]) and best[0]==actual[besty,bestx])
+  def moments(x):
+   s=np.pad(x.astype(np.float64).cumsum(0).cumsum(1),((1,0),(1,0)));return s[th:,tw:]-s[:-th,tw:]-s[th:,:-tw]+s[:-th,:-tw]
+  sa=moments(image);saa=moments(image.astype(np.float64)**2);sb=float(tpl.sum());sbb=float((tpl.astype(np.float64)**2).sum());count=tw*th;aa=count*saa-sa*sa;bb=count*sbb-sb*sb
+diff --git a/tools/moat/profile_solver_backends.py b/tools/moat/profile_solver_backends.py
+index 951ee47c..dd938875 100644
+--- a/tools/moat/profile_solver_backends.py
++++ b/tools/moat/profile_solver_backends.py
+@@ -1,6 +1,6 @@
+ #!/usr/bin/env python3
+ """Observe numeric GPU kernels separately from project extraction/residual kernels."""
+-import json,csv
++import json,csv,shutil
+ from pathlib import Path
+ from experiment import ROOT,Experiment,write,digest
+ from snapshot import capture
+@@ -10,11 +10,12 @@ for s in cat['samples']:
+   d=json.loads((ROOT/s['original_port']['evidence']/'commands.json').read_text());binary=Path(d['run'][0]);jobs.append((Path(s['source']).stem,binary,[s['implementation']]))
+ results=[]
+ for name,binary,sources in jobs:
+- e=Experiment('R3',name+'/backend-trace','rocm-profile',sources=[__file__]+[ROOT/n for n in sources]);write(e.path/'backend.observed.json',observed);out=e.path/'outputs';out.mkdir();trace=e.path/'trace';trace.mkdir();env=dict(REWRITE_OUTPUT=str(out))
+- if name=='rank-svd':env['REWRITE_INPUT']=str(ROOT/'tests/fixtures/rewrite-extensions/svd/original')
++ fixture=ROOT/'tests/fixtures/rewrite-extensions/svd/original';mh=digest(fixture/'manifest.json') if name=='rank-svd' else None
++ e=Experiment('R3',name+'/backend-trace','rocm-profile',case='original',sources=[__file__]+[ROOT/n for n in sources],parent=svd['experiment_id'] if name=='rank-svd' else None,comparison_id='svd/original/'+mh if mh else None);write(e.path/'backend.observed.json',observed);out=e.path/'outputs';out.mkdir();trace=e.path/'trace';trace.mkdir();env=dict(REWRITE_OUTPUT=str(out))
++ if name=='rank-svd':shutil.copytree(fixture,e.path/'inputs');env['REWRITE_INPUT']=str(e.path/'inputs')
+  rc=e.command(['rocprofv3','--kernel-trace','--hip-trace','--stats','--output-format','csv','json','--output-directory',str(trace),'--output-file','solver','--',str(binary)],'profile',timeout=180,env=env)
+  csvs=[q for q in trace.rglob('*.csv') if 'kernel' in q.name.lower()];rows=[]
+  for path in csvs:
+   with path.open() as f:rows+=list(csv.DictReader(f))
+  names=sorted({r.get('Kernel_Name') or r.get('Name') or r.get('KernelName') or str(r) for r in rows});numeric=[n for n in names if 'rocsolver' in n.lower()]
+- r=dict(name=name,return_code=rc,binary_sha256=digest(binary),kernel_records=len(rows),kernel_names=names,solver_algorithm_kernel_names=numeric,blas_kernel_names=[n for n in names if 'rocblas' in n.lower() or n.startswith('Cijk_')],memory_kernel_names=[n for n in names if n.startswith('__amd_rocclr_')],note='BLAS kernels in the original Xgeev programs verify residuals after the eigen call; they do not prove GPU eigensolving.',source_sha256={n:digest(ROOT/n) for n in sources});write(e.path/'kernel-summary.json',r);r['evidence']=e.finish('PROFILE_OBSERVED' if rc==0 else 'PROFILER_FAILED');results.append(r);write(ROOT/'migration/reports/rewrite-solver-backend-traces.json',dict(scope='Actual kernel observations; no host-only eigen routine is promoted from a successful process exit',profiles=results));print(name,rc,len(rows),len(numeric),flush=True)
++ r=dict(name=name,return_code=rc,binary=str(binary),binary_sha256=digest(binary),input_manifest_sha256=mh,build_experiment_id=svd['experiment_id'] if mh else None,kernel_records=len(rows),kernel_names=names,solver_algorithm_kernel_names=numeric,blas_kernel_names=[n for n in names if 'rocblas' in n.lower() or n.startswith('Cijk_')],memory_kernel_names=[n for n in names if n.startswith('__amd_rocclr_')],note='BLAS kernels in the original Xgeev programs verify residuals after the eigen call; they do not prove GPU eigensolving.',source_sha256={n:digest(ROOT/n) for n in sources});write(e.path/'kernel-summary.json',r);r['evidence']=e.finish('PROFILE_OBSERVED' if rc==0 else 'PROFILER_FAILED');results.append(r);write(ROOT/'migration/reports/rewrite-solver-backend-traces.json',dict(scope='Actual kernel observations; no host-only eigen routine is promoted from a successful process exit',profiles=results));print(name,rc,len(rows),len(numeric),flush=True)
+diff --git a/tools/moat/qualify_r3.py b/tools/moat/qualify_r3.py
+index ab4eed73..003b6f9a 100644
+--- a/tools/moat/qualify_r3.py
++++ b/tools/moat/qualify_r3.py
+@@ -1,15 +1,53 @@
+ #!/usr/bin/env python3
+ """Qualify the two completed R3 candidates without clearing other PARTIAL gaps."""
+ import argparse,fcntl,json
++from pathlib import Path
+ from experiment import ROOT,Experiment,write,digest,git
+ import qualify_first as gates
+-gates.REVIEW_PATHS += ['migration/rewrite/extensions.json','tests/fixtures/rewrite-extensions']
++gates.REVIEW_PATHS += ['migration/rewrite','tests/fixtures/rewrite-extensions']
+ def load(name):return json.loads((ROOT/'migration/reports'/name).read_text())
++
++def run_identity(record,kind,case,backend,sample_id):
++ try:
++  directory=ROOT/record['evidence'];manifest=json.loads((directory/'manifest.json').read_text());raw=ROOT/manifest['raw_artifact_dir'];inputs=raw/'inputs'
++  expected_backend='cuda-native' if kind=='ncc' and backend=='cuda' else backend
++  if record['case']!=case or record.get('kind',kind)!=kind or manifest['case_id']!=case or manifest['backend']!=expected_backend or manifest['sample_id']!=sample_id or manifest['experiment_id']!=record['experiment_id'] or manifest['experiment_id']!=directory.name:return False
++  if (ROOT/record['output']).resolve()!=(raw/'outputs').resolve():return False
++  if kind=='svd':
++   expected=digest(ROOT/'tests/fixtures/rewrite-extensions/svd'/case/'manifest.json');m=gates.verify(inputs,expected)
++   return m['kind']==kind and m['case']==case and record['input_manifest_sha256']==expected and record['comparison_id']==manifest['comparison_id']==kind+'/'+case+'/'+expected
++  frozen=json.loads((ROOT/'migration/rewrite/ncc-cases.json').read_text())['cases'][case];m=json.loads((inputs/'manifest.json').read_text())
++  if digest(inputs/'manifest.json')!=frozen['manifest_sha256'] or record['input_manifest_sha256']!=frozen['manifest_sha256'] or m!=frozen['manifest'] or m['case']!=case:return False
++  if backend=='cuda' and manifest['comparison_id']!=frozen['manifest_sha256']:return False
++  image=inputs/'image.raw';info=m['files']['image.raw']
++  return image.stat().st_size==info['bytes'] and digest(image)==info['sha256'] and digest(raw/'outputs/input.bin')==info['sha256']
++ except (OSError,KeyError,ValueError,TypeError):return False
++
++def trace_identity(row,build):
++ try:
++  directory=ROOT/row['evidence'];sealed=json.loads((directory/'kernel-summary.json').read_text());m=json.loads((directory/'manifest.json').read_text());source=json.loads((directory/'source.json').read_text())['dependencies'];raw=ROOT/m['raw_artifact_dir'];commands=json.loads((directory/'commands.json').read_text());expected=digest(ROOT/'tests/fixtures/rewrite-extensions/svd/original/manifest.json')
++  if {k:v for k,v in row.items() if k!='evidence'}!=sealed or gates.check(directory):return False
++  if sealed['name']!='rank-svd' or sealed['return_code']!=0 or sealed['binary_sha256']!=build['binary_sha256'] or sealed['binary']!=str(ROOT/build['binary']) or sealed['build_experiment_id']!=build['experiment_id'] or sealed['input_manifest_sha256']!=expected:return False
++  for name in ['tools/moat/profile_solver_backends.py','rocm/backends/solver/rank_svd.hpp']:
++   if source.get(name)!=digest(ROOT/name):return False
++  if m['experiment_outcome']!='PROFILE_OBSERVED' or m['parent_experiment_id']!=build['experiment_id'] or m['case_id']!='original' or m['comparison_id']!='svd/original/'+expected:return False
++  gates.verify(raw/'inputs',expected)
++  command=next(c for c in commands if c['phase']=='profile')
++  if command['return_code']!=0 or command['argv'][-1]!=str(ROOT/build['binary']) or command['environment_changes']['REWRITE_INPUT']!=str(raw/'inputs'):return False
++  return any('bdsqr_compute' in name for name in sealed['solver_algorithm_kernel_names'])
++ except (OSError,KeyError,ValueError,TypeError,StopIteration):return False
++
+ def collect(kind):
+  profiles=json.loads((ROOT/'migration/rewrite/extensions.json').read_text())['profiles'];p=next(p for p in profiles if p['kind']==kind);checks=[];references=[]
+  def gate(name,value):checks.append(dict(check=name,passed=bool(value)))
+- def proof(evidence,sources,**identity):
+-  references.append(evidence);return gates.auxiliary(evidence,sources,**identity)
++ def proof(evidence,sources,check_names=None,**identity):
++  references.append(evidence)
++  if not gates.auxiliary(evidence,sources,**identity):return False
++  if check_names is not None:
++   names=[c['check'] for c in json.loads((ROOT/evidence/'validation.json').read_text())['checks']]
++   if set(names)!=set(check_names) or len(names)!=len(check_names):return False
++  return True
++ def complete(rows,key,expected):return len(rows)==len(expected) and {r[key] for r in rows}==set(expected)
+  review=load('rewrite-R3-review.json');gate('current-independent-review',review.get('verdict')=='APPROVED' and gates.review_identity(review))
+  required={'ncc':{'original','changed-values','changed-template','no-timing','repeat','constant-template','constant-image','constant-both'},'svd':{'original','changed-values','irregular','layout','repeat','rank-deficient','rank-truncated'}}[kind]
+  gate('frozen-complete-cases',set(p['cases'])==required and len(p['cases'])==len(required));build=load('rewrite-extension-builds.json')[kind]
+@@ -24,26 +62,28 @@ def collect(kind):
+    a=records['rocm'][case];b=records['cuda'][case];gate(case+'/same-manifest',a['input_manifest_sha256']==b['input_manifest_sha256']);gate(case+'/current-build',a['build']['experiment_id']==build['experiment_id'])
+    environment_gate(case,a)
+    for backend,r in [('rocm',a),('cuda',b)]:
++    gate(case+'/'+backend+'/frozen-case-identity',run_identity(r,kind,case,backend,p['sample_id']))
+     gate(case+'/'+backend+'/sealed-run',not gates.check(ROOT/r['evidence']));v=values[backend+'/'+case];gate(case+'/'+backend+'/current-CPU',v['status']=='PASSED' and v['run']['experiment_id']==r['experiment_id'] and proof(v['evidence'],['tools/moat/ncc_reference.py','tools/moat/validate_ncc.py'],parent=r['experiment_id'],comparison=r['input_manifest_sha256']))
+    comp=next(c for c in comparisons['cases'] if c['case']==case);gate(case+'/native-comparison',comp['status']=='PASSED' and comp['rocm']['experiment_id']==a['experiment_id'] and comp['cuda']['experiment_id']==b['experiment_id'] and proof(comp['evidence'],['tools/moat/compare_ncc.py'],parent=a['experiment_id'],comparison=a['input_manifest_sha256']))
+-  negative=load('rewrite-ncc-negative.json');runtime=load('rewrite-ncc-runtime.json');gate('negative-count',len(negative['tests'])==3)
+-  for r in negative['tests']:gate('negative/'+r['mode'],r['passed'] and proof(r['evidence'],['tools/moat/ncc_negative.py','tools/moat/ncc_reference.py'],parent=records['rocm']['original']['experiment_id']))
+-  gate('runtime-count',len(runtime['tests'])==7)
+-  for r in runtime['tests']:gate('CLI/'+r['test'],r['passed'] and proof(r['evidence'],['tools/moat/ncc_runtime.py',p['implementation']],parent=build['experiment_id'],expected_outcome='EXPECTED_REJECTION'))
++  negative=load('rewrite-ncc-negative.json');runtime=load('rewrite-ncc-runtime.json');gate('negative-complete-unique-modes',complete(negative['tests'],'mode',{'scores','annotation','argmax','max-value'}))
++  for r in negative['tests']:gate('negative/'+r['mode'],r['passed'] and proof(r['evidence'],['tools/moat/ncc_negative.py','tools/moat/ncc_reference.py'],parent=records['rocm']['original']['experiment_id'],check_names={'reject-'+r['mode']}))
++  gate('runtime-complete-unique-tests',complete(runtime['tests'],'test',{'negative-x','short-template','huge-template','bad-noise','negative-timing','missing-file','help'}))
++  for r in runtime['tests']:gate('CLI/'+r['test'],r['passed'] and proof(r['evidence'],['tools/moat/ncc_runtime.py',p['implementation']],parent=build['experiment_id'],expected_outcome='EXPECTED_REJECTION',check_names={r['test']}))
+  else:
+   records={backend:load(f'rewrite-extension-{backend}.json') for backend in ['rocm','cuda','native-approx']};values={backend:load(f'rewrite-extension-{backend}-validation.json') for backend in records}
+   for case in p['cases']:
+    key=kind+'/'+case;a=records['rocm'][key];b=records['cuda'][key];gate(case+'/same-input',a['comparison_id']==b['comparison_id']);gate(case+'/current-build',a['build']['experiment_id']==build['experiment_id'])
+    environment_gate(case,a)
+    for backend,r in [('rocm',a),('cuda',b)]:
++    gate(case+'/'+backend+'/frozen-case-identity',run_identity(r,kind,case,backend,p['sample_id']))
+     gate(case+'/'+backend+'/sealed-run',r['return_code']==0 and not gates.check(ROOT/r['evidence']));v=values[backend][key];gate(case+'/'+backend+'/CPU',v['status']=='PASSED' and v['run']['experiment_id']==r['experiment_id'] and proof(v['evidence'],['tools/moat/svd_reference.py','tools/moat/validate_extensions.py','tools/moat/inputs.py'],parent=r['experiment_id'],comparison=r['comparison_id'],input_hash=r['input_manifest_sha256']))
+-  key='svd/original';r=records['native-approx'][key];v=values['native-approx'][key];gate('native-original-gesvda',v['status']=='PASSED' and r['comparison_id']==records['rocm'][key]['comparison_id'] and proof(v['evidence'],['tools/moat/svd_reference.py','tools/moat/validate_extensions.py'],parent=r['experiment_id'],comparison=r['comparison_id'],input_hash=r['input_manifest_sha256']) and not gates.check(ROOT/r['evidence']))
+-  trace=next(r for r in load('rewrite-solver-backend-traces.json')['profiles'] if r['name']=='rank-svd');references.append(trace['evidence']);gate('actual-native-GPU-SVD-kernels',trace['return_code']==0 and trace['binary_sha256']==build['binary_sha256'] and any('bdsqr_compute' in n for n in trace.get('solver_algorithm_kernel_names',[])) and not gates.check(ROOT/trace['evidence']))
+-  negative=load('rewrite-svd-negative.json');runtime=load('rewrite-svd-runtime.json');gate('negative-count',len(negative['tests'])==5)
++  key='svd/original';r=records['native-approx'][key];v=values['native-approx'][key];gate('native-original-gesvda',run_identity(r,kind,'original','native-approx',p['sample_id']) and v['status']=='PASSED' and r['comparison_id']==records['rocm'][key]['comparison_id'] and proof(v['evidence'],['tools/moat/svd_reference.py','tools/moat/validate_extensions.py'],parent=r['experiment_id'],comparison=r['comparison_id'],input_hash=r['input_manifest_sha256']) and not gates.check(ROOT/r['evidence']))
++  trace=next(r for r in load('rewrite-solver-backend-traces.json')['profiles'] if r['name']=='rank-svd');references.append(trace['evidence']);gate('actual-native-GPU-SVD-kernels',trace_identity(trace,build))
++  negative=load('rewrite-svd-negative.json');runtime=load('rewrite-svd-runtime.json');files=['S','U','V','RnrmF','info','A_after'];modes={'singular-value','residual-norm','V-vector','info','stride-padding','partial-tail-S','partial-tail-RnrmF','negative-residual'}|{'oversize-'+f for f in files}|{'undersize-'+f for f in files};gate('negative-complete-unique-modes',complete(negative['tests'],'mode',modes))
+   for r in negative['tests']:
+-   run=records['rocm']['svd/'+r['case']];gate('negative/'+r['mode'],r['passed'] and proof(r['evidence'],['tools/moat/extensions_negative.py','tools/moat/svd_reference.py','tools/moat/inputs.py'],parent=run['experiment_id'],comparison=run['comparison_id'],input_hash=run['input_manifest_sha256']))
+-  gate('runtime-count',len(runtime['tests'])==11)
+-  for r in runtime['tests']:gate('descriptor/'+r['test'],r['passed'] and proof(r['evidence'],['tools/moat/svd_runtime.py','rocm/backends/solver/rank_svd.hpp'],parent=build['experiment_id'],expected_outcome='EXPECTED_REJECTION'))
++   run=records['rocm']['svd/'+r['case']];gate('negative/'+r['mode'],r['case']==('layout' if r['mode']=='stride-padding' else 'original') and r['passed'] and proof(r['evidence'],['tools/moat/extensions_negative.py','tools/moat/svd_reference.py','tools/moat/inputs.py'],parent=run['experiment_id'],comparison=run['comparison_id'],input_hash=run['input_manifest_sha256'],check_names={r['mode']}))
++  gate('runtime-complete-unique-tests',complete(runtime['tests'],'test',{'zero-m','wide-shape','short-lda','short-U','short-V','zero-rank','oversize-rank','short-stride','bad-batch','fractional-rank','huge-stride'}))
++  for r in runtime['tests']:gate('descriptor/'+r['test'],r['passed'] and proof(r['evidence'],['tools/moat/svd_runtime.py','rocm/backends/solver/rank_svd.hpp'],parent=build['experiment_id'],expected_outcome='EXPECTED_REJECTION',check_names={r['test']}))
+  return p,build,checks,sorted(set(references))
+ 
+ def main():
+diff --git a/tools/moat/schemas.py b/tools/moat/schemas.py
+index efbc4f14..f4465a83 100644
+--- a/tools/moat/schemas.py
++++ b/tools/moat/schemas.py
+@@ -1,13 +1,13 @@
+ #!/usr/bin/env python3
+ """Generate explicit schemas for attempts, route registry and sample work coverage."""
+-from experiment import ROOT,write
++from experiment import ROOT,write,OUTCOMES
+ base={'$schema':'https://json-schema.org/draft/2020-12/schema','type':'object'}
+ def record(required,properties):return dict(base,required=required,properties=properties)
+ string={'type':'string','minLength':1}
+ attempt=record(['schema_version','experiment_id','sample_id','case_id','batch_id','backend','started_at_utc','experiment_outcome','eligible_for_sample_pass'],
+  {'schema_version':{'const':1},'experiment_id':string,'sample_id':string,'case_id':string,'batch_id':string,'backend':string,
+   'started_at_utc':{'type':'string','format':'date-time'},'finished_at_utc':{'type':['string','null']},
+-  'experiment_outcome':{'enum':['RUNNING','EXECUTED','PASSED','COMMAND_FAILED','BUILD_ERROR','RUNTIME_ERROR','TIMEOUT','INTERRUPTED','ENV_BLOCKED','NUMERIC_MISMATCH','VALIDATOR_GAP','PROBE_FAILED','NATIVE_SDK_FAILED','SDK_UNAVAILABLE','INITIALIZATION_ERROR']},
++  'experiment_outcome':{'enum':sorted(OUTCOMES)},
+   'eligible_for_sample_pass':{'const':False}})
+ task=record(['sample_id','source','primary_phase','baseline_status','state','retry_condition'],
+  {'sample_id':string,'source':string,'primary_phase':{'enum':['R1','R2','R3','R4','R5','R6','R7','R8']},
+diff --git a/tools/moat/svd_reference.py b/tools/moat/svd_reference.py
+index cba268ef..9b2ea8b8 100644
+--- a/tools/moat/svd_reference.py
++++ b/tools/moat/svd_reference.py
+@@ -6,8 +6,14 @@ from experiment import ROOT,write
+ sys.path.insert(0,str(ROOT/'build/python-reference'));import numpy as np
+ 
+ def validate(inputs,out):
+- c=json.loads((inputs/'config.json').read_text());m,n,rank,batch,lda,ldu,ldv,sa,ss,su,sv=[c[k] for k in ['m','n','rank','batch','lda','ldu','ldv','strideA','strideS','strideU','strideV']];a=np.fromfile(inputs/'A.bin',np.float32);after=np.fromfile(out/'A_after.bin',np.float32);s=np.fromfile(out/'S.bin',np.float32);u=np.fromfile(out/'U.bin',np.float32);v=np.fromfile(out/'V.bin',np.float32);norm=np.fromfile(out/'RnrmF.bin',np.float64);info=np.fromfile(out/'info.bin',np.int32);checks=[]
++ c=json.loads((inputs/'config.json').read_text());m,n,rank,batch,lda,ldu,ldv,sa,ss,su,sv=[c[k] for k in ['m','n','rank','batch','lda','ldu','ldv','strideA','strideS','strideU','strideV']];checks=[]
+  def gate(name,value,**fields):checks.append(dict(check=name,passed=bool(value),**fields))
++ for name,size in [('S',batch*ss*4),('U',batch*su*4),('V',batch*sv*4),('RnrmF',batch*8),('info',batch*4),('A_after',batch*sa*4)]:gate(name+'-exact-output-bytes',(out/(name+'.bin')).is_file() and (out/(name+'.bin')).stat().st_size==size,expected_bytes=size)
++ if (out/'RnrmF_native.bin').exists():gate('native-norm-exact-output-bytes',(out/'RnrmF_native.bin').stat().st_size==batch*8)
++ if not all(c['passed'] for c in checks):return dict(status='FAILED',checks=checks,oracle='Exact whole-file output sizes before numerical parsing')
++ a=np.fromfile(inputs/'A.bin',np.float32);after=np.fromfile(out/'A_after.bin',np.float32);s=np.fromfile(out/'S.bin',np.float32);u=np.fromfile(out/'U.bin',np.float32);v=np.fromfile(out/'V.bin',np.float32);norm=np.fromfile(out/'RnrmF.bin',np.float64);info=np.fromfile(out/'info.bin',np.int32)
++ for name,array in [('S',s),('U',u),('V',v),('RnrmF',norm),('A_after',after)]:gate(name+'-whole-output-finite',np.isfinite(array).all())
++ gate('reported-residual-nonnegative',np.all(norm>=0))
+  gate('all-batches-info-zero',info.tolist()==[0]*batch);gate('input-global-padding-untouched',np.array_equal(a.view(np.uint32),after.view(np.uint32)))
+  for h in range(batch):
+   aa=a[h*sa:h*sa+lda*n].reshape(lda,n,order='F')[:m].astype(np.float64);singular=s[h*ss:h*ss+rank].astype(np.float64);uu=u[h*su:h*su+ldu*rank].reshape(ldu,rank,order='F')[:m].astype(np.float64);vv=v[h*sv:h*sv+ldv*rank].reshape(ldv,rank,order='F')[:n].astype(np.float64);gold=np.linalg.svd(aa,compute_uv=False);reconstruction=(uu*singular)@vv.T;actual_res=float(np.linalg.norm(aa-reconstruction));optimal=float(np.linalg.norm(gold[rank:]));bound=5e-4*max(1,float(np.linalg.norm(aa)))

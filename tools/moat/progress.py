@@ -29,7 +29,8 @@ lines+=['',f'反向检查：{sum(bool(x["passed"]) for x in negative.get("checks
 write(ROOT/'migration/reports/rewrite-progress.json',dict(updated_at=now(),rows=rows,baseline_counts=dict(counts)))
 doc=ROOT.parent/'doc/cuda_samples_on_rocm_moat_rewrite_plan.md';body=doc.read_text();start='<!-- MOAT_EXEC_PROGRESS:START -->';end='<!-- MOAT_EXEC_PROGRESS:END -->'
 total=sum(x['required'] for x in rows)
-qualified=sum(s.get('reason_code')=='VALIDATED_MOAT_REWRITE' and s['status']=='PASSED' for s in cat['samples'])
+first_ids={p['sample_id'] for p in spec}
+qualified=sum(s['id'] in first_ids and s.get('reason_code')=='VALIDATED_MOAT_REWRITE' and s['status']=='PASSED' for s in cat['samples'])
 section='\n'.join([start,'',f'最近更新：{now()}。首批 AMD {sum(x["amd_executed"] for x in rows)}/{total} 已运行，独立 CPU {sum(x["cpu_verified"] for x in rows)}/{total} 通过；CUDA {sum(x["cuda_executed"] for x in rows)}/{total} 已运行，独立 CPU {sum(x["cuda_cpu_verified"] for x in rows)}/{total} 通过。已签发首批整例资格 {qualified}/8。R3–R8仍待完成。','',end])
 if start in body:body=re.sub(re.escape(start)+'.*?'+re.escape(end),section,body,flags=re.S)
 else:body+='\n'+section+'\n'

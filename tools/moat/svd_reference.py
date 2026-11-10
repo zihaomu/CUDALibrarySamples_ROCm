@@ -6,8 +6,14 @@ from experiment import ROOT,write
 sys.path.insert(0,str(ROOT/'build/python-reference'));import numpy as np
 
 def validate(inputs,out):
- c=json.loads((inputs/'config.json').read_text());m,n,rank,batch,lda,ldu,ldv,sa,ss,su,sv=[c[k] for k in ['m','n','rank','batch','lda','ldu','ldv','strideA','strideS','strideU','strideV']];a=np.fromfile(inputs/'A.bin',np.float32);after=np.fromfile(out/'A_after.bin',np.float32);s=np.fromfile(out/'S.bin',np.float32);u=np.fromfile(out/'U.bin',np.float32);v=np.fromfile(out/'V.bin',np.float32);norm=np.fromfile(out/'RnrmF.bin',np.float64);info=np.fromfile(out/'info.bin',np.int32);checks=[]
+ c=json.loads((inputs/'config.json').read_text());m,n,rank,batch,lda,ldu,ldv,sa,ss,su,sv=[c[k] for k in ['m','n','rank','batch','lda','ldu','ldv','strideA','strideS','strideU','strideV']];checks=[]
  def gate(name,value,**fields):checks.append(dict(check=name,passed=bool(value),**fields))
+ for name,size in [('S',batch*ss*4),('U',batch*su*4),('V',batch*sv*4),('RnrmF',batch*8),('info',batch*4),('A_after',batch*sa*4)]:gate(name+'-exact-output-bytes',(out/(name+'.bin')).is_file() and (out/(name+'.bin')).stat().st_size==size,expected_bytes=size)
+ if (out/'RnrmF_native.bin').exists():gate('native-norm-exact-output-bytes',(out/'RnrmF_native.bin').stat().st_size==batch*8)
+ if not all(c['passed'] for c in checks):return dict(status='FAILED',checks=checks,oracle='Exact whole-file output sizes before numerical parsing')
+ a=np.fromfile(inputs/'A.bin',np.float32);after=np.fromfile(out/'A_after.bin',np.float32);s=np.fromfile(out/'S.bin',np.float32);u=np.fromfile(out/'U.bin',np.float32);v=np.fromfile(out/'V.bin',np.float32);norm=np.fromfile(out/'RnrmF.bin',np.float64);info=np.fromfile(out/'info.bin',np.int32)
+ for name,array in [('S',s),('U',u),('V',v),('RnrmF',norm),('A_after',after)]:gate(name+'-whole-output-finite',np.isfinite(array).all())
+ gate('reported-residual-nonnegative',np.all(norm>=0))
  gate('all-batches-info-zero',info.tolist()==[0]*batch);gate('input-global-padding-untouched',np.array_equal(a.view(np.uint32),after.view(np.uint32)))
  for h in range(batch):
   aa=a[h*sa:h*sa+lda*n].reshape(lda,n,order='F')[:m].astype(np.float64);singular=s[h*ss:h*ss+rank].astype(np.float64);uu=u[h*su:h*su+ldu*rank].reshape(ldu,rank,order='F')[:m].astype(np.float64);vv=v[h*sv:h*sv+ldv*rank].reshape(ldv,rank,order='F')[:n].astype(np.float64);gold=np.linalg.svd(aa,compute_uv=False);reconstruction=(uu*singular)@vv.T;actual_res=float(np.linalg.norm(aa-reconstruction));optimal=float(np.linalg.norm(gold[rank:]));bound=5e-4*max(1,float(np.linalg.norm(aa)))

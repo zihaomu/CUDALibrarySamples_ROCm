@@ -1,0 +1,160 @@
+{
+  "scope": "Original fixed 2048x1024 image/CLI fixture identities",
+  "cases": {
+    "original": {
+      "manifest": {
+        "case": "original",
+        "argv": [],
+        "files": {
+          "image.raw": {
+            "sha256": "4fdc3295d8f6dde8bc9ec0850bc8d29c8a80e991ce8461dab08056e172ab89ec",
+            "bytes": 2097152
+          }
+        }
+      },
+      "manifest_sha256": "7aee5718a99b4728dacc38bc1b8e2e454f033b3f5b3ac83a68fb6023cb5ff2c1",
+      "expected_return_code": 0
+    },
+    "changed-values": {
+      "manifest": {
+        "case": "changed-values",
+        "argv": [
+          "-g",
+          "1.1",
+          "-o",
+          "7",
+          "-noise",
+          "1",
+          "-n",
+          "2"
+        ],
+        "files": {
+          "image.raw": {
+            "sha256": "4fdc3295d8f6dde8bc9ec0850bc8d29c8a80e991ce8461dab08056e172ab89ec",
+            "bytes": 2097152
+          }
+        }
+      },
+      "manifest_sha256": "eb10af13f1da64c857fc20c4dc07d475353860273a3477bbc9db66476d7d922e",
+      "expected_return_code": 0
+    },
+    "changed-template": {
+      "manifest": {
+        "case": "changed-template",
+        "argv": [
+          "-tw",
+          "64",
+          "-th",
+          "48",
+          "-n",
+          "1"
+        ],
+        "files": {
+          "image.raw": {
+            "sha256": "4fdc3295d8f6dde8bc9ec0850bc8d29c8a80e991ce8461dab08056e172ab89ec",
+            "bytes": 2097152
+          }
+        }
+      },
+      "manifest_sha256": "85a44ee655045c652c256294fff6fbf7b3c9bd3a72a74b10fbf01cac67e7fff5",
+      "expected_return_code": 0
+    },
+    "no-timing": {
+      "manifest": {
+        "case": "no-timing",
+        "argv": [
+          "-n",
+          "0"
+        ],
+        "files": {
+          "image.raw": {
+            "sha256": "4fdc3295d8f6dde8bc9ec0850bc8d29c8a80e991ce8461dab08056e172ab89ec",
+            "bytes": 2097152
+          }
+        }
+      },
+      "manifest_sha256": "a8a8d10b6ef4a518ee5b44b707fbd693f1ed619b074fc0588253b2d092c3e2d8",
+      "expected_return_code": 0
+    },
+    "repeat": {
+      "manifest": {
+        "case": "repeat",
+        "argv": [
+          "-n",
+          "3"
+        ],
+        "files": {
+          "image.raw": {
+            "sha256": "4fdc3295d8f6dde8bc9ec0850bc8d29c8a80e991ce8461dab08056e172ab89ec",
+            "bytes": 2097152
+          }
+        }
+      },
+      "manifest_sha256": "73f30d6d5002ed7b937ddf68d776b24a81f08fdb80ad0c16020c09cdc37809a6",
+      "expected_return_code": 0
+    },
+    "constant-template": {
+      "manifest": {
+        "case": "constant-template",
+        "argv": [
+          "-g",
+          "0",
+          "-o",
+          "13",
+          "-noise",
+          "0",
+          "-n",
+          "0"
+        ],
+        "files": {
+          "image.raw": {
+            "sha256": "4fdc3295d8f6dde8bc9ec0850bc8d29c8a80e991ce8461dab08056e172ab89ec",
+            "bytes": 2097152
+          }
+        }
+      },
+      "manifest_sha256": "d597f9ca4efb1cf00d9ce7449d0c5e3fefa34cc89b619760e2237ad3e0611166",
+      "expected_return_code": 1
+    },
+    "constant-image": {
+      "manifest": {
+        "case": "constant-image",
+        "argv": [
+          "-n",
+          "0"
+        ],
+        "files": {
+          "image.raw": {
+            "sha256": "d32c5af629c022fed65a868e47f711b18238a9a48a4269001d6eed298e20c440",
+            "bytes": 2097152
+          }
+        }
+      },
+      "manifest_sha256": "1210af0573de3dfe15e1a2691162dc5ddf955b02220071e827db3bf587e12db3",
+      "expected_return_code": 1
+    },
+    "constant-both": {
+      "manifest": {
+        "case": "constant-both",
+        "argv": [
+          "-g",
+          "0",
+          "-o",
+          "13",
+          "-noise",
+          "0",
+          "-n",
+          "0"
+        ],
+        "files": {
+          "image.raw": {
+            "sha256": "d32c5af629c022fed65a868e47f711b18238a9a48a4269001d6eed298e20c440",
+            "bytes": 2097152
+          }
+        }
+      },
+      "manifest_sha256": "a4753b3333ac460fda54dff8acdc13e578760a3004d8244af4ba3473a6f770f2",
+      "expected_return_code": 1
+    }
+  }
+}

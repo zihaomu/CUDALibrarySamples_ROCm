@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """Generate explicit schemas for attempts, route registry and sample work coverage."""
-from experiment import ROOT,write
+from experiment import ROOT,write,OUTCOMES
 base={'$schema':'https://json-schema.org/draft/2020-12/schema','type':'object'}
 def record(required,properties):return dict(base,required=required,properties=properties)
 string={'type':'string','minLength':1}
 attempt=record(['schema_version','experiment_id','sample_id','case_id','batch_id','backend','started_at_utc','experiment_outcome','eligible_for_sample_pass'],
  {'schema_version':{'const':1},'experiment_id':string,'sample_id':string,'case_id':string,'batch_id':string,'backend':string,
   'started_at_utc':{'type':'string','format':'date-time'},'finished_at_utc':{'type':['string','null']},
-  'experiment_outcome':{'enum':['RUNNING','EXECUTED','PASSED','COMMAND_FAILED','BUILD_ERROR','RUNTIME_ERROR','TIMEOUT','INTERRUPTED','ENV_BLOCKED','NUMERIC_MISMATCH','VALIDATOR_GAP','PROBE_FAILED','NATIVE_SDK_FAILED','SDK_UNAVAILABLE','INITIALIZATION_ERROR']},
+  'experiment_outcome':{'enum':sorted(OUTCOMES)},
   'eligible_for_sample_pass':{'const':False}})
 task=record(['sample_id','source','primary_phase','baseline_status','state','retry_condition'],
  {'sample_id':string,'source':string,'primary_phase':{'enum':['R1','R2','R3','R4','R5','R6','R7','R8']},

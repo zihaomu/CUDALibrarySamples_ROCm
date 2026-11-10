@@ -20,6 +20,13 @@ INDEX = ROOT / 'migration/reports/rewrite-experiments.jsonl'
 ALLOWED_ENV = ('HIP_VISIBLE_DEVICES', 'CUDA_VISIBLE_DEVICES', 'OMP_NUM_THREADS',
                'FI_PROVIDER', 'MPIR_CVAR_CH4_NETMOD', 'DEEPINFER_IMAGE_ID',
                'DEEPINFER_ROCM_RELEASE', 'TRITON_CACHE_DIR', 'TORCH_EXTENSIONS_DIR')
+OUTCOMES = frozenset(['RUNNING','EXECUTED','PASSED','COMMAND_FAILED','BUILD_ERROR',
+ 'RUNTIME_ERROR','TIMEOUT','INTERRUPTED','ENV_BLOCKED','NUMERIC_MISMATCH',
+ 'VALIDATOR_GAP','PROBE_FAILED','NATIVE_SDK_FAILED','SDK_UNAVAILABLE',
+ 'INITIALIZATION_ERROR','SELF_TEST_FAILED','EXPECTED_REJECTION','GUARD_FAILED',
+ 'NATIVE_BUILD_FAILED','NUMERIC_OR_HARNESS_MISMATCH','NATIVE_MISMATCH',
+ 'HARNESS_NONZERO','NATIVE_HARNESS_NONZERO','CLI_GAP','OBSERVED',
+ 'PROFILE_OBSERVED','PROFILER_FAILED','CONTRACT_GAP_RECORDED','CONTRACT_AUDIT_FAILED'])
 
 
 def now():
@@ -203,6 +210,8 @@ class Experiment:
     def finish(self, outcome, validation=None, reason=None, metrics=None):
         if self.sealed:
             raise RuntimeError('sealed experiment')
+        if outcome not in OUTCOMES or outcome=='RUNNING':
+            raise ValueError('unknown or nonterminal experiment outcome: '+outcome)
         validation = validation or dict(checks=[], status='NOT_VALIDATED')
         if outcome == 'PASSED':
             checks = validation.get('checks', [])

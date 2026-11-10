@@ -6,6 +6,13 @@ from experiment import Experiment,ROOT,digest,recorder_alive
 from audit import check
 
 class RecorderContract(unittest.TestCase):
+    def test_observed_rejection_schema_and_unknown_outcomes(self):
+        import jsonschema
+        record=json.loads((ROOT/'migration/reports/rewrite-first-runtime-checks.json').read_text())['tests'][0]
+        manifest=json.loads((ROOT/record['evidence']/'manifest.json').read_text());schema=json.loads((ROOT/'migration/moat/schema/experiment.schema.json').read_text())
+        jsonschema.validate(manifest,schema)
+        manifest['experiment_outcome']='UNRECORDED_NUMERIC_SUCCESS'
+        with self.assertRaises(jsonschema.ValidationError):jsonschema.validate(manifest,schema)
     def test_failure_cannot_be_promoted_and_streams_survive(self):
         e=Experiment('P0','recorder-failure-contract','host',sources=[__file__])
         rc=e.command([sys.executable,'-c','import sys;print("stdout-proof");print("stderr-proof",file=sys.stderr);sys.exit(7)'],'deliberate-exit')
@@ -13,6 +20,7 @@ class RecorderContract(unittest.TestCase):
         self.assertIn('stdout-proof',(e.path/e.commands[0]['stdout']).read_text())
         self.assertIn('stderr-proof',(e.path/e.commands[0]['stderr']).read_text())
         with self.assertRaises(ValueError):e.finish('PASSED',dict(checks=[dict(check='dummy',passed=True)]))
+        with self.assertRaises(ValueError):e.finish('UNRECORDED_NUMERIC_SUCCESS')
         e.finish('COMMAND_FAILED',reason='Deliberate CPU process exit for recorder self-test')
         with self.assertRaises(RuntimeError):e.command([sys.executable,'-c','pass'],'after-seal')
         self.assertEqual(check(e.path),[])
