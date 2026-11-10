@@ -1,0 +1,1 @@
+Test composite-qualification for cuDSS/nvfortran/uniform_batch::uniform_batch.cuf, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: none.

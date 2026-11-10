@@ -106,6 +106,8 @@ def render():
   ('UNSUPPORTED','HW_UNSUPPORTED','锁定 ROCm 10.1.0 hipSPARSELt/gfx1201 缺 Tensile kernel bundle；实际运行报错且固定源码的架构 gate 拒绝该目标。','[实测与源码证据](cuSPARSELt/README.md)；需匹配 kernel bundle、新实现或受支持 GPU，不能以 dense GEMM 替代。'),
   ('BLOCKED','ENV_MISSING_DEP','nvJPEG Python 测试的 imports 已通过，但 AMD decoder 可执行文件/完整 CLI 测试前置条件尚未实现。','[逐例报告](migration/sample-reports/nvJPEG/nvJPEG-Decoder/tests/test_decoder.py.md)；补 GPU 可执行文件后执行原始测试。')]:
   intro+=f'| {status} / `{code}` | {reasons[(status,code)]} | {reason} | {evidence} |\n'
+ if (ROOT/'migration/reports/rewrite-R4.md').exists():intro+='**MOAT R4：IEEE/PKZIP CRC32 GPU实现，6数值+1原生空chunk拒绝。** [详细日志与资格](migration/reports/rewrite-R4.md)。\n\n'
+ if (ROOT/'migration/reports/rewrite-R5.md').exists():intro+='**MOAT R5：8个标准Fortran来源入口完成真实语言绑定、批选择重算及应用残差检查。** [逐例范围、CUDA工具链限制和日志](migration/reports/rewrite-R5.md)。\n\n'
  intro+='\n已验收模块内部也保留具体限制：hipTensor FP32 原生 contraction 的架构 gate 失败由 rocBLAS + HIP 保持精度的路线补足；hipFFT 单 batch 1D Xt 缺口由两卡分解/通信/合并补足。B12–B15已完成登记范围的分布/设备内GPU与图像数值试点；部分原始descriptor、低精度通信、RNG LEGACY、原生NPP像素与文件/metadata合同仍保持PARTIAL，多节点与其它未覆盖入口未完成；JPEG2000/TIFF 未找到并实现完整 AMD GPU codec 路线。上述原因在模块矩阵中逐项展示。\n\n'
  intro+='''
 ## 构建与复现

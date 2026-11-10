@@ -1,8 +1,8 @@
 # cuDSS/fortran/residual::residual.f90
 
-**PARTIAL / L3**
+**PASSED / L4**
 
-真实标准Fortran入口7场景通过独立FP64 CPU检查；包含原始数组/leading-dimension、GPU分解求解与排列使用、padding和奇异info。native对照、负向、轨迹及独立复核仍待收口；不声称NVIDIA编译器或vendor内部排列完全相同。
+标准Fortran ISO_C_BINDING真实入口；CPU符号分析+HIP CSR pivot LU/solve，6数值场景通过独立FP64与同输入native cuDSS；奇异info单列（GENERAL native经同步仍info0/NaN，是原生数值失败，非通过基线）。排列实际用于factor/solve、leading dimensions/padding、17注入/8运行边界、C ABI生命周期及GPU轨迹与独立复核通过。nvfortran来源改写为标准Fortran，不声称NVIDIA编译器或内部排列等价。
 
 | 字段 | 当前记录 |
 | --- | --- |
@@ -10,20 +10,20 @@
 | 实际库 / 后端 | standard Fortran ISO_C_BINDING + project HIP CSR pivot LU/solve; CPU symbolic min-degree only / — |
 | 候选路线 | rocSOLVER CSRRF, rocSPARSE/HIP, ISO_C_BINDING |
 | 代码 | [rocm/ported/cuDSS/fortran/residual/residual.f90](../../../../../rocm/ported/cuDSS/fortran/residual/residual.f90) |
-| required cases | 0/2 |
-| CUDA baseline / comparison | BLOCKED / BLOCKED |
+| required cases | 12/12 |
+| CUDA baseline / comparison | BLOCKED / PASSED |
 | 性能 | NOT_RUN |
 | 原始源码 SHA256 | `cb03b13ee54b19390fe25d6a3983585a6e0ef2ceeb1ef753257471bac9ae5fce` |
 
 编译/运行返回 0 仅对应 L3；通过独立参考检查后才记 L4。失败的候选库不列为已使用库。
 
-必需用例：`original-functional-contract`, `independent-numerical-or-semantic-reference`。
+必需用例：`rewrite/R5/original`, `rewrite/R5/changed-values`, `rewrite/R5/layout`, `rewrite/R5/base0`, `rewrite/R5/repeat`, `rewrite/R5/irregular`, `rewrite/R5/singular-info`, `rewrite/R5/negative`, `rewrite/R5/runtime`, `rewrite/R5/C-ABI`, `rewrite/R5/GPU-trace`, `rewrite/R5/review`。
 
-实现方式：`UNIMPLEMENTED_BINDING`。
+实现方式：`ALGORITHM_REWRITE_WITH_STANDARD_FORTRAN_C_ABI`。
 
 恢复/扩展条件：实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。
 
-CUDA 对照限制：CUDA 原始 SDK、绑定或输入前置条件未满足，见该例 CUDA 基线证据。
+CUDA 对照限制：真实CUDA C++ cuDSS核心使用相同冻结Fortran数组；CUDA主机缺少Fortran编译器及vendor module，原语言原生基线仍BLOCKED。
 
 ## 复现与证据
 
@@ -34,3 +34,5 @@ CUDA 对照限制：CUDA 原始 SDK、绑定或输入前置条件未满足，见
 - [migration/reports/evidence/20261109T084354.110802Z/languages/cuDSS_fortran_residual_residual.f90](../../../../reports/evidence/20261109T084354.110802Z/languages/cuDSS_fortran_residual_residual.f90)
 - [migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_fortran_residual_residual.f90](../../../../reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_fortran_residual_residual.f90)
 - [migration/reports/evidence/rewrite/R5/cuDSS_fortran_residual__residual.f90/20261110T101102.553072Z-R5-rocm-fortran-51a1888ee9](../../../../reports/evidence/rewrite/R5/cuDSS_fortran_residual__residual.f90/20261110T101102.553072Z-R5-rocm-fortran-51a1888ee9)
+- [migration/reports/evidence/rewrite/R5/cuDSS_fortran_residual__residual.f90/20261110T104821.942511Z-R5-composite-qualification-499eb8da05](../../../../reports/evidence/rewrite/R5/cuDSS_fortran_residual__residual.f90/20261110T104821.942511Z-R5-composite-qualification-499eb8da05)
+- [migration/reports/rewrite-R5-qualification.json](../../../../reports/rewrite-R5-qualification.json)

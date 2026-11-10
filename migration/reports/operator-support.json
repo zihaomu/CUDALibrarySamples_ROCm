@@ -2,9 +2,9 @@
   "schema_version": 1,
   "counting_rule": "Operator/functional families are deduplicated within each module; dtypes, sizes, language, batch, storage formats and algorithm variants do not create extra operators. At least one explicitly scoped PASSED source profile is required. Cross-module totals may include the same mathematical operation implemented through different library interfaces.",
   "qualification_rule": "A verified family proves only its linked PASSED source profiles/required cases, not every API configuration. PARTIAL examples and capability probes are excluded.",
-  "verified_operator_families": 115,
+  "verified_operator_families": 116,
   "modules_with_verified_operators": 17,
-  "passed_source_profiles": 221,
+  "passed_source_profiles": 229,
   "modules": {
     "cuBLAS": {
       "verified_operator_family_count": 52,
@@ -654,36 +654,60 @@
       }
     },
     "cuDSS": {
-      "verified_operator_family_count": 1,
+      "verified_operator_family_count": 2,
       "verified_operators": [
         {
           "name": "稀疏直接求解",
           "sample_ids": [
+            "cuDSS/fortran/batch::batch.f90",
+            "cuDSS/fortran/residual::residual.f90",
             "cuDSS/fortran/simple::simple.f90",
+            "cuDSS/fortran/uniform_batch::uniform_batch.f90",
+            "cuDSS/nvfortran/batch::batch.cuf",
+            "cuDSS/nvfortran/residual::residual.cuf",
             "cuDSS/nvfortran/simple::simple.cuf",
+            "cuDSS/nvfortran/uniform_batch::uniform_batch.cuf",
             "cuDSS/simple::simple.cpp",
             "cuDSS/simple_batch::simple_batch.cpp",
             "cuDSS/simple_residual::simple_residual.cpp",
             "cuDSS/simple_uniform_batch::simple_uniform_batch.cpp"
           ],
           "sample_reports": [
+            "migration/sample-reports/cuDSS/fortran/batch/batch.f90.md",
+            "migration/sample-reports/cuDSS/fortran/residual/residual.f90.md",
             "migration/sample-reports/cuDSS/fortran/simple/simple.f90.md",
+            "migration/sample-reports/cuDSS/fortran/uniform_batch/uniform_batch.f90.md",
+            "migration/sample-reports/cuDSS/nvfortran/batch/batch.cuf.md",
+            "migration/sample-reports/cuDSS/nvfortran/residual/residual.cuf.md",
             "migration/sample-reports/cuDSS/nvfortran/simple/simple.cuf.md",
+            "migration/sample-reports/cuDSS/nvfortran/uniform_batch/uniform_batch.cuf.md",
             "migration/sample-reports/cuDSS/simple/simple.cpp.md",
             "migration/sample-reports/cuDSS/simple_batch/simple_batch.cpp.md",
             "migration/sample-reports/cuDSS/simple_residual/simple_residual.cpp.md",
             "migration/sample-reports/cuDSS/simple_uniform_batch/simple_uniform_batch.cpp.md"
           ],
-          "source_profiles": 6
+          "source_profiles": 12
+        },
+        {
+          "name": "稀疏重排序与求解",
+          "sample_ids": [
+            "cuDSS/fortran/reordering_phase::reordering_phase.f90",
+            "cuDSS/nvfortran/reordering_phase::reordering_phase.cuf"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuDSS/fortran/reordering_phase/reordering_phase.f90.md",
+            "migration/sample-reports/cuDSS/nvfortran/reordering_phase/reordering_phase.cuf.md"
+          ],
+          "source_profiles": 2
         }
       ],
       "sample_count": 59,
       "sample_outcomes": {
-        "PARTIAL": 10,
+        "PASSED": 14,
         "FAILED": 43,
-        "PASSED": 6
+        "PARTIAL": 2
       },
-      "validation_scope": "FP64 CSR：原始simple三语言、异构/均匀batch、analysis-only、1000阶GENERAL/双RHS残差；CPU稀疏符号/matching + rocSOLVER CSRRF或项目HIP CSR pivot LU。get_set仅部分配置/查询验收；大例固定pivot、小例分量CSR fill，未外推任意大规模动态pivot。",
+      "validation_scope": "FP64 CSR：simple、异构/均匀batch、重排后完整求解及GENERAL多RHS残差；CPU符号/matching + rocSOLVER CSRRF或项目HIP CSR pivot LU。MOAT新增8个真实ISO_C_BINDING Fortran入口，uniform保留GPU factor并选择性重算，residual应用实际检查；原CUDA Fortran工具链仍缺。CPP重排严格METIS向量不同及get_set缺项保持PARTIAL，不把历史analysis-only计为完整求解。规模/动态pivot按逐例范围。",
       "failure_reason_counts": {
         "BINDING_OR_FRONTEND_MIGRATION_REQUIRED": 26,
         "BUILD_ERROR": 17

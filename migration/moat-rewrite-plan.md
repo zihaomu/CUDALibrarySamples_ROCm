@@ -542,7 +542,7 @@ PLAN-01 至 PLAN-03 是规划阶段记录，不代表实验结果。实施中的
 
 <!-- MOAT_EXEC_PROGRESS:START -->
 
-最近更新：2026-11-10T10:45:00.495350+00:00。首批 AMD 51/51 已运行，独立 CPU 51/51 通过；CUDA 51/51 已运行，独立 CPU 51/51 通过。已签发首批整例资格 8/8。R3–R8仍待完成。
+最近更新：2026-11-10T10:49:14.308169+00:00。首批 AMD 51/51 已运行，独立 CPU 51/51 通过；CUDA 51/51 已运行，独立 CPU 51/51 通过。已签发首批整例资格 8/8。R3–R8仍待完成。
 
 <!-- MOAT_EXEC_PROGRESS:END -->
 
@@ -555,3 +555,5 @@ PLAN-01 至 PLAN-03 是规划阶段记录，不代表实验结果。实施中的
 | 2026-11-10 | EXEC-18 | R5首轮复审拒绝f8695059：uniform选择性再次factor/solve、应用自身residual，以及依赖表裁剪/native build证据替换漏洞。已补常驻各GPU factor、index1→X slot0重算和未选中factor保留；Fortran实际residual/max/tol；封存build-result/完整depfile集合、严格native build身份。当前56 AMD/CPU、native 27/28（24正向均通过）、14注入/8运行/13 ABI/4轨迹通过；uniform实际3次GPU factor/solve。原生GENERAL奇异经同步仍info0且NaN，另封存为原生数值失败观察，不推断扰动原因，不计通过基线；前述“扰动策略”判断已更正。 | 9项身份反例复测后新固定内容复审；R6/R7/R8仍未完成 |
 
 | 2026-11-10 | EXEC-19 | R5补native uniform初始/最终各slot padding对冻结原输入的约束；真实UBATCH阶段GPU A/B在初始和选择求解后分别D2H核对。新增成对padding/UBATCH RHS/values故障，总17项全拒绝；当前56 AMD/CPU、native27/28保持（GENERAL额外奇异场景明确失败）。额外原生后solve查询探针确认factor_info=0、postsolve_info=0而active X含NaN；只记录现象。资格检查的SDK gzip归档改为一次顺序读取；被中断的慢自测按INTERRUPTED封存后重验。 | 最小diff独立复核后签发R5；继续R6/R7/R8 |
+
+| 2026-11-10 | EXEC-20 | R5固定b83e4d55三方复核通过，8入口复合资格已签发；当前229 PASSED、23 PARTIAL、385 FAILED、2 UNSUPPORTED。完整保留CUDA原语言工具链BLOCKED与GENERAL额外奇异native数值失败，不冒充三方通过。 | 完成其余候选任务去向与R6专题、R7真实2:4、R8完整交付 |

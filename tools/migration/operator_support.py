@@ -19,7 +19,7 @@ def operator_name(sample):
  if family.startswith('MathDx/'):return {'introduction_example':'设备内 GEMM','simple_fft_block':'设备内 C2C FFT','potrf_block':'设备内 complex Cholesky','getrf_partial_pivot_block':'设备内 partial-pivot LU','posv_batched_block':'设备内 Cholesky 分解/求解','trsm_batched_block':'设备内三角求解'}[path.stem]
  if family=='NPP':return {'distanceTransform':'Euclidean 距离变换/Voronoi','templateMatching':'零均值 NCC','nppCanny':'三通道 Canny'}[path.parent.name]
  if family=='cuBLASLt':return 'GEMM'
- if family=='cuDSS':return '稀疏重排序分析' if kind=='simple_reordering_phase' else '稀疏直接求解'
+ if family=='cuDSS':return '稀疏重排序与求解' if kind in ['simple_reordering_phase','reordering_phase'] else '稀疏直接求解'
  if family=='cuFFT':
   if 'callback' in sample['source']:return 'FFT 窗口过滤 callback'
   return 'R2C/C2R 实数 FFT' if 'r2c' in sample['source'] or 'c2r' in sample['source'] else 'C2C 复数 FFT'
@@ -42,7 +42,7 @@ def operator_name(sample):
 SCOPES={
  'cuBLAS':'固定教学输入与所列扩展 cases；第二批含并列/空索引、旋转 flags、batch/grouped 和正负 alpha；rotmg 极端缩放使用明确登记的 HIP 修正。其它精度/API 仍逐例管理。',
  'cuBLASLt':'3 个 profile：FP32 SGEMM、HSH FP16 input/output + FP32 compute 的 pointer-array 与 strided batch。',
- 'cuDSS':'FP64 CSR：原始simple三语言、异构/均匀batch、analysis-only、1000阶GENERAL/双RHS残差；CPU稀疏符号/matching + rocSOLVER CSRRF或项目HIP CSR pivot LU。get_set仅部分配置/查询验收；大例固定pivot、小例分量CSR fill，未外推任意大规模动态pivot。',
+ 'cuDSS':'FP64 CSR：simple、异构/均匀batch、重排后完整求解及GENERAL多RHS残差；CPU符号/matching + rocSOLVER CSRRF或项目HIP CSR pivot LU。MOAT新增8个真实ISO_C_BINDING Fortran入口，uniform保留GPU factor并选择性重算，residual应用实际检查；原CUDA Fortran工具链仍缺。CPP重排严格METIS向量不同及get_set缺项保持PARTIAL，不把历史analysis-only计为完整求解。规模/动态pivot按逐例范围。',
  'cuFFT':'10 个 profile：原始单卡/双卡 C2C、实数正逆变换和 legacy/离线 SPIR-V/HIPRTC callback。1D 多卡使用 hipFFT + RCCL + HIP。',
  'cuPQC':'SHA-256 单线程与 SHA3-256 的 32-lane 协作 GPU kernel；各 14 输入与 hashlib 精确一致，PQC 其它算法未实现。',
  'cuRAND':'4 种分布 × 9 个 generator = 36 个 profile；原始参数、库内重复性和解析分布矩通过，跨库不要求逐位同序列。',
