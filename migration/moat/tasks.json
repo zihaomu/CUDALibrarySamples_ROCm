@@ -8588,7 +8588,7 @@
       "family": "NPP",
       "primary_phase": "R3",
       "baseline_status": "PARTIAL",
-      "state": "NUMERIC_CANDIDATE_REVIEW_PENDING",
+      "state": "QUALIFIED",
       "reason_code": "VALIDATED_B12_B15_SUBSET",
       "reason": "使用HIP zero-mean normalized correlation + GPU argmax kernels；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。原始2048x1024/96x64、seed1234退化模板、完整score与GPU argmax均验收；原例注释图文件、全部CLI和计时harness尚未移植。",
       "retry_condition": "未完成合同：original-annotation-file-CLI-and-timing-harness；补实现/真实后端并重验。",
@@ -9119,14 +9119,14 @@
       ],
       "prerequisites": [],
       "experiments": [
-        "20261110T090701.687702Z-R3-host-contract-review-c74d32e998"
+        "20261110T090701.687702Z-R3-host-contract-review-c74d32e998",
+        "20261110T092525.448735Z-R3-composite-qualification-ad7d1f1dc9"
       ],
-      "current_status": "PARTIAL",
-      "current_reason": "使用HIP zero-mean normalized correlation + GPU argmax kernels；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。原始2048x1024/96x64、seed1234退化模板、完整score与GPU argmax均验收；原例注释图文件、全部CLI和计时harness尚未移植。",
-      "remaining_contract": [
-        "rewrite/R3/ncc/independent-review-and-qualification"
-      ],
-      "assessment_evidence": "migration/reports/evidence/rewrite/R3/NPP_templateMatching__templateMatching.cpp/20261110T090701.687702Z-R3-host-contract-review-c74d32e998"
+      "current_status": "PASSED",
+      "current_reason": "完整原始合同、登记变体、独立CPU/同字节CUDA、负向/边界与独立复审通过。实际路线：HIP NCC/full original CLI/RAW input/PGM annotation/HIP-event timing。性能不作跨设备比较。",
+      "remaining_contract": [],
+      "assessment_evidence": "migration/reports/evidence/rewrite/R3/NPP_templateMatching__templateMatching.cpp/20261110T090701.687702Z-R3-host-contract-review-c74d32e998",
+      "qualification_id": "20261110T092525.448735Z-R3-composite-qualification-ad7d1f1dc9"
     },
     {
       "sample_id": "NPP/watershedSegmentation::watershedSegmentation.cpp",
@@ -72768,7 +72768,7 @@
       "family": "cuSOLVER",
       "primary_phase": "R3",
       "baseline_status": "PARTIAL",
-      "state": "NUMERIC_CANDIDATE_REVIEW_PENDING",
+      "state": "QUALIFIED",
       "reason_code": "INDEPENDENT_VALIDATION_PENDING",
       "reason": "原始教学输入构建运行通过；独立正确性验证待完成",
       "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
@@ -72781,14 +72781,14 @@
       ],
       "prerequisites": [],
       "experiments": [
-        "20261110T090711.907190Z-R3-host-contract-review-4cc9b3d820"
+        "20261110T090711.907190Z-R3-host-contract-review-4cc9b3d820",
+        "20261110T092526.610000Z-R3-composite-qualification-e9da6e4aed"
       ],
-      "current_status": "PARTIAL",
-      "current_reason": "原始教学输入构建运行通过；独立正确性验证待完成",
-      "remaining_contract": [
-        "rewrite/R3/svd/independent-review-and-qualification"
-      ],
-      "assessment_evidence": "migration/reports/evidence/rewrite/R3/cuSOLVER_gesvdaStridedBatched__cusolver_gesvdaStridedBatched_example.cu/20261110T090711.907190Z-R3-host-contract-review-4cc9b3d820"
+      "current_status": "PASSED",
+      "current_reason": "完整原始合同、登记变体、独立CPU/同字节CUDA、负向/边界与独立复审通过。实际路线：hipSOLVER/rocSOLVER native full GPU SVD + HIP rank projection and FP64 residual。性能不作跨设备比较。",
+      "remaining_contract": [],
+      "assessment_evidence": "migration/reports/evidence/rewrite/R3/cuSOLVER_gesvdaStridedBatched__cusolver_gesvdaStridedBatched_example.cu/20261110T090711.907190Z-R3-host-contract-review-4cc9b3d820",
+      "qualification_id": "20261110T092526.610000Z-R3-composite-qualification-e9da6e4aed"
     },
     {
       "sample_id": "cuSOLVER/gesvdj::cusolver_gesvdj_example.cu",

@@ -1,0 +1,1 @@
+Test composite-qualification for cuSOLVER/gesvdaStridedBatched::cusolver_gesvdaStridedBatched_example.cu, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: none.

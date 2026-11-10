@@ -68856,7 +68856,7 @@
       "actual_library": "HIP NCC/full original CLI/RAW input/PGM annotation/HIP-event timing",
       "backend_library": "project HIP kernels",
       "implementation": "rocm/ported/NPP/templateMatching/templateMatching.cpp",
-      "status": "PARTIAL",
+      "status": "PASSED",
       "level": "L4",
       "required_cases": [
         "rewrite/R3/ncc/original",
@@ -68877,10 +68877,11 @@
         "rewrite/R3/ncc/repeat",
         "rewrite/R3/ncc/constant-template",
         "rewrite/R3/ncc/constant-image",
-        "rewrite/R3/ncc/constant-both"
+        "rewrite/R3/ncc/constant-both",
+        "rewrite/R3/ncc/independent-review-and-qualification"
       ],
-      "reason_code": "REWRITE_REVIEW_PENDING",
-      "reason": "已完成GPU重写与独立数值复核；候选尚需独立审查及完整资格，未升级整例。",
+      "reason_code": "VALIDATED_MOAT_REWRITE",
+      "reason": "完整原始合同、登记变体、独立CPU/同字节CUDA、负向/边界与独立复审通过。实际路线：HIP NCC/full original CLI/RAW input/PGM annotation/HIP-event timing。性能不作跨设备比较。",
       "cuda_baseline": "PASSED",
       "cuda_comparison": "PASSED",
       "benchmark": "NOT_RUN",
@@ -68895,7 +68896,9 @@
         "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp",
         "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp",
         "migration/reports/rewrite-ncc-rocm.json",
-        "migration/reports/rewrite-ncc-native-comparison.json"
+        "migration/reports/rewrite-ncc-native-comparison.json",
+        "migration/reports/evidence/rewrite/R3/NPP_templateMatching__templateMatching.cpp/20261110T092525.448735Z-R3-composite-qualification-ad7d1f1dc9",
+        "migration/reports/rewrite-R3-qualification.json"
       ],
       "attempts": [
         {
@@ -70410,6 +70413,606 @@
           },
           "reason_code": "REWRITE_REVIEW_PENDING",
           "reason": "已完成GPU重写与独立数值复核；候选尚需独立审查及完整资格，未升级整例。"
+        },
+        {
+          "kind": "ncc",
+          "sample_id": "NPP/templateMatching::templateMatching.cpp",
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "current-independent-review",
+              "passed": true
+            },
+            {
+              "check": "frozen-complete-cases",
+              "passed": true
+            },
+            {
+              "check": "unchanged-original-source",
+              "passed": true
+            },
+            {
+              "check": "current-compiled-source",
+              "passed": true
+            },
+            {
+              "check": "current-build-recipe",
+              "passed": true
+            },
+            {
+              "check": "binary-identity",
+              "passed": true
+            },
+            {
+              "check": "sealed-build",
+              "passed": true
+            },
+            {
+              "check": "original/same-manifest",
+              "passed": true
+            },
+            {
+              "check": "original/current-build",
+              "passed": true
+            },
+            {
+              "check": "original/locked-real-GPU",
+              "passed": true
+            },
+            {
+              "check": "original/rocm/frozen-case-identity",
+              "passed": true
+            },
+            {
+              "check": "original/rocm/sealed-run",
+              "passed": true
+            },
+            {
+              "check": "original/rocm/current-CPU",
+              "passed": true
+            },
+            {
+              "check": "original/cuda/frozen-case-identity",
+              "passed": true
+            },
+            {
+              "check": "original/cuda/sealed-run",
+              "passed": true
+            },
+            {
+              "check": "original/cuda/current-CPU",
+              "passed": true
+            },
+            {
+              "check": "original/native-comparison",
+              "passed": true
+            },
+            {
+              "check": "changed-values/same-manifest",
+              "passed": true
+            },
+            {
+              "check": "changed-values/current-build",
+              "passed": true
+            },
+            {
+              "check": "changed-values/locked-real-GPU",
+              "passed": true
+            },
+            {
+              "check": "changed-values/rocm/frozen-case-identity",
+              "passed": true
+            },
+            {
+              "check": "changed-values/rocm/sealed-run",
+              "passed": true
+            },
+            {
+              "check": "changed-values/rocm/current-CPU",
+              "passed": true
+            },
+            {
+              "check": "changed-values/cuda/frozen-case-identity",
+              "passed": true
+            },
+            {
+              "check": "changed-values/cuda/sealed-run",
+              "passed": true
+            },
+            {
+              "check": "changed-values/cuda/current-CPU",
+              "passed": true
+            },
+            {
+              "check": "changed-values/native-comparison",
+              "passed": true
+            },
+            {
+              "check": "changed-template/same-manifest",
+              "passed": true
+            },
+            {
+              "check": "changed-template/current-build",
+              "passed": true
+            },
+            {
+              "check": "changed-template/locked-real-GPU",
+              "passed": true
+            },
+            {
+              "check": "changed-template/rocm/frozen-case-identity",
+              "passed": true
+            },
+            {
+              "check": "changed-template/rocm/sealed-run",
+              "passed": true
+            },
+            {
+              "check": "changed-template/rocm/current-CPU",
+              "passed": true
+            },
+            {
+              "check": "changed-template/cuda/frozen-case-identity",
+              "passed": true
+            },
+            {
+              "check": "changed-template/cuda/sealed-run",
+              "passed": true
+            },
+            {
+              "check": "changed-template/cuda/current-CPU",
+              "passed": true
+            },
+            {
+              "check": "changed-template/native-comparison",
+              "passed": true
+            },
+            {
+              "check": "no-timing/same-manifest",
+              "passed": true
+            },
+            {
+              "check": "no-timing/current-build",
+              "passed": true
+            },
+            {
+              "check": "no-timing/locked-real-GPU",
+              "passed": true
+            },
+            {
+              "check": "no-timing/rocm/frozen-case-identity",
+              "passed": true
+            },
+            {
+              "check": "no-timing/rocm/sealed-run",
+              "passed": true
+            },
+            {
+              "check": "no-timing/rocm/current-CPU",
+              "passed": true
+            },
+            {
+              "check": "no-timing/cuda/frozen-case-identity",
+              "passed": true
+            },
+            {
+              "check": "no-timing/cuda/sealed-run",
+              "passed": true
+            },
+            {
+              "check": "no-timing/cuda/current-CPU",
+              "passed": true
+            },
+            {
+              "check": "no-timing/native-comparison",
+              "passed": true
+            },
+            {
+              "check": "repeat/same-manifest",
+              "passed": true
+            },
+            {
+              "check": "repeat/current-build",
+              "passed": true
+            },
+            {
+              "check": "repeat/locked-real-GPU",
+              "passed": true
+            },
+            {
+              "check": "repeat/rocm/frozen-case-identity",
+              "passed": true
+            },
+            {
+              "check": "repeat/rocm/sealed-run",
+              "passed": true
+            },
+            {
+              "check": "repeat/rocm/current-CPU",
+              "passed": true
+            },
+            {
+              "check": "repeat/cuda/frozen-case-identity",
+              "passed": true
+            },
+            {
+              "check": "repeat/cuda/sealed-run",
+              "passed": true
+            },
+            {
+              "check": "repeat/cuda/current-CPU",
+              "passed": true
+            },
+            {
+              "check": "repeat/native-comparison",
+              "passed": true
+            },
+            {
+              "check": "constant-template/same-manifest",
+              "passed": true
+            },
+            {
+              "check": "constant-template/current-build",
+              "passed": true
+            },
+            {
+              "check": "constant-template/locked-real-GPU",
+              "passed": true
+            },
+            {
+              "check": "constant-template/rocm/frozen-case-identity",
+              "passed": true
+            },
+            {
+              "check": "constant-template/rocm/sealed-run",
+              "passed": true
+            },
+            {
+              "check": "constant-template/rocm/current-CPU",
+              "passed": true
+            },
+            {
+              "check": "constant-template/cuda/frozen-case-identity",
+              "passed": true
+            },
+            {
+              "check": "constant-template/cuda/sealed-run",
+              "passed": true
+            },
+            {
+              "check": "constant-template/cuda/current-CPU",
+              "passed": true
+            },
+            {
+              "check": "constant-template/native-comparison",
+              "passed": true
+            },
+            {
+              "check": "constant-image/same-manifest",
+              "passed": true
+            },
+            {
+              "check": "constant-image/current-build",
+              "passed": true
+            },
+            {
+              "check": "constant-image/locked-real-GPU",
+              "passed": true
+            },
+            {
+              "check": "constant-image/rocm/frozen-case-identity",
+              "passed": true
+            },
+            {
+              "check": "constant-image/rocm/sealed-run",
+              "passed": true
+            },
+            {
+              "check": "constant-image/rocm/current-CPU",
+              "passed": true
+            },
+            {
+              "check": "constant-image/cuda/frozen-case-identity",
+              "passed": true
+            },
+            {
+              "check": "constant-image/cuda/sealed-run",
+              "passed": true
+            },
+            {
+              "check": "constant-image/cuda/current-CPU",
+              "passed": true
+            },
+            {
+              "check": "constant-image/native-comparison",
+              "passed": true
+            },
+            {
+              "check": "constant-both/same-manifest",
+              "passed": true
+            },
+            {
+              "check": "constant-both/current-build",
+              "passed": true
+            },
+            {
+              "check": "constant-both/locked-real-GPU",
+              "passed": true
+            },
+            {
+              "check": "constant-both/rocm/frozen-case-identity",
+              "passed": true
+            },
+            {
+              "check": "constant-both/rocm/sealed-run",
+              "passed": true
+            },
+            {
+              "check": "constant-both/rocm/current-CPU",
+              "passed": true
+            },
+            {
+              "check": "constant-both/cuda/frozen-case-identity",
+              "passed": true
+            },
+            {
+              "check": "constant-both/cuda/sealed-run",
+              "passed": true
+            },
+            {
+              "check": "constant-both/cuda/current-CPU",
+              "passed": true
+            },
+            {
+              "check": "constant-both/native-comparison",
+              "passed": true
+            },
+            {
+              "check": "negative-complete-unique-modes",
+              "passed": true
+            },
+            {
+              "check": "negative/scores",
+              "passed": true
+            },
+            {
+              "check": "negative/annotation",
+              "passed": true
+            },
+            {
+              "check": "negative/argmax",
+              "passed": true
+            },
+            {
+              "check": "negative/max-value",
+              "passed": true
+            },
+            {
+              "check": "runtime-complete-unique-tests",
+              "passed": true
+            },
+            {
+              "check": "CLI/negative-x",
+              "passed": true
+            },
+            {
+              "check": "CLI/short-template",
+              "passed": true
+            },
+            {
+              "check": "CLI/huge-template",
+              "passed": true
+            },
+            {
+              "check": "CLI/bad-noise",
+              "passed": true
+            },
+            {
+              "check": "CLI/negative-timing",
+              "passed": true
+            },
+            {
+              "check": "CLI/missing-file",
+              "passed": true
+            },
+            {
+              "check": "CLI/help",
+              "passed": true
+            }
+          ],
+          "scope": "MOAT R3 full original contract plus registered variants; independent composite qualification",
+          "implementation": "rocm/ported/NPP/templateMatching/templateMatching.cpp",
+          "implementation_sha256": "c1a315319e0436d6e831d2c09a02034a9385b7607e38bcd07dd189d17bd39c43",
+          "dependencies": {
+            "rocm/ported/NPP/templateMatching/templateMatching.cpp": "c1a315319e0436d6e831d2c09a02034a9385b7607e38bcd07dd189d17bd39c43",
+            "rocm/backends/image/ncc_contract.hpp": "5dbfd4eaaacbaf0e7c43197e35b07d20750ceda6f0a07e53c29dbd841ab84de8"
+          },
+          "case_count": 8,
+          "case_ids": [
+            "original",
+            "changed-values",
+            "changed-template",
+            "no-timing",
+            "repeat",
+            "constant-template",
+            "constant-image",
+            "constant-both"
+          ],
+          "evidence_references": [
+            "migration/reports/evidence/rewrite/R3/NCC_CLI_bad-noise/20261110T090418.283133Z-R3-rocm-invalid-cli-f5805369f0",
+            "migration/reports/evidence/rewrite/R3/NCC_CLI_help/20261110T090421.306320Z-R3-rocm-invalid-cli-2d7529d2d0",
+            "migration/reports/evidence/rewrite/R3/NCC_CLI_huge-template/20261110T090417.266727Z-R3-rocm-invalid-cli-acb628a88f",
+            "migration/reports/evidence/rewrite/R3/NCC_CLI_missing-file/20261110T090420.292400Z-R3-rocm-invalid-cli-9980da1c47",
+            "migration/reports/evidence/rewrite/R3/NCC_CLI_negative-timing/20261110T090419.289799Z-R3-rocm-invalid-cli-2eed61e3b1",
+            "migration/reports/evidence/rewrite/R3/NCC_CLI_negative-x/20261110T090415.247890Z-R3-rocm-invalid-cli-406fc6f081",
+            "migration/reports/evidence/rewrite/R3/NCC_CLI_short-template/20261110T090416.259816Z-R3-rocm-invalid-cli-f95713b83d",
+            "migration/reports/evidence/rewrite/R3/NCC_annotation/20261110T091807.397956Z-R3-cpu-negative-c2a49fd6f3",
+            "migration/reports/evidence/rewrite/R3/NCC_argmax/20261110T091808.647170Z-R3-cpu-negative-4421e1fe7a",
+            "migration/reports/evidence/rewrite/R3/NCC_changed-template/20261110T090340.749256Z-R3-native-comparison-44c68827d1",
+            "migration/reports/evidence/rewrite/R3/NCC_changed-template/20261110T091808.567626Z-R3-cpu-validation-7f743fefc0",
+            "migration/reports/evidence/rewrite/R3/NCC_changed-template/20261110T091817.607210Z-R3-cpu-validation-e81bb735fd",
+            "migration/reports/evidence/rewrite/R3/NCC_changed-values/20261110T090340.069301Z-R3-native-comparison-91a35fb705",
+            "migration/reports/evidence/rewrite/R3/NCC_changed-values/20261110T091807.371342Z-R3-cpu-validation-a0fbe098b8",
+            "migration/reports/evidence/rewrite/R3/NCC_changed-values/20261110T091816.477800Z-R3-cpu-validation-e0d2d7f155",
+            "migration/reports/evidence/rewrite/R3/NCC_constant-both/20261110T090344.131394Z-R3-native-comparison-0f320df81a",
+            "migration/reports/evidence/rewrite/R3/NCC_constant-both/20261110T091814.265696Z-R3-cpu-validation-1120704de2",
+            "migration/reports/evidence/rewrite/R3/NCC_constant-both/20261110T091823.235057Z-R3-cpu-validation-7c459b33b3",
+            "migration/reports/evidence/rewrite/R3/NCC_constant-image/20261110T090343.473840Z-R3-native-comparison-98ab9f7206",
+            "migration/reports/evidence/rewrite/R3/NCC_constant-image/20261110T091813.140820Z-R3-cpu-validation-627092d33f",
+            "migration/reports/evidence/rewrite/R3/NCC_constant-image/20261110T091822.083300Z-R3-cpu-validation-59063fa2b1",
+            "migration/reports/evidence/rewrite/R3/NCC_constant-template/20261110T090342.810971Z-R3-native-comparison-16ce8c5c5d",
+            "migration/reports/evidence/rewrite/R3/NCC_constant-template/20261110T091812.051311Z-R3-cpu-validation-b332beedde",
+            "migration/reports/evidence/rewrite/R3/NCC_constant-template/20261110T091821.002069Z-R3-cpu-validation-6b1213f631",
+            "migration/reports/evidence/rewrite/R3/NCC_max-value/20261110T091809.934026Z-R3-cpu-negative-8142990224",
+            "migration/reports/evidence/rewrite/R3/NCC_no-timing/20261110T090341.427230Z-R3-native-comparison-a8e183c6ff",
+            "migration/reports/evidence/rewrite/R3/NCC_no-timing/20261110T091809.702329Z-R3-cpu-validation-e662dd5446",
+            "migration/reports/evidence/rewrite/R3/NCC_no-timing/20261110T091818.722763Z-R3-cpu-validation-3f21c0d803",
+            "migration/reports/evidence/rewrite/R3/NCC_original/20261110T090339.365756Z-R3-native-comparison-8963589b67",
+            "migration/reports/evidence/rewrite/R3/NCC_original/20261110T091805.992924Z-R3-cpu-validation-4c1787aba0",
+            "migration/reports/evidence/rewrite/R3/NCC_original/20261110T091815.347504Z-R3-cpu-validation-1f9b4acbae",
+            "migration/reports/evidence/rewrite/R3/NCC_repeat/20261110T090342.132760Z-R3-native-comparison-d8f28e2050",
+            "migration/reports/evidence/rewrite/R3/NCC_repeat/20261110T091810.869785Z-R3-cpu-validation-3e1e6ce92c",
+            "migration/reports/evidence/rewrite/R3/NCC_repeat/20261110T091819.869910Z-R3-cpu-validation-5d36bb7d39",
+            "migration/reports/evidence/rewrite/R3/NCC_scores/20261110T091805.993990Z-R3-cpu-negative-e4fd9da882"
+          ],
+          "source_commit": "1ea4a7680743de0ea2dccdc740173ff3fd9afec3",
+          "qualification_id": "20261110T092525.448735Z-R3-composite-qualification-ad7d1f1dc9",
+          "evidence": "migration/reports/evidence/rewrite/R3/NPP_templateMatching__templateMatching.cpp/20261110T092525.448735Z-R3-composite-qualification-ad7d1f1dc9",
+          "rocm_evidence": "migration/reports/evidence/rewrite/R3/NPP_templateMatching__templateMatching.cpp/20261110T090234.713336Z-R3-rocm-46071a1d9e",
+          "environment": {
+            "hostname": "1dbe2fb12b01",
+            "platform": "Linux-7.0.0-42-generic-x86_64-with-glibc2.39",
+            "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+            "rocm_release": "10.1.0",
+            "visible_devices": "2",
+            "devices": [
+              {
+                "logical_id": 0,
+                "pci_bdf": "0000:03:00.0",
+                "physical_id": 0,
+                "uuid": "32396463623033636131356166623633"
+              }
+            ],
+            "versions": {
+              "hipRuntimeGetVersion": {
+                "status": 0,
+                "value": 71626385
+              },
+              "hipDriverGetVersion": {
+                "status": 0,
+                "value": 71626385
+              }
+            },
+            "packages": {
+              "rocm-sdk-core": "10.1.0",
+              "rocm-sdk-device-gfx1100": "10.1.0",
+              "rocm-sdk-device-gfx942": "10.1.0",
+              "rocm-sdk-device-gfx1010": "10.1.0",
+              "rocm-sdk-device-gfx1011": "10.1.0",
+              "rocm-sdk-device-gfx1101": "10.1.0",
+              "rocm-bootstrap": "0.3.0",
+              "triton": "3.8.0+git669b31ac.rocm10.1.0",
+              "rocm-sdk-device-gfx1035": "10.1.0",
+              "rocm-sdk-device-gfx1012": "10.1.0",
+              "torch": "2.14.0+rocm10.1.0",
+              "rocm-sdk-device-gfx1152": "10.1.0",
+              "rocm-sdk-device-gfx908": "10.1.0",
+              "rocm-sdk-libraries": "10.1.0",
+              "rocm-sdk-device-gfx1031": "10.1.0",
+              "rocm-sdk-device-gfx1151": "10.1.0",
+              "rocm-sdk-device-gfx1030": "10.1.0",
+              "rocm-sdk-device-gfx1103": "10.1.0",
+              "rocm-sdk-device-gfx1250": "10.1.0",
+              "rocm-sdk-device-gfx1032": "10.1.0",
+              "rocm-sdk-device-gfx1102": "10.1.0",
+              "rocm-sdk-device-gfx1201": "10.1.0",
+              "rocm-sdk-device-gfx90a": "10.1.0",
+              "torchvision": "0.29.0a0+rocm10.1.0",
+              "rocm-sdk-device-gfx1036": "10.1.0",
+              "rocm-sdk-device-gfx1153": "10.1.0",
+              "rocm": "10.1.0",
+              "rocm-sdk-device-gfx1150": "10.1.0",
+              "rocm-sdk-device-gfx1200": "10.1.0",
+              "rocm-sdk-device-gfx1034": "10.1.0",
+              "rocm-sdk-device-gfx1033": "10.1.0",
+              "rocm-sdk-device-gfx950": "10.1.0"
+            },
+            "loaded_libraries": [
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamd_comgr.so.3",
+                "sha256": "6bf2f6fe6b243c5ac3621cd5745887933d3a41edd944a447c88c21ec77da5d5b"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamdhip64.so.7",
+                "sha256": "6d1dbee8cb3ad924e4c1bca7734e22f2c93026eb3bc871a7f64a916778d55e36"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-amd-aqlprofile64.so.1",
+                "sha256": "6d4be9a3d53457b466f3e1fb1b07b897cd78be9b934a5326444b7b2070dabd61"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-runtime64.so.1",
+                "sha256": "12d49db16881b9505629192231d5b3971e9030b26a326fc2c003e92da7de0c44"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocm_kpack.so.0",
+                "sha256": "e2af394dea58ad53d6074c7aa9d56de5dc027ca186f6bbc27d6f32d7b8f12ac3"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocprofiler-register.so.0",
+                "sha256": "a67764cf46d1d579eb27311576ba9c0b4dbfa5052ddd64a062131f716faa11b6"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libLLVM.so.24.0git",
+                "sha256": "3e7b50e1f252792eba7380b8503c05c899bf8ae9deeb70faf3f9be5f995c8e0a"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libclang-cpp.so.24.0git",
+                "sha256": "18ef4cb8bd32366a68599fb6d723ed38814707a2ada1ff34b722dafc7856663b"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_bz2.so",
+                "sha256": "37a39b12a7e6e9f480d10e5e139b9aedbe5824e63b6b9e12a16837baee608602"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm.so.2",
+                "sha256": "b715ae24e1d62e407ffceca56b546e8a35abe37ac50878cbb16fa8b93d9c9fd5"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm_amdgpu.so.1",
+                "sha256": "b25742cda500eaa61e39b2b32492bb482235ad3e3df8a988d8f4130054d94cad"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_elf.so.1",
+                "sha256": "692dd9fe3575a45df78b319ad0e2a58ee36814958771dd810d5d91f9616c6d8f"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_liblzma.so.5",
+                "sha256": "d17f947bfe3947db5aefee897f6d32dfe98c73bf80b477764ba7f4107594a671"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_numa.so.1",
+                "sha256": "26fffd0f85369950b834cfb8f56fa9e1ea4804be8bbc40db98b788c554802bc3"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_z.so.1",
+                "sha256": "e1d7568f4a0b77eeab26f30cc9d2794dfe7ffd14e34b4ae55a9f80bc4f94ba7a"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_zstd.so.1",
+                "sha256": "fc3edd0b74fa071079b0095abe7b3f41418ca39be138f4ec0c57d0640a0b2d8b"
+              }
+            ]
+          },
+          "devices": [
+            {
+              "logical_id": 0,
+              "pci_bdf": "0000:03:00.0",
+              "physical_id": 0,
+              "uuid": "32396463623033636131356166623633"
+            }
+          ],
+          "cuda_evidence": "migration/reports/evidence/rewrite/R3/NPP_templateMatching__templateMatching.cpp/20261110T084543.063400Z-R3-cuda-native-cc2e0f9ee9"
         }
       ],
       "milestone": "M3",
@@ -70485,519 +71088,604 @@
       "cuda_comparison_reason": "当前 AMD 路线尚未通过正确性验收。",
       "cuda_comparison_mode": "COMPATIBLE_CUDA_MATH_BASELINE",
       "selected_validation": {
-        "source": "NPP/templateMatching/templateMatching.cpp",
-        "batch": "b15",
-        "execution_model": "single",
-        "implementation": "rocm/ported/NPP/templateMatching/templateMatching.cpp",
-        "implementation_sha256": "e7d1f6bc6a7229963605d97c28632701583aba5b257cdcb36115f54b5a3bb8e0",
-        "original_sha256": "812ed394222f764ce9fb4ec0cac1c5d0cad6f1620cc15a367dc1be9ce92c2cfb",
-        "build_return_code": 0,
-        "runs": [
+        "kind": "ncc",
+        "sample_id": "NPP/templateMatching::templateMatching.cpp",
+        "status": "PASSED",
+        "checks": [
           {
-            "case": "original",
-            "return_code": 0,
-            "evidence": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp/original"
+            "check": "current-independent-review",
+            "passed": true
           },
           {
-            "case": "irregular",
-            "return_code": 0,
-            "evidence": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp/irregular"
+            "check": "frozen-complete-cases",
+            "passed": true
           },
           {
-            "case": "changed-values",
-            "return_code": 0,
-            "evidence": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp/changed-values"
+            "check": "unchanged-original-source",
+            "passed": true
           },
           {
-            "case": "boundary",
-            "return_code": 0,
-            "evidence": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp/boundary"
+            "check": "current-compiled-source",
+            "passed": true
           },
           {
-            "case": "repeat",
-            "return_code": 0,
-            "evidence": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp/repeat"
+            "check": "current-build-recipe",
+            "passed": true
           },
           {
-            "case": "singular-or-empty",
-            "return_code": 0,
-            "evidence": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp/singular-or-empty"
+            "check": "binary-identity",
+            "passed": true
+          },
+          {
+            "check": "sealed-build",
+            "passed": true
+          },
+          {
+            "check": "original/same-manifest",
+            "passed": true
+          },
+          {
+            "check": "original/current-build",
+            "passed": true
+          },
+          {
+            "check": "original/locked-real-GPU",
+            "passed": true
+          },
+          {
+            "check": "original/rocm/frozen-case-identity",
+            "passed": true
+          },
+          {
+            "check": "original/rocm/sealed-run",
+            "passed": true
+          },
+          {
+            "check": "original/rocm/current-CPU",
+            "passed": true
+          },
+          {
+            "check": "original/cuda/frozen-case-identity",
+            "passed": true
+          },
+          {
+            "check": "original/cuda/sealed-run",
+            "passed": true
+          },
+          {
+            "check": "original/cuda/current-CPU",
+            "passed": true
+          },
+          {
+            "check": "original/native-comparison",
+            "passed": true
+          },
+          {
+            "check": "changed-values/same-manifest",
+            "passed": true
+          },
+          {
+            "check": "changed-values/current-build",
+            "passed": true
+          },
+          {
+            "check": "changed-values/locked-real-GPU",
+            "passed": true
+          },
+          {
+            "check": "changed-values/rocm/frozen-case-identity",
+            "passed": true
+          },
+          {
+            "check": "changed-values/rocm/sealed-run",
+            "passed": true
+          },
+          {
+            "check": "changed-values/rocm/current-CPU",
+            "passed": true
+          },
+          {
+            "check": "changed-values/cuda/frozen-case-identity",
+            "passed": true
+          },
+          {
+            "check": "changed-values/cuda/sealed-run",
+            "passed": true
+          },
+          {
+            "check": "changed-values/cuda/current-CPU",
+            "passed": true
+          },
+          {
+            "check": "changed-values/native-comparison",
+            "passed": true
+          },
+          {
+            "check": "changed-template/same-manifest",
+            "passed": true
+          },
+          {
+            "check": "changed-template/current-build",
+            "passed": true
+          },
+          {
+            "check": "changed-template/locked-real-GPU",
+            "passed": true
+          },
+          {
+            "check": "changed-template/rocm/frozen-case-identity",
+            "passed": true
+          },
+          {
+            "check": "changed-template/rocm/sealed-run",
+            "passed": true
+          },
+          {
+            "check": "changed-template/rocm/current-CPU",
+            "passed": true
+          },
+          {
+            "check": "changed-template/cuda/frozen-case-identity",
+            "passed": true
+          },
+          {
+            "check": "changed-template/cuda/sealed-run",
+            "passed": true
+          },
+          {
+            "check": "changed-template/cuda/current-CPU",
+            "passed": true
+          },
+          {
+            "check": "changed-template/native-comparison",
+            "passed": true
+          },
+          {
+            "check": "no-timing/same-manifest",
+            "passed": true
+          },
+          {
+            "check": "no-timing/current-build",
+            "passed": true
+          },
+          {
+            "check": "no-timing/locked-real-GPU",
+            "passed": true
+          },
+          {
+            "check": "no-timing/rocm/frozen-case-identity",
+            "passed": true
+          },
+          {
+            "check": "no-timing/rocm/sealed-run",
+            "passed": true
+          },
+          {
+            "check": "no-timing/rocm/current-CPU",
+            "passed": true
+          },
+          {
+            "check": "no-timing/cuda/frozen-case-identity",
+            "passed": true
+          },
+          {
+            "check": "no-timing/cuda/sealed-run",
+            "passed": true
+          },
+          {
+            "check": "no-timing/cuda/current-CPU",
+            "passed": true
+          },
+          {
+            "check": "no-timing/native-comparison",
+            "passed": true
+          },
+          {
+            "check": "repeat/same-manifest",
+            "passed": true
+          },
+          {
+            "check": "repeat/current-build",
+            "passed": true
+          },
+          {
+            "check": "repeat/locked-real-GPU",
+            "passed": true
+          },
+          {
+            "check": "repeat/rocm/frozen-case-identity",
+            "passed": true
+          },
+          {
+            "check": "repeat/rocm/sealed-run",
+            "passed": true
+          },
+          {
+            "check": "repeat/rocm/current-CPU",
+            "passed": true
+          },
+          {
+            "check": "repeat/cuda/frozen-case-identity",
+            "passed": true
+          },
+          {
+            "check": "repeat/cuda/sealed-run",
+            "passed": true
+          },
+          {
+            "check": "repeat/cuda/current-CPU",
+            "passed": true
+          },
+          {
+            "check": "repeat/native-comparison",
+            "passed": true
+          },
+          {
+            "check": "constant-template/same-manifest",
+            "passed": true
+          },
+          {
+            "check": "constant-template/current-build",
+            "passed": true
+          },
+          {
+            "check": "constant-template/locked-real-GPU",
+            "passed": true
+          },
+          {
+            "check": "constant-template/rocm/frozen-case-identity",
+            "passed": true
+          },
+          {
+            "check": "constant-template/rocm/sealed-run",
+            "passed": true
+          },
+          {
+            "check": "constant-template/rocm/current-CPU",
+            "passed": true
+          },
+          {
+            "check": "constant-template/cuda/frozen-case-identity",
+            "passed": true
+          },
+          {
+            "check": "constant-template/cuda/sealed-run",
+            "passed": true
+          },
+          {
+            "check": "constant-template/cuda/current-CPU",
+            "passed": true
+          },
+          {
+            "check": "constant-template/native-comparison",
+            "passed": true
+          },
+          {
+            "check": "constant-image/same-manifest",
+            "passed": true
+          },
+          {
+            "check": "constant-image/current-build",
+            "passed": true
+          },
+          {
+            "check": "constant-image/locked-real-GPU",
+            "passed": true
+          },
+          {
+            "check": "constant-image/rocm/frozen-case-identity",
+            "passed": true
+          },
+          {
+            "check": "constant-image/rocm/sealed-run",
+            "passed": true
+          },
+          {
+            "check": "constant-image/rocm/current-CPU",
+            "passed": true
+          },
+          {
+            "check": "constant-image/cuda/frozen-case-identity",
+            "passed": true
+          },
+          {
+            "check": "constant-image/cuda/sealed-run",
+            "passed": true
+          },
+          {
+            "check": "constant-image/cuda/current-CPU",
+            "passed": true
+          },
+          {
+            "check": "constant-image/native-comparison",
+            "passed": true
+          },
+          {
+            "check": "constant-both/same-manifest",
+            "passed": true
+          },
+          {
+            "check": "constant-both/current-build",
+            "passed": true
+          },
+          {
+            "check": "constant-both/locked-real-GPU",
+            "passed": true
+          },
+          {
+            "check": "constant-both/rocm/frozen-case-identity",
+            "passed": true
+          },
+          {
+            "check": "constant-both/rocm/sealed-run",
+            "passed": true
+          },
+          {
+            "check": "constant-both/rocm/current-CPU",
+            "passed": true
+          },
+          {
+            "check": "constant-both/cuda/frozen-case-identity",
+            "passed": true
+          },
+          {
+            "check": "constant-both/cuda/sealed-run",
+            "passed": true
+          },
+          {
+            "check": "constant-both/cuda/current-CPU",
+            "passed": true
+          },
+          {
+            "check": "constant-both/native-comparison",
+            "passed": true
+          },
+          {
+            "check": "negative-complete-unique-modes",
+            "passed": true
+          },
+          {
+            "check": "negative/scores",
+            "passed": true
+          },
+          {
+            "check": "negative/annotation",
+            "passed": true
+          },
+          {
+            "check": "negative/argmax",
+            "passed": true
+          },
+          {
+            "check": "negative/max-value",
+            "passed": true
+          },
+          {
+            "check": "runtime-complete-unique-tests",
+            "passed": true
+          },
+          {
+            "check": "CLI/negative-x",
+            "passed": true
+          },
+          {
+            "check": "CLI/short-template",
+            "passed": true
+          },
+          {
+            "check": "CLI/huge-template",
+            "passed": true
+          },
+          {
+            "check": "CLI/bad-noise",
+            "passed": true
+          },
+          {
+            "check": "CLI/negative-timing",
+            "passed": true
+          },
+          {
+            "check": "CLI/missing-file",
+            "passed": true
+          },
+          {
+            "check": "CLI/help",
+            "passed": true
           }
         ],
-        "evidence": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp",
+        "scope": "MOAT R3 full original contract plus registered variants; independent composite qualification",
+        "implementation": "rocm/ported/NPP/templateMatching/templateMatching.cpp",
+        "implementation_sha256": "c1a315319e0436d6e831d2c09a02034a9385b7607e38bcd07dd189d17bd39c43",
+        "dependencies": {
+          "rocm/ported/NPP/templateMatching/templateMatching.cpp": "c1a315319e0436d6e831d2c09a02034a9385b7607e38bcd07dd189d17bd39c43",
+          "rocm/backends/image/ncc_contract.hpp": "5dbfd4eaaacbaf0e7c43197e35b07d20750ceda6f0a07e53c29dbd841ab84de8"
+        },
+        "case_count": 8,
+        "case_ids": [
+          "original",
+          "changed-values",
+          "changed-template",
+          "no-timing",
+          "repeat",
+          "constant-template",
+          "constant-image",
+          "constant-both"
+        ],
+        "evidence_references": [
+          "migration/reports/evidence/rewrite/R3/NCC_CLI_bad-noise/20261110T090418.283133Z-R3-rocm-invalid-cli-f5805369f0",
+          "migration/reports/evidence/rewrite/R3/NCC_CLI_help/20261110T090421.306320Z-R3-rocm-invalid-cli-2d7529d2d0",
+          "migration/reports/evidence/rewrite/R3/NCC_CLI_huge-template/20261110T090417.266727Z-R3-rocm-invalid-cli-acb628a88f",
+          "migration/reports/evidence/rewrite/R3/NCC_CLI_missing-file/20261110T090420.292400Z-R3-rocm-invalid-cli-9980da1c47",
+          "migration/reports/evidence/rewrite/R3/NCC_CLI_negative-timing/20261110T090419.289799Z-R3-rocm-invalid-cli-2eed61e3b1",
+          "migration/reports/evidence/rewrite/R3/NCC_CLI_negative-x/20261110T090415.247890Z-R3-rocm-invalid-cli-406fc6f081",
+          "migration/reports/evidence/rewrite/R3/NCC_CLI_short-template/20261110T090416.259816Z-R3-rocm-invalid-cli-f95713b83d",
+          "migration/reports/evidence/rewrite/R3/NCC_annotation/20261110T091807.397956Z-R3-cpu-negative-c2a49fd6f3",
+          "migration/reports/evidence/rewrite/R3/NCC_argmax/20261110T091808.647170Z-R3-cpu-negative-4421e1fe7a",
+          "migration/reports/evidence/rewrite/R3/NCC_changed-template/20261110T090340.749256Z-R3-native-comparison-44c68827d1",
+          "migration/reports/evidence/rewrite/R3/NCC_changed-template/20261110T091808.567626Z-R3-cpu-validation-7f743fefc0",
+          "migration/reports/evidence/rewrite/R3/NCC_changed-template/20261110T091817.607210Z-R3-cpu-validation-e81bb735fd",
+          "migration/reports/evidence/rewrite/R3/NCC_changed-values/20261110T090340.069301Z-R3-native-comparison-91a35fb705",
+          "migration/reports/evidence/rewrite/R3/NCC_changed-values/20261110T091807.371342Z-R3-cpu-validation-a0fbe098b8",
+          "migration/reports/evidence/rewrite/R3/NCC_changed-values/20261110T091816.477800Z-R3-cpu-validation-e0d2d7f155",
+          "migration/reports/evidence/rewrite/R3/NCC_constant-both/20261110T090344.131394Z-R3-native-comparison-0f320df81a",
+          "migration/reports/evidence/rewrite/R3/NCC_constant-both/20261110T091814.265696Z-R3-cpu-validation-1120704de2",
+          "migration/reports/evidence/rewrite/R3/NCC_constant-both/20261110T091823.235057Z-R3-cpu-validation-7c459b33b3",
+          "migration/reports/evidence/rewrite/R3/NCC_constant-image/20261110T090343.473840Z-R3-native-comparison-98ab9f7206",
+          "migration/reports/evidence/rewrite/R3/NCC_constant-image/20261110T091813.140820Z-R3-cpu-validation-627092d33f",
+          "migration/reports/evidence/rewrite/R3/NCC_constant-image/20261110T091822.083300Z-R3-cpu-validation-59063fa2b1",
+          "migration/reports/evidence/rewrite/R3/NCC_constant-template/20261110T090342.810971Z-R3-native-comparison-16ce8c5c5d",
+          "migration/reports/evidence/rewrite/R3/NCC_constant-template/20261110T091812.051311Z-R3-cpu-validation-b332beedde",
+          "migration/reports/evidence/rewrite/R3/NCC_constant-template/20261110T091821.002069Z-R3-cpu-validation-6b1213f631",
+          "migration/reports/evidence/rewrite/R3/NCC_max-value/20261110T091809.934026Z-R3-cpu-negative-8142990224",
+          "migration/reports/evidence/rewrite/R3/NCC_no-timing/20261110T090341.427230Z-R3-native-comparison-a8e183c6ff",
+          "migration/reports/evidence/rewrite/R3/NCC_no-timing/20261110T091809.702329Z-R3-cpu-validation-e662dd5446",
+          "migration/reports/evidence/rewrite/R3/NCC_no-timing/20261110T091818.722763Z-R3-cpu-validation-3f21c0d803",
+          "migration/reports/evidence/rewrite/R3/NCC_original/20261110T090339.365756Z-R3-native-comparison-8963589b67",
+          "migration/reports/evidence/rewrite/R3/NCC_original/20261110T091805.992924Z-R3-cpu-validation-4c1787aba0",
+          "migration/reports/evidence/rewrite/R3/NCC_original/20261110T091815.347504Z-R3-cpu-validation-1f9b4acbae",
+          "migration/reports/evidence/rewrite/R3/NCC_repeat/20261110T090342.132760Z-R3-native-comparison-d8f28e2050",
+          "migration/reports/evidence/rewrite/R3/NCC_repeat/20261110T091810.869785Z-R3-cpu-validation-3e1e6ce92c",
+          "migration/reports/evidence/rewrite/R3/NCC_repeat/20261110T091819.869910Z-R3-cpu-validation-5d36bb7d39",
+          "migration/reports/evidence/rewrite/R3/NCC_scores/20261110T091805.993990Z-R3-cpu-negative-e4fd9da882"
+        ],
+        "source_commit": "1ea4a7680743de0ea2dccdc740173ff3fd9afec3",
+        "qualification_id": "20261110T092525.448735Z-R3-composite-qualification-ad7d1f1dc9",
+        "evidence": "migration/reports/evidence/rewrite/R3/NPP_templateMatching__templateMatching.cpp/20261110T092525.448735Z-R3-composite-qualification-ad7d1f1dc9",
+        "rocm_evidence": "migration/reports/evidence/rewrite/R3/NPP_templateMatching__templateMatching.cpp/20261110T090234.713336Z-R3-rocm-46071a1d9e",
         "environment": {
-          "backend": "rocm",
+          "hostname": "1dbe2fb12b01",
+          "platform": "Linux-7.0.0-42-generic-x86_64-with-glibc2.39",
+          "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+          "rocm_release": "10.1.0",
+          "visible_devices": "2",
           "devices": [
             {
               "logical_id": 0,
               "pci_bdf": "0000:03:00.0",
-              "physical_id": 0
+              "physical_id": 0,
+              "uuid": "32396463623033636131356166623633"
             }
           ],
-          "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
-          "rocm_release": "10.1.0",
-          "visible_devices": "2"
+          "versions": {
+            "hipRuntimeGetVersion": {
+              "status": 0,
+              "value": 71626385
+            },
+            "hipDriverGetVersion": {
+              "status": 0,
+              "value": 71626385
+            }
+          },
+          "packages": {
+            "rocm-sdk-core": "10.1.0",
+            "rocm-sdk-device-gfx1100": "10.1.0",
+            "rocm-sdk-device-gfx942": "10.1.0",
+            "rocm-sdk-device-gfx1010": "10.1.0",
+            "rocm-sdk-device-gfx1011": "10.1.0",
+            "rocm-sdk-device-gfx1101": "10.1.0",
+            "rocm-bootstrap": "0.3.0",
+            "triton": "3.8.0+git669b31ac.rocm10.1.0",
+            "rocm-sdk-device-gfx1035": "10.1.0",
+            "rocm-sdk-device-gfx1012": "10.1.0",
+            "torch": "2.14.0+rocm10.1.0",
+            "rocm-sdk-device-gfx1152": "10.1.0",
+            "rocm-sdk-device-gfx908": "10.1.0",
+            "rocm-sdk-libraries": "10.1.0",
+            "rocm-sdk-device-gfx1031": "10.1.0",
+            "rocm-sdk-device-gfx1151": "10.1.0",
+            "rocm-sdk-device-gfx1030": "10.1.0",
+            "rocm-sdk-device-gfx1103": "10.1.0",
+            "rocm-sdk-device-gfx1250": "10.1.0",
+            "rocm-sdk-device-gfx1032": "10.1.0",
+            "rocm-sdk-device-gfx1102": "10.1.0",
+            "rocm-sdk-device-gfx1201": "10.1.0",
+            "rocm-sdk-device-gfx90a": "10.1.0",
+            "torchvision": "0.29.0a0+rocm10.1.0",
+            "rocm-sdk-device-gfx1036": "10.1.0",
+            "rocm-sdk-device-gfx1153": "10.1.0",
+            "rocm": "10.1.0",
+            "rocm-sdk-device-gfx1150": "10.1.0",
+            "rocm-sdk-device-gfx1200": "10.1.0",
+            "rocm-sdk-device-gfx1034": "10.1.0",
+            "rocm-sdk-device-gfx1033": "10.1.0",
+            "rocm-sdk-device-gfx950": "10.1.0"
+          },
+          "loaded_libraries": [
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamd_comgr.so.3",
+              "sha256": "6bf2f6fe6b243c5ac3621cd5745887933d3a41edd944a447c88c21ec77da5d5b"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamdhip64.so.7",
+              "sha256": "6d1dbee8cb3ad924e4c1bca7734e22f2c93026eb3bc871a7f64a916778d55e36"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-amd-aqlprofile64.so.1",
+              "sha256": "6d4be9a3d53457b466f3e1fb1b07b897cd78be9b934a5326444b7b2070dabd61"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-runtime64.so.1",
+              "sha256": "12d49db16881b9505629192231d5b3971e9030b26a326fc2c003e92da7de0c44"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocm_kpack.so.0",
+              "sha256": "e2af394dea58ad53d6074c7aa9d56de5dc027ca186f6bbc27d6f32d7b8f12ac3"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocprofiler-register.so.0",
+              "sha256": "a67764cf46d1d579eb27311576ba9c0b4dbfa5052ddd64a062131f716faa11b6"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libLLVM.so.24.0git",
+              "sha256": "3e7b50e1f252792eba7380b8503c05c899bf8ae9deeb70faf3f9be5f995c8e0a"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libclang-cpp.so.24.0git",
+              "sha256": "18ef4cb8bd32366a68599fb6d723ed38814707a2ada1ff34b722dafc7856663b"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_bz2.so",
+              "sha256": "37a39b12a7e6e9f480d10e5e139b9aedbe5824e63b6b9e12a16837baee608602"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm.so.2",
+              "sha256": "b715ae24e1d62e407ffceca56b546e8a35abe37ac50878cbb16fa8b93d9c9fd5"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm_amdgpu.so.1",
+              "sha256": "b25742cda500eaa61e39b2b32492bb482235ad3e3df8a988d8f4130054d94cad"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_elf.so.1",
+              "sha256": "692dd9fe3575a45df78b319ad0e2a58ee36814958771dd810d5d91f9616c6d8f"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_liblzma.so.5",
+              "sha256": "d17f947bfe3947db5aefee897f6d32dfe98c73bf80b477764ba7f4107594a671"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_numa.so.1",
+              "sha256": "26fffd0f85369950b834cfb8f56fa9e1ea4804be8bbc40db98b788c554802bc3"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_z.so.1",
+              "sha256": "e1d7568f4a0b77eeab26f30cc9d2794dfe7ffd14e34b4ae55a9f80bc4f94ba7a"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_zstd.so.1",
+              "sha256": "fc3edd0b74fa071079b0095abe7b3f41418ca39be138f4ec0c57d0640a0b2d8b"
+            }
+          ]
         },
-        "libraries": [
-          "mpi",
-          "amdhip64",
-          "hipblas",
-          "rccl",
-          "hipfft",
-          "rocrand"
-        ],
-        "dependencies": {
-          "rocm/common/batch15_image.hpp": "684fdb5404368e2e07fe3da83b5be20bc3fdf6445dc748bd0af31fc15c93e449",
-          "rocm/common/batches_runtime.hpp": "04dc008dae2ade89ea3ef3e349d4a2dd0a842601737c77f0c7f076187b34f26f",
-          "rocm/common/observe.hpp": "3bd452d352dfce533bfb51a6e32ea308d9ca5d85a3a22afeca109d1cae743410",
-          "rocm/common/binary_observe.hpp": "c932e3d979f33ea8c62b38e687be1a083dfec0481d5e9ffbb04ffe6865899e73",
-          "tools/migration/batch15_reference.py": "ab77e3cf48118292c2e2c980afdea964b5a07f44693c01f70c2d4e448a4fbdab",
-          "tools/migration/batches12_15_spec.py": "b8220530db3a3a8319ac5fb39050003a3ac6db12b5d6bc52b801ff66426b6f7b"
-        },
-        "status": "PASSED",
-        "level": "L4",
-        "cases": [
+        "devices": [
           {
-            "status": "PASSED",
-            "checks": [
-              {
-                "check": "registered-image-count-no-empty-work",
-                "passed": true
-              },
-              {
-                "check": "actual-kernel-and-repeat-0",
-                "passed": true
-              },
-              {
-                "check": "every-NCC-score-0",
-                "passed": true,
-                "max_abs": 2.9798965850424963e-08
-              },
-              {
-                "check": "GPU-global-argmax-0",
-                "passed": true
-              },
-              {
-                "check": "original-degraded-template-location-0",
-                "passed": true
-              }
-            ],
-            "input_sha256": "ff1f4f9e1a454ea3db7cbdf32ec6e809aa283500430afa13104c6aa35b18e9cb",
-            "output_values": {},
-            "oracle": "SciPy Euclidean distance/nearest sites, FP64 FFT-NCC/integral variance, independent Sobel/NMS and queue/ndimage connectivity; full pixels and GPU region statistics/padding",
-            "output_manifest": {
-              "path": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp/original/outputs-manifest.json",
-              "sha256": "193e3d0dcabb83caa395958ad07fd80ec66e963c3ed08e3aa03719e05e5beeb9",
-              "files": 9
-            },
-            "case": "original"
-          },
-          {
-            "status": "PASSED",
-            "checks": [
-              {
-                "check": "registered-image-count-no-empty-work",
-                "passed": true
-              },
-              {
-                "check": "actual-kernel-and-repeat-0",
-                "passed": true
-              },
-              {
-                "check": "every-NCC-score-0",
-                "passed": true,
-                "max_abs": 2.7476684150151698e-08
-              },
-              {
-                "check": "GPU-global-argmax-0",
-                "passed": true
-              }
-            ],
-            "input_sha256": "44ed549070b1f6065127d5d4b082241520d0a233720cdc594c7a5d2d5e4ae6b2",
-            "output_values": {},
-            "oracle": "SciPy Euclidean distance/nearest sites, FP64 FFT-NCC/integral variance, independent Sobel/NMS and queue/ndimage connectivity; full pixels and GPU region statistics/padding",
-            "output_manifest": {
-              "path": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp/irregular/outputs-manifest.json",
-              "sha256": "fb520807f9ea67cfd1c4702aad7c2cb2e30387e854554c4c603bf2f34ec39700",
-              "files": 9
-            },
-            "case": "irregular"
-          },
-          {
-            "status": "PASSED",
-            "checks": [
-              {
-                "check": "registered-image-count-no-empty-work",
-                "passed": true
-              },
-              {
-                "check": "actual-kernel-and-repeat-0",
-                "passed": true
-              },
-              {
-                "check": "every-NCC-score-0",
-                "passed": true,
-                "max_abs": 1.4730383190997287e-08
-              },
-              {
-                "check": "GPU-global-argmax-0",
-                "passed": true
-              }
-            ],
-            "input_sha256": "7dec33fb5b12d5ac2f2c22ba6c6b2634c7f86e8263d1c619cd3c79b2f9db1a64",
-            "output_values": {},
-            "oracle": "SciPy Euclidean distance/nearest sites, FP64 FFT-NCC/integral variance, independent Sobel/NMS and queue/ndimage connectivity; full pixels and GPU region statistics/padding",
-            "output_manifest": {
-              "path": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp/changed-values/outputs-manifest.json",
-              "sha256": "372f4a2a5f224358ed5492f75c39887d7a9d44c2987bbdd1812f9630a30211c2",
-              "files": 9
-            },
-            "case": "changed-values"
-          },
-          {
-            "status": "PASSED",
-            "checks": [
-              {
-                "check": "registered-image-count-no-empty-work",
-                "passed": true
-              },
-              {
-                "check": "actual-kernel-and-repeat-0",
-                "passed": true
-              },
-              {
-                "check": "every-NCC-score-0",
-                "passed": true,
-                "max_abs": 6.907666688649172e-09
-              },
-              {
-                "check": "GPU-global-argmax-0",
-                "passed": true
-              }
-            ],
-            "input_sha256": "dff7c9406d2f8e6812dec8862407b32d0051400b0a19825a4fb50037172bd973",
-            "output_values": {},
-            "oracle": "SciPy Euclidean distance/nearest sites, FP64 FFT-NCC/integral variance, independent Sobel/NMS and queue/ndimage connectivity; full pixels and GPU region statistics/padding",
-            "output_manifest": {
-              "path": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp/boundary/outputs-manifest.json",
-              "sha256": "9086986a6af3e7ddb1074f1ee1184e44dead4caca18f884ef30160386de727da",
-              "files": 9
-            },
-            "case": "boundary"
-          },
-          {
-            "status": "PASSED",
-            "checks": [
-              {
-                "check": "registered-image-count-no-empty-work",
-                "passed": true
-              },
-              {
-                "check": "actual-kernel-and-repeat-0",
-                "passed": true
-              },
-              {
-                "check": "every-NCC-score-0",
-                "passed": true,
-                "max_abs": 2.9798965850424963e-08
-              },
-              {
-                "check": "GPU-global-argmax-0",
-                "passed": true
-              },
-              {
-                "check": "original-degraded-template-location-0",
-                "passed": true
-              }
-            ],
-            "input_sha256": "ff1f4f9e1a454ea3db7cbdf32ec6e809aa283500430afa13104c6aa35b18e9cb",
-            "output_values": {},
-            "oracle": "SciPy Euclidean distance/nearest sites, FP64 FFT-NCC/integral variance, independent Sobel/NMS and queue/ndimage connectivity; full pixels and GPU region statistics/padding",
-            "output_manifest": {
-              "path": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp/repeat/outputs-manifest.json",
-              "sha256": "d57513f8a0b97746749a4b7b11c308612f4ec0cb8d918e7d5cc8f4ddeb347985",
-              "files": 9
-            },
-            "case": "repeat"
-          },
-          {
-            "status": "PASSED",
-            "checks": [
-              {
-                "check": "registered-image-count-no-empty-work",
-                "passed": true
-              },
-              {
-                "check": "actual-kernel-and-repeat-0",
-                "passed": true
-              },
-              {
-                "check": "every-NCC-score-0",
-                "passed": true,
-                "max_abs": 0.0
-              },
-              {
-                "check": "GPU-global-argmax-0",
-                "passed": true
-              }
-            ],
-            "input_sha256": "ade0a202f827d46d233baccc0567f48dc1bae90b9a03df803bb50de369bfb42d",
-            "output_values": {},
-            "oracle": "SciPy Euclidean distance/nearest sites, FP64 FFT-NCC/integral variance, independent Sobel/NMS and queue/ndimage connectivity; full pixels and GPU region statistics/padding",
-            "output_manifest": {
-              "path": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp/singular-or-empty/outputs-manifest.json",
-              "sha256": "8517af22411d6647a97b27b8171eb4c97a79852e6f05c8c33b91be0e69ad20b6",
-              "files": 9
-            },
-            "case": "singular-or-empty"
+            "logical_id": 0,
+            "pci_bdf": "0000:03:00.0",
+            "physical_id": 0,
+            "uuid": "32396463623033636131356166623633"
           }
         ],
-        "cuda_cases": [
-          {
-            "case": "original",
-            "status": "PASSED",
-            "identical_input": true,
-            "cuda_cpu_checks": {
-              "status": "PASSED",
-              "checks": [
-                {
-                  "check": "registered-image-count-no-empty-work",
-                  "passed": true
-                },
-                {
-                  "check": "actual-kernel-and-repeat-0",
-                  "passed": true
-                },
-                {
-                  "check": "every-NCC-score-0",
-                  "passed": true,
-                  "max_abs": 2.9798965850424963e-08
-                },
-                {
-                  "check": "GPU-global-argmax-0",
-                  "passed": true
-                },
-                {
-                  "check": "original-degraded-template-location-0",
-                  "passed": true
-                }
-              ],
-              "input_sha256": "ff1f4f9e1a454ea3db7cbdf32ec6e809aa283500430afa13104c6aa35b18e9cb",
-              "output_values": {},
-              "oracle": "SciPy Euclidean distance/nearest sites, FP64 FFT-NCC/integral variance, independent Sobel/NMS and queue/ndimage connectivity; full pixels and GPU region statistics/padding",
-              "output_manifest": {
-                "path": "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp/original/outputs-manifest.json",
-                "sha256": "9d1d9914c158092d6ae7d78ac1f5075f610632320bc51957ac029cf5ded565ef",
-                "files": 9
-              }
-            }
-          },
-          {
-            "case": "irregular",
-            "status": "PASSED",
-            "identical_input": true,
-            "cuda_cpu_checks": {
-              "status": "PASSED",
-              "checks": [
-                {
-                  "check": "registered-image-count-no-empty-work",
-                  "passed": true
-                },
-                {
-                  "check": "actual-kernel-and-repeat-0",
-                  "passed": true
-                },
-                {
-                  "check": "every-NCC-score-0",
-                  "passed": true,
-                  "max_abs": 2.7476684150151698e-08
-                },
-                {
-                  "check": "GPU-global-argmax-0",
-                  "passed": true
-                }
-              ],
-              "input_sha256": "44ed549070b1f6065127d5d4b082241520d0a233720cdc594c7a5d2d5e4ae6b2",
-              "output_values": {},
-              "oracle": "SciPy Euclidean distance/nearest sites, FP64 FFT-NCC/integral variance, independent Sobel/NMS and queue/ndimage connectivity; full pixels and GPU region statistics/padding",
-              "output_manifest": {
-                "path": "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp/irregular/outputs-manifest.json",
-                "sha256": "b2c6610ce450540f2c12b0fc018813ff7d7847470cd983c96c7046ccc2169467",
-                "files": 9
-              }
-            }
-          },
-          {
-            "case": "changed-values",
-            "status": "PASSED",
-            "identical_input": true,
-            "cuda_cpu_checks": {
-              "status": "PASSED",
-              "checks": [
-                {
-                  "check": "registered-image-count-no-empty-work",
-                  "passed": true
-                },
-                {
-                  "check": "actual-kernel-and-repeat-0",
-                  "passed": true
-                },
-                {
-                  "check": "every-NCC-score-0",
-                  "passed": true,
-                  "max_abs": 1.4730383190997287e-08
-                },
-                {
-                  "check": "GPU-global-argmax-0",
-                  "passed": true
-                }
-              ],
-              "input_sha256": "7dec33fb5b12d5ac2f2c22ba6c6b2634c7f86e8263d1c619cd3c79b2f9db1a64",
-              "output_values": {},
-              "oracle": "SciPy Euclidean distance/nearest sites, FP64 FFT-NCC/integral variance, independent Sobel/NMS and queue/ndimage connectivity; full pixels and GPU region statistics/padding",
-              "output_manifest": {
-                "path": "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp/changed-values/outputs-manifest.json",
-                "sha256": "2766c2459d14561ebc782987af257c5f30a794a6b89a08afdc4b6f02639f60c0",
-                "files": 9
-              }
-            }
-          },
-          {
-            "case": "boundary",
-            "status": "PASSED",
-            "identical_input": true,
-            "cuda_cpu_checks": {
-              "status": "PASSED",
-              "checks": [
-                {
-                  "check": "registered-image-count-no-empty-work",
-                  "passed": true
-                },
-                {
-                  "check": "actual-kernel-and-repeat-0",
-                  "passed": true
-                },
-                {
-                  "check": "every-NCC-score-0",
-                  "passed": true,
-                  "max_abs": 6.907666688649172e-09
-                },
-                {
-                  "check": "GPU-global-argmax-0",
-                  "passed": true
-                }
-              ],
-              "input_sha256": "dff7c9406d2f8e6812dec8862407b32d0051400b0a19825a4fb50037172bd973",
-              "output_values": {},
-              "oracle": "SciPy Euclidean distance/nearest sites, FP64 FFT-NCC/integral variance, independent Sobel/NMS and queue/ndimage connectivity; full pixels and GPU region statistics/padding",
-              "output_manifest": {
-                "path": "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp/boundary/outputs-manifest.json",
-                "sha256": "fc89a1a9ad31a79588fc4e2fcb4fdefa50b2c27c5dc93de75d70f0ecae7da8d9",
-                "files": 9
-              }
-            }
-          },
-          {
-            "case": "repeat",
-            "status": "PASSED",
-            "identical_input": true,
-            "cuda_cpu_checks": {
-              "status": "PASSED",
-              "checks": [
-                {
-                  "check": "registered-image-count-no-empty-work",
-                  "passed": true
-                },
-                {
-                  "check": "actual-kernel-and-repeat-0",
-                  "passed": true
-                },
-                {
-                  "check": "every-NCC-score-0",
-                  "passed": true,
-                  "max_abs": 2.9798965850424963e-08
-                },
-                {
-                  "check": "GPU-global-argmax-0",
-                  "passed": true
-                },
-                {
-                  "check": "original-degraded-template-location-0",
-                  "passed": true
-                }
-              ],
-              "input_sha256": "ff1f4f9e1a454ea3db7cbdf32ec6e809aa283500430afa13104c6aa35b18e9cb",
-              "output_values": {},
-              "oracle": "SciPy Euclidean distance/nearest sites, FP64 FFT-NCC/integral variance, independent Sobel/NMS and queue/ndimage connectivity; full pixels and GPU region statistics/padding",
-              "output_manifest": {
-                "path": "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp/repeat/outputs-manifest.json",
-                "sha256": "f567a20eba1805d39197d72cd0064af25b91cefe0cf7db8658bf096733968326",
-                "files": 9
-              }
-            }
-          },
-          {
-            "case": "singular-or-empty",
-            "status": "PASSED",
-            "identical_input": true,
-            "cuda_cpu_checks": {
-              "status": "PASSED",
-              "checks": [
-                {
-                  "check": "registered-image-count-no-empty-work",
-                  "passed": true
-                },
-                {
-                  "check": "actual-kernel-and-repeat-0",
-                  "passed": true
-                },
-                {
-                  "check": "every-NCC-score-0",
-                  "passed": true,
-                  "max_abs": 0.0
-                },
-                {
-                  "check": "GPU-global-argmax-0",
-                  "passed": true
-                }
-              ],
-              "input_sha256": "ade0a202f827d46d233baccc0567f48dc1bae90b9a03df803bb50de369bfb42d",
-              "output_values": {},
-              "oracle": "SciPy Euclidean distance/nearest sites, FP64 FFT-NCC/integral variance, independent Sobel/NMS and queue/ndimage connectivity; full pixels and GPU region statistics/padding",
-              "output_manifest": {
-                "path": "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp/singular-or-empty/outputs-manifest.json",
-                "sha256": "bf7ed9d07d82b3792969fa7f3a890c5978ca94cf56db9605d0cef647db5e0002",
-                "files": 9
-              }
-            }
-          }
-        ],
-        "cuda_comparison": "PASSED",
-        "contract_status": "PARTIAL",
-        "missing_contract": [
-          "original-annotation-file-CLI-and-timing-harness"
-        ],
-        "limitation": "原始2048x1024/96x64、seed1234退化模板、完整score与GPU argmax均验收；原例注释图文件、全部CLI和计时harness尚未移植。",
-        "cuda_dependencies": {
-          "rocm/common/batch15_image.hpp": "684fdb5404368e2e07fe3da83b5be20bc3fdf6445dc748bd0af31fc15c93e449",
-          "rocm/common/batches_runtime.hpp": "04dc008dae2ade89ea3ef3e349d4a2dd0a842601737c77f0c7f076187b34f26f",
-          "rocm/common/observe.hpp": "3bd452d352dfce533bfb51a6e32ea308d9ca5d85a3a22afeca109d1cae743410",
-          "rocm/common/binary_observe.hpp": "c932e3d979f33ea8c62b38e687be1a083dfec0481d5e9ffbb04ffe6865899e73"
-        },
-        "current_source_proof": true,
-        "current_cuda_source_proof": true,
-        "cuda_evidence": "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp",
-        "cuda_implementation_sha256": "e7d1f6bc6a7229963605d97c28632701583aba5b257cdcb36115f54b5a3bb8e0",
-        "cuda_baseline_kind": "COMPATIBLE_CUDA_MATH_BASELINE",
-        "native_cuda_attempt": {
-          "source": "NPP/templateMatching/templateMatching.cpp",
-          "original_sha256": "812ed394222f764ce9fb4ec0cac1c5d0cad6f1620cc15a367dc1be9ce92c2cfb",
-          "build_return_code": 0,
-          "run_return_code": 0,
-          "evidence": "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/NPP_templateMatching_templateMatching.cpp",
-          "scope": "Original vendor program; success does not provide shared-input equivalence without additional numerical observations."
-        },
-        "validation_source_sha256": "b1f9658af04bdff00e3d836178a8361fd1465ff64a505c723db1d374c45b1083"
+        "cuda_evidence": "migration/reports/evidence/rewrite/R3/NPP_templateMatching__templateMatching.cpp/20261110T084543.063400Z-R3-cuda-native-cc2e0f9ee9"
       },
       "reproduce": "HIP_VISIBLE_DEVICES=2,1 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh python tools/migration/batches12_15_run.py b15\nOPENBLAS_NUM_THREADS=2 python3 tools/migration/batches12_15_validate.py b15 --qualify",
       "pre_rewrite_contract": {
@@ -397855,8 +398543,8 @@
       "actual_library": "hipSOLVER/rocSOLVER native full GPU SVD + HIP rank projection and FP64 residual",
       "backend_library": "rocSOLVER + project HIP",
       "implementation": "rocm/ported/cuSOLVER/gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu",
-      "status": "PARTIAL",
-      "level": "L3",
+      "status": "PASSED",
+      "level": "L4",
       "required_cases": [
         "rewrite/R3/svd/original",
         "rewrite/R3/svd/changed-values",
@@ -397874,12 +398562,13 @@
         "rewrite/R3/svd/layout",
         "rewrite/R3/svd/repeat",
         "rewrite/R3/svd/rank-deficient",
-        "rewrite/R3/svd/rank-truncated"
+        "rewrite/R3/svd/rank-truncated",
+        "rewrite/R3/svd/independent-review-and-qualification"
       ],
-      "reason_code": "REWRITE_REVIEW_PENDING",
-      "reason": "已完成GPU重写与独立数值复核；候选尚需独立审查及完整资格，未升级整例。",
+      "reason_code": "VALIDATED_MOAT_REWRITE",
+      "reason": "完整原始合同、登记变体、独立CPU/同字节CUDA、负向/边界与独立复审通过。实际路线：hipSOLVER/rocSOLVER native full GPU SVD + HIP rank projection and FP64 residual。性能不作跨设备比较。",
       "cuda_baseline": "PASSED",
-      "cuda_comparison": "BLOCKED",
+      "cuda_comparison": "PASSED",
       "benchmark": "NOT_RUN",
       "evidence": [
         "migration/reports/evidence/20261109T080822.795958Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
@@ -397890,7 +398579,9 @@
         "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
         "migration/reports/evidence/20261109T100720.422147Z/original-cuda/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
         "migration/reports/rewrite-extension-rocm.json",
-        "migration/reports/rewrite-extension-rocm-validation.json"
+        "migration/reports/rewrite-extension-rocm-validation.json",
+        "migration/reports/evidence/rewrite/R3/cuSOLVER_gesvdaStridedBatched__cusolver_gesvdaStridedBatched_example.cu/20261110T092526.610000Z-R3-composite-qualification-e9da6e4aed",
+        "migration/reports/rewrite-R3-qualification.json"
       ],
       "attempts": [
         {
@@ -398039,6 +398730,638 @@
           },
           "reason_code": "REWRITE_REVIEW_PENDING",
           "reason": "已完成GPU重写与独立数值复核；候选尚需独立审查及完整资格，未升级整例。"
+        },
+        {
+          "kind": "svd",
+          "sample_id": "cuSOLVER/gesvdaStridedBatched::cusolver_gesvdaStridedBatched_example.cu",
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "current-independent-review",
+              "passed": true
+            },
+            {
+              "check": "frozen-complete-cases",
+              "passed": true
+            },
+            {
+              "check": "unchanged-original-source",
+              "passed": true
+            },
+            {
+              "check": "current-compiled-source",
+              "passed": true
+            },
+            {
+              "check": "current-build-recipe",
+              "passed": true
+            },
+            {
+              "check": "binary-identity",
+              "passed": true
+            },
+            {
+              "check": "sealed-build",
+              "passed": true
+            },
+            {
+              "check": "original/same-input",
+              "passed": true
+            },
+            {
+              "check": "original/current-build",
+              "passed": true
+            },
+            {
+              "check": "original/locked-real-GPU",
+              "passed": true
+            },
+            {
+              "check": "original/rocm/frozen-case-identity",
+              "passed": true
+            },
+            {
+              "check": "original/rocm/sealed-run",
+              "passed": true
+            },
+            {
+              "check": "original/rocm/CPU",
+              "passed": true
+            },
+            {
+              "check": "original/cuda/frozen-case-identity",
+              "passed": true
+            },
+            {
+              "check": "original/cuda/sealed-run",
+              "passed": true
+            },
+            {
+              "check": "original/cuda/CPU",
+              "passed": true
+            },
+            {
+              "check": "changed-values/same-input",
+              "passed": true
+            },
+            {
+              "check": "changed-values/current-build",
+              "passed": true
+            },
+            {
+              "check": "changed-values/locked-real-GPU",
+              "passed": true
+            },
+            {
+              "check": "changed-values/rocm/frozen-case-identity",
+              "passed": true
+            },
+            {
+              "check": "changed-values/rocm/sealed-run",
+              "passed": true
+            },
+            {
+              "check": "changed-values/rocm/CPU",
+              "passed": true
+            },
+            {
+              "check": "changed-values/cuda/frozen-case-identity",
+              "passed": true
+            },
+            {
+              "check": "changed-values/cuda/sealed-run",
+              "passed": true
+            },
+            {
+              "check": "changed-values/cuda/CPU",
+              "passed": true
+            },
+            {
+              "check": "irregular/same-input",
+              "passed": true
+            },
+            {
+              "check": "irregular/current-build",
+              "passed": true
+            },
+            {
+              "check": "irregular/locked-real-GPU",
+              "passed": true
+            },
+            {
+              "check": "irregular/rocm/frozen-case-identity",
+              "passed": true
+            },
+            {
+              "check": "irregular/rocm/sealed-run",
+              "passed": true
+            },
+            {
+              "check": "irregular/rocm/CPU",
+              "passed": true
+            },
+            {
+              "check": "irregular/cuda/frozen-case-identity",
+              "passed": true
+            },
+            {
+              "check": "irregular/cuda/sealed-run",
+              "passed": true
+            },
+            {
+              "check": "irregular/cuda/CPU",
+              "passed": true
+            },
+            {
+              "check": "layout/same-input",
+              "passed": true
+            },
+            {
+              "check": "layout/current-build",
+              "passed": true
+            },
+            {
+              "check": "layout/locked-real-GPU",
+              "passed": true
+            },
+            {
+              "check": "layout/rocm/frozen-case-identity",
+              "passed": true
+            },
+            {
+              "check": "layout/rocm/sealed-run",
+              "passed": true
+            },
+            {
+              "check": "layout/rocm/CPU",
+              "passed": true
+            },
+            {
+              "check": "layout/cuda/frozen-case-identity",
+              "passed": true
+            },
+            {
+              "check": "layout/cuda/sealed-run",
+              "passed": true
+            },
+            {
+              "check": "layout/cuda/CPU",
+              "passed": true
+            },
+            {
+              "check": "repeat/same-input",
+              "passed": true
+            },
+            {
+              "check": "repeat/current-build",
+              "passed": true
+            },
+            {
+              "check": "repeat/locked-real-GPU",
+              "passed": true
+            },
+            {
+              "check": "repeat/rocm/frozen-case-identity",
+              "passed": true
+            },
+            {
+              "check": "repeat/rocm/sealed-run",
+              "passed": true
+            },
+            {
+              "check": "repeat/rocm/CPU",
+              "passed": true
+            },
+            {
+              "check": "repeat/cuda/frozen-case-identity",
+              "passed": true
+            },
+            {
+              "check": "repeat/cuda/sealed-run",
+              "passed": true
+            },
+            {
+              "check": "repeat/cuda/CPU",
+              "passed": true
+            },
+            {
+              "check": "rank-deficient/same-input",
+              "passed": true
+            },
+            {
+              "check": "rank-deficient/current-build",
+              "passed": true
+            },
+            {
+              "check": "rank-deficient/locked-real-GPU",
+              "passed": true
+            },
+            {
+              "check": "rank-deficient/rocm/frozen-case-identity",
+              "passed": true
+            },
+            {
+              "check": "rank-deficient/rocm/sealed-run",
+              "passed": true
+            },
+            {
+              "check": "rank-deficient/rocm/CPU",
+              "passed": true
+            },
+            {
+              "check": "rank-deficient/cuda/frozen-case-identity",
+              "passed": true
+            },
+            {
+              "check": "rank-deficient/cuda/sealed-run",
+              "passed": true
+            },
+            {
+              "check": "rank-deficient/cuda/CPU",
+              "passed": true
+            },
+            {
+              "check": "rank-truncated/same-input",
+              "passed": true
+            },
+            {
+              "check": "rank-truncated/current-build",
+              "passed": true
+            },
+            {
+              "check": "rank-truncated/locked-real-GPU",
+              "passed": true
+            },
+            {
+              "check": "rank-truncated/rocm/frozen-case-identity",
+              "passed": true
+            },
+            {
+              "check": "rank-truncated/rocm/sealed-run",
+              "passed": true
+            },
+            {
+              "check": "rank-truncated/rocm/CPU",
+              "passed": true
+            },
+            {
+              "check": "rank-truncated/cuda/frozen-case-identity",
+              "passed": true
+            },
+            {
+              "check": "rank-truncated/cuda/sealed-run",
+              "passed": true
+            },
+            {
+              "check": "rank-truncated/cuda/CPU",
+              "passed": true
+            },
+            {
+              "check": "native-original-gesvda",
+              "passed": true
+            },
+            {
+              "check": "actual-native-GPU-SVD-kernels",
+              "passed": true
+            },
+            {
+              "check": "negative-complete-unique-modes",
+              "passed": true
+            },
+            {
+              "check": "negative/singular-value",
+              "passed": true
+            },
+            {
+              "check": "negative/residual-norm",
+              "passed": true
+            },
+            {
+              "check": "negative/V-vector",
+              "passed": true
+            },
+            {
+              "check": "negative/info",
+              "passed": true
+            },
+            {
+              "check": "negative/stride-padding",
+              "passed": true
+            },
+            {
+              "check": "negative/oversize-S",
+              "passed": true
+            },
+            {
+              "check": "negative/oversize-U",
+              "passed": true
+            },
+            {
+              "check": "negative/oversize-V",
+              "passed": true
+            },
+            {
+              "check": "negative/oversize-RnrmF",
+              "passed": true
+            },
+            {
+              "check": "negative/oversize-info",
+              "passed": true
+            },
+            {
+              "check": "negative/oversize-A_after",
+              "passed": true
+            },
+            {
+              "check": "negative/undersize-S",
+              "passed": true
+            },
+            {
+              "check": "negative/undersize-U",
+              "passed": true
+            },
+            {
+              "check": "negative/undersize-V",
+              "passed": true
+            },
+            {
+              "check": "negative/undersize-RnrmF",
+              "passed": true
+            },
+            {
+              "check": "negative/undersize-info",
+              "passed": true
+            },
+            {
+              "check": "negative/undersize-A_after",
+              "passed": true
+            },
+            {
+              "check": "negative/partial-tail-S",
+              "passed": true
+            },
+            {
+              "check": "negative/partial-tail-RnrmF",
+              "passed": true
+            },
+            {
+              "check": "negative/negative-residual",
+              "passed": true
+            },
+            {
+              "check": "runtime-complete-unique-tests",
+              "passed": true
+            },
+            {
+              "check": "descriptor/zero-m",
+              "passed": true
+            },
+            {
+              "check": "descriptor/wide-shape",
+              "passed": true
+            },
+            {
+              "check": "descriptor/short-lda",
+              "passed": true
+            },
+            {
+              "check": "descriptor/short-U",
+              "passed": true
+            },
+            {
+              "check": "descriptor/short-V",
+              "passed": true
+            },
+            {
+              "check": "descriptor/zero-rank",
+              "passed": true
+            },
+            {
+              "check": "descriptor/oversize-rank",
+              "passed": true
+            },
+            {
+              "check": "descriptor/short-stride",
+              "passed": true
+            },
+            {
+              "check": "descriptor/bad-batch",
+              "passed": true
+            },
+            {
+              "check": "descriptor/fractional-rank",
+              "passed": true
+            },
+            {
+              "check": "descriptor/huge-stride",
+              "passed": true
+            }
+          ],
+          "scope": "MOAT R3 full original contract plus registered variants; independent composite qualification",
+          "implementation": "rocm/ported/cuSOLVER/gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu",
+          "implementation_sha256": "850bfa71addf73c7c0e2c5b3ad9f7f439886ea08a087832d51794d9a995bfa70",
+          "dependencies": {
+            "rocm/ported/cuSOLVER/gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu": "850bfa71addf73c7c0e2c5b3ad9f7f439886ea08a087832d51794d9a995bfa70",
+            "rocm/backends/solver/rank_svd.hpp": "ab4317fec2c4a2a6cb921082e8e46c6be0f0ac1b92112ec6483bcb37844c4364",
+            "rocm/common/rewrite_runtime.hpp": "f2b97f13b7f4c89f24827e96ba82bb6d2d6d692f909e80625fc16e81ffe5572c"
+          },
+          "case_count": 7,
+          "case_ids": [
+            "original",
+            "changed-values",
+            "irregular",
+            "layout",
+            "repeat",
+            "rank-deficient",
+            "rank-truncated"
+          ],
+          "evidence_references": [
+            "migration/reports/evidence/rewrite/R3/SVD_bad-batch/20261110T085851.738587Z-R3-rocm-invalid-descriptor-db9cb21fd6",
+            "migration/reports/evidence/rewrite/R3/SVD_fractional-rank/20261110T085852.836235Z-R3-rocm-invalid-descriptor-08d2f66e79",
+            "migration/reports/evidence/rewrite/R3/SVD_huge-stride/20261110T085853.948169Z-R3-rocm-invalid-descriptor-14ba75b79a",
+            "migration/reports/evidence/rewrite/R3/SVD_oversize-rank/20261110T085849.632856Z-R3-rocm-invalid-descriptor-9829619811",
+            "migration/reports/evidence/rewrite/R3/SVD_short-U/20261110T085846.460297Z-R3-rocm-invalid-descriptor-303c3e1670",
+            "migration/reports/evidence/rewrite/R3/SVD_short-V/20261110T085847.519934Z-R3-rocm-invalid-descriptor-fffa6b04d4",
+            "migration/reports/evidence/rewrite/R3/SVD_short-lda/20261110T085845.349500Z-R3-rocm-invalid-descriptor-c7dfe66d3f",
+            "migration/reports/evidence/rewrite/R3/SVD_short-stride/20261110T085850.681680Z-R3-rocm-invalid-descriptor-af6287eded",
+            "migration/reports/evidence/rewrite/R3/SVD_wide-shape/20261110T085844.284496Z-R3-rocm-invalid-descriptor-15939592bb",
+            "migration/reports/evidence/rewrite/R3/SVD_zero-m/20261110T085843.216816Z-R3-rocm-invalid-descriptor-3e694f85fe",
+            "migration/reports/evidence/rewrite/R3/SVD_zero-rank/20261110T085848.577698Z-R3-rocm-invalid-descriptor-df7f7bc1dd",
+            "migration/reports/evidence/rewrite/R3/rank-svd_backend-trace/20261110T091809.531163Z-R3-rocm-profile-c7752f263a",
+            "migration/reports/evidence/rewrite/R3/svd_V-vector/20261110T091807.910049Z-R3-cpu-negative-e095716a26",
+            "migration/reports/evidence/rewrite/R3/svd_changed-values/20261110T091806.967771Z-R3-cpu-validation-30895e678a",
+            "migration/reports/evidence/rewrite/R3/svd_changed-values/20261110T091807.008418Z-R3-cpu-validation-9ef05f4ba4",
+            "migration/reports/evidence/rewrite/R3/svd_info/20261110T091808.768014Z-R3-cpu-negative-3790166812",
+            "migration/reports/evidence/rewrite/R3/svd_irregular/20261110T091807.806683Z-R3-cpu-validation-05678aaed3",
+            "migration/reports/evidence/rewrite/R3/svd_irregular/20261110T091807.827406Z-R3-cpu-validation-1062b2741a",
+            "migration/reports/evidence/rewrite/R3/svd_layout/20261110T091808.647887Z-R3-cpu-validation-f745c61ece",
+            "migration/reports/evidence/rewrite/R3/svd_layout/20261110T091808.657532Z-R3-cpu-validation-ae6a318f5f",
+            "migration/reports/evidence/rewrite/R3/svd_negative-residual/20261110T091821.976508Z-R3-cpu-negative-bd850f0d2c",
+            "migration/reports/evidence/rewrite/R3/svd_original/20261110T091805.993603Z-R3-cpu-validation-bba2f8783e",
+            "migration/reports/evidence/rewrite/R3/svd_original/20261110T091805.995941Z-R3-cpu-validation-04028f311c",
+            "migration/reports/evidence/rewrite/R3/svd_original/20261110T091806.001746Z-R3-cpu-validation-66957aa7f8",
+            "migration/reports/evidence/rewrite/R3/svd_oversize-A_after/20261110T091814.595363Z-R3-cpu-negative-cd528b75f0",
+            "migration/reports/evidence/rewrite/R3/svd_oversize-RnrmF/20261110T091812.970567Z-R3-cpu-negative-147b74a1a5",
+            "migration/reports/evidence/rewrite/R3/svd_oversize-S/20261110T091810.463212Z-R3-cpu-negative-ea99e81b09",
+            "migration/reports/evidence/rewrite/R3/svd_oversize-U/20261110T091811.278608Z-R3-cpu-negative-2bfde3c0f6",
+            "migration/reports/evidence/rewrite/R3/svd_oversize-V/20261110T091812.097735Z-R3-cpu-negative-6f29dd25bb",
+            "migration/reports/evidence/rewrite/R3/svd_oversize-info/20261110T091813.794213Z-R3-cpu-negative-c97762eda4",
+            "migration/reports/evidence/rewrite/R3/svd_partial-tail-RnrmF/20261110T091821.136771Z-R3-cpu-negative-87bfcf08ec",
+            "migration/reports/evidence/rewrite/R3/svd_partial-tail-S/20261110T091820.281067Z-R3-cpu-negative-a0d1916c1a",
+            "migration/reports/evidence/rewrite/R3/svd_rank-deficient/20261110T091810.337962Z-R3-cpu-validation-f4459e63f1",
+            "migration/reports/evidence/rewrite/R3/svd_rank-deficient/20261110T091810.388670Z-R3-cpu-validation-44125e21f8",
+            "migration/reports/evidence/rewrite/R3/svd_rank-truncated/20261110T091811.190989Z-R3-cpu-validation-101a2d9657",
+            "migration/reports/evidence/rewrite/R3/svd_rank-truncated/20261110T091811.231357Z-R3-cpu-validation-ad7b76d91b",
+            "migration/reports/evidence/rewrite/R3/svd_repeat/20261110T091809.489793Z-R3-cpu-validation-dce1dce839",
+            "migration/reports/evidence/rewrite/R3/svd_repeat/20261110T091809.531292Z-R3-cpu-validation-9502b4d3a1",
+            "migration/reports/evidence/rewrite/R3/svd_residual-norm/20261110T091807.077489Z-R3-cpu-negative-e2c0fea753",
+            "migration/reports/evidence/rewrite/R3/svd_singular-value/20261110T091806.045014Z-R3-cpu-negative-2a14a0a3db",
+            "migration/reports/evidence/rewrite/R3/svd_stride-padding/20261110T091809.607141Z-R3-cpu-negative-ef749ead59",
+            "migration/reports/evidence/rewrite/R3/svd_undersize-A_after/20261110T091819.487221Z-R3-cpu-negative-fd0b68224b",
+            "migration/reports/evidence/rewrite/R3/svd_undersize-RnrmF/20261110T091817.803951Z-R3-cpu-negative-a918f1982c",
+            "migration/reports/evidence/rewrite/R3/svd_undersize-S/20261110T091815.382674Z-R3-cpu-negative-e07560759c",
+            "migration/reports/evidence/rewrite/R3/svd_undersize-U/20261110T091816.200204Z-R3-cpu-negative-ec8bed6a54",
+            "migration/reports/evidence/rewrite/R3/svd_undersize-V/20261110T091817.029526Z-R3-cpu-negative-6904bf27f0",
+            "migration/reports/evidence/rewrite/R3/svd_undersize-info/20261110T091818.602076Z-R3-cpu-negative-729e8414ca"
+          ],
+          "source_commit": "1ea4a7680743de0ea2dccdc740173ff3fd9afec3",
+          "qualification_id": "20261110T092526.610000Z-R3-composite-qualification-e9da6e4aed",
+          "evidence": "migration/reports/evidence/rewrite/R3/cuSOLVER_gesvdaStridedBatched__cusolver_gesvdaStridedBatched_example.cu/20261110T092526.610000Z-R3-composite-qualification-e9da6e4aed",
+          "rocm_evidence": "migration/reports/evidence/rewrite/R3/cuSOLVER_gesvdaStridedBatched__cusolver_gesvdaStridedBatched_example.cu/20261110T085723.846931Z-R3-rocm-9da2dde1fe",
+          "environment": {
+            "hostname": "b76901743c49",
+            "platform": "Linux-7.0.0-42-generic-x86_64-with-glibc2.39",
+            "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+            "rocm_release": "10.1.0",
+            "visible_devices": "2",
+            "devices": [
+              {
+                "logical_id": 0,
+                "pci_bdf": "0000:03:00.0",
+                "physical_id": 0,
+                "uuid": "32396463623033636131356166623633"
+              }
+            ],
+            "versions": {
+              "hipRuntimeGetVersion": {
+                "status": 0,
+                "value": 71626385
+              },
+              "hipDriverGetVersion": {
+                "status": 0,
+                "value": 71626385
+              }
+            },
+            "packages": {
+              "rocm-sdk-core": "10.1.0",
+              "rocm-sdk-device-gfx1100": "10.1.0",
+              "rocm-sdk-device-gfx942": "10.1.0",
+              "rocm-sdk-device-gfx1010": "10.1.0",
+              "rocm-sdk-device-gfx1011": "10.1.0",
+              "rocm-sdk-device-gfx1101": "10.1.0",
+              "rocm-bootstrap": "0.3.0",
+              "triton": "3.8.0+git669b31ac.rocm10.1.0",
+              "rocm-sdk-device-gfx1035": "10.1.0",
+              "rocm-sdk-device-gfx1012": "10.1.0",
+              "torch": "2.14.0+rocm10.1.0",
+              "rocm-sdk-device-gfx1152": "10.1.0",
+              "rocm-sdk-device-gfx908": "10.1.0",
+              "rocm-sdk-libraries": "10.1.0",
+              "rocm-sdk-device-gfx1031": "10.1.0",
+              "rocm-sdk-device-gfx1151": "10.1.0",
+              "rocm-sdk-device-gfx1030": "10.1.0",
+              "rocm-sdk-device-gfx1103": "10.1.0",
+              "rocm-sdk-device-gfx1250": "10.1.0",
+              "rocm-sdk-device-gfx1032": "10.1.0",
+              "rocm-sdk-device-gfx1102": "10.1.0",
+              "rocm-sdk-device-gfx1201": "10.1.0",
+              "rocm-sdk-device-gfx90a": "10.1.0",
+              "torchvision": "0.29.0a0+rocm10.1.0",
+              "rocm-sdk-device-gfx1036": "10.1.0",
+              "rocm-sdk-device-gfx1153": "10.1.0",
+              "rocm": "10.1.0",
+              "rocm-sdk-device-gfx1150": "10.1.0",
+              "rocm-sdk-device-gfx1200": "10.1.0",
+              "rocm-sdk-device-gfx1034": "10.1.0",
+              "rocm-sdk-device-gfx1033": "10.1.0",
+              "rocm-sdk-device-gfx950": "10.1.0"
+            },
+            "loaded_libraries": [
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamd_comgr.so.3",
+                "sha256": "6bf2f6fe6b243c5ac3621cd5745887933d3a41edd944a447c88c21ec77da5d5b"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamdhip64.so.7",
+                "sha256": "6d1dbee8cb3ad924e4c1bca7734e22f2c93026eb3bc871a7f64a916778d55e36"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-amd-aqlprofile64.so.1",
+                "sha256": "6d4be9a3d53457b466f3e1fb1b07b897cd78be9b934a5326444b7b2070dabd61"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-runtime64.so.1",
+                "sha256": "12d49db16881b9505629192231d5b3971e9030b26a326fc2c003e92da7de0c44"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocm_kpack.so.0",
+                "sha256": "e2af394dea58ad53d6074c7aa9d56de5dc027ca186f6bbc27d6f32d7b8f12ac3"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocprofiler-register.so.0",
+                "sha256": "a67764cf46d1d579eb27311576ba9c0b4dbfa5052ddd64a062131f716faa11b6"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libLLVM.so.24.0git",
+                "sha256": "3e7b50e1f252792eba7380b8503c05c899bf8ae9deeb70faf3f9be5f995c8e0a"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libclang-cpp.so.24.0git",
+                "sha256": "18ef4cb8bd32366a68599fb6d723ed38814707a2ada1ff34b722dafc7856663b"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_bz2.so",
+                "sha256": "37a39b12a7e6e9f480d10e5e139b9aedbe5824e63b6b9e12a16837baee608602"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm.so.2",
+                "sha256": "b715ae24e1d62e407ffceca56b546e8a35abe37ac50878cbb16fa8b93d9c9fd5"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm_amdgpu.so.1",
+                "sha256": "b25742cda500eaa61e39b2b32492bb482235ad3e3df8a988d8f4130054d94cad"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_elf.so.1",
+                "sha256": "692dd9fe3575a45df78b319ad0e2a58ee36814958771dd810d5d91f9616c6d8f"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_liblzma.so.5",
+                "sha256": "d17f947bfe3947db5aefee897f6d32dfe98c73bf80b477764ba7f4107594a671"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_numa.so.1",
+                "sha256": "26fffd0f85369950b834cfb8f56fa9e1ea4804be8bbc40db98b788c554802bc3"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_z.so.1",
+                "sha256": "e1d7568f4a0b77eeab26f30cc9d2794dfe7ffd14e34b4ae55a9f80bc4f94ba7a"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_zstd.so.1",
+                "sha256": "fc3edd0b74fa071079b0095abe7b3f41418ca39be138f4ec0c57d0640a0b2d8b"
+              }
+            ]
+          },
+          "devices": [
+            {
+              "logical_id": 0,
+              "pci_bdf": "0000:03:00.0",
+              "physical_id": 0,
+              "uuid": "32396463623033636131356166623633"
+            }
+          ],
+          "cuda_evidence": "migration/reports/evidence/rewrite/R3/cuSOLVER_gesvdaStridedBatched__cusolver_gesvdaStridedBatched_example.cu/20261110T085457.928026Z-R3-cuda-6606c446aa"
         }
       ],
       "milestone": "M2",
@@ -398135,6 +399458,638 @@
         "passed_cases": [
           "build-and-original-profile-execution"
         ]
+      },
+      "selected_validation": {
+        "kind": "svd",
+        "sample_id": "cuSOLVER/gesvdaStridedBatched::cusolver_gesvdaStridedBatched_example.cu",
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "current-independent-review",
+            "passed": true
+          },
+          {
+            "check": "frozen-complete-cases",
+            "passed": true
+          },
+          {
+            "check": "unchanged-original-source",
+            "passed": true
+          },
+          {
+            "check": "current-compiled-source",
+            "passed": true
+          },
+          {
+            "check": "current-build-recipe",
+            "passed": true
+          },
+          {
+            "check": "binary-identity",
+            "passed": true
+          },
+          {
+            "check": "sealed-build",
+            "passed": true
+          },
+          {
+            "check": "original/same-input",
+            "passed": true
+          },
+          {
+            "check": "original/current-build",
+            "passed": true
+          },
+          {
+            "check": "original/locked-real-GPU",
+            "passed": true
+          },
+          {
+            "check": "original/rocm/frozen-case-identity",
+            "passed": true
+          },
+          {
+            "check": "original/rocm/sealed-run",
+            "passed": true
+          },
+          {
+            "check": "original/rocm/CPU",
+            "passed": true
+          },
+          {
+            "check": "original/cuda/frozen-case-identity",
+            "passed": true
+          },
+          {
+            "check": "original/cuda/sealed-run",
+            "passed": true
+          },
+          {
+            "check": "original/cuda/CPU",
+            "passed": true
+          },
+          {
+            "check": "changed-values/same-input",
+            "passed": true
+          },
+          {
+            "check": "changed-values/current-build",
+            "passed": true
+          },
+          {
+            "check": "changed-values/locked-real-GPU",
+            "passed": true
+          },
+          {
+            "check": "changed-values/rocm/frozen-case-identity",
+            "passed": true
+          },
+          {
+            "check": "changed-values/rocm/sealed-run",
+            "passed": true
+          },
+          {
+            "check": "changed-values/rocm/CPU",
+            "passed": true
+          },
+          {
+            "check": "changed-values/cuda/frozen-case-identity",
+            "passed": true
+          },
+          {
+            "check": "changed-values/cuda/sealed-run",
+            "passed": true
+          },
+          {
+            "check": "changed-values/cuda/CPU",
+            "passed": true
+          },
+          {
+            "check": "irregular/same-input",
+            "passed": true
+          },
+          {
+            "check": "irregular/current-build",
+            "passed": true
+          },
+          {
+            "check": "irregular/locked-real-GPU",
+            "passed": true
+          },
+          {
+            "check": "irregular/rocm/frozen-case-identity",
+            "passed": true
+          },
+          {
+            "check": "irregular/rocm/sealed-run",
+            "passed": true
+          },
+          {
+            "check": "irregular/rocm/CPU",
+            "passed": true
+          },
+          {
+            "check": "irregular/cuda/frozen-case-identity",
+            "passed": true
+          },
+          {
+            "check": "irregular/cuda/sealed-run",
+            "passed": true
+          },
+          {
+            "check": "irregular/cuda/CPU",
+            "passed": true
+          },
+          {
+            "check": "layout/same-input",
+            "passed": true
+          },
+          {
+            "check": "layout/current-build",
+            "passed": true
+          },
+          {
+            "check": "layout/locked-real-GPU",
+            "passed": true
+          },
+          {
+            "check": "layout/rocm/frozen-case-identity",
+            "passed": true
+          },
+          {
+            "check": "layout/rocm/sealed-run",
+            "passed": true
+          },
+          {
+            "check": "layout/rocm/CPU",
+            "passed": true
+          },
+          {
+            "check": "layout/cuda/frozen-case-identity",
+            "passed": true
+          },
+          {
+            "check": "layout/cuda/sealed-run",
+            "passed": true
+          },
+          {
+            "check": "layout/cuda/CPU",
+            "passed": true
+          },
+          {
+            "check": "repeat/same-input",
+            "passed": true
+          },
+          {
+            "check": "repeat/current-build",
+            "passed": true
+          },
+          {
+            "check": "repeat/locked-real-GPU",
+            "passed": true
+          },
+          {
+            "check": "repeat/rocm/frozen-case-identity",
+            "passed": true
+          },
+          {
+            "check": "repeat/rocm/sealed-run",
+            "passed": true
+          },
+          {
+            "check": "repeat/rocm/CPU",
+            "passed": true
+          },
+          {
+            "check": "repeat/cuda/frozen-case-identity",
+            "passed": true
+          },
+          {
+            "check": "repeat/cuda/sealed-run",
+            "passed": true
+          },
+          {
+            "check": "repeat/cuda/CPU",
+            "passed": true
+          },
+          {
+            "check": "rank-deficient/same-input",
+            "passed": true
+          },
+          {
+            "check": "rank-deficient/current-build",
+            "passed": true
+          },
+          {
+            "check": "rank-deficient/locked-real-GPU",
+            "passed": true
+          },
+          {
+            "check": "rank-deficient/rocm/frozen-case-identity",
+            "passed": true
+          },
+          {
+            "check": "rank-deficient/rocm/sealed-run",
+            "passed": true
+          },
+          {
+            "check": "rank-deficient/rocm/CPU",
+            "passed": true
+          },
+          {
+            "check": "rank-deficient/cuda/frozen-case-identity",
+            "passed": true
+          },
+          {
+            "check": "rank-deficient/cuda/sealed-run",
+            "passed": true
+          },
+          {
+            "check": "rank-deficient/cuda/CPU",
+            "passed": true
+          },
+          {
+            "check": "rank-truncated/same-input",
+            "passed": true
+          },
+          {
+            "check": "rank-truncated/current-build",
+            "passed": true
+          },
+          {
+            "check": "rank-truncated/locked-real-GPU",
+            "passed": true
+          },
+          {
+            "check": "rank-truncated/rocm/frozen-case-identity",
+            "passed": true
+          },
+          {
+            "check": "rank-truncated/rocm/sealed-run",
+            "passed": true
+          },
+          {
+            "check": "rank-truncated/rocm/CPU",
+            "passed": true
+          },
+          {
+            "check": "rank-truncated/cuda/frozen-case-identity",
+            "passed": true
+          },
+          {
+            "check": "rank-truncated/cuda/sealed-run",
+            "passed": true
+          },
+          {
+            "check": "rank-truncated/cuda/CPU",
+            "passed": true
+          },
+          {
+            "check": "native-original-gesvda",
+            "passed": true
+          },
+          {
+            "check": "actual-native-GPU-SVD-kernels",
+            "passed": true
+          },
+          {
+            "check": "negative-complete-unique-modes",
+            "passed": true
+          },
+          {
+            "check": "negative/singular-value",
+            "passed": true
+          },
+          {
+            "check": "negative/residual-norm",
+            "passed": true
+          },
+          {
+            "check": "negative/V-vector",
+            "passed": true
+          },
+          {
+            "check": "negative/info",
+            "passed": true
+          },
+          {
+            "check": "negative/stride-padding",
+            "passed": true
+          },
+          {
+            "check": "negative/oversize-S",
+            "passed": true
+          },
+          {
+            "check": "negative/oversize-U",
+            "passed": true
+          },
+          {
+            "check": "negative/oversize-V",
+            "passed": true
+          },
+          {
+            "check": "negative/oversize-RnrmF",
+            "passed": true
+          },
+          {
+            "check": "negative/oversize-info",
+            "passed": true
+          },
+          {
+            "check": "negative/oversize-A_after",
+            "passed": true
+          },
+          {
+            "check": "negative/undersize-S",
+            "passed": true
+          },
+          {
+            "check": "negative/undersize-U",
+            "passed": true
+          },
+          {
+            "check": "negative/undersize-V",
+            "passed": true
+          },
+          {
+            "check": "negative/undersize-RnrmF",
+            "passed": true
+          },
+          {
+            "check": "negative/undersize-info",
+            "passed": true
+          },
+          {
+            "check": "negative/undersize-A_after",
+            "passed": true
+          },
+          {
+            "check": "negative/partial-tail-S",
+            "passed": true
+          },
+          {
+            "check": "negative/partial-tail-RnrmF",
+            "passed": true
+          },
+          {
+            "check": "negative/negative-residual",
+            "passed": true
+          },
+          {
+            "check": "runtime-complete-unique-tests",
+            "passed": true
+          },
+          {
+            "check": "descriptor/zero-m",
+            "passed": true
+          },
+          {
+            "check": "descriptor/wide-shape",
+            "passed": true
+          },
+          {
+            "check": "descriptor/short-lda",
+            "passed": true
+          },
+          {
+            "check": "descriptor/short-U",
+            "passed": true
+          },
+          {
+            "check": "descriptor/short-V",
+            "passed": true
+          },
+          {
+            "check": "descriptor/zero-rank",
+            "passed": true
+          },
+          {
+            "check": "descriptor/oversize-rank",
+            "passed": true
+          },
+          {
+            "check": "descriptor/short-stride",
+            "passed": true
+          },
+          {
+            "check": "descriptor/bad-batch",
+            "passed": true
+          },
+          {
+            "check": "descriptor/fractional-rank",
+            "passed": true
+          },
+          {
+            "check": "descriptor/huge-stride",
+            "passed": true
+          }
+        ],
+        "scope": "MOAT R3 full original contract plus registered variants; independent composite qualification",
+        "implementation": "rocm/ported/cuSOLVER/gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu",
+        "implementation_sha256": "850bfa71addf73c7c0e2c5b3ad9f7f439886ea08a087832d51794d9a995bfa70",
+        "dependencies": {
+          "rocm/ported/cuSOLVER/gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu": "850bfa71addf73c7c0e2c5b3ad9f7f439886ea08a087832d51794d9a995bfa70",
+          "rocm/backends/solver/rank_svd.hpp": "ab4317fec2c4a2a6cb921082e8e46c6be0f0ac1b92112ec6483bcb37844c4364",
+          "rocm/common/rewrite_runtime.hpp": "f2b97f13b7f4c89f24827e96ba82bb6d2d6d692f909e80625fc16e81ffe5572c"
+        },
+        "case_count": 7,
+        "case_ids": [
+          "original",
+          "changed-values",
+          "irregular",
+          "layout",
+          "repeat",
+          "rank-deficient",
+          "rank-truncated"
+        ],
+        "evidence_references": [
+          "migration/reports/evidence/rewrite/R3/SVD_bad-batch/20261110T085851.738587Z-R3-rocm-invalid-descriptor-db9cb21fd6",
+          "migration/reports/evidence/rewrite/R3/SVD_fractional-rank/20261110T085852.836235Z-R3-rocm-invalid-descriptor-08d2f66e79",
+          "migration/reports/evidence/rewrite/R3/SVD_huge-stride/20261110T085853.948169Z-R3-rocm-invalid-descriptor-14ba75b79a",
+          "migration/reports/evidence/rewrite/R3/SVD_oversize-rank/20261110T085849.632856Z-R3-rocm-invalid-descriptor-9829619811",
+          "migration/reports/evidence/rewrite/R3/SVD_short-U/20261110T085846.460297Z-R3-rocm-invalid-descriptor-303c3e1670",
+          "migration/reports/evidence/rewrite/R3/SVD_short-V/20261110T085847.519934Z-R3-rocm-invalid-descriptor-fffa6b04d4",
+          "migration/reports/evidence/rewrite/R3/SVD_short-lda/20261110T085845.349500Z-R3-rocm-invalid-descriptor-c7dfe66d3f",
+          "migration/reports/evidence/rewrite/R3/SVD_short-stride/20261110T085850.681680Z-R3-rocm-invalid-descriptor-af6287eded",
+          "migration/reports/evidence/rewrite/R3/SVD_wide-shape/20261110T085844.284496Z-R3-rocm-invalid-descriptor-15939592bb",
+          "migration/reports/evidence/rewrite/R3/SVD_zero-m/20261110T085843.216816Z-R3-rocm-invalid-descriptor-3e694f85fe",
+          "migration/reports/evidence/rewrite/R3/SVD_zero-rank/20261110T085848.577698Z-R3-rocm-invalid-descriptor-df7f7bc1dd",
+          "migration/reports/evidence/rewrite/R3/rank-svd_backend-trace/20261110T091809.531163Z-R3-rocm-profile-c7752f263a",
+          "migration/reports/evidence/rewrite/R3/svd_V-vector/20261110T091807.910049Z-R3-cpu-negative-e095716a26",
+          "migration/reports/evidence/rewrite/R3/svd_changed-values/20261110T091806.967771Z-R3-cpu-validation-30895e678a",
+          "migration/reports/evidence/rewrite/R3/svd_changed-values/20261110T091807.008418Z-R3-cpu-validation-9ef05f4ba4",
+          "migration/reports/evidence/rewrite/R3/svd_info/20261110T091808.768014Z-R3-cpu-negative-3790166812",
+          "migration/reports/evidence/rewrite/R3/svd_irregular/20261110T091807.806683Z-R3-cpu-validation-05678aaed3",
+          "migration/reports/evidence/rewrite/R3/svd_irregular/20261110T091807.827406Z-R3-cpu-validation-1062b2741a",
+          "migration/reports/evidence/rewrite/R3/svd_layout/20261110T091808.647887Z-R3-cpu-validation-f745c61ece",
+          "migration/reports/evidence/rewrite/R3/svd_layout/20261110T091808.657532Z-R3-cpu-validation-ae6a318f5f",
+          "migration/reports/evidence/rewrite/R3/svd_negative-residual/20261110T091821.976508Z-R3-cpu-negative-bd850f0d2c",
+          "migration/reports/evidence/rewrite/R3/svd_original/20261110T091805.993603Z-R3-cpu-validation-bba2f8783e",
+          "migration/reports/evidence/rewrite/R3/svd_original/20261110T091805.995941Z-R3-cpu-validation-04028f311c",
+          "migration/reports/evidence/rewrite/R3/svd_original/20261110T091806.001746Z-R3-cpu-validation-66957aa7f8",
+          "migration/reports/evidence/rewrite/R3/svd_oversize-A_after/20261110T091814.595363Z-R3-cpu-negative-cd528b75f0",
+          "migration/reports/evidence/rewrite/R3/svd_oversize-RnrmF/20261110T091812.970567Z-R3-cpu-negative-147b74a1a5",
+          "migration/reports/evidence/rewrite/R3/svd_oversize-S/20261110T091810.463212Z-R3-cpu-negative-ea99e81b09",
+          "migration/reports/evidence/rewrite/R3/svd_oversize-U/20261110T091811.278608Z-R3-cpu-negative-2bfde3c0f6",
+          "migration/reports/evidence/rewrite/R3/svd_oversize-V/20261110T091812.097735Z-R3-cpu-negative-6f29dd25bb",
+          "migration/reports/evidence/rewrite/R3/svd_oversize-info/20261110T091813.794213Z-R3-cpu-negative-c97762eda4",
+          "migration/reports/evidence/rewrite/R3/svd_partial-tail-RnrmF/20261110T091821.136771Z-R3-cpu-negative-87bfcf08ec",
+          "migration/reports/evidence/rewrite/R3/svd_partial-tail-S/20261110T091820.281067Z-R3-cpu-negative-a0d1916c1a",
+          "migration/reports/evidence/rewrite/R3/svd_rank-deficient/20261110T091810.337962Z-R3-cpu-validation-f4459e63f1",
+          "migration/reports/evidence/rewrite/R3/svd_rank-deficient/20261110T091810.388670Z-R3-cpu-validation-44125e21f8",
+          "migration/reports/evidence/rewrite/R3/svd_rank-truncated/20261110T091811.190989Z-R3-cpu-validation-101a2d9657",
+          "migration/reports/evidence/rewrite/R3/svd_rank-truncated/20261110T091811.231357Z-R3-cpu-validation-ad7b76d91b",
+          "migration/reports/evidence/rewrite/R3/svd_repeat/20261110T091809.489793Z-R3-cpu-validation-dce1dce839",
+          "migration/reports/evidence/rewrite/R3/svd_repeat/20261110T091809.531292Z-R3-cpu-validation-9502b4d3a1",
+          "migration/reports/evidence/rewrite/R3/svd_residual-norm/20261110T091807.077489Z-R3-cpu-negative-e2c0fea753",
+          "migration/reports/evidence/rewrite/R3/svd_singular-value/20261110T091806.045014Z-R3-cpu-negative-2a14a0a3db",
+          "migration/reports/evidence/rewrite/R3/svd_stride-padding/20261110T091809.607141Z-R3-cpu-negative-ef749ead59",
+          "migration/reports/evidence/rewrite/R3/svd_undersize-A_after/20261110T091819.487221Z-R3-cpu-negative-fd0b68224b",
+          "migration/reports/evidence/rewrite/R3/svd_undersize-RnrmF/20261110T091817.803951Z-R3-cpu-negative-a918f1982c",
+          "migration/reports/evidence/rewrite/R3/svd_undersize-S/20261110T091815.382674Z-R3-cpu-negative-e07560759c",
+          "migration/reports/evidence/rewrite/R3/svd_undersize-U/20261110T091816.200204Z-R3-cpu-negative-ec8bed6a54",
+          "migration/reports/evidence/rewrite/R3/svd_undersize-V/20261110T091817.029526Z-R3-cpu-negative-6904bf27f0",
+          "migration/reports/evidence/rewrite/R3/svd_undersize-info/20261110T091818.602076Z-R3-cpu-negative-729e8414ca"
+        ],
+        "source_commit": "1ea4a7680743de0ea2dccdc740173ff3fd9afec3",
+        "qualification_id": "20261110T092526.610000Z-R3-composite-qualification-e9da6e4aed",
+        "evidence": "migration/reports/evidence/rewrite/R3/cuSOLVER_gesvdaStridedBatched__cusolver_gesvdaStridedBatched_example.cu/20261110T092526.610000Z-R3-composite-qualification-e9da6e4aed",
+        "rocm_evidence": "migration/reports/evidence/rewrite/R3/cuSOLVER_gesvdaStridedBatched__cusolver_gesvdaStridedBatched_example.cu/20261110T085723.846931Z-R3-rocm-9da2dde1fe",
+        "environment": {
+          "hostname": "b76901743c49",
+          "platform": "Linux-7.0.0-42-generic-x86_64-with-glibc2.39",
+          "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+          "rocm_release": "10.1.0",
+          "visible_devices": "2",
+          "devices": [
+            {
+              "logical_id": 0,
+              "pci_bdf": "0000:03:00.0",
+              "physical_id": 0,
+              "uuid": "32396463623033636131356166623633"
+            }
+          ],
+          "versions": {
+            "hipRuntimeGetVersion": {
+              "status": 0,
+              "value": 71626385
+            },
+            "hipDriverGetVersion": {
+              "status": 0,
+              "value": 71626385
+            }
+          },
+          "packages": {
+            "rocm-sdk-core": "10.1.0",
+            "rocm-sdk-device-gfx1100": "10.1.0",
+            "rocm-sdk-device-gfx942": "10.1.0",
+            "rocm-sdk-device-gfx1010": "10.1.0",
+            "rocm-sdk-device-gfx1011": "10.1.0",
+            "rocm-sdk-device-gfx1101": "10.1.0",
+            "rocm-bootstrap": "0.3.0",
+            "triton": "3.8.0+git669b31ac.rocm10.1.0",
+            "rocm-sdk-device-gfx1035": "10.1.0",
+            "rocm-sdk-device-gfx1012": "10.1.0",
+            "torch": "2.14.0+rocm10.1.0",
+            "rocm-sdk-device-gfx1152": "10.1.0",
+            "rocm-sdk-device-gfx908": "10.1.0",
+            "rocm-sdk-libraries": "10.1.0",
+            "rocm-sdk-device-gfx1031": "10.1.0",
+            "rocm-sdk-device-gfx1151": "10.1.0",
+            "rocm-sdk-device-gfx1030": "10.1.0",
+            "rocm-sdk-device-gfx1103": "10.1.0",
+            "rocm-sdk-device-gfx1250": "10.1.0",
+            "rocm-sdk-device-gfx1032": "10.1.0",
+            "rocm-sdk-device-gfx1102": "10.1.0",
+            "rocm-sdk-device-gfx1201": "10.1.0",
+            "rocm-sdk-device-gfx90a": "10.1.0",
+            "torchvision": "0.29.0a0+rocm10.1.0",
+            "rocm-sdk-device-gfx1036": "10.1.0",
+            "rocm-sdk-device-gfx1153": "10.1.0",
+            "rocm": "10.1.0",
+            "rocm-sdk-device-gfx1150": "10.1.0",
+            "rocm-sdk-device-gfx1200": "10.1.0",
+            "rocm-sdk-device-gfx1034": "10.1.0",
+            "rocm-sdk-device-gfx1033": "10.1.0",
+            "rocm-sdk-device-gfx950": "10.1.0"
+          },
+          "loaded_libraries": [
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamd_comgr.so.3",
+              "sha256": "6bf2f6fe6b243c5ac3621cd5745887933d3a41edd944a447c88c21ec77da5d5b"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamdhip64.so.7",
+              "sha256": "6d1dbee8cb3ad924e4c1bca7734e22f2c93026eb3bc871a7f64a916778d55e36"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-amd-aqlprofile64.so.1",
+              "sha256": "6d4be9a3d53457b466f3e1fb1b07b897cd78be9b934a5326444b7b2070dabd61"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-runtime64.so.1",
+              "sha256": "12d49db16881b9505629192231d5b3971e9030b26a326fc2c003e92da7de0c44"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocm_kpack.so.0",
+              "sha256": "e2af394dea58ad53d6074c7aa9d56de5dc027ca186f6bbc27d6f32d7b8f12ac3"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocprofiler-register.so.0",
+              "sha256": "a67764cf46d1d579eb27311576ba9c0b4dbfa5052ddd64a062131f716faa11b6"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libLLVM.so.24.0git",
+              "sha256": "3e7b50e1f252792eba7380b8503c05c899bf8ae9deeb70faf3f9be5f995c8e0a"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libclang-cpp.so.24.0git",
+              "sha256": "18ef4cb8bd32366a68599fb6d723ed38814707a2ada1ff34b722dafc7856663b"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_bz2.so",
+              "sha256": "37a39b12a7e6e9f480d10e5e139b9aedbe5824e63b6b9e12a16837baee608602"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm.so.2",
+              "sha256": "b715ae24e1d62e407ffceca56b546e8a35abe37ac50878cbb16fa8b93d9c9fd5"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm_amdgpu.so.1",
+              "sha256": "b25742cda500eaa61e39b2b32492bb482235ad3e3df8a988d8f4130054d94cad"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_elf.so.1",
+              "sha256": "692dd9fe3575a45df78b319ad0e2a58ee36814958771dd810d5d91f9616c6d8f"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_liblzma.so.5",
+              "sha256": "d17f947bfe3947db5aefee897f6d32dfe98c73bf80b477764ba7f4107594a671"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_numa.so.1",
+              "sha256": "26fffd0f85369950b834cfb8f56fa9e1ea4804be8bbc40db98b788c554802bc3"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_z.so.1",
+              "sha256": "e1d7568f4a0b77eeab26f30cc9d2794dfe7ffd14e34b4ae55a9f80bc4f94ba7a"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_zstd.so.1",
+              "sha256": "fc3edd0b74fa071079b0095abe7b3f41418ca39be138f4ec0c57d0640a0b2d8b"
+            }
+          ]
+        },
+        "devices": [
+          {
+            "logical_id": 0,
+            "pci_bdf": "0000:03:00.0",
+            "physical_id": 0,
+            "uuid": "32396463623033636131356166623633"
+          }
+        ],
+        "cuda_evidence": "migration/reports/evidence/rewrite/R3/cuSOLVER_gesvdaStridedBatched__cusolver_gesvdaStridedBatched_example.cu/20261110T085457.928026Z-R3-cuda-6606c446aa"
       }
     },
     {

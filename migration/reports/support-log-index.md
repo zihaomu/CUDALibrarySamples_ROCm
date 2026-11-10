@@ -1,6 +1,6 @@
 # 样例支持方式与详细日志总表
 
-覆盖 **639 个样例入口**：219 PASSED、24 PARTIAL、394 FAILED、2 UNSUPPORTED、0 BLOCKED。全部 30 个模块逐项列出实现方式、范围/原因、AMD 日志、CUDA 日志与验收报告。数据直接来自 [逐例清单](../samples.yaml)，[JSON 索引](support-log-index.json) 另含全部历史证据路径、源码 SHA256、已通过/必需用例及恢复条件。
+覆盖 **639 个样例入口**：221 PASSED、22 PARTIAL、394 FAILED、2 UNSUPPORTED、0 BLOCKED。全部 30 个模块逐项列出实现方式、范围/原因、AMD 日志、CUDA 日志与验收报告。数据直接来自 [逐例清单](../samples.yaml)，[JSON 索引](support-log-index.json) 另含全部历史证据路径、源码 SHA256、已通过/必需用例及恢复条件。
 
 **查阅方式：** 先看状态和“支持范围/失败原因”，再看实际库与实现源码。AMD 栏优先链接与当前源码 hash 匹配的选定验收日志；未通过项链接实际尝试。`build.log` 是编译/链接记录，`run.log` 是程序输出，`<case>/run.log` 是对应输入的输出。命令与环境位于同目录的 `commands.json` 和 `*.environment.json`，从“证据目录”进入。缺少运行日志时会明确标注，不将编译/import 成功视作 GPU 通过。
 
@@ -386,6 +386,7 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 | [Xsyevdx/cusolver_Xsyevdx_example.cu](../sample-reports/cuSOLVER/Xsyevdx/cusolver_Xsyevdx_example.cu.md) | PASSED / 4/4 | rocSOLVER dsyevx + checked dimension bridge / rocSOLVER；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-bce1d24c988d) |
 | [Xtrtri/cusolver_Xtrtri_example.cu](../sample-reports/cuSOLVER/Xtrtri/cusolver_Xtrtri_example.cu.md) | PASSED / 4/4 | hipBLAS Dtrsm_64 + HIP diagonal/info adapter / rocBLAS/HIP runtime；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-880b188590cd) |
 | [gesvd/cusolver_gesvd_example.cu](../sample-reports/cuSOLVER/gesvd/cusolver_gesvd_example.cu.md) | PASSED / 4/4 | hipSOLVER + hipBLAS / rocSOLVER/rocBLAS；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-e0724c648c23) |
+| [gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu](../sample-reports/cuSOLVER/gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu.md) | PASSED / 8/8 | hipSOLVER/rocSOLVER native full GPU SVD + HIP rank projection and FP64 residual / rocSOLVER + project HIP；改用 AMD 库重写算法流程 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-c717ad5ad665) |
 | [gesvdj/cusolver_gesvdj_example.cu](../sample-reports/cuSOLVER/gesvdj/cusolver_gesvdj_example.cu.md) | PASSED / 4/4 | hipSOLVER + hipBLAS / rocSOLVER/rocBLAS；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-454eff5e40e2) |
 | [gesvdjBatched/cusolver_gesvdjBatched_example.cu](../sample-reports/cuSOLVER/gesvdjBatched/cusolver_gesvdjBatched_example.cu.md) | PASSED / 3/3 | hipSOLVER / rocSOLVER/rocBLAS；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-ed60e960de23) |
 | [getrf/cusolver_getrf_example.cu](../sample-reports/cuSOLVER/getrf/cusolver_getrf_example.cu.md) | PASSED / 6/6 | hipSOLVER / rocSOLVER；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-d5d8e56391e4) |
@@ -403,7 +404,6 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 | [Xgeev/cusolver_Xgeev_example1.cu](../sample-reports/cuSOLVER/Xgeev/cusolver_Xgeev_example1.cu.md) | PARTIAL / 1/3 | hipsolver / rocSOLVER；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-695c063397de) |
 | [Xgeev/cusolver_Xgeev_example2.cu](../sample-reports/cuSOLVER/Xgeev/cusolver_Xgeev_example2.cu.md) | PARTIAL / 1/3 | hipsolver / rocSOLVER；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-1fe56daf1bd7) |
 | [Xgeev/cusolver_Xgeev_example3.cu](../sample-reports/cuSOLVER/Xgeev/cusolver_Xgeev_example3.cu.md) | PARTIAL / 1/3 | hipsolver / rocSOLVER；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-9602fa21ffdb) |
-| [gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu](../sample-reports/cuSOLVER/gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu.md) | PARTIAL / 7/8 | hipSOLVER/rocSOLVER native full GPU SVD + HIP rank projection and FP64 residual / rocSOLVER + project HIP；改用 AMD 库重写算法流程 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-c717ad5ad665) |
 | [MgPotrf/cusolver_MgPotrf_example2.cu](../sample-reports/cuSOLVER/MgPotrf/cusolver_MgPotrf_example2.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-59f2f1325b54) |
 | [MgSyevd/cusolver_MgSyevd_example1.cu](../sample-reports/cuSOLVER/MgSyevd/cusolver_MgSyevd_example1.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-e6fe5059759e) |
 | [MgSyevd/cusolver_MgSyevd_example2.cu](../sample-reports/cuSOLVER/MgSyevd/cusolver_MgSyevd_example2.cu.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/cuSOLVER.md#sample-0ebd46d9a63d) |
@@ -746,8 +746,8 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 | 样例 / 详情 | 状态 / 用例 | 实际库与实现方式 | 详细日志与范围 |
 | --- | --- | --- | --- |
 | [distanceTransform/distanceTransform.cpp](../sample-reports/NPP/distanceTransform/distanceTransform.cpp.md) | PASSED / 6/6 | HIP exact separable Euclidean distance/Voronoi/integer truncation kernels / HIP exact separable Euclidean distance/Voronoi/integer truncation kernels；库 API 迁移 + 执行语义适配 | [日志、范围、源码](support-log-index/NPP.md#sample-d91dd1bb00e8) |
+| [templateMatching/templateMatching.cpp](../sample-reports/NPP/templateMatching/templateMatching.cpp.md) | PASSED / 9/9 | HIP NCC/full original CLI/RAW input/PGM annotation/HIP-event timing / project HIP kernels；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/NPP.md#sample-7ecae8272f98) |
 | [nppCanny/npp_canny_simple.cpp](../sample-reports/NPP/nppCanny/npp_canny_simple.cpp.md) | PARTIAL / 6/7 | HIP three-channel Sobel/NMS/connected hysteresis kernels / HIP three-channel Sobel/NMS/connected hysteresis kernels；库 API 迁移 + 执行语义适配 | [日志、范围、源码](support-log-index/NPP.md#sample-3348e80044c5) |
-| [templateMatching/templateMatching.cpp](../sample-reports/NPP/templateMatching/templateMatching.cpp.md) | PARTIAL / 8/9 | HIP NCC/full original CLI/RAW input/PGM annotation/HIP-event timing / project HIP kernels；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/NPP.md#sample-7ecae8272f98) |
 | [batchedLabelMarkersAndCompression/batchedLabelMarkersAndCompression.cpp](../sample-reports/NPP/batchedLabelMarkersAndCompression/batchedLabelMarkersAndCompression.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/NPP.md#sample-234b64d6ff2e) |
 | [findContour/findContour.cpp](../sample-reports/NPP/findContour/findContour.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/NPP.md#sample-6e9875bedc70) |
 | [houghLines/houghLines.cpp](../sample-reports/NPP/houghLines/houghLines.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/NPP.md#sample-2fad73bf731b) |

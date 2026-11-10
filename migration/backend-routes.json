@@ -3396,8 +3396,8 @@
     {
       "sample_id": "NPP/templateMatching::templateMatching.cpp",
       "route_id": "NPP/templateMatching::templateMatching.cpp::catalog",
-      "actual_library": "HIP zero-mean normalized correlation + GPU argmax kernels",
-      "backend_library": "HIP zero-mean normalized correlation + GPU argmax kernels",
+      "actual_library": "HIP NCC/full original CLI/RAW input/PGM annotation/HIP-event timing",
+      "backend_library": "project HIP kernels",
       "candidate_libraries": [
         "RPP HIP",
         "rocPRIM"
@@ -3406,9 +3406,9 @@
         "HIP"
       ],
       "implementation": "rocm/ported/NPP/templateMatching/templateMatching.cpp",
-      "method": "API_PORT_WITH_EXECUTION_ADAPTER",
-      "status": "PARTIAL",
-      "scope": "使用HIP zero-mean normalized correlation + GPU argmax kernels；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。原始2048x1024/96x64、seed1234退化模板、完整score与GPU argmax均验收；原例注释图文件、全部CLI和计时harness尚未移植。",
+      "method": "HYBRID_HIP",
+      "status": "PASSED",
+      "scope": "完整原始合同、登记变体、独立CPU/同字节CUDA、负向/边界与独立复审通过。实际路线：HIP NCC/full original CLI/RAW input/PGM annotation/HIP-event timing。性能不作跨设备比较。",
       "evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/NPP_templateMatching_templateMatching.cpp",
         "migration/reports/evidence/20261109T084256.329631Z/original-rocm/NPP_templateMatching_templateMatching.cpp",
@@ -3418,7 +3418,11 @@
         "migration/reports/evidence/20261110T051436.908488Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp",
         "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/NPP_templateMatching_templateMatching.cpp",
         "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP_templateMatching_templateMatching.cpp",
-        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp"
+        "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp",
+        "migration/reports/rewrite-ncc-rocm.json",
+        "migration/reports/rewrite-ncc-native-comparison.json",
+        "migration/reports/evidence/rewrite/R3/NPP_templateMatching__templateMatching.cpp/20261110T092525.448735Z-R3-composite-qualification-ad7d1f1dc9",
+        "migration/reports/rewrite-R3-qualification.json"
       ],
       "cpu_stage_review": "NOT_IN_DECLARED_LIBRARY_STRING"
     },
@@ -11630,19 +11634,21 @@
     {
       "sample_id": "cuSOLVER/gesvdaStridedBatched::cusolver_gesvdaStridedBatched_example.cu",
       "route_id": "cuSOLVER/gesvdaStridedBatched::cusolver_gesvdaStridedBatched_example.cu::catalog",
-      "actual_library": "hipsolver",
-      "backend_library": "rocSOLVER",
+      "actual_library": "hipSOLVER/rocSOLVER native full GPU SVD + HIP rank projection and FP64 residual",
+      "backend_library": "rocSOLVER + project HIP",
       "candidate_libraries": [
         "hipSOLVER",
         "rocSOLVER"
       ],
       "components": [
-        "hipSOLVER"
+        "hipSOLVER",
+        "rocSOLVER",
+        "HIP"
       ],
       "implementation": "rocm/ported/cuSOLVER/gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu",
-      "method": "API_PORT",
-      "status": "PARTIAL",
-      "scope": "原始教学输入构建运行通过；独立正确性验证待完成",
+      "method": "LIBRARY_REWRITE",
+      "status": "PASSED",
+      "scope": "完整原始合同、登记变体、独立CPU/同字节CUDA、负向/边界与独立复审通过。实际路线：hipSOLVER/rocSOLVER native full GPU SVD + HIP rank projection and FP64 residual。性能不作跨设备比较。",
       "evidence": [
         "migration/reports/evidence/20261109T080822.795958Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
         "migration/reports/evidence/20261109T081329.986729Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
@@ -11650,7 +11656,11 @@
         "migration/reports/evidence/20261109T081929.210831Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
         "migration/reports/evidence/20261109T084753.304309Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
         "migration/reports/evidence/20261109T085841.111146Z/original-rocm/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
-        "migration/reports/evidence/20261109T100720.422147Z/original-cuda/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu"
+        "migration/reports/evidence/20261109T100720.422147Z/original-cuda/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu",
+        "migration/reports/rewrite-extension-rocm.json",
+        "migration/reports/rewrite-extension-rocm-validation.json",
+        "migration/reports/evidence/rewrite/R3/cuSOLVER_gesvdaStridedBatched__cusolver_gesvdaStridedBatched_example.cu/20261110T092526.610000Z-R3-composite-qualification-e9da6e4aed",
+        "migration/reports/rewrite-R3-qualification.json"
       ],
       "cpu_stage_review": "NOT_IN_DECLARED_LIBRARY_STRING"
     },

@@ -58,7 +58,7 @@ SCOPES.update({
  'MathDx/cuFFTDx':'HIP调用方kernel内协作128点双C2C FFT、ElementsPerThread=8/共32线程及扩展线程块；全部CPU频谱输出与兼容CUDA数学基线。',
  'MathDx/cuSolverDx':'HIP调用方kernel内complex Cholesky；MOAT新增complex FP32 48×32 pivot LU、complex FP64 32阶双batch POSV、FP64 right/lower 32×33 TRSM。原生MathDx26.06.1原例实际device输出、同字节HIP与独立CPU分别记录；只按已通过样例的登记范围统计。',
  'MathDx/cuRANDDx':'rocRAND设备Philox10 + 显式53bit Box-Muller；NVIDIA LEGACY逐位合同未等价，保持PARTIAL。',
- 'NPP':'精确Euclidean距离/Voronoi/整数截断，原始313×317与64²图及边界/stride/空site；Canny、NCC原始文件harness、NPP+完整元数据等缺口单列PARTIAL。',
+ 'NPP':'精确Euclidean距离/Voronoi/整数截断；NCC原始2048×1024 RAW、全部CLI、完整score/GPU argmax、PGM与HIP-event计时已收口，常量模板/图块按原生大图路径实测；Canny原生像素策略与其它未完成入口继续逐例记录。',
  'nvCOMP':'hipCOMP LZ4/Snappy原生批处理；CPU↔GPU与hipCOMP↔nvCOMP双向互解、逐chunk status/实际长度、空/边界/损坏流；LZ4 native manager/factory +项目CRC32C及100 raw buffers。完整NVBENCH框架仍单列PARTIAL。',
  'cuBLAS':'固定教学profile与所列扩展cases；含复杂rank-k类型化适配、HIP GPU packed转换、FP32分组batched及FP64项目策略调优。rotmg极端缩放使用HIP修正；调优/批量变体按同一数学族去重。',
  'cuBLASLt':'既有6个profile为FP32 SGEMM、HSH pointer-array/strided、grouped分发及custom-find/autotune。MOAT新资格分别登记FP16 planar负偏移转换/FP32 3M/FP16输出，以及真实COL32/COL4 packing + native INT8/INT32 GemmEx；按样例链接与资格状态限定范围。',

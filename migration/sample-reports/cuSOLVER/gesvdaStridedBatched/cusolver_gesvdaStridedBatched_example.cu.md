@@ -1,8 +1,8 @@
 # cuSOLVER/gesvdaStridedBatched::cusolver_gesvdaStridedBatched_example.cu
 
-**PARTIAL / L3**
+**PASSED / L4**
 
-已完成GPU重写与独立数值复核；候选尚需独立审查及完整资格，未升级整例。
+完整原始合同、登记变体、独立CPU/同字节CUDA、负向/边界与独立复审通过。实际路线：hipSOLVER/rocSOLVER native full GPU SVD + HIP rank projection and FP64 residual。性能不作跨设备比较。
 
 | 字段 | 当前记录 |
 | --- | --- |
@@ -10,8 +10,8 @@
 | 实际库 / 后端 | hipSOLVER/rocSOLVER native full GPU SVD + HIP rank projection and FP64 residual / rocSOLVER + project HIP |
 | 候选路线 | hipSOLVER, rocSOLVER |
 | 代码 | [rocm/ported/cuSOLVER/gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu](../../../../rocm/ported/cuSOLVER/gesvdaStridedBatched/cusolver_gesvdaStridedBatched_example.cu) |
-| required cases | 7/8 |
-| CUDA baseline / comparison | PASSED / BLOCKED |
+| required cases | 8/8 |
+| CUDA baseline / comparison | PASSED / PASSED |
 | 性能 | NOT_RUN |
 | 原始源码 SHA256 | `c3afaca538159c5f139b72fbcf97ca28237373a813c901c74d2da2814f9d1916` |
 
@@ -48,3 +48,5 @@ CUDA 对照限制：当前 AMD 路线尚未通过正确性验收。
 - [migration/reports/evidence/20261109T100720.422147Z/original-cuda/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu](../../../reports/evidence/20261109T100720.422147Z/original-cuda/cuSOLVER_gesvdaStridedBatched_cusolver_gesvdaStridedBatched_example.cu)
 - [migration/reports/rewrite-extension-rocm.json](../../../reports/rewrite-extension-rocm.json)
 - [migration/reports/rewrite-extension-rocm-validation.json](../../../reports/rewrite-extension-rocm-validation.json)
+- [migration/reports/evidence/rewrite/R3/cuSOLVER_gesvdaStridedBatched__cusolver_gesvdaStridedBatched_example.cu/20261110T092526.610000Z-R3-composite-qualification-e9da6e4aed](../../../reports/evidence/rewrite/R3/cuSOLVER_gesvdaStridedBatched__cusolver_gesvdaStridedBatched_example.cu/20261110T092526.610000Z-R3-composite-qualification-e9da6e4aed)
+- [migration/reports/rewrite-R3-qualification.json](../../../reports/rewrite-R3-qualification.json)

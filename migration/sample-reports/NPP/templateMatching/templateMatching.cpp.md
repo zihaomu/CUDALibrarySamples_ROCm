@@ -1,8 +1,8 @@
 # NPP/templateMatching::templateMatching.cpp
 
-**PARTIAL / L4**
+**PASSED / L4**
 
-已完成GPU重写与独立数值复核；候选尚需独立审查及完整资格，未升级整例。
+完整原始合同、登记变体、独立CPU/同字节CUDA、负向/边界与独立复审通过。实际路线：HIP NCC/full original CLI/RAW input/PGM annotation/HIP-event timing。性能不作跨设备比较。
 
 | 字段 | 当前记录 |
 | --- | --- |
@@ -10,7 +10,7 @@
 | 实际库 / 后端 | HIP NCC/full original CLI/RAW input/PGM annotation/HIP-event timing / project HIP kernels |
 | 候选路线 | RPP HIP, rocPRIM |
 | 代码 | [rocm/ported/NPP/templateMatching/templateMatching.cpp](../../../../rocm/ported/NPP/templateMatching/templateMatching.cpp) |
-| required cases | 8/9 |
+| required cases | 9/9 |
 | CUDA baseline / comparison | PASSED / PASSED |
 | 性能 | NOT_RUN |
 | 原始源码 SHA256 | `812ed394222f764ce9fb4ec0cac1c5d0cad6f1620cc15a367dc1be9ce92c2cfb` |
@@ -55,3 +55,5 @@ OPENBLAS_NUM_THREADS=2 python3 tools/migration/batches12_15_validate.py b15 --qu
 - [migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp](../../../reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP_templateMatching_templateMatching.cpp)
 - [migration/reports/rewrite-ncc-rocm.json](../../../reports/rewrite-ncc-rocm.json)
 - [migration/reports/rewrite-ncc-native-comparison.json](../../../reports/rewrite-ncc-native-comparison.json)
+- [migration/reports/evidence/rewrite/R3/NPP_templateMatching__templateMatching.cpp/20261110T092525.448735Z-R3-composite-qualification-ad7d1f1dc9](../../../reports/evidence/rewrite/R3/NPP_templateMatching__templateMatching.cpp/20261110T092525.448735Z-R3-composite-qualification-ad7d1f1dc9)
+- [migration/reports/rewrite-R3-qualification.json](../../../reports/rewrite-R3-qualification.json)

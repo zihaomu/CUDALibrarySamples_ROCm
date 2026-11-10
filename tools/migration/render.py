@@ -79,6 +79,8 @@ def render():
 
  if (ROOT/'migration/reports/rewrite-first-qualification.json').exists():
   q=json.loads((ROOT/'migration/reports/rewrite-first-qualification.json').read_text());qualified=[r for r in q['qualifications'] if r['status']=='PASSED'];intro+='**MOAT R1–R2：'+str(len(qualified))+'/8 个原始样例满足复合验收门槛，'+str(sum(r['case_count'] for r in qualified))+' 个预登记输入。** [逐例路线、原生/兼容 CUDA 区分与完整实验入口](migration/reports/rewrite-R1-R2.md)。支持计数以已写入主表的资格为准；失败、重试和证据勘误保留。\n\n'
+ if (ROOT/'migration/reports/rewrite-R3-qualification.json').exists():
+  q=json.loads((ROOT/'migration/reports/rewrite-R3-qualification.json').read_text());qualified=[r for r in q['qualifications'] if r['status']=='PASSED'];intro+='**MOAT R3：'+str(len(qualified))+' 个原PARTIAL整例收口（NCC原始文件harness、rank-r batched SVD），15个输入、24项输出故障注入、18项实际运行边界。** [实际路线与详细实验](migration/reports/rewrite-R3.md)；[原24项逐例合同复审与剩余缺口](migration/reports/rewrite-R3-gaps.md)。静态合同审查不算新增GPU成功。\n\n'
  intro+=render_overview(operators)
  intro+='## 模块支持矩阵\n\n下表覆盖全部 30 个库级模块。“已验收算子族”按上文口径去重；“通过/总入口”是原始 sample 数，二者分别统计。部分完成、失败、明确不支持、前置条件阻塞分别列出；每个模块链接包含全部原始样例的实际库、代码、逐例原因和证据。候选库不计为实际使用库。\n\n| 模块 | 实际/候选 AMD 路线 | 已验收算子族 | 通过/总入口 | 部分 | 失败 | 不支持 | 阻塞 | 当前范围及未通过原因 |\n| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |\n'
  for family in CANDIDATES:
