@@ -542,7 +542,7 @@ PLAN-01 至 PLAN-03 是规划阶段记录，不代表实验结果。实施中的
 
 <!-- MOAT_EXEC_PROGRESS:START -->
 
-最近更新：2026-11-10T11:20:46.814665+00:00。首批 AMD 51/51 已运行，独立 CPU 51/51 通过；CUDA 51/51 已运行，独立 CPU 51/51 通过。已签发首批整例资格 8/8。R3–R8仍待完成。
+最近更新：2026-11-10T11:28:52.283764+00:00。首批 AMD 51/51 已运行，独立 CPU 51/51 通过；CUDA 51/51 已运行，独立 CPU 51/51 通过。已签发首批整例资格 8/8。R3–R8仍待完成。
 
 <!-- MOAT_EXEC_PROGRESS:END -->
 
@@ -561,3 +561,5 @@ PLAN-01 至 PLAN-03 是规划阶段记录，不代表实验结果。实施中的
 | 2026-11-10 | EXEC-21 | R7原生hipSPARSELt两例复测仍失败，分别保留gfx1201 kernel bundle缺失/高级属性未实现及最初链接错误。项目HIP实现真实TILE最大L1裁剪、2 FP16值+4bit索引metadata、稀疏乘法；14 AMD/CPU通过。两个真实原CUDA程序也通过CPU；高级原例C只随机前半行，其余零，最初fixture不符已更正并复验。扩展LDA被原生SDK拒绝，保留失败并用显式CUDA GPU packing做数学对照。 | 两项从原生UNSUPPORTED改为项目重写候选PARTIAL；独立资格前不计支持数，继续验证与R6/R8 |
 
 | 2026-11-10 | EXEC-22 | R7当前14 AMD/CPU及14 native稀疏数学对照均通过；native对照明确使用对应HIP裁剪A，并由CUDA GPU packing补齐LDA限制，两个原CUDA完整样例另验通过，不要求非唯一裁剪tie的mask相同。17语义故障命中预期拒绝、10真实非法descriptor、1有效+3损坏metadata GPU检查、两组真实prune/compress/check/sparse-matmul轨迹通过；基础搜索9次稀疏kernel，高级1次，runtime copy核单列。 | 固定内容独立复核/资格；R6专题和R8仍待完成 |
+
+| 2026-11-10 | EXEC-23 | R7数值/执行合同独立复核批准；证据复核发现另验原CUDA程序的可变output与封存目录/CPU命令未绑定。已补原例raw输出/remote/build/run/collect及CPU冻结输入/完整validation/实际--output绑定，新增不存在输出替换与摘要篡改反例；当前10身份测试执行后复核。 | 重新签发固定内容资格；不跳过失败或用仅return0升级 |

@@ -57,4 +57,19 @@ class Sparse24Qualification(unittest.TestCase):
    if name=='rewrite-sparse24-original-cuda.json':data['profiles'][0]['original_sha256']='f'*64
    return data
   self.assertFalse(next(c['passed'] for c in self.checks(mutate) if c['check']=='sparse24/actual-original-native-program'))
+ def test_native_original_output_cannot_be_redirected(self):
+  def mutate(name,data):
+   if name=='rewrite-sparse24-original-cuda.json':
+    for row in data['profiles']:row['output']='artifacts/nonexistent-original-output'
+   if name=='rewrite-sparse24-original-validation.json':
+    for row in data['profiles']:row['run']['output']='artifacts/nonexistent-original-output'
+   return data
+  checks=self.checks(mutate)
+  for kind in q.KINDS:
+   for gate in ['actual-original-native-program','original-native-DP-and-mathematical-CPU']:self.assertFalse(next(c['passed'] for c in checks if c['check']==kind+'/'+gate))
+ def test_original_CPU_summary_cannot_substitute_unsealed_result(self):
+  def mutate(name,data):
+   if name=='rewrite-sparse24-original-validation.json':data['profiles'][0]['max_fp16_ulp']=2
+   return data
+  self.assertFalse(next(c['passed'] for c in self.checks(mutate) if c['check']=='sparse24/original-native-DP-and-mathematical-CPU'))
 if __name__=='__main__':unittest.main()
