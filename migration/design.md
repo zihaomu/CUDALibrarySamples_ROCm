@@ -550,6 +550,7 @@ artifacts/<run-id>/<sample-id>/<backend>/<case-id>/
 | S74 | 已完成 | 20个目标120case完成AMD/独立CPU/同输入兼容CUDA验收，9整例/11部分；52次数值与执行语义破坏全部拒绝、10项真实MPI/GPU数量/图像descriptor运行边界通过。原始vendor CUDA构建/运行20项另记，MgGetrf成功，MgPotrf原生执行失败及MathDx25.6 API差异保留。 | 绑定当前源码与证据、归档native NPP差异和Voronoi修正，刷新主表/算子支持/设计与路线图。 |
 | S75 | 已完成 | native NPP全量对照定位Voronoi为像素减最近site的位移，已修正HIP原绝对坐标输出并重跑B15。313×317与64²原图float距离与uint16截断逐像素完全一致，位移/最近site验证通过；失败源码/日志单独保留。Canny原始图1995/921600像素差异仍PARTIAL，NCC native FP32误差与文件harness缺口另记。 | 最终证据审计、干净checkout与fork默认rocm分支发布。 |
 | S76 | 已完成 | B12–B15原始vendor尝试20项、兼容CUDA数学与CPU/AMD 120case、53个错误输出/执行语义拒绝、10项运行边界均留证；9整例/11部分。全项目211整例、24部分、111功能族/17模块；B4–B15全部65候选已执行，45整例/20部分合同，未声明多节点/性能或未完成合同成功。 | 干净checkout复核后推送fork默认rocm，核对远端commit与README blob。 |
+| S77 | 已完成 | 实现5dbaee89已推送fork默认rocm；GitHub API确认commit与README blob一致。无build/MPI/SDK/CPU依赖的干净checkout完整审计通过。所有65计划候选执行留证；本轮120case、53故障拒绝、10运行边界完成，9整例/11部分，累计211整例/24部分/111功能族/17模块。 | 未完成合同按逐例恢复条件推进；多节点与性能未资格化，不计已支持。 |
 
 ## 12. 当前实施快照（工具刷新）
 
