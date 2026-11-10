@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Rebuild and replay original profiles inside a fresh checkout, without old binaries."""
-import json,os,shutil,subprocess,sys,time
+import json,os,shutil,subprocess,sys,time,ctypes,ctypes.util
 from pathlib import Path
 from experiment import ROOT,write,digest
 from snapshot import capture
@@ -19,6 +19,10 @@ def main():
     result=dict(status='RUNNING',source_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),initial_clean=True,environment=capture(),commands=commands,cases=cases,
         scope='Fresh M1 plus all 21 newly qualified original AMD profiles and independent CPU checks; historical raw outputs/native CUDA binaries are not copied or regenerated')
     try:
+        lock=json.loads((ROOT/'migration/environments/project.lock.json').read_text());observed=result['environment']
+        environment_checks=dict(image=observed['image_id']==lock['foundation_image_id'],release=observed['rocm_release']==lock['rocm_release'],devices=bool(observed['devices']) and all(d['physical_id']!=3 for d in observed['devices']))
+        result['environment_checks']=environment_checks
+        if not all(environment_checks.values()):raise RuntimeError('Observed environment differs from cloned project lock')
         run(['python3','tools/migration/bootstrap_sdk.py'],'bootstrap-overlay')
         run(['cmake','-S','rocm','-B','build/clean-cmake','-DCMAKE_BUILD_TYPE=Release'],'configure')
         run(['cmake','--build','build/clean-cmake','-j4'],'build-M1')
@@ -28,6 +32,15 @@ def main():
         run(['cmake','--build','build/clean-cmake','--target']+targets+['-j4'],'build-rewrites')
         testlog=run(['ctest','--test-dir','build/clean-cmake','--output-on-failure','--parallel','1'],'CTest')
         if '100% tests passed, 0 tests failed out of 16' not in testlog.read_text():raise RuntimeError('CTest denominator')
+        # The foundation ships an LP64 CPU OpenBLAS, but no system liblapack
+        # soname. Load its CPU LAPACK symbols into the default namespace used by
+        # the unchanged independent reference. Do not substitute ILP64 integers.
+        cpu_library=Path('/opt/rocm/core-10.1/lib/host-math/lib/librocm-openblas.so.0')
+        cpu=ctypes.CDLL(str(cpu_library),mode=ctypes.RTLD_GLOBAL);cpu.openblas_get_config.restype=ctypes.c_char_p;config=cpu.openblas_get_config().decode()
+        if 'USE64BITINT' in config:raise RuntimeError('CPU reference requires LP64 LAPACK')
+        resolved=ctypes.util.find_library('lapack');lapack=ctypes.CDLL(resolved)
+        if any(ctypes.cast(getattr(lapack,n),ctypes.c_void_p).value!=ctypes.cast(getattr(cpu,n),ctypes.c_void_p).value for n in ['cgetrf_','zpotrf_']):raise RuntimeError('Unexpected CPU LAPACK symbol resolution')
+        result['cpu_reference_library']=dict(path=str(cpu_library),sha256=digest(cpu_library),configuration=config,integer_abi='LP64',resolved_soname=resolved,symbols=['cgetrf_','zpotrf_'])
         import first_reference,svd_reference,sparse24_reference,sparse_binding_reference,ncc_reference,crc32_reference
         def binary_case(kind,sample,src,binary,validator):
             out=work/('output-'+kind);out.mkdir();env=dict(REWRITE_INPUT=str(src),REWRITE_OUTPUT=str(out));log=run([binary],'run-'+kind,env=env)

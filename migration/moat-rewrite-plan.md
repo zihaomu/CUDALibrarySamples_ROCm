@@ -59,7 +59,7 @@
 
 ### 2.2 控制仓库与实现仓库分开
 
-拟建本地控制仓库：工作区根目录下 `MOAT_CUDALibrarySamples_ROCm/`；实现继续位于现有 `CUDALibrarySamples_ROCm/`。P0 记录控制仓库的 upstream、适配提交和实现仓库关联。此路径目前只是计划。
+已建立本地控制仓库 `MOAT_CUDALibrarySamples_ROCm/`；实现位于 `CUDALibrarySamples_ROCm/`。固定 upstream、包装 skill、状态适配与可恢复 bundle 已落地，详情见 `migration/moat/adapter-decisions.md`。
 
 - 控制仓库保存 MOAT 代码、角色、工作锁、项目状态、`surface.json`、计划、任务队列和交接摘要。
 - 实现仓库保存 ROCm 实现、现有逐例清单、后端注册表、输入规范、验收脚本和可公开的实验记录。
@@ -69,7 +69,7 @@
 
 ### 2.3 先完成项目适配，再运行队列
 
-P0 必须落实以下差异，并写入拟建的 `migration/moat/adapter-decisions.md`：
+P0 必须落实以下差异，并已写入 `migration/moat/adapter-decisions.md`：
 
 | 上游 MOAT 行为 | 本项目适配 |
 | --- | --- |
@@ -109,7 +109,7 @@ flowchart LR
 
 P0 在实现仓库建立 `.agents/skills/cuda-library-to-rocm/SKILL.md` 项目包装 skill，并在项目 `AGENTS.md` 写明：代码重写、库选型/替换、公共后端整理都从该入口进入。包装 skill 读取锁定 MOAT 主 skill 和相应角色/参考文件，再加载本项目环境、合同、日志和支持表规则。
 
-MOAT 路径、upstream commit、适配版本、skill hash 与控制项目名登记在拟建的 `migration/moat/lock.json`；共享文档不写死个人机器上的控制仓库绝对路径。缺少控制仓库或版本不符时记录接入前置条件缺失，不能静默换用另一版同名 skill。多 agent 工具的调度方式与角色规则分开，角色模型选择按运行环境记录，不照搬上游文件中的某个模型名称。
+MOAT 路径、upstream commit、适配版本、skill hash 与控制项目名已登记在 `migration/moat/lock.json`；共享文档不写死个人机器上的控制仓库绝对路径。缺少控制仓库或版本不符时记录接入前置条件缺失，不能静默换用另一版同名 skill。多 agent 工具的调度方式与角色规则分开，角色模型选择按运行环境记录，不照搬上游文件中的某个模型名称。
 
 每次交接记录任务输入、可审查决策摘要、采取的工具动作、输出文件、当前提交和下一步。实际可获取的 agent/model/工具版本也写入记录；恢复依赖持久化材料，不依赖先前聊天窗口仍然存在。
 
@@ -117,7 +117,7 @@ MOAT 路径、upstream commit、适配版本、skill hash 与控制项目名登�
 
 ### 3.1 建立逐例后端注册表
 
-拟增 `migration/libraries.json`、`migration/backend-routes.json` 和对应 schema。前者描述库，后者描述“原始样例 → 实际执行路线”。现有 `ecosystem-mappings.json`、`ecosystem-decisions.json` 和 `samples.yaml` 通过转换工具关联，避免手工维护相互矛盾的库名单。
+已建立 `migration/libraries.json`、`migration/backend-routes.json` 和对应 schema。前者描述库，后者描述“原始样例 → 实际执行路线”。现有 `ecosystem-mappings.json`、`ecosystem-decisions.json` 和 `samples.yaml` 通过转换工具关联，避免手工维护相互矛盾的库名单。
 
 库记录包括：库 ID、上游/许可、版本/源码提交、构建与运行时路径、包与动态库 hash、架构/精度限制、CPU/GPU 角色、候选/已探测/已验收状态、环境和实验 ID。
 
@@ -169,18 +169,18 @@ CUDALibrarySamples_ROCm/
 
 新阶段使用 P0、P1、R1–R8，与历史 B4–B15 区分。日历时间取决于 GPU 预约、原生 SDK 和单例复杂度；按可验收批次推进，不提前承诺完成日期或新增通过数。
 
-| 阶段 | 内容 | 主要交付 | 退出条件 | 初始状态 |
+| 阶段 | 内容 | 主要交付 | 退出条件 | 当前状态 |
 | --- | --- | --- | --- | --- |
 | P0 | MOAT 项目接入、环境和日志基础 | 固定版本控制仓库、包装 skill、适配说明、639 入口队列、状态/证据桥接 | 真实小型 GPU 试跑和一次失败/修复/恢复闭环均留证；流程状态与支持状态一致 | COMPLETED_SCOPED |
 | P1 | 库注册表和构建整理 | 30 模块的库/路线/依赖映射、公共接口、按样例构建注册 | 639 个 ID 可定位；既有通过路线的受影响回归通过；未发生静默 CPU 替代 | COMPLETED_SCOPED |
 | R1 | 5 个 BLAS/Lt 重写 | 复数 3M、PlanarComplex、INT8 布局与计算 | 第 5 节逐例合同、预登记用例、独立三方验证和反向检查 | COMPLETED_SCOPED |
 | R2 | 3 个 MathDx 求解设备内重写 | partial-pivot LU、POSV、TRSM | 第 5 节原始 dtype/尺寸/执行位置通过，host API 替代检查通过 | COMPLETED_SCOPED |
-| R3 | 24 个 PARTIAL 收口 | 第 6 节逐例缺失合同、可收口实现或保留原因 | 每项有当前证据与下一步；仅完整等价项升级 PASSED | IN_PROGRESS |
-| R4 | 其它基础/高级算法扩展 | 稀疏 QR/IRS/SVD、低精度、图像、压缩、heuristics 等按探针拆批 | 一次只冻结一个可审查小批；完整原始合同和独立验收 | IN_PROGRESS |
-| R5 | 语言绑定扩展 | 对 73 个前端失败入口逐一建立 C ABI / Fortran / Python 路线 | 先有已验收 GPU 核心，再通过原语言实际入口与数据/错误传播检查 | IN_PROGRESS |
-| R6 | 长尾 SDK/设备算法研究 | cuEST、PQC、JPEG2000/TIFF、剩余 MathDx/分布式等分专题 | 每专题明确可实施路线、最小探针、成本和失败恢复条件 | NOT_STARTED |
+| R3 | 24 个 PARTIAL 收口 | 第 6 节逐例缺失合同、可收口实现或保留原因 | 每项有当前证据与下一步；仅完整等价项升级 PASSED | ASSESSMENT_COMPLETE：2整例通过、22缺口保留 |
+| R4 | 其它基础/高级算法扩展 | 稀疏 QR/IRS/SVD、低精度、图像、压缩、heuristics 等按探针拆批 | 一次只冻结一个可审查小批；完整原始合同和独立验收 | COMPLETED_SCOPED：CRC32小批，96待实现 |
+| R5 | 语言绑定扩展 | 对 73 个前端失败入口逐一建立 C ABI / Fortran / Python 路线 | 先有已验收 GPU 核心，再通过原语言实际入口与数据/错误传播检查 | PARTIALLY_IMPLEMENTED：8前端通过、65仍待实现 |
+| R6 | 长尾 SDK/设备算法研究 | cuEST、PQC、JPEG2000/TIFF、剩余 MathDx/分布式等分专题 | 每专题明确可实施路线、最小探针、成本和失败恢复条件 | ASSESSMENT_COMPLETE_PORTS_PENDING：224未通过 |
 | R7 | 2:4 结构化稀疏替代 | 原生路线重探或真正的 HIP sparse 2:4 实现 | prune/compress/metadata/稀疏 matmul 与原例合同通过；原生失败记录保留 | COMPLETED_SCOPED |
-| R8 | 阶段回归、清理与交付 | 干净检出复现、源码封存、全量统计、README 和详细报告 | 当前源码/依赖与全部选中证据一致；未完成入口有明确原因 | NOT_STARTED |
+| R8 | 阶段回归、清理与交付 | 干净检出复现、源码封存、全量统计、README 和详细报告 | 当前源码/依赖与全部选中证据一致；未完成入口有明确原因 | IN_PROGRESS：回归、复现与交付验收 |
 
 执行顺序：P0 → P1 → R1 → R2 → R3 中可收口小批；R4–R7 依赖相应核心/SDK/设备探针，逐批安排。R8 的归档和文档动作在每批结束都执行，阶段结束再做一次整体审计。
 
@@ -475,7 +475,7 @@ CUDA 对照分成 `cuda_native` 与 `cuda_compatible_math`。原生 SDK 缺失�
 
 实时目标：每次阶段交接、完成一个样例、遇到有效失败/阻断时更新；批量 runner 至少每 5 分钟落盘检查点。长 GPU 命令运行期间通过事件/心跳记录当前阶段，不杜撰中间数值结果。恢复后识别未结束尝试为 INTERRUPTED 或仍在运行，先核对进程，避免重复启动。
 
-本计划作为 `doc` 主文档维护；P0 拟建立仓库镜像 `migration/moat-rewrite-plan.md`，README 增加入口。新批次报告拟放 `migration/reports/rewrite-R*.md`，逐例详表继续使用现有 support-log-index。
+本计划作为 `doc` 主文档维护；已建立仓库镜像 `migration/moat-rewrite-plan.md` 与 README 入口。新批次报告位于 `migration/reports/rewrite-R*.md`，逐例详表继续使用现有 support-log-index。
 
 拟新增的工作清单、实验索引和 schema 都注明计划/实施状态；只生成报表不能替代真实实验。
 
@@ -483,14 +483,14 @@ CUDA 对照分成 `cuda_native` 与 `cuda_compatible_math`。原生 SDK 缺失�
 
 ### 12.1 P0/P1 首先需要交付
 
-- [ ] 固定 MOAT 源码、MIT 许可、主 skill 和角色版本；记录项目适配差异。
-- [ ] 创建本地控制仓库；把已有 fork、rocm 分支和 Linux/gfx1201 范围连接到 MOAT；保留其它平台未验证记录。
-- [ ] 对 639 个入口生成完整任务映射；428 个未通过项恰有一个主任务归属；已有 211 项资格保留来源和范围。
-- [ ] 生成并校核 surface；未完成的范围登记为 owed，不能为满足整体完成而删掉。
-- [ ] 实现实验采集/封存/schema/恢复/索引桥接，验证中断记录和失败后重试关联。
-- [ ] 用一个既有通过入口完成真实三方小型试跑；用独立负向检查演练失败、修复、审查和续跑。
-- [ ] 输出 30 模块的库注册与依赖图、已有目标映射、CPU/GPU 阶段、缺失能力清单。
-- [ ] 将首批 8 例的原始合同、case、阈值、CPU/CUDA oracle 和依赖冻结，移交 R1。
+- [x] 固定 MOAT 源码、MIT 许可、主 skill 和角色版本；记录项目适配差异。
+- [x] 创建本地控制仓库；把已有 fork、rocm 分支和 Linux/gfx1201 范围连接到 MOAT；保留其它平台未验证记录。
+- [x] 对 639 个入口生成完整任务映射；428 个未通过项恰有一个主任务归属；已有 211 项资格保留来源和范围。
+- [x] 生成并校核 surface；未完成的范围登记为 owed，不能为满足整体完成而删掉。
+- [x] 实现实验采集/封存/schema/恢复/索引桥接，验证中断记录和失败后重试关联。
+- [x] 用一个既有通过入口完成真实三方小型试跑；用独立负向检查演练失败、修复、审查和续跑。
+- [x] 输出 30 模块的库注册与依赖图、已有目标映射、CPU/GPU 阶段、缺失能力清单。
+- [x] 将首批 8 例的原始合同、case、阈值、CPU/CUDA oracle 和依赖冻结，移交 R1。
 
 ### 12.2 每个重写批次需要交付
 
@@ -542,7 +542,7 @@ PLAN-01 至 PLAN-03 是规划阶段记录，不代表实验结果。实施中的
 
 <!-- MOAT_EXEC_PROGRESS:START -->
 
-最近更新：2026-11-10T12:06:45.232883+00:00。首批 AMD/独立CPU/CUDA 51/51；首批资格 8/8。本轮累计21项新资格，撤销1项旧资格，当前231 PASSED/23 PARTIAL/385 FAILED。剩余408项全部有路线与重试条件；R5仍有65前端和额外CPP项待实现。R8：IN_PROGRESS；全项目surface与其它平台仍owed。
+最近更新：2026-11-10T12:14:27.865139+00:00。首批 AMD/独立CPU/CUDA 51/51；首批资格 8/8。本轮累计21项新资格，撤销1项旧资格，当前231 PASSED/23 PARTIAL/385 FAILED。剩余408项全部有路线与重试条件；R5仍有65前端和额外CPP项待实现。R8：IN_PROGRESS；全项目surface与其它平台仍owed。
 
 <!-- MOAT_EXEC_PROGRESS:END -->
 
@@ -567,3 +567,5 @@ PLAN-01 至 PLAN-03 是规划阶段记录，不代表实验结果。实施中的
 | 2026-11-10 | EXEC-24 | R7固定0d530192三角色批准并签发两例资格；231 PASSED、25→23 PARTIAL、385 FAILED，原两项原生UNSUPPORTED已通过显式项目重写路线收口但原生库失败保留。18模块/117功能族。完整typed FP16默认合同、30次后端数学检查与全部负向/轨迹归档。 | R6专题/全部剩余入口明确去向，以及R8总回归、源码封存、干净检出复现和fork交付 |
 
 | 2026-11-10 | EXEC-25 | R6完成真实HIPRTC编译/加载/执行、物理GPU0/2 GEMM+AllGather、JP2/TIFF实际parser拒绝及SDK/header/符号调查；四个候选库固定源码与许可文件hash。408个未通过入口补齐路线/原因/成本/最小实验/重试条件，不增加支持数。 | R8既有16 CMake/CTest通过；继续干净检出21个原始profile复现、依赖审计、独立审查和fork推送 |
+
+| 2026-11-10 | EXEC-26 | R8独立审查要求补强：资格seal必需成员/不可变发布锚点、R5/R7完整引用集合、传递oracle依赖、严格recorder等价例外，以及干净clone原始输出/Fortran构建和项目镜像锁门槛。初次clone已从零构建21新入口并通过16 M1，但CPU oracle缺少默认LAPACK符号，未通过整组复现；finalizer误用FAILED枚举导致异常，已作为中断恢复归档。 | 使用镜像已有LP64 CPU OpenBLAS提供独立LAPACK符号，不修改数值oracle；修复后重新冻结源码、复现与独立复审，不签发失败尝试 |

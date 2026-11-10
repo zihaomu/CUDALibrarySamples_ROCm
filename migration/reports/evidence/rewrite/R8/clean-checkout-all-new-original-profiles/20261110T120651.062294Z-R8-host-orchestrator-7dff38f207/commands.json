@@ -1,0 +1,63 @@
+[
+  {
+    "command_id": 1,
+    "phase": "fresh-clone",
+    "argv": [
+      "git",
+      "clone",
+      "--no-local",
+      "--no-hardlinks",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/replay-20261110T120651.062294Z-R8-host-orchestrator-7dff38f207"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-10T12:06:51.571931+00:00",
+    "timeout_seconds": 180,
+    "environment": {},
+    "stdout": "logs/0001-fresh-clone.stdout.log",
+    "stderr": "logs/0001-fresh-clone.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-10T12:07:02.213530+00:00",
+    "seconds": 10.640550316951703
+  },
+  {
+    "command_id": 2,
+    "phase": "fixed-commit",
+    "argv": [
+      "git",
+      "checkout",
+      "--detach",
+      "e6c221c1c3d65321d1deabc4f0fe9bf48a251351"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/replay-20261110T120651.062294Z-R8-host-orchestrator-7dff38f207",
+    "started_at_utc": "2026-11-10T12:07:02.246426+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0002-fixed-commit.stdout.log",
+    "stderr": "logs/0002-fixed-commit.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-10T12:07:02.412701+00:00",
+    "seconds": 0.16537826298736036
+  },
+  {
+    "command_id": 3,
+    "phase": "locked-GPU-replay",
+    "argv": [
+      "/home/zihaomu/zihaomu_workspace/rocm10-launch.sh",
+      "python3",
+      "tools/moat/clean_replay.py"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/replay-20261110T120651.062294Z-R8-host-orchestrator-7dff38f207",
+    "started_at_utc": "2026-11-10T12:07:02.414324+00:00",
+    "timeout_seconds": 900,
+    "environment": {},
+    "stdout": "logs/0003-locked-GPU-replay.stdout.log",
+    "stderr": "logs/0003-locked-GPU-replay.stderr.log",
+    "environment_changes": {
+      "HIP_VISIBLE_DEVICES": "2"
+    },
+    "return_code": 1,
+    "finished_at_utc": "2026-11-10T12:08:27.777643+00:00",
+    "seconds": 85.36228794802446
+  }
+]
