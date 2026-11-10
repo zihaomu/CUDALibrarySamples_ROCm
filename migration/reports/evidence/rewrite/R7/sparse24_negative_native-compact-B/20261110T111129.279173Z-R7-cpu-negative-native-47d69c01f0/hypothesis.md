@@ -1,0 +1,1 @@
+Test cpu-negative-native for sparse24/negative/native-compact-B, case original. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T110914.291332Z-R7-cuda-native-compressed-f90d81b3db.

@@ -1,0 +1,1 @@
+Test rocm for cuSPARSELt/matmul::matmul_example.cpp, case repeat. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T110636.353786Z-R7-rocm-build-35cc7a4acf.

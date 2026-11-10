@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "rocm_release": "10.1.0",
+  "foundation_image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+  "gpu_architecture": "gfx1201",
+  "physical_gpu_used": [
+    0,
+    1,
+    2,
+    7
+  ],
+  "inspection": "migration/environments/amd-rocm10-inspection.json",
+  "headers_root": "/opt/rocm/core-10.1/include",
+  "runtime_core": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core",
+  "runtime_libraries": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_libraries",
+  "qualification_scope": "M1 original profile plus 95 cases; additional original-profile validation is reported per entrypoint; GEMM performance has separately scoped evidence",
+  "compiler_mode": "C++ host-library calls plus HIP gfx1201 kernels compiled against a project-local overlay; Fortran ISO_C_BINDING to HIP separately qualified",
+  "cuda_reference_host": "nvidia-5090x2",
+  "cuda_toolkit": "13.4.92",
+  "cuda_driver": "615.71.09",
+  "default_hip_ordinal": 2,
+  "device_mapping": "migration/environments/physical-device-map.json",
+  "historical_device_note": "HIP ordinal0 maps to excluded physical GPU3; early original-port diagnostics on ordinal0 are excluded from final qualification. Historical M1 ordinal1 maps physical GPU2; later runs use guard-checked physical0/1.",
+  "physical_gpus_used_for_final_correctness": [
+    0,
+    1,
+    2,
+    7
+  ],
+  "device_policy": "Physical GPU3 excluded. Reservation and PCI mapping checked dynamically per run; earlier physical2 runs preceded its later reservation. Contended cards may validate correctness but fail performance idle gate."
+}

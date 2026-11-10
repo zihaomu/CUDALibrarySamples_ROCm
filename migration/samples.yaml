@@ -499585,18 +499585,18 @@
       "candidate_libraries": [
         "hipSPARSELt"
       ],
-      "actual_library": "hipsparselt+hipsparse",
-      "backend_library": "hipSPARSELt",
+      "actual_library": "project HIP GPU TILE prune + packed 2:4 values/metadata + sparse-only matmul",
+      "backend_library": "HIP GPU; CPU descriptor/constant-mask setup only",
       "implementation": "rocm/ported/cuSPARSELt/matmul/matmul_example.cpp",
-      "status": "UNSUPPORTED",
-      "level": "L2",
+      "status": "PARTIAL",
+      "level": "L3",
       "required_cases": [
         "original-functional-contract",
         "independent-numerical-or-semantic-reference"
       ],
       "passed_cases": [],
-      "reason_code": "HW_UNSUPPORTED",
-      "reason": "锁定 ROCm 10.1.0 hipSPARSELt 已编译，但 gfx1201 缺少 kernel bundle；实机返回 NOT_IMPLEMENTED/无法加载 TensileLibrary_lazy_gfx1201，固定源码架构检查也拒绝 gfx1201。仅限此版本/硬件/后端；保留 structured prune/compress/matmul 契约，未改成 dense。",
+      "reason_code": "REWRITE_REVIEW_PENDING",
+      "reason": "原生hipSPARSELt路线仍缺gfx1201 bundle/高级属性；已实现项目HIP真实2:4 TILE裁剪、压缩metadata与稀疏乘法，14 AMD/CPU场景通过。原始CUDA两例通过，完整扩展CUDA对照、负向、运行边界、轨迹和独立复核尚待收口。不是dense GEMM回退或原生Sparse Tensor Core支持。",
       "cuda_baseline": "BLOCKED",
       "cuda_comparison": "BLOCKED",
       "benchmark": "NOT_RUN",
@@ -499608,7 +499608,9 @@
         "migration/reports/evidence/20261109T092720.531889Z/original-rocm/cuSPARSELt_matmul_matmul_example.cpp",
         "migration/reports/upstream-support/hipsparselt-gfx1201-configure.log",
         "migration/reports/upstream-support/sources.json",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSPARSELt_matmul_matmul_example.cpp"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSPARSELt_matmul_matmul_example.cpp",
+        "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul__matmul_example.cpp/20261110T110155.523031Z-R7-rocm-e4da9f1bd1",
+        "migration/reports/rewrite-sparseLt-native-route.json"
       ],
       "attempts": [
         {
@@ -499848,7 +499850,7 @@
         ],
         "review_scope": "Original source is the authoritative dtype/layout/batch/API contract; qualified subset and deviations are explicit in reason and required_cases."
       },
-      "equivalence": "API_PORT",
+      "equivalence": "PROJECT_HIP_ALGORITHM_REWRITE",
       "original_cuda": {
         "sample_id": "cuSPARSELt/matmul::matmul_example.cpp",
         "scope": "original_profile",
@@ -499886,18 +499888,18 @@
       "candidate_libraries": [
         "hipSPARSELt"
       ],
-      "actual_library": "hipsparselt+hipsparse",
-      "backend_library": "hipSPARSELt",
+      "actual_library": "project HIP GPU TILE prune + packed 2:4 values/metadata + sparse-only matmul",
+      "backend_library": "HIP GPU; CPU descriptor/constant-mask setup only",
       "implementation": "rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp",
-      "status": "UNSUPPORTED",
-      "level": "L2",
+      "status": "PARTIAL",
+      "level": "L3",
       "required_cases": [
         "original-functional-contract",
         "independent-numerical-or-semantic-reference"
       ],
       "passed_cases": [],
-      "reason_code": "HW_UNSUPPORTED",
-      "reason": "锁定 ROCm 10.1.0 hipSPARSELt 已编译，但 gfx1201 缺少 kernel bundle；实机返回 NOT_IMPLEMENTED/无法加载 TensileLibrary_lazy_gfx1201，固定源码架构检查也拒绝 gfx1201。仅限此版本/硬件/后端；保留 structured prune/compress/matmul 契约，未改成 dense。",
+      "reason_code": "REWRITE_REVIEW_PENDING",
+      "reason": "原生hipSPARSELt路线仍缺gfx1201 bundle/高级属性；已实现项目HIP真实2:4 TILE裁剪、压缩metadata与稀疏乘法，14 AMD/CPU场景通过。原始CUDA两例通过，完整扩展CUDA对照、负向、运行边界、轨迹和独立复核尚待收口。不是dense GEMM回退或原生Sparse Tensor Core支持。",
       "cuda_baseline": "BLOCKED",
       "cuda_comparison": "BLOCKED",
       "benchmark": "NOT_RUN",
@@ -499909,7 +499911,9 @@
         "migration/reports/evidence/20261109T092720.531889Z/original-rocm/cuSPARSELt_matmul_advanced_matmul_advanced_example.cpp",
         "migration/reports/upstream-support/hipsparselt-gfx1201-configure.log",
         "migration/reports/upstream-support/sources.json",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSPARSELt_matmul_advanced_matmul_advanced_example.cpp"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSPARSELt_matmul_advanced_matmul_advanced_example.cpp",
+        "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul_advanced__matmul_advanced_example.cpp/20261110T110208.886413Z-R7-rocm-e78d101558",
+        "migration/reports/rewrite-sparseLt-native-route.json"
       ],
       "attempts": [
         {
@@ -500153,7 +500157,7 @@
         ],
         "review_scope": "Original source is the authoritative dtype/layout/batch/API contract; qualified subset and deviations are explicit in reason and required_cases."
       },
-      "equivalence": "API_PORT",
+      "equivalence": "PROJECT_HIP_ALGORITHM_REWRITE",
       "original_cuda": {
         "sample_id": "cuSPARSELt/matmul_advanced::matmul_advanced_example.cpp",
         "scope": "original_profile",

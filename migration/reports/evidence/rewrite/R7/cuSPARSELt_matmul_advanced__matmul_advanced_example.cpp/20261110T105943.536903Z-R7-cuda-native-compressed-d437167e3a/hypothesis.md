@@ -1,0 +1,1 @@
+Test cuda-native-compressed for cuSPARSELt/matmul_advanced::matmul_advanced_example.cpp, case repeat. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T105858.486157Z-R7-cuda-build-853bd05989.

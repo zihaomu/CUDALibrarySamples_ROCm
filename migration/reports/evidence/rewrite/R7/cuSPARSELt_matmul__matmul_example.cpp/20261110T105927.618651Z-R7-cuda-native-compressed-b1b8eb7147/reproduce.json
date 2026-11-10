@@ -1,0 +1,44 @@
+{
+  "commands": [
+    {
+      "command_id": 1,
+      "phase": "native-compressed-sparse-matmul",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "mkdir -p /tmp/20261110T105858.486157Z-R7-cuda-build-853bd05989/outputs/sparse24/ties && REWRITE_INPUT=/tmp/20261110T105858.486157Z-R7-cuda-build-853bd05989/inputs/sparse24/ties REWRITE_OUTPUT=/tmp/20261110T105858.486157Z-R7-cuda-build-853bd05989/outputs/sparse24/ties /tmp/20261110T105858.486157Z-R7-cuda-build-853bd05989/reference sparse24"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-10T10:59:28.126278+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0001-native-compressed-sparse-matmul.stdout.log",
+      "stderr": "logs/0001-native-compressed-sparse-matmul.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-10T10:59:29.044909+00:00",
+      "seconds": 0.9173036409774795
+    },
+    {
+      "command_id": 2,
+      "phase": "collect",
+      "argv": [
+        "scp",
+        "-r",
+        "nvidia-5090x2:/tmp/20261110T105858.486157Z-R7-cuda-build-853bd05989/outputs/sparse24/ties/.",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/R7/cuSPARSELt_matmul__matmul_example.cpp/20261110T105927.618651Z-R7-cuda-native-compressed-b1b8eb7147/outputs"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-10T10:59:29.046640+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0002-collect.stdout.log",
+      "stderr": "logs/0002-collect.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-10T10:59:29.363724+00:00",
+      "seconds": 0.31614499201532453
+    }
+  ],
+  "source": "source.json",
+  "inputs": "inputs/manifest.json",
+  "expected_environment": "environment.expected.json"
+}

@@ -1,0 +1,154 @@
+{
+  "profiles": [
+    {
+      "status": "PASSED",
+      "checks": [
+        {
+          "check": "finite-FP16-outputs",
+          "passed": true
+        },
+        {
+          "check": "b0/prune-padding",
+          "passed": true
+        },
+        {
+          "check": "b0/output-padding",
+          "passed": true
+        },
+        {
+          "check": "b0/capacity-DP-optimal-L1",
+          "passed": true
+        },
+        {
+          "check": "b0/valid-2-per-row-column-pruning",
+          "passed": true
+        },
+        {
+          "check": "b0/FP64-reference-within-two-FP16-ulp",
+          "passed": true
+        },
+        {
+          "check": "original-active-and-defined-padding-input/A",
+          "passed": true
+        },
+        {
+          "check": "original-active-and-defined-padding-input/B",
+          "passed": true
+        },
+        {
+          "check": "original-active-and-defined-padding-input/C",
+          "passed": true
+        },
+        {
+          "check": "actual-original-program-success",
+          "passed": true
+        }
+      ],
+      "max_fp16_ulp": 0,
+      "scope": "TILE optimal L1 capacity-DP; exact packed/metadata/layout/padding; FP64 independent product, FP16 rounding <=2 ULP. Pruning ties need not select the vendor mask.",
+      "run": {
+        "profile": "matmul",
+        "kind": "sparse24",
+        "return_code": 0,
+        "collection_return_code": 0,
+        "output": "artifacts/rewrite/R7/cuSPARSELt_matmul/20261110T105522.703709Z-R7-cuda-original-220c5ac860/outputs",
+        "experiment_id": "20261110T105522.703709Z-R7-cuda-original-220c5ac860",
+        "remote": "/tmp/20261110T105522.703709Z-R7-cuda-original-220c5ac860",
+        "original_sha256": "19b6c11093e7160dd031648d316e2bc6df8324988adeedd5b9499ca1b623bb95",
+        "instrumented_sha256": "0360b556557270affb739d69086a5ff54e5fdc5a5dd468806968df0b87a749f5",
+        "sdk_version": "0.10.0",
+        "scope": "actual original FP16 cuSPARSELt harness with output-only instrumentation and defined inactive padding",
+        "evidence": "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul/20261110T105522.703709Z-R7-cuda-original-220c5ac860"
+      },
+      "input_manifest_sha256": "38f8d3929ce08ae8a91f9e0f324419723078220001f802dabc87c8c8fa785f78",
+      "evidence": "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul/20261110T111233.201954Z-R7-cpu-native-original-validation-3bd5405161"
+    },
+    {
+      "status": "PASSED",
+      "checks": [
+        {
+          "check": "finite-FP16-outputs",
+          "passed": true
+        },
+        {
+          "check": "b0/prune-padding",
+          "passed": true
+        },
+        {
+          "check": "b0/output-padding",
+          "passed": true
+        },
+        {
+          "check": "b0/capacity-DP-optimal-L1",
+          "passed": true
+        },
+        {
+          "check": "b0/valid-2-per-row-column-pruning",
+          "passed": true
+        },
+        {
+          "check": "b0/FP64-reference-within-two-FP16-ulp",
+          "passed": true
+        },
+        {
+          "check": "b1/prune-padding",
+          "passed": true
+        },
+        {
+          "check": "b1/output-padding",
+          "passed": true
+        },
+        {
+          "check": "b1/capacity-DP-optimal-L1",
+          "passed": true
+        },
+        {
+          "check": "b1/valid-2-per-row-column-pruning",
+          "passed": true
+        },
+        {
+          "check": "b1/FP64-reference-within-two-FP16-ulp",
+          "passed": true
+        },
+        {
+          "check": "original-active-and-defined-padding-input/A",
+          "passed": true
+        },
+        {
+          "check": "original-active-and-defined-padding-input/B",
+          "passed": true
+        },
+        {
+          "check": "original-active-and-defined-padding-input/C",
+          "passed": true
+        },
+        {
+          "check": "original-active-and-defined-padding-input/bias",
+          "passed": true
+        },
+        {
+          "check": "actual-original-program-success",
+          "passed": true
+        }
+      ],
+      "max_fp16_ulp": 0,
+      "scope": "TILE optimal L1 capacity-DP; exact packed/metadata/layout/padding; FP64 independent product, FP16 rounding <=2 ULP. Pruning ties need not select the vendor mask.",
+      "run": {
+        "profile": "matmul_advanced",
+        "kind": "sparse24_advanced",
+        "return_code": 0,
+        "collection_return_code": 0,
+        "output": "artifacts/rewrite/R7/cuSPARSELt_matmul_advanced/20261110T105541.763838Z-R7-cuda-original-2fcbf60bb2/outputs",
+        "experiment_id": "20261110T105541.763838Z-R7-cuda-original-2fcbf60bb2",
+        "remote": "/tmp/20261110T105541.763838Z-R7-cuda-original-2fcbf60bb2",
+        "original_sha256": "9262f190a73481136ab49718c0afefb5f7590decc7930aacdf533f8bfdd059bc",
+        "instrumented_sha256": "88b8a3b28557b28d8f95ceea30cb5a6adf46fc181dab9b564bef520750f09b71",
+        "sdk_version": "0.10.0",
+        "scope": "actual original FP16 cuSPARSELt harness with output-only instrumentation and defined inactive padding",
+        "evidence": "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul_advanced/20261110T105541.763838Z-R7-cuda-original-2fcbf60bb2"
+      },
+      "input_manifest_sha256": "d0f9c4299bca1dea2b939e94d64301182c4b5f861d9e4be3f60fd9c9d952de02",
+      "evidence": "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul_advanced/20261110T111234.308302Z-R7-cpu-native-original-validation-d9c27bc216"
+    }
+  ]
+}

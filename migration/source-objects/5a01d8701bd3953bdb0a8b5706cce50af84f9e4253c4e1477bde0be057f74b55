@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+"""Independent capacity-DP pruning oracle and FP64 dense mathematical reference."""
+import argparse,itertools,json
+from pathlib import Path
+import numpy as np
+from inputs import verify
+def tile_optimum(tile,pruned=None):
+ # Row-capacity DP over column counts, independent of GPU enumeration of bitmasks.
+ dp={(0,0,0,0):0.}
+ for row in range(4):
+  next_dp={}
+  for pair in itertools.combinations(range(4),2):
+   if pruned is not None and any(pruned[row,c]!=(tile[row,c] if c in pair else 0) for c in range(4)):continue
+   score=sum(abs(float(tile[row,c])) for c in pair)
+   for counts,previous in dp.items():
+    updated=tuple(counts[c]+int(c in pair) for c in range(4))
+    if max(updated)<=2:next_dp[updated]=max(next_dp.get(updated,-np.inf),previous+score)
+  dp=next_dp
+ return dp.get((2,2,2,2),-np.inf)
+def ulp_distance(a,b):
+ def ordered(x):
+  bits=np.asarray(x,dtype='<f2').view('<u2').astype(np.int64);return np.where(bits&0x8000,0x8000-(bits&0x7fff),0x8000+bits)
+ return np.abs(ordered(a)-ordered(b))
+def validate(src,out,backend='rocm'):
+ src=Path(src);out=Path(out);mf=verify(src);s=mf['config'];m,n,k,batch=[s[key] for key in ['m','n','k','batch']];lda,ldb,ldc,sa,sb,sc=[s[key] for key in ['lda','ldb','ldc','stride_a','stride_b','stride_c']];advanced=mf['advanced'];checks=[];max_ulp=0
+ def check(name,value):checks.append(dict(check=name,passed=bool(value)))
+ def read(root,name,dtype,count):
+  path=root/(name+'.bin');dt=np.dtype(dtype)
+  if path.stat().st_size!=count*dt.itemsize:raise ValueError('whole byte count: '+name)
+  return np.fromfile(path,dtype=dt)
+ a=read(src,'A','<f2',batch*sa);b=read(src,'B','<f2',batch*sb);c=read(src,'C','<f2',batch*sc);bias=read(src,'bias','<f2',m);ap=read(out,'A_pruned','<f2',batch*sa);d=read(out,'D','<f2',batch*sc);check('finite-FP16-outputs',np.isfinite(ap).all() and np.isfinite(d).all())
+ if backend=='rocm':
+  for name,expected in [('A_after',a),('B_after',b),('C_after',c),('bias_after',bias)]:check(name+'/actual-GPU-input-unchanged',np.array_equal(read(out,name,'<f2',len(expected)).view('<u2'),expected.view('<u2')))
+  groups=batch*m*(k//4);values=read(out,'packed_values','<f2',2*groups).reshape(batch,m,k//4,2);metadata=read(out,'metadata','u1',groups).reshape(batch,m,k//4);masks=read(out,'tile_masks','<u2',batch*(m//4)*(k//4)).reshape(batch,m//4,k//4);check('GPU-prune-check',read(out,'prune_check','<i4',1)[0]==0);check('real-packed-storage',values.nbytes+metadata.nbytes<batch*m*k*2);plan=read(out,'plan','<i8',8);check('actual-project-plan',np.array_equal(plan[:6],[1,0,0,values.nbytes,metadata.nbytes,k//2]) and plan[6] in [0,1] and plan[7]==s['search']);candidates=read(out,'search_candidates','<i4',2 if s['search'] else 0);times=read(out,'search_ms','<f4',2 if s['search'] else 0);check('actual-GPU-search',np.array_equal(candidates,[0,1] if s['search'] else []) and np.isfinite(times).all() and (times>=0).all() and plan[6]==(int(times[1]<times[0]) if s['search'] else 0))
+ if backend=='cuda':
+  for name,expected in [('A_after',ap),('B_after',b),('C_after',c),('bias_after',bias)]:check(name+'/actual-native-GPU-input-unchanged',np.array_equal(read(out,name,'<f2',len(expected)).view('<u2'),expected.view('<u2')))
+  check('native-GPU-structure-check',read(out,'native_prune_check','<i4',1)[0]==0);native_plan=read(out,'native_plan','<u8',3);check('native-compressed-allocation',native_plan[0]>0)
+  compact_a=read(out,'native_A_compact_after','<f2',batch*m*k).reshape(batch,m,k);compact_b=read(out,'native_B_compact_after','<f2',batch*n*k).reshape(batch,n,k);compact_c=read(out,'native_C_compact_after','<f2',batch*m*n).reshape(batch,m,n);compact_d=read(out,'native_D_compact','<f2',batch*m*n).reshape(batch,m,n);check('actual-CUDA-packing-shapes',np.array_equal(read(out,'native_packing','<i8',3),[m*k,n*k,m*n]))
+ for z in range(batch):
+  original=np.stack([a[z*sa+i*lda:z*sa+i*lda+k] for i in range(m)]).astype(np.float64);pruned=np.stack([ap[z*sa+i*lda:z*sa+i*lda+k] for i in range(m)]).astype(np.float64);bt=np.stack([b[z*sb+i*ldb:z*sb+i*ldb+k] for i in range(n)]).astype(np.float64);cin=np.stack([c[z*sc+i*ldc:z*sc+i*ldc+n] for i in range(m)]).astype(np.float64);actual=np.stack([d[z*sc+i*ldc:z*sc+i*ldc+n] for i in range(m)]);active_a=np.zeros(sa,dtype=bool);active_c=np.zeros(sc,dtype=bool)
+  for i in range(m):active_a[i*lda:i*lda+k]=True;active_c[i*ldc:i*ldc+n]=True
+  check(f'b{z}/prune-padding',np.array_equal(ap[z*sa:(z+1)*sa][~active_a].view('<u2'),a[z*sa:(z+1)*sa][~active_a].view('<u2')));check(f'b{z}/output-padding',np.array_equal(d[z*sc:(z+1)*sc][~active_c].view('<u2'),c[z*sc:(z+1)*sc][~active_c].view('<u2')))
+  if backend=='cuda':
+   for name,got,expected_compact in [('A',compact_a[z],pruned),('B',compact_b[z],bt),('C',compact_c[z],cin),('D',compact_d[z],actual)]:check(f'b{z}/actual-native-compact-'+name,np.array_equal(got.view('<u2'),np.asarray(expected_compact,dtype='<f2').view('<u2')))
+  optimal=True;feasible=True;packed_correct=True;mask_correct=True
+  for row in range(0,m,4):
+   for col in range(0,k,4):
+    tile=original[row:row+4,col:col+4];cut=pruned[row:row+4,col:col+4];best=tile_optimum(tile);feasible=feasible and np.isfinite(tile_optimum(tile,cut));optimal=optimal and float(np.abs(cut).sum())==best
+    if backend=='rocm':
+     mask=int(masks[z,row//4,col//4]);selected=np.array([bool(mask&(1<<(4*r+c))) for r in range(4) for c in range(4)]).reshape(4,4);mask_correct=mask_correct and np.all(selected.sum(0)==2) and np.all(selected.sum(1)==2) and np.array_equal(cut,np.where(selected,tile,0))
+     for r in range(4):
+      code=int(metadata[z,row+r,col//4]);indices=[code&3,(code>>2)&3];packed_correct=packed_correct and code<16 and indices[0]<indices[1] and np.array_equal(np.flatnonzero(selected[r]),indices) and np.array_equal(values[z,row+r,col//4].astype(np.float64),cut[r,indices])
+  check(f'b{z}/capacity-DP-optimal-L1',optimal);check(f'b{z}/valid-2-per-row-column-pruning',feasible)
+  if backend=='rocm':check(f'b{z}/GPU-tile-mask',mask_correct);check(f'b{z}/packed-values-and-metadata',packed_correct)
+  expected=s['alpha']*(pruned@bt.T)+s['beta']*cin
+  if advanced:
+   expected+=bias.astype(np.float64)[:,None];expected=np.where(expected<=s['relu_threshold'],0,np.minimum(expected,s['relu_upper']))
+  rounded=expected.astype('<f2');error=ulp_distance(actual,rounded);max_ulp=max(max_ulp,int(np.max(error)));check(f'b{z}/FP64-reference-within-two-FP16-ulp',np.isfinite(actual).all() and np.all(error<=2))
+ return dict(status='PASSED' if checks and all(c['passed'] for c in checks) else 'FAILED',checks=checks,max_fp16_ulp=max_ulp,scope='TILE optimal L1 capacity-DP; exact packed/metadata/layout/padding; FP64 independent product, FP16 rounding <=2 ULP. Pruning ties need not select the vendor mask.')
+def main():
+ p=argparse.ArgumentParser();p.add_argument('--input',required=True);p.add_argument('--output',required=True);p.add_argument('--report',required=True);p.add_argument('--backend',default='rocm');args=p.parse_args()
+ try:r=validate(args.input,args.output,args.backend)
+ except Exception as error:r=dict(status='FAILED',checks=[dict(check='complete-parse-and-reference',passed=False)],error=str(error))
+ Path(args.report).write_text(json.dumps(r,indent=2)+'\n');print(r['status'],[c['check'] for c in r['checks'] if not c['passed']]);return int(r['status']!='PASSED')
+if __name__=='__main__':raise SystemExit(main())

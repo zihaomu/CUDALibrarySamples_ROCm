@@ -1,0 +1,9 @@
+#!/usr/bin/env python3
+import json,shutil,sys
+from experiment import ROOT,Experiment,write,digest
+from inputs import verify
+results=[]
+for run in json.loads((ROOT/'migration/reports/rewrite-sparse24-original-cuda.json').read_text())['profiles']:
+ src=ROOT/'tests/fixtures/rewrite-extensions'/run['kind']/'original';mf=verify(src);mh=digest(src/'manifest.json');e=Experiment('R7','cuSPARSELt/'+run['profile'],'cpu-native-original-validation',case='original',sources=[__file__,ROOT/'tools/moat/sparse24_reference.py'],parent=run['experiment_id'],comparison_id=run['kind']+'/original/'+mh);shutil.copytree(src,e.path/'inputs');out=ROOT/run['output'];report=e.path/'reference.json';rc=e.command([sys.executable,str(ROOT/'tools/moat/sparse24_reference.py'),'--input',str(e.path/'inputs'),'--output',str(out),'--report',str(report),'--backend','cuda-original'],'independent-original-prune-and-product');r=json.loads(report.read_text()) if report.exists() else dict(status='FAILED',checks=[dict(check='original-output-available',passed=False)])
+ for name in ['A','B','C']+(['bias'] if mf['advanced'] else []):r['checks'].append(dict(check='original-active-and-defined-padding-input/'+name,passed=(out/(name+'.bin')).is_file() and digest(out/(name+'.bin'))==digest(src/(name+'.bin'))))
+ r['checks'].append(dict(check='actual-original-program-success',passed=run['return_code']==0 and run['collection_return_code']==0));r['status']='PASSED' if all(c['passed'] for c in r['checks']) else 'FAILED';r.update(run=run,input_manifest_sha256=mh);r['evidence']=e.finish('PASSED' if r['status']=='PASSED' else 'NATIVE_MISMATCH',r);results.append(r);write(ROOT/'migration/reports/rewrite-sparse24-original-validation.json',dict(profiles=results));print(run['profile'],r['status'],[c['check'] for c in r['checks'] if not c['passed']],flush=True)

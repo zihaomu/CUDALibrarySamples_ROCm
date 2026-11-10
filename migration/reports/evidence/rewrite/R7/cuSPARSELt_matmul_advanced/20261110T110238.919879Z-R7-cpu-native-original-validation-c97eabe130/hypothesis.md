@@ -1,0 +1,1 @@
+Test cpu-native-original-validation for cuSPARSELt/matmul_advanced, case original. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T105541.763838Z-R7-cuda-original-2fcbf60bb2.

@@ -55,6 +55,42 @@
       ],
       "contract": "Original -f multi-file CLI, split each file into 65536-byte chunks, two warmups and five total iterations, GPU IEEE/PKZIP CRC32, exact per-chunk checks and GPU event timing; empty input API behavior compared separately",
       "threshold": "Exact uint32 equality to independent zlib.crc32 and native nvCOMP CRC32; distinguish CRC32C"
+    },
+    {
+      "kind": "sparse24",
+      "batch": "R7",
+      "sample_id": "cuSPARSELt/matmul::matmul_example.cpp",
+      "source": "cuSPARSELt/matmul/matmul_example.cpp",
+      "implementation": "rocm/ported/cuSPARSELt/matmul/matmul_example.cpp",
+      "fixture_root": "tests/fixtures/rewrite-extensions/sparse24",
+      "cases": [
+        "original",
+        "changed-values",
+        "layout",
+        "irregular",
+        "zero-A",
+        "ties",
+        "repeat"
+      ],
+      "route": "project HIP 4x4 TILE pruning, two packed FP16 values plus nibble metadata per group of four; sparse-only HIP matmul; explicit GPU search or bias/ReLU; not native hipSPARSELt or vendor opaque format"
+    },
+    {
+      "kind": "sparse24_advanced",
+      "batch": "R7",
+      "sample_id": "cuSPARSELt/matmul_advanced::matmul_advanced_example.cpp",
+      "source": "cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp",
+      "implementation": "rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp",
+      "fixture_root": "tests/fixtures/rewrite-extensions/sparse24_advanced",
+      "cases": [
+        "original",
+        "changed-values",
+        "layout",
+        "irregular",
+        "zero-A",
+        "ties",
+        "repeat"
+      ],
+      "route": "project HIP 4x4 TILE pruning, two packed FP16 values plus nibble metadata per group of four; sparse-only HIP matmul; explicit GPU search or bias/ReLU; not native hipSPARSELt or vendor opaque format"
     }
   ]
 }

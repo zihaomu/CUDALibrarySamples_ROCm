@@ -1,0 +1,229 @@
+{
+  "status": "PASSED",
+  "checks": [
+    {
+      "check": "finite-FP16-outputs",
+      "passed": true
+    },
+    {
+      "check": "A_after/actual-native-GPU-input-unchanged",
+      "passed": true
+    },
+    {
+      "check": "B_after/actual-native-GPU-input-unchanged",
+      "passed": true
+    },
+    {
+      "check": "C_after/actual-native-GPU-input-unchanged",
+      "passed": true
+    },
+    {
+      "check": "bias_after/actual-native-GPU-input-unchanged",
+      "passed": true
+    },
+    {
+      "check": "native-GPU-structure-check",
+      "passed": true
+    },
+    {
+      "check": "native-compressed-allocation",
+      "passed": true
+    },
+    {
+      "check": "actual-CUDA-packing-shapes",
+      "passed": true
+    },
+    {
+      "check": "b0/prune-padding",
+      "passed": true
+    },
+    {
+      "check": "b0/output-padding",
+      "passed": true
+    },
+    {
+      "check": "b0/actual-native-compact-A",
+      "passed": true
+    },
+    {
+      "check": "b0/actual-native-compact-B",
+      "passed": true
+    },
+    {
+      "check": "b0/actual-native-compact-C",
+      "passed": true
+    },
+    {
+      "check": "b0/actual-native-compact-D",
+      "passed": true
+    },
+    {
+      "check": "b0/capacity-DP-optimal-L1",
+      "passed": true
+    },
+    {
+      "check": "b0/valid-2-per-row-column-pruning",
+      "passed": true
+    },
+    {
+      "check": "b0/FP64-reference-within-two-FP16-ulp",
+      "passed": true
+    },
+    {
+      "check": "b1/prune-padding",
+      "passed": true
+    },
+    {
+      "check": "b1/output-padding",
+      "passed": true
+    },
+    {
+      "check": "b1/actual-native-compact-A",
+      "passed": true
+    },
+    {
+      "check": "b1/actual-native-compact-B",
+      "passed": true
+    },
+    {
+      "check": "b1/actual-native-compact-C",
+      "passed": true
+    },
+    {
+      "check": "b1/actual-native-compact-D",
+      "passed": true
+    },
+    {
+      "check": "b1/capacity-DP-optimal-L1",
+      "passed": true
+    },
+    {
+      "check": "b1/valid-2-per-row-column-pruning",
+      "passed": true
+    },
+    {
+      "check": "b1/FP64-reference-within-two-FP16-ulp",
+      "passed": true
+    },
+    {
+      "check": "process-success",
+      "passed": true
+    }
+  ],
+  "max_fp16_ulp": 0,
+  "scope": "TILE optimal L1 capacity-DP; exact packed/metadata/layout/padding; FP64 independent product, FP16 rounding <=2 ULP. Pruning ties need not select the vendor mask.",
+  "run": {
+    "sample_id": "cuSPARSELt/matmul_advanced::matmul_advanced_example.cpp",
+    "kind": "sparse24_advanced",
+    "case": "ties",
+    "return_code": 0,
+    "collection_return_code": 0,
+    "build": {
+      "experiment_id": "20261110T110855.347665Z-R7-cuda-build-e1d397b2e8",
+      "remote": "/tmp/20261110T110855.347665Z-R7-cuda-build-e1d397b2e8",
+      "derived": {
+        "sparse24/original": {
+          "parent_ROCm_experiment": "20261110T110642.947660Z-R7-rocm-4e68d878e2",
+          "pruned_A_sha256": "a5db426945db358026ed6b1a2f20998fa40c196028d2734537aa0d65ae3c3115",
+          "original_input_manifest_sha256": "38f8d3929ce08ae8a91f9e0f324419723078220001f802dabc87c8c8fa785f78",
+          "scope": "A is derived from the corresponding actual HIP pruning output; all other original inputs unchanged; native compress+SpMM baseline with real CUDA packing to contiguous vendor descriptors; native original fixed descriptors tested separately"
+        },
+        "sparse24/changed-values": {
+          "parent_ROCm_experiment": "20261110T110645.127689Z-R7-rocm-776d800b18",
+          "pruned_A_sha256": "e9362cddcbd72f4c89af927a138677b76f3dfb375d55012d03a80f48cb96f02e",
+          "original_input_manifest_sha256": "2b2cb1f78092e379efbdb52d3ae6a9b4f6121b0d9fd584fc7c2fa3abc5725c58",
+          "scope": "A is derived from the corresponding actual HIP pruning output; all other original inputs unchanged; native compress+SpMM baseline with real CUDA packing to contiguous vendor descriptors; native original fixed descriptors tested separately"
+        },
+        "sparse24/layout": {
+          "parent_ROCm_experiment": "20261110T110647.009290Z-R7-rocm-e708bf3172",
+          "pruned_A_sha256": "f8483dcec5cdd847e55d6d8f7379053112e75055c4751ed981fc82ce47eb2e60",
+          "original_input_manifest_sha256": "f69d38ba88c0d947c72c65f77cad031cc156ec4c153a2d988a0bdf37830f129f",
+          "scope": "A is derived from the corresponding actual HIP pruning output; all other original inputs unchanged; native compress+SpMM baseline with real CUDA packing to contiguous vendor descriptors; native original fixed descriptors tested separately"
+        },
+        "sparse24/irregular": {
+          "parent_ROCm_experiment": "20261110T110648.893798Z-R7-rocm-192ec1ff6e",
+          "pruned_A_sha256": "e92b9c5dfe44a7a3db63b7d3768eae1a8c6fd08a88adbd472710d7af91247f66",
+          "original_input_manifest_sha256": "2f10710d445ee4b70395e3f9681928e2be52a266c920de6eb36b86dd269932ed",
+          "scope": "A is derived from the corresponding actual HIP pruning output; all other original inputs unchanged; native compress+SpMM baseline with real CUDA packing to contiguous vendor descriptors; native original fixed descriptors tested separately"
+        },
+        "sparse24/zero-A": {
+          "parent_ROCm_experiment": "20261110T110650.761320Z-R7-rocm-1f301ab8f5",
+          "pruned_A_sha256": "ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7",
+          "original_input_manifest_sha256": "61f1b23aeb2af5d45b331d96d230d5ed630e4c01e2fe019836d24ebe0af9454e",
+          "scope": "A is derived from the corresponding actual HIP pruning output; all other original inputs unchanged; native compress+SpMM baseline with real CUDA packing to contiguous vendor descriptors; native original fixed descriptors tested separately"
+        },
+        "sparse24/ties": {
+          "parent_ROCm_experiment": "20261110T110652.629278Z-R7-rocm-ed1a1213a1",
+          "pruned_A_sha256": "0bc89be4a3b6a3521e765496af2342f774907f1337b6c1d78a4fb38498fe51b2",
+          "original_input_manifest_sha256": "643210d49c182344eb2a187524f07af88e96844d4c64454c744131511d9d5a00",
+          "scope": "A is derived from the corresponding actual HIP pruning output; all other original inputs unchanged; native compress+SpMM baseline with real CUDA packing to contiguous vendor descriptors; native original fixed descriptors tested separately"
+        },
+        "sparse24/repeat": {
+          "parent_ROCm_experiment": "20261110T110654.525663Z-R7-rocm-1ba3dce2a5",
+          "pruned_A_sha256": "a5db426945db358026ed6b1a2f20998fa40c196028d2734537aa0d65ae3c3115",
+          "original_input_manifest_sha256": "bf2f1ee58f8c76562c46c905168e6594c52924b76dd960b61179895fc3a802d3",
+          "scope": "A is derived from the corresponding actual HIP pruning output; all other original inputs unchanged; native compress+SpMM baseline with real CUDA packing to contiguous vendor descriptors; native original fixed descriptors tested separately"
+        },
+        "sparse24_advanced/original": {
+          "parent_ROCm_experiment": "20261110T110656.431869Z-R7-rocm-ba45d06ded",
+          "pruned_A_sha256": "2af0b82f36622cdadbb891b79b38f5bc153629cd254f7893b17fc3a14b825b7f",
+          "original_input_manifest_sha256": "d0f9c4299bca1dea2b939e94d64301182c4b5f861d9e4be3f60fd9c9d952de02",
+          "scope": "A is derived from the corresponding actual HIP pruning output; all other original inputs unchanged; native compress+SpMM baseline with real CUDA packing to contiguous vendor descriptors; native original fixed descriptors tested separately"
+        },
+        "sparse24_advanced/changed-values": {
+          "parent_ROCm_experiment": "20261110T110658.335452Z-R7-rocm-ceea8126bf",
+          "pruned_A_sha256": "871cea71a840ec7fd0c16db4564d8760969e5cc99064033732c90f7363447715",
+          "original_input_manifest_sha256": "bc8a9991cf201c06dac7cee84542d4ec194dd099b6e5ef6f9120712afb1bd3ef",
+          "scope": "A is derived from the corresponding actual HIP pruning output; all other original inputs unchanged; native compress+SpMM baseline with real CUDA packing to contiguous vendor descriptors; native original fixed descriptors tested separately"
+        },
+        "sparse24_advanced/layout": {
+          "parent_ROCm_experiment": "20261110T110700.205390Z-R7-rocm-2b8b10b520",
+          "pruned_A_sha256": "1cc00aaef8e49eb4fc20d96345d832d848c6c3ef6755e4c8f65dcb46b637647b",
+          "original_input_manifest_sha256": "6010cc6f0264e47e3a1b44714afe8dd5f7a8df64768e75d497f7b14d2deb334b",
+          "scope": "A is derived from the corresponding actual HIP pruning output; all other original inputs unchanged; native compress+SpMM baseline with real CUDA packing to contiguous vendor descriptors; native original fixed descriptors tested separately"
+        },
+        "sparse24_advanced/irregular": {
+          "parent_ROCm_experiment": "20261110T110702.069340Z-R7-rocm-4da691c2ab",
+          "pruned_A_sha256": "bca9469c57803950335802c5daa88dbf59e14832794052122b71d064cf89bbc0",
+          "original_input_manifest_sha256": "59dc3ca77c47b2ffff80367359529b6ad4bbd7c8d8b4ec7ef53052f65f1f512b",
+          "scope": "A is derived from the corresponding actual HIP pruning output; all other original inputs unchanged; native compress+SpMM baseline with real CUDA packing to contiguous vendor descriptors; native original fixed descriptors tested separately"
+        },
+        "sparse24_advanced/zero-A": {
+          "parent_ROCm_experiment": "20261110T110703.968118Z-R7-rocm-9a0eee7f31",
+          "pruned_A_sha256": "606f558e014930f9c1669f03c71c28945c4631568e39cd308c6c7f4077c7bfb9",
+          "original_input_manifest_sha256": "b92c9ec76ebe39ed5473b79ff6baf33c72a789dfb41422a631509e70d345cd40",
+          "scope": "A is derived from the corresponding actual HIP pruning output; all other original inputs unchanged; native compress+SpMM baseline with real CUDA packing to contiguous vendor descriptors; native original fixed descriptors tested separately"
+        },
+        "sparse24_advanced/ties": {
+          "parent_ROCm_experiment": "20261110T110705.837349Z-R7-rocm-44790169d4",
+          "pruned_A_sha256": "0c6cfb46450005541fa01806b7e46ff1f45802167e46de5a223d3a3a26ec749a",
+          "original_input_manifest_sha256": "fe21717d69a4cff8b3c925205bf148c43e4c9b668c9db13a302b09a03560fe3b",
+          "scope": "A is derived from the corresponding actual HIP pruning output; all other original inputs unchanged; native compress+SpMM baseline with real CUDA packing to contiguous vendor descriptors; native original fixed descriptors tested separately"
+        },
+        "sparse24_advanced/repeat": {
+          "parent_ROCm_experiment": "20261110T110707.706712Z-R7-rocm-a897148857",
+          "pruned_A_sha256": "2af0b82f36622cdadbb891b79b38f5bc153629cd254f7893b17fc3a14b825b7f",
+          "original_input_manifest_sha256": "fa3554fef5cd25a04ad3e46e357e92b5fa32cfb612b1c363b96a47f3de9c456c",
+          "scope": "A is derived from the corresponding actual HIP pruning output; all other original inputs unchanged; native compress+SpMM baseline with real CUDA packing to contiguous vendor descriptors; native original fixed descriptors tested separately"
+        }
+      },
+      "sdk_version": "0.10.0",
+      "evidence": "migration/reports/evidence/rewrite/R7/native-sparse24-given-HIP-pruned-input/20261110T110855.347665Z-R7-cuda-build-e1d397b2e8"
+    },
+    "derived": {
+      "parent_ROCm_experiment": "20261110T110705.837349Z-R7-rocm-44790169d4",
+      "pruned_A_sha256": "0c6cfb46450005541fa01806b7e46ff1f45802167e46de5a223d3a3a26ec749a",
+      "original_input_manifest_sha256": "fe21717d69a4cff8b3c925205bf148c43e4c9b668c9db13a302b09a03560fe3b",
+      "scope": "A is derived from the corresponding actual HIP pruning output; all other original inputs unchanged; native compress+SpMM baseline with real CUDA packing to contiguous vendor descriptors; native original fixed descriptors tested separately"
+    },
+    "experiment_id": "20261110T110938.859623Z-R7-cuda-native-compressed-2cadf3ea62",
+    "comparison_id": "sparse24_advanced/ties/fe21717d69a4cff8b3c925205bf148c43e4c9b668c9db13a302b09a03560fe3b",
+    "input_manifest_sha256": "fe21717d69a4cff8b3c925205bf148c43e4c9b668c9db13a302b09a03560fe3b",
+    "input_snapshot": "artifacts/rewrite/R7/cuSPARSELt_matmul_advanced__matmul_advanced_example.cpp/20261110T110938.859623Z-R7-cuda-native-compressed-2cadf3ea62/inputs",
+    "native_input_snapshot": "artifacts/rewrite/R7/cuSPARSELt_matmul_advanced__matmul_advanced_example.cpp/20261110T110938.859623Z-R7-cuda-native-compressed-2cadf3ea62/native-inputs",
+    "output": "artifacts/rewrite/R7/cuSPARSELt_matmul_advanced__matmul_advanced_example.cpp/20261110T110938.859623Z-R7-cuda-native-compressed-2cadf3ea62/outputs",
+    "baseline_scope": "A is derived from the corresponding actual HIP pruning output; all other original inputs unchanged; native compress+SpMM baseline with real CUDA packing to contiguous vendor descriptors; native original fixed descriptors tested separately",
+    "evidence": "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul_advanced__matmul_advanced_example.cpp/20261110T110938.859623Z-R7-cuda-native-compressed-2cadf3ea62"
+  },
+  "validation_source_sha256": "5a01d8701bd3953bdb0a8b5706cce50af84f9e4253c4e1477bde0be057f74b55"
+}

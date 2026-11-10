@@ -1,0 +1,1 @@
+Test rocm-profile for cuSPARSELt/matmul_advanced::matmul_advanced_example.cpp/backend-trace, case original. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T110639.446388Z-R7-rocm-build-e2c9096623.

@@ -1,0 +1,1 @@
+Test cpu-negative for sparse24/negative/output-padding, case layout. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T110647.009290Z-R7-rocm-e708bf3172.

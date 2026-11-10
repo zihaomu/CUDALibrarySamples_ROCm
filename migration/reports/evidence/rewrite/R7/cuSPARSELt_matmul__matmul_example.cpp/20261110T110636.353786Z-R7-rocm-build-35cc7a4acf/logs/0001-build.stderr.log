@@ -1,0 +1,137 @@
+Warning: HIP version file: "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/share/hip/version" not found.  Cannot give HIP version information.
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul/matmul_example.cpp:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/sparse/sparse24.hpp:4:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:72:30: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   72 |  ~Blas(){RW_BLAS(Destroy)(h);RW_RT(StreamDestroy)(stream);}
+      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:6:18: note: expanded from macro 'RW_RT'
+    6 | #define RW_RT(n) hip##n
+      |                  ^
+<scratch space>:194:1: note: expanded from here
+  194 | hipStreamDestroy
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul/matmul_example.cpp:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/sparse/sparse24.hpp:4:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:65:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   65 |  ~Buffer(){if(p)RW_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:6:18: note: expanded from macro 'RW_RT'
+    6 | #define RW_RT(n) hip##n
+      |                  ^
+<scratch space>:180:1: note: expanded from here
+  180 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/sparse/sparse24.hpp:17:392: note: in instantiation of member function 'rewrite::Buffer<__half>::~Buffer' requested here
+   17 | inline int run(bool advanced){try{Config config;auto s=shape(config,advanced);identity();auto a=read<__half>("A",s.batch*s.sa),b=read<__half>("B",s.batch*s.sb),c=read<__half>("C",s.batch*s.sc),bias=read<__half>("bias",s.m);for(auto*input:{&a,&b,&c,&bias})for(__half value:*input)if(!std::isfinite(__half2float(value)))throw std::invalid_argument("finite FP16 inputs required");Buffer<__half>da(a),ap(a),db(b),dc(c),dd(c),di(bias);auto masks=legal_tiles();Buffer<uint16_t>legal(masks),selected(s.batch*(s.m/4)*(s.k/4));int groups=s.batch*s.m*(s.k/4);Buffer<__half>packed(2*groups);Buffer<uint8_t>metadata(groups);Buffer<int>status(std::vector<int>{0});int tiles=s.batch*(s.m/4)*(s.k/4);prune_tile<<<(tiles+127)/128,128>>>(s,da.p,ap.p,legal.p,selected.p);compress24<<<(groups+255)/256,256>>>(s,ap.p,selected.p,packed.p,metadata.p);check24<<<(tiles+127)/128,128>>>(s,metadata.p,status.p);sync();if(status.get()[0])throw std::runtime_error("GPU prune/compress check");
+      |                                                                                                                                                                                                                                                                                                                                                                                                        ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul/matmul_example.cpp:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/sparse/sparse24.hpp:4:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:65:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   65 |  ~Buffer(){if(p)RW_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:6:18: note: expanded from macro 'RW_RT'
+    6 | #define RW_RT(n) hip##n
+      |                  ^
+<scratch space>:180:1: note: expanded from here
+  180 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/sparse/sparse24.hpp:17:472: note: in instantiation of member function 'rewrite::Buffer<unsigned short>::~Buffer' requested here
+   17 | inline int run(bool advanced){try{Config config;auto s=shape(config,advanced);identity();auto a=read<__half>("A",s.batch*s.sa),b=read<__half>("B",s.batch*s.sb),c=read<__half>("C",s.batch*s.sc),bias=read<__half>("bias",s.m);for(auto*input:{&a,&b,&c,&bias})for(__half value:*input)if(!std::isfinite(__half2float(value)))throw std::invalid_argument("finite FP16 inputs required");Buffer<__half>da(a),ap(a),db(b),dc(c),dd(c),di(bias);auto masks=legal_tiles();Buffer<uint16_t>legal(masks),selected(s.batch*(s.m/4)*(s.k/4));int groups=s.batch*s.m*(s.k/4);Buffer<__half>packed(2*groups);Buffer<uint8_t>metadata(groups);Buffer<int>status(std::vector<int>{0});int tiles=s.batch*(s.m/4)*(s.k/4);prune_tile<<<(tiles+127)/128,128>>>(s,da.p,ap.p,legal.p,selected.p);compress24<<<(groups+255)/256,256>>>(s,ap.p,selected.p,packed.p,metadata.p);check24<<<(tiles+127)/128,128>>>(s,metadata.p,status.p);sync();if(status.get()[0])throw std::runtime_error("GPU prune/compress check");
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul/matmul_example.cpp:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/sparse/sparse24.hpp:4:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:65:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   65 |  ~Buffer(){if(p)RW_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:6:18: note: expanded from macro 'RW_RT'
+    6 | #define RW_RT(n) hip##n
+      |                  ^
+<scratch space>:180:1: note: expanded from here
+  180 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/sparse/sparse24.hpp:17:596: note: in instantiation of member function 'rewrite::Buffer<unsigned char>::~Buffer' requested here
+   17 | inline int run(bool advanced){try{Config config;auto s=shape(config,advanced);identity();auto a=read<__half>("A",s.batch*s.sa),b=read<__half>("B",s.batch*s.sb),c=read<__half>("C",s.batch*s.sc),bias=read<__half>("bias",s.m);for(auto*input:{&a,&b,&c,&bias})for(__half value:*input)if(!std::isfinite(__half2float(value)))throw std::invalid_argument("finite FP16 inputs required");Buffer<__half>da(a),ap(a),db(b),dc(c),dd(c),di(bias);auto masks=legal_tiles();Buffer<uint16_t>legal(masks),selected(s.batch*(s.m/4)*(s.k/4));int groups=s.batch*s.m*(s.k/4);Buffer<__half>packed(2*groups);Buffer<uint8_t>metadata(groups);Buffer<int>status(std::vector<int>{0});int tiles=s.batch*(s.m/4)*(s.k/4);prune_tile<<<(tiles+127)/128,128>>>(s,da.p,ap.p,legal.p,selected.p);compress24<<<(groups+255)/256,256>>>(s,ap.p,selected.p,packed.p,metadata.p);check24<<<(tiles+127)/128,128>>>(s,metadata.p,status.p);sync();if(status.get()[0])throw std::runtime_error("GPU prune/compress check");
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul/matmul_example.cpp:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/sparse/sparse24.hpp:4:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:65:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   65 |  ~Buffer(){if(p)RW_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:6:18: note: expanded from macro 'RW_RT'
+    6 | #define RW_RT(n) hip##n
+      |                  ^
+<scratch space>:180:1: note: expanded from here
+  180 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/sparse/sparse24.hpp:17:624: note: in instantiation of member function 'rewrite::Buffer<int>::~Buffer' requested here
+   17 | inline int run(bool advanced){try{Config config;auto s=shape(config,advanced);identity();auto a=read<__half>("A",s.batch*s.sa),b=read<__half>("B",s.batch*s.sb),c=read<__half>("C",s.batch*s.sc),bias=read<__half>("bias",s.m);for(auto*input:{&a,&b,&c,&bias})for(__half value:*input)if(!std::isfinite(__half2float(value)))throw std::invalid_argument("finite FP16 inputs required");Buffer<__half>da(a),ap(a),db(b),dc(c),dd(c),di(bias);auto masks=legal_tiles();Buffer<uint16_t>legal(masks),selected(s.batch*(s.m/4)*(s.k/4));int groups=s.batch*s.m*(s.k/4);Buffer<__half>packed(2*groups);Buffer<uint8_t>metadata(groups);Buffer<int>status(std::vector<int>{0});int tiles=s.batch*(s.m/4)*(s.k/4);prune_tile<<<(tiles+127)/128,128>>>(s,da.p,ap.p,legal.p,selected.p);compress24<<<(groups+255)/256,256>>>(s,ap.p,selected.p,packed.p,metadata.p);check24<<<(tiles+127)/128,128>>>(s,metadata.p,status.p);sync();if(status.get()[0])throw std::runtime_error("GPU prune/compress check");
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                ^
+5 warnings generated when compiling for gfx1201.
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul/matmul_example.cpp:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/sparse/sparse24.hpp:4:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:72:30: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   72 |  ~Blas(){RW_BLAS(Destroy)(h);RW_RT(StreamDestroy)(stream);}
+      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:6:18: note: expanded from macro 'RW_RT'
+    6 | #define RW_RT(n) hip##n
+      |                  ^
+<scratch space>:194:1: note: expanded from here
+  194 | hipStreamDestroy
+      | ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul/matmul_example.cpp:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/sparse/sparse24.hpp:4:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:65:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   65 |  ~Buffer(){if(p)RW_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:6:18: note: expanded from macro 'RW_RT'
+    6 | #define RW_RT(n) hip##n
+      |                  ^
+<scratch space>:180:1: note: expanded from here
+  180 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/sparse/sparse24.hpp:17:392: note: in instantiation of member function 'rewrite::Buffer<__half>::~Buffer' requested here
+   17 | inline int run(bool advanced){try{Config config;auto s=shape(config,advanced);identity();auto a=read<__half>("A",s.batch*s.sa),b=read<__half>("B",s.batch*s.sb),c=read<__half>("C",s.batch*s.sc),bias=read<__half>("bias",s.m);for(auto*input:{&a,&b,&c,&bias})for(__half value:*input)if(!std::isfinite(__half2float(value)))throw std::invalid_argument("finite FP16 inputs required");Buffer<__half>da(a),ap(a),db(b),dc(c),dd(c),di(bias);auto masks=legal_tiles();Buffer<uint16_t>legal(masks),selected(s.batch*(s.m/4)*(s.k/4));int groups=s.batch*s.m*(s.k/4);Buffer<__half>packed(2*groups);Buffer<uint8_t>metadata(groups);Buffer<int>status(std::vector<int>{0});int tiles=s.batch*(s.m/4)*(s.k/4);prune_tile<<<(tiles+127)/128,128>>>(s,da.p,ap.p,legal.p,selected.p);compress24<<<(groups+255)/256,256>>>(s,ap.p,selected.p,packed.p,metadata.p);check24<<<(tiles+127)/128,128>>>(s,metadata.p,status.p);sync();if(status.get()[0])throw std::runtime_error("GPU prune/compress check");
+      |                                                                                                                                                                                                                                                                                                                                                                                                        ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul/matmul_example.cpp:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/sparse/sparse24.hpp:4:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:65:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   65 |  ~Buffer(){if(p)RW_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:6:18: note: expanded from macro 'RW_RT'
+    6 | #define RW_RT(n) hip##n
+      |                  ^
+<scratch space>:180:1: note: expanded from here
+  180 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/sparse/sparse24.hpp:17:472: note: in instantiation of member function 'rewrite::Buffer<unsigned short>::~Buffer' requested here
+   17 | inline int run(bool advanced){try{Config config;auto s=shape(config,advanced);identity();auto a=read<__half>("A",s.batch*s.sa),b=read<__half>("B",s.batch*s.sb),c=read<__half>("C",s.batch*s.sc),bias=read<__half>("bias",s.m);for(auto*input:{&a,&b,&c,&bias})for(__half value:*input)if(!std::isfinite(__half2float(value)))throw std::invalid_argument("finite FP16 inputs required");Buffer<__half>da(a),ap(a),db(b),dc(c),dd(c),di(bias);auto masks=legal_tiles();Buffer<uint16_t>legal(masks),selected(s.batch*(s.m/4)*(s.k/4));int groups=s.batch*s.m*(s.k/4);Buffer<__half>packed(2*groups);Buffer<uint8_t>metadata(groups);Buffer<int>status(std::vector<int>{0});int tiles=s.batch*(s.m/4)*(s.k/4);prune_tile<<<(tiles+127)/128,128>>>(s,da.p,ap.p,legal.p,selected.p);compress24<<<(groups+255)/256,256>>>(s,ap.p,selected.p,packed.p,metadata.p);check24<<<(tiles+127)/128,128>>>(s,metadata.p,status.p);sync();if(status.get()[0])throw std::runtime_error("GPU prune/compress check");
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul/matmul_example.cpp:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/sparse/sparse24.hpp:4:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:65:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   65 |  ~Buffer(){if(p)RW_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:6:18: note: expanded from macro 'RW_RT'
+    6 | #define RW_RT(n) hip##n
+      |                  ^
+<scratch space>:180:1: note: expanded from here
+  180 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/sparse/sparse24.hpp:17:596: note: in instantiation of member function 'rewrite::Buffer<unsigned char>::~Buffer' requested here
+   17 | inline int run(bool advanced){try{Config config;auto s=shape(config,advanced);identity();auto a=read<__half>("A",s.batch*s.sa),b=read<__half>("B",s.batch*s.sb),c=read<__half>("C",s.batch*s.sc),bias=read<__half>("bias",s.m);for(auto*input:{&a,&b,&c,&bias})for(__half value:*input)if(!std::isfinite(__half2float(value)))throw std::invalid_argument("finite FP16 inputs required");Buffer<__half>da(a),ap(a),db(b),dc(c),dd(c),di(bias);auto masks=legal_tiles();Buffer<uint16_t>legal(masks),selected(s.batch*(s.m/4)*(s.k/4));int groups=s.batch*s.m*(s.k/4);Buffer<__half>packed(2*groups);Buffer<uint8_t>metadata(groups);Buffer<int>status(std::vector<int>{0});int tiles=s.batch*(s.m/4)*(s.k/4);prune_tile<<<(tiles+127)/128,128>>>(s,da.p,ap.p,legal.p,selected.p);compress24<<<(groups+255)/256,256>>>(s,ap.p,selected.p,packed.p,metadata.p);check24<<<(tiles+127)/128,128>>>(s,metadata.p,status.p);sync();if(status.get()[0])throw std::runtime_error("GPU prune/compress check");
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuSPARSELt/matmul/matmul_example.cpp:19:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/sparse/sparse24.hpp:4:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:65:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   65 |  ~Buffer(){if(p)RW_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/rewrite_runtime.hpp:6:18: note: expanded from macro 'RW_RT'
+    6 | #define RW_RT(n) hip##n
+      |                  ^
+<scratch space>:180:1: note: expanded from here
+  180 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/sparse/sparse24.hpp:17:624: note: in instantiation of member function 'rewrite::Buffer<int>::~Buffer' requested here
+   17 | inline int run(bool advanced){try{Config config;auto s=shape(config,advanced);identity();auto a=read<__half>("A",s.batch*s.sa),b=read<__half>("B",s.batch*s.sb),c=read<__half>("C",s.batch*s.sc),bias=read<__half>("bias",s.m);for(auto*input:{&a,&b,&c,&bias})for(__half value:*input)if(!std::isfinite(__half2float(value)))throw std::invalid_argument("finite FP16 inputs required");Buffer<__half>da(a),ap(a),db(b),dc(c),dd(c),di(bias);auto masks=legal_tiles();Buffer<uint16_t>legal(masks),selected(s.batch*(s.m/4)*(s.k/4));int groups=s.batch*s.m*(s.k/4);Buffer<__half>packed(2*groups);Buffer<uint8_t>metadata(groups);Buffer<int>status(std::vector<int>{0});int tiles=s.batch*(s.m/4)*(s.k/4);prune_tile<<<(tiles+127)/128,128>>>(s,da.p,ap.p,legal.p,selected.p);compress24<<<(groups+255)/256,256>>>(s,ap.p,selected.p,packed.p,metadata.p);check24<<<(tiles+127)/128,128>>>(s,metadata.p,status.p);sync();if(status.get()[0])throw std::runtime_error("GPU prune/compress check");
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                ^
+5 warnings generated when compiling for host.

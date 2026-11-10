@@ -35,6 +35,11 @@
       "scope": "R5 review request on f8695059",
       "reason": "Uniform batch missed selected refactor and residual application missed its own formula; no qualification issued. Current implementation adds retained GPU factors, selected refactor and actual Fortran residual. Native GENERAL singular remains INFO=0/NaN even after synchronization; record as a measured numerical failure without inferring a perturbation policy.",
       "replacement": "rewrite-sparse-native-failure.json; post-review R5 evidence"
+    },
+    {
+      "scope": "R7 first original advanced fixture",
+      "reason": "The original C_height is num_B_rows=16 while m=32; its zero-initialized remaining C rows are not filled by rand. Initial fixture filled all m rows. Fixed original/repeat fixture to exact native original bytes; old mismatch retained; no sample qualified from it.",
+      "replacement": "rewrite-sparse24-original-validation.json"
     }
   ]
 }

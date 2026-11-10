@@ -1,0 +1,1 @@
+Test cpu-negative for sparse24/negative/nonoptimal-prune, case changed-values. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T110645.127689Z-R7-rocm-776d800b18.

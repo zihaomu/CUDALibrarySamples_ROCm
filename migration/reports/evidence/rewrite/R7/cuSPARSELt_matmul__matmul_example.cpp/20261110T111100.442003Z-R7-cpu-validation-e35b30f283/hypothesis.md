@@ -1,0 +1,1 @@
+Test cpu-validation for cuSPARSELt/matmul::matmul_example.cpp, case zero-A. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T110922.577990Z-R7-cuda-native-compressed-7b2e6a76b2.

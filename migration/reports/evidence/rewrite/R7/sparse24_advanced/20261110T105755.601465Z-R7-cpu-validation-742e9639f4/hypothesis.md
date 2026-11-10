@@ -1,0 +1,1 @@
+Test cpu-validation for sparse24_advanced, case changed-values. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T105735.135513Z-R7-rocm-d1cd8307c6.

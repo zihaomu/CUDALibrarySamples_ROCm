@@ -179,7 +179,7 @@ CUDALibrarySamples_ROCm/
 | R4 | 其它基础/高级算法扩展 | 稀疏 QR/IRS/SVD、低精度、图像、压缩、heuristics 等按探针拆批 | 一次只冻结一个可审查小批；完整原始合同和独立验收 | IN_PROGRESS |
 | R5 | 语言绑定扩展 | 对 73 个前端失败入口逐一建立 C ABI / Fortran / Python 路线 | 先有已验收 GPU 核心，再通过原语言实际入口与数据/错误传播检查 | IN_PROGRESS |
 | R6 | 长尾 SDK/设备算法研究 | cuEST、PQC、JPEG2000/TIFF、剩余 MathDx/分布式等分专题 | 每专题明确可实施路线、最小探针、成本和失败恢复条件 | NOT_STARTED |
-| R7 | 2:4 结构化稀疏替代 | 原生路线重探或真正的 HIP sparse 2:4 实现 | prune/compress/metadata/稀疏 matmul 与原例合同通过；原生失败记录保留 | NOT_STARTED |
+| R7 | 2:4 结构化稀疏替代 | 原生路线重探或真正的 HIP sparse 2:4 实现 | prune/compress/metadata/稀疏 matmul 与原例合同通过；原生失败记录保留 | IN_PROGRESS |
 | R8 | 阶段回归、清理与交付 | 干净检出复现、源码封存、全量统计、README 和详细报告 | 当前源码/依赖与全部选中证据一致；未完成入口有明确原因 | NOT_STARTED |
 
 执行顺序：P0 → P1 → R1 → R2 → R3 中可收口小批；R4–R7 依赖相应核心/SDK/设备探针，逐批安排。R8 的归档和文档动作在每批结束都执行，阶段结束再做一次整体审计。
@@ -542,7 +542,7 @@ PLAN-01 至 PLAN-03 是规划阶段记录，不代表实验结果。实施中的
 
 <!-- MOAT_EXEC_PROGRESS:START -->
 
-最近更新：2026-11-10T10:49:14.308169+00:00。首批 AMD 51/51 已运行，独立 CPU 51/51 通过；CUDA 51/51 已运行，独立 CPU 51/51 通过。已签发首批整例资格 8/8。R3–R8仍待完成。
+最近更新：2026-11-10T11:20:46.814665+00:00。首批 AMD 51/51 已运行，独立 CPU 51/51 通过；CUDA 51/51 已运行，独立 CPU 51/51 通过。已签发首批整例资格 8/8。R3–R8仍待完成。
 
 <!-- MOAT_EXEC_PROGRESS:END -->
 
@@ -557,3 +557,7 @@ PLAN-01 至 PLAN-03 是规划阶段记录，不代表实验结果。实施中的
 | 2026-11-10 | EXEC-19 | R5补native uniform初始/最终各slot padding对冻结原输入的约束；真实UBATCH阶段GPU A/B在初始和选择求解后分别D2H核对。新增成对padding/UBATCH RHS/values故障，总17项全拒绝；当前56 AMD/CPU、native27/28保持（GENERAL额外奇异场景明确失败）。额外原生后solve查询探针确认factor_info=0、postsolve_info=0而active X含NaN；只记录现象。资格检查的SDK gzip归档改为一次顺序读取；被中断的慢自测按INTERRUPTED封存后重验。 | 最小diff独立复核后签发R5；继续R6/R7/R8 |
 
 | 2026-11-10 | EXEC-20 | R5固定b83e4d55三方复核通过，8入口复合资格已签发；当前229 PASSED、23 PARTIAL、385 FAILED、2 UNSUPPORTED。完整保留CUDA原语言工具链BLOCKED与GENERAL额外奇异native数值失败，不冒充三方通过。 | 完成其余候选任务去向与R6专题、R7真实2:4、R8完整交付 |
+
+| 2026-11-10 | EXEC-21 | R7原生hipSPARSELt两例复测仍失败，分别保留gfx1201 kernel bundle缺失/高级属性未实现及最初链接错误。项目HIP实现真实TILE最大L1裁剪、2 FP16值+4bit索引metadata、稀疏乘法；14 AMD/CPU通过。两个真实原CUDA程序也通过CPU；高级原例C只随机前半行，其余零，最初fixture不符已更正并复验。扩展LDA被原生SDK拒绝，保留失败并用显式CUDA GPU packing做数学对照。 | 两项从原生UNSUPPORTED改为项目重写候选PARTIAL；独立资格前不计支持数，继续验证与R6/R8 |
+
+| 2026-11-10 | EXEC-22 | R7当前14 AMD/CPU及14 native稀疏数学对照均通过；native对照明确使用对应HIP裁剪A，并由CUDA GPU packing补齐LDA限制，两个原CUDA完整样例另验通过，不要求非唯一裁剪tie的mask相同。17语义故障命中预期拒绝、10真实非法descriptor、1有效+3损坏metadata GPU检查、两组真实prune/compress/check/sparse-matmul轨迹通过；基础搜索9次稀疏kernel，高级1次，runtime copy核单列。 | 固定内容独立复核/资格；R6专题和R8仍待完成 |

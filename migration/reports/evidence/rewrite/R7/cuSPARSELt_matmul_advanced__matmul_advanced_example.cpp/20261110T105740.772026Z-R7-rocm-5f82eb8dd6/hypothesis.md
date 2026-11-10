@@ -1,0 +1,1 @@
+Test rocm for cuSPARSELt/matmul_advanced::matmul_advanced_example.cpp, case zero-A. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T105716.304341Z-R7-rocm-build-6a561e4895.

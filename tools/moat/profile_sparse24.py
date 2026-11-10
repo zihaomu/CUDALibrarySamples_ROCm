@@ -1,0 +1,10 @@
+#!/usr/bin/env python3
+import csv,json,shutil
+from experiment import ROOT,Experiment,write,digest
+from snapshot import capture
+b=json.loads((ROOT/'migration/reports/rewrite-extension-builds.json').read_text());profiles=[p for p in json.loads((ROOT/'migration/rewrite/extensions.json').read_text())['profiles'] if p['batch']=='R7'];rows=[];observed=capture()
+for p in profiles:
+ build=b[p['kind']];src=ROOT/p['fixture_root']/'original';mh=digest(src/'manifest.json');e=Experiment('R7',p['sample_id']+'/backend-trace','rocm-profile',case='original',sources=[__file__,ROOT/'rocm/backends/sparse/sparse24.hpp'],parent=build['experiment_id'],comparison_id=p['kind']+'/original/'+mh);write(e.path/'backend.observed.json',observed);shutil.copytree(src,e.path/'inputs');out=e.path/'outputs';out.mkdir();trace=e.path/'trace';trace.mkdir();rc=e.command(['rocprofv3','--kernel-trace','--output-format','csv','json','--output-directory',str(trace),'--output-file','sparse24','--',str(ROOT/build['binary'])],'actual-sparse-only-pipeline',env=dict(REWRITE_INPUT=str(e.path/'inputs'),REWRITE_OUTPUT=str(out)));records=[]
+ for path in trace.rglob('*kernel_trace.csv'):
+  with path.open() as f:records+=list(csv.DictReader(f))
+ names=[r.get('Kernel_Name') or r.get('Name') or str(r) for r in records];summary=dict(kind=p['kind'],binary=build['binary'],binary_sha256=build['binary_sha256'],build_experiment_id=build['experiment_id'],input_manifest_sha256=mh,return_code=rc,kernel_names=names,prune_dispatches=sum('prune_tile(' in n for n in names),compress_dispatches=sum('compress24(' in n for n in names),check_dispatches=sum('check24(' in n for n in names),sparse_matmul_dispatches=sum('sparse_matmul24<' in n for n in names));write(e.path/'kernel-summary.json',summary);summary['evidence']=e.finish('PROFILE_OBSERVED' if rc==0 else 'PROFILER_FAILED');rows.append(summary);write(ROOT/'migration/reports/rewrite-sparse24-traces.json',dict(profiles=rows));print(p['kind'],summary['prune_dispatches'],summary['compress_dispatches'],summary['sparse_matmul_dispatches'],flush=True)

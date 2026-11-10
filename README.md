@@ -12,7 +12,7 @@
 
 上游固定为 `8b0573b11d183d9b3a36cd2955aa31c16cc61b95`。静态审计覆盖 **866 个源文件、477 个构建定义、639 个独立可执行/脚本源入口**。链接辅助文件、外部 SDK binding、架构/静态链接/通信变体另存元数据，不重复计入入口分母；没有在所有专有 SDK 条件下展开并执行每个构建配置。
 
-PASSED: 229；PARTIAL: 23；FAILED: 385；BLOCKED: 0；UNSUPPORTED: 2；NOT_STARTED: 0；IN_PROGRESS: 0。
+PASSED: 229；PARTIAL: 25；FAILED: 385；BLOCKED: 0；UNSUPPORTED: 0；NOT_STARTED: 0；IN_PROGRESS: 0。
 
 `PASSED` 只表示该行明确登记的原始功能和必需用例通过，不能推及整库、其它精度/规模或性能。`PARTIAL` 包括数值子集已通过但原始功能/执行合同仍有缺口，或已运行尚缺独立验收的端口；`FAILED` 保留真实失败日志和重试条件。不存在“HIPIFY 退出成功即迁移成功”的统计。
 
@@ -96,7 +96,7 @@ PASSED: 229；PARTIAL: 23；FAILED: 385；BLOCKED: 0；UNSUPPORTED: 2；NOT_STAR
 | [cuSOLVERMp](cuSOLVERMp/README.md) | MPI + RCCL + HIP column-distributed partial-row-pivot LU/solve; MPI + RCCL + HIP distributed column Cholesky/solve | 0 | 0/16 | 2 | 14 | 0 | 0 | MPI + RCCL + HIP真实分布列LU/Cholesky与求解、残差已验收；原始二维process-grid、子矩阵offset与随机SPD profile未完整等价，两例PARTIAL。 |
 | [cuSOLVERSp2cuDSS](cuSOLVERSp2cuDSS/README.md) | 候选：hipSOLVER, rocSOLVER (subset) | 0 | 0/7 | 0 | 7 | 0 | 0 | 原例对比两个 NVIDIA 稀疏直接求解 API；没有完成保持两条路线及对应配置语义的 AMD 改写。 |
 | [cuSPARSE](cuSPARSE/README.md) | HIP GPU budgeted CSR SpGEMM adapter → HIP runtime; HIP GPU fused custom SpMM add/mul/epilogue → HIP runtime; HIP GPU fused custom SpMV epilogue → HIP runtime; HIP symmetric expansion + rocSPARSE v2 → rocSPARSE/HIP runtime; hipSPARSE + HIP Graph → rocSPARSE + HIP runtime; hipSPARSE + HIP format adapter → rocSPARSE + HIP runtime; hipSPARSE + hipBLAS → rocSPARSE/rocBLAS; hipSPARSE Csr2cscEx2 → rocSPARSE/HIP runtime; hipSPARSE → rocSPARSE | 20 | 36/37 | 0 | 1 | 0 | 0 | CSR/COO/blocked ELL、SpVV/SpGEMM/reuse、CG/BiCGSTAB、gpsvInterleavedBatch 与真实 SpVV Graph Capture/Replay 已通过独立 CPU 和 CUDA 验收。BSR SDDMM、部分新转换/custom operator 与其它原始入口仍失败，不能推及整个库。 |
-| [cuSPARSELt](cuSPARSELt/README.md) | hipSPARSELt+hipSPARSE | 0 | 0/2 | 0 | 0 | 2 | 0 | hipSPARSELt 已编译并真实运行，gfx1201 kernel 数据缺失；锁定源码的支持架构列表也不接受 gfx1201，不能用 dense GEMM 代替结构化稀疏。 |
+| [cuSPARSELt](cuSPARSELt/README.md) | project HIP GPU TILE prune + packed 2:4 values/metadata + sparse-only matmul → HIP GPU; CPU descriptor/constant-mask setup only | 0 | 0/2 | 2 | 0 | 0 | 0 | hipSPARSELt 已编译并真实运行，gfx1201 kernel 数据缺失；锁定源码的支持架构列表也不接受 gfx1201，不能用 dense GEMM 代替结构化稀疏。 |
 | [cuTENSOR](cuTENSOR/README.md) | HIP GPU permutation/padding → HIP runtime; hipTensor; hipTensor + rocBLAS + HIP → hipTensor/rocBLAS; rocBLAS + HIP tensor adapter → rocBLAS/HIP runtime; rocBLAS + HIP tiled-plan/cache adapter → rocBLAS/HIP runtime; rocBLAS + HIP → FP32 GEMM and GPU tensor permutations | 7 | 9/13 | 0 | 4 | 0 | 0 | hipTensor 的 binary/trinary、permutation、reduction 原始 extents 与小尺寸全部输出通过 CPU/CUDA；FP32 contraction 架构 gate 缺口由 rocBLAS + HIP 排列补足；其它高级/绑定场景仍失败。 |
 | [cuTENSORMg](cuTENSORMg/README.md) | hipBLAS FP32 partitioned contraction + RCCL AllGather; single process with two GPU threads | 1 | 1/2 | 0 | 1 | 0 | 0 | B13保留4096 extents/2048 block、i,k / k,j / i,j及单进程双GPU，hipBLAS + RCCL输入分布/完整输出通过FP64 CPU；其它类型/分区及性能不外推。 |
 | [cuTENSORMp](cuTENSORMp/README.md) | 候选：hipTensor, MPI, RCCL | 0 | 0/3 | 0 | 3 | 0 | 0 | 原始 MPI tensor 描述与分布式算法尚未改写；RCCL 基础可行性不等同原始 Mp profile。 |
@@ -128,7 +128,7 @@ PASSED: 229；PARTIAL: 23；FAILED: 385；BLOCKED: 0；UNSUPPORTED: 2；NOT_STAR
 | PARTIAL / `SEMANTIC_GAP` | 0 | LZ4 和 JPEG 仅完成上述子集，尚未保留完整原样例的 API、输入和执行流程。 | [能力探针](migration/reports/native-probes.json)、[JPEG 像素对照](migration/reports/rocjpeg-cpu.json)；补完整原始功能。 |
 | PARTIAL / `VALIDATED_B9_B11_SUBSET` | 9 | B9两个NVBENCH框架、B10原生GPU progressive及部分调度/流水线、B11完整配置/查询语义仍未等价。 | [逐例B9–B11缺口与日志](migration/reports/batches9-11.md)；缺失功能补齐后重验，不把CPU fallback当完整GPU支持。 |
 | PARTIAL / `VALIDATED_B12_B15_SUBSET` | 10 | B12部分子矩阵/低精度collective、B13部分原始descriptor、B14 RNG LEGACY序列和B15原生像素/metadata/文件harness合同仍有缺口。 | [逐例B12–B15缺口与日志](migration/reports/batches12-15.md)；完整数值与兼容CUDA数学通过不代表所有原始合同均已等价。 |
-| UNSUPPORTED / `HW_UNSUPPORTED` | 2 | 锁定 ROCm 10.1.0 hipSPARSELt/gfx1201 缺 Tensile kernel bundle；实际运行报错且固定源码的架构 gate 拒绝该目标。 | [实测与源码证据](cuSPARSELt/README.md)；需匹配 kernel bundle、新实现或受支持 GPU，不能以 dense GEMM 替代。 |
+| UNSUPPORTED / `HW_UNSUPPORTED` | 0 | 锁定 ROCm 10.1.0 hipSPARSELt/gfx1201 缺 Tensile kernel bundle；实际运行报错且固定源码的架构 gate 拒绝该目标。 | [实测与源码证据](cuSPARSELt/README.md)；需匹配 kernel bundle、新实现或受支持 GPU，不能以 dense GEMM 替代。 |
 | BLOCKED / `ENV_MISSING_DEP` | 0 | nvJPEG Python 测试的 imports 已通过，但 AMD decoder 可执行文件/完整 CLI 测试前置条件尚未实现。 | [逐例报告](migration/sample-reports/nvJPEG/nvJPEG-Decoder/tests/test_decoder.py.md)；补 GPU 可执行文件后执行原始测试。 |
 **MOAT R4：IEEE/PKZIP CRC32 GPU实现，6数值+1原生空chunk拒绝。** [详细日志与资格](migration/reports/rewrite-R4.md)。
 

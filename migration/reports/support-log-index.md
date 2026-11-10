@@ -1,6 +1,6 @@
 # 样例支持方式与详细日志总表
 
-覆盖 **639 个样例入口**：229 PASSED、23 PARTIAL、385 FAILED、2 UNSUPPORTED、0 BLOCKED。全部 30 个模块逐项列出实现方式、范围/原因、AMD 日志、CUDA 日志与验收报告。数据直接来自 [逐例清单](../samples.yaml)，[JSON 索引](support-log-index.json) 另含全部历史证据路径、源码 SHA256、已通过/必需用例及恢复条件。
+覆盖 **639 个样例入口**：229 PASSED、25 PARTIAL、385 FAILED、0 UNSUPPORTED、0 BLOCKED。全部 30 个模块逐项列出实现方式、范围/原因、AMD 日志、CUDA 日志与验收报告。数据直接来自 [逐例清单](../samples.yaml)，[JSON 索引](support-log-index.json) 另含全部历史证据路径、源码 SHA256、已通过/必需用例及恢复条件。
 
 **查阅方式：** 先看状态和“支持范围/失败原因”，再看实际库与实现源码。AMD 栏优先链接与当前源码 hash 匹配的选定验收日志；未通过项链接实际尝试。`build.log` 是编译/链接记录，`run.log` 是程序输出，`<case>/run.log` 是对应输入的输出。命令与环境位于同目录的 `commands.json` 和 `*.environment.json`，从“证据目录”进入。缺少运行日志时会明确标注，不将编译/import 成功视作 GPU 通过。
 
@@ -504,8 +504,8 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 
 | 样例 / 详情 | 状态 / 用例 | 实际库与实现方式 | 详细日志与范围 |
 | --- | --- | --- | --- |
-| [matmul/matmul_example.cpp](../sample-reports/cuSPARSELt/matmul/matmul_example.cpp.md) | UNSUPPORTED / 0/2 | hipsparselt+hipsparse / hipSPARSELt；库 API 迁移 | [日志、范围、源码](support-log-index/cuSPARSELt.md#sample-67e033d8a0a9) |
-| [matmul_advanced/matmul_advanced_example.cpp](../sample-reports/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp.md) | UNSUPPORTED / 0/2 | hipsparselt+hipsparse / hipSPARSELt；库 API 迁移 | [日志、范围、源码](support-log-index/cuSPARSELt.md#sample-9068bb7b1039) |
+| [matmul/matmul_example.cpp](../sample-reports/cuSPARSELt/matmul/matmul_example.cpp.md) | PARTIAL / 0/2 | project HIP GPU TILE prune + packed 2:4 values/metadata + sparse-only matmul / HIP GPU; CPU descriptor/constant-mask setup only；PROJECT_HIP_ALGORITHM_REWRITE | [日志、范围、源码](support-log-index/cuSPARSELt.md#sample-67e033d8a0a9) |
+| [matmul_advanced/matmul_advanced_example.cpp](../sample-reports/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp.md) | PARTIAL / 0/2 | project HIP GPU TILE prune + packed 2:4 values/metadata + sparse-only matmul / HIP GPU; CPU descriptor/constant-mask setup only；PROJECT_HIP_ALGORITHM_REWRITE | [日志、范围、源码](support-log-index/cuSPARSELt.md#sample-9068bb7b1039) |
 
 <a id="module-14"></a>
 

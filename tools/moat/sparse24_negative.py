@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+"""Reject targeted semantic faults, including mutually consistent native output corruption."""
+import argparse,json,shutil,struct,sys
+from pathlib import Path
+from experiment import ROOT,Experiment,write
+from sparse24_reference import validate
+EXPECTED={'packed-value':'packed-values-and-metadata','metadata-index':'packed-values-and-metadata','tile-mask':'GPU-tile-mask','nonoptimal-prune':'capacity-DP-optimal-L1','three-ULP-output':'FP64-reference-within-two-FP16-ulp','output-padding':'output-padding','GPU-input-echo':'B_after/actual-GPU-input-unchanged','search-choice':'actual-GPU-search','NaN-timing':'actual-GPU-search','truncated-packed':'complete-parse-and-reference','trailing-metadata':'complete-parse-and-reference','ReLU-threshold':'FP64-reference-within-two-FP16-ulp','ReLU-upper-bound':'FP64-reference-within-two-FP16-ulp','native-compact-B':'actual-native-compact-B','native-coupled-output':'FP64-reference-within-two-FP16-ulp','native-coupled-padding':'output-padding','allocation-query':'actual-project-plan'}
+def check(src,out,backend,mode):
+ try:r=validate(src,out,backend)
+ except Exception as error:r=dict(status='FAILED',checks=[dict(check='complete-parse-and-reference',passed=False)],error=str(error))
+ failures=[c['check'] for c in r['checks'] if not c['passed']];r['expected_failure_seen']=r['status']=='FAILED' and any(EXPECTED[mode] in name for name in failures);return r
+p=argparse.ArgumentParser();p.add_argument('--single',nargs=5);args=p.parse_args()
+if args.single:
+ src,out,report,backend,mode=args.single;r=check(src,out,backend,mode);write(report,r);raise SystemExit(not r['expected_failure_seen'])
+amd=json.loads((ROOT/'migration/reports/rewrite-extension-rocm.json').read_text());native=json.loads((ROOT/'migration/reports/rewrite-sparse24-cuda.json').read_text());results=[]
+for mode in EXPECTED:
+ backend='cuda' if mode.startswith('native-') else 'rocm';kind='sparse24_advanced' if mode.startswith('ReLU') else 'sparse24';case='zero-A' if mode.startswith('ReLU') else 'layout' if mode in ['output-padding','native-coupled-padding'] else 'changed-values' if mode=='nonoptimal-prune' else 'original';run=(native if backend=='cuda' else amd)[kind+'/'+case];e=Experiment('R7',kind+'/negative/'+mode,'cpu-negative-native' if backend=='cuda' else 'cpu-negative',case=case,sources=[__file__,ROOT/'tools/moat/sparse24_reference.py',ROOT/'tools/moat/inputs.py'],parent=run['experiment_id'],comparison_id=run['comparison_id']);shutil.copytree(ROOT/run['input_snapshot'],e.path/'inputs');shutil.copytree(ROOT/run['output'],e.path/'outputs');out=e.path/'outputs';cfg=json.loads((e.path/'inputs/config.json').read_text())
+ if validate(e.path/'inputs',out,backend)['status']!='PASSED':raise RuntimeError('negative baseline must be valid')
+ def edit(name,offset,fmt,value=None,delta=None):
+  path=out/(name+'.bin');data=bytearray(path.read_bytes());old=struct.unpack_from(fmt,data,offset)[0];struct.pack_into(fmt,data,offset,value if value is not None else old+delta);path.write_bytes(data)
+ if mode=='packed-value':edit('packed_values',0,'<e',delta=2)
+ elif mode=='metadata-index':edit('metadata',0,'B',value=0)
+ elif mode=='tile-mask':
+  path=out/'tile_masks.bin';data=bytearray(path.read_bytes());data[0]^=1;path.write_bytes(data)
+ elif mode=='nonoptimal-prune':
+  path=out/'A_pruned.bin';data=path.read_bytes();index=next(i for i in range(len(data)//2) if struct.unpack_from('<H',data,2*i)[0]&0x7fff);edit('A_pruned',2*index,'<e',value=0);row,col=divmod(index,cfg['lda']);group=row*(cfg['k']//4)+col//4;code=(out/'metadata.bin').read_bytes()[group];slot=0 if (code&3)==col%4 else 1;edit('packed_values',(2*group+slot)*2,'<e',value=0)
+ elif mode=='three-ULP-output':edit('D',0,'<H',delta=3)
+ elif mode=='output-padding':edit('D',2*cfg['n'],'<e',value=1234)
+ elif mode=='GPU-input-echo':edit('B_after',0,'<e',delta=1)
+ elif mode=='search-choice':
+  old=struct.unpack_from('<q',(out/'plan.bin').read_bytes(),48)[0];edit('plan',48,'<q',value=1-old)
+ elif mode=='NaN-timing':edit('search_ms',0,'<f',value=float('nan'))
+ elif mode=='truncated-packed':
+  path=out/'packed_values.bin';path.write_bytes(path.read_bytes()[:-1])
+ elif mode=='trailing-metadata':
+  path=out/'metadata.bin';path.write_bytes(path.read_bytes()+b'\0')
+ elif mode=='ReLU-threshold':edit('D',0,'<e',value=1)
+ elif mode=='ReLU-upper-bound':edit('D',6,'<e',value=16)
+ elif mode=='native-compact-B':edit('native_B_compact_after',0,'<e',delta=1)
+ elif mode=='native-coupled-output':
+  edit('D',0,'<e',delta=100);edit('native_D_compact',0,'<e',delta=100)
+ elif mode=='native-coupled-padding':
+  edit('D',2*cfg['n'],'<e',value=1234);edit('C_after',2*cfg['n'],'<e',value=1234)
+ elif mode=='allocation-query':edit('plan',24,'<q',delta=2)
+ report=e.path/'rejection.json';rc=e.command([sys.executable,__file__,'--single',str(e.path/'inputs'),str(out),str(report),backend,mode],'reject-'+mode);r=dict(mode=mode,kind=kind,case=case,backend=backend,passed=rc==0,expected_failure=EXPECTED[mode],parent_run=run['experiment_id']);r['evidence']=e.finish('PASSED' if rc==0 else 'VALIDATOR_GAP',dict(checks=[dict(check=mode,passed=rc==0)]));results.append(r);write(ROOT/'migration/reports/rewrite-sparse24-negative.json',dict(tests=results,status='PASSED' if all(r['passed'] for r in results) else 'FAILED'));print(mode,rc,flush=True)

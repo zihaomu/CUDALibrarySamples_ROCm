@@ -1,0 +1,1 @@
+Test cuda-native-compressed for cuSPARSELt/matmul_advanced::matmul_advanced_example.cpp, case irregular. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T110855.347665Z-R7-cuda-build-e1d397b2e8.

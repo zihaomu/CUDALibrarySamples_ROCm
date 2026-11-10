@@ -1,0 +1,26 @@
+#!/usr/bin/env python3
+"""Build explicit rewrite extension profiles under the locked GPU environment."""
+import argparse,json
+from pathlib import Path
+from experiment import ROOT,Experiment,write,digest
+from snapshot import capture
+p=argparse.ArgumentParser();p.add_argument('--only',nargs='*',default=[]);args=p.parse_args()
+spec=json.loads((ROOT/'migration/rewrite/extensions.json').read_text())['profiles'];report=ROOT/'migration/reports/rewrite-extension-builds.json';results=json.loads(report.read_text()) if report.exists() else {};observed=capture()
+core=Path('/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core');native=Path('/opt/rocm/core-10.1');overlay=ROOT/'build/rocm-sdk-overlay'
+for profile in spec:
+ if args.only and profile['kind'] not in args.only:continue
+ src=ROOT/profile['implementation'];headers=list((ROOT/'rocm/backends').rglob('*.hpp'))+list((ROOT/'rocm/device').rglob('*.hpp'))+[ROOT/'rocm/common/rewrite_runtime.hpp']
+ e=Experiment(profile['batch'],profile['sample_id'],'rocm-build',sources=[src,ROOT/profile['source'],__file__]+headers);write(e.path/'backend.observed.json',observed)
+ binary=e.path/'sample';dep=e.path/'dependencies.d';includes=[ROOT/'rocm/common',ROOT/'rocm/backends/image',ROOT/'rocm/backends/solver',ROOT/'rocm/backends/codec',ROOT/'rocm/backends/sparse',core/'include',native/'include'];libs=[native/'lib',core.parent/'_rocm_sdk_libraries/lib',core/'lib']
+ cmd=['hipcc','--rocm-path='+str(overlay),'--hip-path='+str(overlay),'--rocm-device-lib-path='+str(core/'lib/llvm/amdgcn/bitcode'),'--offload-arch=gfx1201','-std=c++17','-O2','-D__HIP_PLATFORM_AMD__','-MMD','-MF',str(dep),'-x','hip',str(src),'-o',str(binary)]
+ cmd+=['-I'+str(p) for p in includes]+['-L'+str(p) for p in libs]+['-Wl,-rpath,'+str(p) for p in libs]+['-lamdhip64','-lhipblas']+(['-lhipsolver'] if profile['kind']=='svd' else [])
+ rc=e.command(cmd,'build',timeout=240);dependencies={str(src.relative_to(ROOT)):digest(src)}
+ if rc==0:
+  for word in dep.read_text().replace('\\\n',' ').split()[1:]:
+   path=Path(word).resolve()
+   if path.is_file() and path.is_relative_to(ROOT/'rocm'):dependencies[str(path.relative_to(ROOT))]=digest(path)
+ initial=json.loads((e.path/'source.json').read_text())['dependencies']
+ if rc==0 and any(initial.get(name)!=sha for name,sha in dependencies.items()):rc=1
+ record=dict(build_identity_version=2,status='BUILT' if rc==0 else 'BUILD_ERROR',source=profile['source'],implementation=profile['implementation'],dependencies=dependencies,build_recipe_sha256=digest(__file__),experiment_id=e.id,binary=str(binary.relative_to(ROOT)) if rc==0 else None,binary_sha256=digest(binary) if rc==0 else None)
+ write(e.path/'compiled-dependencies.json',dependencies);write(e.path/'build-result.json',record)
+ record['evidence']=e.finish('EXECUTED' if rc==0 else 'BUILD_ERROR',reason=None if rc==0 else f'compiler exit {rc}');results[profile['kind']]=record;write(report,results);print(profile['kind'],record['status'],flush=True)

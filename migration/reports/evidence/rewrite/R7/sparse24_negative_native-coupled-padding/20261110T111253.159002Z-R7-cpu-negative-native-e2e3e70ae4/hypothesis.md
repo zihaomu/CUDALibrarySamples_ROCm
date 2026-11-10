@@ -1,0 +1,1 @@
+Test cpu-negative-native for sparse24/negative/native-coupled-padding, case layout. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T110918.480389Z-R7-cuda-native-compressed-e4991b3f28.

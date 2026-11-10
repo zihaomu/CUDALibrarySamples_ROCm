@@ -19,5 +19,8 @@ for profile in spec:
   for word in dep.read_text().replace('\\\n',' ').split()[1:]:
    path=Path(word).resolve()
    if path.is_file() and path.is_relative_to(ROOT/'rocm'):dependencies[str(path.relative_to(ROOT))]=digest(path)
- record=dict(status='BUILT' if rc==0 else 'BUILD_ERROR',source=profile['source'],implementation=profile['implementation'],dependencies=dependencies,build_recipe_sha256=digest(__file__),experiment_id=e.id,binary=str(binary.relative_to(ROOT)) if rc==0 else None,binary_sha256=digest(binary) if rc==0 else None)
+ initial=json.loads((e.path/'source.json').read_text())['dependencies']
+ if rc==0 and any(initial.get(name)!=sha for name,sha in dependencies.items()):rc=1
+ record=dict(build_identity_version=2,status='BUILT' if rc==0 else 'BUILD_ERROR',source=profile['source'],implementation=profile['implementation'],dependencies=dependencies,build_recipe_sha256=digest(__file__),experiment_id=e.id,binary=str(binary.relative_to(ROOT)) if rc==0 else None,binary_sha256=digest(binary) if rc==0 else None)
+ write(e.path/'compiled-dependencies.json',dependencies);write(e.path/'build-result.json',record)
  record['evidence']=e.finish('EXECUTED' if rc==0 else 'BUILD_ERROR',reason=None if rc==0 else f'compiler exit {rc}');results[profile['kind']]=record;write(report,results);print(profile['kind'],record['status'],flush=True)

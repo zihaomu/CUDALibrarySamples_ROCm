@@ -1,0 +1,1 @@
+Test cpu-negative for sparse24_advanced/negative/ReLU-upper-bound, case zero-A. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T110703.968118Z-R7-rocm-9a0eee7f31.

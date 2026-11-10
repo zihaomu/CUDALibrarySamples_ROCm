@@ -1,0 +1,72 @@
+{
+  "status": "FAILED",
+  "checks": [
+    {
+      "check": "finite-FP16-outputs",
+      "passed": true
+    },
+    {
+      "check": "A_after/actual-GPU-input-unchanged",
+      "passed": true
+    },
+    {
+      "check": "B_after/actual-GPU-input-unchanged",
+      "passed": true
+    },
+    {
+      "check": "C_after/actual-GPU-input-unchanged",
+      "passed": true
+    },
+    {
+      "check": "bias_after/actual-GPU-input-unchanged",
+      "passed": true
+    },
+    {
+      "check": "GPU-prune-check",
+      "passed": true
+    },
+    {
+      "check": "real-packed-storage",
+      "passed": true
+    },
+    {
+      "check": "actual-project-plan",
+      "passed": true
+    },
+    {
+      "check": "actual-GPU-search",
+      "passed": true
+    },
+    {
+      "check": "b0/prune-padding",
+      "passed": true
+    },
+    {
+      "check": "b0/output-padding",
+      "passed": false
+    },
+    {
+      "check": "b0/capacity-DP-optimal-L1",
+      "passed": true
+    },
+    {
+      "check": "b0/valid-2-per-row-column-pruning",
+      "passed": true
+    },
+    {
+      "check": "b0/GPU-tile-mask",
+      "passed": true
+    },
+    {
+      "check": "b0/packed-values-and-metadata",
+      "passed": true
+    },
+    {
+      "check": "b0/FP64-reference-within-two-FP16-ulp",
+      "passed": true
+    }
+  ],
+  "max_fp16_ulp": 0,
+  "scope": "TILE optimal L1 capacity-DP; exact packed/metadata/layout/padding; FP64 independent product, FP16 rounding <=2 ULP. Pruning ties need not select the vendor mask.",
+  "expected_failure_seen": true
+}

@@ -3,8 +3,7 @@
   "counts": {
     "PASSED": 229,
     "FAILED": 385,
-    "PARTIAL": 23,
-    "UNSUPPORTED": 2
+    "PARTIAL": 25
   },
   "implementation_methods": {
     "API_PORT": "库 API 迁移",
@@ -25598,22 +25597,22 @@
       "id": "cuSPARSELt/matmul::matmul_example.cpp",
       "family": "cuSPARSELt",
       "source": "cuSPARSELt/matmul/matmul_example.cpp",
-      "status": "UNSUPPORTED",
-      "level": "L2",
-      "actual_library": "hipsparselt+hipsparse",
-      "backend_library": "hipSPARSELt",
-      "implementation_method": "API_PORT",
+      "status": "PARTIAL",
+      "level": "L3",
+      "actual_library": "project HIP GPU TILE prune + packed 2:4 values/metadata + sparse-only matmul",
+      "backend_library": "HIP GPU; CPU descriptor/constant-mask setup only",
+      "implementation_method": "PROJECT_HIP_ALGORITHM_REWRITE",
       "implementation": "rocm/ported/cuSPARSELt/matmul/matmul_example.cpp",
-      "implementation_sha256": "ce7d529bea4268fc1ebccadbc21d9b23bbc7ee2f9b3d6e3e51698e77e78115d9",
+      "implementation_sha256": "4666029d661a7a1800e6674aea1db95e621aa985883f9ce7f435d98e48af52ac",
       "passed_cases": [],
       "required_cases": [
         "original-functional-contract",
         "independent-numerical-or-semantic-reference"
       ],
-      "scope_and_reason": "锁定 ROCm 10.1.0 hipSPARSELt 已编译，但 gfx1201 缺少 kernel bundle；实机返回 NOT_IMPLEMENTED/无法加载 TensileLibrary_lazy_gfx1201，固定源码架构检查也拒绝 gfx1201。仅限此版本/硬件/后端；保留 structured prune/compress/matmul 契约，未改成 dense。",
+      "scope_and_reason": "原生hipSPARSELt路线仍缺gfx1201 bundle/高级属性；已实现项目HIP真实2:4 TILE裁剪、压缩metadata与稀疏乘法，14 AMD/CPU场景通过。原始CUDA两例通过，完整扩展CUDA对照、负向、运行边界、轨迹和独立复核尚待收口。不是dense GEMM回退或原生Sparse Tensor Core支持。",
       "retry_condition": "使用有匹配 kernel bundle 的受支持 GPU，或新的 gfx1201 hipSPARSELt 实现/包；重新跑 prune/compress/matmul 与 CPU 参考。",
       "detail": "migration/sample-reports/cuSPARSELt/matmul/matmul_example.cpp.md",
-      "record_field": "attempts/4",
+      "record_field": "original_port",
       "amd_evidence": "migration/reports/evidence/20261109T092720.531889Z/original-rocm/cuSPARSELt_matmul_matmul_example.cpp",
       "amd_logs": [
         "migration/reports/evidence/20261109T092720.531889Z/original-rocm/cuSPARSELt_matmul_matmul_example.cpp/build.log",
@@ -25626,7 +25625,8 @@
         "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSPARSELt_matmul_matmul_example.cpp/build.log"
       ],
       "validation_reports": [
-        "migration/reports/upstream-support/sources.json"
+        "migration/reports/upstream-support/sources.json",
+        "migration/reports/rewrite-sparseLt-native-route.json"
       ],
       "all_evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/cuSPARSELt_matmul_matmul_example.cpp",
@@ -25636,29 +25636,31 @@
         "migration/reports/evidence/20261109T092720.531889Z/original-rocm/cuSPARSELt_matmul_matmul_example.cpp",
         "migration/reports/upstream-support/hipsparselt-gfx1201-configure.log",
         "migration/reports/upstream-support/sources.json",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSPARSELt_matmul_matmul_example.cpp"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSPARSELt_matmul_matmul_example.cpp",
+        "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul__matmul_example.cpp/20261110T110155.523031Z-R7-rocm-e4da9f1bd1",
+        "migration/reports/rewrite-sparseLt-native-route.json"
       ]
     },
     {
       "id": "cuSPARSELt/matmul_advanced::matmul_advanced_example.cpp",
       "family": "cuSPARSELt",
       "source": "cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp",
-      "status": "UNSUPPORTED",
-      "level": "L2",
-      "actual_library": "hipsparselt+hipsparse",
-      "backend_library": "hipSPARSELt",
-      "implementation_method": "API_PORT",
+      "status": "PARTIAL",
+      "level": "L3",
+      "actual_library": "project HIP GPU TILE prune + packed 2:4 values/metadata + sparse-only matmul",
+      "backend_library": "HIP GPU; CPU descriptor/constant-mask setup only",
+      "implementation_method": "PROJECT_HIP_ALGORITHM_REWRITE",
       "implementation": "rocm/ported/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp",
-      "implementation_sha256": "105e07cfecc10d798f7506f8b5043efa88648a9abd547ad010868e87a3efd640",
+      "implementation_sha256": "02acc20a288c30126d33cc38c3fded5d7d85d055232f36e1624e030924270019",
       "passed_cases": [],
       "required_cases": [
         "original-functional-contract",
         "independent-numerical-or-semantic-reference"
       ],
-      "scope_and_reason": "锁定 ROCm 10.1.0 hipSPARSELt 已编译，但 gfx1201 缺少 kernel bundle；实机返回 NOT_IMPLEMENTED/无法加载 TensileLibrary_lazy_gfx1201，固定源码架构检查也拒绝 gfx1201。仅限此版本/硬件/后端；保留 structured prune/compress/matmul 契约，未改成 dense。",
+      "scope_and_reason": "原生hipSPARSELt路线仍缺gfx1201 bundle/高级属性；已实现项目HIP真实2:4 TILE裁剪、压缩metadata与稀疏乘法，14 AMD/CPU场景通过。原始CUDA两例通过，完整扩展CUDA对照、负向、运行边界、轨迹和独立复核尚待收口。不是dense GEMM回退或原生Sparse Tensor Core支持。",
       "retry_condition": "使用有匹配 kernel bundle 的受支持 GPU，或新的 gfx1201 hipSPARSELt 实现/包；重新跑 prune/compress/matmul 与 CPU 参考。",
       "detail": "migration/sample-reports/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp.md",
-      "record_field": "attempts/4",
+      "record_field": "original_port",
       "amd_evidence": "migration/reports/evidence/20261109T092720.531889Z/original-rocm/cuSPARSELt_matmul_advanced_matmul_advanced_example.cpp",
       "amd_logs": [
         "migration/reports/evidence/20261109T092720.531889Z/original-rocm/cuSPARSELt_matmul_advanced_matmul_advanced_example.cpp/build.log",
@@ -25671,7 +25673,8 @@
         "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSPARSELt_matmul_advanced_matmul_advanced_example.cpp/build.log"
       ],
       "validation_reports": [
-        "migration/reports/upstream-support/sources.json"
+        "migration/reports/upstream-support/sources.json",
+        "migration/reports/rewrite-sparseLt-native-route.json"
       ],
       "all_evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/cuSPARSELt_matmul_advanced_matmul_advanced_example.cpp",
@@ -25681,7 +25684,9 @@
         "migration/reports/evidence/20261109T092720.531889Z/original-rocm/cuSPARSELt_matmul_advanced_matmul_advanced_example.cpp",
         "migration/reports/upstream-support/hipsparselt-gfx1201-configure.log",
         "migration/reports/upstream-support/sources.json",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSPARSELt_matmul_advanced_matmul_advanced_example.cpp"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSPARSELt_matmul_advanced_matmul_advanced_example.cpp",
+        "migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul_advanced__matmul_advanced_example.cpp/20261110T110208.886413Z-R7-rocm-e78d101558",
+        "migration/reports/rewrite-sparseLt-native-route.json"
       ]
     },
     {

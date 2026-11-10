@@ -1,13 +1,13 @@
 # cuSPARSELt/matmul::matmul_example.cpp
 
-**UNSUPPORTED / L2**
+**PARTIAL / L3**
 
-锁定 ROCm 10.1.0 hipSPARSELt 已编译，但 gfx1201 缺少 kernel bundle；实机返回 NOT_IMPLEMENTED/无法加载 TensileLibrary_lazy_gfx1201，固定源码架构检查也拒绝 gfx1201。仅限此版本/硬件/后端；保留 structured prune/compress/matmul 契约，未改成 dense。
+原生hipSPARSELt路线仍缺gfx1201 bundle/高级属性；已实现项目HIP真实2:4 TILE裁剪、压缩metadata与稀疏乘法，14 AMD/CPU场景通过。原始CUDA两例通过，完整扩展CUDA对照、负向、运行边界、轨迹和独立复核尚待收口。不是dense GEMM回退或原生Sparse Tensor Core支持。
 
 | 字段 | 当前记录 |
 | --- | --- |
 | 原始入口 | [cuSPARSELt/matmul/matmul_example.cpp](../../../../cuSPARSELt/matmul/matmul_example.cpp) |
-| 实际库 / 后端 | hipsparselt+hipsparse / hipSPARSELt |
+| 实际库 / 后端 | project HIP GPU TILE prune + packed 2:4 values/metadata + sparse-only matmul / HIP GPU; CPU descriptor/constant-mask setup only |
 | 候选路线 | hipSPARSELt |
 | 代码 | [rocm/ported/cuSPARSELt/matmul/matmul_example.cpp](../../../../rocm/ported/cuSPARSELt/matmul/matmul_example.cpp) |
 | required cases | 0/2 |
@@ -19,7 +19,7 @@
 
 必需用例：`original-functional-contract`, `independent-numerical-or-semantic-reference`。
 
-实现方式：`API_PORT`。
+实现方式：`PROJECT_HIP_ALGORITHM_REWRITE`。
 
 恢复/扩展条件：使用有匹配 kernel bundle 的受支持 GPU，或新的 gfx1201 hipSPARSELt 实现/包；重新跑 prune/compress/matmul 与 CPU 参考。
 
@@ -47,3 +47,5 @@ run 失败：hipsparselt_error: Cannot read /opt/venv/lib/python3.13/site-packag
 - [migration/reports/upstream-support/hipsparselt-gfx1201-configure.log](../../../reports/upstream-support/hipsparselt-gfx1201-configure.log)
 - [migration/reports/upstream-support/sources.json](../../../reports/upstream-support/sources.json)
 - [migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuSPARSELt_matmul_matmul_example.cpp](../../../reports/evidence/20261109T084857.451692Z/original-cuda/cuSPARSELt_matmul_matmul_example.cpp)
+- [migration/reports/evidence/rewrite/R7/cuSPARSELt_matmul__matmul_example.cpp/20261110T110155.523031Z-R7-rocm-e4da9f1bd1](../../../reports/evidence/rewrite/R7/cuSPARSELt_matmul__matmul_example.cpp/20261110T110155.523031Z-R7-rocm-e4da9f1bd1)
+- [migration/reports/rewrite-sparseLt-native-route.json](../../../reports/rewrite-sparseLt-native-route.json)
