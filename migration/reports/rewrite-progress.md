@@ -1,6 +1,6 @@
 # MOAT 重写实时进展
 
-更新时间：2026-11-10T11:34:16.708505+00:00。样例支持结论仍以 samples.yaml 为准。
+更新时间：2026-11-10T12:06:45.177865+00:00。样例支持结论仍以 samples.yaml 为准。
 
 | 批次 / 样例 | AMD 已运行 / CPU通过 | CUDA 已运行 / CPU通过 | 当前验收结论 |
 | --- | ---: | ---: | --- |
@@ -19,4 +19,23 @@
 
 日志：[实验事件索引](rewrite-experiments.jsonl)；[AMD运行](rewrite-first-rocm.json)；[独立CPU验收](rewrite-first-rocm-validation.json)；[CUDA运行](rewrite-first-cuda.json)。
 
-R1–R2完整记录：[批次验收](rewrite-R1-R2.md)。后续R3–R8尚未完成，全项目MOAT surface与其它平台仍有owed项。
+R1–R2完整记录：[批次验收](rewrite-R1-R2.md)。其它批次见下表；全项目MOAT surface与其它平台仍有owed项。
+
+## 全阶段与未完成范围
+
+| 阶段 | 本轮新整例资格 | 仍未通过 | 当前结果与范围 |
+| --- | ---: | ---: | --- |
+| R1 | 5 | 0 | COMPLETED_SCOPED；5个 BLAS/Lt 整例 |
+| R2 | 3 | 0 | COMPLETED_SCOPED；3个 device solver 整例 |
+| R3 | 2 | 22 | ASSESSMENT_COMPLETE_22_GAPS；原24项复审，NCC/SVD两例收口 |
+| R4 | 1 | 96 | COMPLETED_SCOPED_96_PENDING；冻结并完成 CRC32 小批；其余逐例评估 |
+| R5 | 8 | 66 | PARTIALLY_IMPLEMENTED_65_FRONTENDS_PENDING；8个真实 Fortran 入口；65前端与额外CPP项待实现 |
+| R6 | 0 | 224 | ASSESSMENT_COMPLETE_PORTS_PENDING；224项专题研究与最小基础探针；未签发整例 |
+| R7 | 2 | 0 | COMPLETED_SCOPED；2个真实GPU packed sparse2:4 整例 |
+| R8 | 0 | 0 | IN_PROGRESS；总回归、依赖封存、干净检出与交付 |
+
+新增资格21项，另撤销旧C++排序样例资格1项，支持211→231，净增20。当前231/639通过、408待支持；117功能族、18模块。
+
+[R3](rewrite-R3.md) · [R4](rewrite-R4.md) · [R5](rewrite-R5.md) · [R6](rewrite-R6.md) · [R7](rewrite-R7.md) · [408项逐例原因与后续实验](rewrite-remaining-assessment.md)。
+
+计划第1.2节区分阶段执行和整例支持；R5剩余65个前端及其它待实现项没有被登记为完成。wave64、Windows、多节点与全项目MOAT surface仍未验证。

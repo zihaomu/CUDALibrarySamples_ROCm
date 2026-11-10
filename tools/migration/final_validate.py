@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Audit scope, selected proof identities, generated documentation and environment gates."""
-import collections,datetime,hashlib,json,pathlib,re,subprocess,urllib.parse
+import collections,datetime,hashlib,json,pathlib,re,subprocess,urllib.parse,sys
 from catalog import ROOT,BASE,CANDIDATES
 from run import digest
 from operator_support import summarize
@@ -14,6 +14,16 @@ def main():
  errors=[];checks={};cat=json.loads((ROOT/'migration/samples.yaml').read_text());samples=cat['samples'];counts=collections.Counter(s['status'] for s in samples);proofs={}
  def require(ok,message):
   if not ok:errors.append(message)
+ sys.path.insert(0,str(ROOT/'tools/moat'))
+ from selected_proofs import inspect as inspect_selected
+ rewrite_checks=[inspect_selected(s) for s in samples if s['status']=='PASSED' and s.get('reason_code')=='VALIDATED_MOAT_REWRITE']
+ for r in rewrite_checks:require(r['status']=='PASSED','Selected MOAT qualification: '+r['sample_id']+' '+str(r['errors']))
+ selected_rewrites={r['sample_id'] for r in rewrite_checks if r['status']=='PASSED'}
+ def superseded(source):
+  return next(s for s in samples if s['source']==source)['id'] in selected_rewrites
+ def withdrawn(source):
+  s=next(s for s in samples if s['source']==source)
+  return source=='cuDSS/simple_reordering_phase/simple_reordering_phase.cpp' and s['status']=='PARTIAL' and s['reason_code']=='VENDOR_PERMUTATION_POLICY_DIFFERS' and bool(s.get('historical_selected_validation')) and 'migration/reports/rewrite-reordering-cpp-repair.json' in s['evidence']
  require(len(samples)==639 and len({s['id'] for s in samples})==639,'Expected 639 unique source entrypoints')
  require(not counts['NOT_STARTED'] and not counts['IN_PROGRESS'],'Unfinished sample states remain')
  require(len(cat['sources'])==866 and len(cat['build_definitions'])==477,'Upstream inventory denominator changed')
@@ -113,7 +123,7 @@ def main():
  for r in cohort911:
   require(r['status']==r['cuda_comparison']=='PASSED' and r.get('current_source_proof') and r.get('current_cuda_source_proof'),'B9-B11 execution/source gate failed '+r['source'])
   require({c['case'] for c in r['cases']}==set(BATCHES9_11[r['source']]) and len(r['cuda_cases'])==len(r['cases']) and all(c['status']=='PASSED' and c['checks'] and all(v['passed'] for v in c['checks']) for c in r['cases']) and all(c['status']=='PASSED' and c['identical_input'] and c['cuda_cpu_checks']['status']=='PASSED' and all(v['passed'] for v in c['cuda_cpu_checks']['checks']) for c in r['cuda_cases']),'B9-B11 independent numerical/CLI checks incomplete '+r['source'])
-  require(r['validation_source_sha256']==digest(ROOT/'tools/migration/batches9_11_validate.py') and sealed_hash(r['implementation'])==r['implementation_sha256'],'B9-B11 qualifier/implementation stale '+r['source'])
+  require(r['validation_source_sha256']==digest(ROOT/'tools/migration/batches9_11_validate.py') and (superseded(r['source']) or withdrawn(r['source']) or sealed_hash(r['implementation'])==r['implementation_sha256']),'B9-B11 qualifier/implementation stale '+r['source'])
   require(manifest['files'].get('build/cuda-observed/'+r['source'],{}).get('sha256')==r['cuda_implementation_sha256'],'B9-B11 CUDA observation stale '+r['source'])
   for name,sha in dict(r['dependencies'],**r['cuda_dependencies']).items():require(sealed_hash(name)==sha,'B9-B11 helper/oracle stale '+name)
   require(r['environment']['rocm_release']=='10.1.0' and r['environment']['image_id']=='sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03' and all(d['physical_id']==0 for d in r['environment']['devices']),'B9-B11 environment/device identity changed '+r['source'])
@@ -122,8 +132,10 @@ def main():
    if (ROOT/m['path']).exists():
     for n,v in json.loads((ROOT/m['path']).read_text()).items():
      if pathlib.Path(n).suffix in {'.log','.json'}:require((ROOT/m['path']).parent.joinpath(n).exists() and digest((ROOT/m['path']).parent/n)==v['sha256'],'B9-B11 archived payload altered '+r['source']+' '+n)
-  s=next(s for s in samples if s['source']==r['source']);partial=r['batch']=='b10' or '/benchmarks/' in r['source'] or '/simple_get_set/' in r['source'];require(r['contract_status']==s['status']==('PARTIAL' if partial else 'PASSED'),'B9-B11 original-profile contract incorrectly promoted '+r['source'])
-  if partial:require(bool(r['missing_contract']) and set(s['passed_cases'])<set(s['required_cases']),'B9-B11 partial missing contract absent '+r['source'])
+  s=next(s for s in samples if s['source']==r['source']);partial=r['batch']=='b10' or '/benchmarks/' in r['source'] or '/simple_get_set/' in r['source']
+  require(r['contract_status']==('PARTIAL' if partial else 'PASSED'),'B9-B11 historical contract changed '+r['source'])
+  if not superseded(r['source']) and not withdrawn(r['source']):require(s['status']==r['contract_status'],'B9-B11 current contract differs without replacement '+r['source'])
+  if partial and not superseded(r['source']):require(bool(r['missing_contract']) and set(s['passed_cases'])<set(s['required_cases']),'B9-B11 partial missing contract absent '+r['source'])
  neg911=json.loads((ROOT/'migration/reports/batches9_11-negative.json').read_text());require(neg911['status']=='PASSED' and neg911['oracles']==19 and neg911['output_faults']==38 and neg911['semantic_faults']==9 and len(neg911['tests'])==47 and all(x['rejected'] for x in neg911['tests']) and neg911['generator_sha256']==digest(ROOT/'tools/migration/batches9_11_negative.py'),'B9-B11 independent rejection gates incomplete')
  runtime911=json.loads((ROOT/'migration/reports/batches9_11-runtime-checks.json').read_text());require(runtime911['status']=='PASSED' and len(runtime911['tests'])==23 and all(x['passed'] for x in runtime911['tests']) and runtime911['generator_sha256']==digest(ROOT/'tools/migration/batches9_11_runtime_checks.py'),'B9-B11 runtime/file CLI gates incomplete')
  interop=json.loads((ROOT/'migration/reports/b9-cross-interop-inputs.json').read_text());require(len(interop)==16 and {x['producer_backend'] for x in interop}=={'rocm','cuda'} and all((ROOT/x['producer_evidence']).exists() and len(x['streams'])==16 for x in interop),'B9 cross-vendor stream provenance missing')
@@ -133,7 +145,7 @@ def main():
  for r in cohort1215:
   require(r['status']==r['cuda_comparison']=='PASSED' and r['current_source_proof'] and r['current_cuda_source_proof'],'B12-B15 execution/source gate failed '+r['source'])
   require({c['case'] for c in r['cases']}==set(BATCHES12_15[r['source']]) and len(r['cuda_cases'])==len(r['cases']) and all(c['status']=='PASSED' and c['checks'] and all(x['passed'] for x in c['checks']) for c in r['cases']) and all(c['status']=='PASSED' and c['identical_input'] and c['cuda_cpu_checks']['status']=='PASSED' and all(x['passed'] for x in c['cuda_cpu_checks']['checks']) for c in r['cuda_cases']),'B12-B15 independent numerical/semantics checks incomplete '+r['source'])
-  require(r['validation_source_sha256']==digest(ROOT/'tools/migration/batches12_15_validate.py') and sealed_hash(r['implementation'])==r['implementation_sha256'],'B12-B15 qualifier/implementation stale '+r['source'])
+  require(r['validation_source_sha256']==digest(ROOT/'tools/migration/batches12_15_validate.py') and (superseded(r['source']) or sealed_hash(r['implementation'])==r['implementation_sha256']),'B12-B15 qualifier/implementation stale '+r['source'])
   require(manifest['files'].get('build/cuda-observed/'+r['source'],{}).get('sha256')==r['cuda_implementation_sha256'],'B12-B15 CUDA source stale '+r['source'])
   for name,sha in dict(r['dependencies'],**r['cuda_dependencies']).items():require(sealed_hash(name)==sha,'B12-B15 oracle/helper stale '+name)
   require(r['environment']['rocm_release']=='10.1.0' and r['environment']['image_id']=='sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03' and all(d['physical_id'] in [0,2] for d in r['environment']['devices']),'B12-B15 environment/device mismatch '+r['source'])
@@ -147,9 +159,13 @@ def main():
      if pathlib.Path(n).suffix in {'.log','.json','.txt'}:require(f.exists() and digest(f)==v['sha256'],'B12-B15 archived log/metadata altered '+str(f))
      else:
       original=str(f.relative_to(ROOT)).replace('migration/reports/evidence/','artifacts/',1);require(binary_index.get(original,{}).get('sha256')==v['sha256'],'B12-B15 binary output identity missing '+original)
-  s=next(s for s in samples if s['source']==r['source']);partial=kind12_15(r['source']) in LIMITS12_15;require(r['contract_status']==s['status']==('PARTIAL' if partial else 'PASSED'),'B12-B15 original contract incorrectly promoted '+r['source'])
-  if partial:require(r['missing_contract'] and set(s['passed_cases'])<set(s['required_cases']),'B12-B15 missing partial contract '+r['source'])
-  require(s['cuda_comparison_mode']==r['cuda_baseline_kind']=='COMPATIBLE_CUDA_MATH_BASELINE' and r['native_cuda_attempt'] is not None,'B12-B15 vendor and compatible baseline conflated '+r['source'])
+  s=next(s for s in samples if s['source']==r['source']);partial=kind12_15(r['source']) in LIMITS12_15
+  require(r['contract_status']==('PARTIAL' if partial else 'PASSED'),'B12-B15 historical contract changed '+r['source'])
+  if not superseded(r['source']):
+   require(s['status']==r['contract_status'],'B12-B15 current contract differs without replacement '+r['source'])
+   if partial:require(r['missing_contract'] and set(s['passed_cases'])<set(s['required_cases']),'B12-B15 missing partial contract '+r['source'])
+   require(s['cuda_comparison_mode']==r['cuda_baseline_kind'],'B12-B15 selected baseline mode differs without replacement '+r['source'])
+  require(r['cuda_baseline_kind']=='COMPATIBLE_CUDA_MATH_BASELINE' and r['native_cuda_attempt'] is not None,'B12-B15 historical vendor and compatible baseline conflated '+r['source'])
  neg1215=json.loads((ROOT/'migration/reports/batches12_15-negative.json').read_text());require(neg1215['status']=='PASSED' and neg1215['oracles']==20 and neg1215['output_faults']==40 and neg1215['semantic_faults']==13 and len(neg1215['tests'])==53 and all(x['rejected'] for x in neg1215['tests']) and neg1215['generator_sha256']==digest(ROOT/'tools/migration/batches12_15_negative.py'),'B12-B15 rejection gates incomplete')
  runtime1215=json.loads((ROOT/'migration/reports/batches12_15-runtime-checks.json').read_text());require(runtime1215['status']=='PASSED' and len(runtime1215['tests'])==10 and all(x['passed'] for x in runtime1215['tests']) and runtime1215['generator_sha256']==digest(ROOT/'tools/migration/batches12_15_runtime_checks.py'),'B12-B15 runtime guards incomplete')
  npp=json.loads((ROOT/'migration/reports/batch15-native-comparison.json').read_text());require(npp['generator_sha256']==digest(ROOT/'tools/migration/batch15_native_compare.py') and npp['native_probe_source_sha256']==digest(ROOT/'tools/migration/probes/batch15_native_cuda.cu'),'Native NPP oracle identity stale')

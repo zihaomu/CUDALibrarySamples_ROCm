@@ -1,0 +1,7 @@
+// SPDX-License-Identifier: Apache-2.0
+// Capability pilot only: runtime-generated AMD code, not a libmathdx sample port.
+#include "check.hpp"
+#include <hip/hiprtc.h>
+int main(){return sample::run([]{
+ const char*source="extern \"C\" __global__ void rewrite_jit(float*x){int i=blockIdx.x*blockDim.x+threadIdx.x;if(i<4)x[i]=2*x[i]+1;}";hiprtcProgram program;CHECK(hiprtcCreateProgram(&program,source,"rewrite_jit.hip",0,nullptr,nullptr));const char*options[]={"--gpu-architecture=gfx1201","-std=c++17"};auto status=hiprtcCompileProgram(program,2,options);size_t log_size=0;CHECK(hiprtcGetProgramLogSize(program,&log_size));std::vector<char>log(log_size);if(log_size){CHECK(hiprtcGetProgramLog(program,log.data()));std::cout.write(log.data(),log_size);}CHECK(status);size_t bytes=0;CHECK(hiprtcGetCodeSize(program,&bytes));std::vector<char>code(bytes);CHECK(hiprtcGetCode(program,code.data()));CHECK(hiprtcDestroyProgram(&program));hipModule_t module;hipFunction_t function;CHECK(hipModuleLoadData(&module,code.data()));CHECK(hipModuleGetFunction(&function,module,"rewrite_jit"));sample::Device<float>x(std::vector<float>{1,2,3,4});void*arguments[]={&x.p};CHECK(hipModuleLaunchKernel(function,1,1,1,64,1,1,0,nullptr,arguments,nullptr));CHECK(hipDeviceSynchronize());sample::report("HIPRTC-generated-module",x.get(),std::vector<float>{3,5,7,9},0,0);std::cout<<"generated-code-bytes="<<bytes<<'\n';CHECK(hipModuleUnload(module));
+});}

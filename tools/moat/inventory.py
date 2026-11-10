@@ -57,6 +57,10 @@ def main():
     old_libraries=json.loads(library_path.read_text()) if library_path.exists() else {}
     for row in old_libraries.get('libraries',[]):
         libraries[row['id']]=dict(libraries.get(row['id'],{}),**row)
+    # This is a current index, not an append-only qualification history. In
+    # particular, withdrawn qualifications must disappear from library counts.
+    for row in libraries.values():
+        row['qualified_samples']=[]
     for s in samples:
         task=dict(sample_id=s['id'],source=s['source'],family=s['family'],
             primary_phase=phase(s),baseline_status=s['status'],state='OWED' if s['status']!='PASSED' else 'HISTORICAL_QUALIFIED',
@@ -65,7 +69,12 @@ def main():
             required_cases=s['required_cases'],prerequisites=[],experiments=[])
         if s['id'] in previous:
             task.update(previous[s['id']])
-        task.update(current_status=s['status'],current_reason=s['reason'],implementation=s.get('implementation'))
+        task.update(current_status=s['status'],current_reason=s['reason'],implementation=s.get('implementation'),
+                    selected_validation=s.get('selected_validation'))
+        if s['status']=='PASSED' and task['state'] in ['OWED','HISTORICAL_QUALIFIED','QUALIFIED']:
+            task['state']='QUALIFIED' if s['reason_code']=='VALIDATED_MOAT_REWRITE' else 'HISTORICAL_QUALIFIED'
+        elif task['state'] in ['QUALIFIED','HISTORICAL_QUALIFIED']:
+            task['state']='OWED'
         tasks.append(task)
         actual=s.get('actual_library') or ''
         components=[n for n in names if re.search(r'(?<![A-Za-z])'+re.escape(n)+r'(?![A-Za-z])',actual,re.I)]
@@ -79,6 +88,7 @@ def main():
             cpu_stage_review='REQUIRES_EXPLICIT_PER_ROUTE_REVIEW' if 'CPU' in actual else 'NOT_IN_DECLARED_LIBRARY_STRING'))
     for lib in libraries.values():
         if lib['qualified_samples']:lib['status']='HISTORICALLY_QUALIFIED_SCOPED'
+        elif lib.get('status')=='HISTORICALLY_QUALIFIED_SCOPED':lib['status']='OBSERVED_NOT_CURRENTLY_QUALIFIED'
     write(ROOT/'migration/libraries.json',dict(schema_version=1,libraries=list(libraries.values()),
         modules={k:dict(candidates=v) for k,v in CANDIDATES.items()}))
     write(ROOT/'migration/backend-routes.json',dict(schema_version=1,routes=routes))
@@ -93,7 +103,7 @@ def main():
             cases=['original','changed-values','irregular','layout','repeat','boundary'],
             state='PLANNED',numeric_rule='Integer exact; floating scaled error/residual; original half overflow explicitly checked')
         profile.update(prior_profiles.get(s['id'],{}));specs.append(profile)
-    write(ROOT/'migration/rewrite/first-eight.json',dict(schema_version=1,profiles=specs))
+    write(ROOT/'migration/rewrite/first-eight.json',dict(old_spec,schema_version=1,profiles=specs))
     control=ROOT.parent/'MOAT_CUDALibrarySamples_ROCm'
     skill=control/'.claude/skills/cuda-to-rocm/SKILL.md'
     if not lock_path.exists():write(lock_path,dict(schema_version=1,

@@ -1,0 +1,16 @@
+#!/usr/bin/env python3
+import json,shutil
+from pathlib import Path
+from experiment import ROOT,Experiment,write
+from snapshot import capture
+builds=json.loads((ROOT/'migration/reports/rewrite-extension-builds.json').read_text());observed=capture();results=[]
+tests={'tile-m':('m','30'),'tile-k':('k','66'),'empty-batch':('batch','0'),'short-lda':('lda','1'),'overlapping-stride':('stride_a','2'),'unsupported-transpose':('transpose_b','2'),'unsupported-dtype':('dtype','8'),'nonfinite-alpha':('alpha','nan'),'reversed-ReLU-bounds':('relu_upper','0')}
+for test,change in list(tests.items())+[('truncated-A',None)]:
+ kind='sparse24_advanced' if test=='reversed-ReLU-bounds' else 'sparse24';b=builds[kind];e=Experiment('R7',kind+'/invalid/'+test,'rocm-invalid-descriptor',sources=[__file__,ROOT/'rocm/backends/sparse/sparse24.hpp'],parent=b['experiment_id']);write(e.path/'backend.observed.json',observed);src=ROOT/'tests/fixtures/rewrite-extensions'/kind/'original';shutil.copytree(src,e.path/'inputs');out=e.path/'outputs';out.mkdir()
+ if change:
+  path=e.path/'inputs/config.txt';lines=path.read_text().splitlines();path.write_text('\n'.join(key+' '+change[1] if key==change[0] else line for line in lines for key in [line.split()[0]])+'\n')
+ else:
+  path=e.path/'inputs/A.bin';path.write_bytes(path.read_bytes()[:-1])
+ rc=e.command([str(ROOT/b['binary'])],'actual-invalid-descriptor',env=dict(REWRITE_INPUT=str(e.path/'inputs'),REWRITE_OUTPUT=str(out)));passed=rc==1 and not (out/'D.bin').exists();r=dict(test=test,kind=kind,passed=passed,return_code=rc);r['evidence']=e.finish('EXPECTED_REJECTION' if passed else 'VALIDATOR_GAP',dict(checks=[dict(check=test,passed=passed)]));results.append(r);write(ROOT/'migration/reports/rewrite-sparse24-runtime.json',dict(tests=results));print(test,rc,passed,flush=True)
+# Real GPU corruption detection, independent of the CPU output validator.
+src=ROOT/'tools/moat/probes/sparse24_metadata.cpp';e=Experiment('R7','sparse24/actual-GPU-metadata-corruption','rocm-GPU-negative',sources=[__file__,src,ROOT/'rocm/backends/sparse/sparse24.hpp',ROOT/'rocm/common/rewrite_runtime.hpp'],parent=builds['sparse24']['experiment_id']);write(e.path/'backend.observed.json',observed);core=Path('/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core');native=Path('/opt/rocm/core-10.1');overlay=ROOT/'build/rocm-sdk-overlay';binary=e.path/'metadata-probe';libs=[native/'lib',core.parent/'_rocm_sdk_libraries/lib',core/'lib'];cmd=['hipcc','--rocm-path='+str(overlay),'--hip-path='+str(overlay),'--rocm-device-lib-path='+str(core/'lib/llvm/amdgcn/bitcode'),'--offload-arch=gfx1201','-std=c++17','-O2','-D__HIP_PLATFORM_AMD__','-x','hip',str(src),'-I'+str(ROOT/'rocm/backends/sparse'),'-I'+str(ROOT/'rocm/common'),'-I'+str(core/'include'),'-I'+str(native/'include'),'-o',str(binary)]+['-L'+str(p) for p in libs]+['-Wl,-rpath,'+str(p) for p in libs]+['-lamdhip64','-lhipblas'];rc=e.command(cmd,'build-GPU-corruption-probe');run=rc or e.command([str(binary)],'actual-GPU-corruption-probe');r=dict(status='PASSED' if run==0 else 'FAILED',checks=[dict(check='valid-and-three-invalid-metadata-GPU-paths',passed=run==0)]);r['evidence']=e.finish('PASSED' if run==0 else 'VALIDATOR_GAP',r);write(ROOT/'migration/reports/rewrite-sparse24-GPU-negative.json',r);print('GPU metadata',r['status'])

@@ -325870,7 +325870,9 @@
         "migration/reports/batches9_11-validation.json",
         "migration/reports/evidence/20261110T043816.470698Z/batches9_11-cuda/cuDSS_simple_reordering_phase_simple_reordering_phase.cpp",
         "migration/reports/evidence/rewrite/R5/cuDSS_simple_reordering_phase__simple_reordering_phase.cpp/20261110T094452.257460Z-R5-host-contract-review-54565fa16d",
-        "migration/reports/evidence/rewrite/R5/cuDSS_simple_reordering_phase__simple_reordering_phase.cpp/20261110T101950.027352Z-R5-rocm-contract-repair-17f17216e0"
+        "migration/reports/evidence/rewrite/R5/cuDSS_simple_reordering_phase__simple_reordering_phase.cpp/20261110T101950.027352Z-R5-rocm-contract-repair-17f17216e0",
+        "migration/reports/rewrite-reordering-cpp-repair.json",
+        "migration/reports/evidence/rewrite/R5/cuDSS_simple_reordering_phase__simple_reordering_phase.cpp/20261110T103529.275718Z-R5-rocm-contract-repair-85587ef969"
       ],
       "attempts": [
         {
@@ -328524,7 +328526,8 @@
       "cuda_baseline_scope": "Original source with observation-only output where present; build/run qualification, separate from independent correctness comparison.",
       "cuda_baseline_reason": "Native CUDA codec/cuDSS/nvJPEG library numerical baseline; project execution adapters separately identified.",
       "cuda_comparison_reason": "CUDA 原始 SDK、绑定或输入前置条件未满足，见该例 CUDA 基线证据。",
-      "selected_validation": {
+      "reproduce": "HIP_VISIBLE_DEVICES=2 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh python tools/migration/batches9_11_run.py b11\nOPENBLAS_NUM_THREADS=1 python3 tools/migration/batches9_11_validate.py b11 --qualify",
+      "historical_selected_validation": {
         "source": "cuDSS/simple_reordering_phase/simple_reordering_phase.cpp",
         "batch": "b11",
         "implementation": "rocm/ported/cuDSS/simple_reordering_phase/simple_reordering_phase.cpp",
@@ -329768,8 +329771,7 @@
         "current_cuda_source_proof": true,
         "current_source_proof": true,
         "contract_status": "PASSED"
-      },
-      "reproduce": "HIP_VISIBLE_DEVICES=2 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh python tools/migration/batches9_11_run.py b11\nOPENBLAS_NUM_THREADS=1 python3 tools/migration/batches9_11_validate.py b11 --qualify"
+      }
     },
     {
       "id": "cuDSS/simple_residual::simple_residual.cpp",

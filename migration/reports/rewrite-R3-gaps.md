@@ -1,3 +1,11 @@
+# R3 当前结论与历史合同复审
+
+原24个 PARTIAL 中，NCC 与 gesvdaStridedBatched 已通过后续完整资格；另22个保留缺口。下面逐项合同复审是实施当时的静态快照。
+
+当前资格：[R3 两例完整验收](rewrite-R3.md)。全部当前缺口和重试条件：[未通过入口清单](rewrite-remaining-assessment.md)。历史逐例实验及 source SHA 保留。
+
+<!-- CURRENT-R3 -->
+
 # R3 逐例合同缺口复审
 
 本表覆盖原始24个PARTIAL。静态合同审查不作为新的GPU通过证据。NCC与SVD候选另有新数值试验；其它项目保留原数值范围及明确缺项。
