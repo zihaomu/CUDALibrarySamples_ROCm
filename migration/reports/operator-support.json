@@ -2,9 +2,9 @@
   "schema_version": 1,
   "counting_rule": "Operator/functional families are deduplicated within each module; dtypes, sizes, language, batch, storage formats and algorithm variants do not create extra operators. At least one explicitly scoped PASSED source profile is required. Cross-module totals may include the same mathematical operation implemented through different library interfaces.",
   "qualification_rule": "A verified family proves only its linked PASSED source profiles/required cases, not every API configuration. PARTIAL examples and capability probes are excluded.",
-  "verified_operator_families": 114,
+  "verified_operator_families": 115,
   "modules_with_verified_operators": 17,
-  "passed_source_profiles": 220,
+  "passed_source_profiles": 221,
   "modules": {
     "cuBLAS": {
       "verified_operator_family_count": 52,
@@ -1707,8 +1707,18 @@
       }
     },
     "nvCOMP": {
-      "verified_operator_family_count": 2,
+      "verified_operator_family_count": 3,
       "verified_operators": [
+        {
+          "name": "CRC32",
+          "sample_ids": [
+            "nvCOMP/examples::nvcomp_crc32.cu"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/nvCOMP/examples/nvcomp_crc32.cu.md"
+          ],
+          "source_profiles": 1
+        },
         {
           "name": "LZ4",
           "sample_ids": [
@@ -1741,10 +1751,10 @@
       "sample_count": 32,
       "sample_outcomes": {
         "FAILED": 23,
-        "PARTIAL": 3,
-        "PASSED": 6
+        "PARTIAL": 2,
+        "PASSED": 7
       },
-      "validation_scope": "hipCOMP LZ4/Snappy原生批处理；CPU↔GPU与hipCOMP↔nvCOMP双向互解、逐chunk status/实际长度、空/边界/损坏流；LZ4 native manager/factory +项目CRC32C及100 raw buffers。完整NVBENCH框架仍单列PARTIAL。",
+      "validation_scope": "hipCOMP LZ4/Snappy原生批处理；CPU↔GPU与hipCOMP↔nvCOMP双向互解、逐chunk status/实际长度、空/边界/损坏流；LZ4 native manager/factory +项目CRC32C及100 raw buffers。独立CRC32入口采用项目HIP IEEE/PKZIP算法，与zlib及真实nvCOMP逐chunk比较，空输入按原生语义拒绝；具体资格见逐例状态。完整NVBENCH框架仍单列PARTIAL。",
       "failure_reason_counts": {
         "BUILD_ERROR": 22,
         "BINDING_OR_FRONTEND_MIGRATION_REQUIRED": 1

@@ -1,8 +1,8 @@
 # nvCOMP/examples::nvcomp_crc32.cu
 
-**PARTIAL / L3**
+**PASSED / L4**
 
-HIP IEEE/PKZIP CRC32已编译与运行；已测非空文件/多chunk/多文件，原生nvCOMP零chunk会拒绝，HIP已补预检并重新验收中。独立资格尚未签发。
+HIP IEEE/PKZIP CRC32：6个数值场景逐chunk通过zlib和真实native nvCOMP；零chunk按原生语义拒绝，错误退出规范化为1。文件/分块/迭代、8注入、5CLI与5次实际GPU核及独立复审通过；不是CRC32C。
 
 | 字段 | 当前记录 |
 | --- | --- |
@@ -10,14 +10,14 @@ HIP IEEE/PKZIP CRC32已编译与运行；已测非空文件/多chunk/多文件�
 | 实际库 / 后端 | project HIP IEEE/PKZIP CRC32; CPU file I/O and reference / HIP GPU CRC32 kernel |
 | 候选路线 | hipCOMP |
 | 代码 | [rocm/ported/nvCOMP/examples/nvcomp_crc32.cu](../../../../rocm/ported/nvCOMP/examples/nvcomp_crc32.cu) |
-| required cases | 0/8 |
-| CUDA baseline / comparison | BLOCKED / BLOCKED |
+| required cases | 11/11 |
+| CUDA baseline / comparison | PASSED / PASSED |
 | 性能 | NOT_RUN |
 | 原始源码 SHA256 | `9cd52441a17cd94464213448d664a4e561937abc06fa565db495f04ad04b878a` |
 
 编译/运行返回 0 仅对应 L3；通过独立参考检查后才记 L4。失败的候选库不列为已使用库。
 
-必需用例：`rewrite/R4/crc32/original`, `rewrite/R4/crc32/changed-values`, `rewrite/R4/crc32/chunk-boundary`, `rewrite/R4/crc32/multi-file`, `rewrite/R4/crc32/empty-with-data`, `rewrite/R4/crc32/repeat`, `rewrite/R4/crc32/empty-only`, `rewrite/R4/crc32/independent-review-and-qualification`。
+必需用例：`rewrite/R4/crc32/original`, `rewrite/R4/crc32/changed-values`, `rewrite/R4/crc32/chunk-boundary`, `rewrite/R4/crc32/multi-file`, `rewrite/R4/crc32/empty-with-data`, `rewrite/R4/crc32/repeat`, `rewrite/R4/crc32/empty-only`, `rewrite/R4/crc32/negative`, `rewrite/R4/crc32/CLI`, `rewrite/R4/crc32/GPU-trace`, `rewrite/R4/crc32/review`。
 
 实现方式：`LIBRARY_REWRITE`。
 
@@ -45,3 +45,5 @@ build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_mi
 - [migration/reports/rewrite-crc32-rocm.json](../../../reports/rewrite-crc32-rocm.json)
 - [migration/reports/rewrite-crc32-cuda.json](../../../reports/rewrite-crc32-cuda.json)
 - [migration/reports/rewrite-crc32-native-build.json](../../../reports/rewrite-crc32-native-build.json)
+- [migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T100517.308572Z-R4-composite-qualification-eaf422140d](../../../reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T100517.308572Z-R4-composite-qualification-eaf422140d)
+- [migration/reports/rewrite-R4-qualification.json](../../../reports/rewrite-R4-qualification.json)

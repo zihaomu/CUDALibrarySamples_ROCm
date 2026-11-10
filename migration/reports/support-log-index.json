@@ -1,9 +1,9 @@
 {
   "scope": "All 639 entrypoints, including failures. PASSED is limited to registered cases. Logs point to current-source qualification where available, otherwise the recorded attempt; compilation/import logs are not GPU correctness proof.",
   "counts": {
-    "PASSED": 220,
+    "PASSED": 221,
     "FAILED": 393,
-    "PARTIAL": 24,
+    "PARTIAL": 23,
     "UNSUPPORTED": 2
   },
   "implementation_methods": {
@@ -27512,14 +27512,26 @@
       "id": "nvCOMP/examples::nvcomp_crc32.cu",
       "family": "nvCOMP",
       "source": "nvCOMP/examples/nvcomp_crc32.cu",
-      "status": "PARTIAL",
-      "level": "L3",
+      "status": "PASSED",
+      "level": "L4",
       "actual_library": "project HIP IEEE/PKZIP CRC32; CPU file I/O and reference",
       "backend_library": "HIP GPU CRC32 kernel",
       "implementation_method": "LIBRARY_REWRITE",
       "implementation": "rocm/ported/nvCOMP/examples/nvcomp_crc32.cu",
       "implementation_sha256": "4333e3c4c7687b4310f657daca201c92d5d066a470144555e5b0a72c200478b0",
-      "passed_cases": [],
+      "passed_cases": [
+        "rewrite/R4/crc32/original",
+        "rewrite/R4/crc32/changed-values",
+        "rewrite/R4/crc32/chunk-boundary",
+        "rewrite/R4/crc32/multi-file",
+        "rewrite/R4/crc32/empty-with-data",
+        "rewrite/R4/crc32/repeat",
+        "rewrite/R4/crc32/empty-only",
+        "rewrite/R4/crc32/negative",
+        "rewrite/R4/crc32/CLI",
+        "rewrite/R4/crc32/GPU-trace",
+        "rewrite/R4/crc32/review"
+      ],
       "required_cases": [
         "rewrite/R4/crc32/original",
         "rewrite/R4/crc32/changed-values",
@@ -27528,27 +27540,38 @@
         "rewrite/R4/crc32/empty-with-data",
         "rewrite/R4/crc32/repeat",
         "rewrite/R4/crc32/empty-only",
-        "rewrite/R4/crc32/independent-review-and-qualification"
+        "rewrite/R4/crc32/negative",
+        "rewrite/R4/crc32/CLI",
+        "rewrite/R4/crc32/GPU-trace",
+        "rewrite/R4/crc32/review"
       ],
-      "scope_and_reason": "HIP IEEE/PKZIP CRC32已编译与运行；已测非空文件/多chunk/多文件，原生nvCOMP零chunk会拒绝，HIP已补预检并重新验收中。独立资格尚未签发。",
+      "scope_and_reason": "HIP IEEE/PKZIP CRC32：6个数值场景逐chunk通过zlib和真实native nvCOMP；零chunk按原生语义拒绝，错误退出规范化为1。文件/分块/迭代、8注入、5CLI与5次实际GPU核及独立复审通过；不是CRC32C。",
       "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
       "detail": "migration/sample-reports/nvCOMP/examples/nvcomp_crc32.cu.md",
-      "record_field": "attempts/2",
-      "amd_evidence": "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093549.703847Z-R4-rocm-build-585dedada3",
+      "record_field": "selected_validation",
+      "amd_evidence": "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093723.156395Z-R4-rocm-83af637350",
       "amd_logs": [
-        "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093549.703847Z-R4-rocm-build-585dedada3/logs/0001-build.stderr.log",
-        "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093549.703847Z-R4-rocm-build-585dedada3/logs/0001-build.stdout.log"
+        "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093723.156395Z-R4-rocm-83af637350/logs/0001-original-file-CLI.stderr.log",
+        "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093723.156395Z-R4-rocm-83af637350/logs/0001-original-file-CLI.stdout.log"
       ],
-      "cuda_comparison": "BLOCKED",
-      "cuda_evidence": "migration/reports/evidence/20261109T084857.451692Z/original-cuda/nvCOMP_examples_nvcomp_crc32.cu",
-      "cuda_evidence_basis": "原始 CUDA 尝试",
+      "cuda_comparison": "PASSED",
+      "cuda_evidence": "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093947.392137Z-R4-cuda-native-7bd9a42de2",
+      "cuda_evidence_basis": "当前验收记录",
       "cuda_logs": [
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/nvCOMP_examples_nvcomp_crc32.cu/build.log"
+        "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093947.392137Z-R4-cuda-native-7bd9a42de2/logs/0001-prepare.stderr.log",
+        "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093947.392137Z-R4-cuda-native-7bd9a42de2/logs/0001-prepare.stdout.log",
+        "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093947.392137Z-R4-cuda-native-7bd9a42de2/logs/0002-upload-identical-files.stderr.log",
+        "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093947.392137Z-R4-cuda-native-7bd9a42de2/logs/0002-upload-identical-files.stdout.log",
+        "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093947.392137Z-R4-cuda-native-7bd9a42de2/logs/0003-original-nvcomp-CRC32.stderr.log",
+        "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093947.392137Z-R4-cuda-native-7bd9a42de2/logs/0003-original-nvcomp-CRC32.stdout.log",
+        "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093947.392137Z-R4-cuda-native-7bd9a42de2/logs/0004-collect.stderr.log",
+        "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093947.392137Z-R4-cuda-native-7bd9a42de2/logs/0004-collect.stdout.log"
       ],
       "validation_reports": [
         "migration/reports/rewrite-crc32-rocm.json",
         "migration/reports/rewrite-crc32-cuda.json",
-        "migration/reports/rewrite-crc32-native-build.json"
+        "migration/reports/rewrite-crc32-native-build.json",
+        "migration/reports/rewrite-R4-qualification.json"
       ],
       "all_evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/nvCOMP_examples_nvcomp_crc32.cu",
@@ -27556,7 +27579,9 @@
         "migration/reports/evidence/20261109T084857.451692Z/original-cuda/nvCOMP_examples_nvcomp_crc32.cu",
         "migration/reports/rewrite-crc32-rocm.json",
         "migration/reports/rewrite-crc32-cuda.json",
-        "migration/reports/rewrite-crc32-native-build.json"
+        "migration/reports/rewrite-crc32-native-build.json",
+        "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T100517.308572Z-R4-composite-qualification-eaf422140d",
+        "migration/reports/rewrite-R4-qualification.json"
       ]
     },
     {

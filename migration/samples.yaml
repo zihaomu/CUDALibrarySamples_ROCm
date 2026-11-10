@@ -601217,8 +601217,8 @@
       "actual_library": "project HIP IEEE/PKZIP CRC32; CPU file I/O and reference",
       "backend_library": "HIP GPU CRC32 kernel",
       "implementation": "rocm/ported/nvCOMP/examples/nvcomp_crc32.cu",
-      "status": "PARTIAL",
-      "level": "L3",
+      "status": "PASSED",
+      "level": "L4",
       "required_cases": [
         "rewrite/R4/crc32/original",
         "rewrite/R4/crc32/changed-values",
@@ -601227,13 +601227,28 @@
         "rewrite/R4/crc32/empty-with-data",
         "rewrite/R4/crc32/repeat",
         "rewrite/R4/crc32/empty-only",
-        "rewrite/R4/crc32/independent-review-and-qualification"
+        "rewrite/R4/crc32/negative",
+        "rewrite/R4/crc32/CLI",
+        "rewrite/R4/crc32/GPU-trace",
+        "rewrite/R4/crc32/review"
       ],
-      "passed_cases": [],
-      "reason_code": "REWRITE_REVIEW_PENDING",
-      "reason": "HIP IEEE/PKZIP CRC32已编译与运行；已测非空文件/多chunk/多文件，原生nvCOMP零chunk会拒绝，HIP已补预检并重新验收中。独立资格尚未签发。",
-      "cuda_baseline": "BLOCKED",
-      "cuda_comparison": "BLOCKED",
+      "passed_cases": [
+        "rewrite/R4/crc32/original",
+        "rewrite/R4/crc32/changed-values",
+        "rewrite/R4/crc32/chunk-boundary",
+        "rewrite/R4/crc32/multi-file",
+        "rewrite/R4/crc32/empty-with-data",
+        "rewrite/R4/crc32/repeat",
+        "rewrite/R4/crc32/empty-only",
+        "rewrite/R4/crc32/negative",
+        "rewrite/R4/crc32/CLI",
+        "rewrite/R4/crc32/GPU-trace",
+        "rewrite/R4/crc32/review"
+      ],
+      "reason_code": "VALIDATED_MOAT_REWRITE",
+      "reason": "HIP IEEE/PKZIP CRC32：6个数值场景逐chunk通过zlib和真实native nvCOMP；零chunk按原生语义拒绝，错误退出规范化为1。文件/分块/迭代、8注入、5CLI与5次实际GPU核及独立复审通过；不是CRC32C。",
+      "cuda_baseline": "PASSED",
+      "cuda_comparison": "PASSED",
       "benchmark": "NOT_RUN",
       "evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/nvCOMP_examples_nvcomp_crc32.cu",
@@ -601241,7 +601256,9 @@
         "migration/reports/evidence/20261109T084857.451692Z/original-cuda/nvCOMP_examples_nvcomp_crc32.cu",
         "migration/reports/rewrite-crc32-rocm.json",
         "migration/reports/rewrite-crc32-cuda.json",
-        "migration/reports/rewrite-crc32-native-build.json"
+        "migration/reports/rewrite-crc32-native-build.json",
+        "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T100517.308572Z-R4-composite-qualification-eaf422140d",
+        "migration/reports/rewrite-R4-qualification.json"
       ],
       "attempts": [
         {
@@ -601306,6 +601323,797 @@
           },
           "evidence": "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093549.703847Z-R4-rocm-build-585dedada3",
           "environment": "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093549.703847Z-R4-rocm-build-585dedada3/backend.observed.json"
+        },
+        {
+          "sample_id": "nvCOMP/examples::nvcomp_crc32.cu",
+          "kind": "crc32",
+          "status": "PASSED",
+          "checks": [
+            {
+              "check": "current-independent-review",
+              "passed": true
+            },
+            {
+              "check": "complete-unique-case-contract",
+              "passed": true
+            },
+            {
+              "check": "unchanged-original-source",
+              "passed": true
+            },
+            {
+              "check": "current-compiled-dependencies",
+              "passed": true
+            },
+            {
+              "check": "current-build-recipe",
+              "passed": true
+            },
+            {
+              "check": "current-binary",
+              "passed": true
+            },
+            {
+              "check": "sealed-build",
+              "passed": true
+            },
+            {
+              "check": "original/expected-input-outcome",
+              "passed": true
+            },
+            {
+              "check": "original/rocm/frozen-run-identity",
+              "passed": true
+            },
+            {
+              "check": "original/actual-build-and-CLI",
+              "passed": true
+            },
+            {
+              "check": "original/locked-GPU",
+              "passed": true
+            },
+            {
+              "check": "original/rocm/process-semantics",
+              "passed": true
+            },
+            {
+              "check": "original/rocm/current-independent-CPU",
+              "passed": true
+            },
+            {
+              "check": "original/rocm/CPU-frozen-input",
+              "passed": true
+            },
+            {
+              "check": "original/cuda/frozen-run-identity",
+              "passed": true
+            },
+            {
+              "check": "original/actual-native-exit",
+              "passed": true
+            },
+            {
+              "check": "original/native-transport-collected",
+              "passed": true
+            },
+            {
+              "check": "original/native-build-provenance",
+              "passed": true
+            },
+            {
+              "check": "original/cuda/process-semantics",
+              "passed": true
+            },
+            {
+              "check": "original/cuda/current-independent-CPU",
+              "passed": true
+            },
+            {
+              "check": "original/cuda/CPU-frozen-input",
+              "passed": true
+            },
+            {
+              "check": "original/native-exact-input.bin",
+              "passed": true
+            },
+            {
+              "check": "original/native-exact-offsets.bin",
+              "passed": true
+            },
+            {
+              "check": "original/native-exact-sizes.bin",
+              "passed": true
+            },
+            {
+              "check": "original/native-exact-crc32.bin",
+              "passed": true
+            },
+            {
+              "check": "changed-values/expected-input-outcome",
+              "passed": true
+            },
+            {
+              "check": "changed-values/rocm/frozen-run-identity",
+              "passed": true
+            },
+            {
+              "check": "changed-values/actual-build-and-CLI",
+              "passed": true
+            },
+            {
+              "check": "changed-values/locked-GPU",
+              "passed": true
+            },
+            {
+              "check": "changed-values/rocm/process-semantics",
+              "passed": true
+            },
+            {
+              "check": "changed-values/rocm/current-independent-CPU",
+              "passed": true
+            },
+            {
+              "check": "changed-values/rocm/CPU-frozen-input",
+              "passed": true
+            },
+            {
+              "check": "changed-values/cuda/frozen-run-identity",
+              "passed": true
+            },
+            {
+              "check": "changed-values/actual-native-exit",
+              "passed": true
+            },
+            {
+              "check": "changed-values/native-transport-collected",
+              "passed": true
+            },
+            {
+              "check": "changed-values/native-build-provenance",
+              "passed": true
+            },
+            {
+              "check": "changed-values/cuda/process-semantics",
+              "passed": true
+            },
+            {
+              "check": "changed-values/cuda/current-independent-CPU",
+              "passed": true
+            },
+            {
+              "check": "changed-values/cuda/CPU-frozen-input",
+              "passed": true
+            },
+            {
+              "check": "changed-values/native-exact-input.bin",
+              "passed": true
+            },
+            {
+              "check": "changed-values/native-exact-offsets.bin",
+              "passed": true
+            },
+            {
+              "check": "changed-values/native-exact-sizes.bin",
+              "passed": true
+            },
+            {
+              "check": "changed-values/native-exact-crc32.bin",
+              "passed": true
+            },
+            {
+              "check": "chunk-boundary/expected-input-outcome",
+              "passed": true
+            },
+            {
+              "check": "chunk-boundary/rocm/frozen-run-identity",
+              "passed": true
+            },
+            {
+              "check": "chunk-boundary/actual-build-and-CLI",
+              "passed": true
+            },
+            {
+              "check": "chunk-boundary/locked-GPU",
+              "passed": true
+            },
+            {
+              "check": "chunk-boundary/rocm/process-semantics",
+              "passed": true
+            },
+            {
+              "check": "chunk-boundary/rocm/current-independent-CPU",
+              "passed": true
+            },
+            {
+              "check": "chunk-boundary/rocm/CPU-frozen-input",
+              "passed": true
+            },
+            {
+              "check": "chunk-boundary/cuda/frozen-run-identity",
+              "passed": true
+            },
+            {
+              "check": "chunk-boundary/actual-native-exit",
+              "passed": true
+            },
+            {
+              "check": "chunk-boundary/native-transport-collected",
+              "passed": true
+            },
+            {
+              "check": "chunk-boundary/native-build-provenance",
+              "passed": true
+            },
+            {
+              "check": "chunk-boundary/cuda/process-semantics",
+              "passed": true
+            },
+            {
+              "check": "chunk-boundary/cuda/current-independent-CPU",
+              "passed": true
+            },
+            {
+              "check": "chunk-boundary/cuda/CPU-frozen-input",
+              "passed": true
+            },
+            {
+              "check": "chunk-boundary/native-exact-input.bin",
+              "passed": true
+            },
+            {
+              "check": "chunk-boundary/native-exact-offsets.bin",
+              "passed": true
+            },
+            {
+              "check": "chunk-boundary/native-exact-sizes.bin",
+              "passed": true
+            },
+            {
+              "check": "chunk-boundary/native-exact-crc32.bin",
+              "passed": true
+            },
+            {
+              "check": "multi-file/expected-input-outcome",
+              "passed": true
+            },
+            {
+              "check": "multi-file/rocm/frozen-run-identity",
+              "passed": true
+            },
+            {
+              "check": "multi-file/actual-build-and-CLI",
+              "passed": true
+            },
+            {
+              "check": "multi-file/locked-GPU",
+              "passed": true
+            },
+            {
+              "check": "multi-file/rocm/process-semantics",
+              "passed": true
+            },
+            {
+              "check": "multi-file/rocm/current-independent-CPU",
+              "passed": true
+            },
+            {
+              "check": "multi-file/rocm/CPU-frozen-input",
+              "passed": true
+            },
+            {
+              "check": "multi-file/cuda/frozen-run-identity",
+              "passed": true
+            },
+            {
+              "check": "multi-file/actual-native-exit",
+              "passed": true
+            },
+            {
+              "check": "multi-file/native-transport-collected",
+              "passed": true
+            },
+            {
+              "check": "multi-file/native-build-provenance",
+              "passed": true
+            },
+            {
+              "check": "multi-file/cuda/process-semantics",
+              "passed": true
+            },
+            {
+              "check": "multi-file/cuda/current-independent-CPU",
+              "passed": true
+            },
+            {
+              "check": "multi-file/cuda/CPU-frozen-input",
+              "passed": true
+            },
+            {
+              "check": "multi-file/native-exact-input.bin",
+              "passed": true
+            },
+            {
+              "check": "multi-file/native-exact-offsets.bin",
+              "passed": true
+            },
+            {
+              "check": "multi-file/native-exact-sizes.bin",
+              "passed": true
+            },
+            {
+              "check": "multi-file/native-exact-crc32.bin",
+              "passed": true
+            },
+            {
+              "check": "empty-with-data/expected-input-outcome",
+              "passed": true
+            },
+            {
+              "check": "empty-with-data/rocm/frozen-run-identity",
+              "passed": true
+            },
+            {
+              "check": "empty-with-data/actual-build-and-CLI",
+              "passed": true
+            },
+            {
+              "check": "empty-with-data/locked-GPU",
+              "passed": true
+            },
+            {
+              "check": "empty-with-data/rocm/process-semantics",
+              "passed": true
+            },
+            {
+              "check": "empty-with-data/rocm/current-independent-CPU",
+              "passed": true
+            },
+            {
+              "check": "empty-with-data/rocm/CPU-frozen-input",
+              "passed": true
+            },
+            {
+              "check": "empty-with-data/cuda/frozen-run-identity",
+              "passed": true
+            },
+            {
+              "check": "empty-with-data/actual-native-exit",
+              "passed": true
+            },
+            {
+              "check": "empty-with-data/native-transport-collected",
+              "passed": true
+            },
+            {
+              "check": "empty-with-data/native-build-provenance",
+              "passed": true
+            },
+            {
+              "check": "empty-with-data/cuda/process-semantics",
+              "passed": true
+            },
+            {
+              "check": "empty-with-data/cuda/current-independent-CPU",
+              "passed": true
+            },
+            {
+              "check": "empty-with-data/cuda/CPU-frozen-input",
+              "passed": true
+            },
+            {
+              "check": "empty-with-data/native-exact-input.bin",
+              "passed": true
+            },
+            {
+              "check": "empty-with-data/native-exact-offsets.bin",
+              "passed": true
+            },
+            {
+              "check": "empty-with-data/native-exact-sizes.bin",
+              "passed": true
+            },
+            {
+              "check": "empty-with-data/native-exact-crc32.bin",
+              "passed": true
+            },
+            {
+              "check": "repeat/expected-input-outcome",
+              "passed": true
+            },
+            {
+              "check": "repeat/rocm/frozen-run-identity",
+              "passed": true
+            },
+            {
+              "check": "repeat/actual-build-and-CLI",
+              "passed": true
+            },
+            {
+              "check": "repeat/locked-GPU",
+              "passed": true
+            },
+            {
+              "check": "repeat/rocm/process-semantics",
+              "passed": true
+            },
+            {
+              "check": "repeat/rocm/current-independent-CPU",
+              "passed": true
+            },
+            {
+              "check": "repeat/rocm/CPU-frozen-input",
+              "passed": true
+            },
+            {
+              "check": "repeat/cuda/frozen-run-identity",
+              "passed": true
+            },
+            {
+              "check": "repeat/actual-native-exit",
+              "passed": true
+            },
+            {
+              "check": "repeat/native-transport-collected",
+              "passed": true
+            },
+            {
+              "check": "repeat/native-build-provenance",
+              "passed": true
+            },
+            {
+              "check": "repeat/cuda/process-semantics",
+              "passed": true
+            },
+            {
+              "check": "repeat/cuda/current-independent-CPU",
+              "passed": true
+            },
+            {
+              "check": "repeat/cuda/CPU-frozen-input",
+              "passed": true
+            },
+            {
+              "check": "repeat/native-exact-input.bin",
+              "passed": true
+            },
+            {
+              "check": "repeat/native-exact-offsets.bin",
+              "passed": true
+            },
+            {
+              "check": "repeat/native-exact-sizes.bin",
+              "passed": true
+            },
+            {
+              "check": "repeat/native-exact-crc32.bin",
+              "passed": true
+            },
+            {
+              "check": "empty-only/expected-input-outcome",
+              "passed": true
+            },
+            {
+              "check": "empty-only/rocm/frozen-run-identity",
+              "passed": true
+            },
+            {
+              "check": "empty-only/actual-build-and-CLI",
+              "passed": true
+            },
+            {
+              "check": "empty-only/locked-GPU",
+              "passed": true
+            },
+            {
+              "check": "empty-only/rocm/process-semantics",
+              "passed": true
+            },
+            {
+              "check": "empty-only/rocm/current-independent-CPU",
+              "passed": true
+            },
+            {
+              "check": "empty-only/rocm/CPU-frozen-input",
+              "passed": true
+            },
+            {
+              "check": "empty-only/cuda/frozen-run-identity",
+              "passed": true
+            },
+            {
+              "check": "empty-only/actual-native-exit",
+              "passed": true
+            },
+            {
+              "check": "empty-only/native-transport-collected",
+              "passed": true
+            },
+            {
+              "check": "empty-only/native-build-provenance",
+              "passed": true
+            },
+            {
+              "check": "empty-only/cuda/process-semantics",
+              "passed": true
+            },
+            {
+              "check": "empty-only/cuda/current-independent-CPU",
+              "passed": true
+            },
+            {
+              "check": "empty-only/cuda/CPU-frozen-input",
+              "passed": true
+            },
+            {
+              "check": "complete-unique-negative-modes",
+              "passed": true
+            },
+            {
+              "check": "negative/checksum",
+              "passed": true
+            },
+            {
+              "check": "negative/CRC32C-polynomial",
+              "passed": true
+            },
+            {
+              "check": "negative/chunk-offset",
+              "passed": true
+            },
+            {
+              "check": "negative/trailing-checksum-byte",
+              "passed": true
+            },
+            {
+              "check": "negative/iteration-count",
+              "passed": true
+            },
+            {
+              "check": "negative/timing-NaN",
+              "passed": true
+            },
+            {
+              "check": "negative/input-byte",
+              "passed": true
+            },
+            {
+              "check": "negative/truncate-checksum",
+              "passed": true
+            },
+            {
+              "check": "complete-unique-CLI-contract",
+              "passed": true
+            },
+            {
+              "check": "CLI/no-files",
+              "passed": true
+            },
+            {
+              "check": "CLI/flag-without-file",
+              "passed": true
+            },
+            {
+              "check": "CLI/unknown-flag",
+              "passed": true
+            },
+            {
+              "check": "CLI/missing-file",
+              "passed": true
+            },
+            {
+              "check": "CLI/zero-chunks",
+              "passed": true
+            },
+            {
+              "check": "actual-five-CRC32-GPU-kernel-dispatches",
+              "passed": true
+            }
+          ],
+          "implementation": "rocm/ported/nvCOMP/examples/nvcomp_crc32.cu",
+          "implementation_sha256": "4333e3c4c7687b4310f657daca201c92d5d066a470144555e5b0a72c200478b0",
+          "dependencies": {
+            "rocm/ported/nvCOMP/examples/nvcomp_crc32.cu": "4333e3c4c7687b4310f657daca201c92d5d066a470144555e5b0a72c200478b0",
+            "rocm/backends/codec/crc32.hpp": "47ee2ccdae2348f62d856b8f0d8ffdc571d07292355a49298e16efb4d3ea06ed",
+            "rocm/common/rewrite_runtime.hpp": "f2b97f13b7f4c89f24827e96ba82bb6d2d6d692f909e80625fc16e81ffe5572c"
+          },
+          "case_count": 7,
+          "numeric_case_count": 6,
+          "semantic_rejection_cases": 1,
+          "case_ids": [
+            "original",
+            "changed-values",
+            "chunk-boundary",
+            "multi-file",
+            "empty-with-data",
+            "repeat",
+            "empty-only"
+          ],
+          "evidence_references": [
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093549.703847Z-R4-rocm-build-585dedada3",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093723.156395Z-R4-rocm-83af637350",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093724.597636Z-R4-rocm-344cb85efe",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093725.833151Z-R4-rocm-b0558ce71b",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093727.130764Z-R4-rocm-9e410ce695",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093728.421908Z-R4-rocm-d7e3c3c6ef",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093729.649096Z-R4-rocm-d0a76f7bc3",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093730.882644Z-R4-rocm-c3e841573f",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093931.590252Z-R4-cpu-validation-7b235029ec",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093932.339630Z-R4-cpu-validation-0ba017ccce",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093932.760198Z-R4-cuda-native-build-5cb732846c",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093933.073087Z-R4-cpu-validation-5ba449efdd",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093933.808706Z-R4-cpu-validation-3ca97a779b",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093934.555898Z-R4-cpu-validation-6d938efabf",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093935.314558Z-R4-cpu-validation-06c7eda0fb",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093936.022643Z-R4-cpu-validation-0be92e2e5f",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093947.392137Z-R4-cuda-native-7bd9a42de2",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093949.796928Z-R4-cuda-native-566c3f495a",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093952.146979Z-R4-cuda-native-06319a8375",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093954.498483Z-R4-cuda-native-d0cbfd9b98",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093956.842734Z-R4-cuda-native-69d268403d",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093959.198274Z-R4-cuda-native-030973bfd2",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T094001.544752Z-R4-cuda-native-cac078fdac",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T094212.297767Z-R4-cpu-validation-af2887ef39",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T094213.025696Z-R4-cpu-validation-49f7e887f0",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T094213.763072Z-R4-cpu-validation-b9f472c55b",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T094214.493594Z-R4-cpu-validation-13df3dcd49",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T094215.228657Z-R4-cpu-validation-aeb39b04c8",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T094215.958161Z-R4-cpu-validation-c21502c8dd",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T094216.661241Z-R4-cpu-validation-0a521931e3",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu_CLI_flag-without-file/20261110T095120.526743Z-R4-rocm-invalid-cli-b034151b85",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu_CLI_missing-file/20261110T095122.612460Z-R4-rocm-invalid-cli-0f18169e5e",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu_CLI_no-files/20261110T095119.439149Z-R4-rocm-invalid-cli-b319657fea",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu_CLI_unknown-flag/20261110T095121.572518Z-R4-rocm-invalid-cli-a9a7c4ffa6",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu_CLI_zero-chunks/20261110T095123.641144Z-R4-rocm-invalid-cli-4ce6c4d330",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu_backend-trace/20261110T095506.923386Z-R4-rocm-profile-a1da4f3f4c",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu_negative_CRC32C-polynomial/20261110T095117.315997Z-R4-cpu-negative-adb3ad011b",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu_negative_checksum/20261110T095116.530545Z-R4-cpu-negative-6645cad8bf",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu_negative_chunk-offset/20261110T095118.005661Z-R4-cpu-negative-d80c01f71d",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu_negative_input-byte/20261110T095120.845512Z-R4-cpu-negative-4c0fc882d6",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu_negative_iteration-count/20261110T095119.443519Z-R4-cpu-negative-90eef75fac",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu_negative_timing-NaN/20261110T095120.144427Z-R4-cpu-negative-b985a24299",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu_negative_trailing-checksum-byte/20261110T095118.739094Z-R4-cpu-negative-3cb895baf8",
+            "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu_negative_truncate-checksum/20261110T095121.568275Z-R4-cpu-negative-431200aa1f"
+          ],
+          "source_commit": "d85635c77b5bdc7cac5ed6b12f15531c2c7c2bfa",
+          "scope": "Original batched IEEE/PKZIP CRC32 file/chunk/iteration contract; six numeric cases plus native zero-chunk rejection, project error exit normalized to 1",
+          "qualification_id": "20261110T100517.308572Z-R4-composite-qualification-eaf422140d",
+          "evidence": "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T100517.308572Z-R4-composite-qualification-eaf422140d",
+          "rocm_evidence": "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093723.156395Z-R4-rocm-83af637350",
+          "cuda_evidence": "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093947.392137Z-R4-cuda-native-7bd9a42de2",
+          "environment": {
+            "hostname": "c04e3dd1e368",
+            "platform": "Linux-7.0.0-42-generic-x86_64-with-glibc2.39",
+            "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+            "rocm_release": "10.1.0",
+            "visible_devices": "2",
+            "devices": [
+              {
+                "logical_id": 0,
+                "pci_bdf": "0000:03:00.0",
+                "physical_id": 0,
+                "uuid": "32396463623033636131356166623633"
+              }
+            ],
+            "versions": {
+              "hipRuntimeGetVersion": {
+                "status": 0,
+                "value": 71626385
+              },
+              "hipDriverGetVersion": {
+                "status": 0,
+                "value": 71626385
+              }
+            },
+            "packages": {
+              "rocm-sdk-core": "10.1.0",
+              "rocm-sdk-device-gfx1100": "10.1.0",
+              "rocm-sdk-device-gfx942": "10.1.0",
+              "rocm-sdk-device-gfx1010": "10.1.0",
+              "rocm-sdk-device-gfx1011": "10.1.0",
+              "rocm-sdk-device-gfx1101": "10.1.0",
+              "rocm-bootstrap": "0.3.0",
+              "triton": "3.8.0+git669b31ac.rocm10.1.0",
+              "rocm-sdk-device-gfx1035": "10.1.0",
+              "rocm-sdk-device-gfx1012": "10.1.0",
+              "torch": "2.14.0+rocm10.1.0",
+              "rocm-sdk-device-gfx1152": "10.1.0",
+              "rocm-sdk-device-gfx908": "10.1.0",
+              "rocm-sdk-libraries": "10.1.0",
+              "rocm-sdk-device-gfx1031": "10.1.0",
+              "rocm-sdk-device-gfx1151": "10.1.0",
+              "rocm-sdk-device-gfx1030": "10.1.0",
+              "rocm-sdk-device-gfx1103": "10.1.0",
+              "rocm-sdk-device-gfx1250": "10.1.0",
+              "rocm-sdk-device-gfx1032": "10.1.0",
+              "rocm-sdk-device-gfx1102": "10.1.0",
+              "rocm-sdk-device-gfx1201": "10.1.0",
+              "rocm-sdk-device-gfx90a": "10.1.0",
+              "torchvision": "0.29.0a0+rocm10.1.0",
+              "rocm-sdk-device-gfx1036": "10.1.0",
+              "rocm-sdk-device-gfx1153": "10.1.0",
+              "rocm": "10.1.0",
+              "rocm-sdk-device-gfx1150": "10.1.0",
+              "rocm-sdk-device-gfx1200": "10.1.0",
+              "rocm-sdk-device-gfx1034": "10.1.0",
+              "rocm-sdk-device-gfx1033": "10.1.0",
+              "rocm-sdk-device-gfx950": "10.1.0"
+            },
+            "loaded_libraries": [
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamd_comgr.so.3",
+                "sha256": "6bf2f6fe6b243c5ac3621cd5745887933d3a41edd944a447c88c21ec77da5d5b"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamdhip64.so.7",
+                "sha256": "6d1dbee8cb3ad924e4c1bca7734e22f2c93026eb3bc871a7f64a916778d55e36"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-amd-aqlprofile64.so.1",
+                "sha256": "6d4be9a3d53457b466f3e1fb1b07b897cd78be9b934a5326444b7b2070dabd61"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-runtime64.so.1",
+                "sha256": "12d49db16881b9505629192231d5b3971e9030b26a326fc2c003e92da7de0c44"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocm_kpack.so.0",
+                "sha256": "e2af394dea58ad53d6074c7aa9d56de5dc027ca186f6bbc27d6f32d7b8f12ac3"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocprofiler-register.so.0",
+                "sha256": "a67764cf46d1d579eb27311576ba9c0b4dbfa5052ddd64a062131f716faa11b6"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libLLVM.so.24.0git",
+                "sha256": "3e7b50e1f252792eba7380b8503c05c899bf8ae9deeb70faf3f9be5f995c8e0a"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libclang-cpp.so.24.0git",
+                "sha256": "18ef4cb8bd32366a68599fb6d723ed38814707a2ada1ff34b722dafc7856663b"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_bz2.so",
+                "sha256": "37a39b12a7e6e9f480d10e5e139b9aedbe5824e63b6b9e12a16837baee608602"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm.so.2",
+                "sha256": "b715ae24e1d62e407ffceca56b546e8a35abe37ac50878cbb16fa8b93d9c9fd5"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm_amdgpu.so.1",
+                "sha256": "b25742cda500eaa61e39b2b32492bb482235ad3e3df8a988d8f4130054d94cad"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_elf.so.1",
+                "sha256": "692dd9fe3575a45df78b319ad0e2a58ee36814958771dd810d5d91f9616c6d8f"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_liblzma.so.5",
+                "sha256": "d17f947bfe3947db5aefee897f6d32dfe98c73bf80b477764ba7f4107594a671"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_numa.so.1",
+                "sha256": "26fffd0f85369950b834cfb8f56fa9e1ea4804be8bbc40db98b788c554802bc3"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_z.so.1",
+                "sha256": "e1d7568f4a0b77eeab26f30cc9d2794dfe7ffd14e34b4ae55a9f80bc4f94ba7a"
+              },
+              {
+                "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_zstd.so.1",
+                "sha256": "fc3edd0b74fa071079b0095abe7b3f41418ca39be138f4ec0c57d0640a0b2d8b"
+              }
+            ]
+          },
+          "devices": [
+            {
+              "logical_id": 0,
+              "pci_bdf": "0000:03:00.0",
+              "physical_id": 0,
+              "uuid": "32396463623033636131356166623633"
+            }
+          ]
         }
       ],
       "milestone": "M3",
@@ -601388,7 +602196,798 @@
       },
       "cuda_baseline_scope": "Original source with observation-only output where present; build/run qualification, separate from independent correctness comparison.",
       "cuda_baseline_reason": "Missing optional CUDA SDK/input or skipped compute",
-      "cuda_comparison_reason": "CUDA 原始 SDK、绑定或输入前置条件未满足，见该例 CUDA 基线证据。"
+      "cuda_comparison_reason": "CUDA 原始 SDK、绑定或输入前置条件未满足，见该例 CUDA 基线证据。",
+      "selected_validation": {
+        "sample_id": "nvCOMP/examples::nvcomp_crc32.cu",
+        "kind": "crc32",
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "current-independent-review",
+            "passed": true
+          },
+          {
+            "check": "complete-unique-case-contract",
+            "passed": true
+          },
+          {
+            "check": "unchanged-original-source",
+            "passed": true
+          },
+          {
+            "check": "current-compiled-dependencies",
+            "passed": true
+          },
+          {
+            "check": "current-build-recipe",
+            "passed": true
+          },
+          {
+            "check": "current-binary",
+            "passed": true
+          },
+          {
+            "check": "sealed-build",
+            "passed": true
+          },
+          {
+            "check": "original/expected-input-outcome",
+            "passed": true
+          },
+          {
+            "check": "original/rocm/frozen-run-identity",
+            "passed": true
+          },
+          {
+            "check": "original/actual-build-and-CLI",
+            "passed": true
+          },
+          {
+            "check": "original/locked-GPU",
+            "passed": true
+          },
+          {
+            "check": "original/rocm/process-semantics",
+            "passed": true
+          },
+          {
+            "check": "original/rocm/current-independent-CPU",
+            "passed": true
+          },
+          {
+            "check": "original/rocm/CPU-frozen-input",
+            "passed": true
+          },
+          {
+            "check": "original/cuda/frozen-run-identity",
+            "passed": true
+          },
+          {
+            "check": "original/actual-native-exit",
+            "passed": true
+          },
+          {
+            "check": "original/native-transport-collected",
+            "passed": true
+          },
+          {
+            "check": "original/native-build-provenance",
+            "passed": true
+          },
+          {
+            "check": "original/cuda/process-semantics",
+            "passed": true
+          },
+          {
+            "check": "original/cuda/current-independent-CPU",
+            "passed": true
+          },
+          {
+            "check": "original/cuda/CPU-frozen-input",
+            "passed": true
+          },
+          {
+            "check": "original/native-exact-input.bin",
+            "passed": true
+          },
+          {
+            "check": "original/native-exact-offsets.bin",
+            "passed": true
+          },
+          {
+            "check": "original/native-exact-sizes.bin",
+            "passed": true
+          },
+          {
+            "check": "original/native-exact-crc32.bin",
+            "passed": true
+          },
+          {
+            "check": "changed-values/expected-input-outcome",
+            "passed": true
+          },
+          {
+            "check": "changed-values/rocm/frozen-run-identity",
+            "passed": true
+          },
+          {
+            "check": "changed-values/actual-build-and-CLI",
+            "passed": true
+          },
+          {
+            "check": "changed-values/locked-GPU",
+            "passed": true
+          },
+          {
+            "check": "changed-values/rocm/process-semantics",
+            "passed": true
+          },
+          {
+            "check": "changed-values/rocm/current-independent-CPU",
+            "passed": true
+          },
+          {
+            "check": "changed-values/rocm/CPU-frozen-input",
+            "passed": true
+          },
+          {
+            "check": "changed-values/cuda/frozen-run-identity",
+            "passed": true
+          },
+          {
+            "check": "changed-values/actual-native-exit",
+            "passed": true
+          },
+          {
+            "check": "changed-values/native-transport-collected",
+            "passed": true
+          },
+          {
+            "check": "changed-values/native-build-provenance",
+            "passed": true
+          },
+          {
+            "check": "changed-values/cuda/process-semantics",
+            "passed": true
+          },
+          {
+            "check": "changed-values/cuda/current-independent-CPU",
+            "passed": true
+          },
+          {
+            "check": "changed-values/cuda/CPU-frozen-input",
+            "passed": true
+          },
+          {
+            "check": "changed-values/native-exact-input.bin",
+            "passed": true
+          },
+          {
+            "check": "changed-values/native-exact-offsets.bin",
+            "passed": true
+          },
+          {
+            "check": "changed-values/native-exact-sizes.bin",
+            "passed": true
+          },
+          {
+            "check": "changed-values/native-exact-crc32.bin",
+            "passed": true
+          },
+          {
+            "check": "chunk-boundary/expected-input-outcome",
+            "passed": true
+          },
+          {
+            "check": "chunk-boundary/rocm/frozen-run-identity",
+            "passed": true
+          },
+          {
+            "check": "chunk-boundary/actual-build-and-CLI",
+            "passed": true
+          },
+          {
+            "check": "chunk-boundary/locked-GPU",
+            "passed": true
+          },
+          {
+            "check": "chunk-boundary/rocm/process-semantics",
+            "passed": true
+          },
+          {
+            "check": "chunk-boundary/rocm/current-independent-CPU",
+            "passed": true
+          },
+          {
+            "check": "chunk-boundary/rocm/CPU-frozen-input",
+            "passed": true
+          },
+          {
+            "check": "chunk-boundary/cuda/frozen-run-identity",
+            "passed": true
+          },
+          {
+            "check": "chunk-boundary/actual-native-exit",
+            "passed": true
+          },
+          {
+            "check": "chunk-boundary/native-transport-collected",
+            "passed": true
+          },
+          {
+            "check": "chunk-boundary/native-build-provenance",
+            "passed": true
+          },
+          {
+            "check": "chunk-boundary/cuda/process-semantics",
+            "passed": true
+          },
+          {
+            "check": "chunk-boundary/cuda/current-independent-CPU",
+            "passed": true
+          },
+          {
+            "check": "chunk-boundary/cuda/CPU-frozen-input",
+            "passed": true
+          },
+          {
+            "check": "chunk-boundary/native-exact-input.bin",
+            "passed": true
+          },
+          {
+            "check": "chunk-boundary/native-exact-offsets.bin",
+            "passed": true
+          },
+          {
+            "check": "chunk-boundary/native-exact-sizes.bin",
+            "passed": true
+          },
+          {
+            "check": "chunk-boundary/native-exact-crc32.bin",
+            "passed": true
+          },
+          {
+            "check": "multi-file/expected-input-outcome",
+            "passed": true
+          },
+          {
+            "check": "multi-file/rocm/frozen-run-identity",
+            "passed": true
+          },
+          {
+            "check": "multi-file/actual-build-and-CLI",
+            "passed": true
+          },
+          {
+            "check": "multi-file/locked-GPU",
+            "passed": true
+          },
+          {
+            "check": "multi-file/rocm/process-semantics",
+            "passed": true
+          },
+          {
+            "check": "multi-file/rocm/current-independent-CPU",
+            "passed": true
+          },
+          {
+            "check": "multi-file/rocm/CPU-frozen-input",
+            "passed": true
+          },
+          {
+            "check": "multi-file/cuda/frozen-run-identity",
+            "passed": true
+          },
+          {
+            "check": "multi-file/actual-native-exit",
+            "passed": true
+          },
+          {
+            "check": "multi-file/native-transport-collected",
+            "passed": true
+          },
+          {
+            "check": "multi-file/native-build-provenance",
+            "passed": true
+          },
+          {
+            "check": "multi-file/cuda/process-semantics",
+            "passed": true
+          },
+          {
+            "check": "multi-file/cuda/current-independent-CPU",
+            "passed": true
+          },
+          {
+            "check": "multi-file/cuda/CPU-frozen-input",
+            "passed": true
+          },
+          {
+            "check": "multi-file/native-exact-input.bin",
+            "passed": true
+          },
+          {
+            "check": "multi-file/native-exact-offsets.bin",
+            "passed": true
+          },
+          {
+            "check": "multi-file/native-exact-sizes.bin",
+            "passed": true
+          },
+          {
+            "check": "multi-file/native-exact-crc32.bin",
+            "passed": true
+          },
+          {
+            "check": "empty-with-data/expected-input-outcome",
+            "passed": true
+          },
+          {
+            "check": "empty-with-data/rocm/frozen-run-identity",
+            "passed": true
+          },
+          {
+            "check": "empty-with-data/actual-build-and-CLI",
+            "passed": true
+          },
+          {
+            "check": "empty-with-data/locked-GPU",
+            "passed": true
+          },
+          {
+            "check": "empty-with-data/rocm/process-semantics",
+            "passed": true
+          },
+          {
+            "check": "empty-with-data/rocm/current-independent-CPU",
+            "passed": true
+          },
+          {
+            "check": "empty-with-data/rocm/CPU-frozen-input",
+            "passed": true
+          },
+          {
+            "check": "empty-with-data/cuda/frozen-run-identity",
+            "passed": true
+          },
+          {
+            "check": "empty-with-data/actual-native-exit",
+            "passed": true
+          },
+          {
+            "check": "empty-with-data/native-transport-collected",
+            "passed": true
+          },
+          {
+            "check": "empty-with-data/native-build-provenance",
+            "passed": true
+          },
+          {
+            "check": "empty-with-data/cuda/process-semantics",
+            "passed": true
+          },
+          {
+            "check": "empty-with-data/cuda/current-independent-CPU",
+            "passed": true
+          },
+          {
+            "check": "empty-with-data/cuda/CPU-frozen-input",
+            "passed": true
+          },
+          {
+            "check": "empty-with-data/native-exact-input.bin",
+            "passed": true
+          },
+          {
+            "check": "empty-with-data/native-exact-offsets.bin",
+            "passed": true
+          },
+          {
+            "check": "empty-with-data/native-exact-sizes.bin",
+            "passed": true
+          },
+          {
+            "check": "empty-with-data/native-exact-crc32.bin",
+            "passed": true
+          },
+          {
+            "check": "repeat/expected-input-outcome",
+            "passed": true
+          },
+          {
+            "check": "repeat/rocm/frozen-run-identity",
+            "passed": true
+          },
+          {
+            "check": "repeat/actual-build-and-CLI",
+            "passed": true
+          },
+          {
+            "check": "repeat/locked-GPU",
+            "passed": true
+          },
+          {
+            "check": "repeat/rocm/process-semantics",
+            "passed": true
+          },
+          {
+            "check": "repeat/rocm/current-independent-CPU",
+            "passed": true
+          },
+          {
+            "check": "repeat/rocm/CPU-frozen-input",
+            "passed": true
+          },
+          {
+            "check": "repeat/cuda/frozen-run-identity",
+            "passed": true
+          },
+          {
+            "check": "repeat/actual-native-exit",
+            "passed": true
+          },
+          {
+            "check": "repeat/native-transport-collected",
+            "passed": true
+          },
+          {
+            "check": "repeat/native-build-provenance",
+            "passed": true
+          },
+          {
+            "check": "repeat/cuda/process-semantics",
+            "passed": true
+          },
+          {
+            "check": "repeat/cuda/current-independent-CPU",
+            "passed": true
+          },
+          {
+            "check": "repeat/cuda/CPU-frozen-input",
+            "passed": true
+          },
+          {
+            "check": "repeat/native-exact-input.bin",
+            "passed": true
+          },
+          {
+            "check": "repeat/native-exact-offsets.bin",
+            "passed": true
+          },
+          {
+            "check": "repeat/native-exact-sizes.bin",
+            "passed": true
+          },
+          {
+            "check": "repeat/native-exact-crc32.bin",
+            "passed": true
+          },
+          {
+            "check": "empty-only/expected-input-outcome",
+            "passed": true
+          },
+          {
+            "check": "empty-only/rocm/frozen-run-identity",
+            "passed": true
+          },
+          {
+            "check": "empty-only/actual-build-and-CLI",
+            "passed": true
+          },
+          {
+            "check": "empty-only/locked-GPU",
+            "passed": true
+          },
+          {
+            "check": "empty-only/rocm/process-semantics",
+            "passed": true
+          },
+          {
+            "check": "empty-only/rocm/current-independent-CPU",
+            "passed": true
+          },
+          {
+            "check": "empty-only/rocm/CPU-frozen-input",
+            "passed": true
+          },
+          {
+            "check": "empty-only/cuda/frozen-run-identity",
+            "passed": true
+          },
+          {
+            "check": "empty-only/actual-native-exit",
+            "passed": true
+          },
+          {
+            "check": "empty-only/native-transport-collected",
+            "passed": true
+          },
+          {
+            "check": "empty-only/native-build-provenance",
+            "passed": true
+          },
+          {
+            "check": "empty-only/cuda/process-semantics",
+            "passed": true
+          },
+          {
+            "check": "empty-only/cuda/current-independent-CPU",
+            "passed": true
+          },
+          {
+            "check": "empty-only/cuda/CPU-frozen-input",
+            "passed": true
+          },
+          {
+            "check": "complete-unique-negative-modes",
+            "passed": true
+          },
+          {
+            "check": "negative/checksum",
+            "passed": true
+          },
+          {
+            "check": "negative/CRC32C-polynomial",
+            "passed": true
+          },
+          {
+            "check": "negative/chunk-offset",
+            "passed": true
+          },
+          {
+            "check": "negative/trailing-checksum-byte",
+            "passed": true
+          },
+          {
+            "check": "negative/iteration-count",
+            "passed": true
+          },
+          {
+            "check": "negative/timing-NaN",
+            "passed": true
+          },
+          {
+            "check": "negative/input-byte",
+            "passed": true
+          },
+          {
+            "check": "negative/truncate-checksum",
+            "passed": true
+          },
+          {
+            "check": "complete-unique-CLI-contract",
+            "passed": true
+          },
+          {
+            "check": "CLI/no-files",
+            "passed": true
+          },
+          {
+            "check": "CLI/flag-without-file",
+            "passed": true
+          },
+          {
+            "check": "CLI/unknown-flag",
+            "passed": true
+          },
+          {
+            "check": "CLI/missing-file",
+            "passed": true
+          },
+          {
+            "check": "CLI/zero-chunks",
+            "passed": true
+          },
+          {
+            "check": "actual-five-CRC32-GPU-kernel-dispatches",
+            "passed": true
+          }
+        ],
+        "implementation": "rocm/ported/nvCOMP/examples/nvcomp_crc32.cu",
+        "implementation_sha256": "4333e3c4c7687b4310f657daca201c92d5d066a470144555e5b0a72c200478b0",
+        "dependencies": {
+          "rocm/ported/nvCOMP/examples/nvcomp_crc32.cu": "4333e3c4c7687b4310f657daca201c92d5d066a470144555e5b0a72c200478b0",
+          "rocm/backends/codec/crc32.hpp": "47ee2ccdae2348f62d856b8f0d8ffdc571d07292355a49298e16efb4d3ea06ed",
+          "rocm/common/rewrite_runtime.hpp": "f2b97f13b7f4c89f24827e96ba82bb6d2d6d692f909e80625fc16e81ffe5572c"
+        },
+        "case_count": 7,
+        "numeric_case_count": 6,
+        "semantic_rejection_cases": 1,
+        "case_ids": [
+          "original",
+          "changed-values",
+          "chunk-boundary",
+          "multi-file",
+          "empty-with-data",
+          "repeat",
+          "empty-only"
+        ],
+        "evidence_references": [
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093549.703847Z-R4-rocm-build-585dedada3",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093723.156395Z-R4-rocm-83af637350",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093724.597636Z-R4-rocm-344cb85efe",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093725.833151Z-R4-rocm-b0558ce71b",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093727.130764Z-R4-rocm-9e410ce695",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093728.421908Z-R4-rocm-d7e3c3c6ef",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093729.649096Z-R4-rocm-d0a76f7bc3",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093730.882644Z-R4-rocm-c3e841573f",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093931.590252Z-R4-cpu-validation-7b235029ec",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093932.339630Z-R4-cpu-validation-0ba017ccce",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093932.760198Z-R4-cuda-native-build-5cb732846c",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093933.073087Z-R4-cpu-validation-5ba449efdd",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093933.808706Z-R4-cpu-validation-3ca97a779b",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093934.555898Z-R4-cpu-validation-6d938efabf",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093935.314558Z-R4-cpu-validation-06c7eda0fb",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093936.022643Z-R4-cpu-validation-0be92e2e5f",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093947.392137Z-R4-cuda-native-7bd9a42de2",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093949.796928Z-R4-cuda-native-566c3f495a",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093952.146979Z-R4-cuda-native-06319a8375",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093954.498483Z-R4-cuda-native-d0cbfd9b98",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093956.842734Z-R4-cuda-native-69d268403d",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093959.198274Z-R4-cuda-native-030973bfd2",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T094001.544752Z-R4-cuda-native-cac078fdac",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T094212.297767Z-R4-cpu-validation-af2887ef39",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T094213.025696Z-R4-cpu-validation-49f7e887f0",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T094213.763072Z-R4-cpu-validation-b9f472c55b",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T094214.493594Z-R4-cpu-validation-13df3dcd49",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T094215.228657Z-R4-cpu-validation-aeb39b04c8",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T094215.958161Z-R4-cpu-validation-c21502c8dd",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T094216.661241Z-R4-cpu-validation-0a521931e3",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu_CLI_flag-without-file/20261110T095120.526743Z-R4-rocm-invalid-cli-b034151b85",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu_CLI_missing-file/20261110T095122.612460Z-R4-rocm-invalid-cli-0f18169e5e",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu_CLI_no-files/20261110T095119.439149Z-R4-rocm-invalid-cli-b319657fea",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu_CLI_unknown-flag/20261110T095121.572518Z-R4-rocm-invalid-cli-a9a7c4ffa6",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu_CLI_zero-chunks/20261110T095123.641144Z-R4-rocm-invalid-cli-4ce6c4d330",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu_backend-trace/20261110T095506.923386Z-R4-rocm-profile-a1da4f3f4c",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu_negative_CRC32C-polynomial/20261110T095117.315997Z-R4-cpu-negative-adb3ad011b",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu_negative_checksum/20261110T095116.530545Z-R4-cpu-negative-6645cad8bf",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu_negative_chunk-offset/20261110T095118.005661Z-R4-cpu-negative-d80c01f71d",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu_negative_input-byte/20261110T095120.845512Z-R4-cpu-negative-4c0fc882d6",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu_negative_iteration-count/20261110T095119.443519Z-R4-cpu-negative-90eef75fac",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu_negative_timing-NaN/20261110T095120.144427Z-R4-cpu-negative-b985a24299",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu_negative_trailing-checksum-byte/20261110T095118.739094Z-R4-cpu-negative-3cb895baf8",
+          "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu_negative_truncate-checksum/20261110T095121.568275Z-R4-cpu-negative-431200aa1f"
+        ],
+        "source_commit": "d85635c77b5bdc7cac5ed6b12f15531c2c7c2bfa",
+        "scope": "Original batched IEEE/PKZIP CRC32 file/chunk/iteration contract; six numeric cases plus native zero-chunk rejection, project error exit normalized to 1",
+        "qualification_id": "20261110T100517.308572Z-R4-composite-qualification-eaf422140d",
+        "evidence": "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T100517.308572Z-R4-composite-qualification-eaf422140d",
+        "rocm_evidence": "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093723.156395Z-R4-rocm-83af637350",
+        "cuda_evidence": "migration/reports/evidence/rewrite/R4/nvCOMP_examples__nvcomp_crc32.cu/20261110T093947.392137Z-R4-cuda-native-7bd9a42de2",
+        "environment": {
+          "hostname": "c04e3dd1e368",
+          "platform": "Linux-7.0.0-42-generic-x86_64-with-glibc2.39",
+          "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+          "rocm_release": "10.1.0",
+          "visible_devices": "2",
+          "devices": [
+            {
+              "logical_id": 0,
+              "pci_bdf": "0000:03:00.0",
+              "physical_id": 0,
+              "uuid": "32396463623033636131356166623633"
+            }
+          ],
+          "versions": {
+            "hipRuntimeGetVersion": {
+              "status": 0,
+              "value": 71626385
+            },
+            "hipDriverGetVersion": {
+              "status": 0,
+              "value": 71626385
+            }
+          },
+          "packages": {
+            "rocm-sdk-core": "10.1.0",
+            "rocm-sdk-device-gfx1100": "10.1.0",
+            "rocm-sdk-device-gfx942": "10.1.0",
+            "rocm-sdk-device-gfx1010": "10.1.0",
+            "rocm-sdk-device-gfx1011": "10.1.0",
+            "rocm-sdk-device-gfx1101": "10.1.0",
+            "rocm-bootstrap": "0.3.0",
+            "triton": "3.8.0+git669b31ac.rocm10.1.0",
+            "rocm-sdk-device-gfx1035": "10.1.0",
+            "rocm-sdk-device-gfx1012": "10.1.0",
+            "torch": "2.14.0+rocm10.1.0",
+            "rocm-sdk-device-gfx1152": "10.1.0",
+            "rocm-sdk-device-gfx908": "10.1.0",
+            "rocm-sdk-libraries": "10.1.0",
+            "rocm-sdk-device-gfx1031": "10.1.0",
+            "rocm-sdk-device-gfx1151": "10.1.0",
+            "rocm-sdk-device-gfx1030": "10.1.0",
+            "rocm-sdk-device-gfx1103": "10.1.0",
+            "rocm-sdk-device-gfx1250": "10.1.0",
+            "rocm-sdk-device-gfx1032": "10.1.0",
+            "rocm-sdk-device-gfx1102": "10.1.0",
+            "rocm-sdk-device-gfx1201": "10.1.0",
+            "rocm-sdk-device-gfx90a": "10.1.0",
+            "torchvision": "0.29.0a0+rocm10.1.0",
+            "rocm-sdk-device-gfx1036": "10.1.0",
+            "rocm-sdk-device-gfx1153": "10.1.0",
+            "rocm": "10.1.0",
+            "rocm-sdk-device-gfx1150": "10.1.0",
+            "rocm-sdk-device-gfx1200": "10.1.0",
+            "rocm-sdk-device-gfx1034": "10.1.0",
+            "rocm-sdk-device-gfx1033": "10.1.0",
+            "rocm-sdk-device-gfx950": "10.1.0"
+          },
+          "loaded_libraries": [
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamd_comgr.so.3",
+              "sha256": "6bf2f6fe6b243c5ac3621cd5745887933d3a41edd944a447c88c21ec77da5d5b"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamdhip64.so.7",
+              "sha256": "6d1dbee8cb3ad924e4c1bca7734e22f2c93026eb3bc871a7f64a916778d55e36"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-amd-aqlprofile64.so.1",
+              "sha256": "6d4be9a3d53457b466f3e1fb1b07b897cd78be9b934a5326444b7b2070dabd61"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libhsa-runtime64.so.1",
+              "sha256": "12d49db16881b9505629192231d5b3971e9030b26a326fc2c003e92da7de0c44"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocm_kpack.so.0",
+              "sha256": "e2af394dea58ad53d6074c7aa9d56de5dc027ca186f6bbc27d6f32d7b8f12ac3"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/librocprofiler-register.so.0",
+              "sha256": "a67764cf46d1d579eb27311576ba9c0b4dbfa5052ddd64a062131f716faa11b6"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libLLVM.so.24.0git",
+              "sha256": "3e7b50e1f252792eba7380b8503c05c899bf8ae9deeb70faf3f9be5f995c8e0a"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/libclang-cpp.so.24.0git",
+              "sha256": "18ef4cb8bd32366a68599fb6d723ed38814707a2ada1ff34b722dafc7856663b"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_bz2.so",
+              "sha256": "37a39b12a7e6e9f480d10e5e139b9aedbe5824e63b6b9e12a16837baee608602"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm.so.2",
+              "sha256": "b715ae24e1d62e407ffceca56b546e8a35abe37ac50878cbb16fa8b93d9c9fd5"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_drm_amdgpu.so.1",
+              "sha256": "b25742cda500eaa61e39b2b32492bb482235ad3e3df8a988d8f4130054d94cad"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_elf.so.1",
+              "sha256": "692dd9fe3575a45df78b319ad0e2a58ee36814958771dd810d5d91f9616c6d8f"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_liblzma.so.5",
+              "sha256": "d17f947bfe3947db5aefee897f6d32dfe98c73bf80b477764ba7f4107594a671"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_numa.so.1",
+              "sha256": "26fffd0f85369950b834cfb8f56fa9e1ea4804be8bbc40db98b788c554802bc3"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_z.so.1",
+              "sha256": "e1d7568f4a0b77eeab26f30cc9d2794dfe7ffd14e34b4ae55a9f80bc4f94ba7a"
+            },
+            {
+              "path": "/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/rocm_sysdeps/lib/librocm_sysdeps_zstd.so.1",
+              "sha256": "fc3edd0b74fa071079b0095abe7b3f41418ca39be138f4ec0c57d0640a0b2d8b"
+            }
+          ]
+        },
+        "devices": [
+          {
+            "logical_id": 0,
+            "pci_bdf": "0000:03:00.0",
+            "physical_id": 0,
+            "uuid": "32396463623033636131356166623633"
+          }
+        ]
+      }
     },
     {
       "id": "nvCOMP/examples::nvcomp_gds.cu",

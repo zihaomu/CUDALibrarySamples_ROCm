@@ -177,7 +177,7 @@ CUDALibrarySamples_ROCm/
 | R2 | 3 个 MathDx 求解设备内重写 | partial-pivot LU、POSV、TRSM | 第 5 节原始 dtype/尺寸/执行位置通过，host API 替代检查通过 | COMPLETED_SCOPED |
 | R3 | 24 个 PARTIAL 收口 | 第 6 节逐例缺失合同、可收口实现或保留原因 | 每项有当前证据与下一步；仅完整等价项升级 PASSED | IN_PROGRESS |
 | R4 | 其它基础/高级算法扩展 | 稀疏 QR/IRS/SVD、低精度、图像、压缩、heuristics 等按探针拆批 | 一次只冻结一个可审查小批；完整原始合同和独立验收 | IN_PROGRESS |
-| R5 | 语言绑定扩展 | 对 73 个前端失败入口逐一建立 C ABI / Fortran / Python 路线 | 先有已验收 GPU 核心，再通过原语言实际入口与数据/错误传播检查 | NOT_STARTED |
+| R5 | 语言绑定扩展 | 对 73 个前端失败入口逐一建立 C ABI / Fortran / Python 路线 | 先有已验收 GPU 核心，再通过原语言实际入口与数据/错误传播检查 | IN_PROGRESS |
 | R6 | 长尾 SDK/设备算法研究 | cuEST、PQC、JPEG2000/TIFF、剩余 MathDx/分布式等分专题 | 每专题明确可实施路线、最小探针、成本和失败恢复条件 | NOT_STARTED |
 | R7 | 2:4 结构化稀疏替代 | 原生路线重探或真正的 HIP sparse 2:4 实现 | prune/compress/metadata/稀疏 matmul 与原例合同通过；原生失败记录保留 | NOT_STARTED |
 | R8 | 阶段回归、清理与交付 | 干净检出复现、源码封存、全量统计、README 和详细报告 | 当前源码/依赖与全部选中证据一致；未完成入口有明确原因 | NOT_STARTED |
@@ -542,6 +542,8 @@ PLAN-01 至 PLAN-03 是规划阶段记录，不代表实验结果。实施中的
 
 <!-- MOAT_EXEC_PROGRESS:START -->
 
-最近更新：2026-11-10T09:44:56.064676+00:00。首批 AMD 51/51 已运行，独立 CPU 51/51 通过；CUDA 51/51 已运行，独立 CPU 51/51 通过。已签发首批整例资格 8/8。R3–R8仍待完成。
+最近更新：2026-11-10T10:05:43.451119+00:00。首批 AMD 51/51 已运行，独立 CPU 51/51 通过；CUDA 51/51 已运行，独立 CPU 51/51 通过。已签发首批整例资格 8/8。R3–R8仍待完成。
 
 <!-- MOAT_EXEC_PROGRESS:END -->
+
+| 2026-11-10 | EXEC-15 | R4 CRC32通过固定提交d85635c7三方独立复审和复合资格：6数值+1原生零chunk拒绝、8注入、5CLI、5次实际GPU CRC kernel；CRC32C区别与早期空操作更正已归档。当前221 PASSED；功能族115。 | 继续R4其它候选去向、R5真实语言入口、R6专题与R7/R8；全计划未完成 |
