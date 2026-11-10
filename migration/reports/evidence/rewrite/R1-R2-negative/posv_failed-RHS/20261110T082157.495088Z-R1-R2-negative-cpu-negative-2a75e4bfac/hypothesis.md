@@ -1,0 +1,1 @@
+Test cpu-negative for posv/failed-RHS, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T081913.711491Z-R2-rocm-0eea92b174.

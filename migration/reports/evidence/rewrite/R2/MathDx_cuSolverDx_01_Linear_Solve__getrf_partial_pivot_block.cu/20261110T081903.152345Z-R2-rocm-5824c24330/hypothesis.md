@@ -1,0 +1,1 @@
+Test rocm for MathDx/cuSolverDx/01_Linear_Solve::getrf_partial_pivot_block.cu, case repeat. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T081702.025768Z-R2-rocm-build-6139b4a6e2.

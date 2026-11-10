@@ -9,7 +9,7 @@ history=ROOT/'migration/reports/rewrite-native-mathdx.json';previous=json.loads(
 results.update(previous)
 for profile in spec:
  if args.only and profile['kind'] not in args.only:continue
- kind=profile['kind'];original=ROOT/profile['source'];e=Experiment('R2',profile['sample_id'],'cuda-native-MathDx',sources=[original,Path(__file__),ROOT/'tools/moat/native_mathdx_capture.hpp'],parent=previous.get(kind,{}).get('experiment_id'),hypothesis='Run original MathDx source with SDK 26.06.1 with vendored CuTe, explicit SM120 dispatch and relocatable-device/LTO linking to libcusolverdx.a plus the original host error_checking.cpp helper; retain native input/output and launch traits before the host reference changes buffers.')
+ kind=profile['kind'];original=ROOT/profile['source'];e=Experiment('R2',profile['sample_id'],'cuda-native-MathDx',sources=[original,Path(__file__),ROOT/'tools/moat/native_mathdx_capture.hpp'],parent=previous.get(kind,{}).get('experiment_id'),hypothesis='Run original MathDx source with SDK 26.06.1 with vendored CuTe, explicit SM120 dispatch and relocatable-device/LTO linking to libcusolverdx.a plus original error_checking.cpp compiled as CUDA, matching CUDA header requirements, with the device archive selected by -L/-l rather than parsed as CUDA source; retain native input/output and launch traits before the host reference changes buffers.')
  generated=e.path/'src'/profile['source'];generated.parent.mkdir(parents=True);text='#include "native_mathdx_capture.hpp"\n'+original.read_text()
  load='native_emit("input_A",A'+(',size_t(batches)*one_batch_size_A' if kind in ['posv','trsm'] else '')+');\n'
  if kind in ['posv','trsm']:load+='native_emit("input_B",B,size_t(batches)*one_batch_size_B);\n'
@@ -26,7 +26,7 @@ for profile in spec:
   f.add(generated,arcname=profile['source']);f.add(ROOT/'tools/moat/native_mathdx_capture.hpp',arcname='native_mathdx_capture.hpp')
   f.add(ROOT/'MathDx/cuSolverDx/common',arcname='MathDx/cuSolverDx/common')
   if (ROOT/'MathDx/common').exists():f.add(ROOT/'MathDx/common',arcname='MathDx/common')
- commands=[(['ssh',host,shlex.join(['mkdir','-p',remote+'/outputs'])],'prepare'),(['scp',str(bundle),host+':'+remote+'/source.tar.gz'],'upload'),(['ssh',host,shlex.join(['tar','-xzf',remote+'/source.tar.gz','-C',remote])],'unpack'),(['ssh',host,shlex.join(['/usr/local/cuda-13.4/bin/nvcc','-std=c++17','-O2','--expt-relaxed-constexpr','--extended-lambda','-arch=sm_120','-DCUSOLVERDX_EXAMPLE_ENABLE_SM_120','-rdc=true','-dlto','-I'+sdkinclude,'-I'+str(Path(sdkinclude).parent/'external/cutlass/include'),'-I'+remote,remote+'/'+profile['source'],remote+'/MathDx/cuSolverDx/common/error_checking.cpp',str(Path(sdkinclude).parent/'lib/libcusolverdx.a'),'-lcublas','-lcusolver','-o',remote+'/native'])],'build')]
+ commands=[(['ssh',host,shlex.join(['mkdir','-p',remote+'/outputs'])],'prepare'),(['scp',str(bundle),host+':'+remote+'/source.tar.gz'],'upload'),(['ssh',host,shlex.join(['tar','-xzf',remote+'/source.tar.gz','-C',remote])],'unpack'),(['ssh',host,shlex.join(['/usr/local/cuda-13.4/bin/nvcc','-std=c++17','-O2','-x','cu','--expt-relaxed-constexpr','--extended-lambda','-arch=sm_120','-DCUSOLVERDX_EXAMPLE_ENABLE_SM_120','-rdc=true','-dlto','-I'+sdkinclude,'-I'+str(Path(sdkinclude).parent/'external/cutlass/include'),'-I'+remote,remote+'/'+profile['source'],remote+'/MathDx/cuSolverDx/common/error_checking.cpp','-L'+str(Path(sdkinclude).parent/'lib'),'-lcusolverdx','-lcublas','-lcusolver','-o',remote+'/native'])],'build')]
  rc=0
  for cmd,phase in commands:
   rc=e.command(cmd,phase,timeout=240)

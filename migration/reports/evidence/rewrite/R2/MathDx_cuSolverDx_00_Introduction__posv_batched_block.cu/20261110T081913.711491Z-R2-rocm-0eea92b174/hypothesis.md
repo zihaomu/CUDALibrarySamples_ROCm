@@ -1,0 +1,1 @@
+Test rocm for MathDx/cuSolverDx/00_Introduction::posv_batched_block.cu, case nonspd-second-minor. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T081705.082301Z-R2-rocm-build-39af4f4aa3.

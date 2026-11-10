@@ -1,0 +1,60 @@
+{
+  "kind": "gemm3m",
+  "case": "layout",
+  "config": {
+    "m": 2,
+    "n": 2,
+    "k": 2,
+    "lda": 5,
+    "ldb": 6,
+    "ldc": 7,
+    "opa": 0,
+    "opb": 0,
+    "repeat": 1,
+    "triangle": 0,
+    "alpha_r": 1,
+    "alpha_i": -0.25,
+    "beta_r": 0.5,
+    "beta_i": 0.1,
+    "batch": 1,
+    "nrhs": 1,
+    "threads": 256
+  },
+  "generator_sha256": "ea8cd4709696154e47f3217f630eb01a95a7d42c8b00362d363f5660c72cc48e",
+  "files": {
+    "config.txt": {
+      "sha256": "93a5c7332fc7210f1a1949c0eb9d5101b407a28a6baea50f652904da5740c9c0",
+      "bytes": 135,
+      "dtype": "metadata"
+    },
+    "A.bin": {
+      "sha256": "7f67aa17a01a015b7c95b898a67d9dc3d5cb1c0108cdd518a5fca3261f45c207",
+      "bytes": 80,
+      "dtype": "complex64"
+    },
+    "config.json": {
+      "sha256": "da5abc37192167610537dc30ea3083a16b4ae8f8ace0cfdaa4e32f7a6d691550",
+      "bytes": 240,
+      "dtype": "metadata"
+    },
+    "B.bin": {
+      "sha256": "8f72f54b4be77f755173e8ff547951be8768197708e77e8d955c30bea2a0d68d",
+      "bytes": 96,
+      "dtype": "complex64"
+    },
+    "C.bin": {
+      "sha256": "b94cb16ebe57919381d8ab31012376818f80cc17c2cca9e8342c1c4802bd3b3b",
+      "bytes": 112,
+      "dtype": "complex64"
+    }
+  },
+  "numerical_contract": {
+    "float32_atol": 2e-05,
+    "float32_rtol": 0.0001,
+    "float64_atol": 2e-12,
+    "float64_rtol": 5e-12,
+    "integers": "exact",
+    "half": "expected overflow masks and finite half error <= 2 ULP",
+    "untouched_storage": "exact including NaN placement"
+  }
+}

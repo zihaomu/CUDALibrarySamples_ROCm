@@ -59,6 +59,27 @@ def environment():
     return {k: os.environ[k] for k in ALLOWED_ENV if k in os.environ}
 
 
+def process_start(pid):
+    try:
+        return Path(f'/proc/{pid}/stat').read_text().rsplit(')',1)[1].split()[19]
+    except (OSError,IndexError):
+        return None
+
+
+def recorder_alive(manifest):
+    if manifest.get('hostname') == platform.node():
+        actual=process_start(manifest.get('recorder_pid',-1))
+        if actual is None:return False
+        expected=manifest.get('recorder_start_ticks')
+        return actual == expected if expected is not None else None
+    hostname=manifest.get('hostname','')
+    if re.fullmatch(r'[0-9a-f]{12,64}',hostname):
+        p=subprocess.run(['docker','ps','--no-trunc','--format','{{.ID}}'],capture_output=True,text=True)
+        if p.returncode:return None
+        return any(line.startswith(hostname) for line in p.stdout.splitlines())
+    return None
+
+
 class Experiment:
     def __init__(self, batch, sample, backend, case='all', sources=(), parent=None,
                  comparison_id=None, hypothesis=''):
@@ -75,11 +96,13 @@ class Experiment:
                          sample_id=sample, backend=backend, case_id=case,
                          parent_experiment_id=parent, comparison_id=comparison_id,
                          recorder_pid=os.getpid(), hostname=platform.node(),
+                         recorder_start_ticks=process_start(os.getpid()),
                          raw_artifact_dir=str(self.path.relative_to(ROOT)),
                          started_at_utc=now(), finished_at_utc=None,
                          experiment_outcome='RUNNING', eligible_for_sample_pass=False)
         write(self.path / 'manifest.json', self.meta)
         files = {str(Path(p).resolve().relative_to(ROOT)): digest(p) for p in sources}
+        files['tools/moat/experiment.py']=digest(__file__)
         objects = {}
         for name, sha in files.items():
             target = ROOT / 'migration/source-objects' / sha
@@ -95,11 +118,11 @@ class Experiment:
                 finally:
                     tmp.unlink()
             objects[name] = str(target.relative_to(ROOT))
-        write(self.path / 'source.json', dict(commit=git('rev-parse', 'HEAD').strip(),
+        write(self.path / 'source.json', dict(provenance_version=2,commit=git('rev-parse', 'HEAD').strip(),
               tree=git('rev-parse', 'HEAD^{tree}').strip(),
               status=git('status', '--porcelain'), dependencies=files, source_objects=objects,
               recorder_sha256=digest(__file__)))
-        (self.path / 'source.patch').write_text(git('diff', '--binary', 'HEAD'))
+        (self.path / 'source.patch').write_text(git('diff', '--binary', 'HEAD','--','rocm','tools','cmake','.agents','AGENTS.md'))
         lock = ROOT / 'migration/environments/project.lock.json'
         shutil.copyfile(lock, self.path / 'environment.expected.json')
         write(self.path / 'environment.observed.json', dict(hostname=platform.node(),
@@ -149,6 +172,7 @@ class Experiment:
                 proc = subprocess.Popen(rec['argv'], cwd=cwd,
                     env=dict(os.environ, **(env or {})), stdout=fo, stderr=fe,
                     start_new_session=True)
+                write(self.path/'subprocess.json',dict(pid=proc.pid,start_ticks=process_start(proc.pid),hostname=platform.node(),command_id=number))
                 rec['return_code'] = proc.wait(timeout=timeout)
             except subprocess.TimeoutExpired:
                 os.killpg(proc.pid, signal.SIGKILL)

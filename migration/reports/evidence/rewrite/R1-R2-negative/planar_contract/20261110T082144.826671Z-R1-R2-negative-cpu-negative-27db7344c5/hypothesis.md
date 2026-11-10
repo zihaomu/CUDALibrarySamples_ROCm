@@ -1,0 +1,1 @@
+Test cpu-negative for planar/contract, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T081836.583039Z-R1-rocm-3e56880584.

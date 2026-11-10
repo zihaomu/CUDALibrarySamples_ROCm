@@ -1,0 +1,1 @@
+Test cpu-validation for lu/boundary, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T081904.340686Z-R2-rocm-57fd405738.

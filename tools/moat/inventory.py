@@ -36,6 +36,15 @@ def phase(s):
 
 
 def main():
+    from bootstrap import validate_existing
+    lock_path=ROOT/'migration/moat/lock.json'
+    if lock_path.exists():validate_existing(ROOT)
+    task_path=ROOT/'migration/moat/tasks.json'
+    prior=json.loads(task_path.read_text()) if task_path.exists() else {}
+    previous={r['sample_id']:r for r in prior.get('tasks',[])}
+    spec_path=ROOT/'migration/rewrite/first-eight.json'
+    old_spec=json.loads(spec_path.read_text()) if spec_path.exists() else {}
+    prior_profiles={p['sample_id']:p for p in old_spec.get('profiles',[])}
     cat=json.loads((ROOT/'migration/samples.yaml').read_text())
     samples=cat['samples']; tasks=[]; routes=[]
     names=['hipBLASLt','hipSPARSELt','hipBLAS','rocBLAS','hipSOLVER','rocSOLVER',
@@ -44,16 +53,24 @@ def main():
     libraries={name:dict(id=name,version=None,status='CANDIDATE',qualified_samples=[],
                          observation_scope='Existing catalog only; per-run dependencies recorded separately')
                for name in names}
+    library_path=ROOT/'migration/libraries.json'
+    old_libraries=json.loads(library_path.read_text()) if library_path.exists() else {}
+    for row in old_libraries.get('libraries',[]):
+        libraries[row['id']]=dict(libraries.get(row['id'],{}),**row)
     for s in samples:
-        tasks.append(dict(sample_id=s['id'],source=s['source'],family=s['family'],
+        task=dict(sample_id=s['id'],source=s['source'],family=s['family'],
             primary_phase=phase(s),baseline_status=s['status'],state='OWED' if s['status']!='PASSED' else 'HISTORICAL_QUALIFIED',
             reason_code=s['reason_code'],reason=s['reason'],retry_condition=s.get('retry_condition'),
             implementation=s.get('implementation'),selected_validation=s.get('selected_validation'),
-            required_cases=s['required_cases'],prerequisites=[],experiments=[]))
+            required_cases=s['required_cases'],prerequisites=[],experiments=[])
+        if s['id'] in previous:
+            task.update(previous[s['id']])
+        task.update(current_status=s['status'],current_reason=s['reason'],implementation=s.get('implementation'))
+        tasks.append(task)
         actual=s.get('actual_library') or ''
         components=[n for n in names if re.search(r'(?<![A-Za-z])'+re.escape(n)+r'(?![A-Za-z])',actual,re.I)]
         for n in components:
-            if s['status']=='PASSED':libraries[n]['qualified_samples'].append(s['id'])
+            if s['status']=='PASSED' and s['id'] not in libraries[n]['qualified_samples']:libraries[n]['qualified_samples'].append(s['id'])
         routes.append(dict(sample_id=s['id'],route_id=s['id']+'::catalog',
             actual_library=s.get('actual_library'),backend_library=s.get('backend_library'),
             candidate_libraries=s['candidate_libraries'],components=components,
@@ -66,19 +83,20 @@ def main():
         modules={k:dict(candidates=v) for k,v in CANDIDATES.items()}))
     write(ROOT/'migration/backend-routes.json',dict(schema_version=1,routes=routes))
     write(ROOT/'migration/moat/tasks.json',dict(schema_version=1,
-        baseline_catalog_sha256=digest(ROOT/'migration/samples.yaml'),tasks=tasks,
+        baseline_catalog_sha256=prior.get('baseline_catalog_sha256',digest(ROOT/'migration/samples.yaml')),tasks=tasks,
         phase_counts=dict(collections.Counter(x['primary_phase'] for x in tasks))))
     specs=[]
     for batch,kind,source in TARGETS:
         s=next(x for x in samples if x['source']==source)
-        specs.append(dict(batch=batch,kind=kind,source=source,sample_id=s['id'],
+        profile=dict(batch=batch,kind=kind,source=source,sample_id=s['id'],
             original_sha256=digest(ROOT/source),
             cases=['original','changed-values','irregular','layout','repeat','boundary'],
-            state='PLANNED',numeric_rule='Integer exact; floating scaled error/residual; original half overflow explicitly checked'))
+            state='PLANNED',numeric_rule='Integer exact; floating scaled error/residual; original half overflow explicitly checked')
+        profile.update(prior_profiles.get(s['id'],{}));specs.append(profile)
     write(ROOT/'migration/rewrite/first-eight.json',dict(schema_version=1,profiles=specs))
     control=ROOT.parent/'MOAT_CUDALibrarySamples_ROCm'
     skill=control/'.claude/skills/cuda-to-rocm/SKILL.md'
-    write(ROOT/'migration/moat/lock.json',dict(schema_version=1,
+    if not lock_path.exists():write(lock_path,dict(schema_version=1,
         control_checkout='../MOAT_CUDALibrarySamples_ROCm',
         upstream_url='https://github.com/AMD-Ecosystem/moat',
         upstream_commit='7b5082cc516c61b91038295346adbe8a1b5d8315',
@@ -88,8 +106,6 @@ def main():
         required_profile='linux-gfx1201-rocm10.1',
         unverified_platforms=['wave64','windows'],
         state_sync='local bare origin; no writes to AMD-Ecosystem upstream'))
-    shutil.copyfile(ROOT.parent/'doc/cuda_samples_on_rocm_moat_rewrite_plan.md',
-                    ROOT/'migration/moat-rewrite-plan.md')
     print(json.dumps(dict(samples=len(tasks),pending=sum(x['baseline_status']!='PASSED' for x in tasks),
         modules=len(CANDIDATES),phases=collections.Counter(x['primary_phase'] for x in tasks))))
 

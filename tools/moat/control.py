@@ -7,6 +7,8 @@ from pathlib import Path
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
+from bootstrap import validate_existing
+validate_existing(ROOT)
 CONTROL = ROOT.parent / 'MOAT_CUDALibrarySamples_ROCm'
 lock_path=ROOT/'migration/moat/lock.json'
 if lock_path.exists():

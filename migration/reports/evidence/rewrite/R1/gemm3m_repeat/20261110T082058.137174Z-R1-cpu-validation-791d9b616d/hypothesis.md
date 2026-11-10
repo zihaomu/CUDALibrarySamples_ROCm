@@ -1,0 +1,1 @@
+Test cpu-validation for gemm3m/repeat, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T081805.323290Z-R1-rocm-d7a28895f0.

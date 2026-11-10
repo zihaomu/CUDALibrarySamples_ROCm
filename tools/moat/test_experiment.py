@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Exercise failed processes, timeouts, seal refusal and evidence tampering."""
-import shutil,sys,unittest
-from experiment import Experiment,ROOT
+import shutil,sys,unittest,json,subprocess,time,os,signal
+from unittest.mock import patch
+from experiment import Experiment,ROOT,digest,recorder_alive
 from audit import check
 
 class RecorderContract(unittest.TestCase):
@@ -25,5 +26,34 @@ class RecorderContract(unittest.TestCase):
         self.assertEqual(rc,124);self.assertTrue(e.commands[0]['timed_out'])
         e.finish('TIMEOUT',reason='Deliberate CPU timeout for recorder self-test')
         self.assertEqual(check(e.path),[])
+
+    def test_external_source_object_is_mandatory(self):
+        e=Experiment('P0','recorder-object-contract','host',sources=[__file__])
+        e.finish('EXECUTED')
+        obj=next(iter(json.loads((e.path/'source.json').read_text())['source_objects'].values()))
+        from pathlib import Path
+        original=Path.is_file
+        with patch.object(Path,'is_file',lambda p:False if p==ROOT/obj else original(p)):
+            self.assertTrue(any(x.startswith('source-object:') for x in check(e.path)))
+        self.assertEqual(check(e.path),[])
+
+    def test_sigkill_recorder_recovers_streams(self):
+        code='from experiment import Experiment;import sys;e=Experiment("P0","recorder-killed-contract","host",sources=[]);print(e.path,flush=True);e.command([sys.executable,"-u","-c","import time;print(\\\"child-stream-proof\\\",flush=True);time.sleep(120)"],"interrupted-child")'
+        proc=subprocess.Popen([sys.executable,'-c',code],cwd=ROOT/'tools/moat',stdout=subprocess.PIPE,text=True)
+        from pathlib import Path
+        target=Path(proc.stdout.readline().strip())
+        for _ in range(100):
+            logs=list((target/'logs').glob('*.stdout.log'))
+            if logs and 'child-stream-proof' in logs[0].read_text():break
+            time.sleep(.02)
+        self.assertTrue(recorder_alive(json.loads((target/'manifest.json').read_text())))
+        denied=subprocess.run([sys.executable,str(ROOT/'tools/moat/recover.py'),'--target',str(target),'--reason','test active refusal'],capture_output=True)
+        self.assertNotEqual(denied.returncode,0)
+        os.kill(proc.pid,signal.SIGKILL);proc.wait();proc.stdout.close()
+        self.assertFalse(recorder_alive(json.loads((target/'manifest.json').read_text())))
+        recovered=subprocess.run([sys.executable,str(ROOT/'tools/moat/recover.py'),'--target',str(target),'--reason','Deliberate recorder SIGKILL for recovery contract'],capture_output=True,text=True)
+        self.assertEqual(recovered.returncode,0,recovered.stderr)
+        self.assertEqual(json.loads((target/'manifest.json').read_text())['experiment_outcome'],'INTERRUPTED')
+        self.assertIn('child-stream-proof',logs[0].read_text());self.assertEqual(check(target),[])
 
 if __name__=='__main__':unittest.main()

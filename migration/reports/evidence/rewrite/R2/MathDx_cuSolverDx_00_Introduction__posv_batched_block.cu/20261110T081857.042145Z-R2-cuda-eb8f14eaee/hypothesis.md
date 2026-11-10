@@ -1,0 +1,1 @@
+Test cuda for MathDx/cuSolverDx/00_Introduction::posv_batched_block.cu, case irregular. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T081645.634298Z-R1-R2-cuda-build-c73cafe501.

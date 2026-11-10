@@ -5,7 +5,7 @@ import shutil
 from pathlib import Path
 from experiment import Experiment,ROOT,write,digest
 from snapshot import capture
-p=argparse.ArgumentParser();p.add_argument('--only',nargs='*',default=[]);a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--only',nargs='*',default=[]);p.add_argument('--cases',nargs='*',default=[]);a=p.parse_args()
 spec=json.loads((ROOT/'migration/rewrite/first-eight.json').read_text())['profiles'];builds=json.loads((ROOT/'migration/reports/rewrite-first-builds.json').read_text());observed=capture()
 library_hashes={}
 report=ROOT/'migration/reports/rewrite-first-rocm.json';records=json.loads(report.read_text()) if report.exists() else {}
@@ -16,6 +16,7 @@ for profile in spec:
  if build['status']!='BUILT':continue
  if any(digest(ROOT/name)!=sha for name,sha in build['dependencies'].items() if name.startswith('rocm/')):raise RuntimeError('compiled source dependencies changed '+kind)
  for case in profile['cases']:
+  if a.cases and case not in a.cases:continue
   fixture=ROOT/'tests/fixtures/rewrite-first'/kind/case;mh=digest(fixture/'manifest.json')
   e=Experiment(profile['batch'],profile['sample_id'],'rocm',case=case,
       sources=[ROOT/'rocm/ported'/profile['source'],Path(__file__)]+[ROOT/name for name in build['dependencies']],
@@ -23,7 +24,7 @@ for profile in spec:
   write(e.path/'backend.observed.json',observed);shutil.copytree(fixture,e.path/'inputs')
   out=e.path/'outputs';out.mkdir()
   rc=e.command([str(ROOT/build['binary'])],'run',timeout=180,
-       env=dict(REWRITE_INPUT=str(fixture),REWRITE_OUTPUT=str(out)))
+       env=dict(REWRITE_INPUT=str(e.path/'inputs'),REWRITE_OUTPUT=str(out)))
   loaded=[]
   for line in (e.path/e.commands[-1]['stdout']).read_text().splitlines():
    if line.startswith('loaded-library '):
@@ -34,7 +35,7 @@ for profile in spec:
   write(e.path/'libraries.loaded.json',loaded)
   write(out/'manifest.json',dict(files={q.name:dict(sha256=digest(q),bytes=q.stat().st_size) for q in out.iterdir() if q.is_file()}))
   record=dict(kind=kind,case=case,return_code=rc,output=str(out.relative_to(ROOT)),experiment_id=e.id,
-      comparison_id=e.meta['comparison_id'],input_manifest_sha256=mh,build=build)
+      comparison_id=e.meta['comparison_id'],input_manifest_sha256=mh,input_snapshot=str((e.path/'inputs').relative_to(ROOT)),build=build)
   record['evidence']=e.finish('EXECUTED' if rc==0 else 'RUNTIME_ERROR',reason=None if rc==0 else f'run exit {rc}')
   records[kind+'/'+case]=record;write(report,records)
   print(kind,case,rc,record['evidence'],flush=True)

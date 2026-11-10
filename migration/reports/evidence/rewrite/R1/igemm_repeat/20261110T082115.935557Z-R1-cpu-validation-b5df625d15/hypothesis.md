@@ -1,0 +1,1 @@
+Test cpu-validation for igemm/repeat, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T081855.423631Z-R1-rocm-ee61d55dbf.

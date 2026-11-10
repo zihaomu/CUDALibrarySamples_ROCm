@@ -4,15 +4,17 @@ import json
 import sys
 from pathlib import Path
 from experiment import Experiment,ROOT,write,digest
+from inputs import copy_run_inputs
 p=argparse.ArgumentParser();p.add_argument('--only',nargs='*',default=[]);p.add_argument('--cases',nargs='*',default=[]);p.add_argument('--backend',default='rocm');a=p.parse_args()
 records=json.loads((ROOT/f'migration/reports/rewrite-first-{a.backend}.json').read_text());dest=ROOT/f'migration/reports/rewrite-first-{a.backend}-validation.json';results=json.loads(dest.read_text()) if dest.exists() else {}
 for key,r in records.items():
  if a.only and r['kind'] not in a.only:continue
  if a.cases and r['case'] not in a.cases:continue
  if r['return_code']!=0:continue
- e=Experiment('R1' if r['kind'] in ['gemm3m','herk3m','syrk3m','planar','igemm'] else 'R2',key,'cpu-validation',sources=[ROOT/'tools/moat/first_reference.py'],parent=r['experiment_id'],comparison_id=r['comparison_id'])
+ e=Experiment('R1' if r['kind'] in ['gemm3m','herk3m','syrk3m','planar','igemm'] else 'R2',key,'cpu-validation',sources=[ROOT/'tools/moat/first_reference.py',ROOT/'tools/moat/inputs.py'],parent=r['experiment_id'],comparison_id=r['comparison_id'])
+ snapshot=copy_run_inputs(r,e.path/'inputs')
  report=e.path/'cpu-report.json'
- rc=e.command([sys.executable,str(ROOT/'tools/moat/first_reference.py'),'--kind',r['kind'],'--case',r['case'],'--output',str(ROOT/r['output']),'--report',str(report),'--backend',a.backend],'independent-cpu',timeout=120)
+ rc=e.command([sys.executable,str(ROOT/'tools/moat/first_reference.py'),'--kind',r['kind'],'--case',r['case'],'--output',str(ROOT/r['output']),'--input',str(snapshot),'--report',str(report),'--backend',a.backend],'independent-cpu',timeout=120)
  validation=json.loads(report.read_text()) if report.exists() else dict(status='FAILED',checks=[dict(check='oracle-executed',passed=False)])
  evidence=e.finish('PASSED' if rc==0 else 'NUMERIC_MISMATCH',validation=validation,reason=None if rc==0 else 'independent reference check failed')
  results[key]=dict(**validation,evidence=evidence,run=r,experiment_id=e.id,validation_source_sha256=digest(ROOT/'tools/moat/first_reference.py'));write(dest,results)

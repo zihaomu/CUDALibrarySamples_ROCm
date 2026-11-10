@@ -11,6 +11,8 @@ BASE=ROOT/'tests/fixtures/rewrite-first'
 
 
 def create(kind,case):
+ obj=ROOT/'migration/source-objects'/digest(__file__)
+ if not obj.exists():obj.write_bytes(Path(__file__).read_bytes())
  original=case in ['original','repeat'];rng=np.random.default_rng(41017+len(kind)*31)
  m=n=k=2
  if kind=='planar':m=n=k=16
@@ -18,6 +20,7 @@ def create(kind,case):
  if kind=='lu':m,n,k=48,32,0
  if kind=='posv':m=n=32;k=0
  if kind=='trsm':m,n,k=32,33,0
+ if kind=='posv' and case=='nonspd-second-minor':m=n=4
  if case=='irregular':
   m,n,k=(7,5,9) if kind not in ['lu','posv','trsm','igemm'] else {'lu':(17,11,0),'posv':(17,17,0),'trsm':(17,19,0),'igemm':(9,11,35)}[kind]
  if kind in ['herk3m','syrk3m']:n=m
@@ -28,13 +31,14 @@ def create(kind,case):
  if kind=='lu':lda=m;ldb=0
  if kind=='posv':lda=ldb=n
  if kind=='trsm':lda=n;ldb=m
- if case=='layout':lda+=3;ldb+=4;ldc+=5
+ if case in ['layout','nonspd-second-minor']:lda+=3;ldb+=4;ldc+=5
  cfg=dict(m=m,n=n,k=k,lda=lda,ldb=ldb,ldc=ldc,opa=opa,opb=opb,
-          repeat=3 if case=='repeat' else 1,triangle=2 if case=='layout' and kind in ['herk3m','syrk3m'] else 1 if kind in ['herk3m','syrk3m'] else 0,
+          repeat=97 if case=='wave-stress' else 3 if case=='repeat' else 1,triangle=2 if case=='layout' and kind in ['herk3m','syrk3m'] else 1 if kind in ['herk3m','syrk3m'] else 0,
           alpha_r=1,alpha_i=1 if kind in ['gemm3m','syrk3m'] else 0,beta_r=0,beta_i=0,
           batch=3 if kind=='posv' and case=='irregular' else 2 if kind=='posv' else 1,
           nrhs=2 if kind=='posv' and case=='irregular' else 1,
           threads=33 if kind=='lu' else 128 if case=='irregular' else 256)
+ if original and kind in ['posv','trsm']:cfg['threads']=64
  if case=='changed-values':cfg.update(alpha_r=.75 if kind!='igemm' else 2,beta_r=.5 if kind!='igemm' else -1)
  if case=='layout' and kind in ['gemm3m','syrk3m']:cfg.update(alpha_i=-.25,beta_r=.5,beta_i=.1)
  values={}
@@ -55,6 +59,12 @@ def create(kind,case):
    elif case in ['original','repeat','boundary']:v[:]=np.float16(float('nan'))
    if case=='boundary' and name=='A':v[:]=0
    values[name]=v
+  if case=='half-max':
+   cfg.update(alpha_r=.75,beta_r=.5)
+   for name in ['A','B','C']:values[name][:]=0
+   values['A'][lda*k]=512
+   for col in range(n):values['B'][ldb*n+col*ldb]=128
+   values['C'][ldc*n:]=32704
  elif kind=='igemm':
   values=dict(A=np.arange(lda*k,dtype=np.int8) if original else rng.integers(-128,128,lda*k,dtype=np.int8),
               B=np.arange(ldb*n,dtype=np.int8) if original else rng.integers(-128,128,ldb*n,dtype=np.int8),
@@ -71,12 +81,24 @@ def create(kind,case):
    for i in range(n):aa[i,i]=n*2+i+batch+1+3j
    bb=z(n,cfg['nrhs'],ldb,np.complex128)
    if case=='boundary' and batch==0:aa[0,0]=-1+3j
+   if case=='nonspd-second-minor':
+    aa[:n]=0
+    for i in range(n):aa[i,i]=4+3j
+    if batch==0:aa[1,1]=-1+3j
    av.extend(aa.ravel(order='F'));bv.extend(bb.ravel(order='F'))
   values=dict(A=np.asarray(av,dtype=np.complex128),B=np.asarray(bv,dtype=np.complex128))
  else:
   aa=np.full((lda,n),73.,order='F');aa[:n]=rng.uniform(-.05,.05,(n,n));np.fill_diagonal(aa[:n],2)
   if case=='boundary':aa[:n][np.triu_indices(n,1)]=100000
   bb=np.full((ldb,n),-17.,order='F');bb[:m]=rng.uniform(-1,1,(m,n));values=dict(A=aa.ravel(order='F'),B=bb.ravel(order='F'))
+ captured=ROOT/'tests/fixtures/rewrite-native-original'/kind
+ if original and captured.is_dir():
+  for name,value in values.items():
+   p=captured/(name+'.bin')
+   if p.exists():
+    actual=np.fromfile(p,value.dtype)
+    if actual.size!=value.size:raise RuntimeError('native original input size mismatch: '+str(p))
+    values[name]=actual
  path=BASE/kind/case;path.mkdir(parents=True,exist_ok=True)
  (path/'config.txt').write_text('\n'.join(f'{key} {v}' for key,v in cfg.items())+'\n');write(path/'config.json',cfg)
  for name,value in values.items():value.tofile(path/(name+'.bin'))
@@ -95,4 +117,4 @@ if __name__=='__main__':
  spec=json.loads((ROOT/'migration/rewrite/first-eight.json').read_text())
  for profile in spec['profiles']:
   for case in profile['cases']:create(profile['kind'],case)
- print('Preregistered 48 shared-input cases with dtype/layout and thresholds')
+ print('Preregistered',sum(len(p['cases']) for p in spec['profiles']),'shared-input cases with dtype/layout and thresholds')

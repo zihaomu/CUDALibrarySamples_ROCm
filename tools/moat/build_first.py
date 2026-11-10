@@ -21,12 +21,18 @@ for profile in profiles:
  binary=e.path/'sample'
  cmd=['hipcc','--rocm-path='+str(ROOT/'build/rocm-sdk-overlay'),'--hip-path='+str(ROOT/'build/rocm-sdk-overlay'),
       '--rocm-device-lib-path='+str(core/'lib/llvm/amdgcn/bitcode'),'--offload-arch=gfx1201',
-      '-std=c++17','-O2','-D__HIP_PLATFORM_AMD__','-x','hip',str(source),'-o',str(binary)]
+      '-std=c++17','-O2','-D__HIP_PLATFORM_AMD__','-MMD','-MF',str(e.path/'compiler-dependencies.d'),'-x','hip',str(source),'-o',str(binary)]
  cmd+=['-I'+str(x) for x in includes]+['-L'+str(x) for x in libraries]+['-Wl,-rpath,'+str(x) for x in libraries]+['-lhipblas','-lamdhip64']
  rc=e.command(cmd,'build',timeout=240)
  if rc==0:e.command(['ldd',str(binary)],'runtime-links',timeout=30)
+ compiled_dependencies=[source]
+ if rc==0:
+  for word in (e.path/'compiler-dependencies.d').read_text().replace('\\\n',' ').split()[1:]:
+   path=Path(word).resolve()
+   if path.is_file() and path.is_relative_to(ROOT/'rocm') and path not in compiled_dependencies:compiled_dependencies.append(path)
  record=dict(source=profile['source'],implementation=str(source.relative_to(ROOT)),implementation_sha256=digest(source),
-             dependencies={str(x.relative_to(ROOT)):digest(x) for x in dependencies},
+             dependencies={str(x.relative_to(ROOT)):digest(x) for x in compiled_dependencies},
+             build_recipe_sha256=digest(__file__),
              status='BUILT' if rc==0 else 'BUILD_ERROR',binary=str(binary.relative_to(ROOT)) if rc==0 else None,
              binary_sha256=digest(binary) if rc==0 else None,experiment_id=e.id)
  record['evidence']=e.finish('EXECUTED' if rc==0 else 'BUILD_ERROR',reason=None if rc==0 else f'build exit {rc}')

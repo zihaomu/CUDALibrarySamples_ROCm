@@ -1,0 +1,1 @@
+Test cpu-validation for lu/repeat, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T081841.499233Z-R2-cuda-dda4b09283.

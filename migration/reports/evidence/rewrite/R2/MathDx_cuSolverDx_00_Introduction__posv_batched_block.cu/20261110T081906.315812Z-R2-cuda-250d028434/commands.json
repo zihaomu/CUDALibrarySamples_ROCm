@@ -1,0 +1,39 @@
+[
+  {
+    "command_id": 1,
+    "phase": "cuda-run",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "python3 /tmp/20261110T081645.634298Z-R1-R2-cuda-build-c73cafe501/tools/moat/cuda_remote_run.py --input /tmp/20261110T081645.634298Z-R1-R2-cuda-build-c73cafe501/tests/fixtures/rewrite-first/posv/boundary --output /tmp/20261110T081645.634298Z-R1-R2-cuda-build-c73cafe501/outputs/posv/boundary --binary /tmp/20261110T081645.634298Z-R1-R2-cuda-build-c73cafe501/reference --kind posv"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-10T08:19:06.701325+00:00",
+    "timeout_seconds": 180,
+    "environment": {},
+    "stdout": "logs/0001-cuda-run.stdout.log",
+    "stderr": "logs/0001-cuda-run.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-10T08:19:08.820841+00:00",
+    "seconds": 2.1186492150009144
+  },
+  {
+    "command_id": 2,
+    "phase": "collect",
+    "argv": [
+      "scp",
+      "-r",
+      "nvidia-5090x2:/tmp/20261110T081645.634298Z-R1-R2-cuda-build-c73cafe501/outputs/posv/boundary/.",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/R2/MathDx_cuSolverDx_00_Introduction__posv_batched_block.cu/20261110T081906.315812Z-R2-cuda-250d028434/outputs"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-10T08:19:08.822363+00:00",
+    "timeout_seconds": 60,
+    "environment": {},
+    "stdout": "logs/0002-collect.stdout.log",
+    "stderr": "logs/0002-collect.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-10T08:19:09.138862+00:00",
+    "seconds": 0.3155495059909299
+  }
+]

@@ -1,0 +1,1 @@
+Test rocm for cuBLAS/Extensions/Csyrk3mEx::cublas_Csyrk3mEx_example.cu, case boundary. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T081653.185241Z-R1-rocm-build-0002a6b158.

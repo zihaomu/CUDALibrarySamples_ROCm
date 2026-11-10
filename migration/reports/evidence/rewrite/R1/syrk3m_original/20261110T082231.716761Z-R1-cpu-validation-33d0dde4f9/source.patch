@@ -1,0 +1,763 @@
+diff --git a/rocm/device/solver/block_solvers.hpp b/rocm/device/solver/block_solvers.hpp
+index d6a79a54..05f2791b 100644
+--- a/rocm/device/solver/block_solvers.hpp
++++ b/rocm/device/solver/block_solvers.hpp
+@@ -16,6 +16,7 @@ __device__ void lu_device(C32*a,int m,int n,int ld,int*piv,int*info){
+ __global__ void lu_block(C32*a,int m,int n,int lda,int*piv,int*info,int*trace){
+  __shared__ C32 s[65*64];__shared__ int ip[64],code;int ld=m+1;
+  for(int t=threadIdx.x;t<ld*n;t+=blockDim.x)s[t]={-97,13};
++ __syncthreads();
+  for(int t=threadIdx.x;t<m*n;t+=blockDim.x)s[t%m+(t/m)*ld]=a[t%m+(t/m)*lda];
+  if(threadIdx.x==0)code=0;__syncthreads();lu_device(s,m,n,ld,ip,&code);
+  for(int t=threadIdx.x;t<m*n;t+=blockDim.x)a[t%m+(t/m)*lda]=s[t%m+(t/m)*ld];
+@@ -46,6 +47,7 @@ __global__ void posv_block(C64*a,C64*b,int n,int nrhs,int lda,int ldb,int*info,i
+  C64*aa=a+batch*lda*n,*bb=b+batch*ldb*nrhs;
+  for(int t=threadIdx.x;t<ld*n;t+=blockDim.x)s[t]={-97,13};
+  for(int t=threadIdx.x;t<ld*nrhs;t+=blockDim.x)rhs[t]={-97,13};
++ __syncthreads();
+  for(int t=threadIdx.x;t<n*n;t+=blockDim.x)s[t%n+(t/n)*ld]=aa[t%n+(t/n)*lda];
+  for(int t=threadIdx.x;t<n*nrhs;t+=blockDim.x)rhs[t%n+(t/n)*ld]=bb[t%n+(t/n)*ldb];
+  if(!threadIdx.x)code=0;__syncthreads();posv_device(s,rhs,n,nrhs,ld,ld,&code);
+@@ -60,6 +62,7 @@ __global__ void trsm_block(const double*a,double*b,int m,int n,int lda,int ldb,i
+  __shared__ double s[49*48],rhs[49*48];int al=n+1,bl=m+1;
+  for(int t=threadIdx.x;t<al*n;t+=blockDim.x)s[t]=-97;
+  for(int t=threadIdx.x;t<bl*n;t+=blockDim.x)rhs[t]=-97;
++ __syncthreads();
+  for(int t=threadIdx.x;t<n*n;t+=blockDim.x)s[t%n+(t/n)*al]=a[t%n+(t/n)*lda];
+  for(int t=threadIdx.x;t<m*n;t+=blockDim.x)rhs[t%m+(t/m)*bl]=b[t%m+(t/m)*ldb];
+  __syncthreads();trsm_device(s,rhs,m,n,al,bl);
+@@ -71,6 +74,10 @@ inline int solver_main(const std::string&kind){try{
+  if(m>64||n>64||nrhs>8||m<1||n<1)throw std::runtime_error("unsupported device shape");
+  if(kind=="posv"&&n>32)throw std::runtime_error("unsupported POSV shared shape");
+  if(kind=="trsm"&&(m>48||n>48))throw std::runtime_error("unsupported TRSM shared shape");
++ if(lda<1||lda>1024||ldb<0||ldb>1024||batch<1||batch>1024||nrhs<1||repeat<1||threads<1||threads>1024)throw std::runtime_error("invalid solver storage or launch descriptor");
++ if(kind=="lu"&&(lda<m||batch!=1))throw std::runtime_error("invalid LU leading dimension or batch");
++ if(kind=="posv"&&(m!=n||lda<n||ldb<n))throw std::runtime_error("invalid POSV leading dimension or square shape");
++ if(kind=="trsm"&&(lda<n||ldb<m||batch!=1))throw std::runtime_error("invalid TRSM leading dimension or batch");
+  Buffer<int> trace(std::vector<int>{0,0,0,1});
+  if(kind=="lu"){
+   auto av=read<C32>("A",lda*n);Buffer<C32>a(av);Buffer<int>piv(std::min(m,n)),info(1);
+diff --git a/tools/moat/audit.py b/tools/moat/audit.py
+index f0aa148d..b013cfc5 100644
+--- a/tools/moat/audit.py
++++ b/tools/moat/audit.py
+@@ -2,7 +2,7 @@
+ """Check immutable attempt records, task coverage and pinned control sources."""
+ import argparse,json
+ from pathlib import Path
+-from experiment import ROOT,digest,write
++from experiment import ROOT,digest,write,recorder_alive
+ 
+ def check(directory):
+     seal=json.loads((directory/'sealed.json').read_text());errors=[]
+@@ -15,8 +15,37 @@ def check(directory):
+                 raw=str(Path('artifacts')/directory.relative_to(ROOT/'migration/reports/evidence'))
+             p=ROOT/(raw or '')/name
+         if not p.is_file() or p.stat().st_size!=row['bytes'] or digest(p)!=row['sha256']:errors.append(name)
++    source=directory/'source.json'
++    if source.exists():
++        data=json.loads(source.read_text());objects=data.get('source_objects')
++        if data.get('provenance_version',0)>=2 and objects is None:errors.append('source-object mapping absent')
++        if objects is not None:
++            dependencies=data.get('dependencies',{})
++            if set(objects)!=set(dependencies):errors.append('source-object mapping completeness')
++            for name,path in objects.items():
++                p=ROOT/path;sha=dependencies.get(name)
++                if not p.is_relative_to(ROOT/'migration/source-objects') or p.name!=sha or not p.is_file() or digest(p)!=sha:errors.append('source-object:'+name)
+     return errors
+ 
++def unfinished():
++    active=[];orphans=[];terminal=[];pending=[]
++    manifests={}
++    for p in (ROOT/'artifacts/rewrite').glob('*/*/*/manifest.json'):
++        m=json.loads(p.read_text());manifests[m['experiment_id']]=(p,m)
++        if m.get('experiment_outcome')=='RUNNING':
++            (active if recorder_alive(m) is True else orphans).append(str(p.parent.relative_to(ROOT)))
++        elif not (p.parent/'sealed.json').exists():terminal.append(str(p.parent.relative_to(ROOT)))
++        elif not (ROOT/'migration/reports/evidence'/p.parent.relative_to(ROOT/'artifacts')/'sealed.json').exists():pending.append(str(p.parent.relative_to(ROOT)))
++    index=ROOT/'migration/reports/rewrite-experiments.jsonl'
++    events=[json.loads(line) for line in index.read_text().splitlines()] if index.exists() else []
++    started={e['experiment_id'] for e in events if e['event']=='start'}
++    ended={e['experiment_id'] for e in events if e['event'] in ['finish','recovered-initialization','recovered-interruption']}
++    unmatched=[]
++    for eid in started-ended:
++        pair=manifests.get(eid)
++        if not pair or recorder_alive(pair[1]) is not True:unmatched.append(eid)
++    return dict(check='unfinished-attempt-accounting',passed=not (orphans or terminal or pending or unmatched),active=active,abandoned_or_unverifiable=orphans,terminal_unsealed=terminal,archive_pending=pending,unmatched_starts=unmatched)
++
+ if __name__=='__main__':
+     import jsonschema
+     p=argparse.ArgumentParser();p.add_argument('--directory',type=Path);a=p.parse_args()
+@@ -31,5 +60,6 @@ if __name__=='__main__':
+     schema=json.loads((ROOT/'migration/moat/schema/experiment.schema.json').read_text());validator=jsonschema.Draft202012Validator(schema)
+     for d in dirs:schema_errors += [str(d)+': '+e.message for e in validator.iter_errors(json.loads((d/'manifest.json').read_text()))]
+     checks.append(dict(check='structured-record-schemas',passed=not schema_errors,errors=schema_errors))
++    checks.append(unfinished())
+     result=dict(status='PASSED' if all(c['passed'] for c in checks) else 'FAILED',checks=checks)
+     write(ROOT/'migration/reports/rewrite-evidence-audit.json',result);print(json.dumps(result));raise SystemExit(0 if result['status']=='PASSED' else 1)
+diff --git a/tools/moat/bootstrap.py b/tools/moat/bootstrap.py
+index 9f4d306c..978040a0 100644
+--- a/tools/moat/bootstrap.py
++++ b/tools/moat/bootstrap.py
+@@ -1,25 +1,55 @@
+ #!/usr/bin/env python3
+-"""Restore the pinned local control checkout without writing to public remotes."""
++"""Restore or validate every part of the pinned local control checkout."""
+ import hashlib,json,subprocess
+ from pathlib import Path
+ ROOT=Path(__file__).resolve().parents[2]
+-lock=json.loads((ROOT/'migration/moat/lock.json').read_text());control=(ROOT/lock['control_checkout']).resolve()
+-def run(argv,cwd=None):subprocess.run(list(map(str,argv)),cwd=cwd,check=True)
+-if not control.exists():
+- run(['git','clone','--no-checkout',lock['upstream_url'],control]);run(['git','remote','rename','origin','upstream'],control)
+- bundle=ROOT/'migration/moat/control.bundle'
+- if bundle.exists():
+-  run(['git','fetch',bundle,'port/CUDALibrarySamples_ROCm:refs/heads/port/CUDALibrarySamples_ROCm'],control)
+-  run(['git','checkout','port/CUDALibrarySamples_ROCm'],control)
+- else:raise SystemExit('Missing saved project control bundle; refusing to invent project state')
+- run(['git','init','--bare','.git/project-sync.git'],control)
+- run(['git','remote','add','origin','.git/project-sync.git'],control)
+- run(['git','push','-u','origin','port/CUDALibrarySamples_ROCm'],control)
+- run(['git','push','origin',lock['upstream_commit']+':refs/heads/main'],control)
+- run(['bash','utils/setup_git.sh'],control)
+- src=control/'projects'/lock['project']/'src'
+- if not src.exists():src.symlink_to(ROOT,target_is_directory=True)
+-for path,key in [(lock['skill'],'skill_sha256'),('utils/moatlib.py','state_library_sha256')]:
+- if hashlib.sha256((control/path).read_bytes()).hexdigest()!=lock[key]:raise SystemExit('Pinned source mismatch: '+path)
+-run(['git','merge-base','--is-ancestor',lock['upstream_commit'],'HEAD'],control)
+-print('Verified pinned MOAT control checkout:',control)
++
++def git(control,*args,check=True):
++    return subprocess.run(['git',*map(str,args)],cwd=control,check=check,capture_output=True,text=True)
++
++def validate_existing(root=ROOT):
++    lock=json.loads((root/'migration/moat/lock.json').read_text());control=(root/lock['control_checkout']).resolve()
++    for path,key in [(lock['skill'],'skill_sha256'),('utils/moatlib.py','state_library_sha256')]:
++        if hashlib.sha256((control/path).read_bytes()).hexdigest()!=lock[key]:raise RuntimeError('Pinned source mismatch: '+path)
++    git(control,'merge-base','--is-ancestor',lock['upstream_commit'],'HEAD')
++    if git(control,'branch','--show-current').stdout.strip()!='port/'+lock['project']:raise RuntimeError('Unexpected control branch')
++    origin=git(control,'remote','get-url','origin').stdout.strip()
++    if (control/origin).resolve()!=(control/'.git/project-sync.git').resolve():raise RuntimeError('Control origin must be the local bare synchronization repository')
++    project=control/'projects'/lock['project'];src=project/'src'
++    if not (project/'status.json').is_file() or src.resolve()!=root.resolve():raise RuntimeError('Missing project state or mismatched source checkout')
++    return control
++
++def ensure(root=ROOT):
++    lock=json.loads((root/'migration/moat/lock.json').read_text());control=(root/lock['control_checkout']).resolve();branch='port/'+lock['project']
++    if not control.exists():subprocess.run(['git','clone','--no-checkout',lock['upstream_url'],str(control)],check=True)
++    if not (control/'.git').is_dir():raise RuntimeError('Existing control path is not a Git checkout')
++    if git(control,'cat-file','-e',lock['upstream_commit']+'^{commit}',check=False).returncode:git(control,'fetch',lock['upstream_url'],lock['upstream_commit'])
++    current=git(control,'branch','--show-current').stdout.strip();project=control/'projects'/lock['project']
++    if current!=branch:
++        if git(control,'status','--porcelain','--untracked-files=no').stdout:raise RuntimeError('Do not replace modified control files')
++        if not (project/'status.json').exists():
++            bundle=root/'migration/moat/control.bundle'
++            if not bundle.exists():raise RuntimeError('Saved project control bundle is required')
++            if git(control,'show-ref','--verify','refs/heads/'+branch,check=False).returncode:git(control,'fetch',bundle,branch+':refs/heads/'+branch)
++        git(control,'checkout',branch)
++    if not (project/'status.json').is_file():raise RuntimeError('Expected branch has no project state; refusing to invent it')
++    remotes=git(control,'remote').stdout.split()
++    if 'origin' in remotes:
++        url=git(control,'remote','get-url','origin').stdout.strip()
++        if url.rstrip('/').removesuffix('.git')==lock['upstream_url'].rstrip('/'):
++            if 'upstream' in remotes:raise RuntimeError('Ambiguous upstream/origin remotes')
++            git(control,'remote','rename','origin','upstream');remotes.remove('origin')
++        elif (control/url).resolve()!=(control/'.git/project-sync.git').resolve():raise RuntimeError('Unexpected origin; refusing public synchronization')
++    bare=control/'.git/project-sync.git'
++    if not bare.exists():git(control,'init','--bare',bare)
++    if 'origin' not in remotes:git(control,'remote','add','origin','.git/project-sync.git')
++    git(control,'push','-u','origin',branch)
++    if git(control,'show-ref','--verify','refs/remotes/origin/main',check=False).returncode:git(control,'push','origin',lock['upstream_commit']+':refs/heads/main')
++    subprocess.run(['bash','utils/setup_git.sh'],cwd=control,check=True)
++    src=project/'src'
++    if src.is_symlink() or src.exists():
++        if src.resolve()!=root.resolve():raise RuntimeError('Existing project source link points to another checkout')
++    else:src.symlink_to(root,target_is_directory=True)
++    return validate_existing(root)
++
++if __name__=='__main__':print('Verified pinned MOAT control checkout:',ensure())
+diff --git a/tools/moat/control.py b/tools/moat/control.py
+index 878d9592..dc56283f 100644
+--- a/tools/moat/control.py
++++ b/tools/moat/control.py
+@@ -7,6 +7,8 @@ from pathlib import Path
+ import sys
+ 
+ ROOT = Path(__file__).resolve().parents[2]
++from bootstrap import validate_existing
++validate_existing(ROOT)
+ CONTROL = ROOT.parent / 'MOAT_CUDALibrarySamples_ROCm'
+ lock_path=ROOT/'migration/moat/lock.json'
+ if lock_path.exists():
+diff --git a/tools/moat/cuda_first.py b/tools/moat/cuda_first.py
+index 24b65116..6dc3da56 100644
+--- a/tools/moat/cuda_first.py
++++ b/tools/moat/cuda_first.py
+@@ -1,14 +1,15 @@
+ #!/usr/bin/env python3
+-import argparse,json,shlex,tarfile
++import argparse,json,shlex,tarfile,shutil
+ from pathlib import Path
+ from experiment import Experiment,ROOT,write,digest
+-p=argparse.ArgumentParser();p.add_argument('--only',nargs='*',default=[]);a=p.parse_args();host='nvidia-5090x2'
++p=argparse.ArgumentParser();p.add_argument('--only',nargs='*',default=[]);p.add_argument('--cases',nargs='*',default=[]);a=p.parse_args();host='nvidia-5090x2'
+ sources=[ROOT/'tools/moat/cuda_first_reference.cu',ROOT/'rocm/common/rewrite_runtime.hpp',ROOT/'tools/moat/cuda_remote_run.py']
+ build=Experiment('R1-R2','first-eight-native-and-compatible','cuda-build',sources=sources)
+ remote='/tmp/'+build.id;bundle=build.path/'inputs.tar.gz'
++shared_inputs=build.path/'inputs';shutil.copytree(ROOT/'tests/fixtures/rewrite-first',shared_inputs)
+ with tarfile.open(bundle,'w:gz') as f:
+  for source in sources:f.add(source,arcname=str(source.relative_to(ROOT)))
+- f.add(ROOT/'tests/fixtures/rewrite-first',arcname='tests/fixtures/rewrite-first')
++ f.add(shared_inputs,arcname='tests/fixtures/rewrite-first')
+ commands=[(['ssh',host,shlex.join(['mkdir','-p',remote])],'prepare'),
+           (['scp',str(bundle),host+':'+remote+'/inputs.tar.gz'],'upload'),
+           (['ssh',host,shlex.join(['tar','-xzf',remote+'/inputs.tar.gz','-C',remote])],'unpack'),
+@@ -23,15 +24,18 @@ for profile in spec:
+  kind=profile['kind']
+  if a.only and kind not in a.only:continue
+  for case in profile['cases']:
+-  fixture=ROOT/'tests/fixtures/rewrite-first'/kind/case;mh=digest(fixture/'manifest.json')
++  if a.cases and case not in a.cases:continue
++  fixture=shared_inputs/kind/case;mh=digest(fixture/'manifest.json')
+   e=Experiment(profile['batch'],profile['sample_id'],'cuda',case=case,sources=sources,
+       parent=build.id,comparison_id=kind+'/'+case+'/'+mh)
++  shutil.copytree(fixture,e.path/'inputs')
+   out=e.path/'outputs';out.mkdir();remoteout=remote+'/outputs/'+kind+'/'+case
+   cmd=['python3',remote+'/tools/moat/cuda_remote_run.py','--input',remote+'/tests/fixtures/rewrite-first/'+kind+'/'+case,'--output',remoteout,'--binary',remote+'/reference','--kind',kind]
+   rc=e.command(['ssh',host,shlex.join(cmd)],'cuda-run',timeout=180)
+   copyrc=e.command(['scp','-r',host+':'+remoteout+'/.',str(out)],'collect',timeout=60)
+   record=dict(kind=kind,case=case,return_code=rc if rc else copyrc,output=str(out.relative_to(ROOT)),
+               experiment_id=e.id,comparison_id=e.meta['comparison_id'],input_manifest_sha256=mh,
++              input_snapshot=str((e.path/'inputs').relative_to(ROOT)),
+               baseline_scope='native-cuBLAS-3m-or-Lt-planar' if kind in ['gemm3m','herk3m','syrk3m','planar'] else 'compatible-CUDA-mathematics-not-original-MathDx-or-special-IMMA')
+   record['evidence']=e.finish('EXECUTED' if not rc and not copyrc else 'RUNTIME_ERROR',reason=None if not rc and not copyrc else f'CUDA exit {rc}, collect {copyrc}')
+   records[kind+'/'+case]=record;write(report,records);print(kind,case,rc,flush=True)
+diff --git a/tools/moat/experiment.py b/tools/moat/experiment.py
+index b8fa8952..070997f3 100644
+--- a/tools/moat/experiment.py
++++ b/tools/moat/experiment.py
+@@ -59,6 +59,27 @@ def environment():
+     return {k: os.environ[k] for k in ALLOWED_ENV if k in os.environ}
+ 
+ 
++def process_start(pid):
++    try:
++        return Path(f'/proc/{pid}/stat').read_text().rsplit(')',1)[1].split()[19]
++    except (OSError,IndexError):
++        return None
++
++
++def recorder_alive(manifest):
++    if manifest.get('hostname') == platform.node():
++        actual=process_start(manifest.get('recorder_pid',-1))
++        if actual is None:return False
++        expected=manifest.get('recorder_start_ticks')
++        return actual == expected if expected is not None else None
++    hostname=manifest.get('hostname','')
++    if re.fullmatch(r'[0-9a-f]{12,64}',hostname):
++        p=subprocess.run(['docker','ps','--no-trunc','--format','{{.ID}}'],capture_output=True,text=True)
++        if p.returncode:return None
++        return any(line.startswith(hostname) for line in p.stdout.splitlines())
++    return None
++
++
+ class Experiment:
+     def __init__(self, batch, sample, backend, case='all', sources=(), parent=None,
+                  comparison_id=None, hypothesis=''):
+@@ -75,11 +96,13 @@ class Experiment:
+                          sample_id=sample, backend=backend, case_id=case,
+                          parent_experiment_id=parent, comparison_id=comparison_id,
+                          recorder_pid=os.getpid(), hostname=platform.node(),
++                         recorder_start_ticks=process_start(os.getpid()),
+                          raw_artifact_dir=str(self.path.relative_to(ROOT)),
+                          started_at_utc=now(), finished_at_utc=None,
+                          experiment_outcome='RUNNING', eligible_for_sample_pass=False)
+         write(self.path / 'manifest.json', self.meta)
+         files = {str(Path(p).resolve().relative_to(ROOT)): digest(p) for p in sources}
++        files['tools/moat/experiment.py']=digest(__file__)
+         objects = {}
+         for name, sha in files.items():
+             target = ROOT / 'migration/source-objects' / sha
+@@ -95,11 +118,11 @@ class Experiment:
+                 finally:
+                     tmp.unlink()
+             objects[name] = str(target.relative_to(ROOT))
+-        write(self.path / 'source.json', dict(commit=git('rev-parse', 'HEAD').strip(),
++        write(self.path / 'source.json', dict(provenance_version=2,commit=git('rev-parse', 'HEAD').strip(),
+               tree=git('rev-parse', 'HEAD^{tree}').strip(),
+               status=git('status', '--porcelain'), dependencies=files, source_objects=objects,
+               recorder_sha256=digest(__file__)))
+-        (self.path / 'source.patch').write_text(git('diff', '--binary', 'HEAD'))
++        (self.path / 'source.patch').write_text(git('diff', '--binary', 'HEAD','--','rocm','tools','cmake','.agents','AGENTS.md'))
+         lock = ROOT / 'migration/environments/project.lock.json'
+         shutil.copyfile(lock, self.path / 'environment.expected.json')
+         write(self.path / 'environment.observed.json', dict(hostname=platform.node(),
+@@ -149,6 +172,7 @@ class Experiment:
+                 proc = subprocess.Popen(rec['argv'], cwd=cwd,
+                     env=dict(os.environ, **(env or {})), stdout=fo, stderr=fe,
+                     start_new_session=True)
++                write(self.path/'subprocess.json',dict(pid=proc.pid,start_ticks=process_start(proc.pid),hostname=platform.node(),command_id=number))
+                 rec['return_code'] = proc.wait(timeout=timeout)
+             except subprocess.TimeoutExpired:
+                 os.killpg(proc.pid, signal.SIGKILL)
+diff --git a/tools/moat/first_fixtures.py b/tools/moat/first_fixtures.py
+index c810d253..fe8a47e5 100644
+--- a/tools/moat/first_fixtures.py
++++ b/tools/moat/first_fixtures.py
+@@ -11,6 +11,8 @@ BASE=ROOT/'tests/fixtures/rewrite-first'
+ 
+ 
+ def create(kind,case):
++ obj=ROOT/'migration/source-objects'/digest(__file__)
++ if not obj.exists():obj.write_bytes(Path(__file__).read_bytes())
+  original=case in ['original','repeat'];rng=np.random.default_rng(41017+len(kind)*31)
+  m=n=k=2
+  if kind=='planar':m=n=k=16
+@@ -18,6 +20,7 @@ def create(kind,case):
+  if kind=='lu':m,n,k=48,32,0
+  if kind=='posv':m=n=32;k=0
+  if kind=='trsm':m,n,k=32,33,0
++ if kind=='posv' and case=='nonspd-second-minor':m=n=4
+  if case=='irregular':
+   m,n,k=(7,5,9) if kind not in ['lu','posv','trsm','igemm'] else {'lu':(17,11,0),'posv':(17,17,0),'trsm':(17,19,0),'igemm':(9,11,35)}[kind]
+  if kind in ['herk3m','syrk3m']:n=m
+@@ -28,13 +31,14 @@ def create(kind,case):
+  if kind=='lu':lda=m;ldb=0
+  if kind=='posv':lda=ldb=n
+  if kind=='trsm':lda=n;ldb=m
+- if case=='layout':lda+=3;ldb+=4;ldc+=5
++ if case in ['layout','nonspd-second-minor']:lda+=3;ldb+=4;ldc+=5
+  cfg=dict(m=m,n=n,k=k,lda=lda,ldb=ldb,ldc=ldc,opa=opa,opb=opb,
+-          repeat=3 if case=='repeat' else 1,triangle=2 if case=='layout' and kind in ['herk3m','syrk3m'] else 1 if kind in ['herk3m','syrk3m'] else 0,
++          repeat=97 if case=='wave-stress' else 3 if case=='repeat' else 1,triangle=2 if case=='layout' and kind in ['herk3m','syrk3m'] else 1 if kind in ['herk3m','syrk3m'] else 0,
+           alpha_r=1,alpha_i=1 if kind in ['gemm3m','syrk3m'] else 0,beta_r=0,beta_i=0,
+           batch=3 if kind=='posv' and case=='irregular' else 2 if kind=='posv' else 1,
+           nrhs=2 if kind=='posv' and case=='irregular' else 1,
+           threads=33 if kind=='lu' else 128 if case=='irregular' else 256)
++ if original and kind in ['posv','trsm']:cfg['threads']=64
+  if case=='changed-values':cfg.update(alpha_r=.75 if kind!='igemm' else 2,beta_r=.5 if kind!='igemm' else -1)
+  if case=='layout' and kind in ['gemm3m','syrk3m']:cfg.update(alpha_i=-.25,beta_r=.5,beta_i=.1)
+  values={}
+@@ -55,6 +59,12 @@ def create(kind,case):
+    elif case in ['original','repeat','boundary']:v[:]=np.float16(float('nan'))
+    if case=='boundary' and name=='A':v[:]=0
+    values[name]=v
++  if case=='half-max':
++   cfg.update(alpha_r=.75,beta_r=.5)
++   for name in ['A','B','C']:values[name][:]=0
++   values['A'][lda*k]=512
++   for col in range(n):values['B'][ldb*n+col*ldb]=128
++   values['C'][ldc*n:]=32704
+  elif kind=='igemm':
+   values=dict(A=np.arange(lda*k,dtype=np.int8) if original else rng.integers(-128,128,lda*k,dtype=np.int8),
+               B=np.arange(ldb*n,dtype=np.int8) if original else rng.integers(-128,128,ldb*n,dtype=np.int8),
+@@ -71,12 +81,24 @@ def create(kind,case):
+    for i in range(n):aa[i,i]=n*2+i+batch+1+3j
+    bb=z(n,cfg['nrhs'],ldb,np.complex128)
+    if case=='boundary' and batch==0:aa[0,0]=-1+3j
++   if case=='nonspd-second-minor':
++    aa[:n]=0
++    for i in range(n):aa[i,i]=4+3j
++    if batch==0:aa[1,1]=-1+3j
+    av.extend(aa.ravel(order='F'));bv.extend(bb.ravel(order='F'))
+   values=dict(A=np.asarray(av,dtype=np.complex128),B=np.asarray(bv,dtype=np.complex128))
+  else:
+   aa=np.full((lda,n),73.,order='F');aa[:n]=rng.uniform(-.05,.05,(n,n));np.fill_diagonal(aa[:n],2)
+   if case=='boundary':aa[:n][np.triu_indices(n,1)]=100000
+   bb=np.full((ldb,n),-17.,order='F');bb[:m]=rng.uniform(-1,1,(m,n));values=dict(A=aa.ravel(order='F'),B=bb.ravel(order='F'))
++ captured=ROOT/'tests/fixtures/rewrite-native-original'/kind
++ if original and captured.is_dir():
++  for name,value in values.items():
++   p=captured/(name+'.bin')
++   if p.exists():
++    actual=np.fromfile(p,value.dtype)
++    if actual.size!=value.size:raise RuntimeError('native original input size mismatch: '+str(p))
++    values[name]=actual
+  path=BASE/kind/case;path.mkdir(parents=True,exist_ok=True)
+  (path/'config.txt').write_text('\n'.join(f'{key} {v}' for key,v in cfg.items())+'\n');write(path/'config.json',cfg)
+  for name,value in values.items():value.tofile(path/(name+'.bin'))
+@@ -95,4 +117,4 @@ if __name__=='__main__':
+  spec=json.loads((ROOT/'migration/rewrite/first-eight.json').read_text())
+  for profile in spec['profiles']:
+   for case in profile['cases']:create(profile['kind'],case)
+- print('Preregistered 48 shared-input cases with dtype/layout and thresholds')
++ print('Preregistered',sum(len(p['cases']) for p in spec['profiles']),'shared-input cases with dtype/layout and thresholds')
+diff --git a/tools/moat/first_negative.py b/tools/moat/first_negative.py
+index b23cd4e2..f2c55e63 100644
+--- a/tools/moat/first_negative.py
++++ b/tools/moat/first_negative.py
+@@ -1,26 +1,41 @@
+ #!/usr/bin/env python3
+ import argparse,json,shutil,sys
+ from pathlib import Path
+-from experiment import Experiment,ROOT,write
++from experiment import Experiment,ROOT,write,digest
++from inputs import copy_run_inputs
+ from first_reference import validate,np
+-p=argparse.ArgumentParser();p.add_argument('--single',nargs=3,metavar=('KIND','OUTPUT','REPORT'));a=p.parse_args()
++p=argparse.ArgumentParser();p.add_argument('--single',nargs=4,metavar=('KIND','CASE','OUTPUT','REPORT'));a=p.parse_args()
+ if a.single:
+- kind,output,report=a.single;result=validate(kind,'changed-values',Path(output));write(report,result);print(json.dumps(result));raise SystemExit(0 if result['status']=='FAILED' else 1)
++ kind,case,output,report=a.single;result=validate(kind,case,Path(output));write(report,result);print(json.dumps(result));raise SystemExit(0 if result['status']=='FAILED' else 1)
+ records=json.loads((ROOT/'migration/reports/rewrite-first-rocm.json').read_text());results=[]
+-for kind in ['gemm3m','herk3m','syrk3m','planar','igemm','lu','posv','trsm']:
+- original=records[kind+'/changed-values']
+- if validate(kind,'changed-values',ROOT/original['output'])['status']!='PASSED':raise RuntimeError('negative test requires a passing unchanged baseline: '+kind)
+- for mode in ['numerical','contract']:
++tests=[(kind,'changed-values',mode) for kind in ['gemm3m','herk3m','syrk3m','planar','igemm','lu','posv','trsm'] for mode in ['numerical','contract']]
++tests += [(kind,'layout','subtle-padding') for kind in ['gemm3m','herk3m','syrk3m','planar']]
++tests += [(kind,'layout','subtle-triangle') for kind in ['herk3m','syrk3m']]
++tests += [('planar','half-max','finite-half-maximum')]
++tests += [('posv','nonspd-second-minor',mode) for mode in ['wrong-failure-minor','failed-RHS','failed-upper','failed-padding']]
++for kind,case,mode in tests:
++ original=records[kind+'/'+case]
++ if True:
+   e=Experiment('R1-R2-negative',kind+'/'+mode,'cpu-negative',sources=[Path(__file__),ROOT/'tools/moat/first_reference.py'],parent=original['experiment_id'])
++  snapshot=copy_run_inputs(original,e.path/'inputs');cfg=json.loads((snapshot/'config.json').read_text())
++  if validate(kind,case,ROOT/original['output'],inputs=snapshot)['status']!='PASSED':raise RuntimeError('negative test requires a passing unchanged baseline: '+kind+'/'+case)
+   out=e.path/'outputs';shutil.copytree(ROOT/original['output'],out)
++  if (out/'manifest.json').exists():(out/'manifest.json').rename(out/'manifest.before-injection.json')
+   if mode=='numerical':
+    dtype=np.float16 if kind=='planar' else np.int32 if kind=='igemm' else np.float32 if kind in ['gemm3m','herk3m','syrk3m','lu'] else np.float64
+    path=out/'output.bin';data=np.fromfile(path,dtype);data[0]+=10;data.tofile(path)
+-  else:
++  elif mode=='contract':
+    name='packed_B' if kind=='igemm' else 'pivots' if kind=='lu' else 'info' if kind=='posv' else 'A_after' if kind=='trsm' else 'output' if kind=='planar' else 'trace'
+    dtype=np.int8 if kind=='igemm' else np.int32 if kind in ['lu','posv','gemm3m','herk3m','syrk3m'] else np.float16 if kind=='planar' else np.float64
+    path=out/(name+'.bin');data=np.fromfile(path,dtype);data[0]=np.inf if kind=='planar' else data[0]+1;data.tofile(path)
+-  report=e.path/'injected-check.json';rc=e.command([sys.executable,str(Path(__file__).resolve()),'--single',kind,str(out),str(report)],'reject-injected-error',timeout=90)
++  elif mode.startswith('subtle'):
++   path=out/'output.bin';dtype=np.float16 if kind=='planar' else np.complex64;data=np.fromfile(path,dtype);index=cfg['m'] if mode=='subtle-padding' else cfg['ldc'];data[index]+=np.float16(.0625) if kind=='planar' else .001 if mode=='subtle-padding' else 1e-7;data.tofile(path)
++  elif mode=='finite-half-maximum':
++   path=out/'output.bin';data=np.fromfile(path,np.float16);index=cfg['ldc']*cfg['n'];assert data[index]==65504;data[index]=0;data.tofile(path)
++  else:
++   name='info' if mode=='wrong-failure-minor' else 'output' if mode=='failed-RHS' else 'factor';dtype=np.int32 if name=='info' else np.complex128;path=out/(name+'.bin');data=np.fromfile(path,dtype);index=0 if mode in ['wrong-failure-minor','failed-RHS'] else cfg['lda'] if mode=='failed-upper' else cfg['n'];data[index]=999 if name=='info' else data[index]+.001;data.tofile(path)
++  write(out/'manifest.json',dict(injection=mode,files={p.name:dict(sha256=digest(p),bytes=p.stat().st_size) for p in out.glob('*.bin')}))
++  report=e.path/'injected-check.json';rc=e.command([sys.executable,str(Path(__file__).resolve()),'--single',kind,case,str(out),str(report)],'reject-injected-error',timeout=90)
+   check=dict(check='reject-'+kind+'-'+mode,passed=rc==0);evidence=e.finish('PASSED' if rc==0 else 'VALIDATOR_GAP',dict(checks=[check]),reason=None if rc==0 else 'corrupted output accepted')
+   results.append(dict(**check,evidence=evidence));print(kind,mode,rc,flush=True)
+ write(ROOT/'migration/reports/rewrite-first-negative.json',dict(status='PASSED' if all(x['passed'] for x in results) else 'FAILED',checks=results))
+diff --git a/tools/moat/first_reference.py b/tools/moat/first_reference.py
+index e10158e6..45f7f5a6 100644
+--- a/tools/moat/first_reference.py
++++ b/tools/moat/first_reference.py
+@@ -10,8 +10,9 @@ sys.path.insert(0,str(ROOT/'build/python-reference'))
+ import numpy as np
+ 
+ 
+-def validate(kind,case,out,backend='rocm'):
+-    src=ROOT/'tests/fixtures/rewrite-first'/kind/case;c=json.loads((src/'config.json').read_text());checks=[]
++def validate(kind,case,out,backend='rocm',inputs=None):
++    src=Path(inputs) if inputs else out.parent/'inputs'
++    c=json.loads((src/'config.json').read_text());checks=[]
+     m,n,k,lda,ldb,ldc=[int(c[x]) for x in ['m','n','k','lda','ldb','ldc']]
+     def gate(name,value,**kw):checks.append(dict(check=name,passed=bool(value),**kw))
+     def read(name,dtype):return np.fromfile(src/(name+'.bin'),dtype)
+@@ -41,6 +42,11 @@ def validate(kind,case,out,backend='rocm'):
+             ii,jj=np.triu_indices(n) if c['triangle']==1 else np.tril_indices(n);expected[ii,jj]=prod[ii,jj]
+         else:expected[:m]=prod
+         actual=result('output',np.complex64).reshape(ldc,n,order='F');near('direct-complex-product',actual,expected)
++        written=np.zeros((ldc,n),dtype=bool)
++        if c['triangle']:written[ii,jj]=True
++        else:written[:m]=True
++        initial=read('C',np.complex64).reshape(ldc,n,order='F')
++        gate('untouched-complex-storage-bit-exact',np.array_equal(actual[~written].view(np.uint8),initial[~written].view(np.uint8)))
+         trace=result('trace',np.int32);gate('actual-real-SGEMM-count' if backend=='rocm' else 'native-CUDA-call-count',trace[0]==c['repeat']*(3 if backend=='rocm' else 1))
+     elif kind=='planar':
+         def unpack(name,rows,cols,ld):
+@@ -50,7 +56,16 @@ def validate(kind,case,out,backend='rocm'):
+         with np.errstate(over='ignore'):
+             xr=z.real.astype(np.float16);xi=z.imag.astype(np.float16)
+         for j in range(n):expected[j*ldc:j*ldc+m]=xi[:,j];expected[ldc*n+j*ldc:ldc*n+j*ldc+m]=xr[:,j]
+-        actual=result('output',np.float16);finite=np.isfinite(expected);spacing=np.abs(np.spacing(expected[finite]));delta=np.abs(actual[finite].astype(np.float64)-expected[finite].astype(np.float64));gate('finite-half-output-within-2ULP',actual.shape==expected.shape and np.all(delta<=2*spacing),max_abs=float(delta.max(initial=0)))
++        actual=result('output',np.float16);finite=np.isfinite(expected)
++        def ordered(v):
++            bits=v.view(np.uint16).astype(np.int32)
++            return np.where(bits&0x8000,0x8000-(bits&0x7fff),0x8000+bits)
++        distance=np.abs(ordered(actual[finite])-ordered(expected[finite]));delta=np.abs(actual[finite].astype(np.float64)-expected[finite].astype(np.float64))
++        gate('finite-half-output-within-2ULP',actual.shape==expected.shape and np.all(np.isfinite(actual[finite])) and np.all(distance<=2),max_abs=float(delta.max(initial=0)),max_ulp=int(distance.max(initial=0)))
++        active=np.zeros(actual.size,dtype=bool)
++        for j in range(n):active[j*ldc:j*ldc+m]=True;active[ldc*n+j*ldc:ldc*n+j*ldc+m]=True
++        initial=read('C',np.float16)
++        gate('untouched-half-storage-bit-exact',np.array_equal(actual[~active].view(np.uint16),initial[~active].view(np.uint16)))
+         gate('half-overflow-and-NaN-mask',np.array_equal(np.isposinf(actual),np.isposinf(expected)) and np.array_equal(np.isneginf(actual),np.isneginf(expected)) and np.array_equal(np.isnan(actual),np.isnan(expected)))
+         if case in ['original','repeat']:gate('original-negative-plane-offset-and-overflow',m==n==k==16 and np.all(np.isposinf(actual)),plane_offset_bytes=-2*ldc*n)
+     elif kind=='igemm':
+@@ -77,8 +92,17 @@ def validate(kind,case,out,backend='rocm'):
+         nrhs,batch=int(c['nrhs']),int(c['batch']);av=read('A',np.complex128).reshape(batch,lda*n);bv=read('B',np.complex128).reshape(batch,ldb*nrhs);fac=result('factor',np.complex128).reshape(batch,lda*n);solution=result('output',np.complex128).reshape(batch,ldb*nrhs);info=result('info',np.int32)
+         for h in range(batch):
+             aa=av[h].reshape(lda,n,order='F');bb=bv[h].reshape(ldb,nrhs,order='F');ff=fac[h].reshape(lda,n,order='F');xx=solution[h].reshape(ldb,nrhs,order='F');herm=np.tril(aa[:n],-1);herm=herm+herm.conj().T+np.diag(np.diag(aa[:n]).real)
+-            try:ll=np.linalg.cholesky(herm)
+-            except np.linalg.LinAlgError:gate('non-SPD-info-'+str(h),info[h]>0);continue
++            probe=np.array(aa[:n],order='F',copy=True);nn=ctypes.c_int(n);ld=ctypes.c_int(n);code=ctypes.c_int()
++            ctypes.CDLL(ctypes.util.find_library('lapack')).zpotrf_(ctypes.c_char_p(b'L'),ctypes.byref(nn),probe.ctypes.data_as(ctypes.c_void_p),ctypes.byref(ld),ctypes.byref(code),ctypes.c_size_t(1))
++            gate('independent-LAPACK-info-'+str(h),int(info[h])==code.value)
++            ii,jj=np.triu_indices(n,1)
++            gate('unused-upper-bit-exact-'+str(h),np.array_equal(ff[ii,jj].view(np.uint8),aa[ii,jj].view(np.uint8)))
++            gate('A-padding-bit-exact-'+str(h),np.array_equal(ff[n:].ravel().view(np.uint8),aa[n:].ravel().view(np.uint8)))
++            gate('B-padding-bit-exact-'+str(h),np.array_equal(xx[n:].ravel().view(np.uint8),bb[n:].ravel().view(np.uint8)))
++            if code.value>0:
++                gate('non-SPD-RHS-not-solved-'+str(h),np.array_equal(xx.ravel().view(np.uint8),bb.ravel().view(np.uint8)))
++                continue
++            ll=np.linalg.cholesky(herm)
+             gate('SPD-info-zero-'+str(h),info[h]==0);lower=np.tril(ff[:n]);near('Cholesky-reconstruction-'+str(h),lower@lower.conj().T,herm,5e-12,2e-12);near('independent-factor-'+str(h),lower,ll,5e-12,2e-12);near('independent-solution-'+str(h),xx[:n],np.linalg.solve(herm,bb[:n]),5e-12,2e-12);near('A-X-equals-B-'+str(h),herm@xx[:n],bb[:n],5e-12,2e-12);ii,jj=np.triu_indices(n,1);near('unused-upper-'+str(h),ff[ii,jj],aa[ii,jj],0,0);near('A-padding-'+str(h),ff[n:],aa[n:],0,0);near('B-padding-'+str(h),xx[n:],bb[n:],0,0)
+     else:
+         a=read('A',np.float64).reshape(lda,n,order='F');b=read('B',np.float64).reshape(ldb,n,order='F');actual=result('output',np.float64).reshape(ldb,n,order='F');lower=np.tril(a[:n]);expected=np.linalg.solve(lower.T,b[:m].T).T;near('right-lower-TRSM',actual[:m],expected,5e-12,2e-12);near('X-L-equals-B',actual[:m]@lower,b[:m],5e-12,2e-12);near('B-padding',actual[m:],b[m:],0,0);near('A-unchanged',result('A_after',np.float64),a.ravel(order='F'),0,0)
+@@ -92,6 +116,6 @@ def validate(kind,case,out,backend='rocm'):
+ if __name__=='__main__':
+     import argparse
+     from experiment import write
+-    p=argparse.ArgumentParser();p.add_argument('--kind',required=True);p.add_argument('--case',required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--report',type=Path,required=True);p.add_argument('--backend',default='rocm');a=p.parse_args()
+-    report=validate(a.kind,a.case,a.output,a.backend);write(a.report,report)
++    p=argparse.ArgumentParser();p.add_argument('--kind',required=True);p.add_argument('--case',required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--input',type=Path,required=True);p.add_argument('--report',type=Path,required=True);p.add_argument('--backend',default='rocm');a=p.parse_args()
++    report=validate(a.kind,a.case,a.output,a.backend,a.input);write(a.report,report)
+     print(json.dumps(report));raise SystemExit(0 if report['status']=='PASSED' else 1)
+diff --git a/tools/moat/inventory.py b/tools/moat/inventory.py
+index 2d97bb92..37164515 100644
+--- a/tools/moat/inventory.py
++++ b/tools/moat/inventory.py
+@@ -36,6 +36,15 @@ def phase(s):
+ 
+ 
+ def main():
++    from bootstrap import validate_existing
++    lock_path=ROOT/'migration/moat/lock.json'
++    if lock_path.exists():validate_existing(ROOT)
++    task_path=ROOT/'migration/moat/tasks.json'
++    prior=json.loads(task_path.read_text()) if task_path.exists() else {}
++    previous={r['sample_id']:r for r in prior.get('tasks',[])}
++    spec_path=ROOT/'migration/rewrite/first-eight.json'
++    old_spec=json.loads(spec_path.read_text()) if spec_path.exists() else {}
++    prior_profiles={p['sample_id']:p for p in old_spec.get('profiles',[])}
+     cat=json.loads((ROOT/'migration/samples.yaml').read_text())
+     samples=cat['samples']; tasks=[]; routes=[]
+     names=['hipBLASLt','hipSPARSELt','hipBLAS','rocBLAS','hipSOLVER','rocSOLVER',
+@@ -44,16 +53,24 @@ def main():
+     libraries={name:dict(id=name,version=None,status='CANDIDATE',qualified_samples=[],
+                          observation_scope='Existing catalog only; per-run dependencies recorded separately')
+                for name in names}
++    library_path=ROOT/'migration/libraries.json'
++    old_libraries=json.loads(library_path.read_text()) if library_path.exists() else {}
++    for row in old_libraries.get('libraries',[]):
++        libraries[row['id']]=dict(libraries.get(row['id'],{}),**row)
+     for s in samples:
+-        tasks.append(dict(sample_id=s['id'],source=s['source'],family=s['family'],
++        task=dict(sample_id=s['id'],source=s['source'],family=s['family'],
+             primary_phase=phase(s),baseline_status=s['status'],state='OWED' if s['status']!='PASSED' else 'HISTORICAL_QUALIFIED',
+             reason_code=s['reason_code'],reason=s['reason'],retry_condition=s.get('retry_condition'),
+             implementation=s.get('implementation'),selected_validation=s.get('selected_validation'),
+-            required_cases=s['required_cases'],prerequisites=[],experiments=[]))
++            required_cases=s['required_cases'],prerequisites=[],experiments=[])
++        if s['id'] in previous:
++            task.update(previous[s['id']])
++        task.update(current_status=s['status'],current_reason=s['reason'],implementation=s.get('implementation'))
++        tasks.append(task)
+         actual=s.get('actual_library') or ''
+         components=[n for n in names if re.search(r'(?<![A-Za-z])'+re.escape(n)+r'(?![A-Za-z])',actual,re.I)]
+         for n in components:
+-            if s['status']=='PASSED':libraries[n]['qualified_samples'].append(s['id'])
++            if s['status']=='PASSED' and s['id'] not in libraries[n]['qualified_samples']:libraries[n]['qualified_samples'].append(s['id'])
+         routes.append(dict(sample_id=s['id'],route_id=s['id']+'::catalog',
+             actual_library=s.get('actual_library'),backend_library=s.get('backend_library'),
+             candidate_libraries=s['candidate_libraries'],components=components,
+@@ -66,19 +83,20 @@ def main():
+         modules={k:dict(candidates=v) for k,v in CANDIDATES.items()}))
+     write(ROOT/'migration/backend-routes.json',dict(schema_version=1,routes=routes))
+     write(ROOT/'migration/moat/tasks.json',dict(schema_version=1,
+-        baseline_catalog_sha256=digest(ROOT/'migration/samples.yaml'),tasks=tasks,
++        baseline_catalog_sha256=prior.get('baseline_catalog_sha256',digest(ROOT/'migration/samples.yaml')),tasks=tasks,
+         phase_counts=dict(collections.Counter(x['primary_phase'] for x in tasks))))
+     specs=[]
+     for batch,kind,source in TARGETS:
+         s=next(x for x in samples if x['source']==source)
+-        specs.append(dict(batch=batch,kind=kind,source=source,sample_id=s['id'],
++        profile=dict(batch=batch,kind=kind,source=source,sample_id=s['id'],
+             original_sha256=digest(ROOT/source),
+             cases=['original','changed-values','irregular','layout','repeat','boundary'],
+-            state='PLANNED',numeric_rule='Integer exact; floating scaled error/residual; original half overflow explicitly checked'))
++            state='PLANNED',numeric_rule='Integer exact; floating scaled error/residual; original half overflow explicitly checked')
++        profile.update(prior_profiles.get(s['id'],{}));specs.append(profile)
+     write(ROOT/'migration/rewrite/first-eight.json',dict(schema_version=1,profiles=specs))
+     control=ROOT.parent/'MOAT_CUDALibrarySamples_ROCm'
+     skill=control/'.claude/skills/cuda-to-rocm/SKILL.md'
+-    write(ROOT/'migration/moat/lock.json',dict(schema_version=1,
++    if not lock_path.exists():write(lock_path,dict(schema_version=1,
+         control_checkout='../MOAT_CUDALibrarySamples_ROCm',
+         upstream_url='https://github.com/AMD-Ecosystem/moat',
+         upstream_commit='7b5082cc516c61b91038295346adbe8a1b5d8315',
+@@ -88,8 +106,6 @@ def main():
+         required_profile='linux-gfx1201-rocm10.1',
+         unverified_platforms=['wave64','windows'],
+         state_sync='local bare origin; no writes to AMD-Ecosystem upstream'))
+-    shutil.copyfile(ROOT.parent/'doc/cuda_samples_on_rocm_moat_rewrite_plan.md',
+-                    ROOT/'migration/moat-rewrite-plan.md')
+     print(json.dumps(dict(samples=len(tasks),pending=sum(x['baseline_status']!='PASSED' for x in tasks),
+         modules=len(CANDIDATES),phases=collections.Counter(x['primary_phase'] for x in tasks))))
+ 
+diff --git a/tools/moat/mathdx_native.py b/tools/moat/mathdx_native.py
+index 5778b168..5498b18d 100644
+--- a/tools/moat/mathdx_native.py
++++ b/tools/moat/mathdx_native.py
+@@ -9,7 +9,7 @@ history=ROOT/'migration/reports/rewrite-native-mathdx.json';previous=json.loads(
+ results.update(previous)
+ for profile in spec:
+  if args.only and profile['kind'] not in args.only:continue
+- kind=profile['kind'];original=ROOT/profile['source'];e=Experiment('R2',profile['sample_id'],'cuda-native-MathDx',sources=[original,Path(__file__),ROOT/'tools/moat/native_mathdx_capture.hpp'],parent=previous.get(kind,{}).get('experiment_id'),hypothesis='Run original MathDx source with SDK 26.06.1 with vendored CuTe, explicit SM120 dispatch and relocatable-device/LTO linking to libcusolverdx.a plus the original host error_checking.cpp helper; retain native input/output and launch traits before the host reference changes buffers.')
++ kind=profile['kind'];original=ROOT/profile['source'];e=Experiment('R2',profile['sample_id'],'cuda-native-MathDx',sources=[original,Path(__file__),ROOT/'tools/moat/native_mathdx_capture.hpp'],parent=previous.get(kind,{}).get('experiment_id'),hypothesis='Run original MathDx source with SDK 26.06.1 with vendored CuTe, explicit SM120 dispatch and relocatable-device/LTO linking to libcusolverdx.a plus original error_checking.cpp compiled as CUDA, matching CUDA header requirements, with the device archive selected by -L/-l rather than parsed as CUDA source; retain native input/output and launch traits before the host reference changes buffers.')
+  generated=e.path/'src'/profile['source'];generated.parent.mkdir(parents=True);text='#include "native_mathdx_capture.hpp"\n'+original.read_text()
+  load='native_emit("input_A",A'+(',size_t(batches)*one_batch_size_A' if kind in ['posv','trsm'] else '')+');\n'
+  if kind in ['posv','trsm']:load+='native_emit("input_B",B,size_t(batches)*one_batch_size_B);\n'
+@@ -26,7 +26,7 @@ for profile in spec:
+   f.add(generated,arcname=profile['source']);f.add(ROOT/'tools/moat/native_mathdx_capture.hpp',arcname='native_mathdx_capture.hpp')
+   f.add(ROOT/'MathDx/cuSolverDx/common',arcname='MathDx/cuSolverDx/common')
+   if (ROOT/'MathDx/common').exists():f.add(ROOT/'MathDx/common',arcname='MathDx/common')
+- commands=[(['ssh',host,shlex.join(['mkdir','-p',remote+'/outputs'])],'prepare'),(['scp',str(bundle),host+':'+remote+'/source.tar.gz'],'upload'),(['ssh',host,shlex.join(['tar','-xzf',remote+'/source.tar.gz','-C',remote])],'unpack'),(['ssh',host,shlex.join(['/usr/local/cuda-13.4/bin/nvcc','-std=c++17','-O2','--expt-relaxed-constexpr','--extended-lambda','-arch=sm_120','-DCUSOLVERDX_EXAMPLE_ENABLE_SM_120','-rdc=true','-dlto','-I'+sdkinclude,'-I'+str(Path(sdkinclude).parent/'external/cutlass/include'),'-I'+remote,remote+'/'+profile['source'],remote+'/MathDx/cuSolverDx/common/error_checking.cpp',str(Path(sdkinclude).parent/'lib/libcusolverdx.a'),'-lcublas','-lcusolver','-o',remote+'/native'])],'build')]
++ commands=[(['ssh',host,shlex.join(['mkdir','-p',remote+'/outputs'])],'prepare'),(['scp',str(bundle),host+':'+remote+'/source.tar.gz'],'upload'),(['ssh',host,shlex.join(['tar','-xzf',remote+'/source.tar.gz','-C',remote])],'unpack'),(['ssh',host,shlex.join(['/usr/local/cuda-13.4/bin/nvcc','-std=c++17','-O2','-x','cu','--expt-relaxed-constexpr','--extended-lambda','-arch=sm_120','-DCUSOLVERDX_EXAMPLE_ENABLE_SM_120','-rdc=true','-dlto','-I'+sdkinclude,'-I'+str(Path(sdkinclude).parent/'external/cutlass/include'),'-I'+remote,remote+'/'+profile['source'],remote+'/MathDx/cuSolverDx/common/error_checking.cpp','-L'+str(Path(sdkinclude).parent/'lib'),'-lcusolverdx','-lcublas','-lcusolver','-o',remote+'/native'])],'build')]
+  rc=0
+  for cmd,phase in commands:
+   rc=e.command(cmd,phase,timeout=240)
+diff --git a/tools/moat/recover.py b/tools/moat/recover.py
+index 64ba723a..861b068c 100644
+--- a/tools/moat/recover.py
++++ b/tools/moat/recover.py
+@@ -1,16 +1,20 @@
+ #!/usr/bin/env python3
+ """Seal an explicitly identified, abandoned initialization; do not infer GPU results."""
+-import argparse,json,shutil
++import argparse,json,shutil,os,signal,platform,time
+ from pathlib import Path
+-from experiment import ROOT,digest,write,now,append,INDEX
++from experiment import ROOT,digest,write,now,append,INDEX,recorder_alive,process_start
+ p=argparse.ArgumentParser();p.add_argument('--target',type=Path,required=True);p.add_argument('--reason',required=True);a=p.parse_args();d=a.target.resolve()
+ if not d.is_relative_to(ROOT/'artifacts/rewrite') or (d/'sealed.json').exists():raise SystemExit('Only unsealed project attempts can be recovered')
+ m=json.loads((d/'manifest.json').read_text())
+-if m.get('experiment_outcome')!='RUNNING':raise SystemExit('Attempt is already terminal')
+-if m.get('recorder_pid'):raise SystemExit('Explicit process verification required for attempts with a recorder PID')
++if m.get('recorder_pid') and recorder_alive(m) is not False:raise SystemExit('Recorder is alive or cannot be verified dead; refusing recovery')
++child=d/'subprocess.json'
++if child.exists():
++    c=json.loads(child.read_text())
++    if c.get('hostname')==platform.node() and process_start(c['pid'])==c.get('start_ticks'):
++        os.killpg(c['pid'],signal.SIGKILL)
+ shutil.copyfile(d/'manifest.json',d/'manifest.before-recovery.json')
+-m.update(experiment_outcome='INITIALIZATION_ERROR',finished_at_utc=now(),reason=a.reason,raw_artifact_dir=str(d.relative_to(ROOT)),eligible_for_sample_pass=False)
+-write(d/'manifest.json',m);write(d/'recovery.json',dict(observed_reason=a.reason,numerical_result='NOT_RUN',note='Recovered an abandoned constructor before any subprocess; no reconstructed stdout/stderr.'))
+-append(INDEX,dict(event='recovered-initialization',timestamp_utc=now(),experiment_id=m['experiment_id'],evidence=str(d.relative_to(ROOT)),reason=a.reason))
++m.update(experiment_outcome='INTERRUPTED' if m.get('recorder_pid') else 'INITIALIZATION_ERROR',previous_outcome=m.get('experiment_outcome'),finished_at_utc=now(),reason=a.reason,raw_artifact_dir=str(d.relative_to(ROOT)),eligible_for_sample_pass=False)
++write(d/'manifest.json',m);write(d/'recovery.json',dict(observed_reason=a.reason,numerical_result='NOT_QUALIFIED',note='Recorder confirmed dead or abandoned before subprocess initialization; preserve existing streams without reconstructing results.'))
++append(INDEX,dict(event='recovered-interruption',timestamp_utc=now(),experiment_id=m['experiment_id'],evidence=str(d.relative_to(ROOT)),reason=a.reason))
+ write(d/'sealed.json',dict(schema_version=1,files={str(q.relative_to(d)):dict(sha256=digest(q),bytes=q.stat().st_size) for q in d.rglob('*') if q.is_file()}))
+-archive=ROOT/'migration/reports/evidence'/d.relative_to(ROOT/'artifacts');shutil.copytree(d,archive);print(archive.relative_to(ROOT))
++archive=ROOT/'migration/reports/evidence'/d.relative_to(ROOT/'artifacts');shutil.copytree(d,archive,ignore=lambda directory,names:[n for n in names if (Path(directory)/n).is_file() and ((Path(directory)/n).stat().st_size>4*1024*1024 or Path(n).suffix in {'.bin','.o','.so'})]);print(archive.relative_to(ROOT))
+diff --git a/tools/moat/run_first.py b/tools/moat/run_first.py
+index be904d46..6e8fabb7 100644
+--- a/tools/moat/run_first.py
++++ b/tools/moat/run_first.py
+@@ -5,7 +5,7 @@ import shutil
+ from pathlib import Path
+ from experiment import Experiment,ROOT,write,digest
+ from snapshot import capture
+-p=argparse.ArgumentParser();p.add_argument('--only',nargs='*',default=[]);a=p.parse_args()
++p=argparse.ArgumentParser();p.add_argument('--only',nargs='*',default=[]);p.add_argument('--cases',nargs='*',default=[]);a=p.parse_args()
+ spec=json.loads((ROOT/'migration/rewrite/first-eight.json').read_text())['profiles'];builds=json.loads((ROOT/'migration/reports/rewrite-first-builds.json').read_text());observed=capture()
+ library_hashes={}
+ report=ROOT/'migration/reports/rewrite-first-rocm.json';records=json.loads(report.read_text()) if report.exists() else {}
+@@ -16,6 +16,7 @@ for profile in spec:
+  if build['status']!='BUILT':continue
+  if any(digest(ROOT/name)!=sha for name,sha in build['dependencies'].items() if name.startswith('rocm/')):raise RuntimeError('compiled source dependencies changed '+kind)
+  for case in profile['cases']:
++  if a.cases and case not in a.cases:continue
+   fixture=ROOT/'tests/fixtures/rewrite-first'/kind/case;mh=digest(fixture/'manifest.json')
+   e=Experiment(profile['batch'],profile['sample_id'],'rocm',case=case,
+       sources=[ROOT/'rocm/ported'/profile['source'],Path(__file__)]+[ROOT/name for name in build['dependencies']],
+@@ -23,7 +24,7 @@ for profile in spec:
+   write(e.path/'backend.observed.json',observed);shutil.copytree(fixture,e.path/'inputs')
+   out=e.path/'outputs';out.mkdir()
+   rc=e.command([str(ROOT/build['binary'])],'run',timeout=180,
+-       env=dict(REWRITE_INPUT=str(fixture),REWRITE_OUTPUT=str(out)))
++       env=dict(REWRITE_INPUT=str(e.path/'inputs'),REWRITE_OUTPUT=str(out)))
+   loaded=[]
+   for line in (e.path/e.commands[-1]['stdout']).read_text().splitlines():
+    if line.startswith('loaded-library '):
+@@ -34,7 +35,7 @@ for profile in spec:
+   write(e.path/'libraries.loaded.json',loaded)
+   write(out/'manifest.json',dict(files={q.name:dict(sha256=digest(q),bytes=q.stat().st_size) for q in out.iterdir() if q.is_file()}))
+   record=dict(kind=kind,case=case,return_code=rc,output=str(out.relative_to(ROOT)),experiment_id=e.id,
+-      comparison_id=e.meta['comparison_id'],input_manifest_sha256=mh,build=build)
++      comparison_id=e.meta['comparison_id'],input_manifest_sha256=mh,input_snapshot=str((e.path/'inputs').relative_to(ROOT)),build=build)
+   record['evidence']=e.finish('EXECUTED' if rc==0 else 'RUNTIME_ERROR',reason=None if rc==0 else f'run exit {rc}')
+   records[kind+'/'+case]=record;write(report,records)
+   print(kind,case,rc,record['evidence'],flush=True)
+diff --git a/tools/moat/test_experiment.py b/tools/moat/test_experiment.py
+index 914edee6..97c4e0ac 100644
+--- a/tools/moat/test_experiment.py
++++ b/tools/moat/test_experiment.py
+@@ -1,7 +1,8 @@
+ #!/usr/bin/env python3
+ """Exercise failed processes, timeouts, seal refusal and evidence tampering."""
+-import shutil,sys,unittest
+-from experiment import Experiment,ROOT
++import shutil,sys,unittest,json,subprocess,time,os,signal
++from unittest.mock import patch
++from experiment import Experiment,ROOT,digest,recorder_alive
+ from audit import check
+ 
+ class RecorderContract(unittest.TestCase):
+@@ -26,4 +27,33 @@ class RecorderContract(unittest.TestCase):
+         e.finish('TIMEOUT',reason='Deliberate CPU timeout for recorder self-test')
+         self.assertEqual(check(e.path),[])
+ 
++    def test_external_source_object_is_mandatory(self):
++        e=Experiment('P0','recorder-object-contract','host',sources=[__file__])
++        e.finish('EXECUTED')
++        obj=next(iter(json.loads((e.path/'source.json').read_text())['source_objects'].values()))
++        from pathlib import Path
++        original=Path.is_file
++        with patch.object(Path,'is_file',lambda p:False if p==ROOT/obj else original(p)):
++            self.assertTrue(any(x.startswith('source-object:') for x in check(e.path)))
++        self.assertEqual(check(e.path),[])
++
++    def test_sigkill_recorder_recovers_streams(self):
++        code='from experiment import Experiment;import sys;e=Experiment("P0","recorder-killed-contract","host",sources=[]);print(e.path,flush=True);e.command([sys.executable,"-u","-c","import time;print(\\\"child-stream-proof\\\",flush=True);time.sleep(120)"],"interrupted-child")'
++        proc=subprocess.Popen([sys.executable,'-c',code],cwd=ROOT/'tools/moat',stdout=subprocess.PIPE,text=True)
++        from pathlib import Path
++        target=Path(proc.stdout.readline().strip())
++        for _ in range(100):
++            logs=list((target/'logs').glob('*.stdout.log'))
++            if logs and 'child-stream-proof' in logs[0].read_text():break
++            time.sleep(.02)
++        self.assertTrue(recorder_alive(json.loads((target/'manifest.json').read_text())))
++        denied=subprocess.run([sys.executable,str(ROOT/'tools/moat/recover.py'),'--target',str(target),'--reason','test active refusal'],capture_output=True)
++        self.assertNotEqual(denied.returncode,0)
++        os.kill(proc.pid,signal.SIGKILL);proc.wait()
++        self.assertFalse(recorder_alive(json.loads((target/'manifest.json').read_text())))
++        recovered=subprocess.run([sys.executable,str(ROOT/'tools/moat/recover.py'),'--target',str(target),'--reason','Deliberate recorder SIGKILL for recovery contract'],capture_output=True,text=True)
++        self.assertEqual(recovered.returncode,0,recovered.stderr)
++        self.assertEqual(json.loads((target/'manifest.json').read_text())['experiment_outcome'],'INTERRUPTED')
++        self.assertIn('child-stream-proof',logs[0].read_text());self.assertEqual(check(target),[])
++
+ if __name__=='__main__':unittest.main()
+diff --git a/tools/moat/validate_first.py b/tools/moat/validate_first.py
+index ddcea92a..f7d28be4 100644
+--- a/tools/moat/validate_first.py
++++ b/tools/moat/validate_first.py
+@@ -4,15 +4,17 @@ import json
+ import sys
+ from pathlib import Path
+ from experiment import Experiment,ROOT,write,digest
++from inputs import copy_run_inputs
+ p=argparse.ArgumentParser();p.add_argument('--only',nargs='*',default=[]);p.add_argument('--cases',nargs='*',default=[]);p.add_argument('--backend',default='rocm');a=p.parse_args()
+ records=json.loads((ROOT/f'migration/reports/rewrite-first-{a.backend}.json').read_text());dest=ROOT/f'migration/reports/rewrite-first-{a.backend}-validation.json';results=json.loads(dest.read_text()) if dest.exists() else {}
+ for key,r in records.items():
+  if a.only and r['kind'] not in a.only:continue
+  if a.cases and r['case'] not in a.cases:continue
+  if r['return_code']!=0:continue
+- e=Experiment('R1' if r['kind'] in ['gemm3m','herk3m','syrk3m','planar','igemm'] else 'R2',key,'cpu-validation',sources=[ROOT/'tools/moat/first_reference.py'],parent=r['experiment_id'],comparison_id=r['comparison_id'])
++ e=Experiment('R1' if r['kind'] in ['gemm3m','herk3m','syrk3m','planar','igemm'] else 'R2',key,'cpu-validation',sources=[ROOT/'tools/moat/first_reference.py',ROOT/'tools/moat/inputs.py'],parent=r['experiment_id'],comparison_id=r['comparison_id'])
++ snapshot=copy_run_inputs(r,e.path/'inputs')
+  report=e.path/'cpu-report.json'
+- rc=e.command([sys.executable,str(ROOT/'tools/moat/first_reference.py'),'--kind',r['kind'],'--case',r['case'],'--output',str(ROOT/r['output']),'--report',str(report),'--backend',a.backend],'independent-cpu',timeout=120)
++ rc=e.command([sys.executable,str(ROOT/'tools/moat/first_reference.py'),'--kind',r['kind'],'--case',r['case'],'--output',str(ROOT/r['output']),'--input',str(snapshot),'--report',str(report),'--backend',a.backend],'independent-cpu',timeout=120)
+  validation=json.loads(report.read_text()) if report.exists() else dict(status='FAILED',checks=[dict(check='oracle-executed',passed=False)])
+  evidence=e.finish('PASSED' if rc==0 else 'NUMERIC_MISMATCH',validation=validation,reason=None if rc==0 else 'independent reference check failed')
+  results[key]=dict(**validation,evidence=evidence,run=r,experiment_id=e.id,validation_source_sha256=digest(ROOT/'tools/moat/first_reference.py'));write(dest,results)

@@ -10,8 +10,9 @@ sys.path.insert(0,str(ROOT/'build/python-reference'))
 import numpy as np
 
 
-def validate(kind,case,out,backend='rocm'):
-    src=ROOT/'tests/fixtures/rewrite-first'/kind/case;c=json.loads((src/'config.json').read_text());checks=[]
+def validate(kind,case,out,backend='rocm',inputs=None):
+    src=Path(inputs) if inputs else out.parent/'inputs'
+    c=json.loads((src/'config.json').read_text());checks=[]
     m,n,k,lda,ldb,ldc=[int(c[x]) for x in ['m','n','k','lda','ldb','ldc']]
     def gate(name,value,**kw):checks.append(dict(check=name,passed=bool(value),**kw))
     def read(name,dtype):return np.fromfile(src/(name+'.bin'),dtype)
@@ -41,6 +42,11 @@ def validate(kind,case,out,backend='rocm'):
             ii,jj=np.triu_indices(n) if c['triangle']==1 else np.tril_indices(n);expected[ii,jj]=prod[ii,jj]
         else:expected[:m]=prod
         actual=result('output',np.complex64).reshape(ldc,n,order='F');near('direct-complex-product',actual,expected)
+        written=np.zeros((ldc,n),dtype=bool)
+        if c['triangle']:written[ii,jj]=True
+        else:written[:m]=True
+        initial=read('C',np.complex64).reshape(ldc,n,order='F')
+        gate('untouched-complex-storage-bit-exact',np.array_equal(actual[~written].view(np.uint8),initial[~written].view(np.uint8)))
         trace=result('trace',np.int32);gate('actual-real-SGEMM-count' if backend=='rocm' else 'native-CUDA-call-count',trace[0]==c['repeat']*(3 if backend=='rocm' else 1))
     elif kind=='planar':
         def unpack(name,rows,cols,ld):
@@ -50,7 +56,16 @@ def validate(kind,case,out,backend='rocm'):
         with np.errstate(over='ignore'):
             xr=z.real.astype(np.float16);xi=z.imag.astype(np.float16)
         for j in range(n):expected[j*ldc:j*ldc+m]=xi[:,j];expected[ldc*n+j*ldc:ldc*n+j*ldc+m]=xr[:,j]
-        actual=result('output',np.float16);finite=np.isfinite(expected);spacing=np.abs(np.spacing(expected[finite]));delta=np.abs(actual[finite].astype(np.float64)-expected[finite].astype(np.float64));gate('finite-half-output-within-2ULP',actual.shape==expected.shape and np.all(delta<=2*spacing),max_abs=float(delta.max(initial=0)))
+        actual=result('output',np.float16);finite=np.isfinite(expected)
+        def ordered(v):
+            bits=v.view(np.uint16).astype(np.int32)
+            return np.where(bits&0x8000,0x8000-(bits&0x7fff),0x8000+bits)
+        distance=np.abs(ordered(actual[finite])-ordered(expected[finite]));delta=np.abs(actual[finite].astype(np.float64)-expected[finite].astype(np.float64))
+        gate('finite-half-output-within-2ULP',actual.shape==expected.shape and np.all(np.isfinite(actual[finite])) and np.all(distance<=2),max_abs=float(delta.max(initial=0)),max_ulp=int(distance.max(initial=0)))
+        active=np.zeros(actual.size,dtype=bool)
+        for j in range(n):active[j*ldc:j*ldc+m]=True;active[ldc*n+j*ldc:ldc*n+j*ldc+m]=True
+        initial=read('C',np.float16)
+        gate('untouched-half-storage-bit-exact',np.array_equal(actual[~active].view(np.uint16),initial[~active].view(np.uint16)))
         gate('half-overflow-and-NaN-mask',np.array_equal(np.isposinf(actual),np.isposinf(expected)) and np.array_equal(np.isneginf(actual),np.isneginf(expected)) and np.array_equal(np.isnan(actual),np.isnan(expected)))
         if case in ['original','repeat']:gate('original-negative-plane-offset-and-overflow',m==n==k==16 and np.all(np.isposinf(actual)),plane_offset_bytes=-2*ldc*n)
     elif kind=='igemm':
@@ -77,8 +92,17 @@ def validate(kind,case,out,backend='rocm'):
         nrhs,batch=int(c['nrhs']),int(c['batch']);av=read('A',np.complex128).reshape(batch,lda*n);bv=read('B',np.complex128).reshape(batch,ldb*nrhs);fac=result('factor',np.complex128).reshape(batch,lda*n);solution=result('output',np.complex128).reshape(batch,ldb*nrhs);info=result('info',np.int32)
         for h in range(batch):
             aa=av[h].reshape(lda,n,order='F');bb=bv[h].reshape(ldb,nrhs,order='F');ff=fac[h].reshape(lda,n,order='F');xx=solution[h].reshape(ldb,nrhs,order='F');herm=np.tril(aa[:n],-1);herm=herm+herm.conj().T+np.diag(np.diag(aa[:n]).real)
-            try:ll=np.linalg.cholesky(herm)
-            except np.linalg.LinAlgError:gate('non-SPD-info-'+str(h),info[h]>0);continue
+            probe=np.array(aa[:n],order='F',copy=True);nn=ctypes.c_int(n);ld=ctypes.c_int(n);code=ctypes.c_int()
+            ctypes.CDLL(ctypes.util.find_library('lapack')).zpotrf_(ctypes.c_char_p(b'L'),ctypes.byref(nn),probe.ctypes.data_as(ctypes.c_void_p),ctypes.byref(ld),ctypes.byref(code),ctypes.c_size_t(1))
+            gate('independent-LAPACK-info-'+str(h),int(info[h])==code.value)
+            ii,jj=np.triu_indices(n,1)
+            gate('unused-upper-bit-exact-'+str(h),np.array_equal(ff[ii,jj].view(np.uint8),aa[ii,jj].view(np.uint8)))
+            gate('A-padding-bit-exact-'+str(h),np.array_equal(ff[n:].ravel().view(np.uint8),aa[n:].ravel().view(np.uint8)))
+            gate('B-padding-bit-exact-'+str(h),np.array_equal(xx[n:].ravel().view(np.uint8),bb[n:].ravel().view(np.uint8)))
+            if code.value>0:
+                gate('non-SPD-RHS-not-solved-'+str(h),np.array_equal(xx.ravel().view(np.uint8),bb.ravel().view(np.uint8)))
+                continue
+            ll=np.linalg.cholesky(herm)
             gate('SPD-info-zero-'+str(h),info[h]==0);lower=np.tril(ff[:n]);near('Cholesky-reconstruction-'+str(h),lower@lower.conj().T,herm,5e-12,2e-12);near('independent-factor-'+str(h),lower,ll,5e-12,2e-12);near('independent-solution-'+str(h),xx[:n],np.linalg.solve(herm,bb[:n]),5e-12,2e-12);near('A-X-equals-B-'+str(h),herm@xx[:n],bb[:n],5e-12,2e-12);ii,jj=np.triu_indices(n,1);near('unused-upper-'+str(h),ff[ii,jj],aa[ii,jj],0,0);near('A-padding-'+str(h),ff[n:],aa[n:],0,0);near('B-padding-'+str(h),xx[n:],bb[n:],0,0)
     else:
         a=read('A',np.float64).reshape(lda,n,order='F');b=read('B',np.float64).reshape(ldb,n,order='F');actual=result('output',np.float64).reshape(ldb,n,order='F');lower=np.tril(a[:n]);expected=np.linalg.solve(lower.T,b[:m].T).T;near('right-lower-TRSM',actual[:m],expected,5e-12,2e-12);near('X-L-equals-B',actual[:m]@lower,b[:m],5e-12,2e-12);near('B-padding',actual[m:],b[m:],0,0);near('A-unchanged',result('A_after',np.float64),a.ravel(order='F'),0,0)
@@ -92,6 +116,6 @@ def validate(kind,case,out,backend='rocm'):
 if __name__=='__main__':
     import argparse
     from experiment import write
-    p=argparse.ArgumentParser();p.add_argument('--kind',required=True);p.add_argument('--case',required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--report',type=Path,required=True);p.add_argument('--backend',default='rocm');a=p.parse_args()
-    report=validate(a.kind,a.case,a.output,a.backend);write(a.report,report)
+    p=argparse.ArgumentParser();p.add_argument('--kind',required=True);p.add_argument('--case',required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--input',type=Path,required=True);p.add_argument('--report',type=Path,required=True);p.add_argument('--backend',default='rocm');a=p.parse_args()
+    report=validate(a.kind,a.case,a.output,a.backend,a.input);write(a.report,report)
     print(json.dumps(report));raise SystemExit(0 if report['status']=='PASSED' else 1)

@@ -1,0 +1,1 @@
+Test rocm-build for cuBLAS/Level-3/gemm3m::cublas_gemm3m_example.cu, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: none.

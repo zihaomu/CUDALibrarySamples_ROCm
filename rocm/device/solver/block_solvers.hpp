@@ -16,6 +16,7 @@ __device__ void lu_device(C32*a,int m,int n,int ld,int*piv,int*info){
 __global__ void lu_block(C32*a,int m,int n,int lda,int*piv,int*info,int*trace){
  __shared__ C32 s[65*64];__shared__ int ip[64],code;int ld=m+1;
  for(int t=threadIdx.x;t<ld*n;t+=blockDim.x)s[t]={-97,13};
+ __syncthreads();
  for(int t=threadIdx.x;t<m*n;t+=blockDim.x)s[t%m+(t/m)*ld]=a[t%m+(t/m)*lda];
  if(threadIdx.x==0)code=0;__syncthreads();lu_device(s,m,n,ld,ip,&code);
  for(int t=threadIdx.x;t<m*n;t+=blockDim.x)a[t%m+(t/m)*lda]=s[t%m+(t/m)*ld];
@@ -46,6 +47,7 @@ __global__ void posv_block(C64*a,C64*b,int n,int nrhs,int lda,int ldb,int*info,i
  C64*aa=a+batch*lda*n,*bb=b+batch*ldb*nrhs;
  for(int t=threadIdx.x;t<ld*n;t+=blockDim.x)s[t]={-97,13};
  for(int t=threadIdx.x;t<ld*nrhs;t+=blockDim.x)rhs[t]={-97,13};
+ __syncthreads();
  for(int t=threadIdx.x;t<n*n;t+=blockDim.x)s[t%n+(t/n)*ld]=aa[t%n+(t/n)*lda];
  for(int t=threadIdx.x;t<n*nrhs;t+=blockDim.x)rhs[t%n+(t/n)*ld]=bb[t%n+(t/n)*ldb];
  if(!threadIdx.x)code=0;__syncthreads();posv_device(s,rhs,n,nrhs,ld,ld,&code);
@@ -60,6 +62,7 @@ __global__ void trsm_block(const double*a,double*b,int m,int n,int lda,int ldb,i
  __shared__ double s[49*48],rhs[49*48];int al=n+1,bl=m+1;
  for(int t=threadIdx.x;t<al*n;t+=blockDim.x)s[t]=-97;
  for(int t=threadIdx.x;t<bl*n;t+=blockDim.x)rhs[t]=-97;
+ __syncthreads();
  for(int t=threadIdx.x;t<n*n;t+=blockDim.x)s[t%n+(t/n)*al]=a[t%n+(t/n)*lda];
  for(int t=threadIdx.x;t<m*n;t+=blockDim.x)rhs[t%m+(t/m)*bl]=b[t%m+(t/m)*ldb];
  __syncthreads();trsm_device(s,rhs,m,n,al,bl);
@@ -67,10 +70,16 @@ __global__ void trsm_block(const double*a,double*b,int m,int n,int lda,int ldb,i
  if(!threadIdx.x){int okay=1;for(int j=0;j<n;++j)okay&=s[n+j*al]==-97&&rhs[m+j*bl]==-97;trace[0]++;trace[1]=blockDim.x;trace[2]=warpSize;trace[3]=okay;}
 }
 inline int solver_main(const std::string&kind){try{
- Config c;identity();int m=c.get("m"),n=c.get("n"),lda=c.get("lda"),ldb=c.get("ldb"),batch=c.get("batch",1),nrhs=c.get("nrhs",1),threads=c.get("threads",256),repeat=c.get("repeat",1);
+ Config c;for(auto key:{"m","n","lda","ldb","batch","nrhs","threads","repeat"}){double v=c.get(key);if(!std::isfinite(v)||v!=std::floor(v)||v < -2147483647.0 || v > 2147483647.0)throw std::runtime_error("invalid integer solver descriptor");}
+ int m=c.get("m"),n=c.get("n"),lda=c.get("lda"),ldb=c.get("ldb"),batch=c.get("batch",1),nrhs=c.get("nrhs",1),threads=c.get("threads",256),repeat=c.get("repeat",1);
  if(m>64||n>64||nrhs>8||m<1||n<1)throw std::runtime_error("unsupported device shape");
  if(kind=="posv"&&n>32)throw std::runtime_error("unsupported POSV shared shape");
  if(kind=="trsm"&&(m>48||n>48))throw std::runtime_error("unsupported TRSM shared shape");
+ if(lda<1||lda>1024||ldb<0||ldb>1024||batch<1||batch>1024||nrhs<1||repeat<1||threads<1||threads>1024)throw std::runtime_error("invalid solver storage or launch descriptor");
+ if(kind=="lu"&&(lda<m||batch!=1))throw std::runtime_error("invalid LU leading dimension or batch");
+ if(kind=="posv"&&(m!=n||lda<n||ldb<n))throw std::runtime_error("invalid POSV leading dimension or square shape");
+ if(kind=="trsm"&&(lda<n||ldb<m||batch!=1))throw std::runtime_error("invalid TRSM leading dimension or batch");
+ identity();
  Buffer<int> trace(std::vector<int>{0,0,0,1});
  if(kind=="lu"){
   auto av=read<C32>("A",lda*n);Buffer<C32>a(av);Buffer<int>piv(std::min(m,n)),info(1);

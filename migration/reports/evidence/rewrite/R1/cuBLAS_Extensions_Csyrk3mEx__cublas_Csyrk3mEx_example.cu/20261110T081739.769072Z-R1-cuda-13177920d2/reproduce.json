@@ -1,0 +1,44 @@
+{
+  "commands": [
+    {
+      "command_id": 1,
+      "phase": "cuda-run",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "python3 /tmp/20261110T081645.634298Z-R1-R2-cuda-build-c73cafe501/tools/moat/cuda_remote_run.py --input /tmp/20261110T081645.634298Z-R1-R2-cuda-build-c73cafe501/tests/fixtures/rewrite-first/syrk3m/layout --output /tmp/20261110T081645.634298Z-R1-R2-cuda-build-c73cafe501/outputs/syrk3m/layout --binary /tmp/20261110T081645.634298Z-R1-R2-cuda-build-c73cafe501/reference --kind syrk3m"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-10T08:17:40.180474+00:00",
+      "timeout_seconds": 180,
+      "environment": {},
+      "stdout": "logs/0001-cuda-run.stdout.log",
+      "stderr": "logs/0001-cuda-run.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-10T08:17:42.352162+00:00",
+      "seconds": 2.170429530000547
+    },
+    {
+      "command_id": 2,
+      "phase": "collect",
+      "argv": [
+        "scp",
+        "-r",
+        "nvidia-5090x2:/tmp/20261110T081645.634298Z-R1-R2-cuda-build-c73cafe501/outputs/syrk3m/layout/.",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/R1/cuBLAS_Extensions_Csyrk3mEx__cublas_Csyrk3mEx_example.cu/20261110T081739.769072Z-R1-cuda-13177920d2/outputs"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-10T08:17:42.355996+00:00",
+      "timeout_seconds": 60,
+      "environment": {},
+      "stdout": "logs/0002-collect.stdout.log",
+      "stderr": "logs/0002-collect.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-10T08:17:42.672844+00:00",
+      "seconds": 0.3157301750034094
+    }
+  ],
+  "source": "source.json",
+  "inputs": "inputs/manifest.json",
+  "expected_environment": "environment.expected.json"
+}

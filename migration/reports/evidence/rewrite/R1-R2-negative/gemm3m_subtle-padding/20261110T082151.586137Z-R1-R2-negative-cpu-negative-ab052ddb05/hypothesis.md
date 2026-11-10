@@ -1,0 +1,1 @@
+Test cpu-negative for gemm3m/subtle-padding, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T081803.279010Z-R1-rocm-1aa237eff0.

@@ -1,0 +1,1 @@
+Test cpu-validation for trsm/boundary, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T081921.528696Z-R2-rocm-f9c0668579.

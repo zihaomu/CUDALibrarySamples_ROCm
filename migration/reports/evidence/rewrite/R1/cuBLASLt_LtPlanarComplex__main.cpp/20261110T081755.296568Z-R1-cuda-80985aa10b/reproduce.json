@@ -1,0 +1,44 @@
+{
+  "commands": [
+    {
+      "command_id": 1,
+      "phase": "cuda-run",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "python3 /tmp/20261110T081645.634298Z-R1-R2-cuda-build-c73cafe501/tools/moat/cuda_remote_run.py --input /tmp/20261110T081645.634298Z-R1-R2-cuda-build-c73cafe501/tests/fixtures/rewrite-first/planar/irregular --output /tmp/20261110T081645.634298Z-R1-R2-cuda-build-c73cafe501/outputs/planar/irregular --binary /tmp/20261110T081645.634298Z-R1-R2-cuda-build-c73cafe501/reference --kind planar"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-10T08:17:55.684866+00:00",
+      "timeout_seconds": 180,
+      "environment": {},
+      "stdout": "logs/0001-cuda-run.stdout.log",
+      "stderr": "logs/0001-cuda-run.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-10T08:17:57.855233+00:00",
+      "seconds": 2.1691205379902385
+    },
+    {
+      "command_id": 2,
+      "phase": "collect",
+      "argv": [
+        "scp",
+        "-r",
+        "nvidia-5090x2:/tmp/20261110T081645.634298Z-R1-R2-cuda-build-c73cafe501/outputs/planar/irregular/.",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/R1/cuBLASLt_LtPlanarComplex__main.cpp/20261110T081755.296568Z-R1-cuda-80985aa10b/outputs"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-10T08:17:57.856909+00:00",
+      "timeout_seconds": 60,
+      "environment": {},
+      "stdout": "logs/0002-collect.stdout.log",
+      "stderr": "logs/0002-collect.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-10T08:17:58.172662+00:00",
+      "seconds": 0.31486701100948267
+    }
+  ],
+  "source": "source.json",
+  "inputs": "inputs/manifest.json",
+  "expected_environment": "environment.expected.json"
+}

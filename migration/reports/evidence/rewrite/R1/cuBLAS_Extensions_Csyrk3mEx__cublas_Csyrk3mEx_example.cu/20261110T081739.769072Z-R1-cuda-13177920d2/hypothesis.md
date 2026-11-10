@@ -1,0 +1,1 @@
+Test cuda for cuBLAS/Extensions/Csyrk3mEx::cublas_Csyrk3mEx_example.cu, case layout. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T081645.634298Z-R1-R2-cuda-build-c73cafe501.

@@ -1,0 +1,1 @@
+Test cpu-validation for posv/nonspd-second-minor, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T081909.374767Z-R2-cuda-2b02224c4d.
