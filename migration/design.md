@@ -637,3 +637,10 @@ python3 tools/migration/render.py
 | `nvMatmulHeuristics` | 7 | 0 |
 | `nvTIFF` | 6 | 6 |
 | **合计** | **866** | **362** |
+
+
+### 2026-11-10 MOAT 重写阶段交付
+
+本轮新增21个整例资格并撤销1个旧C++排序错误资格，净增20：231 PASSED、23 PARTIAL、385 FAILED，117个功能族、18个模块。原始866源文件、477构建定义和639入口保持。R1/R2八例、R3两例、R4 CRC32、R5八个真实Fortran入口、R7两个真实packed sparse2:4已验收。16 CTest及fresh clone的21原始AMD profile/独立CPU复验通过，固定源码97dab620三方独立复审通过。
+
+R6仅完成专题研究和能力探针；R5仍有65个原前端及额外C++合同缺口。剩余408项逐一登记路线/原因/实验/成本/重试条件，不预记支持。详见 [MOAT实施计划](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/moat-rewrite-plan.md)、[R8交付报告](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/reports/rewrite-R8.md) 和 [逐项未支持清单](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/reports/rewrite-remaining-assessment.md)。原生库失败、CUDA工具链限制、原生数值失败与所有中断记录保留。

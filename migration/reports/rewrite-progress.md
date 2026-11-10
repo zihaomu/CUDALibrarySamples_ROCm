@@ -1,6 +1,6 @@
 # MOAT 重写实时进展
 
-更新时间：2026-11-10T12:14:27.809066+00:00。样例支持结论仍以 samples.yaml 为准。
+更新时间：2026-11-10T12:22:25.029424+00:00。样例支持结论仍以 samples.yaml 为准。
 
 | 批次 / 样例 | AMD 已运行 / CPU通过 | CUDA 已运行 / CPU通过 | 当前验收结论 |
 | --- | ---: | ---: | --- |
@@ -32,7 +32,7 @@ R1–R2完整记录：[批次验收](rewrite-R1-R2.md)。其它批次见下表�
 | R5 | 8 | 66 | PARTIALLY_IMPLEMENTED_65_FRONTENDS_PENDING；8个真实 Fortran 入口；65前端与额外CPP项待实现 |
 | R6 | 0 | 224 | ASSESSMENT_COMPLETE_PORTS_PENDING；224项专题研究与最小基础探针；未签发整例 |
 | R7 | 2 | 0 | COMPLETED_SCOPED；2个真实GPU packed sparse2:4 整例 |
-| R8 | 0 | 0 | IN_PROGRESS；总回归、依赖封存、干净检出与交付 |
+| R8 | 0 | 0 | COMPLETED_SCOPED；总回归、依赖封存、干净检出与交付 |
 
 新增资格21项，另撤销旧C++排序样例资格1项，支持211→231，净增20。当前231/639通过、408待支持；117功能族、18模块。
 
