@@ -1,0 +1,1 @@
+Test cpu-negative for herk3m/subtle-triangle, case layout. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T082622.529156Z-R1-rocm-2e16fbf2db.

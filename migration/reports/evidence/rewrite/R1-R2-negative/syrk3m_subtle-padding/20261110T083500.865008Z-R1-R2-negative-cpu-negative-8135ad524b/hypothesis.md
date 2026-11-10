@@ -1,0 +1,1 @@
+Test cpu-negative for syrk3m/subtle-padding, case layout. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T082635.084073Z-R1-rocm-85622b722a.

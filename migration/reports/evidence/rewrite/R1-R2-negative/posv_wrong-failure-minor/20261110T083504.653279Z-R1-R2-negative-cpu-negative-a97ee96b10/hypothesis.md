@@ -1,0 +1,1 @@
+Test cpu-negative for posv/wrong-failure-minor, case nonspd-second-minor. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T082720.896437Z-R2-rocm-1768f90832.

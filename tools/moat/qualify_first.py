@@ -7,10 +7,45 @@ from inputs import verify
 from audit import check
 
 def load(name):return json.loads((ROOT/'migration/reports'/name).read_text())
+
+REVIEW_PATHS=['rocm','tools/moat','cmake','.agents','AGENTS.md','migration/rewrite/first-eight.json','tests/fixtures/rewrite-first','tests/fixtures/rewrite-native-original']
+def review_identity(review):
+    commit=review.get('source_commit','')
+    if not commit:return False
+    try:
+        import subprocess
+        subprocess.run(['git','merge-base','--is-ancestor',commit,'HEAD'],cwd=ROOT,check=True,capture_output=True)
+        listing=git('ls-tree','-r',commit,'--',*REVIEW_PATHS).splitlines()
+        current=set(git('ls-tree','-r','--name-only','HEAD','--',*REVIEW_PATHS).splitlines())
+        expected={line.split('\t',1)[1]:line.split()[2] for line in listing}
+        if set(expected)!=current or git('ls-files','--others','--exclude-standard','--',*REVIEW_PATHS).strip():return False
+        # hash-object reads the current bytes, including uncommitted changes.
+        p=subprocess.run(['git','hash-object','--stdin-paths'],cwd=ROOT,input='\n'.join(expected)+'\n',capture_output=True,text=True,check=True)
+        return p.stdout.splitlines()==list(expected.values())
+    except (OSError,ValueError,subprocess.CalledProcessError):return False
+
+def auxiliary(evidence,required_sources,*,parent=None,comparison=None,input_hash=None,expected_outcome='PASSED'):
+    directory=ROOT/evidence
+    try:
+        if check(directory):return False
+        source=json.loads((directory/'source.json').read_text())['dependencies']
+        if any(source.get(n)!=digest(ROOT/n) for n in required_sources):return False
+        manifest=json.loads((directory/'manifest.json').read_text());validation=json.loads((directory/'validation.json').read_text())
+        if manifest['experiment_outcome']!=expected_outcome or not validation['checks'] or not all(c.get('passed') is True for c in validation['checks']):return False
+        if parent is not None and manifest['parent_experiment_id']!=parent:return False
+        if comparison is not None and manifest['comparison_id']!=comparison:return False
+        if manifest['experiment_id']!=directory.name:return False
+        if input_hash is not None:verify(ROOT/manifest['raw_artifact_dir']/'inputs',input_hash)
+        return True
+    except (OSError,KeyError,ValueError,TypeError):return False
 def collect(profile):
     kind=profile['kind'];checks=[];references=[]
     def gate(name,value,**fields):checks.append(dict(check=name,passed=bool(value),**fields))
-    review=load('rewrite-first-review.json');gate('independent-review',review.get('verdict')=='APPROVED' and not [r for r in review['findings'] if r['state']!='RESOLVED'])
+    required={'original','changed-values','irregular','layout','repeat','boundary'}
+    required |= {'half-max'} if kind=='planar' else {'wave-stress'} if kind=='lu' else {'nonspd-second-minor'} if kind=='posv' else set()
+    registered=json.loads((ROOT/'migration/rewrite/first-eight.json').read_text())['profiles']
+    gate('frozen-nonempty-complete-case-contract',set(profile['cases'])==required and len(profile['cases'])==len(required) and profile in registered)
+    review=load('rewrite-first-review.json');gate('independent-review',review.get('verdict')=='APPROVED' and not [r for r in review['findings'] if r['state']!='RESOLVED'] and review_identity(review))
     records={b:load(f'rewrite-first-{b}.json') for b in ['rocm','cuda']}
     validations={b:load(f'rewrite-first-{b}-validation.json') for b in ['rocm','cuda']}
     build=load('rewrite-first-builds.json')[kind]
@@ -24,6 +59,7 @@ def collect(profile):
             run=records[backend][key];validation=validations[backend][key]
             gate(backend+'/'+case+'/run',run['return_code']==0)
             gate(backend+'/'+case+'/current-validation',validation['status']=='PASSED' and validation.get('validation_source_sha256')==digest(ROOT/'tools/moat/first_reference.py') and validation['run']['experiment_id']==run['experiment_id'])
+            gate(backend+'/'+case+'/sealed-current-oracle',auxiliary(validation['evidence'],['tools/moat/first_reference.py','tools/moat/inputs.py'],parent=run['experiment_id'],comparison=run['comparison_id'],input_hash=run['input_manifest_sha256']))
             fixture=ROOT/'tests/fixtures/rewrite-first'/kind/case
             gate(backend+'/'+case+'/registered-input',digest(fixture/'manifest.json')==run['input_manifest_sha256'])
             verify(ROOT/run['input_snapshot'],run['input_manifest_sha256'])
@@ -36,18 +72,26 @@ def collect(profile):
                 gate(backend+'/'+case+'/locked-environment',observed['image_id']=='sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03' and observed['rocm_release']=='10.1.0' and bool(observed['devices']) and all(d['physical_id']!=3 for d in observed['devices']))
         gate(case+'/identical-three-way-input',pair[0]==pair[1])
     negative=load('rewrite-first-negative.json');own=[c for c in negative['checks'] if c['check'].startswith('reject-'+kind+'-')]
-    gate('actual-negative-checks',len(own)>=2 and all(c['passed'] for c in own));references += [c['evidence'] for c in own]
+    needed={'gemm3m':3,'herk3m':4,'syrk3m':4,'planar':4,'igemm':2,'lu':2,'posv':6,'trsm':2}[kind]
+    gate('actual-negative-checks',len(own)==needed and all(c['passed'] for c in own));references += [c['evidence'] for c in own]
+    for c in own:
+        run=records['rocm'].get(kind+'/'+c.get('case',''),{})
+        gate(c['check']+'/integrity-and-current-oracle',bool(run) and auxiliary(c['evidence'],['tools/moat/first_negative.py','tools/moat/first_reference.py','tools/moat/inputs.py'],parent=run.get('experiment_id'),comparison=run.get('comparison_id'),input_hash=run.get('input_manifest_sha256')))
     if profile['batch']=='R2':
         runtime=load('rewrite-first-runtime-checks.json');own=[r for r in runtime['tests'] if r['kind']==kind]
         gate('actual-invalid-descriptors',len(own)>=11 and all(r['passed'] for r in own));references += [r['evidence'] for r in own]
+        for r in own:gate('runtime/'+r['test']+'/current-build-and-checker',auxiliary(r['evidence'],['tools/moat/first_runtime_checks.py','rocm/device/solver/block_solvers.hpp'],parent=build['experiment_id'],expected_outcome='EXPECTED_REJECTION'))
         native=load('rewrite-native-mathdx-validation.json')[kind]
         gate('native-device-original-CPU-and-HIP',native['status']=='PASSED' and native['rocm']['experiment_id']==records['rocm'][kind+'/original']['experiment_id'])
+        gate('native-comparison-sealed-current-reference',auxiliary(native['evidence'],['tools/moat/validate_native_mathdx.py','tools/moat/first_reference.py','tools/moat/inputs.py'],parent=native['native']['experiment_id'],comparison=records['rocm'][kind+'/original']['comparison_id'],input_hash=records['rocm'][kind+'/original']['input_manifest_sha256']))
+        gate('native-source-sealed',not check(ROOT/native['native']['evidence']) and native['native']['original_sha256']==digest(ROOT/profile['source']) and native['native']['experiment_id']==load('rewrite-native-mathdx.json')[kind]['experiment_id'])
         references.append(native['evidence'])
     return checks,build,sorted(set(references))
 
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--apply',action='store_true');args=parser.parse_args()
     profiles=json.loads((ROOT/'migration/rewrite/first-eight.json').read_text())['profiles'];results=[]
+    if len(profiles)!=8 or {p['kind'] for p in profiles}!={'gemm3m','herk3m','syrk3m','planar','igemm','lu','posv','trsm'} or len({p['sample_id'] for p in profiles})!=8:raise SystemExit('Eight unique frozen sample profiles required')
     for p in profiles:
         checks,build,references=collect(p);passed=all(c['passed'] for c in checks)
         r=dict(sample_id=p['sample_id'],kind=p['kind'],status='PASSED' if passed else 'FAILED',checks=checks,source_commit=git('rev-parse','HEAD').strip(),implementation=build['implementation'],implementation_sha256=build['implementation_sha256'],dependencies=build['dependencies'],case_ids=p['cases'],case_count=len(p['cases']),evidence_references=references)

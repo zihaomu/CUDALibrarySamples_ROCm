@@ -16,7 +16,7 @@ tests += [('posv','nonspd-second-minor',mode) for mode in ['wrong-failure-minor'
 for kind,case,mode in tests:
  original=records[kind+'/'+case]
  if True:
-  e=Experiment('R1-R2-negative',kind+'/'+mode,'cpu-negative',sources=[Path(__file__),ROOT/'tools/moat/first_reference.py'],parent=original['experiment_id'])
+  e=Experiment('R1-R2-negative',kind+'/'+mode,'cpu-negative',case=case,sources=[Path(__file__),ROOT/'tools/moat/first_reference.py',ROOT/'tools/moat/inputs.py'],parent=original['experiment_id'],comparison_id=original['comparison_id'])
   snapshot=copy_run_inputs(original,e.path/'inputs');cfg=json.loads((snapshot/'config.json').read_text())
   if validate(kind,case,ROOT/original['output'],inputs=snapshot)['status']!='PASSED':raise RuntimeError('negative test requires a passing unchanged baseline: '+kind+'/'+case)
   out=e.path/'outputs';shutil.copytree(ROOT/original['output'],out)
@@ -37,5 +37,5 @@ for kind,case,mode in tests:
   write(out/'manifest.json',dict(injection=mode,files={p.name:dict(sha256=digest(p),bytes=p.stat().st_size) for p in out.glob('*.bin')}))
   report=e.path/'injected-check.json';rc=e.command([sys.executable,str(Path(__file__).resolve()),'--single',kind,case,str(out),str(report)],'reject-injected-error',timeout=90)
   check=dict(check='reject-'+kind+'-'+mode,passed=rc==0);evidence=e.finish('PASSED' if rc==0 else 'VALIDATOR_GAP',dict(checks=[check]),reason=None if rc==0 else 'corrupted output accepted')
-  results.append(dict(**check,evidence=evidence));print(kind,mode,rc,flush=True)
+  results.append(dict(**check,evidence=evidence,kind=kind,case=case,run_id=original['experiment_id'],comparison_id=original['comparison_id'],input_manifest_sha256=original['input_manifest_sha256']));print(kind,mode,rc,flush=True)
 write(ROOT/'migration/reports/rewrite-first-negative.json',dict(status='PASSED' if all(x['passed'] for x in results) else 'FAILED',checks=results))

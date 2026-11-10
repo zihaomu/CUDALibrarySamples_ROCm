@@ -1,0 +1,1 @@
+Test cpu-negative for planar/subtle-padding, case layout. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T082647.645494Z-R1-rocm-cedbbd6828.

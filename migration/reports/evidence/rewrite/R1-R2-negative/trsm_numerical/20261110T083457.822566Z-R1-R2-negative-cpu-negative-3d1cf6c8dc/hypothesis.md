@@ -1,0 +1,1 @@
+Test cpu-negative for trsm/numerical, case changed-values. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261110T082723.274987Z-R2-rocm-2cebd69721.
