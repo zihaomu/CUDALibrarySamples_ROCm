@@ -71,7 +71,7 @@ def main():
             task.update(previous[s['id']])
         task.update(current_status=s['status'],current_reason=s['reason'],implementation=s.get('implementation'),
                     selected_validation=s.get('selected_validation'),active_batch=s.get('active_batch'),required_cases=s['required_cases'])
-        if s['status']=='PASSED' and task['state'] in ['OWED','HISTORICAL_QUALIFIED','QUALIFIED']:
+        if s['status']=='PASSED' and task['state'] in ['OWED','HISTORICAL_QUALIFIED','QUALIFIED','ASSESSED_GAP_REMAINS']:
             task['state']='QUALIFIED' if s['reason_code']=='VALIDATED_MOAT_REWRITE' else 'HISTORICAL_QUALIFIED'
         elif task['state'] in ['QUALIFIED','HISTORICAL_QUALIFIED']:
             task['state']='OWED'
