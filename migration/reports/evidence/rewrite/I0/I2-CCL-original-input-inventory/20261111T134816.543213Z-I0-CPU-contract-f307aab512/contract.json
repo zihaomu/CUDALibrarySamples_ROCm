@@ -1,0 +1,119 @@
+{
+  "status": "OBSERVED",
+  "scope": "Original five images, individual and advanced heterogeneous batch labeling/compression; no new support qualification.",
+  "sources": [
+    {
+      "title": "NVIDIA LabelMarkers documentation",
+      "url": "https://docs.nvidia.com/cuda/archive/11.8.0/npp/group__image__filter__label__markers.html"
+    },
+    {
+      "title": "NVIDIA NPP+ filtering/contour geometry documentation",
+      "url": "https://docs.nvidia.com/cuda/nppplus/image_filtering_functions.html"
+    }
+  ],
+  "semantic": "Equal-valued connected regions, NormInf eight-neighbor and NormL1 four-neighbor semantics. UF API has no nMinVal exclusion parameter; zero-valued regions require explicit native/CPU investigation.",
+  "CLI": "Default five images, -b first 1..5 images, help; invalid/missing count must be rejected safely.",
+  "inputs": [
+    {
+      "file": "NPP/batchedLabelMarkersAndCompression/images/lena_512x512_8u.raw",
+      "bytes": 262144,
+      "sha256": "91aa283822bf4a1c3f9d53007fad6dc34a6f218798ea199eedd00d15a1708c71",
+      "values": [
+        0,
+        255
+      ],
+      "counts": [
+        168138,
+        94006
+      ]
+    },
+    {
+      "file": "NPP/batchedLabelMarkersAndCompression/images/CT_skull_512x512_8u.raw",
+      "bytes": 262144,
+      "sha256": "13a71ba09bc16fe42e20353c08ca094605dc8091d0fa29de8afcd35ade080940",
+      "values": [
+        0,
+        255
+      ],
+      "counts": [
+        82179,
+        179965
+      ]
+    },
+    {
+      "file": "NPP/batchedLabelMarkersAndCompression/images/PCB_METAL_509x335_8u.raw",
+      "bytes": 170515,
+      "sha256": "64dc6686b5ae544ea0db25c83cc080d5b662c200d745cca004974e296b13c85f",
+      "values": [
+        0,
+        7,
+        8,
+        73,
+        82,
+        91,
+        155,
+        164,
+        246,
+        247,
+        255
+      ],
+      "counts": [
+        40902,
+        768,
+        640,
+        11,
+        570,
+        124,
+        349,
+        688,
+        998,
+        928,
+        124537
+      ]
+    },
+    {
+      "file": "NPP/batchedLabelMarkersAndCompression/images/PCB2_1024x683_8u.raw",
+      "bytes": 699392,
+      "sha256": "17fe6f2101336af677b0ac28a79bf1e6e85183038e2f2b181d2e433dab5e406c",
+      "values": [
+        0,
+        255
+      ],
+      "counts": [
+        65195,
+        634197
+      ]
+    },
+    {
+      "file": "NPP/batchedLabelMarkersAndCompression/images/PCB_1280x720_8u.raw",
+      "bytes": 921600,
+      "sha256": "b3b869c6a101643e5d68c215201e94757e2573838772d723f6f17a77ebf6c29d",
+      "values": [
+        0,
+        255
+      ],
+      "counts": [
+        324348,
+        597252
+      ]
+    }
+  ],
+  "external_repro_candidate": [
+    [
+      0,
+      2,
+      0
+    ],
+    [
+      0,
+      2,
+      0
+    ],
+    [
+      1,
+      0,
+      1
+    ]
+  ],
+  "external_report_note": "An external 2026-10 NVIDIA forum repro suggests possible native component splitting; treat as an unconfirmed hypothesis until this environment is actually tested, never use incorrect vendor partitions as CPU truth."
+}

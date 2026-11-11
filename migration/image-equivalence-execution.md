@@ -101,11 +101,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-11T13:43:39.281751+00:00。26入口当前3通过/8部分/15失败。
+更新时间：2026-11-11T13:48:17.410241+00:00。26入口当前3通过/8部分/15失败。
 
-I1：资格13自测首轮因测试cache遗漏fixture-replay报告而拒绝正例，已补回必需报告（未降低覆盖门槛）重跑：PASSED；原失败保留。
+I0：I2 CCL原始合同准备：五输入/单图与异构batch/压缩、-b与help范围已核对，零值区域与真实分区语义需实测；官方文档和3x3外部回归候选记录，不以未确认厂商报告替代本机证据。
 
-证据：`migration/reports/evidence/rewrite/I1/C3-Canny-qualification-binding-tests/20261111T134334.521258Z-I1-CPU-selftest-f069c31963`
+证据：`migration/reports/evidence/rewrite/I0/I2-CCL-original-input-inventory/20261111T134816.543213Z-I0-CPU-contract-f307aab512`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

@@ -1,0 +1,807 @@
+{
+  "status": "PASSED",
+  "qualifications": [
+    {
+      "sample_id": "NPP/nppCanny::npp_canny_simple.cpp",
+      "kind": "image-canny-c3-full/cpp",
+      "status": "PASSED",
+      "implementation": "rocm/ported/NPP/nppCanny/npp_canny_simple.cpp",
+      "implementation_sha256": "1f3fb81cddadbc2dcba2da365ac5326de8b12f917a6a7d77051aec31f6c57ac7",
+      "dependencies": {
+        "rocm/common/image/canny_stages.h": "afd4be4bedbfc218a36169437f086f86ce82d6486e174db2bc534de208dce4b9",
+        "rocm/common/image/canny_stages.hip": "dd0a7b1c89003532626ad73e9f6355f866f015fad0d7cf6629aee92a2c6e06b6",
+        "rocm/common/image/connectivity.h": "f6a25d07f6f3f499b72f2877dfe4674f76e60410141f2f9462476843d4b871da",
+        "rocm/common/image/connectivity.hip": "fffe2c0096705d0fb8f8b6bc0770f15944bf526135c12c8f746b4ead4af3d412",
+        "rocm/common/image/image_memory.hpp": "4a24dd7cd8efc50e2b65d50fc1dfe872a9b8ba09654b6f220524cd64c1131f35",
+        "rocm/common/image/canny_color.h": "61c47bd84bbb9bca5bc507fcf63c54830b41b83de081b174f4ae7bd03192f275",
+        "rocm/common/image/canny_color.hip": "f98fc0a8b209c98356e4419a8a1829411390cd717a090094357a2e8976f159a8",
+        "rocm/python/image/canny_color.py": "ce9a72465f7c291756a4d7fe639f526f92411bad468af34e213eb340470d75a2",
+        "rocm/python/image/__init__.py": "aedba5972c103917e72898f3e7eb3c1384980e2ad27e9c6b7efcd743403b4d5e",
+        "rocm/python/image/canny.py": "219b6089c040e4fc0a157f70d838951f0882b32af658994677adcb2f25503aec",
+        "rocm/ported/NPP/nppCanny/npp_canny_simple.cpp": "1f3fb81cddadbc2dcba2da365ac5326de8b12f917a6a7d77051aec31f6c57ac7",
+        "rocm/ported/NPP/nppCanny/npp_canny_simple.py": "8cf97f0bf7a3e69ce2de16443e1a0cb8230effa5b436c9c0f7b3a697dc1acf74",
+        "migration/rewrite/canny-color-profile.json": "b3af9d77f99550587ee2ed4366938c9e08ee50883e03c40a62c94ffb07c7952e"
+      },
+      "case_ids": [
+        "original-teapot",
+        "constant-zero",
+        "constant-gray",
+        "step-channel-0",
+        "step-channel-1",
+        "step-channel-2",
+        "isoluminant-color-step",
+        "isolated-weak-step",
+        "weak-step-with-strong-seed",
+        "strong-cross",
+        "strong-diagonal",
+        "border-frame",
+        "impulse",
+        "independent-noise-128374",
+        "independent-noise-983743",
+        "independent-noise-762321",
+        "one-pixel",
+        "single-row",
+        "single-column",
+        "equal-threshold",
+        "high-threshold",
+        "zero-threshold"
+      ],
+      "case_count": 22,
+      "comparison_mode": "ALGORITHM_VARIANT",
+      "checks": [
+        {
+          "check": "two-original-languages-and-22-unique-inputs",
+          "passed": true
+        },
+        {
+          "check": "frozen-separate-classical-C3-contract-and-holdouts",
+          "passed": true
+        },
+        {
+          "check": "deterministic-input-and-PNG-reconstruction",
+          "passed": true
+        },
+        {
+          "check": "actual-private-OpenCV-headers-and-SO-identities",
+          "passed": true
+        },
+        {
+          "check": "current-C-ABI-library-and-real-C++-binary-build",
+          "passed": true
+        },
+        {
+          "check": "native-22-unique-cases",
+          "passed": true
+        },
+        {
+          "check": "native-real-NPP-build",
+          "passed": true
+        },
+        {
+          "check": "native/original-teapot/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/constant-zero/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/constant-gray/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/step-channel-0/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/step-channel-1/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/step-channel-2/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/isoluminant-color-step/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/isolated-weak-step/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/weak-step-with-strong-seed/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/strong-cross/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/strong-diagonal/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/border-frame/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/impulse/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/independent-noise-128374/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/independent-noise-983743/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/independent-noise-762321/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/one-pixel/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/single-row/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/single-column/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/equal-threshold/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/high-threshold/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/zero-threshold/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "actual-guarded-GPU-22-mask-producer",
+          "passed": true
+        },
+        {
+          "check": "all-ten-original-language-workflows",
+          "passed": true
+        },
+        {
+          "check": "original/cpp/original-teapot/actual-current-binary",
+          "passed": true
+        },
+        {
+          "check": "original/cpp/constant-zero/actual-current-binary",
+          "passed": true
+        },
+        {
+          "check": "original/cpp/isoluminant-color-step/actual-current-binary",
+          "passed": true
+        },
+        {
+          "check": "original/cpp/weak-step-with-strong-seed/actual-current-binary",
+          "passed": true
+        },
+        {
+          "check": "original/cpp/independent-noise-983743/actual-current-binary",
+          "passed": true
+        },
+        {
+          "check": "original/python/original-teapot/actual-current-binary",
+          "passed": true
+        },
+        {
+          "check": "original/python/constant-zero/actual-current-binary",
+          "passed": true
+        },
+        {
+          "check": "original/python/isoluminant-color-step/actual-current-binary",
+          "passed": true
+        },
+        {
+          "check": "original/python/weak-step-with-strong-seed/actual-current-binary",
+          "passed": true
+        },
+        {
+          "check": "original/python/independent-noise-983743/actual-current-binary",
+          "passed": true
+        },
+        {
+          "check": "22-full-masks-independent-CPU-and-native-differences",
+          "passed": true
+        },
+        {
+          "check": "ten-original-file-preprocessing-PNG-and-loop-checks",
+          "passed": true
+        },
+        {
+          "check": "runtime/actual-guarded-current-library",
+          "passed": true
+        },
+        {
+          "check": "runtime/independent-input-output-return-code-and-dispatch-checks",
+          "passed": true
+        },
+        {
+          "check": "trace/actual-guarded-current-library",
+          "passed": true
+        },
+        {
+          "check": "trace/independent-input-output-return-code-and-dispatch-checks",
+          "passed": true
+        },
+        {
+          "check": "actual-C++-class-ROI-errors-and-independent-instances",
+          "passed": true
+        },
+        {
+          "check": "C++-class-complete-CPU-pixels-and-specific-diagnostics",
+          "passed": true
+        },
+        {
+          "check": "all-ten-CLI-and-no-device-branches",
+          "passed": true
+        },
+        {
+          "check": "CLI/cpp/default-image/actual-entry-and-device-mask",
+          "passed": true
+        },
+        {
+          "check": "CLI/cpp/missing-image/actual-entry-and-device-mask",
+          "passed": true
+        },
+        {
+          "check": "CLI/cpp/invalid-image/actual-entry-and-device-mask",
+          "passed": true
+        },
+        {
+          "check": "CLI/cpp/unwritable-output/actual-entry-and-device-mask",
+          "passed": true
+        },
+        {
+          "check": "CLI/cpp/no-GPU/actual-entry-and-device-mask",
+          "passed": true
+        },
+        {
+          "check": "CLI/python/default-image/actual-entry-and-device-mask",
+          "passed": true
+        },
+        {
+          "check": "CLI/python/missing-image/actual-entry-and-device-mask",
+          "passed": true
+        },
+        {
+          "check": "CLI/python/invalid-image/actual-entry-and-device-mask",
+          "passed": true
+        },
+        {
+          "check": "CLI/python/unwritable-output/actual-entry-and-device-mask",
+          "passed": true
+        },
+        {
+          "check": "CLI/python/no-GPU/actual-entry-and-device-mask",
+          "passed": true
+        },
+        {
+          "check": "CLI-default-full-pixels-and-specific-rejections",
+          "passed": true
+        },
+        {
+          "check": "default-CLI-measurements-are-real-positive-finite",
+          "passed": true
+        },
+        {
+          "check": "complete-39-validator-positive-and-negative-experiments",
+          "passed": true
+        },
+        {
+          "check": "unmodified-original-CUDA-C++-workflow",
+          "passed": true
+        },
+        {
+          "check": "original-CUDA-three-PNGs-match-native-API-and-OpenCV",
+          "passed": true
+        },
+        {
+          "check": "original-CUDA-Python-prerequisite-status-distinct",
+          "passed": true
+        },
+        {
+          "check": "fresh-SDK-checkout-build-22-masks-and-ten-originals",
+          "passed": true
+        },
+        {
+          "check": "three-distinct-scopes-review-current-source-and-proof-set",
+          "passed": true
+        }
+      ],
+      "evidence_references": [
+        "migration/reports/evidence/rewrite/I1/C3-Canny-CLI-independent-check/20261111T133344.842713Z-I1-CPU-reference-437b1ac188",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-C__-class-independent-check/20261111T131709.455515Z-I1-CPU-reference-d7ab526084",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-both-public-APIs/20261111T130002.873095Z-I1-rocm-run-facc5cc9e6",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-clean-checkout/20261111T133732.314009Z-I1-host-cold-replay-000ee189ff",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-complete-masks/20261111T130421.254625Z-I1-CPU-reference-5d7d8350e1",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-contract-and-fixtures/20261111T123551.898143Z-I1-CPU-fixtures-809377af53",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-deterministic-fixtures/20261111T125520.286886Z-I1-CPU-fixtures-1021202580",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-full-build/20261111T125815.409990Z-I1-rocm-build-e4019a75d5",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-build/20261111T124455.300560Z-I1-cuda-build-23b6396e6b",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124458.915110Z-I1-cuda-run-d786ac28a9",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124501.305069Z-I1-cuda-run-3540868ad4",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124503.572135Z-I1-cuda-run-acc4b13ed0",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124505.984676Z-I1-cuda-run-fe53add719",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124508.326792Z-I1-cuda-run-32bdaea6c2",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124510.629917Z-I1-cuda-run-b48992e939",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124512.967840Z-I1-cuda-run-34f2277a37",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124515.345644Z-I1-cuda-run-d4628bf02a",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124517.685914Z-I1-cuda-run-878e94328f",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124520.074654Z-I1-cuda-run-bcecd4f45f",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124522.383363Z-I1-cuda-run-74783b3da9",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124524.706845Z-I1-cuda-run-028f530155",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124527.093502Z-I1-cuda-run-f14f4262c9",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124529.476202Z-I1-cuda-run-809637dbc3",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124531.864428Z-I1-cuda-run-aecc4f4dd7",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124534.238600Z-I1-cuda-run-858fe72026",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124536.632615Z-I1-cuda-run-eab63b208d",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124539.142390Z-I1-cuda-run-76d83134e5",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124541.508245Z-I1-cuda-run-a00857c6f1",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124543.899840Z-I1-cuda-run-f22fb3b38f",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124546.265667Z-I1-cuda-run-eec5719438",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124548.630365Z-I1-cuda-run-b3e29b3863",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-original-CUDA-file-verification/20261111T130036.265905Z-I1-CPU-reference-960e13f829",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-originals/20261111T130421.264655Z-I1-CPU-reference-b61f8970f8",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-runtime-CPU-check/20261111T130421.327461Z-I1-CPU-reference-ea13fad9aa",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-runtime/20261111T130004.170118Z-I1-rocm-runtime-158fb53156",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-runtime/20261111T130005.286455Z-I1-rocm-trace-60344be9aa",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-trace-CPU-check/20261111T130421.304841Z-I1-CPU-reference-c707b1df03",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-validator-mutations/20261111T131710.747758Z-I1-CPU-validator-test-aab106c466",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.cpp/20261111T125651.093276Z-I1-cuda-original-0b26d5d685",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.cpp/20261111T130002.915816Z-I1-rocm-original-899baf79ea",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.cpp/20261111T130005.379157Z-I1-rocm-original-9d5ffdbe04",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.cpp/20261111T130007.597332Z-I1-rocm-original-5f1091bc4b",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.cpp/20261111T130009.968776Z-I1-rocm-original-28ac49ffa7",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.cpp/20261111T130012.002589Z-I1-rocm-original-6f74d0a195",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.cpp/20261111T130928.329112Z-I1-rocm-C++-runtime-4f1085fb80",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.cpp/20261111T132657.918211Z-I1-rocm-CLI-ea9d0402a2",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.cpp/20261111T132700.720011Z-I1-rocm-CLI-0733bc9d2b",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.cpp/20261111T132702.612676Z-I1-rocm-CLI-0dbbcdea5f",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.cpp/20261111T132704.483615Z-I1-rocm-CLI-2441b03dc5",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.cpp/20261111T132706.531897Z-I1-rocm-CLI-1863805b37",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.py/20261111T125718.122262Z-I1-cuda-original-edc8139bf1",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.py/20261111T130014.056912Z-I1-rocm-original-956f216a8f",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.py/20261111T130017.593126Z-I1-rocm-original-0574e34db0",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.py/20261111T130021.096225Z-I1-rocm-original-a3eae9c000",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.py/20261111T130024.714513Z-I1-rocm-original-3d24172d0c",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.py/20261111T130028.799336Z-I1-rocm-original-12efa9b1e7",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.py/20261111T132708.518364Z-I1-rocm-CLI-7f93c94bee",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.py/20261111T132712.220663Z-I1-rocm-CLI-e41d545a69",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.py/20261111T132715.350017Z-I1-rocm-CLI-42d891a119",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.py/20261111T132718.419319Z-I1-rocm-CLI-9e76d10fa1",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.py/20261111T132721.980476Z-I1-rocm-CLI-8b9044dd47",
+        "migration/reports/evidence/rewrite/I1/image-private-OpenCV-C__/20261111T123829.979807Z-I1-host-setup-196d7f2db2"
+      ],
+      "source_commit": "039380a2221717897e633c464217bb84fd5ba9d2",
+      "scope": "Complete original C++/Python three-output/10-loop workflow; explicit classical 8-connected hysteresis variant, independent exact CPU masks, native differences, streams/concurrent instances and real negative/trace/cold-checkout proofs. No native pixel-identity or cross-device performance claim.",
+      "qualification_id": "20261111T134944.382367Z-I1-composite-qualification-de4a35e530",
+      "evidence": "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.cpp/20261111T134944.382367Z-I1-composite-qualification-de4a35e530",
+      "rocm_evidence": "migration/reports/evidence/rewrite/I1/C3-Canny-both-public-APIs/20261111T130002.873095Z-I1-rocm-run-facc5cc9e6",
+      "cuda_evidence": "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124458.915110Z-I1-cuda-run-d786ac28a9",
+      "environment": "migration/reports/evidence/rewrite/I1/C3-Canny-both-public-APIs/20261111T130002.873095Z-I1-rocm-run-facc5cc9e6/backend.observed.json",
+      "devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:23:00.0",
+          "physical_id": 1,
+          "uuid": "39383130336566346332326133636363"
+        }
+      ]
+    },
+    {
+      "sample_id": "NPP/nppCanny::npp_canny_simple.py",
+      "kind": "image-canny-c3-full/python",
+      "status": "PASSED",
+      "implementation": "rocm/ported/NPP/nppCanny/npp_canny_simple.py",
+      "implementation_sha256": "8cf97f0bf7a3e69ce2de16443e1a0cb8230effa5b436c9c0f7b3a697dc1acf74",
+      "dependencies": {
+        "rocm/common/image/canny_stages.h": "afd4be4bedbfc218a36169437f086f86ce82d6486e174db2bc534de208dce4b9",
+        "rocm/common/image/canny_stages.hip": "dd0a7b1c89003532626ad73e9f6355f866f015fad0d7cf6629aee92a2c6e06b6",
+        "rocm/common/image/connectivity.h": "f6a25d07f6f3f499b72f2877dfe4674f76e60410141f2f9462476843d4b871da",
+        "rocm/common/image/connectivity.hip": "fffe2c0096705d0fb8f8b6bc0770f15944bf526135c12c8f746b4ead4af3d412",
+        "rocm/common/image/image_memory.hpp": "4a24dd7cd8efc50e2b65d50fc1dfe872a9b8ba09654b6f220524cd64c1131f35",
+        "rocm/common/image/canny_color.h": "61c47bd84bbb9bca5bc507fcf63c54830b41b83de081b174f4ae7bd03192f275",
+        "rocm/common/image/canny_color.hip": "f98fc0a8b209c98356e4419a8a1829411390cd717a090094357a2e8976f159a8",
+        "rocm/python/image/canny_color.py": "ce9a72465f7c291756a4d7fe639f526f92411bad468af34e213eb340470d75a2",
+        "rocm/python/image/__init__.py": "aedba5972c103917e72898f3e7eb3c1384980e2ad27e9c6b7efcd743403b4d5e",
+        "rocm/python/image/canny.py": "219b6089c040e4fc0a157f70d838951f0882b32af658994677adcb2f25503aec",
+        "rocm/ported/NPP/nppCanny/npp_canny_simple.cpp": "1f3fb81cddadbc2dcba2da365ac5326de8b12f917a6a7d77051aec31f6c57ac7",
+        "rocm/ported/NPP/nppCanny/npp_canny_simple.py": "8cf97f0bf7a3e69ce2de16443e1a0cb8230effa5b436c9c0f7b3a697dc1acf74",
+        "migration/rewrite/canny-color-profile.json": "b3af9d77f99550587ee2ed4366938c9e08ee50883e03c40a62c94ffb07c7952e"
+      },
+      "case_ids": [
+        "original-teapot",
+        "constant-zero",
+        "constant-gray",
+        "step-channel-0",
+        "step-channel-1",
+        "step-channel-2",
+        "isoluminant-color-step",
+        "isolated-weak-step",
+        "weak-step-with-strong-seed",
+        "strong-cross",
+        "strong-diagonal",
+        "border-frame",
+        "impulse",
+        "independent-noise-128374",
+        "independent-noise-983743",
+        "independent-noise-762321",
+        "one-pixel",
+        "single-row",
+        "single-column",
+        "equal-threshold",
+        "high-threshold",
+        "zero-threshold"
+      ],
+      "case_count": 22,
+      "comparison_mode": "ALGORITHM_VARIANT",
+      "checks": [
+        {
+          "check": "two-original-languages-and-22-unique-inputs",
+          "passed": true
+        },
+        {
+          "check": "frozen-separate-classical-C3-contract-and-holdouts",
+          "passed": true
+        },
+        {
+          "check": "deterministic-input-and-PNG-reconstruction",
+          "passed": true
+        },
+        {
+          "check": "actual-private-OpenCV-headers-and-SO-identities",
+          "passed": true
+        },
+        {
+          "check": "current-C-ABI-library-and-real-C++-binary-build",
+          "passed": true
+        },
+        {
+          "check": "native-22-unique-cases",
+          "passed": true
+        },
+        {
+          "check": "native-real-NPP-build",
+          "passed": true
+        },
+        {
+          "check": "native/original-teapot/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/constant-zero/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/constant-gray/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/step-channel-0/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/step-channel-1/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/step-channel-2/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/isoluminant-color-step/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/isolated-weak-step/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/weak-step-with-strong-seed/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/strong-cross/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/strong-diagonal/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/border-frame/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/impulse/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/independent-noise-128374/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/independent-noise-983743/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/independent-noise-762321/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/one-pixel/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/single-row/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/single-column/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/equal-threshold/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/high-threshold/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "native/zero-threshold/frozen-command-and-binary-receipt",
+          "passed": true
+        },
+        {
+          "check": "actual-guarded-GPU-22-mask-producer",
+          "passed": true
+        },
+        {
+          "check": "all-ten-original-language-workflows",
+          "passed": true
+        },
+        {
+          "check": "original/cpp/original-teapot/actual-current-binary",
+          "passed": true
+        },
+        {
+          "check": "original/cpp/constant-zero/actual-current-binary",
+          "passed": true
+        },
+        {
+          "check": "original/cpp/isoluminant-color-step/actual-current-binary",
+          "passed": true
+        },
+        {
+          "check": "original/cpp/weak-step-with-strong-seed/actual-current-binary",
+          "passed": true
+        },
+        {
+          "check": "original/cpp/independent-noise-983743/actual-current-binary",
+          "passed": true
+        },
+        {
+          "check": "original/python/original-teapot/actual-current-binary",
+          "passed": true
+        },
+        {
+          "check": "original/python/constant-zero/actual-current-binary",
+          "passed": true
+        },
+        {
+          "check": "original/python/isoluminant-color-step/actual-current-binary",
+          "passed": true
+        },
+        {
+          "check": "original/python/weak-step-with-strong-seed/actual-current-binary",
+          "passed": true
+        },
+        {
+          "check": "original/python/independent-noise-983743/actual-current-binary",
+          "passed": true
+        },
+        {
+          "check": "22-full-masks-independent-CPU-and-native-differences",
+          "passed": true
+        },
+        {
+          "check": "ten-original-file-preprocessing-PNG-and-loop-checks",
+          "passed": true
+        },
+        {
+          "check": "runtime/actual-guarded-current-library",
+          "passed": true
+        },
+        {
+          "check": "runtime/independent-input-output-return-code-and-dispatch-checks",
+          "passed": true
+        },
+        {
+          "check": "trace/actual-guarded-current-library",
+          "passed": true
+        },
+        {
+          "check": "trace/independent-input-output-return-code-and-dispatch-checks",
+          "passed": true
+        },
+        {
+          "check": "actual-C++-class-ROI-errors-and-independent-instances",
+          "passed": true
+        },
+        {
+          "check": "C++-class-complete-CPU-pixels-and-specific-diagnostics",
+          "passed": true
+        },
+        {
+          "check": "all-ten-CLI-and-no-device-branches",
+          "passed": true
+        },
+        {
+          "check": "CLI/cpp/default-image/actual-entry-and-device-mask",
+          "passed": true
+        },
+        {
+          "check": "CLI/cpp/missing-image/actual-entry-and-device-mask",
+          "passed": true
+        },
+        {
+          "check": "CLI/cpp/invalid-image/actual-entry-and-device-mask",
+          "passed": true
+        },
+        {
+          "check": "CLI/cpp/unwritable-output/actual-entry-and-device-mask",
+          "passed": true
+        },
+        {
+          "check": "CLI/cpp/no-GPU/actual-entry-and-device-mask",
+          "passed": true
+        },
+        {
+          "check": "CLI/python/default-image/actual-entry-and-device-mask",
+          "passed": true
+        },
+        {
+          "check": "CLI/python/missing-image/actual-entry-and-device-mask",
+          "passed": true
+        },
+        {
+          "check": "CLI/python/invalid-image/actual-entry-and-device-mask",
+          "passed": true
+        },
+        {
+          "check": "CLI/python/unwritable-output/actual-entry-and-device-mask",
+          "passed": true
+        },
+        {
+          "check": "CLI/python/no-GPU/actual-entry-and-device-mask",
+          "passed": true
+        },
+        {
+          "check": "CLI-default-full-pixels-and-specific-rejections",
+          "passed": true
+        },
+        {
+          "check": "default-CLI-measurements-are-real-positive-finite",
+          "passed": true
+        },
+        {
+          "check": "complete-39-validator-positive-and-negative-experiments",
+          "passed": true
+        },
+        {
+          "check": "unmodified-original-CUDA-C++-workflow",
+          "passed": true
+        },
+        {
+          "check": "original-CUDA-three-PNGs-match-native-API-and-OpenCV",
+          "passed": true
+        },
+        {
+          "check": "original-CUDA-Python-prerequisite-status-distinct",
+          "passed": true
+        },
+        {
+          "check": "fresh-SDK-checkout-build-22-masks-and-ten-originals",
+          "passed": true
+        },
+        {
+          "check": "three-distinct-scopes-review-current-source-and-proof-set",
+          "passed": true
+        }
+      ],
+      "evidence_references": [
+        "migration/reports/evidence/rewrite/I1/C3-Canny-CLI-independent-check/20261111T133344.842713Z-I1-CPU-reference-437b1ac188",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-C__-class-independent-check/20261111T131709.455515Z-I1-CPU-reference-d7ab526084",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-both-public-APIs/20261111T130002.873095Z-I1-rocm-run-facc5cc9e6",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-clean-checkout/20261111T133732.314009Z-I1-host-cold-replay-000ee189ff",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-complete-masks/20261111T130421.254625Z-I1-CPU-reference-5d7d8350e1",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-contract-and-fixtures/20261111T123551.898143Z-I1-CPU-fixtures-809377af53",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-deterministic-fixtures/20261111T125520.286886Z-I1-CPU-fixtures-1021202580",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-full-build/20261111T125815.409990Z-I1-rocm-build-e4019a75d5",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-build/20261111T124455.300560Z-I1-cuda-build-23b6396e6b",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124458.915110Z-I1-cuda-run-d786ac28a9",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124501.305069Z-I1-cuda-run-3540868ad4",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124503.572135Z-I1-cuda-run-acc4b13ed0",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124505.984676Z-I1-cuda-run-fe53add719",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124508.326792Z-I1-cuda-run-32bdaea6c2",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124510.629917Z-I1-cuda-run-b48992e939",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124512.967840Z-I1-cuda-run-34f2277a37",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124515.345644Z-I1-cuda-run-d4628bf02a",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124517.685914Z-I1-cuda-run-878e94328f",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124520.074654Z-I1-cuda-run-bcecd4f45f",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124522.383363Z-I1-cuda-run-74783b3da9",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124524.706845Z-I1-cuda-run-028f530155",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124527.093502Z-I1-cuda-run-f14f4262c9",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124529.476202Z-I1-cuda-run-809637dbc3",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124531.864428Z-I1-cuda-run-aecc4f4dd7",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124534.238600Z-I1-cuda-run-858fe72026",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124536.632615Z-I1-cuda-run-eab63b208d",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124539.142390Z-I1-cuda-run-76d83134e5",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124541.508245Z-I1-cuda-run-a00857c6f1",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124543.899840Z-I1-cuda-run-f22fb3b38f",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124546.265667Z-I1-cuda-run-eec5719438",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124548.630365Z-I1-cuda-run-b3e29b3863",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-original-CUDA-file-verification/20261111T130036.265905Z-I1-CPU-reference-960e13f829",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-originals/20261111T130421.264655Z-I1-CPU-reference-b61f8970f8",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-runtime-CPU-check/20261111T130421.327461Z-I1-CPU-reference-ea13fad9aa",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-runtime/20261111T130004.170118Z-I1-rocm-runtime-158fb53156",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-runtime/20261111T130005.286455Z-I1-rocm-trace-60344be9aa",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-trace-CPU-check/20261111T130421.304841Z-I1-CPU-reference-c707b1df03",
+        "migration/reports/evidence/rewrite/I1/C3-Canny-validator-mutations/20261111T131710.747758Z-I1-CPU-validator-test-aab106c466",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.cpp/20261111T125651.093276Z-I1-cuda-original-0b26d5d685",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.cpp/20261111T130002.915816Z-I1-rocm-original-899baf79ea",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.cpp/20261111T130005.379157Z-I1-rocm-original-9d5ffdbe04",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.cpp/20261111T130007.597332Z-I1-rocm-original-5f1091bc4b",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.cpp/20261111T130009.968776Z-I1-rocm-original-28ac49ffa7",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.cpp/20261111T130012.002589Z-I1-rocm-original-6f74d0a195",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.cpp/20261111T130928.329112Z-I1-rocm-C++-runtime-4f1085fb80",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.cpp/20261111T132657.918211Z-I1-rocm-CLI-ea9d0402a2",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.cpp/20261111T132700.720011Z-I1-rocm-CLI-0733bc9d2b",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.cpp/20261111T132702.612676Z-I1-rocm-CLI-0dbbcdea5f",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.cpp/20261111T132704.483615Z-I1-rocm-CLI-2441b03dc5",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.cpp/20261111T132706.531897Z-I1-rocm-CLI-1863805b37",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.py/20261111T125718.122262Z-I1-cuda-original-edc8139bf1",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.py/20261111T130014.056912Z-I1-rocm-original-956f216a8f",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.py/20261111T130017.593126Z-I1-rocm-original-0574e34db0",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.py/20261111T130021.096225Z-I1-rocm-original-a3eae9c000",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.py/20261111T130024.714513Z-I1-rocm-original-3d24172d0c",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.py/20261111T130028.799336Z-I1-rocm-original-12efa9b1e7",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.py/20261111T132708.518364Z-I1-rocm-CLI-7f93c94bee",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.py/20261111T132712.220663Z-I1-rocm-CLI-e41d545a69",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.py/20261111T132715.350017Z-I1-rocm-CLI-42d891a119",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.py/20261111T132718.419319Z-I1-rocm-CLI-9e76d10fa1",
+        "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.py/20261111T132721.980476Z-I1-rocm-CLI-8b9044dd47",
+        "migration/reports/evidence/rewrite/I1/image-private-OpenCV-C__/20261111T123829.979807Z-I1-host-setup-196d7f2db2"
+      ],
+      "source_commit": "039380a2221717897e633c464217bb84fd5ba9d2",
+      "scope": "Complete original C++/Python three-output/10-loop workflow; explicit classical 8-connected hysteresis variant, independent exact CPU masks, native differences, streams/concurrent instances and real negative/trace/cold-checkout proofs. No native pixel-identity or cross-device performance claim.",
+      "qualification_id": "20261111T134946.611864Z-I1-composite-qualification-0eb950308a",
+      "evidence": "migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.py/20261111T134946.611864Z-I1-composite-qualification-0eb950308a",
+      "rocm_evidence": "migration/reports/evidence/rewrite/I1/C3-Canny-both-public-APIs/20261111T130002.873095Z-I1-rocm-run-facc5cc9e6",
+      "cuda_evidence": "migration/reports/evidence/rewrite/I1/C3-Canny-native-mask/20261111T124458.915110Z-I1-cuda-run-d786ac28a9",
+      "environment": "migration/reports/evidence/rewrite/I1/C3-Canny-both-public-APIs/20261111T130002.873095Z-I1-rocm-run-facc5cc9e6/backend.observed.json",
+      "devices": [
+        {
+          "logical_id": 0,
+          "pci_bdf": "0000:23:00.0",
+          "physical_id": 1,
+          "uuid": "39383130336566346332326133636363"
+        }
+      ]
+    }
+  ]
+}
