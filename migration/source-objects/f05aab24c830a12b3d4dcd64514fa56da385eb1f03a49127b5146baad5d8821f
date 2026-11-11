@@ -1,0 +1,47 @@
+// SPDX-License-Identifier: Apache-2.0
+#pragma once
+#include "contour.h"
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <limits>
+#include <stdexcept>
+#include <string>
+#include <vector>
+namespace rocm_image_contour_sample {
+inline void check(hipError_t s){if(s!=hipSuccess)throw std::runtime_error(hipGetErrorString(s));}
+inline uint64_t workspace(int w,int h){uint64_t n=0;check(rocm_image_contour_workspace_size(w,h,&n));return n;}
+inline size_t pixels(int w,int h){workspace(w,h);return size_t(w)*h;}
+inline std::vector<uint8_t> read(const std::string&path,size_t bytes){std::ifstream f(path,std::ios::binary);if(!f)throw std::runtime_error("missing input: "+path);std::vector<uint8_t>out(bytes);f.read(reinterpret_cast<char*>(out.data()),bytes);if(f.gcount()!=long(bytes)||f.peek()!=EOF)throw std::runtime_error("invalid raw input length: "+path);return out;}
+inline void write(const std::string&path,const void*data,size_t bytes){std::ofstream f(path,std::ios::binary|std::ios::trunc);if(!f)throw std::runtime_error("cannot create output: "+path);f.write(static_cast<const char*>(data),bytes);f.close();if(!f)throw std::runtime_error("cannot write output: "+path);}
+struct Device {void*p=nullptr;explicit Device(size_t n){check(hipMalloc(&p,n));}~Device(){if(p)hipFree(p);}Device(const Device&)=delete;Device&operator=(const Device&)=delete;};
+struct Stream {hipStream_t s=nullptr;Stream(){check(hipStreamCreateWithFlags(&s,hipStreamNonBlocking));}~Stream(){if(s){hipStreamSynchronize(s);hipStreamDestroy(s);}}Stream(const Stream&)=delete;Stream&operator=(const Stream&)=delete;};
+class Image {
+public:
+ int w,h;size_t n;std::vector<uint8_t>input,mask,reconstruction;std::vector<uint32_t>raw,labels;std::vector<rocm_image_contour_info>info;std::vector<rocm_image_contour_edge>geometry;uint32_t totals[3]{};
+ Device d_input,d_raw,d_labels,d_mask,d_info,d_geometry,d_totals,d_workspace,d_reconstruction,d_flags;
+ // Destruction synchronizes the stream before every device and host buffer.
+ Stream stream;
+ Image(int width,int height,const std::string&file):w(width),h(height),n(pixels(w,h)),input(read(file,n)),mask(n),reconstruction(n),raw(n),labels(n),d_input(n),d_raw(4*n),d_labels(4*n),d_mask(n),d_info(n*sizeof(rocm_image_contour_info)),d_geometry(4*n*sizeof(rocm_image_contour_edge)),d_totals(12),d_workspace(workspace(w,h)),d_reconstruction(n),d_flags(4*(n+1)){}
+ Image(const Image&)=delete;Image&operator=(const Image&)=delete;
+ void process(){
+  check(hipMemcpyAsync(d_input.p,input.data(),n,hipMemcpyHostToDevice,stream.s));rocm_image_contour_descriptor d{static_cast<const uint8_t*>(d_input.p),uint64_t(w),static_cast<uint32_t*>(d_raw.p),uint64_t(w)*4,static_cast<uint32_t*>(d_labels.p),uint64_t(w)*4,static_cast<uint8_t*>(d_mask.p),uint64_t(w),static_cast<rocm_image_contour_info*>(d_info.p),n,static_cast<rocm_image_contour_edge*>(d_geometry.p),4*n,static_cast<uint32_t*>(d_totals.p),d_workspace.p,workspace(w,h),w,h};check(rocm_image_contour_run(&d,stream.s));check(hipMemcpyAsync(totals,d_totals.p,12,hipMemcpyDeviceToHost,stream.s));check(hipStreamSynchronize(stream.s));if(!totals[0]||totals[0]>n||totals[1]>4*n||totals[2]>totals[1])throw std::runtime_error("invalid GPU contour totals");info.resize(totals[0]);geometry.resize(totals[1]);check(hipMemcpyAsync(raw.data(),d_raw.p,n*4,hipMemcpyDeviceToHost,stream.s));check(hipMemcpyAsync(labels.data(),d_labels.p,n*4,hipMemcpyDeviceToHost,stream.s));check(hipMemcpyAsync(mask.data(),d_mask.p,n,hipMemcpyDeviceToHost,stream.s));check(hipMemcpyAsync(info.data(),d_info.p,info.size()*sizeof(info[0]),hipMemcpyDeviceToHost,stream.s));check(hipMemcpyAsync(geometry.data(),d_geometry.p,geometry.size()*sizeof(geometry[0]),hipMemcpyDeviceToHost,stream.s));check(hipStreamSynchronize(stream.s));
+ }
+ void reconstruct(uint32_t start,uint32_t stop,uint32_t limit){if(start>stop||stop>totals[0])throw std::runtime_error("marker range must satisfy 0 <= start <= stop <= component count");check(rocm_image_contour_reconstruct(static_cast<const uint32_t*>(d_labels.p),uint64_t(w)*4,static_cast<const rocm_image_contour_info*>(d_info.p),totals[0],static_cast<const rocm_image_contour_edge*>(d_geometry.p),totals[1],start,stop,limit,static_cast<uint8_t*>(d_reconstruction.p),w,d_flags.p,4*(n+1),w,h,stream.s));check(hipMemcpyAsync(reconstruction.data(),d_reconstruction.p,n,hipMemcpyDeviceToHost,stream.s));check(hipStreamSynchronize(stream.s));}
+ void save(const std::string&directory,bool plus){std::string shape=std::to_string(w)+"x"+std::to_string(h);write(directory+"/CircuitBoard_LabelMarkersUF_8Way_"+shape+"_32u.raw",raw.data(),n*4);write(directory+"/CircuitBoard_CompressedMarkerLabelsUF_8Way_"+shape+"_32u.raw",labels.data(),n*4);write(directory+"/CircuitBoard_Contours_8Way_"+shape+"_8u.raw",mask.data(),n);if(plus)write(directory+"/CircuitBoard_ContoursReconstructed_8Way_"+shape+"_8u.raw",reconstruction.data(),n);}
+ void diagnostics(uint32_t start,uint32_t stop,uint32_t limit){
+  for(uint32_t c=start;c<stop;++c){const auto&i=info[c];std::cout<<"nID "<<c<<" Cnt "<<i.contour_pixels<<" Edges "<<i.edge_count<<" Loops "<<i.loop_count<<" BB "<<i.min_x<<" "<<i.min_y<<" "<<i.max_x<<" "<<i.max_y<<"\n";if(stop-start>1&&i.contour_pixels>=limit)std::cout<<"nID "<<c<<" geometry diagnostics bypassed at "<<limit<<" contour pixels\n";}
+  // Records are already ordered on GPU; the CPU only formats their fields.
+  for(const auto&g:geometry)if(g.component>=start&&g.component<stop&&(stop-start<=1||info[g.component].contour_pixels<limit))std::cout<<"ID "<<g.component<<" Loop "<<g.loop_id<<" Cnt "<<g.order<<" "<<g.pixel_x<<" "<<g.pixel_y<<" Vertex "<<g.x0<<" "<<g.y0<<" "<<g.x1<<" "<<g.y1<<"\n";
+ }
+ void audit(const std::string&directory,bool plus,uint32_t start,uint32_t stop,uint32_t limit){std::filesystem::create_directories(directory);write(directory+"/input.bin",input.data(),n);write(directory+"/info.bin",info.data(),info.size()*sizeof(info[0]));write(directory+"/geometry.bin",geometry.data(),geometry.size()*sizeof(geometry[0]));write(directory+"/totals.bin",totals,12);std::ofstream f(directory+"/workflow.json");f<<"{\"width\":"<<w<<",\"height\":"<<h<<",\"plus\":"<<(plus?"true":"false")<<",\"start\":"<<start<<",\"stop\":"<<stop<<",\"limit\":"<<limit<<",\"components\":"<<totals[0]<<",\"edges\":"<<totals[1]<<",\"loops\":"<<totals[2]<<"}\n";f.close();if(!f)throw std::runtime_error("cannot write audit metadata");}
+};
+inline int integer(const std::string&s){size_t used=0;int n=std::stoi(s,&used);if(used!=s.size())throw std::runtime_error("invalid integer: "+s);return n;}
+inline int application(int argc,char**argv,bool plus){try{
+ int w=2048,h=1024,start=1,stop=-1;uint32_t limit=262144;std::string input="images/CircuitBoard_2048x1024_8u.raw",output="images";bool explicit_stop=false;
+ for(int i=1;i<argc;++i){std::string arg=argv[i];if(arg=="-h"||arg=="--help"){std::cout<<"Usage: "<<argv[0]<<" [--input RAW] [--output-dir DIR] [--width W --height H]"<<(plus?" [--start-id ID --stop-id ID --limit N]":"")<<"\n";return 0;}
+  if(i+1>=argc)throw std::runtime_error("missing value: "+arg);std::string value=argv[++i];if(arg=="--input")input=value;else if(arg=="--output-dir")output=value;else if(arg=="--width")w=integer(value);else if(arg=="--height")h=integer(value);else if(plus&&arg=="--start-id")start=integer(value);else if(plus&&arg=="--stop-id"){stop=integer(value);explicit_stop=true;}else if(plus&&arg=="--limit"){int v=integer(value);if(v<0)throw std::runtime_error("negative contour limit");limit=v;}else throw std::runtime_error("unknown option: "+arg);
+ }
+ pixels(w,h);if(start<0||(explicit_stop&&(stop<0||start>stop)))throw std::runtime_error("invalid marker range");int devices=0;check(hipGetDeviceCount(&devices));if(!devices)throw std::runtime_error("no HIP devices");Image image(w,h,input);image.process();uint32_t end=explicit_stop?uint32_t(stop):image.totals[0];if(plus){image.reconstruct(start,end,limit);image.diagnostics(start,end,limit);}image.save(output,plus);if(const char*directory=std::getenv("MIGRATION_IMAGE_CONTOUR_AUDIT_DIR"))image.audit(directory,plus,start,end,limit);std::cout<<"Contour GPU workflow complete: components "<<image.totals[0]<<", edges "<<image.totals[1]<<", loops "<<image.totals[2]<<"\n";return 0;
+ }catch(const std::exception&e){std::cerr<<"Contour error: "<<e.what()<<"\n";return 1;}}
+}

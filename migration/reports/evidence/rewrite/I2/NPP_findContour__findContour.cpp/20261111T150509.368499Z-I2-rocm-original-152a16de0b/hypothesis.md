@@ -1,0 +1,1 @@
+Test rocm-original for NPP/findContour::findContour.cpp, case original/default. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T150502.475814Z-I2-rocm-build-ee03415e78.

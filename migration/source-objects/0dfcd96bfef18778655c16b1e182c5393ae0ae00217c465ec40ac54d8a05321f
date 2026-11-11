@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+"""Validate every HIP pixel, edge, loop order, count, bbox and rasterized range."""
+import argparse,json
+import numpy as np
+from experiment import ROOT,Experiment,write,digest
+from image_contour_model import model,reconstruct
+from image_progress import record
+
+def check_array(name,actual,expected):
+ ok=actual.shape==expected.shape and actual.dtype==expected.dtype
+ return dict(check=name,passed=ok and np.array_equal(actual,expected),mismatches=int(np.count_nonzero(actual!=expected)) if ok else None)
+def bytes_file(p,n,sha=None):
+ if not p.is_file() or p.stat().st_size!=n or sha is not None and digest(p)!=sha:raise ValueError('exact file identity/length '+str(p))
+ return p.read_bytes()
+def validate(run):
+ spec=json.loads((ROOT/'migration/rewrite/image-contour-profile.json').read_text());cases={c['case']:c for c in spec['cases'] if not run['small'] or c['width']*c['height']<=5000};out=ROOT/run['outputs'];rows=json.loads((out/'runs.json').read_text());results=[]
+ if run['return_code'] or len(rows)!=len(cases) or {r['case'] for r in rows}!=set(cases):raise ValueError('all unique complete successful geometry cases')
+ for r in rows:
+  c=cases[r['case']];w,h,pitch=c['width'],c['height'],c['pitch'];d=out/r['case'];source=bytes_file(ROOT/c['fixture']/'input.bin',h*pitch);image=np.frombuffer(source,np.uint8).reshape(h,pitch)[:,:w];expected=model(image);k,m,loops=map(int,expected['totals']);checks=[dict(check='actual-GPU-success-and-frozen-geometry',passed=r['return_code']==0 and [r['width'],r['height'],r['input_pitch']]==[w,h,pitch]),dict(check='actual-device-component-edge-loop-counts',passed=r['totals']==[k,m,loops])];n=w*h
+  ranges=[('all',0,k,2**32-1),('default',1,k,262144),('empty',k,k,262144)]+([('single-ID-override',1,2,262144)] if c['case']=='large-multiple-ID-bypass' else []);names={'raw.bin','labels.bin','mask.bin','input-after.bin','info.bin','geometry.bin','totals.bin',*('reconstruction-'+x[0]+'.bin' for x in ranges)}
+  if n<=5000:names|={'unused-info.bin','unused-geometry.bin'}
+  if set(r['files'])!=names or {p.name for p in d.iterdir()}!=names|{'run.json'}:raise ValueError('complete per-case output set')
+  for name,v in r['files'].items():bytes_file(d/name,v['bytes'],v['sha256'])
+  for name,field,pad,kind in [('raw','raw',167,'<u4'),('labels','labels',185,'<u4'),('mask','mask',171,'u1')]:
+   step=r[name+'_pitch'];size=4 if kind=='<u4' else 1;b=np.frombuffer(bytes_file(d/(name+'.bin'),h*step),np.uint8).reshape(h,step);pixels=b[:,:w*size].copy().view(kind).reshape(h,w);checks.append(check_array(name+'/all-pixels',pixels,expected[field]));checks.append(dict(check=name+'/padding',passed=step>=w*size and bool(np.all(b[:,w*size:]==pad))))
+  for name,shape,values in [('info',(k,7),expected['info']),('geometry',(m,9),expected['geometry']),('totals',(3,),expected['totals'])]:
+   actual=np.frombuffer(bytes_file(d/(name+'.bin'),int(np.prod(shape))*4),'<u4').reshape(shape);checks.append(check_array(name+'/all-values',actual,values))
+  checks.append(dict(check='input-and-all-padding-preserved',passed=bytes_file(d/'input-after.bin',len(source))==source))
+  if len(r['ranges'])!=len(ranges) or {(x['case'],x['start'],x['stop'],x['limit']) for x in r['ranges']}!=set(ranges):raise ValueError('all frozen reconstruction/range/bypass obligations')
+  for rec in r['ranges']:
+   if rec['return_code']!=0:raise ValueError('actual reconstruction status')
+   wanted=reconstruct(expected['geometry'],expected['labels'],expected['info'],rec['start'],rec['stop'],rec['limit']);step=rec['output_pitch'];b=np.frombuffer(bytes_file(d/rec['file'],h*step),np.uint8).reshape(h,step);checks.extend([check_array('geometry-reconstruction/'+rec['case'],b[:,:w],wanted),dict(check='geometry-reconstruction/'+rec['case']+'/padding',passed=step>=w and bool(np.all(b[:,w:]==173)))])
+  if n<=5000:
+   for name,size,pad in [('unused-info.bin',(n-k)*28,221),('unused-geometry.bin',(4*n-m)*36,205)]:checks.append(dict(check=name+'/all-canaries',passed=all(x==pad for x in bytes_file(d/name,size))))
+  results.append(dict(case=r['case'],status='PASSED' if all(c['passed'] for c in checks) else 'FAILED',checks=checks,totals=[k,m,loops]));print(r['case'],results[-1]['status'],flush=True)
+ return results
+
+def main():
+ p=argparse.ArgumentParser();p.add_argument('--small',action='store_true');a=p.parse_args();name='small' if a.small else 'all';run=json.loads((ROOT/f'migration/reports/image-contour-{name}.json').read_text());e=Experiment('I2','Contour-full-geometry-'+name+'-CPU','CPU-reference',sources=[__file__,ROOT/'tools/moat/image_contour_model.py',ROOT/'tools/moat/image_ccl_reference.py',ROOT/'migration/rewrite/image-contour-profile.json'],parent=run['experiment_id'])
+ try:results=validate(run);v=dict(status='PASSED' if all(r['status']=='PASSED' for r in results) else 'FAILED',case_count=len(results),results=results)
+ except Exception as error:v=dict(status='FAILED',results=[],error=repr(error))
+ write(e.path/'results.json',v);v['evidence']=e.finish('PASSED' if v['status']=='PASSED' else 'NUMERIC_MISMATCH',dict(status=v['status'],checks=[dict(check='independent-complete-geometry-and-pixels',passed=v['status']=='PASSED')]));write(ROOT/f'migration/reports/image-contour-{name}-validation.json',v);record('I2','Contour '+name+'全部像素/逐edge循环顺序/marker计数与bbox/真实geometry重建独立CPU：'+v['status']+'；尚非完整原入口资格。',[v['evidence']]);print(v['status'],v.get('error'),[(r['case'],[c for c in r['checks'] if not c['passed']]) for r in v['results'] if r['status']=='FAILED'][:3]);return int(v['status']!='PASSED')
+if __name__=='__main__':raise SystemExit(main())

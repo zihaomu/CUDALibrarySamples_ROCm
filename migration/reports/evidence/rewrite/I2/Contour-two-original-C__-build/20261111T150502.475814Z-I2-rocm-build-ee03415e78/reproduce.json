@@ -1,0 +1,89 @@
+{
+  "commands": [
+    {
+      "command_id": 1,
+      "phase": "compile-real-NPP-C++",
+      "argv": [
+        "hipcc",
+        "--rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay",
+        "--hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay",
+        "--rocm-device-lib-path=/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode",
+        "--offload-arch=gfx1201",
+        "-std=c++17",
+        "-O2",
+        "-D__HIP_PLATFORM_AMD__",
+        "-I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/image",
+        "-x",
+        "hip",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/NPP/findContour/findContour.cpp",
+        "-L/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I2/Contour-GPU-geometry-build/20261111T145921.077073Z-I2-rocm-build-b6c174a07f",
+        "-limage_contour",
+        "-Wl,-rpath,/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I2/Contour-GPU-geometry-build/20261111T145921.077073Z-I2-rocm-build-b6c174a07f",
+        "-L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib",
+        "-Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib",
+        "-lamdhip64",
+        "-o",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I2/Contour-two-original-C__-build/20261111T150502.475814Z-I2-rocm-build-ee03415e78/NPP-contour"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T15:05:03.794935+00:00",
+      "timeout_seconds": 300,
+      "environment": {
+        "HIP_VISIBLE_DEVICES": "0",
+        "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "DEEPINFER_ROCM_RELEASE": "10.1.0",
+        "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+        "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+      },
+      "stdout": "logs/0001-compile-real-NPP-C++.stdout.log",
+      "stderr": "logs/0001-compile-real-NPP-C++.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T15:05:05.062788+00:00",
+      "seconds": 1.2670445360126905
+    },
+    {
+      "command_id": 2,
+      "phase": "compile-real-NPP+-C++",
+      "argv": [
+        "hipcc",
+        "--rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay",
+        "--hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay",
+        "--rocm-device-lib-path=/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode",
+        "--offload-arch=gfx1201",
+        "-std=c++17",
+        "-O2",
+        "-D__HIP_PLATFORM_AMD__",
+        "-I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/image",
+        "-x",
+        "hip",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/NPP+/findContour/findContourNPPPlus.cpp",
+        "-L/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I2/Contour-GPU-geometry-build/20261111T145921.077073Z-I2-rocm-build-b6c174a07f",
+        "-limage_contour",
+        "-Wl,-rpath,/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I2/Contour-GPU-geometry-build/20261111T145921.077073Z-I2-rocm-build-b6c174a07f",
+        "-L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib",
+        "-Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib",
+        "-lamdhip64",
+        "-o",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I2/Contour-two-original-C__-build/20261111T150502.475814Z-I2-rocm-build-ee03415e78/NPP+-contour"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T15:05:05.065054+00:00",
+      "timeout_seconds": 300,
+      "environment": {
+        "HIP_VISIBLE_DEVICES": "0",
+        "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "DEEPINFER_ROCM_RELEASE": "10.1.0",
+        "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+        "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+      },
+      "stdout": "logs/0002-compile-real-NPP+-C++.stdout.log",
+      "stderr": "logs/0002-compile-real-NPP+-C++.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T15:05:06.282933+00:00",
+      "seconds": 1.217020860989578
+    }
+  ],
+  "source": "source.json",
+  "inputs": "inputs/manifest.json",
+  "expected_environment": "environment.expected.json"
+}
