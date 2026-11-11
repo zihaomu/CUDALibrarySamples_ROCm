@@ -33,7 +33,9 @@ for kind in ['masks','runtime','originals']:
   if not path.exists():continue
   rs=json.loads(path.read_text());rs=rs if isinstance(rs,list) else [rs]
   for i,r in enumerate(rs):
-   meta=json.loads((clone/r['evidence']/'manifest.json').read_text());raw=clone/meta['raw_artifact_dir'];dest=e.path/'child-evidence'/name/str(i);shutil.copytree(raw,dest);(dest/'sealed.json').rename(dest/'child-seal.json');src=json.loads((dest/'source.json').read_text())
+   meta=json.loads((clone/r['evidence']/'manifest.json').read_text());raw=clone/meta['raw_artifact_dir']
+   if not raw.is_dir() or not (raw/'sealed.json').is_file():continue
+   dest=e.path/'child-evidence'/name/str(i);shutil.copytree(raw,dest);(dest/'sealed.json').rename(dest/'child-seal.json');src=json.loads((dest/'source.json').read_text())
    for object_name in src['source_objects'].values():
     source=clone/object_name;target=ROOT/object_name
     if target.exists():

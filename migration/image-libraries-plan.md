@@ -280,7 +280,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-11T14:17:46.527935+00:00。26入口当前5通过/7部分/14失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-11T14:19:37.636505+00:00。26入口当前5通过/7部分/14失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -812,5 +812,45 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-11T14:17:42.023587+00:00 | I2 | NPP/scan-recursive原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T141739.583168Z-I2-cuda-run-541f475185` |
 | 2026-11-11T14:17:44.803778+00:00 | I2 | NPP/constant-0原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T141742.349969Z-I2-cuda-run-467e7c2810` |
 | 2026-11-11T14:17:46.527935+00:00 | I2 | 首轮冷检出未执行数值测试：提交源码时与并行实验git status短暂争用index.lock，提交失败后冷重放检出了旧提交，缺少CCL脚本；失败已封存。检查锁已正常释放，无删除活锁；先确认新源码提交成功，再重跑冷检出。 | `migration/reports/image-ccl-cold.json` |
+| 2026-11-11T14:17:47.569502+00:00 | I2 | NPP/constant-1原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T141745.129133Z-I2-cuda-run-a5988b4785` |
+| 2026-11-11T14:17:50.303638+00:00 | I2 | NPP/constant-255原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T141747.892699Z-I2-cuda-run-45aa457458` |
+| 2026-11-11T14:17:53.063900+00:00 | I2 | NPP/noise-847原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T141750.634360Z-I2-cuda-run-7dd5930d6e` |
+| 2026-11-11T14:17:55.837269+00:00 | I2 | NPP/noise-83827原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T141753.384636Z-I2-cuda-run-69155ba806` |
+| 2026-11-11T14:17:58.649133+00:00 | I2 | NPP/noise-654981原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T141756.153367Z-I2-cuda-run-9a21c1032f` |
+| 2026-11-11T14:18:01.494130+00:00 | I2 | NPP/diagonal-touch原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T141758.960993Z-I2-cuda-run-f04a1ddd21` |
+| 2026-11-11T14:18:04.346633+00:00 | I2 | NPP/frame-hole-and-island原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T141801.818308Z-I2-cuda-run-a8f1933e5a` |
+| 2026-11-11T14:18:07.114230+00:00 | I2 | NPP/long-serpentine-component原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T141804.668272Z-I2-cuda-run-27bb543335` |
+| 2026-11-11T14:18:09.684251+00:00 | I2 | NPP+/npp-lena原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T141807.415257Z-I2-cuda-run-b8afec2255` |
+| 2026-11-11T14:18:12.325524+00:00 | I2 | NPP+/npp-CT_skull原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T141810.005592Z-I2-cuda-run-0dbf6bd616` |
+| 2026-11-11T14:18:14.855434+00:00 | I2 | NPP+/npp-PCB_METAL原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T141812.644725Z-I2-cuda-run-dcca3652a9` |
+| 2026-11-11T14:18:17.427003+00:00 | I2 | NPP+/npp-PCB2原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T141815.175119Z-I2-cuda-run-c8df447ea8` |
+| 2026-11-11T14:18:20.117299+00:00 | I2 | NPP+/npp-PCB原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T141817.729694Z-I2-cuda-run-628a3f90d6` |
+| 2026-11-11T14:18:22.756661+00:00 | I2 | NPP+/plus-lena原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T141820.428599Z-I2-cuda-run-e49a1182f2` |
+| 2026-11-11T14:18:25.362481+00:00 | I2 | NPP+/plus-CT_skull原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T141823.075486Z-I2-cuda-run-e0cae8407a` |
+| 2026-11-11T14:18:27.942084+00:00 | I2 | NPP+/plus-PCB_METAL原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T141825.680043Z-I2-cuda-run-f0cd5a77e0` |
+| 2026-11-11T14:18:30.570868+00:00 | I2 | NPP+/plus-PCB2原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T141828.261096Z-I2-cuda-run-d27aa6744c` |
+| 2026-11-11T14:18:33.309895+00:00 | I2 | NPP+/plus-PCB原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T141830.882672Z-I2-cuda-run-9df50ec846` |
+| 2026-11-11T14:18:35.808498+00:00 | I2 | NPP+/three-by-three-stale-root原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T141833.616497Z-I2-cuda-run-5521c4c0bf` |
+| 2026-11-11T14:18:38.361483+00:00 | I2 | NPP+/one-pixel原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T141836.126243Z-I2-cuda-run-6e7e6e5b39` |
+| 2026-11-11T14:18:40.868859+00:00 | I2 | NPP+/single-row原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T141838.681217Z-I2-cuda-run-c8fcffd088` |
+| 2026-11-11T14:18:43.441998+00:00 | I2 | NPP+/single-column原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T141841.188853Z-I2-cuda-run-e9121d67a4` |
+| 2026-11-11T14:18:45.999642+00:00 | I2 | NPP+/scan-255原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T141843.758561Z-I2-cuda-run-44eb203cbb` |
+| 2026-11-11T14:18:48.508036+00:00 | I2 | NPP+/scan-256原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T141846.312429Z-I2-cuda-run-24504a7df8` |
+| 2026-11-11T14:18:51.019261+00:00 | I2 | NPP+/scan-257原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T141848.819030Z-I2-cuda-run-fb73300141` |
+| 2026-11-11T14:18:53.607813+00:00 | I2 | NPP+/scan-recursive原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T141851.346364Z-I2-cuda-run-c188b23ff3` |
+| 2026-11-11T14:18:56.161392+00:00 | I2 | NPP+/constant-0原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T141853.926351Z-I2-cuda-run-ad144cbcf0` |
+| 2026-11-11T14:18:58.710420+00:00 | I2 | NPP+/constant-1原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T141856.467579Z-I2-cuda-run-211d3845d0` |
+| 2026-11-11T14:19:01.232226+00:00 | I2 | NPP+/constant-255原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T141859.024643Z-I2-cuda-run-f539818c06` |
+| 2026-11-11T14:19:03.751236+00:00 | I2 | NPP+/noise-847原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T141901.549496Z-I2-cuda-run-6f663791cc` |
+| 2026-11-11T14:19:06.415485+00:00 | I2 | NPP+/noise-83827原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T141904.066977Z-I2-cuda-run-5e14157988` |
+| 2026-11-11T14:19:08.990063+00:00 | I2 | NPP+/noise-654981原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T141906.726999Z-I2-cuda-run-45f5f5505a` |
+| 2026-11-11T14:19:11.560948+00:00 | I2 | NPP+/diagonal-touch原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T141909.312639Z-I2-cuda-run-b2480bb4b5` |
+| 2026-11-11T14:19:14.072076+00:00 | I2 | NPP+/frame-hole-and-island原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T141911.877549Z-I2-cuda-run-e5dc295c13` |
+| 2026-11-11T14:19:16.580484+00:00 | I2 | NPP+/long-serpentine-component原生label/compact rc=0；正确分区由独立CPU后验检查。 | `migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T141914.379893Z-I2-cuda-run-5a0a4f236e` |
+| 2026-11-11T14:19:19.537943+00:00 | I2 | NPP/default未改CUDA完整原例 rc=0；所有原始输出保留。 | `migration/reports/evidence/rewrite/I2/CCL-original-NPP/20261111T141916.897353Z-I2-cuda-original-076cc394a3` |
+| 2026-11-11T14:19:22.189125+00:00 | I2 | NPP+/default未改CUDA完整原例 rc=0；所有原始输出保留。 | `migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T141919.840654Z-I2-cuda-original-afddc9bfbb` |
+| 2026-11-11T14:19:25.059879+00:00 | I2 | NPP+/batch-compression未改CUDA完整原例 rc=0；所有原始输出保留。 | `migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T141922.490221Z-I2-cuda-original-83bb8bfe52` |
+| 2026-11-11T14:19:37.278995+00:00 | I2 | 冻结CCL 27组输入、两原始入口/完整条件分支、1..5实际batch及错误合同；30个历史golden全部出现同值相邻分裂，作为实测旧文件缺陷保留，当前SDK另测，不复制错误分区。 | `migration/reports/evidence/rewrite/I2/CCL-frozen-contracts-and-golden-audit/20261111T141936.193470Z-I2-CPU-contract-d4eba7f9c1` |
+| 2026-11-11T14:19:37.636505+00:00 | I2 | 干净clone发现真实复现缺口：fixture重建mkdir缺parents，build不存在即失败；冷收集器随后误读旧报告路径。两个初始化/冷记录已恢复封存；补父目录并跳过缺失/未封存子记录，重新固定源代码后从空build重试。原27输入profile保持逐字节相同，未改变数值合同。 | `migration/reports/evidence/rewrite/I2/CCL-clean-checkout/20261111T141756.772700Z-I2-host-cold-replay-f4d02524dd`；`migration/reports/image-ccl-contracts.json` |
 
 <!-- IMAGE_EXECUTION:END -->

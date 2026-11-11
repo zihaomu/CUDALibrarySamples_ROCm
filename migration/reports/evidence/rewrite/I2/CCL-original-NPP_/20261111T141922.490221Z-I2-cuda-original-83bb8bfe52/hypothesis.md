@@ -1,0 +1,1 @@
+Test cuda-original for CCL-original-NPP+, case batch-compression. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T141640.635639Z-I2-cuda-build-7b2e51ccd3.

@@ -103,11 +103,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-11T14:17:46.527935+00:00。26入口当前5通过/7部分/14失败。
+更新时间：2026-11-11T14:19:37.636505+00:00。26入口当前5通过/7部分/14失败。
 
-I2：首轮冷检出未执行数值测试：提交源码时与并行实验git status短暂争用index.lock，提交失败后冷重放检出了旧提交，缺少CCL脚本；失败已封存。检查锁已正常释放，无删除活锁；先确认新源码提交成功，再重跑冷检出。
+I2：干净clone发现真实复现缺口：fixture重建mkdir缺parents，build不存在即失败；冷收集器随后误读旧报告路径。两个初始化/冷记录已恢复封存；补父目录并跳过缺失/未封存子记录，重新固定源代码后从空build重试。原27输入profile保持逐字节相同，未改变数值合同。
 
-证据：`migration/reports/image-ccl-cold.json`
+证据：`migration/reports/evidence/rewrite/I2/CCL-clean-checkout/20261111T141756.772700Z-I2-host-cold-replay-f4d02524dd`；`migration/reports/image-ccl-contracts.json`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

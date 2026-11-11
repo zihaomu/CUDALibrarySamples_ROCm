@@ -13,7 +13,7 @@ def main():
   for stem,w,h in SIZES:
    p=d/'images'/(stem+f'_{w}x{h}_8u.raw');a=np.fromfile(p,np.uint8);assert len(a)==w*h
    originals.append(dict(case=('npp-' if family=='NPP' else 'plus-')+stem,source=str(p.relative_to(ROOT)),width=w,height=h,values=len(np.unique(a)),sha256=digest(p),bytes=p.stat().st_size))
- e=Experiment('I2','CCL-frozen-contracts-and-golden-audit','CPU-contract',sources=sources);fixtures=ROOT/'build/image-ccl-fixtures';fixtures.mkdir(exist_ok=True);cases=[]
+ e=Experiment('I2','CCL-frozen-contracts-and-golden-audit','CPU-contract',sources=sources);fixtures=ROOT/'build/image-ccl-fixtures';fixtures.mkdir(parents=True,exist_ok=True);cases=[]
  def add(name,a,original=None):
   h,w=a.shape;pitch=w+7;data=np.full((h,pitch),193,np.uint8);data[:,:w]=a;d=fixtures/name;d.mkdir(exist_ok=True);data.tofile(d/'input.bin');cfg=dict(case=name,width=w,height=h,pitch=pitch,connectivity=8,all_values_including_zero=True);write(d/'config.json',cfg);write(d/'manifest.json',dict(files={n:dict(bytes=(d/n).stat().st_size,sha256=digest(d/n)) for n in ['input.bin','config.json']}));cases.append(dict(**cfg,fixture=str(d.relative_to(ROOT)),manifest_sha256=digest(d/'manifest.json'),original=original))
  for x in originals:add(x['case'],np.fromfile(ROOT/x['source'],np.uint8).reshape(x['height'],x['width']),x)
