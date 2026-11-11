@@ -280,7 +280,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-11T13:48:17.410241+00:00。26入口当前3通过/8部分/15失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-11T13:55:00.259413+00:00。26入口当前5通过/7部分/14失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -632,5 +632,6 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-11T13:42:37.939100+00:00 | I1 | C3冷重放PASSED：全新clone无build/SDK，固定OpenCV/依赖/22输入和新C++/HIP库全部重建，22mask/两语言10完整流程独立CPU复验通过；15子记录/source objects父封存。合法空设备mask下10 CLI全部正确拒绝/成功；复合预检仅余独立复审。 | `migration/reports/canny-color-cold.json`；`migration/reports/canny-color-cli-validation.json`；`migration/reports/canny-color-qualification-tests.json` |
 | 2026-11-11T13:43:39.281751+00:00 | I1 | 资格13自测首轮因测试cache遗漏fixture-replay报告而拒绝正例，已补回必需报告（未降低覆盖门槛）重跑：PASSED；原失败保留。 | `migration/reports/evidence/rewrite/I1/C3-Canny-qualification-binding-tests/20261111T134334.521258Z-I1-CPU-selftest-f069c31963` |
 | 2026-11-11T13:48:17.410241+00:00 | I0 | I2 CCL原始合同准备：五输入/单图与异构batch/压缩、-b与help范围已核对，零值区域与真实分区语义需实测；官方文档和3x3外部回归候选记录，不以未确认厂商报告替代本机证据。 | `migration/reports/evidence/rewrite/I0/I2-CCL-original-input-inventory/20261111T134816.543213Z-I0-CPU-contract-f307aab512` |
+| 2026-11-11T13:55:00.259413+00:00 | I1 | C3两个完整入口资格先提交e9fe6f175后发布；I1三个Canny入口全部完成。项目244通过/22部分/373失败，图像5通过/7部分/14失败；22mask、两语言10原流程、55运行、C++12、CLI10、39反例及冷重放通过；差异、原CUDA Python缺依赖与性能未验收单列。继续I2。 | `migration/reports/canny-color-qualification.json`；`migration/reports/canny-color-review.json`；`migration/reports/canny-color.md` |
 
 <!-- IMAGE_EXECUTION:END -->

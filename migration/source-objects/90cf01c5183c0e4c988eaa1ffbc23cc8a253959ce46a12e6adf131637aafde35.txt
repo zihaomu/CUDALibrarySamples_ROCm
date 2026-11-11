@@ -1,0 +1,32 @@
+#!/usr/bin/env python3
+"""Copy the installed CPU OpenCV development SDK into a private image prefix."""
+import json,re,shutil
+from pathlib import Path
+from experiment import ROOT,Experiment,write,digest
+from image_progress import record
+
+def main():
+ e=Experiment('I1','image-private-OpenCV-C++','host-setup',sources=[__file__]);prefix=ROOT/'build/image-opencv';libs=prefix/'lib';libs.mkdir(parents=True,exist_ok=True)
+ rc=e.command(['dpkg-query','-W','-f','${Package} ${Version}\n','libopencv-core-dev','libopencv-imgproc-dev','libopencv-imgcodecs-dev'],'installed-OpenCV-development-packages')
+ source=Path('/usr/lib/x86_64-linux-gnu/libopencv_imgcodecs.so');rc=rc or e.command(['ldd',str(source)],'resolved-OpenCV-and-transitive-libraries')
+ try:
+  if rc:raise RuntimeError('OpenCV development package inventory failed')
+  shutil.copytree('/usr/include/opencv4',prefix/'include/opencv4',dirs_exist_ok=True)
+  copied={};skip={'libc.so.6','libm.so.6','libdl.so.2','librt.so.1','libpthread.so.0','libstdc++.so.6','libgcc_s.so.1'}
+  primary=source.resolve();shutil.copyfile(primary,libs/primary.name);copied[primary.name]=dict(original=str(primary),sha256=digest(primary),bytes=primary.stat().st_size)
+  soname=source.readlink().name
+  if soname!=primary.name and not (libs/soname).exists():(libs/soname).symlink_to(primary.name)
+  text=(e.path/'logs/0002-resolved-OpenCV-and-transitive-libraries.stdout.log').read_text()
+  for name,path in re.findall(r'^\s*(\S+)\s+=>\s+(/\S+)\s+\(',text,re.M):
+   if name in skip:continue
+   original=Path(path).resolve();target=libs/name;shutil.copyfile(original,target);copied[name]=dict(original=str(original),sha256=digest(target),bytes=target.stat().st_size)
+  for name in ['core','imgproc','imgcodecs']:
+   alias=libs/('libopencv_'+name+'.so');target=next(p for p in libs.glob('libopencv_'+name+'.so.*') if p.is_file())
+   if alias.is_symlink():alias.unlink()
+   alias.symlink_to(target.name)
+  headers={str(p.relative_to(prefix)):dict(sha256=digest(p),bytes=p.stat().st_size) for p in (prefix/'include').rglob('*') if p.is_file()}
+  result=dict(status='READY',prefix=str(prefix.relative_to(ROOT)),libraries=copied,headers=headers,scope='CPU OpenCV comparisons and image file IO only; no CPU production Canny fallback')
+ except Exception as error:result=dict(status='FAILED',error=repr(error));rc=1
+ write(e.path/'SDK.json',result);result['evidence']=e.finish('EXECUTED' if not rc else 'ENV_BLOCKED');write(prefix/'manifest.json',result);write(ROOT/'migration/reports/image-opencv-sdk.json',result)
+ record('I1','原始C++图像入口的私有OpenCV开发prefix：'+result['status']+'；宿主固定包/全部header和实际依赖SO哈希封存，foundation系统环境不修改。',[result['evidence']]);print(result['status']);return rc
+if __name__=='__main__':raise SystemExit(main())

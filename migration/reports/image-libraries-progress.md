@@ -1,13 +1,13 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-11T13:48:17.410241+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-11T13:55:00.259413+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
-26入口当前：3 PASSED / 8 PARTIAL / 15 FAILED。
+26入口当前：5 PASSED / 7 PARTIAL / 14 FAILED。
 
 | 阶段 | 执行状态 |
 | --- | --- |
 | I0 | IN_PROGRESS |
-| I1 | IN_PROGRESS |
+| I1 | COMPLETED_SCOPED |
 | I2 | NOT_STARTED |
 | I3 | NOT_STARTED |
 | I4 | NOT_STARTED |
@@ -369,3 +369,4 @@
 | 2026-11-11T13:42:37.939100+00:00 | I1 | C3冷重放PASSED：全新clone无build/SDK，固定OpenCV/依赖/22输入和新C++/HIP库全部重建，22mask/两语言10完整流程独立CPU复验通过；15子记录/source objects父封存。合法空设备mask下10 CLI全部正确拒绝/成功；复合预检仅余独立复审。 | [canny-color-cold.json](canny-color-cold.json)；[canny-color-cli-validation.json](canny-color-cli-validation.json)；[canny-color-qualification-tests.json](canny-color-qualification-tests.json) |
 | 2026-11-11T13:43:39.281751+00:00 | I1 | 资格13自测首轮因测试cache遗漏fixture-replay报告而拒绝正例，已补回必需报告（未降低覆盖门槛）重跑：PASSED；原失败保留。 | [20261111T134334.521258Z-I1-CPU-selftest-f069c31963](evidence/rewrite/I1/C3-Canny-qualification-binding-tests/20261111T134334.521258Z-I1-CPU-selftest-f069c31963) |
 | 2026-11-11T13:48:17.410241+00:00 | I0 | I2 CCL原始合同准备：五输入/单图与异构batch/压缩、-b与help范围已核对，零值区域与真实分区语义需实测；官方文档和3x3外部回归候选记录，不以未确认厂商报告替代本机证据。 | [20261111T134816.543213Z-I0-CPU-contract-f307aab512](evidence/rewrite/I0/I2-CCL-original-input-inventory/20261111T134816.543213Z-I0-CPU-contract-f307aab512) |
+| 2026-11-11T13:55:00.259413+00:00 | I1 | C3两个完整入口资格先提交e9fe6f175后发布；I1三个Canny入口全部完成。项目244通过/22部分/373失败，图像5通过/7部分/14失败；22mask、两语言10原流程、55运行、C++12、CLI10、39反例及冷重放通过；差异、原CUDA Python缺依赖与性能未验收单列。继续I2。 | [canny-color-qualification.json](canny-color-qualification.json)；[canny-color-review.json](canny-color-review.json)；[canny-color.md](canny-color.md) |

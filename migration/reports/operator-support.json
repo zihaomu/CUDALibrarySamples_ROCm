@@ -2,9 +2,9 @@
   "schema_version": 1,
   "counting_rule": "Operator/functional families are deduplicated within each module; dtypes, sizes, language, batch, storage formats and algorithm variants do not create extra operators. At least one explicitly scoped PASSED source profile is required. Cross-module totals may include the same mathematical operation implemented through different library interfaces.",
   "qualification_rule": "A verified family proves only its linked PASSED source profiles/required cases, not every API configuration. PARTIAL examples and capability probes are excluded.",
-  "verified_operator_families": 120,
+  "verified_operator_families": 121,
   "modules_with_verified_operators": 19,
-  "passed_source_profiles": 242,
+  "passed_source_profiles": 244,
   "modules": {
     "cuBLAS": {
       "verified_operator_family_count": 52,
@@ -1689,7 +1689,7 @@
       }
     },
     "NPP": {
-      "verified_operator_family_count": 2,
+      "verified_operator_family_count": 3,
       "verified_operators": [
         {
           "name": "Euclidean 距离变换/Voronoi",
@@ -1700,6 +1700,18 @@
             "migration/sample-reports/NPP/distanceTransform/distanceTransform.cpp.md"
           ],
           "source_profiles": 1
+        },
+        {
+          "name": "三通道 Canny",
+          "sample_ids": [
+            "NPP/nppCanny::npp_canny_simple.cpp",
+            "NPP/nppCanny::npp_canny_simple.py"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/NPP/nppCanny/npp_canny_simple.cpp.md",
+            "migration/sample-reports/NPP/nppCanny/npp_canny_simple.py.md"
+          ],
+          "source_profiles": 2
         },
         {
           "name": "零均值 NCC",
@@ -1714,14 +1726,12 @@
       ],
       "sample_count": 9,
       "sample_outcomes": {
-        "FAILED": 6,
-        "PASSED": 2,
-        "PARTIAL": 1
+        "FAILED": 5,
+        "PASSED": 4
       },
-      "validation_scope": "精确Euclidean距离/Voronoi/整数截断；NCC原始2048×1024 RAW、全部CLI、完整score/GPU argmax、PGM与HIP-event计时已收口，常量模板/图块按原生大图路径实测；Canny原生像素策略与其它未完成入口继续逐例记录。",
+      "validation_scope": "精确Euclidean距离/Voronoi/整数截断与完整NCC已通过；C3 Canny使用项目HIP经典8连接强种子滞后变体，C++/Python三PNG与10次原流程、22组CPU精确mask及native完整差异、stream/并发/错误/trace/冷重放和复审通过。原图比NPP少4328个弱边缘像素（IoU0.6323），不声明native mask逐点兼容；其它入口单列。",
       "failure_reason_counts": {
-        "BUILD_ERROR": 5,
-        "BINDING_OR_FRONTEND_MIGRATION_REQUIRED": 1
+        "BUILD_ERROR": 5
       }
     },
     "NPP+": {

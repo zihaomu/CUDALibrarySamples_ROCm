@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+"""Actual C3 stream/concurrency, conversion and invalid-ABI experiments."""
+import argparse,ctypes,json,os,sys
+from pathlib import Path
+from experiment import ROOT,Experiment,write,digest
+
+OUTPUTS=['repeat-a','repeat-b','changed','cpu-uint8','cpu-float32','gpu-float16','gpu-float32','noncontiguous','stream-a','stream-b','concurrent-a','concurrent-b','numpy-strided','numpy-float32','after-errors']
+PY_ERRORS=['rank-two','rank-four','channels-four','zero-size','negative-low','reverse-threshold','large-high','fractional-threshold','not-tensor','numpy-negative-strides','numpy-object']
+ABI_ERRORS=['zero-width','negative-height','large-width','negative-low','reverse-threshold','large-high','null-source','null-output','null-workspace','short-source-pitch','short-output-pitch','short-source-span','short-output-span','short-workspace','overstated-source','overstated-output','overstated-workspace','alias-source-output','alias-source-workspace','alias-output-workspace','misaligned-workspace','host-source','overflow-pitch']
+QUERY_ERRORS=['zero-width','negative-height','large-width','null-size']
+def contract():return dict(schema_version=1,outputs=OUTPUTS,python_errors=PY_ERRORS,ABI_errors=ABI_ERRORS,query_errors=QUERY_ERRORS,expected_ABI_status=1,python_exception_types={n:'TypeError' if n in {'fractional-threshold','numpy-object'} else 'ValueError' for n in PY_ERRORS},output_file_set=['input.bin','config.json','output.bin'],storage_file_set=['buffer.bin'],fixture='independent-noise-128374')
+
+def worker(out,library,expected_sha,trace=False):
+ import concurrent.futures
+ import numpy as np,torch
+ sys.path.insert(0,str(ROOT/'rocm/python'));from image.canny_color import NPPCanny
+ assert digest(library)==expected_sha;out.mkdir(parents=True);detector=NPPCanny(library);rows=[];pending=[];spec=json.loads((ROOT/'migration/rewrite/canny-color-profile.json').read_text());case=next(c for c in spec['cases'] if c['case']==contract()['fixture']);f=ROOT/case['fixture'];cfg=json.loads((f/'config.json').read_text());h,w=cfg['height'],cfg['width'];base=np.fromfile(f/'input.bin',np.uint8).reshape(h,cfg['pitch'])[:,:3*w].reshape(h,w,3).copy();changed=base[:,::-1].copy();gpu=torch.from_numpy(base).cuda()
+ def submit(name,tensor,expected,stream=None):
+  stream=stream or torch.cuda.current_stream()
+  with torch.cuda.stream(stream):result=detector.tensor(tensor)
+  pending.append((name,result,expected.copy(),int(stream.cuda_stream)))
+ if trace:
+  submit('trace-first',gpu,base);submit('trace-changed',torch.from_numpy(changed).cuda(),changed)
+ else:
+  submit('repeat-a',gpu,base);submit('repeat-b',gpu,base);submit('changed',torch.from_numpy(changed).cuda(),changed);submit('cpu-uint8',torch.from_numpy(base),base);submit('cpu-float32',torch.from_numpy(base).float(),base)
+  for dtype in [torch.float16,torch.float32]:submit('gpu-'+str(dtype).split('.')[-1],gpu.to(dtype),base)
+  padded=torch.zeros((h,w*2,3),dtype=torch.uint8,device='cuda');padded[:,::2]=gpu;submit('noncontiguous',padded[:,::2],base);streams=[torch.cuda.Stream(),torch.cuda.Stream()]
+  changed_gpu=gpu.flip(1)
+  for stream in streams:stream.wait_stream(torch.cuda.current_stream())
+  submit('stream-a',gpu,base,streams[0]);submit('stream-b',changed_gpu,changed,streams[1])
+  def job(index):
+   torch.cuda.set_device(0)
+   with torch.cuda.stream(streams[index]):return NPPCanny(library).tensor(torch.from_numpy(base if index==0 else changed).cuda())
+  with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
+   futures=[pool.submit(job,i) for i in range(2)]
+   for i,future in enumerate(futures):pending.append(('concurrent-'+('a' if i==0 else 'b'),future.result(),(base if i==0 else changed).copy(),int(streams[i].cuda_stream)))
+  data=np.zeros((h,w*2,3),np.uint8);data[:,::2]=base;pending.append(('numpy-strided',detector.detect(data[:,::2]),base.copy(),int(torch.cuda.current_stream().cuda_stream)));pending.append(('numpy-float32',detector.detect(base.astype(np.float32)),base.copy(),int(torch.cuda.current_stream().cuda_stream)))
+  pressure=[torch.full((h*w*16+4,),239,dtype=torch.uint8,device='cuda') for _ in range(32)]
+  bad=[torch.zeros(3,4),torch.zeros(2,3,4,3),torch.zeros(3,4,4),torch.zeros(0,4,3),gpu,gpu,gpu,gpu,[[[1,2,3]]]];limits=[(50,100)]*4+[(-1,100),(101,100),(50,32768),(1.5,100),(50,100)]
+  for name,tensor,(lo,hi) in zip(PY_ERRORS[:9],bad,limits):
+   try:detector.tensor(tensor,lo,hi)
+   except (ValueError,TypeError) as error:rows.append(dict(case='python/'+name,passed=True,exception_type=type(error).__name__,diagnostic=str(error)))
+   else:rows.append(dict(case='python/'+name,passed=False))
+  for name,array in [('numpy-negative-strides',base[:,::-1]),('numpy-object',base.astype(object))]:
+   try:detector.detect(array)
+   except (ValueError,TypeError) as error:rows.append(dict(case='python/'+name,passed=True,exception_type=type(error).__name__,diagnostic=str(error)))
+   else:rows.append(dict(case='python/'+name,passed=False))
+  output=torch.full((h,w),173,dtype=torch.uint8,device='cuda');space=torch.empty(h*w*16+4,dtype=torch.uint8,device='cuda');original=[gpu.data_ptr(),gpu.numel(),3*w,w,h,50,100,output.data_ptr(),output.numel(),w,space.data_ptr(),space.numel(),0]
+  modifications=[{3:0},{4:-1},{3:32769},{5:-1},{5:101},{6:32768},{0:0},{7:0},{10:0},{2:3*w-1},{9:w-1},{1:gpu.numel()-1},{8:output.numel()-1},{11:space.numel()-1},{1:1<<40},{8:1<<40},{11:1<<40},{7:gpu.data_ptr()},{10:gpu.data_ptr()},{10:output.data_ptr()},{10:space.data_ptr()+1},{0:base.ctypes.data},{2:(1<<64)-1}]
+  for name,modification in zip(ABI_ERRORS,modifications):
+   args=original.copy()
+   for k,v in modification.items():args[k]=v
+   rc=detector.call(*args);rows.append(dict(case='ABI/'+name,status=rc,passed=rc==1))
+  for name,ww,hh,null in [('zero-width',0,1,False),('negative-height',1,-1,False),('large-width',32769,1,False),('null-size',1,1,True)]:
+   n=ctypes.c_uint64(999);rc=detector.size(ww,hh,None if null else ctypes.byref(n));rows.append(dict(case='query/'+name,status=rc,size_after=n.value,passed=rc==1 and n.value==999))
+  torch.cuda.synchronize()
+  for name,buffer,expected in [('rejected-output-preserved',output,np.full((h,w),173,np.uint8)),('rejected-input-preserved',gpu,base)]:
+   d=out/name;d.mkdir();actual=buffer.cpu().numpy();actual.tofile(d/'buffer.bin');rows.append(dict(case=name,passed=bool(np.array_equal(actual,expected)),files={'buffer.bin':dict(sha256=digest(d/'buffer.bin'),bytes=(d/'buffer.bin').stat().st_size)}))
+  submit('after-errors',gpu,base)
+ torch.cuda.synchronize()
+ for name,result,expected,stream in pending:
+  d=out/name;d.mkdir();expected.tofile(d/'input.bin');actual=result.cpu().numpy() if isinstance(result,torch.Tensor) else result;actual.tofile(d/'output.bin');write(d/'config.json',dict(width=w,height=h,pitch=w*3,channels=3,low=50,high=100));rows.append(dict(case=name,passed=True,stream=stream,files={p.name:dict(sha256=digest(p),bytes=p.stat().st_size) for p in d.iterdir()}))
+ write(out/'results.json',rows)
+ if not all(r['passed'] for r in rows):raise RuntimeError('C3 runtime failures '+str([r for r in rows if not r['passed']]))
+
+def main():
+ p=argparse.ArgumentParser();p.add_argument('--worker',action='store_true');p.add_argument('--trace',action='store_true');p.add_argument('--output',type=Path);p.add_argument('--library',type=Path);p.add_argument('--expected-sha');a=p.parse_args()
+ if a.worker:return worker(a.output,a.library,a.expected_sha,a.trace)
+ from canny_color_build import dependencies
+ from snapshot import capture
+ from image_progress import record
+ profile=ROOT/'migration/rewrite/canny-color-runtime.json'
+ if not profile.exists():write(profile,contract())
+ if json.loads(profile.read_text())!=contract():raise RuntimeError('Runtime contract changed')
+ build=json.loads((ROOT/'migration/reports/canny-color-build.json').read_text());library=ROOT/build['library']
+ if digest(library)!=build['library_sha256'] or any(digest(ROOT/n)!=sha for n,sha in build['dependencies'].items()):raise RuntimeError('Stale C3 runtime build')
+ e=Experiment('I1','C3-Canny-runtime','rocm-trace' if a.trace else 'rocm-runtime',sources=[__file__,profile,*dependencies()],parent=build['experiment_id']);write(e.path/'backend.observed.json',capture());cmd=[sys.executable,__file__,'--worker','--output',str(e.path/'outputs'),'--library',str(library),'--expected-sha',build['library_sha256']]
+ if a.trace:cmd=['rocprofv3','--kernel-trace','--hip-trace','--output-format','csv','--output-directory',str(e.path/'trace'),'--']+cmd+['--trace']
+ env=dict(os.environ,PYTHONPATH=str(ROOT/'build/image-gpu-site')+':'+str(ROOT/'rocm/python'));rc=e.command(cmd,'actual-C3-trace' if a.trace else 'actual-C3-runtime-and-invalid-ABI',env=env,timeout=300);r=dict(return_code=rc,experiment_id=e.id,build=build,outputs=str((e.path/'outputs').relative_to(ROOT)),trace=str((e.path/'trace').relative_to(ROOT)));write(e.path/'run.json',r);r['evidence']=e.finish('EXECUTED' if not rc else 'RUNTIME_ERROR');write(ROOT/('migration/reports/canny-color-trace.json' if a.trace else 'migration/reports/canny-color-runtime.json'),r);record('I1','C3 '+('真实GPU trace' if a.trace else 'stream/并发/转换/非法参数')+'执行rc='+str(rc)+'；待独立数值/实际返回码验收。',[r['evidence']]);print(rc,r['evidence']);return rc
+if __name__=='__main__':raise SystemExit(main())

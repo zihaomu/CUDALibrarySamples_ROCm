@@ -2,7 +2,7 @@
 
 日期：2026-11-11。状态：**IN_PROGRESS**。逐步实施中；仅封存资格会增加支持数。
 
-本方案落实用户“合理差异可以接受”的要求，是[完整图像库计划](image-libraries-plan.md)的执行细化。[生效验收政策](rewrite/image-acceptance-policy.json)和[差异复评](reports/image-difference-acceptance.md)作为依据。目标仍为原定 26 个入口：方案起点为 2 通过、8 部分、16 失败，新增目标为 24 个；完整模式和输入分支不删减。当前已发布 3 通过、8 部分、15 失败。
+本方案落实用户“合理差异可以接受”的要求，是[完整图像库计划](image-libraries-plan.md)的执行细化。[生效验收政策](rewrite/image-acceptance-policy.json)和[差异复评](reports/image-difference-acceptance.md)作为依据。目标仍为原定 26 个入口：方案起点为 2 通过、8 部分、16 失败，新增目标为 24 个；完整模式和输入分支不删减。当前已发布 5 通过、7 部分、14 失败。
 
 ## 1. 执行原则与前置工作
 
@@ -31,7 +31,7 @@ I0 调整为公共基线和各入口前置合同两部分。原始源码身份�
 
 首批新增独立 corpus 必须包括弱边缘、边界直线/交叉、平台/斜线、稀疏边缘、常量/空结果、奇数尺寸、非连续/pitched 输入和修改输入后的复用。保留全部逐点差异、边缘数、内部/边界统计及结构检查。不能通过忽略整个边界或全图差异占比让错误实现过关。
 
-C1 的步骤 1–7 已全部完成并发布：[完整验收](reports/canny-plus.md)、[固定资格](reports/canny-plus-qualification.json)、[三项独立复审](reports/canny-plus-review.json)。原始 8 分辨率、31 组完整 mask、49 项运行合同、28 项正反向检查及干净检出重放通过。仅此一个入口新增支持；I1 仍在推进 C3 两入口。
+C1 的步骤 1–7 已全部完成并发布：[完整验收](reports/canny-plus.md)、[固定资格](reports/canny-plus-qualification.json)、[三项独立复审](reports/canny-plus-review.json)。原始 8 分辨率、31 组完整 mask、49 项运行合同、28 项正反向检查及干净检出重放通过。该入口新增支持已发布；C3 两入口亦已完成以下验收。
 
 ## 3. 第二批：完成 NPP 的两个 C3 Canny 入口
 
@@ -40,6 +40,8 @@ C1 的步骤 1–7 已全部完成并发布：[完整验收](reports/canny-plus.
 共享 Sobel/L2/NMS、C ABI、文件和 Python 基础设施，保留 C3 最大梯度通道选择及对应源例的预处理、默认阈值、文件/计时流程。**不直接把 NPP+ C1 局部模型套到 NPP C3**。
 
 当前 NPP 对照中存在数千像素的差异，与已接受的 NPP+ 3 个边界点不是同一结论。先固定并分析连接算法；可选择合理、明确的 Canny 算法变体，但需给出独立 CPU 与构造几何图的效果证据，报告与原生 NPP 的实际差异，不声称 mask 精确兼容。若这一功能判断尚不成立，两项保持 PARTIAL；不阻塞已完成入口的发布。
+
+C3 两入口现已完成并发布：[完整验收](reports/canny-color.md)、[固定资格](reports/canny-color-qualification.json)、[三项独立复核](reports/canny-color-review.json)。22 组完整 mask、两语言 10 个完整文件流程、55 项运行合同、12 项 C++ 类检查、10 项 CLI、39 项验收器检查及干净检出重放通过。项目采用经典八连接强种子滞后，原图比 native NPP 少 4328 个像素，完整差异及结构说明保留。I1 状态为 COMPLETED_SCOPED，不代表后续图像范围完成。
 
 ## 4. JPEG 路线
 
@@ -94,18 +96,18 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 容差内的扰动是正向检查，超预算数值偏差和错通道/ROI/模式/丢 batch 是反向检查；不要求所有 1 LSB 扰动都被判错。无损数据、位深/通道/尺寸、ROI/padding、错误行为和 GPU 实际执行仍有硬约束。水印、tile/ROI、连通结构等另作局部/语义检查，不能只用全图 SSIM 判断。
 
-首页仍只展示当前支持情况；批次过程与完整日志保留在[逐步记录](reports/image-libraries-progress.md)和[支持日志总表](reports/support-log-index.md)。当前已发布项目 242/23/374、图像 3/8/15；新增数只来自已经签发并先提交 Git 的完整入口资格。
+首页仍只展示当前支持情况；批次过程与完整日志保留在[逐步记录](reports/image-libraries-progress.md)和[支持日志总表](reports/support-log-index.md)。当前已发布项目 244/22/373、图像 5/7/14；新增数只来自已经签发并先提交 Git 的完整入口资格。
 
 
 <!-- IMAGE_EXECUTION:START -->
 
 ## 当前实施检查点
 
-更新时间：2026-11-11T13:48:17.410241+00:00。26入口当前3通过/8部分/15失败。
+更新时间：2026-11-11T13:55:00.259413+00:00。26入口当前5通过/7部分/14失败。
 
-I0：I2 CCL原始合同准备：五输入/单图与异构batch/压缩、-b与help范围已核对，零值区域与真实分区语义需实测；官方文档和3x3外部回归候选记录，不以未确认厂商报告替代本机证据。
+I1：C3两个完整入口资格先提交e9fe6f175后发布；I1三个Canny入口全部完成。项目244通过/22部分/373失败，图像5通过/7部分/14失败；22mask、两语言10原流程、55运行、C++12、CLI10、39反例及冷重放通过；差异、原CUDA Python缺依赖与性能未验收单列。继续I2。
 
-证据：`migration/reports/evidence/rewrite/I0/I2-CCL-original-input-inventory/20261111T134816.543213Z-I0-CPU-contract-f307aab512`
+证据：`migration/reports/canny-color-qualification.json`；`migration/reports/canny-color-review.json`；`migration/reports/canny-color.md`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

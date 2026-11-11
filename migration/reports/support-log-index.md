@@ -2,7 +2,7 @@
 
 [返回项目首页](../../README.md) · [构建与复现](../usage.md) · [机器可读记录](support-log-index.json)
 
-覆盖 **639 个样例入口**：242 PASSED、23 PARTIAL、374 FAILED、0 UNSUPPORTED、0 BLOCKED。全部 30 个模块逐项列出实现方式、范围/原因、AMD 日志、CUDA 日志与验收报告。数据直接来自 [逐例清单](../samples.yaml)，[JSON 索引](support-log-index.json) 另含全部历史证据路径、源码 SHA256、已通过/必需用例及恢复条件。
+覆盖 **639 个样例入口**：244 PASSED、22 PARTIAL、373 FAILED、0 UNSUPPORTED、0 BLOCKED。全部 30 个模块逐项列出实现方式、范围/原因、AMD 日志、CUDA 日志与验收报告。数据直接来自 [逐例清单](../samples.yaml)，[JSON 索引](support-log-index.json) 另含全部历史证据路径、源码 SHA256、已通过/必需用例及恢复条件。
 
 **查阅方式：** 先看状态和“支持范围/失败原因”，再看实际库与实现源码。AMD 栏优先链接与当前源码 hash 匹配的选定验收日志；未通过项链接实际尝试。`build.log` 是编译/链接记录，`run.log` 是程序输出，`<case>/run.log` 是对应输入的输出。命令与环境位于同目录的 `commands.json` 和 `*.environment.json`，从“证据目录”进入。缺少运行日志时会明确标注，不将编译/import 成功视作 GPU 通过。
 
@@ -16,7 +16,7 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 
 ## 已验收算子与验证范围
 
-**19 个模块已有整例通过，覆盖 120 个按模块去重的算子/功能族，对应 242 个通过的样例入口。**
+**19 个模块已有整例通过，覆盖 121 个按模块去重的算子/功能族，对应 244 个通过的样例入口。**
 
 计数按数学算子或原例核心功能归并；同模块的精度、尺寸、语言、batch、存储格式和算法变体不重复增加算子数。例如 cuRAND 是 4 种分布、36 个 generator/distribution profile；cuDSS simple 的 3 种语言入口算 1 个功能族。跨模块总数保留不同库接口的实现，GEMM 可分别出现在 cuBLAS 与 cuBLASLt。每个族至少有一个通过独立验收的样例，支持范围限于下表和逐例 required cases。
 
@@ -38,7 +38,7 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 | [MathDx/cuBLASDx](../../MathDx/cuBLASDx/README.md) | 1 | `设备内 GEMM` | 1 | HIP调用方kernel内协作GEMM三阶段、128点双FFT、32阶complex上三角Cholesky/shared LDA33；原生SDK25.6版本差异与兼容CUDA数学对照分开。RNG LEGACY逐位合同仍PARTIAL。 |
 | [MathDx/cuFFTDx](../../MathDx/cuFFTDx/README.md) | 1 | `设备内 C2C FFT` | 1 | HIP调用方kernel内协作128点双C2C FFT、ElementsPerThread=8/共32线程及扩展线程块；全部CPU频谱输出与兼容CUDA数学基线。 |
 | [MathDx/cuSolverDx](../../MathDx/cuSolverDx/README.md) | 4 | `设备内 Cholesky 分解/求解`、`设备内 complex Cholesky`、`设备内 partial-pivot LU`、`设备内三角求解` | 4 | HIP调用方kernel内complex Cholesky；MOAT新增complex FP32 48×32 pivot LU、complex FP64 32阶双batch POSV、FP64 right/lower 32×33 TRSM。原生MathDx26.06.1原例实际device输出、同字节HIP与独立CPU分别记录；只按已通过样例的登记范围统计。 |
-| [NPP](../../NPP/README.md) | 2 | `Euclidean 距离变换/Voronoi`、`零均值 NCC` | 2 | 精确Euclidean距离/Voronoi/整数截断；NCC原始2048×1024 RAW、全部CLI、完整score/GPU argmax、PGM与HIP-event计时已收口，常量模板/图块按原生大图路径实测；Canny原生像素策略与其它未完成入口继续逐例记录。 |
+| [NPP](../../NPP/README.md) | 3 | `Euclidean 距离变换/Voronoi`、`三通道 Canny`、`零均值 NCC` | 4 | 精确Euclidean距离/Voronoi/整数截断与完整NCC已通过；C3 Canny使用项目HIP经典8连接强种子滞后变体，C++/Python三PNG与10次原流程、22组CPU精确mask及native完整差异、stream/并发/错误/trace/冷重放和复审通过。原图比NPP少4328个弱边缘像素（IoU0.6323），不声明native mask逐点兼容；其它入口单列。 |
 | [NPP+](../../NPP+/README.md) | 1 | `单通道 Canny` | 1 | 项目HIP C1 Sobel3/整数L2/NMS/局部阈值，ROCm Torch/C ABI；原例8分辨率、5次预热/1000测量和PNG/CSV，31组CPU精确mask及native API比较，stream/并发/非法span/trace与独立审查。native内部精确一致，3外圈差异按项目边界定义接受；无跨设备性能结论。其它入口单列。 |
 | [nvCOMP](../../nvCOMP/README.md) | 3 | `CRC32`、`LZ4`、`Snappy` | 8 | hipCOMP LZ4/Snappy原生批处理；CPU↔GPU与hipCOMP↔nvCOMP双向互解、逐chunk status/实际长度、空/边界/损坏流；LZ4 native manager/factory +项目CRC32C及100 raw buffers。独立CRC32入口采用项目HIP IEEE/PKZIP算法，与zlib及真实nvCOMP逐chunk比较，空输入按原生语义拒绝；具体资格见逐例状态。R9 CRC32 benchmark保留CLI/默认16GiB/CSV/完整GPU搜索和最终重算；四个小输入同字节三方，默认各后端RNG独立CPU验收，性能及完整32GiB complete扫描未验收。完整NVBENCH框架仍单列PARTIAL。 |
 
@@ -47,7 +47,6 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 | 模块 | 已验证子集 | 原始样例尚缺什么 |
 | --- | --- | --- |
 | nvJPEG | rocJPEG baseline 解码；CLI/布局/缩放/ROI/多实例/后处理逐例验收 | progressive缺少原生GPU后端；显式CPU fallback/encode另标注；6 PARTIAL、0 PASSED |
-| NPP | 精确Euclidean距离/Voronoi与NCC已整例通过；Canny有数值子集 | 原生Canny像素策略及其它尚未完成合同按逐例状态记录 |
 
 逐个算子族与样例的可追溯映射见 [operator-support.json](../../migration/reports/operator-support.json)；失败仍按具体入口和原因保留。
 
@@ -57,10 +56,10 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 
 | 当前结论 | 原因编码 | 入口数 | 说明 |
 | --- | --- | ---: | --- |
-| FAILED | `BINDING_OR_FRONTEND_MIGRATION_REQUIRED` | 58 | 原始语言前端或 vendor 绑定尚未完成迁移。 |
+| FAILED | `BINDING_OR_FRONTEND_MIGRATION_REQUIRED` | 57 | 原始语言前端或 vendor 绑定尚未完成迁移。 |
 | FAILED | `BUILD_ERROR` | 316 | 当前移植稿的 API、类型、链接或算法实现未完成，实际构建失败。 |
 | PARTIAL | `INDEPENDENT_VALIDATION_PENDING` | 3 | 尚未完成对应独立数值及实际执行路径验收。 |
-| PARTIAL | `VALIDATED_B12_B15_SUBSET` | 10 | 已有验收子集，原始 descriptor、低精度通信、序列或像素语义仍有缺口。 |
+| PARTIAL | `VALIDATED_B12_B15_SUBSET` | 9 | 已有验收子集，原始 descriptor、低精度通信、序列或像素语义仍有缺口。 |
 | PARTIAL | `VALIDATED_B9_B11_SUBSET` | 9 | 已有验收子集，原例框架、调度或配置/查询语义仍有缺口。 |
 | PARTIAL | `VENDOR_PERMUTATION_POLICY_DIFFERS` | 1 | 置换/排序策略未满足原始 vendor 合同。 |
 
@@ -804,12 +803,12 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 | 样例 / 详情 | 状态 / 用例 | 实际库与实现方式 | 详细日志与范围 |
 | --- | --- | --- | --- |
 | [distanceTransform/distanceTransform.cpp](../sample-reports/NPP/distanceTransform/distanceTransform.cpp.md) | PASSED / 6/6 | HIP exact separable Euclidean distance/Voronoi/integer truncation kernels / HIP exact separable Euclidean distance/Voronoi/integer truncation kernels；库 API 迁移 + 执行语义适配 | [日志、范围、源码](support-log-index/NPP.md#sample-d91dd1bb00e8) |
+| [nppCanny/npp_canny_simple.cpp](../sample-reports/NPP/nppCanny/npp_canny_simple.cpp.md) | PASSED / 30/30 | HIP C3 Sobel/NMS/GPU union-find hysteresis + OpenCV file IO/CPU comparisons / project HIP classical C3 Canny；ALGORITHM_VARIANT_C3_CLASSICAL_HYSTERESIS | [日志、范围、源码](support-log-index/NPP.md#sample-3348e80044c5) |
+| [nppCanny/npp_canny_simple.py](../sample-reports/NPP/nppCanny/npp_canny_simple.py.md) | PASSED / 30/30 | HIP C3 Sobel/NMS/GPU union-find hysteresis + OpenCV file IO/CPU comparisons + ROCm Torch / project HIP classical C3 Canny；ALGORITHM_VARIANT_C3_CLASSICAL_HYSTERESIS | [日志、范围、源码](support-log-index/NPP.md#sample-46f944149acb) |
 | [templateMatching/templateMatching.cpp](../sample-reports/NPP/templateMatching/templateMatching.cpp.md) | PASSED / 9/9 | HIP NCC/full original CLI/RAW input/PGM annotation/HIP-event timing / project HIP kernels；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/NPP.md#sample-7ecae8272f98) |
-| [nppCanny/npp_canny_simple.cpp](../sample-reports/NPP/nppCanny/npp_canny_simple.cpp.md) | PARTIAL / 6/7 | HIP three-channel Sobel/NMS/connected hysteresis kernels / HIP three-channel Sobel/NMS/connected hysteresis kernels；库 API 迁移 + 执行语义适配 | [日志、范围、源码](support-log-index/NPP.md#sample-3348e80044c5) |
 | [batchedLabelMarkersAndCompression/batchedLabelMarkersAndCompression.cpp](../sample-reports/NPP/batchedLabelMarkersAndCompression/batchedLabelMarkersAndCompression.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/NPP.md#sample-234b64d6ff2e) |
 | [findContour/findContour.cpp](../sample-reports/NPP/findContour/findContour.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/NPP.md#sample-6e9875bedc70) |
 | [houghLines/houghLines.cpp](../sample-reports/NPP/houghLines/houghLines.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/NPP.md#sample-2fad73bf731b) |
-| [nppCanny/npp_canny_simple.py](../sample-reports/NPP/nppCanny/npp_canny_simple.py.md) | FAILED / 0/2 | 尚无已验证使用库；语言绑定尚未实现 | [日志、范围、源码](support-log-index/NPP.md#sample-46f944149acb) |
 | [opencvBenchmark/opencvBenchmark.cpp](../sample-reports/NPP/opencvBenchmark/opencvBenchmark.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/NPP.md#sample-d17ea2c018b5) |
 | [watershedSegmentation/watershedSegmentation.cpp](../sample-reports/NPP/watershedSegmentation/watershedSegmentation.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/NPP.md#sample-eb94340a73f3) |
 
