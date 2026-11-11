@@ -1,0 +1,1 @@
+Test rocm-C++-runtime for NPP/nppCanny::npp_canny_simple.cpp, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T125815.409990Z-I1-rocm-build-e4019a75d5.

@@ -1,0 +1,1 @@
+Test CPU-reference for C3-Canny-trace-CPU-check, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T130005.286455Z-I1-rocm-trace-60344be9aa.

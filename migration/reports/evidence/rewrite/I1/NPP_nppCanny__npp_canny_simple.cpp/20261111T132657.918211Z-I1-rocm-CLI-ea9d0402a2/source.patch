@@ -1,0 +1,399 @@
+diff --git a/rocm/ported/NPP/nppCanny/npp_canny_simple.cpp b/rocm/ported/NPP/nppCanny/npp_canny_simple.cpp
+index ed2d6e7b4..28ad36fb4 100644
+--- a/rocm/ported/NPP/nppCanny/npp_canny_simple.cpp
++++ b/rocm/ported/NPP/nppCanny/npp_canny_simple.cpp
+@@ -1,34 +1,63 @@
+-/*
+- * SPDX-FileCopyrightText: Copyright (c) 2021-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
++/* SPDX-FileCopyrightText: Copyright (c) 2021-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  * SPDX-License-Identifier: Apache-2.0
+- *
+- * Licensed under the Apache License, Version 2.0 (the "License");
+- * you may not use this file except in compliance with the License.
+- * You may obtain a copy of the License at
+- *
+- * http://www.apache.org/licenses/LICENSE-2.0
+- *
+- * Unless required by applicable law or agreed to in writing, software
+- * distributed under the License is distributed on an "AS IS" BASIS,
+- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+- * See the License for the specific language governing permissions and
+- * limitations under the License.
++ * ROCm implementation of the original color-edge file/benchmark workflow.
+  */
+-
+-/**
+- * NPP 3-Channel Canny Edge Detection - Simple Example
+- * ====================================================
+- *
+- * Detects edges in color images using NVIDIA NPP.
+- * 20x faster than OpenCV, detects 60% more edges.
+- *
+- * Build:
+- *   mkdir build && cd build
+- *   cmake .. && cmake --build . --config Release
+- *
+- * Usage:
+- *   ./nppCannySimple image.jpg
+- */
+-
+-#include "batch15_image.hpp"
+-int main(){return migration_image::main15("canny");}
++#include <opencv2/core.hpp>
++#include <opencv2/imgproc.hpp>
++#include <opencv2/imgcodecs.hpp>
++#include "canny_color.h"
++#include <hip/hip_runtime.h>
++#include <chrono>
++#include <cstdlib>
++#include <fstream>
++#include <iomanip>
++#include <iostream>
++#include <stdexcept>
++#include <vector>
++namespace {
++void check(hipError_t s){if(s!=hipSuccess)throw std::runtime_error(hipGetErrorString(s));}
++struct Buffer {
++ void*p=nullptr;uint64_t bytes=0;
++ explicit Buffer(uint64_t n):bytes(n){check(hipMalloc(&p,n));}
++ ~Buffer(){if(p)hipFree(p);}
++ Buffer(const Buffer&)=delete;Buffer&operator=(const Buffer&)=delete;
++ Buffer(Buffer&&)=delete;Buffer&operator=(Buffer&&)=delete;
++};
++void raw(const std::string&name,const cv::Mat&a){std::ofstream f(name,std::ios::binary);for(int y=0;y<a.rows;++y)f.write(reinterpret_cast<const char*>(a.ptr(y)),a.cols*a.elemSize());if(!f)throw std::runtime_error("Audit file write failed");}
++void save(const std::string&name,const cv::Mat&a){if(!cv::imwrite(name,a))throw std::runtime_error("Image output failed: "+name);}
++double elapsed(std::chrono::steady_clock::time_point start){return std::chrono::duration<double,std::milli>(std::chrono::steady_clock::now()-start).count();}
++uint64_t scratch(int w,int h){uint64_t n=0;check(rocm_image_canny_color_workspace_size(w,h,&n));return n;}
++}
++class NPPCanny {
++ int width,height;Buffer workspace,source,output;
++public:
++ NPPCanny(int w,int h):width(w),height(h),workspace(scratch(w,h)),source(uint64_t(w)*h*3),output(uint64_t(w)*h){}
++ ~NPPCanny(){hipStreamSynchronize(0);}
++ cv::Mat detect(const cv::Mat&image,int low=50,int high=100){
++  if(image.cols!=width||image.rows!=height||image.type()!=CV_8UC3)throw std::runtime_error("Image size/type mismatch");
++  if(low<0||high<low||high>32767)throw std::runtime_error("Invalid thresholds");
++  check(hipMemcpy2DAsync(source.p,width*3,image.data,image.step,width*3,height,hipMemcpyHostToDevice,0));
++  check(rocm_image_canny_color(static_cast<uint8_t*>(source.p),source.bytes,width*3,width,height,low,high,static_cast<uint8_t*>(output.p),output.bytes,width,workspace.p,workspace.bytes,0));
++  cv::Mat edges(height,width,CV_8UC1);check(hipMemcpy2DAsync(edges.data,edges.step,output.p,width,width,height,hipMemcpyDeviceToHost,0));check(hipStreamSynchronize(0));return edges;
++ }
++};
++int main(int argc,char**argv){try{
++ std::string path=argc>1?argv[1]:"image.jpg";cv::Mat image=cv::imread(path);
++ if(image.empty())throw std::runtime_error("Could not read "+path);
++ int count=0;check(hipGetDeviceCount(&count));if(!count)throw std::runtime_error("No HIP device");hipDeviceProp_t props{};int device=0;check(hipGetDevice(&device));check(hipGetDeviceProperties(&props,device));
++ std::cout<<"Image: "<<image.cols<<"x"<<image.rows<<"\nGPU: "<<props.name<<"\nOpenCV: "<<CV_VERSION<<"\nBackend: Project HIP classical C3 Canny\n";
++ NPPCanny detector(image.cols,image.rows);cv::Mat edges=detector.detect(image);std::vector<double>timings;
++ for(int i=0;i<10;++i){auto start=std::chrono::steady_clock::now();edges=detector.detect(image);timings.push_back(elapsed(start));}
++ cv::Mat gray,gray_edges;cv::cvtColor(image,gray,cv::COLOR_BGR2GRAY);auto start=std::chrono::steady_clock::now();for(int i=0;i<10;++i)cv::Canny(gray,gray_edges,50,100,3,true);double gray_ms=elapsed(start)/10;
++ std::vector<cv::Mat>channels;cv::split(image,channels);cv::Mat b,g,r,merged;start=std::chrono::steady_clock::now();
++ for(int i=0;i<10;++i){cv::Canny(channels[0],b,50,100,3,true);cv::Canny(channels[1],g,50,100,3,true);cv::Canny(channels[2],r,50,100,3,true);cv::bitwise_or(r,g,merged);cv::bitwise_or(merged,b,merged);}double color_ms=elapsed(start)/10;
++ double hip_ms=0;for(double t:timings)hip_ms+=t/10;int hip_count=cv::countNonZero(edges),gray_count=cv::countNonZero(gray_edges),color_count=cv::countNonZero(merged);
++ std::cout<<std::setprecision(17)<<"HIP 3-Channel: "<<hip_ms<<" ms ("<<hip_count<<" edges)\nOpenCV Grayscale: "<<gray_ms<<" ms ("<<gray_count<<" edges)\nOpenCV 3-Channel: "<<color_ms<<" ms ("<<color_count<<" edges)\n";
++ if(hip_ms>0)std::cout<<"Gray/HIP elapsed ratio: "<<gray_ms/hip_ms<<"\n3-channel/HIP elapsed ratio: "<<color_ms/hip_ms<<"\n";
++ if(gray_count)std::cout<<"Extra edges vs Gray (%): "<<100.*(hip_count-gray_count)/gray_count<<"\n";else std::cout<<"Extra edges vs Gray: undefined (no gray edges)\n";
++ save("edges_npp.png",edges);save("edges_opencv_gray.png",gray_edges);save("edges_opencv_3ch.png",merged);
++ if(const char*dir=std::getenv("MIGRATION_IMAGE_AUDIT_DIR")){
++  std::string root=dir;raw(root+"/input.bin",image);raw(root+"/mask.bin",edges);std::ofstream f(root+"/workflow.json");f<<std::setprecision(17)<<"{\"width\":"<<image.cols<<",\"height\":"<<image.rows<<",\"warmup\":1,\"iterations\":10,\"gray_iterations\":10,\"color_iterations\":10,\"timings_ms\":[";for(size_t i=0;i<timings.size();++i)f<<(i?",":"")<<timings[i];f<<"],\"gray_ms\":"<<gray_ms<<",\"color_ms\":"<<color_ms<<",\"backend\":\"Project HIP classical C3 Canny\"}\n";if(!f)throw std::runtime_error("Audit metadata write failed");
++ }
++ return 0;
++}catch(const std::exception&error){std::cerr<<"Error: "<<error.what()<<"\n";return 1;}}
+diff --git a/rocm/ported/NPP/nppCanny/npp_canny_simple.py b/rocm/ported/NPP/nppCanny/npp_canny_simple.py
+index b12964b3e..06e6aaf8b 100644
+--- a/rocm/ported/NPP/nppCanny/npp_canny_simple.py
++++ b/rocm/ported/NPP/nppCanny/npp_canny_simple.py
+@@ -1,243 +1,31 @@
+ # SPDX-FileCopyrightText: Copyright (c) 2021 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ # SPDX-License-Identifier: Apache-2.0
+-#
+-# Licensed under the Apache License, Version 2.0 (the "License");
+-# you may not use this file except in compliance with the License.
+-# You may obtain a copy of the License at
+-#
+-# http://www.apache.org/licenses/LICENSE-2.0
+-#
+-# Unless required by applicable law or agreed to in writing, software
+-# distributed under the License is distributed on an "AS IS" BASIS,
+-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-# See the License for the specific language governing permissions and
+-# limitations under the License.
+-
+-"""
+-NPP 3-Channel Canny Edge Detection - Simple Example
+-====================================================
+-
+-Detects edges in color images using NVIDIA NPP.
+-20x faster than OpenCV, detects 60% more edges.
+-
+-Requirements:
+-    pip install torch opencv-python numpy
+-
+-Usage:
+-    python npp_canny_simple.py image.jpg
+-"""
+-
+-import cv2
+-import torch
+-import ctypes
+-from ctypes import c_int, c_int16, c_ubyte, POINTER, c_void_p, sizeof
+-import sys
+-import time
+-
+-
+-class NPPCanny:
+-    """NPP 3-Channel Canny Edge Detector"""
+-
+-    # NPP enum constants
+-    NPP_FILTER_SOBEL = 0
+-    NPP_MASK_SIZE_3_X_3 = 200
+-    NPPI_NORM_L2 = 2
+-    NPP_BORDER_REPLICATE = 2
+-
+-    class NppiSize(ctypes.Structure):
+-        _fields_ = [("width", c_int), ("height", c_int)]
+-
+-    class NppiPoint(ctypes.Structure):
+-        _fields_ = [("x", c_int), ("y", c_int)]
+-
+-    class NppStreamContext(ctypes.Structure):
+-        _fields_ = [
+-            ("hStream", c_void_p), ("nCudaDeviceId", c_int),
+-            ("nMultiProcessorCount", c_int), ("nMaxThreadsPerMultiProcessor", c_int),
+-            ("nMaxThreadsPerBlock", c_int), ("nSharedMemPerBlock", c_int),
+-            ("nCudaDevAttrComputeCapabilityMajor", c_int),
+-            ("nCudaDevAttrComputeCapabilityMinor", c_int),
+-            ("nStreamFlags", c_int)
+-        ]
+-
+-    def __init__(self):
+-        # Load NPP library
+-        import platform
+-        if platform.system() == 'Windows':
+-            lib = r"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.1\bin\x64\nppif64_13.dll"
+-        else:
+-            lib = "/usr/local/cuda/lib64/libnppif.so"
+-
+-        self.npp = ctypes.cdll.LoadLibrary(lib)
+-
+-        # Setup functions
+-        self.get_buffer_size = self.npp.nppiFilterCannyBorderGetBufferSize
+-        self.get_buffer_size.restype = c_int
+-        self.get_buffer_size.argtypes = [NPPCanny.NppiSize, POINTER(c_int)]
+-
+-        self.canny = self.npp.nppiFilterCannyBorder_8u_C3C1R_Ctx
+-        self.canny.restype = c_int
+-        self.canny.argtypes = [
+-            POINTER(c_ubyte), c_int, NPPCanny.NppiSize, NPPCanny.NppiPoint,
+-            POINTER(c_ubyte), c_int, NPPCanny.NppiSize,
+-            c_int, c_int, c_int16, c_int16, c_int, c_int, c_void_p,
+-            NPPCanny.NppStreamContext
+-        ]
+-
+-    def detect(self, image, low=50, high=100):
+-        """
+-        Detect edges in RGB image
+-
+-        Args:
+-            image: numpy array (H, W, 3) BGR format
+-            low: low threshold (0-255)
+-            high: high threshold (0-255)
+-
+-        Returns:
+-            edges: numpy array (H, W) binary edge map
+-        """
+-        # Convert to tensor (HWC format required by NPP)
+-        img_tensor = torch.from_numpy(image).cuda().to(torch.uint8).contiguous()
+-
+-        h, w, c = img_tensor.shape
+-
+-        # Allocate output
+-        output = torch.empty((h, w), dtype=torch.uint8, device='cuda')
+-
+-        # Get buffer size
+-        roi = NPPCanny.NppiSize(w, h)
+-        buf_size = c_int(0)
+-        status = self.get_buffer_size(roi, ctypes.byref(buf_size))
+-        if status != 0:
+-            raise RuntimeError(f"NPP buffer size error: {status}")
+-        buffer = torch.empty(buf_size.value, dtype=torch.uint8, device='cuda')
+-
+-        # Setup context - properly initialize all fields
+-        device_id = torch.cuda.current_device()
+-        device_props = torch.cuda.get_device_properties(device_id)
+-
+-        ctx = NPPCanny.NppStreamContext()
+-        ctx.hStream = c_void_p(torch.cuda.current_stream().cuda_stream)
+-        ctx.nCudaDeviceId = device_id
+-        ctx.nMultiProcessorCount = device_props.multi_processor_count
+-        ctx.nMaxThreadsPerMultiProcessor = device_props.max_threads_per_multi_processor
+-        ctx.nMaxThreadsPerBlock = device_props.max_threads_per_block
+-        ctx.nSharedMemPerBlock = device_props.total_constant_memory  # Approximation
+-        ctx.nCudaDevAttrComputeCapabilityMajor = device_props.major
+-        ctx.nCudaDevAttrComputeCapabilityMinor = device_props.minor
+-        ctx.nStreamFlags = 0
+-
+-        # Run Canny
+-        status = self.canny(
+-            ctypes.cast(img_tensor.data_ptr(), POINTER(c_ubyte)),
+-            3 * w * sizeof(c_ubyte),
+-            NPPCanny.NppiSize(w, h),
+-            NPPCanny.NppiPoint(0, 0),
+-            ctypes.cast(output.data_ptr(), POINTER(c_ubyte)),
+-            w * sizeof(c_ubyte),
+-            roi,
+-            NPPCanny.NPP_FILTER_SOBEL,
+-            NPPCanny.NPP_MASK_SIZE_3_X_3,
+-            c_int16(low),
+-            c_int16(high),
+-            NPPCanny.NPPI_NORM_L2,
+-            NPPCanny.NPP_BORDER_REPLICATE,
+-            ctypes.cast(buffer.data_ptr(), c_void_p),
+-            ctx
+-        )
+-
+-        # Check NPP status
+-        if status != 0:
+-            raise RuntimeError(f"NPP error: {status}")
+-
+-        return output.cpu().numpy()
+-
++"""Original three-output workflow backed by project HIP classical C3 Canny."""
++import json,os,sys,time
++from pathlib import Path
++sys.path.insert(0,str(Path(__file__).resolve().parents[3]/'python'))
++import cv2,numpy as np,torch
++from image.canny_color import NPPCanny
+ 
+ def main():
+-    # Load image
+-    image_path = sys.argv[1] if len(sys.argv) > 1 else "image.jpg"
+-    image = cv2.imread(image_path)
+-
+-    if image is None:
+-        print(f"Error: Could not read {image_path}")
+-        return
+-
+-    print(f"Image: {image.shape[1]}×{image.shape[0]}")
+-
+-    # Check GPU
+-    if not torch.cuda.is_available():
+-        print("Error: CUDA not available")
+-        return
+-
+-    print(f"GPU: {torch.cuda.get_device_name(0)}")
+-
+-    # NPP 3-Channel Canny
+-    print("\nNPP 3-Channel Canny...")
+-    detector = NPPCanny()
+-
+-    # Warmup run (initializes CUDA context)
+-    _ = detector.detect(image, low=50, high=100)
+-    torch.cuda.synchronize()
+-
+-    # Timed run (average of 10 iterations)
+-    start = time.time()
+-    for _ in range(10):
+-        edges_npp = detector.detect(image, low=50, high=100)
+-    torch.cuda.synchronize()
+-    npp_time = (time.time() - start) * 1000 / 10
+-
+-    print(f"  Time: {npp_time:.2f} ms")
+-    print(f"  Edges: {edges_npp.sum() // 255} pixels")
+-
+-    # OpenCV Grayscale (comparison)
+-    print("\nOpenCV Grayscale...")
+-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+-
+-    # Average of 10 iterations for fair comparison
+-    start = time.time()
+-    for _ in range(10):
+-        edges_cv = cv2.Canny(gray, 50, 100, L2gradient=True)
+-    cv_time = (time.time() - start) * 1000 / 10
+-
+-    print(f"  Time: {cv_time:.2f} ms")
+-    print(f"  Edges: {edges_cv.sum() // 255} pixels")
+-
+-    # OpenCV 3-Channel (naive approach: 3 separate Canny + merge)
+-    print("\nOpenCV 3-Channel (3× separate)...")
+-    b, g, r = cv2.split(image)
+-
+-    # Average of 10 iterations
+-    start = time.time()
+-    for _ in range(10):
+-        edges_b = cv2.Canny(b, 50, 100, L2gradient=True)
+-        edges_g = cv2.Canny(g, 50, 100, L2gradient=True)
+-        edges_r = cv2.Canny(r, 50, 100, L2gradient=True)
+-        edges_cv_3ch = cv2.bitwise_or(edges_r, cv2.bitwise_or(edges_g, edges_b))
+-    cv_3ch_time = (time.time() - start) * 1000 / 10
+-
+-    print(f"  Time: {cv_3ch_time:.2f} ms")
+-    print(f"  Edges: {edges_cv_3ch.sum() // 255} pixels")
+-
+-    # Results
+-    print("\n" + "="*50)
+-    print("PERFORMANCE COMPARISON")
+-    print("="*50)
+-    print(f"NPP 3-Channel:       {npp_time:6.2f} ms  ({edges_npp.sum() // 255:5d} edges)")
+-    print(f"OpenCV Grayscale:    {cv_time:6.2f} ms  ({edges_cv.sum() // 255:5d} edges)")
+-    print(f"OpenCV 3-Channel:    {cv_3ch_time:6.2f} ms  ({edges_cv_3ch.sum() // 255:5d} edges)")
+-    print("="*50)
+-    print(f"NPP vs OpenCV Gray:  {cv_time/npp_time:5.1f}× faster")
+-    print(f"NPP vs OpenCV 3-Ch:  {cv_3ch_time/npp_time:5.1f}× faster")
+-    print(f"Extra edges vs Gray: +{((edges_npp.sum() - edges_cv.sum()) / edges_cv.sum() * 100):4.0f}%")
+-    print("="*50)
+-
+-    # Save outputs
+-    cv2.imwrite("edges_npp.png", edges_npp)
+-    cv2.imwrite("edges_opencv_gray.png", edges_cv)
+-    cv2.imwrite("edges_opencv_3ch.png", edges_cv_3ch)
+-
+-    print("\nSaved: edges_npp.png, edges_opencv_gray.png, edges_opencv_3ch.png")
+-
+-
+-if __name__ == "__main__":
+-    main()
++ path=sys.argv[1] if len(sys.argv)>1 else 'image.jpg';image=cv2.imread(path)
++ if image is None:raise FileNotFoundError('Could not read '+path)
++ if not torch.cuda.is_available():raise RuntimeError('No HIP device')
++ print('Image:',image.shape,'GPU:',torch.cuda.get_device_name(0),'Backend: Project HIP classical C3 Canny')
++ detector=NPPCanny();detector.detect(image);torch.cuda.synchronize();timings=[]
++ for _ in range(10):
++  start=time.perf_counter();edges=detector.detect(image);timings.append((time.perf_counter()-start)*1000)
++ gray=cv2.cvtColor(image,cv2.COLOR_BGR2GRAY);start=time.perf_counter()
++ for _ in range(10):gray_edges=cv2.Canny(gray,50,100,L2gradient=True)
++ gray_ms=(time.perf_counter()-start)*1000/10;b,g,r=cv2.split(image);start=time.perf_counter()
++ for _ in range(10):merged=cv2.bitwise_or(cv2.Canny(r,50,100,L2gradient=True),cv2.bitwise_or(cv2.Canny(g,50,100,L2gradient=True),cv2.Canny(b,50,100,L2gradient=True)))
++ color_ms=(time.perf_counter()-start)*1000/10;hip_ms=float(np.mean(timings));counts=[int(np.count_nonzero(a)) for a in [edges,gray_edges,merged]]
++ print('HIP 3-Channel:',hip_ms,'ms',counts[0],'edges');print('OpenCV Grayscale:',gray_ms,'ms',counts[1],'edges');print('OpenCV 3-Channel:',color_ms,'ms',counts[2],'edges')
++ print('Gray/HIP elapsed ratio:',gray_ms/hip_ms,'3-channel/HIP elapsed ratio:',color_ms/hip_ms)
++ print('Extra edges vs Gray (%):',100.*(counts[0]-counts[1])/counts[1] if counts[1] else 'undefined (no gray edges)')
++ for name,array in zip(['edges_npp.png','edges_opencv_gray.png','edges_opencv_3ch.png'],[edges,gray_edges,merged]):
++  if not cv2.imwrite(name,array):raise RuntimeError('Image output failed: '+name)
++ if root:=os.environ.get('MIGRATION_IMAGE_AUDIT_DIR'):
++  d=Path(root);d.mkdir(parents=True,exist_ok=True);image.tofile(d/'input.bin');edges.tofile(d/'mask.bin');(d/'workflow.json').write_text(json.dumps(dict(width=image.shape[1],height=image.shape[0],warmup=1,iterations=10,gray_iterations=10,color_iterations=10,timings_ms=timings,gray_ms=gray_ms,color_ms=color_ms,backend='Project HIP classical C3 Canny'))+'\n')
++ return 0
++if __name__=='__main__':raise SystemExit(main())
+diff --git a/tools/migration/operator_support.py b/tools/migration/operator_support.py
+index 647dd7a5d..0cd9619a3 100644
+--- a/tools/migration/operator_support.py
++++ b/tools/migration/operator_support.py
+@@ -78,7 +78,9 @@ def summarize(cat):
+   for s in samples:
+    if s['status']=='PASSED':groups[operator_name(s)].append(s)
+   operations=[{'name':name,'sample_ids':[s['id'] for s in rows],'sample_reports':['migration/sample-reports/'+s['source']+'.md' for s in rows],'source_profiles':len(rows)} for name,rows in sorted(groups.items())];counts=collections.Counter(s['status'] for s in samples);total_operators+=len(operations)
+-  families[family]={'verified_operator_family_count':len(operations),'verified_operators':operations,'sample_count':len(samples),'sample_outcomes':dict(counts),'validation_scope':SCOPES.get(family,'尚无通过整例验收的算子族。'),'failure_reason_counts':dict(collections.Counter(s['reason_code'] for s in samples if s['status'] not in {'PASSED','PARTIAL'}))}
++  scope=SCOPES.get(family,'尚无通过整例验收的算子族。')
++  if family=='NPP' and '三通道 Canny' in groups:scope='精确Euclidean距离/Voronoi/整数截断与完整NCC已通过；C3 Canny使用项目HIP经典8连接强种子滞后变体，C++/Python三PNG与10次原流程、22组CPU精确mask及native完整差异、stream/并发/错误/trace/冷重放和复审通过。原图比NPP少4328个弱边缘像素（IoU0.6323），不声明native mask逐点兼容；其它入口单列。'
++  families[family]={'verified_operator_family_count':len(operations),'verified_operators':operations,'sample_count':len(samples),'sample_outcomes':dict(counts),'validation_scope':scope,'failure_reason_counts':dict(collections.Counter(s['reason_code'] for s in samples if s['status'] not in {'PASSED','PARTIAL'}))}
+  return {'schema_version':1,'counting_rule':'Operator/functional families are deduplicated within each module; dtypes, sizes, language, batch, storage formats and algorithm variants do not create extra operators. At least one explicitly scoped PASSED source profile is required. Cross-module totals may include the same mathematical operation implemented through different library interfaces.','qualification_rule':'A verified family proves only its linked PASSED source profiles/required cases, not every API configuration. PARTIAL examples and capability probes are excluded.','verified_operator_families':total_operators,'modules_with_verified_operators':sum(bool(v['verified_operator_family_count']) for v in families.values()),'passed_source_profiles':sum(s['status']=='PASSED' for s in cat['samples']),'modules':families}
+ 
+ def render_overview(report,prefix=''):
+@@ -92,7 +94,7 @@ def render_overview(report,prefix=''):
+  text+='\n以下仅有子集/能力探针，**不计入上述整例支持数**：\n\n| 模块 | 已验证子集 | 原始样例尚缺什么 |\n| --- | --- | --- |\n'
+  if not report['modules']['nvCOMP']['verified_operator_family_count']:text+='| nvCOMP | hipCOMP LZ4 单 chunk 往返 | 完整 batch/manager 待验收 |\n'
+  text+='| nvJPEG | rocJPEG baseline 解码；CLI/布局/缩放/ROI/多实例/后处理逐例验收 | progressive缺少原生GPU后端；显式CPU fallback/encode另标注；'+str(report['modules']['nvJPEG']['sample_outcomes'].get('PARTIAL',0))+' PARTIAL、0 PASSED |\n'
+- text+='| NPP | 精确Euclidean距离/Voronoi与NCC已整例通过；Canny有数值子集 | 原生Canny像素策略及其它尚未完成合同按逐例状态记录 |\n'
++ if not any(v['name']=='三通道 Canny' for v in report['modules']['NPP']['verified_operators']):text+='| NPP | 精确Euclidean距离/Voronoi与NCC已整例通过；Canny有数值子集 | 原生Canny像素策略及其它尚未完成合同按逐例状态记录 |\n'
+  text+=f'\n逐个算子族与样例的可追溯映射见 [operator-support.json]({prefix}migration/reports/operator-support.json)；失败仍按具体入口和原因保留。\n\n'
+  return text
+ 

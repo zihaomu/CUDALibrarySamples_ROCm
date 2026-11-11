@@ -1,0 +1,1 @@
+Test CPU-reference for C3-Canny-original-CUDA-file-verification, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T125651.093276Z-I1-cuda-original-0b26d5d685.

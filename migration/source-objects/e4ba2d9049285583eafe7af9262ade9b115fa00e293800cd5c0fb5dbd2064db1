@@ -1,0 +1,73 @@
+#!/usr/bin/env python3
+"""Independent vector convolutions and CPU components for the declared C3 variant."""
+import argparse,json,math
+import cv2,numpy as np
+from experiment import ROOT,Experiment,write,digest
+from image_canny_stages_reference import reference
+from image_validation import coverage,array_check,fixture_identity,file_set
+from image_progress import record
+
+def model(fixture):
+ c=json.loads((fixture/'config.json').read_text());stages=reference(fixture);weak=stages['suppressed']>c['low'];strong=stages['suppressed']>c['high'];count,labels=cv2.connectedComponents(weak.astype(np.uint8),connectivity=8);keep=np.zeros(count,bool);keep[labels[strong]]=True;keep[0]=False
+ return (keep[labels].astype(np.uint8)*255),dict(weak=weak,strong=strong,weak_components=count-1,seeded_components=int(np.count_nonzero(keep)))
+
+def semantic(fixture,mask,info):
+ c=json.loads((fixture/'config.json').read_text());h,w=c['height'],c['width'];kind=c['semantic'];checks=[dict(check='binary-and-weak-support',passed=bool(np.all((mask==0)|(mask==255)) and np.all((mask==0)|info['weak']))),dict(check='all-strong-seeds-retained',passed=bool(np.all(mask[info['strong']]==255)))]
+ if kind in {'empty','no-strong-empty'}:checks.append(dict(check='semantic-empty',passed=not bool(mask.any())))
+ if kind in {'straight-edge','color-edge-gray-empty'}:
+  band=mask[:,w//2-1:w//2+2];checks.append(dict(check='whole-straight-edge-present',passed=bool(np.all(np.any(band,axis=1)) and np.count_nonzero(band)==np.count_nonzero(mask))))
+ if kind=='color-edge-gray-empty':
+  image=np.fromfile(fixture/'input.bin',np.uint8).reshape(h,c['pitch'])[:,:w*3].reshape(h,w,3);gray=cv2.cvtColor(image,cv2.COLOR_BGR2GRAY);checks.append(dict(check='color-edge-retained-while-gray-empty',passed=bool(mask.any() and not cv2.Canny(gray,c['low'],c['high'],L2gradient=True).any())))
+ if kind=='strong-seeded-component':checks.append(dict(check='connected-weak-edge-propagates-beyond-strong-seed',passed=bool(mask[:15].any() and mask[-15:].any() and info['strong'].any())))
+ if kind=='nonempty':checks.append(dict(check='semantic-nonempty',passed=bool(mask.any())))
+ return checks
+
+def native_comparison(row,case,fixture,expected):
+ c=json.loads((fixture/'config.json').read_text());h,w=c['height'],c['width'];checks=[dict(check='identical-native-input',passed=row['input_manifest_sha256']==case['manifest_sha256'])]
+ if row['expected_size_rejection']:
+  d=ROOT/row['evidence'];stderr=(d/'logs/0001-actual-native-C3-frozen-identities.stderr.log').read_text();checks.append(dict(check='native-size-extension-rejection',passed=(w<3 or h<3) and row['return_code']==1 and row['collection_return_code']==0 and 'status=-6' in stderr));return checks,dict(native_size_extension=True)
+ checks.append(dict(check='actual-native-success',passed=row['return_code']==row['collection_return_code']==0));out=ROOT/row['outputs'];checks.append(file_set(out,['output.bin','native.json']))
+ for name,r in row['files'].items():checks.append(dict(check='native/'+name+'/identity',passed=(out/name).is_file() and (out/name).stat().st_size==r['bytes'] and digest(out/name)==r['sha256']))
+ if not all(v['passed'] for v in checks):return checks,{}
+ p=out/'output.bin';checks.append(dict(check='native-exact-data-length',passed=p.stat().st_size==h*c['output_pitch']))
+ if not checks[-1]['passed']:return checks,{}
+ a=np.fromfile(p,np.uint8).reshape(h,c['output_pitch']);checks.append(dict(check='native-binary-and-padding',passed=bool(np.all((a[:,:w]==0)|(a[:,:w]==255)) and np.all(a[:,w:]==173))))
+ gold=a[:,:w];left=expected>0;right=gold>0;union=int(np.count_nonzero(left|right));diff=expected!=gold;inside=diff.copy();inside[[0,-1],:]=False;inside[:,[0,-1]]=False
+ metrics=dict(IoU=float(np.count_nonzero(left&right)/union) if union else 1.,different_pixels=int(diff.sum()),interior_differences=int(inside.sum()),project_edges=int(left.sum()),native_edges=int(right.sum()))
+ if case['kind']=='original':checks.append(dict(check='natural-both-nonempty',passed=bool(left.any() and right.any())))
+ return checks,metrics
+
+def validate_masks(run,spec,natives,debug=None):
+ checks=[dict(check='actual-process-success',passed=run['return_code']==0)];results=[]
+ try:
+  out=ROOT/run['outputs'];rows=json.loads((out/'results.json').read_text());checks.extend([coverage(rows,spec['cases']),coverage(natives,spec['cases'])]);by={r['case']:r for r in rows};native={r['case']:r for r in natives}
+  for case in spec['cases']:
+   name=case['case'];row=by[name];d=ROOT/case['fixture'];c=json.loads((d/'config.json').read_text());h,w=c['height'],c['width'];expected,info=model(d);own=[fixture_identity(d,case['manifest_sha256']),file_set(out/name,['pitched.bin','tensor.bin','numpy.bin']),dict(check='complete-output-manifest-and-identity',passed=set(row['files'])=={'pitched.bin','tensor.bin','numpy.bin'} and row['library_sha256']==run['build']['library_sha256'] and row['input_manifest_sha256']==case['manifest_sha256'] and row['width']==w and row['height']==h)];padded=np.full((h,c['output_pitch']),173,np.uint8);padded[:,:w]=expected
+   for file,expected_array in [('pitched.bin',padded),('tensor.bin',expected),('numpy.bin',expected)]:
+    own.append(dict(check=file+'/declared-bytes',passed=row['files'][file]['bytes']==expected_array.nbytes));own.append(array_check(out/name/file,expected_array,row['files'][file]['sha256']))
+   own+=semantic(d,expected,info);cross,metrics=native_comparison(native[name],case,d,expected);own+=cross
+   if debug is not None:expected.tofile(debug/(name+'-CPU.bin'))
+   checks.extend(dict(v,check=name+'/'+v['check']) for v in own);results.append(dict(case=name,status='PASSED' if all(v['passed'] for v in own) else 'FAILED',native=metrics,components=dict(weak=info['weak_components'],seeded=info['seeded_components']),checks=own))
+ except Exception as error:checks.append(dict(check='complete-data-no-exception',passed=False,error=repr(error)))
+ return dict(status='PASSED' if checks and all(c['passed'] is True for c in checks) else 'FAILED',checks=checks,case_count=len(results),cases=results)
+
+ORIGINAL_CASES={'original-teapot','constant-zero','isoluminant-color-step','weak-step-with-strong-seed','independent-noise-983743'}
+def validate_originals(runs,spec,language=None):
+ checks=[];results=[];required=[dict(case=lang+'/'+name) for lang in ([language] if language else ['cpp','python']) for name in sorted(ORIGINAL_CASES)]
+ rows=[r for r in runs if language is None or r['language']==language];checks.append(coverage([dict(case=r['language']+'/'+r['case']) for r in rows],required));by={c['case']:c for c in spec['cases']}
+ try:
+  for r in rows:
+   name=r['language']+'/'+r['case'];case=by[r['case']];d=ROOT/case['fixture'];c=json.loads((d/'config.json').read_text());h,w=c['height'],c['width'];out=ROOT/r['outputs'];audit=ROOT/r['audit'];info=json.loads((audit/'workflow.json').read_text());expected,_=model(d);source=np.fromfile(d/'input.bin',np.uint8).reshape(h,c['pitch'])[:,:3*w].reshape(h,w,3);gray=cv2.Canny(cv2.cvtColor(source,cv2.COLOR_BGR2GRAY),50,100,L2gradient=True);channels=cv2.split(source);merged=cv2.bitwise_or(cv2.Canny(channels[0],50,100,L2gradient=True),cv2.bitwise_or(cv2.Canny(channels[1],50,100,L2gradient=True),cv2.Canny(channels[2],50,100,L2gradient=True)))
+   own=[dict(check='actual-original-process-success',passed=r['return_code']==0),fixture_identity(d,case['manifest_sha256']),file_set(out,['edges_npp.png','edges_opencv_gray.png','edges_opencv_3ch.png']),file_set(audit,['input.bin','mask.bin','workflow.json']),array_check(audit/'input.bin',np.ascontiguousarray(source),digest(audit/'input.bin')),array_check(audit/'mask.bin',expected,digest(audit/'mask.bin'))]
+   for filename,gold in [('edges_npp.png',expected),('edges_opencv_gray.png',gray),('edges_opencv_3ch.png',merged)]:
+    actual=cv2.imread(str(out/filename),cv2.IMREAD_UNCHANGED);own.append(dict(check=filename+'/all-decoded-pixels',passed=actual is not None and actual.shape==gold.shape and actual.dtype==np.uint8 and np.array_equal(actual,gold)))
+   ts=info['timings_ms'];own.append(dict(check='complete-original-timing-and-CPU-comparison-workflow',passed=info['width']==w and info['height']==h and info['warmup']==1 and info['iterations']==info['gray_iterations']==info['color_iterations']==10 and len(ts)==10 and all(math.isfinite(t) and t>0 for t in [*ts,info['gray_ms'],info['color_ms']]) and info['backend']=='Project HIP classical C3 Canny'))
+   checks.extend(dict(v,check=name+'/'+v['check']) for v in own);results.append(dict(case=name,status='PASSED' if all(c['passed'] for c in own) else 'FAILED',checks=own))
+ except Exception as error:checks.append(dict(check='complete-original-data-no-exception',passed=False,error=repr(error)))
+ return dict(status='PASSED' if checks and all(c['passed'] is True for c in checks) else 'FAILED',checks=checks,case_count=len(results),cases=results)
+
+def main():
+ p=argparse.ArgumentParser();p.add_argument('--originals',action='store_true');a=p.parse_args();spec=json.loads((ROOT/'migration/rewrite/canny-color-profile.json').read_text());runs=json.loads((ROOT/('migration/reports/canny-color-originals.json' if a.originals else 'migration/reports/canny-color-rocm.json')).read_text());sources=[__file__,ROOT/'tools/moat/image_canny_stages_reference.py',ROOT/'tools/moat/image_validation.py',ROOT/'migration/rewrite/canny-color-profile.json'];e=Experiment('I1','C3-Canny-originals' if a.originals else 'C3-Canny-complete-masks','CPU-reference',sources=sources)
+ v=validate_originals(runs,spec) if a.originals else validate_masks(runs[0],spec,json.loads((ROOT/'migration/reports/canny-color-native.json').read_text()),e.path)
+ write(e.path/'results.json',v);v['evidence']=e.finish('PASSED' if v['status']=='PASSED' else 'NUMERIC_MISMATCH',v);write(ROOT/('migration/reports/canny-color-originals-validation.json' if a.originals else 'migration/reports/canny-color-validation.json'),v);record('I1','C3 '+('两个完整文件/benchmark入口' if a.originals else '22组全mask/颜色/强弱连接语义')+'独立CPU核对：'+v['status']+'；native实际像素差异单列，不以厂商逐点复刻作为本经典变体合同。',[v['evidence']]);print(v['status'],[c for c in v['checks'] if not c['passed']]);return int(v['status']!='PASSED')
+if __name__=='__main__':raise SystemExit(main())

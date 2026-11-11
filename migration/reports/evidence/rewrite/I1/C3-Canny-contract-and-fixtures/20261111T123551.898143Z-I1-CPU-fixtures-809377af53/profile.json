@@ -1,0 +1,196 @@
+{
+  "schema_version": 1,
+  "status": "FROZEN_IMPLEMENTATION_PROFILE",
+  "sample_ids": [
+    "NPP/nppCanny::npp_canny_simple.cpp",
+    "NPP/nppCanny::npp_canny_simple.py"
+  ],
+  "sources": {
+    "NPP/nppCanny/npp_canny_simple.cpp": "baf56fa10d093239368ac3feb40874b3d76f9a9d97824697ea8851d196a68eb4",
+    "NPP/nppCanny/npp_canny_simple.py": "2234be4a8099a7fcc45b5174bd10e2eb9716c5692d47ae3a065b92728881be87",
+    "NPP+/cannyEdgeDetectorPython/Teapot.jpg": "3fc3d9938ac87c4fe21c42126644a6696637a444bcf1e60c90309aeaab39a625"
+  },
+  "implementations": [
+    "rocm/ported/NPP/nppCanny/npp_canny_simple.cpp",
+    "rocm/ported/NPP/nppCanny/npp_canny_simple.py"
+  ],
+  "comparison_mode": "ALGORITHM_VARIANT",
+  "algorithm": {
+    "stages": "Sobel3, first maximum squared-gradient channel, floor integer L2, NMS >= both; replicate whole-image border",
+    "weak": "suppressed > low",
+    "strong": "suppressed > high",
+    "connection": "Keep each complete 8-connected weak component if and only if it contains a strong pixel",
+    "production": "GPU gradients, weak mask, union/find, strong-root mark and final binary mask; host may read only one convergence scalar"
+  },
+  "original": {
+    "warmup": 1,
+    "iterations": 10,
+    "outputs": [
+      "edges_npp.png",
+      "edges_opencv_gray.png",
+      "edges_opencv_3ch.png"
+    ],
+    "CPU_comparisons": "Original grayscale and three per-channel Canny/OR comparisons retained explicitly"
+  },
+  "native_policy": {
+    "natural": "Full native difference/IoU/edge/component statistics reported; this explicit classical algorithm variant does not promise NPP internal mask identity",
+    "geometric": "Flat and isolated-weak cases must be empty; color/strong step must detect meaningful edges; primary CPU all pixels exact",
+    "scope": "The accepted C1 three-border-pixel exception is not reused for C3"
+  },
+  "cases": [
+    {
+      "case": "original-teapot",
+      "fixture": "build/canny-color-fixtures/original-teapot",
+      "manifest_sha256": "c6c16241685a59ec4a0c606adde2dc48e5b2732c1de823c720536c913de68711",
+      "semantic": "general",
+      "kind": "original"
+    },
+    {
+      "case": "constant-zero",
+      "fixture": "build/canny-color-fixtures/constant-zero",
+      "manifest_sha256": "a077f0db2044501917260d1c8f293a177fdf71a9b526c10bd81c72eea38f66f7",
+      "semantic": "empty",
+      "kind": "holdout"
+    },
+    {
+      "case": "constant-gray",
+      "fixture": "build/canny-color-fixtures/constant-gray",
+      "manifest_sha256": "623a68a0d98da04239701a96a559cdc1302535e85ee2ff1e53fab9c66fc8dce2",
+      "semantic": "empty",
+      "kind": "holdout"
+    },
+    {
+      "case": "step-channel-0",
+      "fixture": "build/canny-color-fixtures/step-channel-0",
+      "manifest_sha256": "b493bcd803248112ba241389206ac169e0c69b2ce5efacf04e66ac03636cb5aa",
+      "semantic": "straight-edge",
+      "kind": "holdout"
+    },
+    {
+      "case": "step-channel-1",
+      "fixture": "build/canny-color-fixtures/step-channel-1",
+      "manifest_sha256": "69fb0d307c60684bb91261bf58c3a76833509822cfd6cb920dbaf4cc1df0b47e",
+      "semantic": "straight-edge",
+      "kind": "holdout"
+    },
+    {
+      "case": "step-channel-2",
+      "fixture": "build/canny-color-fixtures/step-channel-2",
+      "manifest_sha256": "f171e6574055c77737a8d69e6b6132e904e16d2624bdbb5873dd90e31409cb29",
+      "semantic": "straight-edge",
+      "kind": "holdout"
+    },
+    {
+      "case": "isoluminant-color-step",
+      "fixture": "build/canny-color-fixtures/isoluminant-color-step",
+      "manifest_sha256": "333fe5aabfc17fb75a6ad13f95070373afaac288e6eca9e47a5d12f4b1059f75",
+      "semantic": "color-edge-gray-empty",
+      "kind": "holdout"
+    },
+    {
+      "case": "isolated-weak-step",
+      "fixture": "build/canny-color-fixtures/isolated-weak-step",
+      "manifest_sha256": "216d1fb56f450d82918bca5ebad2cb5d8a02b29fd579e3c3002d97f66378e27b",
+      "semantic": "no-strong-empty",
+      "kind": "holdout"
+    },
+    {
+      "case": "weak-step-with-strong-seed",
+      "fixture": "build/canny-color-fixtures/weak-step-with-strong-seed",
+      "manifest_sha256": "11480cf1bc6d3693291dba6db61063a67775fe1b9e363b639dfe390df1feb619",
+      "semantic": "strong-seeded-component",
+      "kind": "holdout"
+    },
+    {
+      "case": "strong-cross",
+      "fixture": "build/canny-color-fixtures/strong-cross",
+      "manifest_sha256": "257d6c6e18122b09ec27c09ebe103f352c87b62f136217f524ef79e5fc5d325c",
+      "semantic": "nonempty",
+      "kind": "holdout"
+    },
+    {
+      "case": "strong-diagonal",
+      "fixture": "build/canny-color-fixtures/strong-diagonal",
+      "manifest_sha256": "df16ac22d5ac0ee90b7e5cdc66898631ad3d56e734101afaeec96abb24737d1e",
+      "semantic": "nonempty",
+      "kind": "holdout"
+    },
+    {
+      "case": "border-frame",
+      "fixture": "build/canny-color-fixtures/border-frame",
+      "manifest_sha256": "a96d3a0c9e6442096aaffb22cfd1150dec28b2900bf353f3f0d3e5cc95fcd754",
+      "semantic": "nonempty",
+      "kind": "holdout"
+    },
+    {
+      "case": "impulse",
+      "fixture": "build/canny-color-fixtures/impulse",
+      "manifest_sha256": "2e78042c9c7a566c4f0ac86ce6ae51c4431fda2ac6a3eb2cc710fd9176dd5e82",
+      "semantic": "nonempty",
+      "kind": "holdout"
+    },
+    {
+      "case": "independent-noise-128374",
+      "fixture": "build/canny-color-fixtures/independent-noise-128374",
+      "manifest_sha256": "e9aeb96c95c2471ffaf05300f0c2a1aefaea54f5407c342c8e7fd8c74d02d814",
+      "semantic": "general",
+      "kind": "holdout"
+    },
+    {
+      "case": "independent-noise-983743",
+      "fixture": "build/canny-color-fixtures/independent-noise-983743",
+      "manifest_sha256": "c864f8cdc22bc633ff4652145f22ea9c425f89887818fcbe81d442036311ae9b",
+      "semantic": "general",
+      "kind": "holdout"
+    },
+    {
+      "case": "independent-noise-762321",
+      "fixture": "build/canny-color-fixtures/independent-noise-762321",
+      "manifest_sha256": "fee2edf1c8fd43b0c48f01db12c37a9868965aa6b495b996be5d9e7b41bf391e",
+      "semantic": "general",
+      "kind": "holdout"
+    },
+    {
+      "case": "one-pixel",
+      "fixture": "build/canny-color-fixtures/one-pixel",
+      "manifest_sha256": "bac719dacfd94bdf49cd1f8608cb9678280b6e104940c7f1c64ad44eb7ded5b0",
+      "semantic": "empty",
+      "kind": "holdout"
+    },
+    {
+      "case": "single-row",
+      "fixture": "build/canny-color-fixtures/single-row",
+      "manifest_sha256": "90dee9c198c286e64e7a53ce4cc5e0de7f67ee159a9b6633955d95461ad91f76",
+      "semantic": "general",
+      "kind": "holdout"
+    },
+    {
+      "case": "single-column",
+      "fixture": "build/canny-color-fixtures/single-column",
+      "manifest_sha256": "2ab689f0477508fdb6e5f9b1db335422f10d16ae870a92a7f15305203942d904",
+      "semantic": "general",
+      "kind": "holdout"
+    },
+    {
+      "case": "equal-threshold",
+      "fixture": "build/canny-color-fixtures/equal-threshold",
+      "manifest_sha256": "f83140a41dad9424fa723b7ad07c0e6d753a3f6be60ad48f64bec6dcc3eae132",
+      "semantic": "general",
+      "kind": "holdout"
+    },
+    {
+      "case": "high-threshold",
+      "fixture": "build/canny-color-fixtures/high-threshold",
+      "manifest_sha256": "f65897be5a02aef6a54b2422ecf958c1582c79ae6b72778e58a57a37e84b8f62",
+      "semantic": "no-strong-empty",
+      "kind": "holdout"
+    },
+    {
+      "case": "zero-threshold",
+      "fixture": "build/canny-color-fixtures/zero-threshold",
+      "manifest_sha256": "27ea24bf40a6f2fef62108c6c7c84b7414b1aa0a30f43d48ec7e43fabbb9dc92",
+      "semantic": "general",
+      "kind": "holdout"
+    }
+  ]
+}

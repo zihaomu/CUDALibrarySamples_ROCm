@@ -1,0 +1,36 @@
+{
+  "status": "PASSED",
+  "checks": [
+    {
+      "check": "unmodified-original-CUDA-process-success",
+      "passed": true
+    },
+    {
+      "check": "exact-output-file-set",
+      "passed": true,
+      "actual": [
+        "edges_npp.png",
+        "edges_opencv_3ch.png",
+        "edges_opencv_gray.png"
+      ],
+      "required": [
+        "edges_npp.png",
+        "edges_opencv_3ch.png",
+        "edges_opencv_gray.png"
+      ]
+    },
+    {
+      "check": "edges_npp.png/all-original-native-pixels",
+      "passed": true
+    },
+    {
+      "check": "edges_opencv_gray.png/all-original-native-pixels",
+      "passed": true
+    },
+    {
+      "check": "edges_opencv_3ch.png/all-original-native-pixels",
+      "passed": true
+    }
+  ],
+  "scope": "Original C++ native NPP output matches the separately run native NPP API; project classical hysteresis variant has its own explicitly reported differences."
+}

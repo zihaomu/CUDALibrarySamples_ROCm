@@ -1,0 +1,1 @@
+Test rocm-env-probe for C3-valid-empty-device-mask-probe, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: none.

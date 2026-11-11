@@ -1,0 +1,23 @@
+#!/usr/bin/env python3
+"""Independent full output and diagnostic checks for the real C++ class probe."""
+import json
+from experiment import ROOT,Experiment,write,digest
+from canny_color_reference import model
+from image_validation import coverage,array_check,file_set
+from image_progress import record
+
+def validate(run):
+ spec=json.loads((ROOT/'migration/rewrite/canny-color-cpp-runtime.json').read_text());out=ROOT/run['outputs'];rows=json.loads((out/'checks.json').read_text())['checks'];expected,_=model(ROOT/run['fixture']);checks=[dict(check='actual-C++-process-success',passed=run['return_code']==0),coverage(rows,[dict(case=n) for n in spec['cases']]),file_set(out,['checks.json','noncontiguous.bin','after-errors.bin','concurrent-a.bin','concurrent-b.bin'])]
+ for name in ['noncontiguous','after-errors','concurrent-a','concurrent-b']:checks.append(array_check(out/(name+'.bin'),expected,digest(out/(name+'.bin'))))
+ for r in rows:
+  checks.append(dict(check=r['case']+'/actual-expected-behavior',passed=r['passed'] is True))
+  if r['case'] not in {'noncontiguous','after-errors','concurrent-a','concurrent-b'}:
+   text=r.get('diagnostic','');token='Image size/type mismatch' if r['case'] in {'dimension-mismatch','type-mismatch'} else 'Invalid thresholds' if r['case'].startswith('invalid-') else 'invalid argument';checks.append(dict(check=r['case']+'/specific-diagnostic',passed=bool(text and token.lower() in text.lower())))
+ return dict(status='PASSED' if checks and all(c['passed'] is True for c in checks) else 'FAILED',checks=checks,case_count=len(rows))
+
+def main():
+ run=json.loads((ROOT/'migration/reports/canny-color-cpp-runtime.json').read_text());e=Experiment('I1','C3-Canny-C++-class-independent-check','CPU-reference',sources=[__file__,ROOT/'tools/moat/canny_color_reference.py',ROOT/'tools/moat/image_canny_stages_reference.py',ROOT/'tools/moat/image_validation.py',ROOT/'migration/rewrite/canny-color-cpp-runtime.json'],parent=run['experiment_id'])
+ try:v=validate(run)
+ except Exception as error:v=dict(status='FAILED',checks=[dict(check='complete-C++-runtime-data',passed=False,error=repr(error))])
+ write(e.path/'results.json',v);v['evidence']=e.finish('PASSED' if v['status']=='PASSED' else 'NUMERIC_MISMATCH',v);v['parent']=run['evidence'];write(ROOT/'migration/reports/canny-color-cpp-runtime-validation.json',v);record('I1','C3实际C++ class非连续ROI/8错误/恢复调用独立检查：'+v['status']+'。',[v['evidence']]);print(v['status'],[c for c in v['checks'] if not c['passed']]);return int(v['status']!='PASSED')
+if __name__=='__main__':raise SystemExit(main())

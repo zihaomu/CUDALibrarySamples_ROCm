@@ -1,0 +1,1 @@
+Test CPU-reference for C3-Canny-C++-class-independent-check, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T130006.423192Z-I1-rocm-C++-runtime-f316ee5609.

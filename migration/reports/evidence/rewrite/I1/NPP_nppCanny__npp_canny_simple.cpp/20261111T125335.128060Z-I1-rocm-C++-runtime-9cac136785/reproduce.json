@@ -1,0 +1,85 @@
+{
+  "commands": [
+    {
+      "command_id": 1,
+      "phase": "build-actual-class-contract",
+      "argv": [
+        "hipcc",
+        "--rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay",
+        "--hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay",
+        "--rocm-device-lib-path=/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode",
+        "--offload-arch=gfx1201",
+        "-std=c++17",
+        "-O2",
+        "-D__HIP_PLATFORM_AMD__",
+        "-I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/image",
+        "-I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-opencv/include/opencv4",
+        "-x",
+        "hip",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/probes/image/canny_color_cpp_contract.cpp",
+        "-L/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I1/C3-Canny-full-build/20261111T124348.996279Z-I1-rocm-build-c9a90fd607",
+        "-limage_canny_color",
+        "-Wl,-rpath,/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I1/C3-Canny-full-build/20261111T124348.996279Z-I1-rocm-build-c9a90fd607",
+        "-L/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-opencv/lib",
+        "-Wl,-rpath,/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-opencv/lib",
+        "-lopencv_imgcodecs",
+        "-lopencv_imgproc",
+        "-lopencv_core",
+        "-L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib",
+        "-Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib",
+        "-lamdhip64",
+        "-o",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I1/NPP_nppCanny__npp_canny_simple.cpp/20261111T125335.128060Z-I1-rocm-C++-runtime-9cac136785/class-contract"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T12:53:36.373422+00:00",
+      "timeout_seconds": 300,
+      "environment": {
+        "HIP_VISIBLE_DEVICES": "0",
+        "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "DEEPINFER_ROCM_RELEASE": "10.1.0",
+        "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+        "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+      },
+      "stdout": "logs/0001-build-actual-class-contract.stdout.log",
+      "stderr": "logs/0001-build-actual-class-contract.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T12:53:38.442990+00:00",
+      "seconds": 2.068543201952707
+    },
+    {
+      "command_id": 2,
+      "phase": "actual-host-ROI-and-C++-errors",
+      "argv": [
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I1/NPP_nppCanny__npp_canny_simple.cpp/20261111T125335.128060Z-I1-rocm-C++-runtime-9cac136785/class-contract",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/canny-color-fixtures/independent-noise-128374",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I1/NPP_nppCanny__npp_canny_simple.cpp/20261111T125335.128060Z-I1-rocm-C++-runtime-9cac136785/outputs"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T12:53:38.444332+00:00",
+      "timeout_seconds": 180,
+      "environment": {
+        "HIP_VISIBLE_DEVICES": "0",
+        "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "DEEPINFER_ROCM_RELEASE": "10.1.0",
+        "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+        "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+      },
+      "stdout": "logs/0002-actual-host-ROI-and-C++-errors.stdout.log",
+      "stderr": "logs/0002-actual-host-ROI-and-C++-errors.stderr.log",
+      "environment_changes": {
+        "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch",
+        "DEEPINFER_ROCM_RELEASE": "10.1.0",
+        "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "HIP_VISIBLE_DEVICES": "0",
+        "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton"
+      },
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T12:53:38.909640+00:00",
+      "seconds": 0.4649337529554032
+    }
+  ],
+  "source": "source.json",
+  "inputs": "inputs/manifest.json",
+  "expected_environment": "environment.expected.json"
+}

@@ -1,0 +1,1 @@
+Test CPU-reference for C3-Canny-runtime-CPU-check, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T125220.215815Z-I1-rocm-runtime-cc0c7fe1a7.

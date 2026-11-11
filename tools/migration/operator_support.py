@@ -78,7 +78,9 @@ def summarize(cat):
   for s in samples:
    if s['status']=='PASSED':groups[operator_name(s)].append(s)
   operations=[{'name':name,'sample_ids':[s['id'] for s in rows],'sample_reports':['migration/sample-reports/'+s['source']+'.md' for s in rows],'source_profiles':len(rows)} for name,rows in sorted(groups.items())];counts=collections.Counter(s['status'] for s in samples);total_operators+=len(operations)
-  families[family]={'verified_operator_family_count':len(operations),'verified_operators':operations,'sample_count':len(samples),'sample_outcomes':dict(counts),'validation_scope':SCOPES.get(family,'尚无通过整例验收的算子族。'),'failure_reason_counts':dict(collections.Counter(s['reason_code'] for s in samples if s['status'] not in {'PASSED','PARTIAL'}))}
+  scope=SCOPES.get(family,'尚无通过整例验收的算子族。')
+  if family=='NPP' and '三通道 Canny' in groups:scope='精确Euclidean距离/Voronoi/整数截断与完整NCC已通过；C3 Canny使用项目HIP经典8连接强种子滞后变体，C++/Python三PNG与10次原流程、22组CPU精确mask及native完整差异、stream/并发/错误/trace/冷重放和复审通过。原图比NPP少4328个弱边缘像素（IoU0.6323），不声明native mask逐点兼容；其它入口单列。'
+  families[family]={'verified_operator_family_count':len(operations),'verified_operators':operations,'sample_count':len(samples),'sample_outcomes':dict(counts),'validation_scope':scope,'failure_reason_counts':dict(collections.Counter(s['reason_code'] for s in samples if s['status'] not in {'PASSED','PARTIAL'}))}
  return {'schema_version':1,'counting_rule':'Operator/functional families are deduplicated within each module; dtypes, sizes, language, batch, storage formats and algorithm variants do not create extra operators. At least one explicitly scoped PASSED source profile is required. Cross-module totals may include the same mathematical operation implemented through different library interfaces.','qualification_rule':'A verified family proves only its linked PASSED source profiles/required cases, not every API configuration. PARTIAL examples and capability probes are excluded.','verified_operator_families':total_operators,'modules_with_verified_operators':sum(bool(v['verified_operator_family_count']) for v in families.values()),'passed_source_profiles':sum(s['status']=='PASSED' for s in cat['samples']),'modules':families}
 
 def render_overview(report,prefix=''):
@@ -92,7 +94,7 @@ def render_overview(report,prefix=''):
  text+='\n以下仅有子集/能力探针，**不计入上述整例支持数**：\n\n| 模块 | 已验证子集 | 原始样例尚缺什么 |\n| --- | --- | --- |\n'
  if not report['modules']['nvCOMP']['verified_operator_family_count']:text+='| nvCOMP | hipCOMP LZ4 单 chunk 往返 | 完整 batch/manager 待验收 |\n'
  text+='| nvJPEG | rocJPEG baseline 解码；CLI/布局/缩放/ROI/多实例/后处理逐例验收 | progressive缺少原生GPU后端；显式CPU fallback/encode另标注；'+str(report['modules']['nvJPEG']['sample_outcomes'].get('PARTIAL',0))+' PARTIAL、0 PASSED |\n'
- text+='| NPP | 精确Euclidean距离/Voronoi与NCC已整例通过；Canny有数值子集 | 原生Canny像素策略及其它尚未完成合同按逐例状态记录 |\n'
+ if not any(v['name']=='三通道 Canny' for v in report['modules']['NPP']['verified_operators']):text+='| NPP | 精确Euclidean距离/Voronoi与NCC已整例通过；Canny有数值子集 | 原生Canny像素策略及其它尚未完成合同按逐例状态记录 |\n'
  text+=f'\n逐个算子族与样例的可追溯映射见 [operator-support.json]({prefix}migration/reports/operator-support.json)；失败仍按具体入口和原因保留。\n\n'
  return text
 

@@ -101,11 +101,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-11T12:32:49.720879+00:00。26入口当前3通过/8部分/15失败。
+更新时间：2026-11-11T13:33:46.213542+00:00。26入口当前3通过/8部分/15失败。
 
-I1：NPP+ C1整例资格已先提交Git后发布：31mask、8原始5/1000流程、49运行合同、28正反例及冷重放/三复审完整通过。项目242通过/23部分/374失败，图像3通过/8部分/15失败；I1其余C3两项和I2-I9继续实施。
+I1：C3最终构建闭包重放：22mask、两语言10原流程、55运行/trace、C++12项含两独立实例并发及39反例全部通过；NVIDIA未改C++三PNG与native API/OpenCV精确。正在完成合法空设备mask重验和干净clone；主表仍242/23/374，尚未发布C3资格。
 
-证据：`migration/reports/canny-plus-qualification.json`；`migration/reports/canny-plus-review.json`；`migration/reports/canny-plus.md`
+证据：`migration/reports/canny-color-validation.json`；`migration/reports/canny-color-originals-validation.json`；`migration/reports/canny-color-cpp-runtime-validation.json`；`migration/reports/canny-color-checks.json`；`migration/reports/canny-color-original-cuda-validation.json`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

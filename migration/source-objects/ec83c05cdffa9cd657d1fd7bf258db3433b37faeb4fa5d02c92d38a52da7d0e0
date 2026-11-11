@@ -1,0 +1,20 @@
+// SPDX-License-Identifier: Apache-2.0
+#define main ported_file_workflow_main
+#include "../../ported/NPP/nppCanny/npp_canny_simple.cpp"
+#undef main
+#include <cstring>
+#include <functional>
+#include <future>
+int main(int argc,char**argv){try{
+ if(argc!=3)throw std::runtime_error("expected fixture and output directories");
+ std::string input=argv[1],output=argv[2];int w,h,c,pitch,x,y,rw,rh,lo,hi,op;std::ifstream params(input+"/params.txt");if(!(params>>w>>h>>c>>pitch>>x>>y>>rw>>rh>>lo>>hi>>op)||c!=3)throw std::runtime_error("fixture params");std::ifstream file(input+"/input.bin",std::ios::binary);std::vector<unsigned char>bytes((std::istreambuf_iterator<char>(file)),{});if(bytes.size()!=size_t(h)*pitch)throw std::runtime_error("fixture bytes");
+ cv::Mat backing(h,w*2,CV_8UC3,cv::Scalar(149,149,149));cv::Mat roi=backing(cv::Rect(1,0,w,h));for(int row=0;row<h;++row)std::memcpy(roi.ptr(row),bytes.data()+size_t(row)*pitch,w*3);if(roi.isContinuous())throw std::runtime_error("test requires noncontinuous host ROI");
+ NPPCanny detector(w,h);cv::Mat first=detector.detect(roi);raw(output+"/noncontiguous.bin",first);
+ std::ofstream log(output+"/checks.json");log<<"{\"checks\":[{\"case\":\"noncontiguous\",\"passed\":true}";bool all=true;
+ auto reject=[&](const char*name,std::function<void()>fn){bool caught=false;std::string message;try{fn();}catch(const std::runtime_error&e){caught=true;message=e.what();}all&=caught;log<<",{\"case\":"<<std::quoted(name)<<",\"passed\":"<<(caught?"true":"false")<<",\"diagnostic\":"<<std::quoted(message)<<"}";};
+ reject("dimension-mismatch",[&]{detector.detect(cv::Mat(h,w-1,CV_8UC3));});reject("type-mismatch",[&]{detector.detect(cv::Mat(h,w,CV_8UC1));});reject("invalid-low",[&]{detector.detect(roi,-1,100);});reject("invalid-order",[&]{detector.detect(roi,101,100);});reject("invalid-high",[&]{detector.detect(roi,50,32768);});reject("constructor-zero",[&]{NPPCanny bad(0,h);});reject("constructor-negative",[&]{NPPCanny bad(-1,h);});reject("constructor-limit",[&]{NPPCanny bad(32769,1);});
+ cv::Mat after=detector.detect(roi);raw(output+"/after-errors.bin",after);bool same=cv::countNonZero(first!=after)==0;all&=same;log<<",{\"case\":\"after-errors\",\"passed\":"<<(same?"true":"false")<<"}";
+ auto concurrent=[&]{check(hipSetDevice(0));NPPCanny independent(w,h);return independent.detect(roi);};auto a=std::async(std::launch::async,concurrent);auto b=std::async(std::launch::async,concurrent);
+ for(auto entry:std::vector<std::pair<std::string,cv::Mat>>{{"concurrent-a",a.get()},{"concurrent-b",b.get()}}){raw(output+"/"+entry.first+".bin",entry.second);bool equal=cv::countNonZero(first!=entry.second)==0;all&=equal;log<<",{\"case\":"<<std::quoted(entry.first)<<",\"passed\":"<<(equal?"true":"false")<<"}";}
+ log<<"]}\n";if(!log)throw std::runtime_error("check output");return all?0:1;
+}catch(const std::exception&e){std::cerr<<e.what()<<"\n";return 1;}}
