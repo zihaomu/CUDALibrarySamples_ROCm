@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "version": "image-functional-v1",
+  "date": "2026-11-11",
+  "status": "ACTIVE_DESIGN_POLICY",
+  "user_direction": "我觉得合理的差异是可用接受的，你从这个角度判断一下",
+  "goal": "Complete original sample functionality with documented functional equivalence; exact vendor output is an additional compatibility grade.",
+  "report": "migration/reports/image-difference-acceptance.md",
+  "observations": "migration/reports/image-difference-assessment.json",
+  "comparison_modes": [
+    "EXACT",
+    "NUMERICAL_TOLERANCE",
+    "ALGORITHM_VARIANT"
+  ],
+  "qualification_effect": "No promotion from this policy or its observations. A complete real GPU entrypoint and all required cases must satisfy a separately frozen per-profile contract before publication.",
+  "current_judgments": {
+    "NPPPlus_Canny_CPU_model_three_outer_boundary_pixels": "Acceptable documented boundary difference for functional-equivalence development; final HIP mask and complete original callers remain pending.",
+    "rocJPEG_ten_baseline_outputs": "Acceptable observed decode difference: CPU fancy-upsample off gives maxAbs1-3, PSNR55.74-63.84dB and RGB SSIM>=0.999716. This is not a universal threshold or complete JPEG sample qualification.",
+    "progressive_JPEG_decode_failure_and_missing_GPU_JPEG2000_modes": "Missing functionality, not numerical tolerance.",
+    "JPEG2000_reversible_pixel_errors": "Not acceptable; preserve the promised lossless data representation. Compressed stream bytes may differ."
+  },
+  "hard_constraints": [
+    "complete required cases",
+    "accurate metadata and descriptors",
+    "actual GPU computation",
+    "valid input/output and all batch results",
+    "lossless/reversible representation exactness",
+    "fail-closed validator and immutable original evidence"
+  ],
+  "future_tolerance_status": "Must be fixed per profile before new holdouts and qualification; existing observed maxima are not universal limits.",
+  "historical_baseline": "migration/rewrite/image-libraries-plan.json retains its original exact-first design; this active policy supersedes that design's blanket cross-vendor pixel-exact requirement.",
+  "execution_plan": "migration/image-equivalence-execution.md",
+  "entry_gating": "An entry may qualify after its own complete frozen contract/cases and all common prerequisites pass; unfinished unrelated codec investigations remain owed in I0."
+}

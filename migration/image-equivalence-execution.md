@@ -99,11 +99,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-11T12:27:48.138541+00:00。26入口当前2通过/8部分/16失败。
+更新时间：2026-11-11T12:29:47.172381+00:00。26入口当前2通过/8部分/16失败。
 
-I1：干净clone最终重放通过：无预存build，私有依赖/overlay从零安装，31组输入hash重建及新共享库构建成功，31mask和8尺寸5/1000原例再次通过独立CPU/native检查；子记录由父seal完整保留。
+I1：C3两入口合同准备：保留原例三种输出/10次计时和C3最大梯度，采用单独明确的8连接滞后候选；原生数千像素差异继续单列，不能套用C1三外圈差异结论。
 
-证据：`migration/reports/canny-plus-cold.json`；`migration/reports/evidence/rewrite/I1/CannyPlus-review-identity-tests/20261111T122557.872555Z-I1-CPU-selftest-b2d9d7dbf2`
+证据：`migration/reports/evidence/rewrite/I1/C3-Canny-original-entry-contract/20261111T122946.359147Z-I1-CPU-contract-ac3c6dd7e5`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

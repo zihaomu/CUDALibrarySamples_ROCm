@@ -1,0 +1,16 @@
+{
+  "scope": "Next two C3 callers; no sample qualification",
+  "gradient": "First maximal squared-gradient channel; Sobel3/integer L2/NMS >= both neighbors",
+  "connection": "Proposed explicit classical 8-connected hysteresis; weak suppressed > low, strong > high; separate from the C1 local rule",
+  "workflow": {
+    "warmup": 1,
+    "iterations": 10,
+    "outputs": [
+      "edges_npp.png",
+      "edges_opencv_gray.png",
+      "edges_opencv_3ch.png"
+    ],
+    "CPU_comparisons": "Original grayscale Canny and per-channel Canny OR remain explicit comparison workflows"
+  },
+  "known_native_gap": "Known Teapot C3 global-hysteresis model differs by thousands of pixels; evaluate structural holdouts and preserve full native differences, not the C1 three-border-pixel exception"
+}

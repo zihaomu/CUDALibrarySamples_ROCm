@@ -1,6 +1,6 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-11T12:27:48.138541+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-11T12:29:47.172381+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
 26入口当前：2 PASSED / 8 PARTIAL / 16 FAILED。
 
@@ -257,3 +257,4 @@
 | 2026-11-11T12:25:59.741512+00:00 | I1 | 冷检出两次setup在依赖安装成功后因缺少仓库外doc目录而失败，均保留日志；进度工具已支持仓库内plan镜像fallback，重新执行完整冷重放。未发生算法失败或资格提升。 | [20261111T122341.548807Z-I1-host-cold-replay-bf8fc284c3](evidence/rewrite/I1/CannyPlus-clean-checkout/20261111T122341.548807Z-I1-host-cold-replay-bf8fc284c3)；[20261111T122440.113615Z-I1-host-cold-replay-864cb3a3c8](evidence/rewrite/I1/CannyPlus-clean-checkout/20261111T122440.113615Z-I1-host-cold-replay-864cb3a3c8) |
 | 2026-11-11T12:27:05.182649+00:00 | I1 | 全新checkout无build缓存：PASSED；重新安装私有依赖、重建31输入/共享库、重跑31mask与8尺寸1000循环、独立CPU复核。 | [20261111T122544.406349Z-I1-host-cold-replay-4540da489b](evidence/rewrite/I1/CannyPlus-clean-checkout/20261111T122544.406349Z-I1-host-cold-replay-4540da489b) |
 | 2026-11-11T12:27:48.138541+00:00 | I1 | 干净clone最终重放通过：无预存build，私有依赖/overlay从零安装，31组输入hash重建及新共享库构建成功，31mask和8尺寸5/1000原例再次通过独立CPU/native检查；子记录由父seal完整保留。 | [canny-plus-cold.json](canny-plus-cold.json)；[20261111T122557.872555Z-I1-CPU-selftest-b2d9d7dbf2](evidence/rewrite/I1/CannyPlus-review-identity-tests/20261111T122557.872555Z-I1-CPU-selftest-b2d9d7dbf2) |
+| 2026-11-11T12:29:47.172381+00:00 | I1 | C3两入口合同准备：保留原例三种输出/10次计时和C3最大梯度，采用单独明确的8连接滞后候选；原生数千像素差异继续单列，不能套用C1三外圈差异结论。 | [20261111T122946.359147Z-I1-CPU-contract-ac3c6dd7e5](evidence/rewrite/I1/C3-Canny-original-entry-contract/20261111T122946.359147Z-I1-CPU-contract-ac3c6dd7e5) |
