@@ -1,6 +1,6 @@
 # 等值连通域与 GPU 标签压缩
 
-状态：实现、完整数值/运行验收及干净检出重放通过；复审要求的 stream/验收器修复已实施并重验，更新后的干净检出和最终复核进行中。尚未据此增加首页通过数。
+状态：实现、完整数值/运行验收及干净检出重放通过；复审要求的 stream/验收器修复、全量重验与更新后的干净检出均已通过；最终固定提交复核与资格发布进行中。尚未据此增加首页通过数。
 
 两个原始入口分别为 NPP 与 NPP+ 的 `batchedLabelMarkersAndCompression`。AMD 实现采用项目 HIP 八连接并查集与分层 GPU 前缀扫描，覆盖输入的所有字节值，包含零值区域。CPU 只读取收敛标量和最终分量数，以及文件 IO；标签生成和压缩都在 GPU。
 
@@ -25,13 +25,13 @@
 | CLI | 三个配置共 39 项：默认目录、帮助、参数/输入/输出错误和合法空设备 mask；检查实际返回码、具体诊断、成功输出全集。[执行](image-ccl-cli.json)、[验收](image-ccl-cli-validation.json) |
 | 默认/外设备/销毁 stream | 默认 nullptr 正向完整像素通过；GPU0仅创建外设备流，GPU1拒绝返回101并保留存储；销毁流查询/调用均返回709。全部像素仅GPU1执行。[GPU](image-ccl-streams.json)、[CPU](image-ccl-streams-validation.json) |
 | 原生执行预检反例 | 实际runner对失败build、缺binary身份、缺分支三项均先封存拒绝，无远端命令和逐例孤立记录。[检查](image-ccl-native-guard-tests.json) |
-| 真实 GPU trace | 27 次 initialize/root_flags/output；53 次 hook/compress、61 次 block_scan、34 次 scan_offsets。时间、grid、PCI 检查均通过，执行物理 GPU1 `0000:23:00.0`。[执行](image-ccl-trace.json)、[验收](image-ccl-trace-validation.json) |
-| 干净检出 | 无预先 build，固定提交重新生成27输入并校验profile一致，创建SDK overlay、重编译库/三个原入口；27mask、44运行及15完整流程全部再次CPU通过。[冷重放](image-ccl-cold.json)；此前19子raw与源对象封存；stream与独立角色约束更新后重做冷检出，目标20子记录。 |
+| 真实 GPU trace | 27 次 initialize/root_flags/output；50 次 hook/compress、61 次 block_scan、34 次 scan_offsets。时间、grid、PCI 检查均通过，执行物理 GPU1 `0000:23:00.0`。[执行](image-ccl-trace.json)、[验收](image-ccl-trace-validation.json) |
+| 干净检出 | 无预先 build，固定提交重新生成27输入并校验profile一致，创建SDK overlay、重编译库/三个原入口；27mask、44运行、3stream及15完整流程全部再次CPU通过。[冷重放](image-ccl-cold.json)；固定473f2e363的更新冷检出已通过：27mask、44运行、3stream及15完整流程共89项，20子raw与源对象封存。 |
 | 验收器正反例 | 31 项，增加像素→错误、查询valid/几何重定义、错误→查询、丢源身份四类绕过反例；接受任意 native 标签重编号，拒绝错误分区、压缩、padding、计数、输入、缺例/重复、实际失败码和结构错误。[检查](image-ccl-checks.json) |
 
 ## NVIDIA 原生对照与真实差异
 
-[54 次 API 对照](image-ccl-native.json)与[独立分区比较](image-ccl-native-validation.json)已完成。当前 NPP 13.4 工具链及 NPP+ 0.10 私有 SDK 的两个 API 全部运行成功，但部分分区不符合同值八连接定义。例如：
+[54 次 API 对照](image-ccl-native.json)与[独立分区比较](image-ccl-native-validation.json)已完成。当前 CUDA 13.4 工具链中的 NPP及 NPP+ 0.10 私有 SDK 的两个 API 全部运行成功，但部分分区不符合同值八连接定义。例如：
 
 ```text
 0 2 0

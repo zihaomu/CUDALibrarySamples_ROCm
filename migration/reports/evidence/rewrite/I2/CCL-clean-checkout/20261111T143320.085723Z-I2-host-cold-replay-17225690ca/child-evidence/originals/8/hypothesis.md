@@ -1,0 +1,1 @@
+Test rocm-original for CCL-original-NPP+, case default/4. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T143348.940927Z-I2-rocm-build-65f05f0e14.

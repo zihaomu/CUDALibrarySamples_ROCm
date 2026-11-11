@@ -280,7 +280,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-11T14:33:16.933221+00:00。26入口当前5通过/7部分/14失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-11T14:35:51.728086+00:00。26入口当前5通过/7部分/14失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -998,5 +998,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-11T14:31:41.951373+00:00 | I2 | CCL独立BFS/OpenCV交叉、任意native编号正例和像素/压缩/padding/输入/缺例/ABI/文件等验收器正反向检查：PASSED | `migration/reports/evidence/rewrite/I2/CCL-independent-validator-mutations/20261111T143131.646449Z-I2-CPU-validator-test-6da204dc5c` |
 | 2026-11-11T14:32:33.576171+00:00 | I2 | 原生原例runner三项真实预检反向执行：失败build、缺binary身份、缺分支均先封存拒绝，不发远端命令、不创建逐例记录，原READY报告不修改。PASSED | `migration/reports/evidence/rewrite/I2/CCL-native-original-preflight-negative-tests/20261111T143230.137474Z-I2-CPU-selftest-f7d40c8c1f`；`migration/reports/evidence/rewrite/I2/CCL-native-original-preflight/20261111T143230.757595Z-I2-host-preflight-afd2728f4a`；`migration/reports/evidence/rewrite/I2/CCL-native-original-preflight/20261111T143231.630112Z-I2-host-preflight-3b8ff57a83`；`migration/reports/evidence/rewrite/I2/CCL-native-original-preflight/20261111T143232.493210Z-I2-host-preflight-5c7873f0d5` |
 | 2026-11-11T14:33:16.933221+00:00 | I2 | 三项复审缺口已修复并重验：native原始编译rc汇总/封存预检、GetDevice默认/外设备/销毁流预检、独立runtime角色/源身份/几何/query约束。新HIP库27mask/44runtime/trace/15全流程165文件/39CLI均重跑；3额外stream默认0/外设备101/销毁709与完整存储通过，GPU0只建外设备流、仅GPU1计算；31数值/结构/绕过反例及3原生预检反例通过。下一步新固定源码的20子记录冷检出和最终复审。 | `migration/reports/image-ccl-streams-validation.json`；`migration/reports/image-ccl-checks.json`；`migration/reports/image-ccl-native-guard-tests.json`；`migration/rewrite/image-ccl-runtime-contract.json` |
+| 2026-11-11T14:34:55.116008+00:00 | I2 | CCL干净检出/27输入重建/新HIP编译/两C++全15流程及44运行合同冷重放：PASSED；全部子raw和source objects封存。 | `migration/reports/evidence/rewrite/I2/CCL-clean-checkout/20261111T143320.085723Z-I2-host-cold-replay-17225690ca` |
+| 2026-11-11T14:35:51.728086+00:00 | I2 | 复审修复后冷clone再次PASSED：473f2e363空build重建27输入/共享HIP/三个C++配置，27mask、独立固定角色的44runtime、3实际default/foreign/destroyed streams与15完整流程共89项CPU通过，20子raw和source objects封存。复合预检除独立三范围最终review外全部通过，准备签发两个CCL入口，I2其它3入口仍待实现。 | `migration/reports/image-ccl-cold.json`；`migration/reports/image-ccl.md` |
 
 <!-- IMAGE_EXECUTION:END -->
