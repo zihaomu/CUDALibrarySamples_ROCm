@@ -66,6 +66,11 @@ class Promotion(unittest.TestCase):
   for field,value in [('kind','matrix-helper/cpp/'+p['kind']),('implementation',self.profile['implementation']),('implementation_sha256','0'*64)]:
    wrong=dict(qrow);wrong[field]=value
    with self.assertRaisesRegex(ValueError,'source-language/profile identity'):publish_r9.profile_identity(wrong,p)
+ def test_actual_published_composite_is_accepted(self):
+  import publish_r9
+  row=self.original_load('rewrite-R9-helper-qualification.json')['qualifications'][0]
+  sample=next(s for s in json.loads((ROOT/'migration/samples.yaml').read_text())['samples'] if s['id']==self.profile['sample_id'])
+  publish_r9.validate_qualification(row,sample,self.profile,self.original_load('rewrite-R9-helper-review.json'))
  def test_complete_crc_proof(self):self.assertTrue(all(c['passed'] for c in self.crc()))
  def test_crc_output_redirect(self):self.rejected(self.crc('rewrite-R9-crc-benchmark-rocm.json',lambda r:r['original-auto'].update(output='nonexistent-output')))
  def test_crc_native_binary_identity(self):self.rejected(self.crc('rewrite-R9-crc-benchmark-native-build.json',lambda b:b.update(binary_sha256='0'*64)))

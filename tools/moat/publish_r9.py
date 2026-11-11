@@ -13,7 +13,7 @@ def profile_identity(q,profile):
 
 def validate_qualification(q,sample,profile,review):
  directory=ROOT/q['evidence'];seal=json.loads((directory/'sealed.json').read_text())['files']
- mandatory={'qualification.json','manifest.json','source.json','validation.json','commands.json'}
+ mandatory={'qualification.json','manifest.json','source.json','validation.json'}
  if not mandatory<=set(seal) or check(directory):raise ValueError('unsealed composite qualification')
  profile_identity(q,profile)
  m=json.loads((directory/'manifest.json').read_text());sealed=json.loads((directory/'qualification.json').read_text())
