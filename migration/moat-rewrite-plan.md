@@ -542,7 +542,7 @@ PLAN-01 至 PLAN-03 是规划阶段记录，不代表实验结果。实施中的
 
 <!-- MOAT_EXEC_PROGRESS:START -->
 
-最近更新：2026-11-11T07:26:49.333978+00:00。首批 AMD/独立CPU/CUDA 51/51；首批资格 8/8。累计31项新资格，撤销1项旧资格，当前241 PASSED/23 PARTIAL/375 FAILED。剩余398项全部有路线与重试条件；R5仍有59前端和额外CPP项待支持。R8：COMPLETED_SCOPED；全项目surface与其它平台仍owed。
+最近更新：2026-11-11T07:28:29.958023+00:00。首批 AMD/独立CPU/CUDA 51/51；首批资格 8/8。累计31项新资格，撤销1项旧资格，当前241 PASSED/23 PARTIAL/375 FAILED。剩余398项全部有路线与重试条件；R5仍有59前端和额外CPP项待支持。R8：COMPLETED_SCOPED；全项目surface与其它平台仍owed。
 
 <!-- MOAT_EXEC_PROGRESS:END -->
 
@@ -600,3 +600,6 @@ PLAN-01 至 PLAN-03 是规划阶段记录，不代表实验结果。实施中的
 
 
 | 2026-11-11 | R9-09 | 保存当前MOAT状态/计划/notes/surface并更新bundle；实际冷恢复/续接/来源拒绝3测试通过，bundle SHA与原始输出已归档。全部封存记录复核无未封存、失联、未匹配start或仍活动尝试。 | 推送用户fork默认rocm并核对远端SHA与首页；本批不设置整项目platform完成 |
+
+
+| 2026-11-11 | R9-10 | R9实现/报告提交d059ac034已推送用户fork默认rocm，GitHub branch API与fetch分支SHA、首页README blob一致，推送后工作区干净。详细交付回执位于migration/reports/rewrite-R9-delivery.json。 | 本批完成；398未支持入口、446 owed组件与其它平台/性能边界继续登记 |

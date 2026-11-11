@@ -64,3 +64,6 @@ CMake登记：`rewrite_matrix_helpers` 和 `rewrite_crc32_benchmark`。CUDA对�
 
 
 [控制bundle冷恢复/续接与来源拒绝检查](rewrite-R9-control-validation.json)：保存的控制bundle实际通过3项基础设施测试。控制origin仅本地bare，MOAT upstream保持只读；记录完整原始测试输出及bundle SHA。
+
+
+交付完成：实现/报告提交`d059ac034a013c66f5acc59a3ce6647629378980`已推送用户fork默认`rocm`；GitHub API、fetch后的分支SHA与首页README blob均一致，推送后工作区干净。[交付核验回执](rewrite-R9-delivery.json)。
