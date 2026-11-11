@@ -1,0 +1,17 @@
+#!/usr/bin/env python3
+"""Rerun unchanged originals with verified binary and full input receipts."""
+import json,shlex
+from experiment import ROOT,Experiment,write,digest
+from image_progress import record
+
+def main():
+ b=json.loads((ROOT/'migration/reports/image-ccl-native-build.json').read_text());spec=json.loads((ROOT/'migration/rewrite/image-ccl-profile.json').read_text());rows=[]
+ for original in b['originals']:
+  family=original['family'];e=Experiment('I2','CCL-identity-bound-original-'+family,'cuda-original',case=original['mode'],sources=[__file__,ROOT/'migration/rewrite/image-ccl-profile.json',*[ROOT/n for n in spec['original_sources']]],parent=json.loads((ROOT/b['evidence']/'manifest.json').read_text())['experiment_id']);config=dict(binary=original['binary'],binary_sha256=b['identities'][original['binary']],cwd=original['cwd'],inputs=[dict(path=b['remote']+'/'+family+'/images/'+(ROOT/x['source']).name,sha256=x['sha256'],bytes=x['bytes']) for x in spec['originals'] if x['source'].startswith(family+'/')]);wrapper='''import json,pathlib,hashlib,os,sys,subprocess
+c=json.loads(__CONFIG__);assert hashlib.file_digest(open(c['binary'],'rb'),'sha256').hexdigest()==c['binary_sha256']
+for x in c['inputs']:
+ p=pathlib.Path(x['path']);assert p.stat().st_size==x['bytes'] and hashlib.file_digest(p.open('rb'),'sha256').hexdigest()==x['sha256']
+print(json.dumps(dict(binary_sha256=c['binary_sha256'],inputs=c['inputs'])),flush=True);sys.exit(subprocess.run([c['binary']],cwd=c['cwd'],env=dict(os.environ,CUDA_VISIBLE_DEVICES='1')).returncode)
+'''.replace('__CONFIG__',repr(json.dumps(config)));rc=e.command(['ssh','nvidia-5090x2',shlex.join(['python3','-c',wrapper])],'verified-unchanged-CUDA-original',timeout=300);out=e.path/'outputs';out.mkdir();copy=e.command(['scp','-r','nvidia-5090x2:'+b['remote']+'/'+family+'/images/.',str(out)],'collect-original-complete-files');r=dict(family=family,mode=original['mode'],return_code=rc,collection_return_code=copy,config=config,build=b,outputs=str(out.relative_to(ROOT)),experiment_id=e.id,files={p.name:dict(bytes=p.stat().st_size,sha256=digest(p)) for p in out.iterdir()});write(e.path/'run.json',r);r['evidence']=e.finish('OBSERVED' if not rc and not copy else 'NATIVE_MISMATCH');rows.append(r);write(ROOT/'migration/reports/image-ccl-native-originals.json',rows);record('I2',family+'/'+original['mode']+'未改CUDA完整原例以实际binary及五输入SHA绑定重跑rc='+str(rc)+'；native分区缺陷单列。',[r['evidence']]);print(family,original['mode'],rc,flush=True)
+ return int(any(r['return_code'] or r['collection_return_code'] for r in rows))
+if __name__=='__main__':raise SystemExit(main())

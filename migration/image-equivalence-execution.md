@@ -103,11 +103,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-11T13:55:00.259413+00:00。26入口当前5通过/7部分/14失败。
+更新时间：2026-11-11T14:17:46.527935+00:00。26入口当前5通过/7部分/14失败。
 
-I1：C3两个完整入口资格先提交e9fe6f175后发布；I1三个Canny入口全部完成。项目244通过/22部分/373失败，图像5通过/7部分/14失败；22mask、两语言10原流程、55运行、C++12、CLI10、39反例及冷重放通过；差异、原CUDA Python缺依赖与性能未验收单列。继续I2。
+I2：首轮冷检出未执行数值测试：提交源码时与并行实验git status短暂争用index.lock，提交失败后冷重放检出了旧提交，缺少CCL脚本；失败已封存。检查锁已正常释放，无删除活锁；先确认新源码提交成功，再重跑冷检出。
 
-证据：`migration/reports/canny-color-qualification.json`；`migration/reports/canny-color-review.json`；`migration/reports/canny-color.md`
+证据：`migration/reports/image-ccl-cold.json`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

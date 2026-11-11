@@ -1,0 +1,1 @@
+Test CPU-reference for CCL-trace-independent-CPU, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T140445.395489Z-I2-rocm-trace-4739ad43d8.

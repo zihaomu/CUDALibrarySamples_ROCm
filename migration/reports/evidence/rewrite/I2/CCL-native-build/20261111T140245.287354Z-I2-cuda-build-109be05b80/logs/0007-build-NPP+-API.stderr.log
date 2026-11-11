@@ -1,0 +1,13 @@
+/tmp/20261111T140245.287354Z-I2-cuda-build-109be05b80/probe.cpp: In function ‘int main(int, char**)’:
+/tmp/20261111T140245.287354Z-I2-cuda-build-109be05b80/probe.cpp:29:221: error: ‘nppiLabelMarkersUFGetBufferSize_32u_C1R’ was not declared in this scope
+   29 |  Npp8u *src=nullptr,*scratch=nullptr;Npp32u*labels=nullptr;ck(cudaMalloc(&src,a.size()));ck(cudaMalloc(&labels,size_t(w)*h*4));ck(cudaMemcpyAsync(src,a.data(),a.size(),cudaMemcpyHostToDevice,ctx.hStream));int bytes=0;nk(nppiLabelMarkersUFGetBufferSize_32u_C1R(roi,&bytes),"label-size");ck(cudaMalloc(&scratch,bytes));
+      |                                                                                                                                                                                                                             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/tmp/20261111T140245.287354Z-I2-cuda-build-109be05b80/probe.cpp:31:9: error: ‘nppiLabelMarkersUF_8u32u_C1R_Ctx’ is not a member of ‘nppPlusV’
+   31 |  nk(UF::nppiLabelMarkersUF_8u32u_C1R_Ctx(src,pitch,labels,w*4,roi,nppiNormInf,scratch,ctx),"label");
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/tmp/20261111T140245.287354Z-I2-cuda-build-109be05b80/probe.cpp:43:9: error: ‘nppiCompressMarkerLabelsGetBufferSize_32u_C1R’ is not a member of ‘nppPlusV’
+   43 |  nk(UF::nppiCompressMarkerLabelsGetBufferSize_32u_C1R(w*h,&bytes),"compact-size");
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/tmp/20261111T140245.287354Z-I2-cuda-build-109be05b80/probe.cpp:49:9: error: ‘nppiCompressMarkerLabelsUF_32u_C1IR_Ctx’ is not a member of ‘nppPlusV’
+   49 |  nk(UF::nppiCompressMarkerLabelsUF_32u_C1IR_Ctx(labels,w*4,roi,w*h,&count,scratch,ctx),"compact");
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

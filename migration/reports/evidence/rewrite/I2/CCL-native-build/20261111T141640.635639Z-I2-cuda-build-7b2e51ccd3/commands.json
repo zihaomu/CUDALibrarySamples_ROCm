@@ -1,0 +1,218 @@
+[
+  {
+    "command_id": 1,
+    "phase": "prepare",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "mkdir -p /tmp/20261111T141640.635639Z-I2-cuda-build-7b2e51ccd3"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T14:16:42.787393+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0001-prepare.stdout.log",
+    "stderr": "logs/0001-prepare.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T14:16:43.103791+00:00",
+    "seconds": 0.31532159697962925
+  },
+  {
+    "command_id": 2,
+    "phase": "upload",
+    "argv": [
+      "scp",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I2/CCL-native-build/20261111T141640.635639Z-I2-cuda-build-7b2e51ccd3/bundle.tar.gz",
+      "nvidia-5090x2:/tmp/20261111T141640.635639Z-I2-cuda-build-7b2e51ccd3/bundle.tar.gz"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T14:16:43.104837+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0002-upload.stdout.log",
+    "stderr": "logs/0002-upload.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T14:16:43.420628+00:00",
+    "seconds": 0.3152210279949941
+  },
+  {
+    "command_id": 3,
+    "phase": "extract",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "tar -xzf /tmp/20261111T141640.635639Z-I2-cuda-build-7b2e51ccd3/bundle.tar.gz -C /tmp/20261111T141640.635639Z-I2-cuda-build-7b2e51ccd3"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T14:16:43.422313+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0003-extract.stdout.log",
+    "stderr": "logs/0003-extract.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T14:16:43.788865+00:00",
+    "seconds": 0.36562755098566413
+  },
+  {
+    "command_id": 4,
+    "phase": "build-NPP-API",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "/usr/local/cuda-13.4/bin/nvcc -std=c++17 -O2 -arch=sm_120 -L/usr/local/cuda-13.4/lib64 -Xlinker -rpath -Xlinker /usr/local/cuda-13.4/lib64 /tmp/20261111T141640.635639Z-I2-cuda-build-7b2e51ccd3/probe.cpp -lnppif -lnppc -o /tmp/20261111T141640.635639Z-I2-cuda-build-7b2e51ccd3/NPP-probe"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T14:16:43.790384+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0004-build-NPP-API.stdout.log",
+    "stderr": "logs/0004-build-NPP-API.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T14:16:45.159738+00:00",
+    "seconds": 1.3684594269725494
+  },
+  {
+    "command_id": 5,
+    "phase": "create-original-NPP-default",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "mkdir -p /tmp/20261111T141640.635639Z-I2-cuda-build-7b2e51ccd3/NPP/default"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T14:16:45.161724+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0005-create-original-NPP-default.stdout.log",
+    "stderr": "logs/0005-create-original-NPP-default.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T14:16:45.478642+00:00",
+    "seconds": 0.3159873830154538
+  },
+  {
+    "command_id": 6,
+    "phase": "build-original-NPP-default",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "/usr/local/cuda-13.4/bin/nvcc -std=c++17 -O2 -arch=sm_120 -L/usr/local/cuda-13.4/lib64 -Xlinker -rpath -Xlinker /usr/local/cuda-13.4/lib64 /tmp/20261111T141640.635639Z-I2-cuda-build-7b2e51ccd3/NPP/batchedLabelMarkersAndCompression.cpp -lnppif -lnppc -o /tmp/20261111T141640.635639Z-I2-cuda-build-7b2e51ccd3/NPP/default/original"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T14:16:45.480362+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0006-build-original-NPP-default.stdout.log",
+    "stderr": "logs/0006-build-original-NPP-default.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T14:16:46.800000+00:00",
+    "seconds": 1.3186829009791836
+  },
+  {
+    "command_id": 7,
+    "phase": "build-NPP+-API",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "/usr/local/cuda-13.4/bin/nvcc -std=c++17 -O2 -arch=sm_120 -L/usr/local/cuda-13.4/lib64 -Xlinker -rpath -Xlinker /usr/local/cuda-13.4/lib64 -DUSE_NPPPLUS -DNPP_PLUS_ENABLE -I/tmp/image-library-private-SDKs/nppplus-0.10.0.0/libnpp_plus-linux-x86_64-0.10.0.0_cuda12-archive/include -L/tmp/image-library-private-SDKs/nppplus-0.10.0.0/libnpp_plus-linux-x86_64-0.10.0.0_cuda12-archive/lib -Xlinker -rpath -Xlinker /tmp/image-library-private-SDKs/nppplus-0.10.0.0/libnpp_plus-linux-x86_64-0.10.0.0_cuda12-archive/lib -lnpp_plus_if -lnpp_plus_c /tmp/20261111T141640.635639Z-I2-cuda-build-7b2e51ccd3/probe.cpp -lnppif -lnppc -o /tmp/20261111T141640.635639Z-I2-cuda-build-7b2e51ccd3/NPP+-probe"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T14:16:46.802241+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0007-build-NPP+-API.stdout.log",
+    "stderr": "logs/0007-build-NPP+-API.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T14:16:47.921536+00:00",
+    "seconds": 1.118247724021785
+  },
+  {
+    "command_id": 8,
+    "phase": "create-original-NPP+-default",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "mkdir -p /tmp/20261111T141640.635639Z-I2-cuda-build-7b2e51ccd3/NPP+/default"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T14:16:47.923904+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0008-create-original-NPP+-default.stdout.log",
+    "stderr": "logs/0008-create-original-NPP+-default.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T14:16:48.241159+00:00",
+    "seconds": 0.31618274201173335
+  },
+  {
+    "command_id": 9,
+    "phase": "build-original-NPP+-default",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "/usr/local/cuda-13.4/bin/nvcc -std=c++17 -O2 -arch=sm_120 -L/usr/local/cuda-13.4/lib64 -Xlinker -rpath -Xlinker /usr/local/cuda-13.4/lib64 -DUSE_NPPPLUS -DNPP_PLUS_ENABLE -I/tmp/image-library-private-SDKs/nppplus-0.10.0.0/libnpp_plus-linux-x86_64-0.10.0.0_cuda12-archive/include -L/tmp/image-library-private-SDKs/nppplus-0.10.0.0/libnpp_plus-linux-x86_64-0.10.0.0_cuda12-archive/lib -Xlinker -rpath -Xlinker /tmp/image-library-private-SDKs/nppplus-0.10.0.0/libnpp_plus-linux-x86_64-0.10.0.0_cuda12-archive/lib -lnpp_plus_if -lnpp_plus_c /tmp/20261111T141640.635639Z-I2-cuda-build-7b2e51ccd3/NPP+/batchedLabelMarkersAndCompressionNPPPlus.cpp -lnppif -lnppc -o /tmp/20261111T141640.635639Z-I2-cuda-build-7b2e51ccd3/NPP+/default/original"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T14:16:48.243088+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0009-build-original-NPP+-default.stdout.log",
+    "stderr": "logs/0009-build-original-NPP+-default.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T14:16:49.512526+00:00",
+    "seconds": 1.2684690980240703
+  },
+  {
+    "command_id": 10,
+    "phase": "create-original-NPP+-batch-compression",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "mkdir -p /tmp/20261111T141640.635639Z-I2-cuda-build-7b2e51ccd3/NPP+/batch-compression"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T14:16:49.514707+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0010-create-original-NPP+-batch-compression.stdout.log",
+    "stderr": "logs/0010-create-original-NPP+-batch-compression.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T14:16:49.831766+00:00",
+    "seconds": 0.3159739039838314
+  },
+  {
+    "command_id": 11,
+    "phase": "build-original-NPP+-batch-compression",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "/usr/local/cuda-13.4/bin/nvcc -std=c++17 -O2 -arch=sm_120 -L/usr/local/cuda-13.4/lib64 -Xlinker -rpath -Xlinker /usr/local/cuda-13.4/lib64 -DUSE_NPPPLUS -DNPP_PLUS_ENABLE -I/tmp/image-library-private-SDKs/nppplus-0.10.0.0/libnpp_plus-linux-x86_64-0.10.0.0_cuda12-archive/include -L/tmp/image-library-private-SDKs/nppplus-0.10.0.0/libnpp_plus-linux-x86_64-0.10.0.0_cuda12-archive/lib -Xlinker -rpath -Xlinker /tmp/image-library-private-SDKs/nppplus-0.10.0.0/libnpp_plus-linux-x86_64-0.10.0.0_cuda12-archive/lib -lnpp_plus_if -lnpp_plus_c -DCUDA11U1 /tmp/20261111T141640.635639Z-I2-cuda-build-7b2e51ccd3/NPP+/batchedLabelMarkersAndCompressionNPPPlus.cpp -lnppif -lnppc -o /tmp/20261111T141640.635639Z-I2-cuda-build-7b2e51ccd3/NPP+/batch-compression/original"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T14:16:49.833807+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0011-build-original-NPP+-batch-compression.stdout.log",
+    "stderr": "logs/0011-build-original-NPP+-batch-compression.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T14:16:50.952696+00:00",
+    "seconds": 1.1179885059827939
+  },
+  {
+    "command_id": 12,
+    "phase": "actual-native-binaries-and-libraries",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "sha256sum /tmp/20261111T141640.635639Z-I2-cuda-build-7b2e51ccd3/NPP-probe /tmp/20261111T141640.635639Z-I2-cuda-build-7b2e51ccd3/NPP+-probe /tmp/20261111T141640.635639Z-I2-cuda-build-7b2e51ccd3/NPP/default/original /tmp/20261111T141640.635639Z-I2-cuda-build-7b2e51ccd3/NPP+/default/original /tmp/20261111T141640.635639Z-I2-cuda-build-7b2e51ccd3/NPP+/batch-compression/original /usr/local/cuda-13.4/lib64/libnppif.so /usr/local/cuda-13.4/lib64/libnppc.so /tmp/image-library-private-SDKs/nppplus-0.10.0.0/libnpp_plus-linux-x86_64-0.10.0.0_cuda12-archive/lib/libnpp_plus_if.so /tmp/image-library-private-SDKs/nppplus-0.10.0.0/libnpp_plus-linux-x86_64-0.10.0.0_cuda12-archive/lib/libnpp_plus_c.so"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T14:16:50.955064+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0012-actual-native-binaries-and-libraries.stdout.log",
+    "stderr": "logs/0012-actual-native-binaries-and-libraries.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T14:16:51.472615+00:00",
+    "seconds": 0.5165775489876978
+  }
+]

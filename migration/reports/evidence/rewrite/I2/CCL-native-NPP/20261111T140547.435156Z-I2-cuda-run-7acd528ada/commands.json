@@ -1,0 +1,57 @@
+[
+  {
+    "command_id": 1,
+    "phase": "output-directory",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "mkdir -p /tmp/20261111T140440.247316Z-I2-cuda-build-6c44e9bcb4/outputs/NPP/scan-256"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T14:05:48.028605+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0001-output-directory.stdout.log",
+    "stderr": "logs/0001-output-directory.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T14:05:48.344463+00:00",
+    "seconds": 0.315224137972109
+  },
+  {
+    "command_id": 2,
+    "phase": "actual-native-API",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "env CUDA_VISIBLE_DEVICES=1 /tmp/20261111T140440.247316Z-I2-cuda-build-6c44e9bcb4/NPP-probe /tmp/20261111T140440.247316Z-I2-cuda-build-6c44e9bcb4/fixtures/scan-256/input.bin 128 2 135 /tmp/20261111T140440.247316Z-I2-cuda-build-6c44e9bcb4/outputs/NPP/scan-256"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T14:05:48.345436+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0002-actual-native-API.stdout.log",
+    "stderr": "logs/0002-actual-native-API.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T14:05:49.262678+00:00",
+    "seconds": 0.9168062450480647
+  },
+  {
+    "command_id": 3,
+    "phase": "collect",
+    "argv": [
+      "scp",
+      "-r",
+      "nvidia-5090x2:/tmp/20261111T140440.247316Z-I2-cuda-build-6c44e9bcb4/outputs/NPP/scan-256/.",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I2/CCL-native-NPP/20261111T140547.435156Z-I2-cuda-run-7acd528ada/outputs"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T14:05:49.264875+00:00",
+    "timeout_seconds": 120,
+    "environment": {},
+    "stdout": "logs/0003-collect.stdout.log",
+    "stderr": "logs/0003-collect.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T14:05:49.582002+00:00",
+    "seconds": 0.31600417400477454
+  }
+]

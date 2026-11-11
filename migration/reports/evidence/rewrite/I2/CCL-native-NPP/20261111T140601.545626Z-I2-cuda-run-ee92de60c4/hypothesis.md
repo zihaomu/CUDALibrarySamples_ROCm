@@ -1,0 +1,1 @@
+Test cuda-run for CCL-native-NPP, case constant-255. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T140440.247316Z-I2-cuda-build-6c44e9bcb4.

@@ -1,0 +1,1 @@
+Test rocm-CLI for CCL-original-NPP, case default/unwritable-output. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T140040.464406Z-I2-rocm-build-ed39346a15.

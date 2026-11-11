@@ -2,7 +2,8 @@
   "status": "IN_PROGRESS",
   "phases": {
     "I0": "IN_PROGRESS",
-    "I1": "COMPLETED_SCOPED"
+    "I1": "COMPLETED_SCOPED",
+    "I2": "IN_PROGRESS"
   },
   "events": [
     {
@@ -2871,9 +2872,1447 @@
         "migration/reports/canny-color-review.json",
         "migration/reports/canny-color.md"
       ]
+    },
+    {
+      "time": "2026-11-11T13:57:07.586426+00:00",
+      "phase": "I2",
+      "message": "冻结CCL 27组输入、两原始入口/完整条件分支、1..5实际batch及错误合同；30个历史golden全部出现同值相邻分裂，作为实测旧文件缺陷保留，当前SDK另测，不复制错误分区。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-frozen-contracts-and-golden-audit/20261111T135706.543785Z-I2-CPU-contract-cf54392de5"
+      ]
+    },
+    {
+      "time": "2026-11-11T13:58:26.509543+00:00",
+      "phase": "I2",
+      "message": "CCL两个原生API及原始默认/条件编译入口实际构建：BUILD_ERROR；逐项返回码保留。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-build/20261111T135817.558757Z-I2-cuda-build-6a3d3ca4ea"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:00:36.772041+00:00",
+      "phase": "I2",
+      "message": "首轮NPP+原生构建因未启用SDK要求的NPP_PLUS_ENABLE及库名配置失败，原失败已封存；补正确编译配置重试，原CUDA源码未改。NPP原始默认构建已成功。",
+      "evidence": [
+        "migration/reports/image-ccl-native-build.json"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:00:47.485720+00:00",
+      "phase": "I2",
+      "message": "CCL两个原生API及原始默认/条件编译入口实际构建：BUILD_ERROR；逐项返回码保留。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-build/20261111T140037.119075Z-I2-cuda-build-8040212f44"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:00:48.636028+00:00",
+      "phase": "I2",
+      "message": "共享HIP等值CCL/前缀压缩、两个真实C++入口及NPP+条件分支构建：BUILT",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-shared-GPU-and-original-build/20261111T140040.464406Z-I2-rocm-build-ed39346a15"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:02:20.510732+00:00",
+      "phase": "I2",
+      "message": "CCL masks实际GPU执行rc=0；独立CPU像素/ABI/trace验收另行执行。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-masks/20261111T140216.102900Z-I2-rocm-masks-d59c9f7195"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:02:44.931008+00:00",
+      "phase": "I2",
+      "message": "第二轮原始NPP/NPP+默认及batch-compression三项已构建成功；API对照探针自身先包含npp.h导致NPP+声明被include guard排除，失败已记录，调整探针头文件顺序重试。生产HIP构建已成功，27组GPU输出正在运行。",
+      "evidence": [
+        "migration/reports/image-ccl-native-build.json",
+        "migration/reports/image-ccl-build.json"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:02:55.303671+00:00",
+      "phase": "I2",
+      "message": "CCL两个原生API及原始默认/条件编译入口实际构建：BUILD_ERROR；逐项返回码保留。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-build/20261111T140245.287354Z-I2-cuda-build-109be05b80"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:03:55.892646+00:00",
+      "phase": "I2",
+      "message": "CCL masks独立CPU完整验收：PASSED；native分区正确性与项目GPU验收分别记录。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-masks-independent-CPU/20261111T140354.667647Z-I2-CPU-reference-a5f4dece76"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:04:02.370774+00:00",
+      "phase": "I2",
+      "message": "CCL runtime实际GPU执行rc=0；独立CPU像素/ABI/trace验收另行执行。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-runtime/20261111T140358.633057Z-I2-rocm-runtime-56b3acb2e5"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:04:42.348760+00:00",
+      "phase": "I2",
+      "message": "CCL runtime独立CPU完整验收：PASSED；native分区正确性与项目GPU验收分别记录。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-runtime-independent-CPU/20261111T140441.458354Z-I2-CPU-reference-b7dd35838c"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:04:47.251020+00:00",
+      "phase": "I2",
+      "message": "NPP/default/1完整C++ 输入/文件执行rc=0；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP/20261111T140445.010298Z-I2-rocm-original-dd3f5543bb"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:04:49.415675+00:00",
+      "phase": "I2",
+      "message": "NPP/default/2完整C++ 输入/文件执行rc=0；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP/20261111T140447.578696Z-I2-rocm-original-222106e100"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:04:49.949934+00:00",
+      "phase": "I2",
+      "message": "CCL trace实际GPU执行rc=0；独立CPU像素/ABI/trace验收另行执行。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-trace/20261111T140445.395489Z-I2-rocm-trace-4739ad43d8"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:04:50.508500+00:00",
+      "phase": "I2",
+      "message": "CCL两个原生API及原始默认/条件编译入口实际构建：BUILT；逐项返回码保留。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-build/20261111T140440.247316Z-I2-cuda-build-6c44e9bcb4"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:04:51.550536+00:00",
+      "phase": "I2",
+      "message": "NPP/default/3完整C++ 输入/文件执行rc=0；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP/20261111T140449.764726Z-I2-rocm-original-b83b7b32de"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:04:53.704596+00:00",
+      "phase": "I2",
+      "message": "NPP/default/4完整C++ 输入/文件执行rc=0；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP/20261111T140451.853309Z-I2-rocm-original-5d0803d4ed"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:04:54.000350+00:00",
+      "phase": "I2",
+      "message": "NPP/npp-lena原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T140450.838789Z-I2-cuda-run-acf88283fa"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:04:55.858796+00:00",
+      "phase": "I2",
+      "message": "NPP/default/5完整C++ 输入/文件执行rc=0；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP/20261111T140453.999175Z-I2-rocm-original-8a7cb016a6"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:04:57.116096+00:00",
+      "phase": "I2",
+      "message": "NPP/npp-CT_skull原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T140454.333464Z-I2-cuda-run-0396ff4c6e"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:04:57.907471+00:00",
+      "phase": "I2",
+      "message": "NPP+/default/1完整C++ 输入/文件执行rc=0；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140456.148256Z-I2-rocm-original-7da59e15e2"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:04:59.869332+00:00",
+      "phase": "I2",
+      "message": "NPP+/default/2完整C++ 输入/文件执行rc=0；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140458.197900Z-I2-rocm-original-0cc8d45eb0"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:05:00.381733+00:00",
+      "phase": "I2",
+      "message": "NPP/npp-PCB_METAL原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T140457.432837Z-I2-cuda-run-9159575542"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:05:01.868434+00:00",
+      "phase": "I2",
+      "message": "NPP+/default/3完整C++ 输入/文件执行rc=0；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140500.165007Z-I2-rocm-original-ba7ead2327"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:05:04.036397+00:00",
+      "phase": "I2",
+      "message": "NPP+/default/4完整C++ 输入/文件执行rc=0；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140502.163097Z-I2-rocm-original-26477d0e82"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:05:04.650786+00:00",
+      "phase": "I2",
+      "message": "NPP/npp-PCB2原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T140500.688651Z-I2-cuda-run-1c51638e6c"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:05:06.218346+00:00",
+      "phase": "I2",
+      "message": "NPP+/default/5完整C++ 输入/文件执行rc=0；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140504.334562Z-I2-rocm-original-14c1a15753"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:05:08.213855+00:00",
+      "phase": "I2",
+      "message": "NPP+/batch-compression/1完整C++ 输入/文件执行rc=0；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140506.518236Z-I2-rocm-original-f3e08bfe2a"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:05:10.198497+00:00",
+      "phase": "I2",
+      "message": "NPP+/batch-compression/2完整C++ 输入/文件执行rc=0；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140508.502973Z-I2-rocm-original-c05d0a0c11"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:05:10.608291+00:00",
+      "phase": "I2",
+      "message": "NPP/npp-PCB原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T140504.965536Z-I2-cuda-run-dbf241b6f4"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:05:12.216241+00:00",
+      "phase": "I2",
+      "message": "NPP+/batch-compression/3完整C++ 输入/文件执行rc=0；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140510.491323Z-I2-rocm-original-77be49f020"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:05:14.104435+00:00",
+      "phase": "I2",
+      "message": "NPP/plus-lena原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T140510.923099Z-I2-cuda-run-29fd9de45c"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:05:14.431738+00:00",
+      "phase": "I2",
+      "message": "NPP+/batch-compression/4完整C++ 输入/文件执行rc=0；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140512.504136Z-I2-rocm-original-425f2e706b"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:05:16.535678+00:00",
+      "phase": "I2",
+      "message": "NPP+/batch-compression/5完整C++ 输入/文件执行rc=0；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140514.722664Z-I2-rocm-original-0a4a1499cf"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:05:17.105441+00:00",
+      "phase": "I2",
+      "message": "NPP/plus-CT_skull原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T140514.430949Z-I2-cuda-run-29e362e28e"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:05:20.387203+00:00",
+      "phase": "I2",
+      "message": "NPP/plus-PCB_METAL原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T140517.445284Z-I2-cuda-run-5afaca65fb"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:05:27.411023+00:00",
+      "phase": "I2",
+      "message": "NPP/plus-PCB2原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T140520.708561Z-I2-cuda-run-8f74dc1cb8"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:05:33.531029+00:00",
+      "phase": "I2",
+      "message": "NPP/plus-PCB原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T140527.712226Z-I2-cuda-run-ec236e7468"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:05:36.236191+00:00",
+      "phase": "I2",
+      "message": "NPP/three-by-three-stale-root原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T140533.848272Z-I2-cuda-run-737cd3f6f0"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:05:38.962000+00:00",
+      "phase": "I2",
+      "message": "NPP/one-pixel原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T140536.558476Z-I2-cuda-run-75143b7dec"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:05:41.671229+00:00",
+      "phase": "I2",
+      "message": "NPP/single-row原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T140539.278439Z-I2-cuda-run-e2a7a8a998"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:05:44.371168+00:00",
+      "phase": "I2",
+      "message": "NPP/single-column原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T140541.983463Z-I2-cuda-run-dbf337aafe"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:05:47.121027+00:00",
+      "phase": "I2",
+      "message": "NPP/scan-255原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T140544.683619Z-I2-cuda-run-681866951b"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:05:49.821175+00:00",
+      "phase": "I2",
+      "message": "NPP/scan-256原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T140547.435156Z-I2-cuda-run-7acd528ada"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:05:52.516245+00:00",
+      "phase": "I2",
+      "message": "NPP/scan-257原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T140550.132230Z-I2-cuda-run-d4099f449a"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:05:55.282239+00:00",
+      "phase": "I2",
+      "message": "NPP/scan-recursive原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T140552.831607Z-I2-cuda-run-d3a18c3ac1"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:05:56.318758+00:00",
+      "phase": "I2",
+      "message": "CCL完整C++ originals逐原图/全部文件/计数/实际诊断验收：PASSED",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-originals-independent-CPU/20261111T140554.664576Z-I2-CPU-reference-89c5fd0e55"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:05:58.020773+00:00",
+      "phase": "I2",
+      "message": "CCL trace独立CPU完整验收：PASSED；native分区正确性与项目GPU验收分别记录。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-trace-independent-CPU/20261111T140556.772663Z-I2-CPU-reference-658082c968"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:05:58.337388+00:00",
+      "phase": "I2",
+      "message": "NPP/constant-0原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T140555.604072Z-I2-cuda-run-b9b381cf22"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:01.224510+00:00",
+      "phase": "I2",
+      "message": "NPP/constant-1原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T140558.629336Z-I2-cuda-run-b3095500bf"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:03.929607+00:00",
+      "phase": "I2",
+      "message": "NPP/constant-255原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T140601.545626Z-I2-cuda-run-ee92de60c4"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:06.062779+00:00",
+      "phase": "I2",
+      "message": "NPP/default/default-directory完整C++ CLI执行rc=0；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP/20261111T140603.949376Z-I2-rocm-CLI-30459a9d5e"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:06.621362+00:00",
+      "phase": "I2",
+      "message": "NPP/noise-847原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T140604.230209Z-I2-cuda-run-d3a27a95fb"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:07.857681+00:00",
+      "phase": "I2",
+      "message": "NPP/default/help完整C++ CLI执行rc=0；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP/20261111T140606.365684Z-I2-rocm-CLI-6c878db8d9"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:09.411964+00:00",
+      "phase": "I2",
+      "message": "NPP/noise-83827原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T140606.940546Z-I2-cuda-run-8a4cd88bb2"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:09.734204+00:00",
+      "phase": "I2",
+      "message": "NPP/default/missing-b完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP/20261111T140608.147286Z-I2-rocm-CLI-551148c3cf"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:11.502009+00:00",
+      "phase": "I2",
+      "message": "NPP/default/zero完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP/20261111T140610.015926Z-I2-rocm-CLI-2b24c34c41"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:12.136090+00:00",
+      "phase": "I2",
+      "message": "NPP/noise-654981原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T140609.733553Z-I2-cuda-run-ffee26e89e"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:13.241483+00:00",
+      "phase": "I2",
+      "message": "NPP/default/negative完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP/20261111T140611.785404Z-I2-rocm-CLI-2feb833647"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:14.845595+00:00",
+      "phase": "I2",
+      "message": "NPP/diagonal-touch原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T140612.452200Z-I2-cuda-run-a6e0e4951d"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:15.162580+00:00",
+      "phase": "I2",
+      "message": "NPP/default/above-five完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP/20261111T140613.538884Z-I2-rocm-CLI-4744d33893"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:16.968228+00:00",
+      "phase": "I2",
+      "message": "NPP/default/noninteger完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP/20261111T140615.465167Z-I2-rocm-CLI-f4143760a8"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:17.606208+00:00",
+      "phase": "I2",
+      "message": "NPP/frame-hole-and-island原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T140615.161590Z-I2-cuda-run-be6ee220a8"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:18.698836+00:00",
+      "phase": "I2",
+      "message": "NPP/default/duplicate完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP/20261111T140617.252977Z-I2-rocm-CLI-c8f840289c"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:20.372522+00:00",
+      "phase": "I2",
+      "message": "NPP/long-serpentine-component原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T140617.925955Z-I2-cuda-run-ff27738699"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:20.690369+00:00",
+      "phase": "I2",
+      "message": "NPP/default/unknown-option完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP/20261111T140618.991272Z-I2-rocm-CLI-7083b71470"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:22.634751+00:00",
+      "phase": "I2",
+      "message": "NPP/default/missing-input完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP/20261111T140620.993403Z-I2-rocm-CLI-8a5597f91c"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:22.940298+00:00",
+      "phase": "I2",
+      "message": "NPP+/npp-lena原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T140620.689442Z-I2-cuda-run-55afe75e22"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:24.654182+00:00",
+      "phase": "I2",
+      "message": "NPP/default/truncated-input完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP/20261111T140622.938781Z-I2-rocm-CLI-daeda7c3ec"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:25.596627+00:00",
+      "phase": "I2",
+      "message": "NPP+/npp-CT_skull原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T140623.262859Z-I2-cuda-run-3ac2fdf597"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:26.730626+00:00",
+      "phase": "I2",
+      "message": "NPP/default/unwritable-output完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP/20261111T140624.954734Z-I2-rocm-CLI-c0080f8a72"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:28.136779+00:00",
+      "phase": "I2",
+      "message": "NPP+/npp-PCB_METAL原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T140625.909727Z-I2-cuda-run-5572cc6958"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:28.752979+00:00",
+      "phase": "I2",
+      "message": "NPP/default/no-GPU完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP/20261111T140627.046125Z-I2-rocm-CLI-d580bafb18"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:30.830809+00:00",
+      "phase": "I2",
+      "message": "NPP+/npp-PCB2原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T140628.435134Z-I2-cuda-run-ada75e4c53"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:31.163142+00:00",
+      "phase": "I2",
+      "message": "NPP+/default/default-directory完整C++ CLI执行rc=0；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140629.039180Z-I2-rocm-CLI-3586da14a6"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:33.009105+00:00",
+      "phase": "I2",
+      "message": "NPP+/default/help完整C++ CLI执行rc=0；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140631.459560Z-I2-rocm-CLI-58e0f9e526"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:33.487987+00:00",
+      "phase": "I2",
+      "message": "NPP+/npp-PCB原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T140631.162386Z-I2-cuda-run-2c76d28077"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:34.828109+00:00",
+      "phase": "I2",
+      "message": "NPP+/default/missing-b完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140633.292493Z-I2-rocm-CLI-7f4c1bb8c3"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:36.091728+00:00",
+      "phase": "I2",
+      "message": "NPP+/plus-lena原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T140633.813750Z-I2-cuda-run-8ac50a1a9b"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:36.663746+00:00",
+      "phase": "I2",
+      "message": "NPP+/default/zero完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140635.112635Z-I2-rocm-CLI-e3e37c440b"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:38.531403+00:00",
+      "phase": "I2",
+      "message": "NPP+/default/negative完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140636.966233Z-I2-rocm-CLI-10af4594ec"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:38.817384+00:00",
+      "phase": "I2",
+      "message": "NPP+/plus-CT_skull原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T140636.390473Z-I2-cuda-run-6105a7a2bf"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:40.291125+00:00",
+      "phase": "I2",
+      "message": "NPP+/default/above-five完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140638.815869Z-I2-rocm-CLI-055781734d"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:41.414955+00:00",
+      "phase": "I2",
+      "message": "NPP+/plus-PCB_METAL原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T140639.137238Z-I2-cuda-run-a2f8309b5f"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:42.077148+00:00",
+      "phase": "I2",
+      "message": "NPP+/default/noninteger完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140640.576668Z-I2-rocm-CLI-a69402ed1c"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:43.875441+00:00",
+      "phase": "I2",
+      "message": "NPP+/default/duplicate完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140642.357886Z-I2-rocm-CLI-39b4de1d8e"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:44.164895+00:00",
+      "phase": "I2",
+      "message": "NPP+/plus-PCB2原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T140641.723950Z-I2-cuda-run-45846a8c20"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:45.681233+00:00",
+      "phase": "I2",
+      "message": "NPP+/default/unknown-option完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140644.163299Z-I2-rocm-CLI-e4ca71d769"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:46.843254+00:00",
+      "phase": "I2",
+      "message": "NPP+/plus-PCB原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T140644.496539Z-I2-cuda-run-67c5436826"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:47.642087+00:00",
+      "phase": "I2",
+      "message": "NPP+/default/missing-input完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140645.968603Z-I2-rocm-CLI-bd8bdf8a44"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:49.336219+00:00",
+      "phase": "I2",
+      "message": "NPP+/three-by-three-stale-root原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T140647.146579Z-I2-cuda-run-a3458e7abe"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:49.654615+00:00",
+      "phase": "I2",
+      "message": "NPP+/default/truncated-input完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140647.943565Z-I2-rocm-CLI-7738bdf96c"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:51.582454+00:00",
+      "phase": "I2",
+      "message": "NPP+/default/unwritable-output完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140649.938457Z-I2-rocm-CLI-c09350b068"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:51.880767+00:00",
+      "phase": "I2",
+      "message": "NPP+/one-pixel原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T140649.653919Z-I2-cuda-run-f7a51df6f0"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:53.476363+00:00",
+      "phase": "I2",
+      "message": "NPP+/default/no-GPU完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140651.879441Z-I2-rocm-CLI-7d935f71f7"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:54.366495+00:00",
+      "phase": "I2",
+      "message": "NPP+/single-row原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T140652.195745Z-I2-cuda-run-26c5d1e368"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:55.510067+00:00",
+      "phase": "I2",
+      "message": "NPP+/batch-compression/default-directory完整C++ CLI执行rc=0；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140653.775947Z-I2-rocm-CLI-95b8ba2607"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:56.856916+00:00",
+      "phase": "I2",
+      "message": "NPP+/single-column原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T140654.665600Z-I2-cuda-run-7eb63952bb"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:57.270514+00:00",
+      "phase": "I2",
+      "message": "NPP+/batch-compression/help完整C++ CLI执行rc=0；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140655.796869Z-I2-rocm-CLI-c27b8a8f18"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:58.997996+00:00",
+      "phase": "I2",
+      "message": "NPP+/batch-compression/missing-b完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140657.554619Z-I2-rocm-CLI-57738c0f10"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:06:59.361142+00:00",
+      "phase": "I2",
+      "message": "NPP+/scan-255原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T140657.166205Z-I2-cuda-run-4d90f4b40e"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:07:00.780501+00:00",
+      "phase": "I2",
+      "message": "NPP+/batch-compression/zero完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140659.296980Z-I2-rocm-CLI-6eb0d8fc67"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:07:01.864967+00:00",
+      "phase": "I2",
+      "message": "NPP+/scan-256原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T140659.672865Z-I2-cuda-run-349429f6ad"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:07:02.643371+00:00",
+      "phase": "I2",
+      "message": "NPP+/batch-compression/negative完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140701.105417Z-I2-rocm-CLI-fbdd505a53"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:07:04.376404+00:00",
+      "phase": "I2",
+      "message": "NPP+/scan-257原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T140702.181476Z-I2-cuda-run-57e3d38efc"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:07:04.688103+00:00",
+      "phase": "I2",
+      "message": "NPP+/batch-compression/above-five完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140702.937307Z-I2-rocm-CLI-56f7d13f66"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:07:06.476451+00:00",
+      "phase": "I2",
+      "message": "NPP+/batch-compression/noninteger完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140705.001841Z-I2-rocm-CLI-7124cf8bfb"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:07:06.934491+00:00",
+      "phase": "I2",
+      "message": "NPP+/scan-recursive原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T140704.686850Z-I2-cuda-run-c44625053f"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:07:08.216112+00:00",
+      "phase": "I2",
+      "message": "NPP+/batch-compression/duplicate完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140706.765000Z-I2-rocm-CLI-a469f4dd18"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:07:09.414770+00:00",
+      "phase": "I2",
+      "message": "NPP+/constant-0原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T140707.242128Z-I2-cuda-run-59cfb283fa"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:07:09.948342+00:00",
+      "phase": "I2",
+      "message": "NPP+/batch-compression/unknown-option完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140708.502782Z-I2-rocm-CLI-0ca708d493"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:07:11.879441+00:00",
+      "phase": "I2",
+      "message": "NPP+/batch-compression/missing-input完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140710.235873Z-I2-rocm-CLI-f603a659bc"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:07:12.182379+00:00",
+      "phase": "I2",
+      "message": "NPP+/constant-1原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T140709.708488Z-I2-cuda-run-e7a97fea52"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:07:13.849203+00:00",
+      "phase": "I2",
+      "message": "NPP+/batch-compression/truncated-input完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140712.180704Z-I2-rocm-CLI-5d5f9a1339"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:07:14.698190+00:00",
+      "phase": "I2",
+      "message": "NPP+/constant-255原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T140712.504009Z-I2-cuda-run-43d5284775"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:07:15.805260+00:00",
+      "phase": "I2",
+      "message": "NPP+/batch-compression/unwritable-output完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140714.146837Z-I2-rocm-CLI-ae3920602c"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:07:17.209455+00:00",
+      "phase": "I2",
+      "message": "NPP+/noise-847原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T140715.009874Z-I2-cuda-run-741a590371"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:07:17.727270+00:00",
+      "phase": "I2",
+      "message": "NPP+/batch-compression/no-GPU完整C++ CLI执行rc=1；全文件集合/像素/实际诊断后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140716.109275Z-I2-rocm-CLI-dcec7844c9"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:07:19.764525+00:00",
+      "phase": "I2",
+      "message": "NPP+/noise-83827原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T140717.518827Z-I2-cuda-run-ef4b631a54"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:07:22.221640+00:00",
+      "phase": "I2",
+      "message": "NPP+/noise-654981原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T140720.074587Z-I2-cuda-run-2bfa49f0a5"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:07:24.721232+00:00",
+      "phase": "I2",
+      "message": "NPP+/diagonal-touch原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T140722.537407Z-I2-cuda-run-88f67d03ec"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:07:25.700797+00:00",
+      "phase": "I2",
+      "message": "CCL masks独立CPU完整验收：PASSED；native分区正确性与项目GPU验收分别记录。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-masks-independent-CPU/20261111T140724.496032Z-I2-CPU-reference-f2f6f418db"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:07:27.007314+00:00",
+      "phase": "I2",
+      "message": "CCL runtime独立CPU完整验收：PASSED；native分区正确性与项目GPU验收分别记录。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-runtime-independent-CPU/20261111T140726.125357Z-I2-CPU-reference-c75f6b148a"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:07:27.313168+00:00",
+      "phase": "I2",
+      "message": "NPP+/frame-hole-and-island原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T140725.018103Z-I2-cuda-run-ad4beada18"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:07:28.607610+00:00",
+      "phase": "I2",
+      "message": "CCL trace独立CPU完整验收：PASSED；native分区正确性与项目GPU验收分别记录。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-trace-independent-CPU/20261111T140727.419672Z-I2-CPU-reference-ab93db3a0c"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:07:29.765294+00:00",
+      "phase": "I2",
+      "message": "NPP+/long-serpentine-component原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP_/20261111T140727.624427Z-I2-cuda-run-cde9416f20"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:07:32.752947+00:00",
+      "phase": "I2",
+      "message": "NPP/default未改CUDA完整原例 rc=0；所有原始输出保留。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP/20261111T140730.075976Z-I2-cuda-original-38a128fb2f"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:07:35.362629+00:00",
+      "phase": "I2",
+      "message": "NPP+/default未改CUDA完整原例 rc=0；所有原始输出保留。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140733.044725Z-I2-cuda-original-934998f358"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:07:38.104359+00:00",
+      "phase": "I2",
+      "message": "NPP+/batch-compression未改CUDA完整原例 rc=0；所有原始输出保留。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-NPP_/20261111T140735.658931Z-I2-cuda-original-4e710d97eb"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:07:44.084136+00:00",
+      "phase": "I2",
+      "message": "CCL完整C++ cli逐原图/全部文件/计数/实际诊断验收：PASSED",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-cli-independent-CPU/20261111T140742.828732Z-I2-CPU-reference-2da7773a4f"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:08:06.580365+00:00",
+      "phase": "I2",
+      "message": "CCL完整C++ cli逐原图/全部文件/计数/实际诊断验收：PASSED",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-cli-independent-CPU/20261111T140805.315546Z-I2-CPU-reference-e4f9413d82"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:08:08.601777+00:00",
+      "phase": "I2",
+      "message": "CCL native独立CPU完整验收：PASSED；native分区正确性与项目GPU验收分别记录。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-independent-CPU/20261111T140804.124867Z-I2-CPU-reference-e568298843"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:08:08.918747+00:00",
+      "phase": "I2",
+      "message": "CCL完整C++ originals逐原图/全部文件/计数/实际诊断验收：PASSED",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-originals-independent-CPU/20261111T140807.032311Z-I2-CPU-reference-1ed4921228"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:09:27.882341+00:00",
+      "phase": "I2",
+      "message": "CCL独立BFS/OpenCV交叉、任意native编号正例和像素/压缩/padding/输入/缺例/ABI/文件等验收器正反向检查：PASSED",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-independent-validator-mutations/20261111T140917.690909Z-I2-CPU-validator-test-e6ca788e8c"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:10:09.620925+00:00",
+      "phase": "I2",
+      "message": "CCL masks独立CPU完整验收：PASSED；native分区正确性与项目GPU验收分别记录。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-masks-independent-CPU/20261111T141008.411223Z-I2-CPU-reference-403d4c0a01"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:10:10.903400+00:00",
+      "phase": "I2",
+      "message": "CCL runtime独立CPU完整验收：PASSED；native分区正确性与项目GPU验收分别记录。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-runtime-independent-CPU/20261111T141010.032756Z-I2-CPU-reference-9dea6c893d"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:10:12.518290+00:00",
+      "phase": "I2",
+      "message": "CCL trace独立CPU完整验收：PASSED；native分区正确性与项目GPU验收分别记录。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-trace-independent-CPU/20261111T141011.319577Z-I2-CPU-reference-3f5e453b98"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:10:17.252798+00:00",
+      "phase": "I2",
+      "message": "CCL native独立CPU完整验收：PASSED；native分区正确性与项目GPU验收分别记录。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-independent-CPU/20261111T141012.935997Z-I2-CPU-reference-b30a5ce03c"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:10:27.836561+00:00",
+      "phase": "I2",
+      "message": "CCL独立BFS/OpenCV交叉、任意native编号正例和像素/压缩/padding/输入/缺例/ABI/文件等验收器正反向检查：PASSED",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-independent-validator-mutations/20261111T141017.717026Z-I2-CPU-validator-test-74bae3fd44"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:10:32.329603+00:00",
+      "phase": "I2",
+      "message": "CCL当前NPP/NPP+两API共54次均rc0，3x3实测两库均返回5分量而独立CPU/HIP为4，native数学失败单列。原始三配置亦运行成功。追加原例binary/五输入SHA绑定工具的路径拼接初始化错误已恢复封存，未执行CUDA、不推断结果，修正重跑。",
+      "evidence": [
+        "migration/reports/image-ccl-native-validation.json",
+        "migration/reports/evidence/rewrite/I2/CCL-identity-bound-original-NPP/20261111T141007.605611Z-I2-cuda-original-9b94e64c9e"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:10:35.451720+00:00",
+      "phase": "I2",
+      "message": "NPP/default未改CUDA完整原例以实际binary及五输入SHA绑定重跑rc=0；native分区缺陷单列。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-identity-bound-original-NPP/20261111T141032.686363Z-I2-cuda-original-a73e544a2c"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:10:38.237556+00:00",
+      "phase": "I2",
+      "message": "NPP+/default未改CUDA完整原例以实际binary及五输入SHA绑定重跑rc=0；native分区缺陷单列。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-identity-bound-original-NPP_/20261111T141035.767663Z-I2-cuda-original-35a0bcbb3b"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:10:41.048532+00:00",
+      "phase": "I2",
+      "message": "NPP+/batch-compression未改CUDA完整原例以实际binary及五输入SHA绑定重跑rc=0；native分区缺陷单列。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-identity-bound-original-NPP_/20261111T141038.543343Z-I2-cuda-original-51aa72fc26"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:11:03.969907+00:00",
+      "phase": "I2",
+      "message": "CCL native-originals独立CPU完整验收：FAILED；native分区正确性与项目GPU验收分别记录。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-originals-independent-CPU/20261111T141100.310616Z-I2-CPU-reference-8a20c1d37f"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:11:06.099205+00:00",
+      "phase": "I2",
+      "message": "CCL完整C++ originals逐原图/全部文件/计数/实际诊断验收：PASSED",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-originals-independent-CPU/20261111T141104.410163Z-I2-CPU-reference-6685d01108"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:11:07.840430+00:00",
+      "phase": "I2",
+      "message": "CCL完整C++ cli逐原图/全部文件/计数/实际诊断验收：PASSED",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-cli-independent-CPU/20261111T141106.606317Z-I2-CPU-reference-497ba6ad38"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:12:06.046834+00:00",
+      "phase": "I2",
+      "message": "CCL native-originals独立CPU完整验收：FAILED；native分区正确性与项目GPU验收分别记录。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-originals-independent-CPU/20261111T141202.444873Z-I2-CPU-reference-f7ecdfde79"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:12:08.211293+00:00",
+      "phase": "I2",
+      "message": "CCL完整C++ originals逐原图/全部文件/计数/实际诊断验收：PASSED",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-originals-independent-CPU/20261111T141206.530314Z-I2-CPU-reference-3767d1b79d"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:12:09.935109+00:00",
+      "phase": "I2",
+      "message": "CCL完整C++ cli逐原图/全部文件/计数/实际诊断验收：PASSED",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-original-cli-independent-CPU/20261111T141208.690549Z-I2-CPU-reference-7e0368738f"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:12:20.466448+00:00",
+      "phase": "I2",
+      "message": "CCL独立BFS/OpenCV交叉、任意native编号正例和像素/压缩/padding/输入/缺例/ABI/文件等验收器正反向检查：PASSED",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-independent-validator-mutations/20261111T141210.475715Z-I2-CPU-validator-test-1793c91c6c"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:12:26.256988+00:00",
+      "phase": "I2",
+      "message": "未改CUDA入口增加binary/输入SHA绑定后原始程序rc0，但复用原生图片目录残留条件编译版第四类输出，严格文件集合验收拒绝；不接受该污染目录，改为每次独立新工作/图片目录重跑，保留首次失败。HIP165文件、39 CLI和27验收器检查已通过。",
+      "evidence": [
+        "migration/reports/image-ccl-native-originals-validation.json",
+        "migration/reports/image-ccl-cli-validation.json",
+        "migration/reports/image-ccl-checks.json"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:12:29.357553+00:00",
+      "phase": "I2",
+      "message": "NPP/default未改CUDA完整原例以实际binary及五输入SHA绑定重跑rc=0；native分区缺陷单列。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-identity-bound-original-NPP/20261111T141226.597711Z-I2-cuda-original-82e74d57c4"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:12:31.994590+00:00",
+      "phase": "I2",
+      "message": "NPP+/default未改CUDA完整原例以实际binary及五输入SHA绑定重跑rc=0；native分区缺陷单列。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-identity-bound-original-NPP_/20261111T141229.665430Z-I2-cuda-original-be96e5c99b"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:12:34.782929+00:00",
+      "phase": "I2",
+      "message": "NPP+/batch-compression未改CUDA完整原例以实际binary及五输入SHA绑定重跑rc=0；native分区缺陷单列。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-identity-bound-original-NPP_/20261111T141232.310336Z-I2-cuda-original-4718a9fe0e"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:15:08.421983+00:00",
+      "phase": "I2",
+      "message": "CCL native-originals独立CPU完整验收：PASSED；native分区正确性与项目GPU验收分别记录。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-originals-independent-CPU/20261111T141503.486572Z-I2-CPU-reference-eda46057d8"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:15:58.580667+00:00",
+      "phase": "I2",
+      "message": "CCL 27组精确CPU分区、44运行合同、15完整C++流程/165文件、39 CLI、真实分层GPU trace与27验收器/BFS检查已通过；三项未改CUDA原例改为独立新目录并SHA绑定完成，当前重验完整55原始输出。准备固定源码及干净检出重放，主表尚未提升。",
+      "evidence": [
+        "migration/reports/image-ccl.md",
+        "migration/reports/image-ccl-native-originals.json",
+        "migration/reports/image-ccl-originals-validation.json"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:16:40.288431+00:00",
+      "phase": "I2",
+      "message": "CCL复合资格预检拒绝：54次API日志缺少资格器要求的运行前binary/input哈希receipt，数值结果不受此缺口代替验收。已补实际远端校验wrapper，整套native重新编译/执行；原日志保留，新proof完成前不发布。",
+      "evidence": [
+        "migration/reports/image-ccl-native.json"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:16:51.720568+00:00",
+      "phase": "I2",
+      "message": "CCL两个原生API及原始默认/条件编译入口实际构建：BUILT；逐项返回码保留。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-build/20261111T141640.635639Z-I2-cuda-build-7b2e51ccd3"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:16:54.590960+00:00",
+      "phase": "I2",
+      "message": "NPP/npp-lena原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T141652.043647Z-I2-cuda-run-3c07405a6f"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:16:57.348045+00:00",
+      "phase": "I2",
+      "message": "NPP/npp-CT_skull原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T141654.911332Z-I2-cuda-run-f3efe873f7"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:17:00.093500+00:00",
+      "phase": "I2",
+      "message": "NPP/npp-PCB_METAL原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T141657.666189Z-I2-cuda-run-88057c8a59"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:17:02.926289+00:00",
+      "phase": "I2",
+      "message": "NPP/npp-PCB2原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T141700.410699Z-I2-cuda-run-806c18d4f2"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:17:05.725717+00:00",
+      "phase": "I2",
+      "message": "NPP/npp-PCB原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T141703.242134Z-I2-cuda-run-47fd70651a"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:17:08.523440+00:00",
+      "phase": "I2",
+      "message": "NPP/plus-lena原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T141706.031631Z-I2-cuda-run-28e1e65fce"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:17:11.337371+00:00",
+      "phase": "I2",
+      "message": "NPP/plus-CT_skull原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T141708.846350Z-I2-cuda-run-22ce6a3346"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:17:14.089145+00:00",
+      "phase": "I2",
+      "message": "NPP/plus-PCB_METAL原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T141711.657909Z-I2-cuda-run-2336353275"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:17:16.972489+00:00",
+      "phase": "I2",
+      "message": "NPP/plus-PCB2原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T141714.409714Z-I2-cuda-run-608dbc1e83"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:17:19.884908+00:00",
+      "phase": "I2",
+      "message": "NPP/plus-PCB原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T141717.293689Z-I2-cuda-run-9d4a3a6f5d"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:17:21.241599+00:00",
+      "phase": "I2",
+      "message": "CCL干净检出/27输入重建/新HIP编译/两C++全15流程及44运行合同冷重放：FAILED；全部子raw和source objects封存。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-clean-checkout/20261111T141714.587247Z-I2-host-cold-replay-bf28dddfbb"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:17:22.631624+00:00",
+      "phase": "I2",
+      "message": "NPP/three-by-three-stale-root原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T141720.190275Z-I2-cuda-run-b79adb05f5"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:17:25.371608+00:00",
+      "phase": "I2",
+      "message": "NPP/one-pixel原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T141722.950439Z-I2-cuda-run-84193fa820"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:17:28.165134+00:00",
+      "phase": "I2",
+      "message": "NPP/single-row原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T141725.699798Z-I2-cuda-run-0cd206ab84"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:17:30.924549+00:00",
+      "phase": "I2",
+      "message": "NPP/single-column原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T141728.489015Z-I2-cuda-run-795510737c"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:17:33.703903+00:00",
+      "phase": "I2",
+      "message": "NPP/scan-255原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T141731.256164Z-I2-cuda-run-6e3f080d29"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:17:36.489658+00:00",
+      "phase": "I2",
+      "message": "NPP/scan-256原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T141734.036529Z-I2-cuda-run-8fa0496e54"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:17:39.262487+00:00",
+      "phase": "I2",
+      "message": "NPP/scan-257原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T141736.817905Z-I2-cuda-run-dc2779428c"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:17:42.023587+00:00",
+      "phase": "I2",
+      "message": "NPP/scan-recursive原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T141739.583168Z-I2-cuda-run-541f475185"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:17:44.803778+00:00",
+      "phase": "I2",
+      "message": "NPP/constant-0原生label/compact rc=0；正确分区由独立CPU后验检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I2/CCL-native-NPP/20261111T141742.349969Z-I2-cuda-run-467e7c2810"
+      ]
+    },
+    {
+      "time": "2026-11-11T14:17:46.527935+00:00",
+      "phase": "I2",
+      "message": "首轮冷检出未执行数值测试：提交源码时与并行实验git status短暂争用index.lock，提交失败后冷重放检出了旧提交，缺少CCL脚本；失败已封存。检查锁已正常释放，无删除活锁；先确认新源码提交成功，再重跑冷检出。",
+      "evidence": [
+        "migration/reports/image-ccl-cold.json"
+      ]
     }
   ],
-  "updated_at": "2026-11-11T13:55:00.259413+00:00",
+  "updated_at": "2026-11-11T14:17:46.527935+00:00",
   "acceptance_policy": "migration/rewrite/image-acceptance-policy.json",
   "execution_plan": "migration/image-equivalence-execution.md"
 }

@@ -1,0 +1,46 @@
+#!/usr/bin/env python3
+"""Run both real CCL APIs and unchanged original applications on NVIDIA."""
+import json,shlex,tarfile,shutil
+from experiment import ROOT,Experiment,write,digest
+from image_progress import record
+PLUS='/tmp/image-library-private-SDKs/nppplus-0.10.0.0/libnpp_plus-linux-x86_64-0.10.0.0_cuda12-archive'
+SDK='/usr/local/cuda-13.4'
+def ssh(e,args,phase,timeout=300):return e.command(['ssh','nvidia-5090x2',shlex.join(args)],phase,timeout=timeout)
+def main():
+ profile=ROOT/'migration/rewrite/image-ccl-profile.json';spec=json.loads(profile.read_text());source=ROOT/'rocm/probes/image/ccl_native.cpp';sources=[__file__,profile,source]+[ROOT/n for n in spec['original_sources']];e=Experiment('I2','CCL-native-build','cuda-build',sources=sources);remote='/tmp/'+e.id;bundle=e.path/'bundle.tar.gz'
+ with tarfile.open(bundle,'w:gz') as tar:
+  tar.add(source,arcname='probe.cpp')
+  for c in spec['cases']:tar.add(ROOT/c['fixture'],arcname='fixtures/'+c['case'])
+  for family in ['NPP','NPP+']:
+   d=ROOT/family/'batchedLabelMarkersAndCompression'
+   for p in d.iterdir():
+    if p.suffix in ['.cpp','.h'] and p.name!='dirent.h':tar.add(p,arcname=family+'/'+p.name)
+   for x in spec['originals']:
+    if x['source'].startswith(family+'/'):tar.add(ROOT/x['source'],arcname=family+'/images/'+(ROOT/x['source']).name)
+ rc=ssh(e,['mkdir','-p',remote],'prepare') or e.command(['scp',str(bundle),'nvidia-5090x2:'+remote+'/bundle.tar.gz'],'upload') or ssh(e,['tar','-xzf',remote+'/bundle.tar.gz','-C',remote],'extract')
+ builds=[]
+ for family in ['NPP','NPP+']:
+  extra=[] if family=='NPP' else ['-DUSE_NPPPLUS','-DNPP_PLUS_ENABLE','-I'+PLUS+'/include','-L'+PLUS+'/lib','-Xlinker','-rpath','-Xlinker',PLUS+'/lib','-lnpp_plus_if','-lnpp_plus_c']
+  flags=[SDK+'/bin/nvcc','-std=c++17','-O2','-arch=sm_120','-L'+SDK+'/lib64','-Xlinker','-rpath','-Xlinker',SDK+'/lib64',*extra]
+  if not rc:rc=ssh(e,[*flags,remote+'/probe.cpp','-lnppif','-lnppc','-o',remote+'/'+family+'-probe'],'build-'+family+'-API')
+  sourcefile='batchedLabelMarkersAndCompression.cpp' if family=='NPP' else 'batchedLabelMarkersAndCompressionNPPPlus.cpp'
+  for mode in ['default']+(['batch-compression'] if family=='NPP+' else []):
+   out=remote+'/'+family+'/'+mode;code=ssh(e,['mkdir','-p',out],'create-original-'+family+'-'+mode)
+   if not code:code=ssh(e,[*flags,*(['-DCUDA11U1'] if mode=='batch-compression' else []),remote+'/'+family+'/'+sourcefile,'-lnppif','-lnppc','-o',out+'/original'],'build-original-'+family+'-'+mode)
+   builds.append(dict(family=family,mode=mode,binary=out+'/original',cwd=out,return_code=code))
+ identities={}
+ if not rc:
+  names=[remote+'/'+f+'-probe' for f in ['NPP','NPP+']]+[b['binary'] for b in builds if not b['return_code']]+[SDK+'/lib64/libnppif.so',SDK+'/lib64/libnppc.so',PLUS+'/lib/libnpp_plus_if.so',PLUS+'/lib/libnpp_plus_c.so'];rc=ssh(e,['sha256sum',*names],'actual-native-binaries-and-libraries');identities={line.split()[1]:line.split()[0] for line in (e.path/e.commands[-1]['stdout']).read_text().splitlines()}
+ build=dict(status='BUILT' if not rc else 'BUILD_ERROR',remote=remote,originals=builds,identities=identities);write(e.path/'build.json',build);build['evidence']=e.finish('EXECUTED' if not rc else 'NATIVE_BUILD_FAILED');write(ROOT/'migration/reports/image-ccl-native-build.json',build);record('I2','CCL两个原生API及原始默认/条件编译入口实际构建：'+build['status']+'；逐项返回码保留。',[build['evidence']])
+ if rc:return rc
+ rows=[]
+ for family in ['NPP','NPP+']:
+  for c in spec['cases']:
+   # Original NPP and NPP+ assets may differ: both APIs consume every exact frozen input.
+   r=Experiment('I2','CCL-native-'+family,'cuda-run',case=c['case'],sources=sources,parent=e.id);out=r.path/'outputs';out.mkdir();where=remote+'/outputs/'+family+'/'+c['case'];ssh(r,['mkdir','-p',where],'output-directory');args=[remote+'/'+family+'-probe',remote+'/fixtures/'+c['case']+'/input.bin',str(c['width']),str(c['height']),str(c['pitch']),where];code=ssh(r,['env','CUDA_VISIBLE_DEVICES=1',*args],'actual-native-API')
+   copy=r.command(['scp','-r','nvidia-5090x2:'+where+'/.',str(out)],'collect',timeout=120);row=dict(family=family,case=c['case'],return_code=code,collection_return_code=copy,outputs=str(out.relative_to(ROOT)),build=build,input_manifest_sha256=c['manifest_sha256'],files={p.name:dict(bytes=p.stat().st_size,sha256=digest(p)) for p in out.iterdir()});write(r.path/'run.json',row);row['evidence']=r.finish('OBSERVED' if not code and not copy else 'NATIVE_MISMATCH');rows.append(row);write(ROOT/'migration/reports/image-ccl-native.json',rows);record('I2',family+'/'+c['case']+'原生label/compact rc='+str(code)+'；正确分区由独立CPU后验检查。',[row['evidence']]);print(family,c['case'],code,flush=True)
+ for b in builds:
+  if b['return_code']:continue
+  r=Experiment('I2','CCL-original-'+b['family'],'cuda-original',case=b['mode'],sources=sources,parent=e.id);code=ssh(r,['bash','-c','cd '+shlex.quote(b['cwd'])+' && CUDA_VISIBLE_DEVICES=1 ./original'],'unchanged-original-full-inputs',timeout=300);out=r.path/'outputs';out.mkdir();copy=r.command(['scp','-r','nvidia-5090x2:'+remote+'/'+b['family']+'/images/.',str(out)],'collect-all-input-and-output-files');row=dict(**b,run_return_code=code,collection_return_code=copy,outputs=str(out.relative_to(ROOT)),files={p.name:dict(bytes=p.stat().st_size,sha256=digest(p)) for p in out.iterdir()});write(r.path/'run.json',row);row['evidence']=r.finish('OBSERVED' if not code and not copy else 'NATIVE_MISMATCH');rows.append(row);write(ROOT/'migration/reports/image-ccl-native.json',rows);record('I2',b['family']+'/'+b['mode']+'未改CUDA完整原例 rc='+str(code)+'；所有原始输出保留。',[row['evidence']])
+ return 0
+if __name__=='__main__':raise SystemExit(main())
