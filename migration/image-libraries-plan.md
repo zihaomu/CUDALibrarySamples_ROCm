@@ -280,7 +280,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-11T18:08:29.240788+00:00。26入口当前9通过/7部分/10失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-11T18:09:52.740548+00:00。26入口当前10通过/7部分/9失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -1257,5 +1257,6 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-11T18:04:03.926729+00:00 | I3 | 对两张完整RGB原图/5个捆绑输出做独立8连通seed谓词和4/8邻域内外边界研究；只作既有vendor文件观察，新的实际native基线与GPU实现尚未完成。 | `migration/reports/evidence/rewrite/I3/FloodFill-bundled-native-full-output-CPU-research/20261111T180402.676532Z-I3-CPU-research-904a751674` |
 | 2026-11-11T18:06:08.195681+00:00 | I2 | EDT最终固定提交76afb83f6三独立scope复审全部APPROVED；15生成数据/CAS闭包问题与此前NaN/fixture问题均闭合。开始完整资格器重算；尚不改主表。 | `migration/reports/image-distance-review.json` |
 | 2026-11-11T18:08:29.240788+00:00 | I2 | 真实EDT publisher拒绝尚未Git封存的资格、错sample ID、缺qualification ID、伪造物理GPU及缺必需case；6检查通过，所有拒绝前后主表SHA不变。接下来先提交资格后发布。 | `migration/reports/evidence/rewrite/I2/Distance-real-publisher-prepublication-and-forgery-guards/20261111T180802.705402Z-I2-CPU-publication-guard-946776192a` |
+| 2026-11-11T18:09:52.740548+00:00 | I2 | NPP+ unsigned/signed EDT完整资格经24复合门槛/三复审/先Git门禁正式发布；项目249通过/22部分/368失败、图像10/26、126功能族。I2新增5入口完成；I9旧NPP六RAW原文件适配仍明确欠项，继续I3五入口与后续codec。 | `migration/reports/image-distance-qualification.json`；`migration/reports/image-distance-publication-guards.json` |
 
 <!-- IMAGE_EXECUTION:END -->

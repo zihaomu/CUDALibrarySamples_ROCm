@@ -18,7 +18,7 @@ def operator_name(sample):
  if family=='cuTENSORMg':return '多 GPU 张量 contraction'
  if family.startswith('MathDx/'):return {'introduction_example':'设备内 GEMM','simple_fft_block':'设备内 C2C FFT','potrf_block':'设备内 complex Cholesky','getrf_partial_pivot_block':'设备内 partial-pivot LU','posv_batched_block':'设备内 Cholesky 分解/求解','trsm_batched_block':'设备内三角求解'}[path.stem]
  if family=='NPP':return {'distanceTransform':'Euclidean 距离变换/Voronoi','templateMatching':'零均值 NCC','nppCanny':'三通道 Canny','batchedLabelMarkersAndCompression':'等值八连接 CCL 与标签压缩','findContour':'轮廓/闭环有序几何与重建'}[path.parent.name]
- if family=='NPP+':return {'cannyEdgeDetectorPython':'单通道 Canny','batchedLabelMarkersAndCompression':'等值八连接 CCL 与标签压缩','findContour':'轮廓/闭环有序几何与重建'}[path.parent.name]
+ if family=='NPP+':return {'cannyEdgeDetectorPython':'单通道 Canny','batchedLabelMarkersAndCompression':'等值八连接 CCL 与标签压缩','findContour':'轮廓/闭环有序几何与重建','distanceTransform':'Unsigned EDT 与子像素 signed 距离/Voronoi'}[path.parent.name]
  if family=='cuBLASLt':return 'GEMM'
  if family=='cuSPARSELt':return '2:4 结构化稀疏 GEMM（含裁剪/压缩）'
  if family=='cuDSS' and 'matrix_helpers' in kind:return '稠密矩阵描述符管理' if 'dense_matrix' in kind else 'CSR 矩阵描述符管理'
@@ -82,6 +82,7 @@ def summarize(cat):
   if family=='NPP' and '三通道 Canny' in groups:scope='精确Euclidean距离/Voronoi/整数截断与完整NCC已通过；C3 Canny使用项目HIP经典8连接强种子滞后变体，C++/Python三PNG与10次原流程、22组CPU精确mask及native完整差异、stream/并发/错误/trace/冷重放和复审通过。原图比NPP少4328个弱边缘像素（IoU0.6323），不声明native mask逐点兼容；其它入口单列。'
   if family in {'NPP','NPP+'} and '等值八连接 CCL 与标签压缩' in groups:scope+=' 等值八连接CCL与GPU标签压缩覆盖所有值（含0）、两个真实C++入口、单图/异构batch及NPP+默认/条件编译模式；原生NPP/NPP+分区失败独立记录，项目按CPU正确分区验收。'
   if family in {'NPP','NPP+'} and '轮廓/闭环有序几何与重建' in groups:scope+=' 轮廓采用项目HIP有向像素单元边、GPU闭环排序及geometry驱动重建；保持原例三/四RAW、范围/bypass与有序诊断，22全量输入和15实际流程55文件验收。此表示非NPP专有packed ABI，原生分区差异与历史ABI1失败另存。'
+  if family=='NPP+' and 'Unsigned EDT 与子像素 signed 距离/Voronoi' in groups:scope+=' 距离变换为项目HIP exact unsigned EDT与预固定的线性阈值交点signed点集距离；完整五图12RAW、30输入及确定性site/Voronoi、4流程48文件、运行/冷检出验收。signed与NPP+闭源算法差异明确单列，非vendor逐位一致；项目CPU/GPU30输入maxAbs=0。'
   families[family]={'verified_operator_family_count':len(operations),'verified_operators':operations,'sample_count':len(samples),'sample_outcomes':dict(counts),'validation_scope':scope,'failure_reason_counts':dict(collections.Counter(s['reason_code'] for s in samples if s['status'] not in {'PASSED','PARTIAL'}))}
  return {'schema_version':1,'counting_rule':'Operator/functional families are deduplicated within each module; dtypes, sizes, language, batch, storage formats and algorithm variants do not create extra operators. At least one explicitly scoped PASSED source profile is required. Cross-module totals may include the same mathematical operation implemented through different library interfaces.','qualification_rule':'A verified family proves only its linked PASSED source profiles/required cases, not every API configuration. PARTIAL examples and capability probes are excluded.','verified_operator_families':total_operators,'modules_with_verified_operators':sum(bool(v['verified_operator_family_count']) for v in families.values()),'passed_source_profiles':sum(s['status']=='PASSED' for s in cat['samples']),'modules':families}
 

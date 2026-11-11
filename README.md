@@ -8,15 +8,15 @@
 
 ## 整体支持情况
 
-覆盖 **30 个模块、639 个独立样例入口**；其中 **19 个模块已有整例通过**，共 **125 个按模块去重的算子/功能族**。
+覆盖 **30 个模块、639 个独立样例入口**；其中 **19 个模块已有整例通过**，共 **126 个按模块去重的算子/功能族**。
 
 | 当前结论 | 入口数 |
 | --- | ---: |
-| 已通过（PASSED） | 248 |
+| 已通过（PASSED） | 249 |
 | 部分支持（PARTIAL） | 22 |
-| 尚未通过（FAILED） | 369 |
+| 尚未通过（FAILED） | 368 |
 
-尚未整例通过 **391 个入口**。通过结论限于该入口登记的原始功能和必需用例；精度、规模、语言、batch 和存储变体不重复增加算子数。未通过原因、部分实现范围和重现日志统一列在[详细记录](migration/reports/support-log-index.md)。
+尚未整例通过 **390 个入口**。通过结论限于该入口登记的原始功能和必需用例；精度、规模、语言、batch 和存储变体不重复增加算子数。未通过原因、部分实现范围和重现日志统一列在[详细记录](migration/reports/support-log-index.md)。
 
 ## 模块支持矩阵
 
@@ -48,7 +48,7 @@
 | [MathDx/libmathdx](migration/reports/support-log-index/MathDx__libmathdx.md) | 尚无整例通过 | 0 | 0/12 | 0 | 12 |
 | [MathDx/nvCOMPDx](migration/reports/support-log-index/MathDx__nvCOMPDx.md) | 尚无整例通过 | 0 | 0/7 | 0 | 7 |
 | [NPP](migration/reports/support-log-index/NPP.md) | 项目 HIP 图像处理实现 | 5 | 6/9 | 0 | 3 |
-| [NPP+](migration/reports/support-log-index/NPP+.md) | 项目 HIP 图像处理 + ROCm Torch | 3 | 3/6 | 1 | 2 |
+| [NPP+](migration/reports/support-log-index/NPP+.md) | 项目 HIP 图像处理 + ROCm Torch | 4 | 4/6 | 1 | 1 |
 | [nvJPEG](migration/reports/support-log-index/nvJPEG.md) | 尚无整例通过 | 0 | 0/7 | 6 | 1 |
 | [nvJPEG2000](migration/reports/support-log-index/nvJPEG2000.md) | 尚无整例通过 | 0 | 0/4 | 0 | 4 |
 | [nvTIFF](migration/reports/support-log-index/nvTIFF.md) | 尚无整例通过 | 0 | 0/6 | 0 | 6 |

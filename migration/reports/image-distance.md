@@ -1,6 +1,6 @@
 # NPP+ signed / unsigned EDT 实现与实验记录
 
-状态：**实施中，未签发整例资格**。当前项目248通过、图像9/26通过保持不变。
+状态：**已签发完整 NPP+ 原例资格**。当前项目249通过，图像10/26通过；四模块其它缺口继续按计划实施。
 
 原始入口：`NPP+/distanceTransform::unsignedAndSignedDistanceTransformNPPPlus.cpp`。实际后端为项目 HIP；CPU 负责文件、标量和调度，不承担生产距离/Voronoi/可视化计算。
 
@@ -57,3 +57,5 @@ python3 tools/moat/image_distance_originals.py
 当前补充验收：100项CPU解析/穷举参考检查、69参数、27状态、19CLI、34核心与23运行/文件验收器正反例全部通过；旧EDT6组及完整NCC8组也通过。30组实际GPU/项目CPU距离最大绝对误差为0；与native不同signed定义的差异仍单列。
 
 冷启动复现通过：[12个封存子记录](image-distance-cold.json)，从提交7a4972d28干净检出、三类输入重建、新编译库/完整C++入口，30输入/4流程48RAW/69参数/27状态独立CPU重新核对。资格器和发布器重新计算全部必需证据、完整frontend编译闭包，发布前要求资格先进入Git。当前仍不提前增加支持数。
+
+最终资格24项复合门槛全部通过，三scope批准提交`76afb83f64178d974cedd7b62260b2d27dcaa728`；资格与全部引用seal首次发布于`67a4bba604b96aa09d28e9349a42b7d0005256d9`，随后真实publisher才修改支持主表。[资格](image-distance-qualification.json) · [复审](image-distance-review.json) · [数据CAS门禁](image-distance-review-gate-checks.json) · [实际发布拒绝/主表不变检查](image-distance-publication-guards.json)。这完成I2新增5原入口的范围；I3与codec/I9仍未完成，旧NPP六RAW文件入口仍须补齐。

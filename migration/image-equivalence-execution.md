@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-11T18:08:29.240788+00:00。26入口当前9通过/7部分/10失败。
+更新时间：2026-11-11T18:09:52.740548+00:00。26入口当前10通过/7部分/9失败。
 
-I2：真实EDT publisher拒绝尚未Git封存的资格、错sample ID、缺qualification ID、伪造物理GPU及缺必需case；6检查通过，所有拒绝前后主表SHA不变。接下来先提交资格后发布。
+I2：NPP+ unsigned/signed EDT完整资格经24复合门槛/三复审/先Git门禁正式发布；项目249通过/22部分/368失败、图像10/26、126功能族。I2新增5入口完成；I9旧NPP六RAW原文件适配仍明确欠项，继续I3五入口与后续codec。
 
-证据：`migration/reports/evidence/rewrite/I2/Distance-real-publisher-prepublication-and-forgery-guards/20261111T180802.705402Z-I2-CPU-publication-guard-946776192a`
+证据：`migration/reports/image-distance-qualification.json`；`migration/reports/image-distance-publication-guards.json`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 
