@@ -115,6 +115,12 @@ Python 使用 ROCm PyTorch 与共享 HIP C ABI。`torch.cuda` 在 ROCm 中仍是
 - 固定 nvJPEG2000 SDK 版本及 `NVJPEG2K_HAS_NLT3_{ENCODE,DECODE}`。源码中浮点分支不能通过选旧 SDK 宏关闭后称完整；只有明确不存在于所冻结原始构建面的分支才可写成条件不适用，并保留理由。
 - CPU oracle 环境与 GPU 项目环境分开固定；Python3.13/ROCm Torch 的二进制依赖在项目环境构建，原环境与包配对不被静默替换。
 
+### 4.2 合理差异下的当前执行方案
+
+详见[功能等价实施方案](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/image-equivalence-execution.md)，工作区副本为 `doc/cuda_samples_on_rocm_image_equivalence_execution.md`。先完成 NPP+ C1 Canny 一个完整入口，再处理 NPP 两个 C3 入口；随后按 I2/I3 图像算子、JPEG decode/encode、JPEG2000 完整分支推进。新增入口目标依次为 1、2、5、5、4、3、4，共24项；累计条件目标为3、5、10、15、19、22、26/26。
+
+I0按公共基线和各入口所需前置合同分解。一个入口的合同、输入、参考配置和验收完整后可单独完成资格，不等待所有JPEG2000纵向研究结束；其它未完成项继续留在I0，不提前标全局完成。这细化了原先I0→I1的整体依赖，不删减任何必需模式。NPP+现有3个边界像素差异可接受；NPP C3中的大范围连接差异须单独定义算法profile与效果验收。JPEG baseline复用rocJPEG并匹配CPU输出策略，研发重点转到progressive、GPU编码及完整调用流程。
+
 ## 5. 核心算法合同
 
 ### 5.1 NPP / NPP+
@@ -159,7 +165,7 @@ baseline/progressive、grayscale/RGB/YCbCr、所有实际接受的 subsampling�
 
 | 输出类型 | 默认验收原则 | 额外检查 |
 | --- | --- | --- |
-| metadata、文件尺寸、位深/通道/ROI/padding、无损数据 | 与声明语义精确一致 | 不能用视觉质量指标容忍错布局/丢结果/错误无损重建 |
+| metadata、解码尺寸、位深/通道/ROI/padding、无损数据 | 与声明语义精确一致，长度字段与实际数据匹配；合法压缩文件大小可不同 | 不能用视觉质量指标容忍错布局/丢结果/错误无损重建 |
 | mask、labels、整数图像操作 | 主参考验证明确的项目算法；跨 vendor 可记录合法算法/边界差异 | Canny保留内部与边界/边缘统计；CCL编号可映射但分区/背景/分量数须一致；不只比全图占比 |
 | EDT FP32/FP64 | 预设目标分别≤2/4 ULP，I0按标准及原生行为冻结 | 符号、Voronoi坐标、截断与非有限值分别判断 |
 | JPEG decode | 匹配输出/上采样策略后，按逐profile容差与质量指标验收 | 原maxAbs≤2/PSNR≥48dB仅保留为初始严格候选，不作跨不同策略的统一门槛；报告全像素/分量误差、分位数、PSNR/SSIM与局部效果 |
@@ -274,7 +280,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-11T10:02:02.333196+00:00。26入口当前2通过/8部分/16失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-11T11:27:09.314951+00:00。26入口当前2通过/8部分/16失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -435,5 +441,6 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-11T09:18:24.226917+00:00 | I1 | 审查问题已修：固定15 stage和5 native case覆盖，失败rc不跳过/严格非零退出，逐文件精确字节/集合/hash/输入检查。16项正反测试全部通过；重新构建15 GPU/CPU阶段及15 native梯度数组严格复验通过。SDK两包已实际逐文件验证复用，所有失败分支可封存。 | `migration/reports/image-checkpoint-validation.json`；`migration/reports/image-review-4705868ef.json`；`migration/reports/image-I1-Canny-stages-validation.json` |
 | 2026-11-11T09:22:58.923043+00:00 | I1 | 固定66abeeeb三项独立复审批准，先前must-fix均闭合；代码与审查版本逐字节一致门槛通过。I0/I1仍未完成，无原始样例资格新增，下一工作保留Canny边界/连接和codec GPU纵向原型。 | `migration/reports/evidence/rewrite/I1/image-foundation-independent-review/20261111T092258.027132Z-I1-host-review-9e527480d1`；`migration/reports/image-I0-I1-checkpoint.md` |
 | 2026-11-11T10:02:02.333196+00:00 | I0 | 按用户允许合理差异重新评估：新增CPU控制变量实验，关闭fancy upsampling后，10张既有GPU图maxAbs1–3、PSNR>55.7、RGB SSIM>0.9997；Canny CPU模型/native的3点全部位于外圈。当前差异可接受，后续按明确语义的功能等价推进，原始失败和未实现功能保留，不直接升级样例。 | `migration/reports/image-difference-assessment.json`；`migration/reports/image-difference-acceptance.md`；`migration/rewrite/image-acceptance-policy.json` |
+| 2026-11-11T11:27:09.314951+00:00 | I1 | 功能等价执行方案已落地：先完成NPP+ C1一个真实GPU入口，再处理NPP C3两入口，其后按5/5/4/3/4目标推进；I0按入口前置拆分，未完成codec研究继续保留。主表和支持数未升级。 | `migration/image-equivalence-execution.md`；`migration/rewrite/image-acceptance-policy.json` |
 
 <!-- IMAGE_EXECUTION:END -->
