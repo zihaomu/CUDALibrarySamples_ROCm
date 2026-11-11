@@ -2,7 +2,7 @@
 
 日期：2026-11-11。状态：**IN_PROGRESS**。逐步实施中；仅封存资格会增加支持数。
 
-本方案落实用户“合理差异可以接受”的要求，是[完整图像库计划](image-libraries-plan.md)的执行细化。[生效验收政策](rewrite/image-acceptance-policy.json)和[差异复评](reports/image-difference-acceptance.md)作为依据。目标仍为原定 26 个入口：方案起点为 2 通过、8 部分、16 失败，新增目标为 24 个；完整模式和输入分支不删减。当前已发布 7 通过、7 部分、12 失败。
+本方案落实用户“合理差异可以接受”的要求，是[完整图像库计划](image-libraries-plan.md)的执行细化。[生效验收政策](rewrite/image-acceptance-policy.json)和[差异复评](reports/image-difference-acceptance.md)作为依据。目标仍为原定 26 个入口：方案起点为 2 通过、8 部分、16 失败，新增目标为 24 个；完整模式和输入分支不删减。当前已发布 9 通过、7 部分、10 失败。
 
 ## 1. 执行原则与前置工作
 
@@ -45,7 +45,7 @@ C3 两入口现已完成并发布：[完整验收](reports/canny-color.md)、[�
 
 ### I2 当前进展
 
-两个 CCL 完整入口已发布：[支持方式和验收](reports/image-ccl.md)、[固定资格](reports/image-ccl-qualification.json)、[独立复核](reports/image-ccl-review.json)。覆盖原始五图、单图/异构batch、NPP+默认及条件编译、全部batch 1..5；27mask、44运行、3默认/外设备/销毁stream、15完整流程165文件、39CLI、31正反例、3原生预检反例及20子记录冷重放通过。当前NPP/NPP+分区缺陷独立保留，项目与CPU正确分区精确。I2剩余两项轮廓与一项signed/unsigned EDT继续实施，I2保持IN_PROGRESS。
+两个 CCL 完整入口已发布：[支持方式和验收](reports/image-ccl.md)、[固定资格](reports/image-ccl-qualification.json)、[独立复核](reports/image-ccl-review.json)。覆盖原始五图、单图/异构batch、NPP+默认及条件编译、全部batch 1..5；27mask、44运行、3默认/外设备/销毁stream、15完整流程165文件、39CLI、31正反例、3原生预检反例及20子记录冷重放通过。当前NPP/NPP+分区缺陷独立保留，项目与CPU正确分区精确。两项轮廓现亦已完整验收发布：[支持方式](reports/image-contour.md)、[资格](reports/image-contour-qualification.json)、[独立复审](reports/image-contour-review.json)。22完整输入、15工作流/55RAW、61参数、26设备数据、11状态/stream、32CLI、58反例及22子记录冷重放通过。I2剩余一项signed/unsigned EDT与既有EDT/NCC回归，保持IN_PROGRESS。
 
 ## 4. JPEG 路线
 
@@ -100,18 +100,18 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 容差内的扰动是正向检查，超预算数值偏差和错通道/ROI/模式/丢 batch 是反向检查；不要求所有 1 LSB 扰动都被判错。无损数据、位深/通道/尺寸、ROI/padding、错误行为和 GPU 实际执行仍有硬约束。水印、tile/ROI、连通结构等另作局部/语义检查，不能只用全图 SSIM 判断。
 
-首页仍只展示当前支持情况；批次过程与完整日志保留在[逐步记录](reports/image-libraries-progress.md)和[支持日志总表](reports/support-log-index.md)。当前已发布项目 246/22/371、图像 7/7/12；新增数只来自已经签发并先提交 Git 的完整入口资格。
+首页仍只展示当前支持情况；批次过程与完整日志保留在[逐步记录](reports/image-libraries-progress.md)和[支持日志总表](reports/support-log-index.md)。当前已发布项目 248/22/369、图像 9/7/10；新增数只来自已经签发并先提交 Git 的完整入口资格。
 
 
 <!-- IMAGE_EXECUTION:START -->
 
 ## 当前实施检查点
 
-更新时间：2026-11-11T16:24:00.212972+00:00。26入口当前7通过/7部分/12失败。
+更新时间：2026-11-11T16:27:50.800157+00:00。26入口当前9通过/7部分/10失败。
 
-I2：真实发布器两项负测均正确拒绝且主表SHA不变；记录器拒绝把预期非零命令标成PASSED，原记录恢复封存，独立审核按EXPECTED_REJECTION保存。先Git后发布保护有效。
+I2：Contour发布后的整体一致性、38项当前资格依赖和3821份完整实验记录均PASSED，639原入口/866原源/477构建定义保持。补齐新轮廓功能族的文档生成映射，首页仅显示当前248/22/369与125功能族。后续signed EDT仍未支持。
 
-证据：`migration/reports/evidence/rewrite/I2/Contour-real-first-Git-publication-guards/20261111T162211.383563Z-I2-CPU-publication-test-d163696219`；`migration/reports/evidence/rewrite/I2/Contour-independent-publication-guard-audit/20261111T162359.328000Z-I2-CPU-publication-test-c551cec31a`
+证据：`migration/reports/final-validation.json`；`migration/reports/rewrite-selected-proof-audit.json`；`migration/reports/rewrite-evidence-audit.json`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+"""Exercise real device-data rejections, including the reviewer's two-pixel hole."""
+import argparse,json,sys
+import numpy as np
+import torch
+from experiment import ROOT,Experiment,write,digest
+from image_contour_runtime_common import State,load_library
+from image_contour_build import dependencies
+from snapshot import capture
+from image_progress import record
+
+def worker(out,library,sha,legacy=False):
+ spec=json.loads((ROOT/'migration/rewrite/image-contour-data-error-contract.json').read_text());stream=torch.cuda.Stream();data=bytes(spec['input_pixels']+[197]*11);s=State(load_library(library,sha,legacy),data,2,1,13,stream,legacy);rc=s.run();assert rc==0 and [s.k,s.m,s.loops]==[2,8,2];out.mkdir(parents=True);s.save_baseline(out/'baseline');rows=[]
+ if legacy:
+  s.reset_output();before=s.snapshots();rc=s.render(count=1);stream.synchronize();s.out.cpu().numpy().tofile(out/'legacy-truncated-output.bin');rows=[dict(case='legacy-ABI1-truncated-observation',return_code=rc,before=before,after=s.snapshots(),output='legacy-truncated-output.bin')]
+ else:
+  with torch.cuda.stream(stream):saved={n:getattr(s,n).clone() for n in ['geometry','info','labels']}
+  for name,rule in spec['cases'].items():
+   with torch.cuda.stream(stream):
+    for n,t in saved.items():getattr(s,n).copy_(t)
+    g=s.geometry.view(torch.int32).view(8,9);info=s.info.view(torch.int32).view(2,7);labels=s.labels.view(torch.int32);count=None
+    if name=='zero-edge-count':count=0
+    elif name=='one-edge-count':count=1
+    elif name in ['missing-last-edge','empty-range-missing-edge']:count=7
+    elif name=='missing-root-edge':g[:7].copy_(saved['geometry'].view(torch.int32).view(8,9)[1:]);count=7
+    elif name=='duplicate-edge':g[1].copy_(g[0])
+    elif name=='swapped-edge-order':g[0].copy_(saved['geometry'].view(torch.int32).view(8,9)[1]);g[1].copy_(saved['geometry'].view(torch.int32).view(8,9)[0])
+    elif name=='wrong-order':g[2,2]=0
+    elif name=='wrong-loop-ID':g[2,1]=1
+    elif name=='unknown-loop-ID':g[2,1]=7
+    elif name=='invalid-component':g[0,0]=2
+    elif name=='out-of-ROI-vertex':g[0,5]=999
+    elif name=='wrong-owner':g[0,7]=1
+    elif name=='wrong-contour-count':info[0,0]=0
+    elif name in ['wrong-edge-count','empty-range-bad-info']:info[0,1]=3
+    elif name=='wrong-loop-count':info[0,2]=0
+    elif name=='wrong-bbox':info[0,3]=1
+    elif name=='forged-bypass-count':info[0,0]=-1
+    elif name=='out-of-range-label':labels[0]=2
+    s.out.fill_(173)
+   before=s.snapshots();code=s.render(rule.get('start',0),rule.get('stop',2),rule.get('limit',262144),count=count);stream.synchronize();filename=name+'.bin';s.out.cpu().numpy().tofile(out/filename);rows.append(dict(case=name,kind=rule['kind'],return_code=code,before=before,after=s.snapshots(),output=filename));print(name,code,flush=True)
+ write(out/'runs.json',rows);return 0
+
+def main():
+ p=argparse.ArgumentParser();p.add_argument('--worker',action='store_true');p.add_argument('--legacy',action='store_true');p.add_argument('--output');p.add_argument('--library');p.add_argument('--sha');a=p.parse_args()
+ if a.worker:return worker(__import__('pathlib').Path(a.output),a.library,a.sha,a.legacy)
+ if a.legacy:
+  ref='migration/reports/evidence/rewrite/I2/Contour-GPU-geometry-build/20261111T145921.077073Z-I2-rocm-build-b6c174a07f';b=json.loads((ROOT/ref/'build.json').read_text());sources=[__file__,ROOT/'tools/moat/image_contour_runtime_common.py',ROOT/'tools/moat/image_contour_worker.py',ROOT/ref/'source.json',ROOT/'migration/rewrite/image-contour-data-error-contract.json']
+ else:b=json.loads((ROOT/'migration/reports/image-contour-build.json').read_text());sources=[__file__,ROOT/'tools/moat/image_contour_runtime_common.py',ROOT/'tools/moat/image_contour_worker.py',ROOT/'migration/rewrite/image-contour-data-error-contract.json',*dependencies()]
+ e=Experiment('I2','Contour-'+('legacy-ABI1-contract-failure' if a.legacy else 'malformed-device-geometry-errors'),'rocm-data-errors',sources=sources,parent=b['experiment_id']);write(e.path/'backend.observed.json',capture());out=e.path/'outputs';rc=e.command([sys.executable,__file__,'--worker','--output',str(out),'--library',str(ROOT/b['library']),'--sha',b['library_sha256']]+(['--legacy'] if a.legacy else []),'actual-device-geometry-and-info-rejection',timeout=180);r=dict(return_code=rc,legacy=a.legacy,outputs=str(out.relative_to(ROOT)),build=b,experiment_id=e.id);write(e.path/'run.json',r);r['evidence']=e.finish('OBSERVED' if not rc else 'RUNTIME_ERROR');write(ROOT/('migration/reports/image-contour-'+('legacy-data-error' if a.legacy else 'data-errors')+'.json'),r);record('I2','Contour '+('历史ABI1缺边反例观测' if a.legacy else 'ABI2真实设备缺边/重复/顺序/loopID/info/label拒绝及恢复')+'执行rc='+str(rc)+'；独立CPU字节/实际返回码检查另行执行。',[r['evidence']]);print(rc,r['evidence']);return rc
+if __name__=='__main__':raise SystemExit(main())

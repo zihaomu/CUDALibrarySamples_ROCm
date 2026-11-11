@@ -1,8 +1,8 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-11T16:24:00.212972+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-11T16:27:50.800157+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
-26入口当前：7 PASSED / 7 PARTIAL / 12 FAILED。
+26入口当前：9 PASSED / 7 PARTIAL / 10 FAILED。
 
 | 阶段 | 执行状态 |
 | --- | --- |
@@ -892,3 +892,5 @@
 | 2026-11-11T16:15:54.564084+00:00 | I2 | Contour32项CLI实际返回码/具体诊断/空输出/无设备mask独立验收：PASSED | [20261111T161553.608888Z-I2-CPU-reference-92eb0daa07](evidence/rewrite/I2/Contour-CLI-independent-CPU/20261111T161553.608888Z-I2-CPU-reference-92eb0daa07) |
 | 2026-11-11T16:17:59.488759+00:00 | I0 | Signed/unsigned EDT拟采用保留小数的线性阈值交点集欧氏距离定义；64f圆图与native有约29.94差异，不能当作数值容差放宽。已落独立合同草案，后续冻结JSON和独立输入后实现；五图12输出、Voronoi、运行合同均保留。 | [image-I2-distance-definition-research.json](image-I2-distance-definition-research.json)；`migration/image-signed-edt-contract.md` |
 | 2026-11-11T16:24:00.212972+00:00 | I2 | 真实发布器两项负测均正确拒绝且主表SHA不变；记录器拒绝把预期非零命令标成PASSED，原记录恢复封存，独立审核按EXPECTED_REJECTION保存。先Git后发布保护有效。 | [20261111T162211.383563Z-I2-CPU-publication-test-d163696219](evidence/rewrite/I2/Contour-real-first-Git-publication-guards/20261111T162211.383563Z-I2-CPU-publication-test-d163696219)；[20261111T162359.328000Z-I2-CPU-publication-test-c551cec31a](evidence/rewrite/I2/Contour-independent-publication-guard-audit/20261111T162359.328000Z-I2-CPU-publication-test-c551cec31a) |
+| 2026-11-11T16:26:04.929578+00:00 | I2 | 两个Contour完整原始入口已先Git锚定资格666eb8480后发布；全项目248通过/22部分/369失败，图像9/7/10。22输入、15流程55RAW、61参数、26设备数据、11状态stream、32CLI、58反例、22子记录冷重放及三个固定提交复审全部通过。继续signed/unsigned EDT和旧EDT/NCC回归，I2不提前完成。 | [image-contour-qualification.json](image-contour-qualification.json)；[image-contour-review.json](image-contour-review.json)；[image-contour-publication-tests.json](image-contour-publication-tests.json) |
+| 2026-11-11T16:27:50.800157+00:00 | I2 | Contour发布后的整体一致性、38项当前资格依赖和3821份完整实验记录均PASSED，639原入口/866原源/477构建定义保持。补齐新轮廓功能族的文档生成映射，首页仅显示当前248/22/369与125功能族。后续signed EDT仍未支持。 | [final-validation.json](final-validation.json)；[rewrite-selected-proof-audit.json](rewrite-selected-proof-audit.json)；[rewrite-evidence-audit.json](rewrite-evidence-audit.json) |
