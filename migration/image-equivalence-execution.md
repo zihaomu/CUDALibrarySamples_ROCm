@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-11T18:09:52.740548+00:00。26入口当前10通过/7部分/9失败。
+更新时间：2026-11-11T18:32:20.184809+00:00。26入口当前10通过/7部分/9失败。
 
-I2：NPP+ unsigned/signed EDT完整资格经24复合门槛/三复审/先Git门禁正式发布；项目249通过/22部分/368失败、图像10/26、126功能族。I2新增5入口完成；I9旧NPP六RAW原文件适配仍明确欠项，继续I3五入口与后续codec。
+I3：RGB flood29全量GPU/CPU精确通过；4完整C++流程20RGB产品及63参数/query/完整guard/alias/复用/并发/错误流独立CPU通过。五未改native原例现均已实际运行：benchmark缺OpenCV的失败保留，私有固定4.12.0补齐后原4096x2048/四操作/五轮20次成功；flood native分区/边界/metadata差异单列。尚待CLI/trace/反例/冷检出/最终复审，不增资格。
 
-证据：`migration/reports/image-distance-qualification.json`；`migration/reports/image-distance-publication-guards.json`
+证据：`migration/reports/image-flood-all-validation.json`；`migration/reports/image-flood-originals-validation.json`；`migration/reports/image-flood-runtime-validation.json`；`migration/reports/image-flood-native-validation.json`；`migration/reports/image-I3-benchmark-native.json`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

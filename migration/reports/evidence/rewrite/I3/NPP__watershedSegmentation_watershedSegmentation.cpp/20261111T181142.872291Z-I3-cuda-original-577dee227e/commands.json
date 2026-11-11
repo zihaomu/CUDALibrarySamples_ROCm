@@ -1,0 +1,112 @@
+[
+  {
+    "command_id": 1,
+    "phase": "prepare-private-full-original",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "mkdir -p /tmp/20261111T181142.872291Z-I3-cuda-original-577dee227e/work /tmp/20261111T181142.872291Z-I3-cuda-original-577dee227e/images"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T18:11:43.654697+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0001-prepare-private-full-original.stdout.log",
+    "stderr": "logs/0001-prepare-private-full-original.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T18:11:43.970894+00:00",
+    "seconds": 0.3155284759704955
+  },
+  {
+    "command_id": 2,
+    "phase": "upload-unmodified-sources-and-exact-inputs",
+    "argv": [
+      "scp",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I3/NPP__watershedSegmentation_watershedSegmentation.cpp/20261111T181142.872291Z-I3-cuda-original-577dee227e/original.tar.gz",
+      "nvidia-5090x2:/tmp/20261111T181142.872291Z-I3-cuda-original-577dee227e/original.tar.gz"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T18:11:43.972361+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0002-upload-unmodified-sources-and-exact-inputs.stdout.log",
+    "stderr": "logs/0002-upload-unmodified-sources-and-exact-inputs.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T18:11:44.289115+00:00",
+    "seconds": 0.3157486540148966
+  },
+  {
+    "command_id": 3,
+    "phase": "extract-private-original",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "tar -xzf /tmp/20261111T181142.872291Z-I3-cuda-original-577dee227e/original.tar.gz -C /tmp/20261111T181142.872291Z-I3-cuda-original-577dee227e"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T18:11:44.290904+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0003-extract-private-original.stdout.log",
+    "stderr": "logs/0003-extract-private-original.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T18:11:44.607702+00:00",
+    "seconds": 0.3159446440404281
+  },
+  {
+    "command_id": 4,
+    "phase": "compile-complete-unmodified-original",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "/usr/local/cuda-13.4/bin/nvcc -O2 -std=c++17 -arch=sm_120 -lnppif -lnppig -lnppicc -lnppc /tmp/20261111T181142.872291Z-I3-cuda-original-577dee227e/watershedSegmentation.cpp -o /tmp/20261111T181142.872291Z-I3-cuda-original-577dee227e/original"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T18:11:44.609398+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0004-compile-complete-unmodified-original.stdout.log",
+    "stderr": "logs/0004-compile-complete-unmodified-original.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T18:11:45.929014+00:00",
+    "seconds": 1.318632611015346
+  },
+  {
+    "command_id": 5,
+    "phase": "actual-complete-native-default-with-source-input-library-GPU-receipt",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "env CUDA_VISIBLE_DEVICES=1 python3 -c 'import hashlib,json,pathlib,subprocess,sys,os\nc=json.loads(sys.argv[1]);root=pathlib.Path(c['\"'\"'remote'\"'\"']);sha=lambda p:hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()\nassert sha(root/c['\"'\"'source'\"'\"'])==c['\"'\"'source_sha256'\"'\"']\nassert {n:sha(root/n) for n in c['\"'\"'headers'\"'\"']}==c['\"'\"'headers'\"'\"']\nassert {p.name:sha(p) for p in (root/'\"'\"'images'\"'\"').iterdir()}==c['\"'\"'inputs'\"'\"']\nloader=subprocess.check_output(['\"'\"'ldd'\"'\"',str(root/'\"'\"'original'\"'\"')],text=True);libraries={}\nfor line in loader.splitlines():\n if '\"'\"'=>'\"'\"' in line and any(n in line for n in ['\"'\"'libnpp'\"'\"','\"'\"'libopencv'\"'\"']):\n  p=pathlib.Path(line.split('\"'\"'=>'\"'\"',1)[1].split()[0]).resolve();libraries[str(p)]=dict(bytes=p.stat().st_size,sha256=sha(p))\ndevice=subprocess.check_output(['\"'\"'nvidia-smi'\"'\"','\"'\"'-i'\"'\"','\"'\"'1'\"'\"','\"'\"'--query-gpu=name,uuid,pci.bus_id,driver_version'\"'\"','\"'\"'--format=csv,noheader'\"'\"'],text=True).strip()\nprint(json.dumps(dict(source_sha256=sha(root/c['\"'\"'source'\"'\"']),headers=c['\"'\"'headers'\"'\"'],inputs=c['\"'\"'inputs'\"'\"'],binary_sha256=sha(root/'\"'\"'original'\"'\"'),libraries=libraries,loader=loader,physical_device_index=1,CUDA_VISIBLE_DEVICES=os.environ.get('\"'\"'CUDA_VISIBLE_DEVICES'\"'\"'),device=device)),flush=True)\nsys.exit(subprocess.call([str(root/'\"'\"'original'\"'\"')],cwd=root/'\"'\"'work'\"'\"'))\n' '{\"remote\":\"/tmp/20261111T181142.872291Z-I3-cuda-original-577dee227e\",\"source\":\"watershedSegmentation.cpp\",\"source_sha256\":\"7beb7bf2489f0126934b08c13618dd3908a0bb627a02bd510d4112a6f9c9791d\",\"headers\":{\"watershedSegmentation.h\":\"cd89ff891fd176aff8a2371eed7ba478f7ae46ff9349db056b63ff8a28f90721\"},\"inputs\":{\"Lena_512x512_8u_Gray.raw\":\"1413a84e01e2738166b18a72c4a147c8e0b4dbf1efc0ececbb9e99dc27593a39\",\"CT_skull_512x512_8u_Gray.raw\":\"144fdfe2f97aff0f05cc3473e14ac4a5c376eb8e2313a9cef244c49c69568daf\",\"Rocks_512x512_8u_Gray.raw\":\"23dce5a33ff855aa217b6a19ee66dee53eda7cc5b79a056fd905be38d2ea8e6d\",\"coins_500x383_8u_Gray.raw\":\"3c70e2c8e0cfbdd2004c04f918e33fa0870ce2fa170c18c2d8e9105eaa8eacee\",\"coins_overlay_500x569_8u_Gray.raw\":\"c9029f2747c00585915e00640d138f0eadf6af396198c64f87e63f9dca7d8d99\"}}'"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T18:11:45.933297+00:00",
+    "timeout_seconds": 900,
+    "environment": {},
+    "stdout": "logs/0005-actual-complete-native-default-with-source-input-library-GPU-receipt.stdout.log",
+    "stderr": "logs/0005-actual-complete-native-default-with-source-input-library-GPU-receipt.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T18:11:47.152741+00:00",
+    "seconds": 1.218169444007799
+  },
+  {
+    "command_id": 6,
+    "phase": "collect-all-inputs-products-and-original-workflow-files",
+    "argv": [
+      "scp",
+      "-r",
+      "nvidia-5090x2:/tmp/20261111T181142.872291Z-I3-cuda-original-577dee227e/images",
+      "nvidia-5090x2:/tmp/20261111T181142.872291Z-I3-cuda-original-577dee227e/work",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I3/NPP__watershedSegmentation_watershedSegmentation.cpp/20261111T181142.872291Z-I3-cuda-original-577dee227e/outputs"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T18:11:47.154367+00:00",
+    "timeout_seconds": 180,
+    "environment": {},
+    "stdout": "logs/0006-collect-all-inputs-products-and-original-workflow-files.stdout.log",
+    "stderr": "logs/0006-collect-all-inputs-products-and-original-workflow-files.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T18:11:47.871548+00:00",
+    "seconds": 0.7163483289768919
+  }
+]

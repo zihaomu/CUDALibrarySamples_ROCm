@@ -16,5 +16,5 @@
  */
 
 
-#include "batch15_image.hpp"
-int main(){return migration_image::main15("flood");}
+#include "../../../common/image/flood_sample.hpp"
+int main(int argc,char**argv){return image_flood_sample::main(argc,argv);}
