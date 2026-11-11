@@ -280,7 +280,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-11T16:13:57.956929+00:00。26入口当前7通过/7部分/12失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-11T16:15:54.564084+00:00。26入口当前7通过/7部分/12失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -1119,5 +1119,39 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-11T16:13:05.956837+00:00 | I2 | Contour干净检出/22输入重建/ABI2新HIP编译/15实际原流程及26设备数据、61参数、11状态合同冷重放：PASSED；22子记录原始bytes和source objects封存。 | `migration/reports/evidence/rewrite/I2/Contour-clean-checkout/20261111T161048.114670Z-I2-host-cold-replay-85c8a19f8b` |
 | 2026-11-11T16:13:08.608010+00:00 | I0 | Signed EDT独立CPU私有SciPy：READY；首次venv无pip和记录器终态拼写错误已保留/恢复封存，改用系统pip指定私有venv，NumPy不变。 | `migration/reports/evidence/rewrite/I0/Signed-EDT-independent-CPU-spatial-reference-retry/20261111T161303.010431Z-I0-host-dependency-5060327eea`；`migration/reports/evidence/rewrite/I0/Signed-EDT-independent-CPU-spatial-reference/20261111T161225.094936Z-I0-host-dependency-a3f091408b` |
 | 2026-11-11T16:13:57.956929+00:00 | I2 | 四项独立预审发现已修复并由原reviewer复核闭合；CLI完整绑定/冷重放唯一矩阵/native完整输出与当前数学重算/包含原入口的编译闭包。58项反例与新冷重放通过，最终固定commit复审待执行。 | `migration/reports/evidence/rewrite/I2/Contour-four-independent-review-fixes/20261111T161357.047887Z-I2-source-review-fixes-7bc1184d4c`；`migration/reports/evidence/rewrite/I2/Contour-actual-validator-mutations/20261111T160931.855865Z-I2-CPU-validator-test-153f7dcf0d`；`migration/reports/evidence/rewrite/I2/Contour-clean-checkout/20261111T161048.114670Z-I2-host-cold-replay-85c8a19f8b` |
+| 2026-11-11T16:14:35.695128+00:00 | I2 | NPP contour CLI/help实际返回0；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP_findContour-CLI/20261111T161433.999819Z-I2-rocm-CLI-d348b2b4d4` |
+| 2026-11-11T16:14:37.569341+00:00 | I2 | NPP contour CLI/missing-value实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP_findContour-CLI/20261111T161436.023368Z-I2-rocm-CLI-3d2e870b70` |
+| 2026-11-11T16:14:39.398309+00:00 | I2 | NPP contour CLI/unknown-option实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP_findContour-CLI/20261111T161437.887799Z-I2-rocm-CLI-208c636e43` |
+| 2026-11-11T16:14:41.245812+00:00 | I2 | NPP contour CLI/zero-width实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP_findContour-CLI/20261111T161439.702039Z-I2-rocm-CLI-7f16886603` |
+| 2026-11-11T16:14:43.111074+00:00 | I2 | NPP contour CLI/negative-height实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP_findContour-CLI/20261111T161441.547737Z-I2-rocm-CLI-c1e095501c` |
+| 2026-11-11T16:14:44.957894+00:00 | I2 | NPP contour CLI/overwide实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP_findContour-CLI/20261111T161443.417321Z-I2-rocm-CLI-c838eaf7d2` |
+| 2026-11-11T16:14:46.810218+00:00 | I2 | NPP contour CLI/too-many-pixels实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP_findContour-CLI/20261111T161445.267166Z-I2-rocm-CLI-9ce833e9bf` |
+| 2026-11-11T16:14:48.641606+00:00 | I2 | NPP contour CLI/noninteger-width实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP_findContour-CLI/20261111T161447.115572Z-I2-rocm-CLI-1e5ffd05f7` |
+| 2026-11-11T16:14:50.600932+00:00 | I2 | NPP contour CLI/missing-input实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP_findContour-CLI/20261111T161448.957011Z-I2-rocm-CLI-538000700c` |
+| 2026-11-11T16:14:52.573227+00:00 | I2 | NPP contour CLI/truncated-input实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP_findContour-CLI/20261111T161450.926794Z-I2-rocm-CLI-b4b2e96e37` |
+| 2026-11-11T16:14:54.534288+00:00 | I2 | NPP contour CLI/trailing-input实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP_findContour-CLI/20261111T161452.892931Z-I2-rocm-CLI-f499535149` |
+| 2026-11-11T16:14:56.755382+00:00 | I2 | NPP contour CLI/unwritable-output实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP_findContour-CLI/20261111T161454.849088Z-I2-rocm-CLI-02ef4f4387` |
+| 2026-11-11T16:14:58.743768+00:00 | I2 | NPP contour CLI/no-GPU实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP_findContour-CLI/20261111T161457.073899Z-I2-rocm-CLI-a44c436492` |
+| 2026-11-11T16:15:00.619307+00:00 | I2 | NPP+ contour CLI/help实际返回0；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP__findContour-CLI/20261111T161459.063968Z-I2-rocm-CLI-b6541fa25e` |
+| 2026-11-11T16:15:02.441039+00:00 | I2 | NPP+ contour CLI/missing-value实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP__findContour-CLI/20261111T161500.921302Z-I2-rocm-CLI-2af358c5fa` |
+| 2026-11-11T16:15:04.289901+00:00 | I2 | NPP+ contour CLI/unknown-option实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP__findContour-CLI/20261111T161502.745713Z-I2-rocm-CLI-d613bb4978` |
+| 2026-11-11T16:15:06.138920+00:00 | I2 | NPP+ contour CLI/zero-width实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP__findContour-CLI/20261111T161504.591362Z-I2-rocm-CLI-940b85a59b` |
+| 2026-11-11T16:15:06.447800+00:00 | I0 | Signed EDT线性阈值交点集欧氏距离/连续小数覆盖率候选定义与全量native输出比较：OBSERVED；独立SciPy kd-tree数学研究，GPU实现及最终合同尚未签发。 | `migration/reports/evidence/rewrite/I0/Signed-EDT-linear-zero-crossing-definition/20261111T161504.812920Z-I0-CPU-research-3c49a70f94` |
+| 2026-11-11T16:15:07.959098+00:00 | I2 | NPP+ contour CLI/negative-height实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP__findContour-CLI/20261111T161506.443810Z-I2-rocm-CLI-cb9f122cbc` |
+| 2026-11-11T16:15:09.790816+00:00 | I2 | NPP+ contour CLI/overwide实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP__findContour-CLI/20261111T161508.262399Z-I2-rocm-CLI-70280420e1` |
+| 2026-11-11T16:15:11.617444+00:00 | I2 | NPP+ contour CLI/too-many-pixels实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP__findContour-CLI/20261111T161510.097276Z-I2-rocm-CLI-c0266f6be0` |
+| 2026-11-11T16:15:13.445179+00:00 | I2 | NPP+ contour CLI/noninteger-width实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP__findContour-CLI/20261111T161511.923888Z-I2-rocm-CLI-f63ecb8088` |
+| 2026-11-11T16:15:15.423703+00:00 | I2 | NPP+ contour CLI/missing-input实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP__findContour-CLI/20261111T161513.750462Z-I2-rocm-CLI-d0b7585d76` |
+| 2026-11-11T16:15:17.413513+00:00 | I2 | NPP+ contour CLI/truncated-input实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP__findContour-CLI/20261111T161515.748288Z-I2-rocm-CLI-0a23b1d30b` |
+| 2026-11-11T16:15:19.388340+00:00 | I2 | NPP+ contour CLI/trailing-input实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP__findContour-CLI/20261111T161517.718038Z-I2-rocm-CLI-a4ca1e4169` |
+| 2026-11-11T16:15:21.435651+00:00 | I2 | NPP+ contour CLI/unwritable-output实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP__findContour-CLI/20261111T161519.709257Z-I2-rocm-CLI-ebf911ebf3` |
+| 2026-11-11T16:15:23.439331+00:00 | I2 | NPP+ contour CLI/no-GPU实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP__findContour-CLI/20261111T161521.734784Z-I2-rocm-CLI-483f361e37` |
+| 2026-11-11T16:15:25.364958+00:00 | I2 | NPP+ contour CLI/negative-start实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP__findContour-CLI/20261111T161523.778323Z-I2-rocm-CLI-72ab11da5a` |
+| 2026-11-11T16:15:27.274833+00:00 | I2 | NPP+ contour CLI/negative-stop实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP__findContour-CLI/20261111T161525.714792Z-I2-rocm-CLI-f580f92024` |
+| 2026-11-11T16:15:29.191910+00:00 | I2 | NPP+ contour CLI/inverted-range实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP__findContour-CLI/20261111T161527.602256Z-I2-rocm-CLI-26bd20ba8f` |
+| 2026-11-11T16:15:31.293191+00:00 | I2 | NPP+ contour CLI/beyond-components实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP__findContour-CLI/20261111T161529.535308Z-I2-rocm-CLI-a2d258ccb1` |
+| 2026-11-11T16:15:33.199106+00:00 | I2 | NPP+ contour CLI/negative-limit实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP__findContour-CLI/20261111T161531.602817Z-I2-rocm-CLI-7164dac7f1` |
+| 2026-11-11T16:15:35.000771+00:00 | I2 | NPP+ contour CLI/noninteger-limit实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP__findContour-CLI/20261111T161533.497791Z-I2-rocm-CLI-bde261ccb8` |
+| 2026-11-11T16:15:54.564084+00:00 | I2 | Contour32项CLI实际返回码/具体诊断/空输出/无设备mask独立验收：PASSED | `migration/reports/evidence/rewrite/I2/Contour-CLI-independent-CPU/20261111T161553.608888Z-I2-CPU-reference-92eb0daa07` |
 
 <!-- IMAGE_EXECUTION:END -->
