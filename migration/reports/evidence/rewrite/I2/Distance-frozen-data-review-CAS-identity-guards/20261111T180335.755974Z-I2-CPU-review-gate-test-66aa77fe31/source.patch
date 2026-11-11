@@ -1,0 +1,41 @@
+diff --git a/tools/moat/qualify_image_distance.py b/tools/moat/qualify_image_distance.py
+index 7790351f0..ebe196151 100644
+--- a/tools/moat/qualify_image_distance.py
++++ b/tools/moat/qualify_image_distance.py
+@@ -19,6 +19,27 @@ SAMPLE='NPP+/distanceTransform::unsignedAndSignedDistanceTransformNPPPlus.cpp'
+ IMPLEMENTATION='rocm/ported/NPP+/distanceTransform/unsignedAndSignedDistanceTransformNPPPlus.cpp'
+ COMPARISON='ALGORITHM_VARIANT_EXACT_PROJECT_TYPED_SDF'
+ def load(name):return json.loads((ROOT/f'migration/reports/image-distance-{name}.json').read_text())
++def review_sources(names,refs):
++ # Generated image data is reviewed through its committed content object. Only
++ # the fifteen exact files declared by the frozen workflow qualify; every other
++ # dependency still has to exist at its original path in the reviewed Git tree.
++ contract=json.loads((ROOT/'migration/rewrite/image-distance-original-contract.json').read_text())
++ fixtures={c['path']:(c['sha256'],c['bytes']) for rows in contract['datasets'].values() for c in rows}
++ if len(fixtures)!=15:raise ValueError('exact fifteen original-workflow data dependencies')
++ result=set(names)-set(fixtures)
++ for name in set(names)&set(fixtures):
++  sha,size=fixtures[name];path=ROOT/name
++  if not path.is_file() or path.stat().st_size!=size or digest(path)!=sha:raise ValueError('frozen generated data bytes '+name)
++  objects=set()
++  for ref in refs:
++   _,_,source=sealed(ref)
++   if name not in source['dependencies']:continue
++   obj=source['source_objects'][name]
++   if source['dependencies'][name]!=sha or not obj.startswith('migration/source-objects/') or Path(obj).parent!=Path('migration/source-objects') or (ROOT/obj).stat().st_size!=size or digest(ROOT/obj)!=sha:raise ValueError('frozen data content object '+name)
++   objects.add(obj)
++  if not objects:raise ValueError('missing sealed frozen data dependency '+name)
++  result.update(objects)
++ return sorted(result)
+ def cold_inventory(children):
+  sizes={'contracts':1,'original-contracts':1,'state-contracts':1,'build':1,'all':1,'frontend-build':1,'originals':4,'arguments':1,'states':1}
+  if len(children)!=12 or {c['name'] for c in children}!=set(sizes) or len({c['relative'] for c in children})!=12 or len({c['report']['evidence'] for c in children})!=12:return False
+@@ -131,7 +152,7 @@ def collect(review=None):
+   return actual==json.loads((d/'originals-CPU.json').read_text()) and all(x['status']=='PASSED' for x in actual)
+  gate('twelve-child-clean-checkout-rebuild-full-inputs-files-and-runtime',cold)
+  sources.update({'tools/moat/qualify_image_distance.py','tools/moat/publish_image_distance.py','tools/moat/qualify_canny_plus.py','tools/moat/qualify_first.py','tools/moat/selected_proofs.py','tools/moat/audit.py','tools/moat/snapshot.py','tools/migration/device_guard.py','migration/environments/project.lock.json','migration/rewrite/image-acceptance-policy.json'})
+- gate('three-independent-exact-source-and-proof-reviews',lambda:reviewed(review,sorted(sources),refs))
++ gate('three-independent-exact-source-and-proof-reviews',lambda:reviewed(review,review_sources(sources,refs),refs))
+  return checks,refs,sorted(sources),b,spec
+ 
+ def metadata():

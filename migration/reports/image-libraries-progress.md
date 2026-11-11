@@ -1,6 +1,6 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-11T17:58:22.447718+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-11T18:03:36.783315+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
 26入口当前：9 PASSED / 7 PARTIAL / 10 FAILED。
 
@@ -9,7 +9,7 @@
 | I0 | IN_PROGRESS |
 | I1 | COMPLETED_SCOPED |
 | I2 | IN_PROGRESS |
-| I3 | NOT_STARTED |
+| I3 | IN_PROGRESS |
 | I4 | NOT_STARTED |
 | I5 | NOT_STARTED |
 | I6 | NOT_STARTED |
@@ -989,3 +989,5 @@
 | 2026-11-11T17:41:33.546995+00:00 | I2 | EDT23项实际69参数/27状态/19CLI/4原流程验收器正反向role/输入/时序/stream/paired-hash/文件与诊断伪造：PASSED | [20261111T174128.275008Z-I2-CPU-validator-test-7454731bb4](evidence/rewrite/I2/Distance-runtime-CLI-original-validator-mutations/20261111T174128.275008Z-I2-CPU-validator-test-7454731bb4) |
 | 2026-11-11T17:49:23.493075+00:00 | I2 | EDT干净检出/三类输入重建/全新HIP编译/30输入/4完整原流程48RAW/69参数/27状态及极值、12子记录冷重放：PASSED | [20261111T174754.875439Z-I2-host-cold-replay-ce0109eb53](evidence/rewrite/I2/Distance-clean-checkout-complete-original-and-runtime/20261111T174754.875439Z-I2-host-cold-replay-ce0109eb53) |
 | 2026-11-11T17:58:22.447718+00:00 | I2 | EDT12子记录冷检出全部通过；完成复合资格器/发布器，覆盖全部冻结输入/完整C++编译闭包/CPU重算/原生receipt/14旧EDT-NCC回归及先Git门禁；准备固定源码三独立复审，暂不增加支持数。 | [image-distance-cold.json](image-distance-cold.json) |
+| 2026-11-11T18:01:04.233436+00:00 | I3 | 开始5原入口源码面核对：NPP watershed实际5图10输出且不解析README的-b；NPP+3图12输出；flood5分支/5RGB输出+元数据；Hough完整五直线/外部图/CLI；benchmark原4096x2048/四算子/预热/五轮20次。仅调查，不增加支持数。 | [20261111T180103.350853Z-I3-CPU-source-audit-7b5e20754b](evidence/rewrite/I3/Five-original-image-entrypoint-surface-audit/20261111T180103.350853Z-I3-CPU-source-audit-7b5e20754b) |
+| 2026-11-11T18:03:36.783315+00:00 | I2 | 最终复审发现15个生成图像数据不能直接git-show的问题；Distance专用映射仅对冻结15文件使用已提交CAS，4项真实数据/CAS身份与反例检查通过，未知build路径仍要求原Git blob。共享复审门禁与已合格图像源码未改。 | [20261111T180335.755974Z-I2-CPU-review-gate-test-66aa77fe31](evidence/rewrite/I2/Distance-frozen-data-review-CAS-identity-guards/20261111T180335.755974Z-I2-CPU-review-gate-test-66aa77fe31) |

@@ -1,0 +1,79 @@
+{
+  "status": "OBSERVED",
+  "entry_count": 5,
+  "entries": [
+    {
+      "source": "NPP/watershedSegmentation/watershedSegmentation.cpp",
+      "sha256": "7beb7bf2489f0126934b08c13618dd3908a0bb627a02bd510d4112a6f9c9791d",
+      "bytes": 5512,
+      "APIs": [
+        "nppiSegmentWatershedGetBufferSize_8u_C1R",
+        "nppiSegmentWatershed_8u_C1IR_Ctx",
+        "nppiWorkspaceCreate",
+        "nppiWorkspaceDestroy"
+      ]
+    },
+    {
+      "source": "NPP+/watershedSegmentation/watershedSegmentationNPPPlus.cpp",
+      "sha256": "da1f96daa9b45c9bc4e4bbf81545586f47adf1c9f1a2b389d163490837b8a8f5",
+      "bytes": 24801,
+      "APIs": [
+        "nppiCompressMarkerLabelsGetBufferSize_32u_C1R",
+        "nppiCompressMarkerLabelsUF_32u_C1IR_Ctx",
+        "nppiSegmentWatershedGetBufferSize_8u_C1R",
+        "nppiSegmentWatershed_8u_C1IR_Ctx"
+      ]
+    },
+    {
+      "source": "NPP+/floodFill/floodFillVariousRegionTypesNPPPlus.cpp",
+      "sha256": "b607b3cc985c64e4504fa62a9e08f0fd296821737726f87d90d74653c683eb5c",
+      "bytes": 17911,
+      "APIs": [
+        "nppiFloodFillGetBufferSize",
+        "nppiFloodFillGradientBoundary_Ctx",
+        "nppiFloodFillGradient_Ctx",
+        "nppiFloodFillRangeBoundary_Ctx",
+        "nppiFloodFillRange_Ctx",
+        "nppiFloodFill_Ctx"
+      ]
+    },
+    {
+      "source": "NPP/houghLines/houghLines.cpp",
+      "sha256": "2433c9caa3838ee4f32d31f3e1d1930c1b1b9add72883335c64928ba3e7d7b50",
+      "bytes": 13672,
+      "APIs": [
+        "nppiFilterCannyBorderGetBufferSize",
+        "nppiFilterCannyBorder_8u_C1R_Ctx",
+        "nppiFilterHoughLineGetBufferSize",
+        "nppiFilterHoughLine_8u32f_C1R_Ctx"
+      ]
+    },
+    {
+      "source": "NPP/opencvBenchmark/opencvBenchmark.cpp",
+      "sha256": "0332d73b327bbf76726b6eb13e38bbf68110baff7f923f328dbaabbca54fb30e",
+      "bytes": 14409,
+      "APIs": [
+        "nppiFilterCannyBorderGetBufferSize",
+        "nppiFilterCannyBorder_8u_C1R_Ctx",
+        "nppiFilterGaussBorder_8u_C1R_Ctx",
+        "nppiRGBToGray_8u_C3C1R_Ctx",
+        "nppiResize_8u_C1R_Ctx",
+        "nppiWorkspaceCreate",
+        "nppiWorkspaceDestroy"
+      ]
+    }
+  ],
+  "contracts": {
+    "watershed_NPP": "Actual source runs five images and two outputs per image, despite README batch wording; main does not parse -b. Original nppiWorkspace high-water branch preserved as an equivalent reusable HIP workspace contract.",
+    "watershed_plus": "Three full images; segmentation, compressed labels, boundaries-only and contrasting-boundary products, twelve RAW files.",
+    "flood": "Five RGB workflows: exact seed equality, fixed seed gradient, gradient with boundary, absolute range, range with boundary; two originals, five full RGB RAW products and connected-region metadata. Vendor bounding-box width/height mean right/bottom coordinates per official documentation.",
+    "Hough": "Full synthetic1024x768 five known lines+noise; all threshold/maxLines/iterations/Canny options and external RAW mode; full device edge/accumulator/line evidence and drawn output.",
+    "OpenCV": "4096x2048 mirrored tiling, four operations, kernel-only and pinned end-to-end timings, CPU1/allthreads, one warm-up and five runs of20iterations by default; numerical sanity comparisons not a speedup approval."
+  },
+  "documentation_sources": [
+    "https://docs.nvidia.com/cuda/archive/12.3.2/nppplus/image_filtering_functions.html",
+    "https://docs.nvidia.com/cuda/archive/12.1.1/npp/group__image__computer__vision__filtering__functions.html"
+  ],
+  "scope": "Source surface audit only; numerical contracts, independent inputs, native baselines and implementations remain owed. No sample promotion.",
+  "evidence": "migration/reports/evidence/rewrite/I3/Five-original-image-entrypoint-surface-audit/20261111T180103.350853Z-I3-CPU-source-audit-7b5e20754b"
+}
