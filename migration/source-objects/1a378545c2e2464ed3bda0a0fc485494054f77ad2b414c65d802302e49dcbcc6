@@ -1,0 +1,50 @@
+#!/usr/bin/env python3
+"""Real default/reuse/change/concurrent and foreign/destroyed stream checks."""
+import ctypes as C,json,sys
+from pathlib import Path
+import torch
+from experiment import ROOT,Experiment,write,digest
+from image_contour_build import dependencies
+from image_contour_runtime_common import State,load_library
+from image_progress import record
+
+def worker(out,library,sha):
+ import _rocm_sdk_core
+ from snapshot import capture
+ from concurrent.futures import ThreadPoolExecutor
+ observed=capture();devices=observed['devices'];assert {d['physical_id'] for d in devices}=={0,1};current=next(d['logical_id'] for d in devices if d['physical_id']==1);other=next(d['logical_id'] for d in devices if d['physical_id']==0);torch.cuda.set_device(current);l=load_library(library,sha);spec=json.loads((ROOT/'migration/rewrite/image-contour-profile.json').read_text());cases={c['case']:c for c in spec['cases']};out.mkdir(parents=True);write(out/'devices.json',observed);c=cases['independent-noise-875231'];data=(ROOT/c['fixture']/'input.bin').read_bytes();s=State(l,data,c['width'],c['height'],c['pitch'],torch.cuda.default_stream(current));rows=[]
+ def core(name,state,case,zero=False):
+  code=state.run();state.save_baseline(out/name);return dict(case=name,kind='core',return_code=code,source_case=case['case'],all_input_bytes_zero=zero,width=state.w,height=state.h,input_pitch=state.pitch)
+ def render(name,zero=False):
+  s.reset_output();code=s.render();s.stream.synchronize();s.out.cpu().numpy().tofile(out/(name+'.bin'));return dict(case=name,kind='render',return_code=code,source_case=c['case'],all_input_bytes_zero=zero,width=s.w,height=s.h,input_pitch=s.pitch,output_pitch=s.op)
+ rows.append(core('default-core',s,c));rows.append(render('default-render'));rows.append(core('repeat-core',s,c))
+ with torch.cuda.stream(s.stream):s.src.zero_()
+ rows.append(core('changed-core',s,c,True));rows.append(render('changed-render',True))
+ def independent(name,source):
+  torch.cuda.set_device(current);case=cases[source];stream=torch.cuda.Stream(device=current);state=State(l,(ROOT/case['fixture']/'input.bin').read_bytes(),case['width'],case['height'],case['pitch'],stream);return core(name,state,case)
+ with ThreadPoolExecutor(max_workers=2) as pool:
+  futures=[pool.submit(independent,'concurrent-A','independent-noise-875231'),pool.submit(independent,'concurrent-B','annulus')];rows.extend(f.result() for f in futures)
+ def snapshots():return dict(s.snapshots(),**{n:__import__('hashlib').sha256(getattr(s,n).cpu().numpy().tobytes()).hexdigest() for n in ['work','render_work','out']})
+ s.save_baseline(out/'negative-baseline')
+ for n in ['work','render_work','out']:getattr(s,n).cpu().numpy().tofile(out/'negative-baseline'/(n+'.bin'))
+ hip=C.CDLL(str(Path(_rocm_sdk_core.__file__).parent/'lib/libamdhip64.so.7'));hip.hipStreamCreateWithFlags.argtypes=[C.POINTER(C.c_void_p),C.c_uint];hip.hipStreamGetDevice.argtypes=[C.c_void_p,C.POINTER(C.c_int)];hip.hipStreamDestroy.argtypes=[C.c_void_p];hip.hipSetDevice.argtypes=[C.c_int]
+ for kind in ['foreign','destroyed']:
+  ptr=C.c_void_p();assert hip.hipSetDevice(other if kind=='foreign' else current)==0;assert hip.hipStreamCreateWithFlags(C.byref(ptr),1)==0;assert hip.hipSetDevice(current)==0
+  if kind=='destroyed':assert hip.hipStreamDestroy(ptr)==0
+  device=C.c_int(-1);query=hip.hipStreamGetDevice(ptr,C.byref(device))
+  for operation in ['run','render']:
+   before=snapshots()
+   if operation=='run':code=l.rocm_image_contour_run(C.byref(s.descriptor),ptr)
+   else:code=l.rocm_image_contour_reconstruct(s.labels.data_ptr(),s.lp,s.info.data_ptr(),s.k,s.geometry.data_ptr(),s.m,0,s.k,2**32-1,s.out.data_ptr(),s.op,s.render_work.data_ptr(),s.rwb,s.w,s.h,ptr)
+   rows.append(dict(case=kind+'-'+operation,kind='error-'+operation,return_code=code,stream_query_return_code=query,stream_device=device.value,current_device=current,foreign_device=other,before=before,after=snapshots(),source_case=c['case'],all_input_bytes_zero=True))
+  if kind=='foreign':assert hip.hipSetDevice(other)==0;assert hip.hipStreamDestroy(ptr)==0;assert hip.hipSetDevice(current)==0
+ write(out/'runs.json',rows);print([(r['case'],r['return_code']) for r in rows]);return 0
+
+def main():
+ if len(sys.argv)>1:return worker(Path(sys.argv[1]),sys.argv[2],sys.argv[3])
+ from snapshot import capture
+ b=json.loads((ROOT/'migration/reports/image-contour-build.json').read_text());e=Experiment('I2','Contour-real-state-streams-and-concurrent-instances','rocm-runtime',sources=[__file__,ROOT/'tools/moat/image_contour_runtime_common.py',ROOT/'tools/moat/image_contour_worker.py',ROOT/'migration/rewrite/image-contour-state-contract.json',*dependencies()],parent=b['experiment_id'])
+ try:o=capture();write(e.path/'backend.observed.json',o);assert {d['physical_id'] for d in o['devices']}=={0,1}
+ except Exception as error:ref=e.finish('GUARD_FAILED',reason=repr(error));record('I2','Contour state guard拒绝：'+repr(error),[ref]);return 1
+ out=e.path/'outputs';rc=e.command([sys.executable,__file__,str(out),str(ROOT/b['library']),b['library_sha256']],'actual-default-changed-reused-concurrent-foreign-destroyed',timeout=180);r=dict(return_code=rc,outputs=str(out.relative_to(ROOT)),build=b,experiment_id=e.id);write(e.path/'run.json',r);r['evidence']=e.finish('EXECUTED' if not rc else 'RUNTIME_ERROR');write(ROOT/'migration/reports/image-contour-states.json',r);record('I2','Contour默认流/复用/改变输入/两并发实例/外设备与销毁流11实际case执行rc='+str(rc)+'；像素仅物理GPU1，GPU0仅建外设备流。',[r['evidence']]);print(rc,r['evidence']);return rc
+if __name__=='__main__':raise SystemExit(main())

@@ -24,8 +24,9 @@ def geometry_invariants(g,labels):
  area2=x1*y0-x0*y1;summed=np.zeros(k,np.int64);np.add.at(summed,c,area2);expected=2*np.bincount(labels.ravel(),minlength=k);area=bool(np.array_equal(summed,expected) and np.all(np.add.reduceat(area2,starts)!=0))
  return dict(check='closed-geometry-structural-invariants',passed=chain and ordinal and minimum and ownership and area,closed_chains=chain,ordered_loops=ordinal,unique_minimum_edge_ids=minimum,component_left_ownership=ownership,exact_signed_component_area=area)
 
-def validate(run):
- spec=json.loads((ROOT/'migration/rewrite/image-contour-profile.json').read_text());cases={c['case']:c for c in spec['cases'] if not run['small'] or c['width']*c['height']<=5000};out=ROOT/run['outputs'];rows=json.loads((out/'runs.json').read_text());results=[]
+def validate(run,expected_small=False):
+ if type(run.get('small')) is not bool or run['small'] is not expected_small:raise ValueError('independently fixed full/small obligation')
+ spec=json.loads((ROOT/'migration/rewrite/image-contour-profile.json').read_text());cases={c['case']:c for c in spec['cases'] if not expected_small or c['width']*c['height']<=5000};out=ROOT/run['outputs'];rows=json.loads((out/'runs.json').read_text());results=[]
  if run['return_code'] or len(rows)!=len(cases) or {r['case'] for r in rows}!=set(cases):raise ValueError('all unique complete successful geometry cases')
  for r in rows:
   c=cases[r['case']];w,h,pitch=c['width'],c['height'],c['pitch'];d=out/r['case'];source=bytes_file(ROOT/c['fixture']/'input.bin',h*pitch);image=np.frombuffer(source,np.uint8).reshape(h,pitch)[:,:w];expected=model(image);k,m,loops=map(int,expected['totals']);checks=[dict(check='actual-GPU-success-and-frozen-geometry',passed=r['return_code']==0 and [r['width'],r['height'],r['input_pitch']]==[w,h,pitch]),dict(check='actual-device-component-edge-loop-counts',passed=r['totals']==[k,m,loops])];n=w*h
@@ -50,7 +51,7 @@ def validate(run):
 
 def main():
  p=argparse.ArgumentParser();p.add_argument('--small',action='store_true');a=p.parse_args();name='small' if a.small else 'all';run=json.loads((ROOT/f'migration/reports/image-contour-{name}.json').read_text());e=Experiment('I2','Contour-full-geometry-'+name+'-CPU','CPU-reference',sources=[__file__,ROOT/'tools/moat/image_contour_model.py',ROOT/'tools/moat/image_ccl_reference.py',ROOT/'migration/rewrite/image-contour-profile.json'],parent=run['experiment_id'])
- try:results=validate(run);v=dict(status='PASSED' if all(r['status']=='PASSED' for r in results) else 'FAILED',case_count=len(results),results=results)
+ try:results=validate(run,a.small);v=dict(status='PASSED' if all(r['status']=='PASSED' for r in results) else 'FAILED',case_count=len(results),results=results)
  except Exception as error:v=dict(status='FAILED',results=[],error=repr(error))
  write(e.path/'results.json',v);v['evidence']=e.finish('PASSED' if v['status']=='PASSED' else 'NUMERIC_MISMATCH',dict(status=v['status'],checks=[dict(check='independent-complete-geometry-and-pixels',passed=v['status']=='PASSED')]));write(ROOT/f'migration/reports/image-contour-{name}-validation.json',v);record('I2','Contour '+name+'全部像素/逐edge循环顺序/marker计数与bbox/真实geometry重建独立CPU：'+v['status']+'；尚非完整原入口资格。',[v['evidence']]);print(v['status'],v.get('error'),[(r['case'],[c for c in r['checks'] if not c['passed']]) for r in v['results'] if r['status']=='FAILED'][:3]);return int(v['status']!='PASSED')
 if __name__=='__main__':raise SystemExit(main())

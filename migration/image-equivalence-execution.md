@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-11T15:12:09.057227+00:00。26入口当前7通过/7部分/12失败。
+更新时间：2026-11-11T15:53:56.008509+00:00。26入口当前7通过/7部分/12失败。
 
-I2：两个contour C++入口15个完整原始/构造/范围流程均实际rc0，共55个原始命名RAW输出；原图保持2048x1024，额外含单ID强制与多ID实际旁路。GPU22组另有独立结构不变量：闭环/连续顺序/最小edge ID/左侧归属/每组件有符号面积精确等于像素数，全部通过。原入口CPU全字段/实际stdout排序诊断校验正在收口，随后运行/CLI/trace负例。
+I2：Contour验收器固定47项真实输出/metadata/模式/默认路径/geometry/状态/原例stdout正反向检查：PASSED
 
-证据：`migration/reports/image-contour-all-validation.json`；`migration/reports/image-contour-originals.json`；`migration/reports/image-contour-originals-validation.json`
+证据：`migration/reports/evidence/rewrite/I2/Contour-actual-validator-mutations/20261111T155352.592443Z-I2-CPU-validator-test-a2cb4cbdcd`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

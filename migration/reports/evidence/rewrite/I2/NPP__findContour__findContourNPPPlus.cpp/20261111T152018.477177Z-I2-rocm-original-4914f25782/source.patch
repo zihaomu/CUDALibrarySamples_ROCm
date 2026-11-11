@@ -1,0 +1,213 @@
+diff --git a/rocm/common/image/contour.h b/rocm/common/image/contour.h
+index 8a5515046..b015a02b9 100644
+--- a/rocm/common/image/contour.h
++++ b/rocm/common/image/contour.h
+@@ -31,8 +31,12 @@ hipError_t rocm_image_contour_run(const rocm_image_contour_descriptor*image,hipS
+ // Rasterize supplied closed-cell geometry into the exact 0-boundary/255-other
+ // eight-neighbor mask. [start,stop) selects zero-based component IDs; regions
+ // with contour_pixels >= limit are bypassed unless stop-start<=1. A zero
+-// limit is legal (bypass all under a multi-ID range). Pixel flags require
+-// width*height uint32 values plus one uint32 validation flag. Synchronizes
++// limit is legal (bypass all under a multi-ID range). ABI2 validates the
++// complete unique edge set, canonical closed loops and all marker metadata
++// before writing output. Query scratch for the actual component count.
++hipError_t rocm_image_contour_reconstruct_workspace_size(int width,int height,
++ uint32_t components,uint64_t*bytes);
++// Synchronizes
+ // validation scalars; final pixel kernels remain queued on the caller stream.
+ hipError_t rocm_image_contour_reconstruct(const uint32_t*labels,uint64_t labels_pitch,
+  const rocm_image_contour_info*info,uint32_t components,
+diff --git a/rocm/common/image/contour.hip b/rocm/common/image/contour.hip
+index a67eaa293..a5d92756f 100644
+--- a/rocm/common/image/contour.hip
++++ b/rocm/common/image/contour.hip
+@@ -41,7 +41,7 @@ __global__ void geometry(const uint32_t*compact,const uint32_t*parents,const uin
+ #define R(call) do{hipError_t status=(call);if(status!=hipSuccess)return status;}while(0)
+ hipError_t read_flag(uint32_t*flag,uint32_t&host,hipStream_t stream){R(hipMemcpyAsync(&host,flag,4,hipMemcpyDeviceToHost,stream));return hipStreamSynchronize(stream);}
+ }
+-extern "C" uint32_t rocm_image_contour_abi_version(){return 1;}
++extern "C" uint32_t rocm_image_contour_abi_version(){return 2;}
+ extern "C" hipError_t rocm_image_contour_workspace_size(int w,int h,uint64_t*bytes){if(!bytes)return hipErrorInvalidValue;*bytes=0;if(!shape(w,h))return hipErrorInvalidValue;*bytes=4*work_words(w,h);return hipSuccess;}
+ extern "C" hipError_t rocm_image_contour_run(const rocm_image_contour_descriptor*p,hipStream_t stream){
+  if(!p)return hipErrorInvalidValue;const auto&d=*p;int w=d.width,h=d.height;if(!shape(w,h)||!d.input||!d.raw_labels||!d.labels||!d.mask||!d.info||!d.geometry||!d.totals||!d.workspace||d.input_pitch<uint64_t(w)||d.raw_pitch<4*uint64_t(w)||d.labels_pitch<4*uint64_t(w)||d.mask_pitch<uint64_t(w)||d.raw_pitch%4||d.labels_pitch%4||d.input_pitch>UINT64_MAX/uint64_t(h)||d.raw_pitch>UINT64_MAX/uint64_t(h)||d.labels_pitch>UINT64_MAX/uint64_t(h)||d.mask_pitch>UINT64_MAX/uint64_t(h))return hipErrorInvalidValue;
+@@ -58,16 +58,38 @@ extern "C" hipError_t rocm_image_contour_run(const rocm_image_contour_descriptor
+ namespace {
+ __device__ uint32_t label_at(const uint32_t*labels,uint64_t pitch,int x,int y){return reinterpret_cast<const uint32_t*>(reinterpret_cast<const uint8_t*>(labels)+uint64_t(y)*pitch)[x];}
+ __device__ int direction_of(const rocm_image_contour_edge&g){uint32_t x=g.pixel_x,y=g.pixel_y;if(g.x0==x+1&&g.y0==y&&g.x1==x&&g.y1==y)return 0;if(g.x0==x&&g.y0==y&&g.x1==x&&g.y1==y+1)return 1;if(g.x0==x&&g.y0==y+1&&g.x1==x+1&&g.y1==y+1)return 2;if(g.x0==x+1&&g.y0==y+1&&g.x1==x+1&&g.y1==y)return 3;return -1;}
+-__global__ void validate_render(const uint32_t*labels,uint64_t pitch,uint32_t k,const rocm_image_contour_edge*edges,uint32_t count,uint32_t*invalid,int w,int h){int i=blockIdx.x*threads+threadIdx.x;if(i<w*h&&label_at(labels,pitch,i%w,i/w)>=k)atomicExch(invalid,1u);if(i>=int(count))return;const auto g=edges[i];if(g.component>=k||g.pixel_x>=uint32_t(w)||g.pixel_y>=uint32_t(h)||g.x0>uint32_t(w)||g.x1>uint32_t(w)||g.y0>uint32_t(h)||g.y1>uint32_t(h)){atomicExch(invalid,1u);return;}int d=direction_of(g);if(d<0||label_at(labels,pitch,g.pixel_x,g.pixel_y)!=g.component){atomicExch(invalid,1u);return;}int nx=int(g.pixel_x)+(d==3)-(d==1),ny=int(g.pixel_y)+(d==2)-(d==0);if(nx>=0&&ny>=0&&nx<w&&ny<h&&label_at(labels,pitch,nx,ny)==g.component)atomicExch(invalid,1u);}
++__device__ bool pitched_edge_valid(const uint32_t*labels,uint64_t pitch,int w,int h,uint32_t e){int p=e/4,d=e%4,x=p%w,y=p/w,nx=x+(d==3)-(d==1),ny=y+(d==2)-(d==0);return nx<0||ny<0||nx>=w||ny>=h||label_at(labels,pitch,x,y)!=label_at(labels,pitch,nx,ny);}
++__global__ void validate_render(const uint32_t*labels,uint64_t pitch,uint32_t k,const rocm_image_contour_edge*edges,uint32_t count,uint32_t*seen,uint32_t*invalid,int w,int h){
++ int i=blockIdx.x*threads+threadIdx.x;if(i<w*h&&label_at(labels,pitch,i%w,i/w)>=k)atomicExch(invalid,1u);if(i>=int(count))return;const auto g=edges[i];if(g.component>=k||g.pixel_x>=uint32_t(w)||g.pixel_y>=uint32_t(h)||g.x0>uint32_t(w)||g.x1>uint32_t(w)||g.y0>uint32_t(h)||g.y1>uint32_t(h)||g.loop_id>=4u*uint32_t(w*h)||g.order>=count){atomicExch(invalid,1u);return;}int d=direction_of(g);if(d<0||label_at(labels,pitch,g.pixel_x,g.pixel_y)!=g.component){atomicExch(invalid,1u);return;}uint32_t e=4*(g.pixel_y*w+g.pixel_x)+d;if(!pitched_edge_valid(labels,pitch,w,h,e)||atomicCAS(seen+e,absent,uint32_t(i))!=absent)atomicExch(invalid,1u);
++}
++__global__ void init_render_info(rocm_image_contour_info*info,uint32_t k){int i=blockIdx.x*threads+threadIdx.x;if(i<int(k))info[i]={0,0,0,absent,absent,0,0};}
++__global__ void complete_render_info(const uint32_t*labels,uint64_t pitch,const uint32_t*seen,rocm_image_contour_info*info,uint32_t*invalid,int w,int h){
++ int p=blockIdx.x*threads+threadIdx.x;if(p>=w*h)return;int x=p%w,y=p/w;uint32_t c=label_at(labels,pitch,x,y);bool boundary=false;uint32_t edge_count=0;
++ for(int dy=-1;dy<=1;++dy)for(int dx=-1;dx<=1;++dx){int xx=x+dx,yy=y+dy;if(xx>=0&&yy>=0&&xx<w&&yy<h&&label_at(labels,pitch,xx,yy)!=c)boundary=true;}
++ for(int d=0;d<4;++d){uint32_t e=4*p+d;bool expected=pitched_edge_valid(labels,pitch,w,h,e);if((seen[e]!=absent)!=expected)atomicExch(invalid,1u);edge_count+=expected;}
++ if(boundary)atomicAdd(&info[c].contour_pixels,1u);atomicAdd(&info[c].edge_count,edge_count);atomicMin(&info[c].min_x,uint32_t(x));atomicMin(&info[c].min_y,uint32_t(y));atomicMax(&info[c].max_x,uint32_t(x));atomicMax(&info[c].max_y,uint32_t(y));
++}
++__global__ void validate_render_topology(const uint32_t*labels,uint64_t pitch,const rocm_image_contour_edge*edges,uint32_t count,const uint32_t*seen,rocm_image_contour_info*info,uint32_t*invalid,int w,int h){
++ int i=blockIdx.x*threads+threadIdx.x;if(i>=int(count))return;auto g=edges[i];uint32_t first=seen[g.loop_id];int d=direction_of(g);uint32_t e=4*(g.pixel_y*w+g.pixel_x)+d;
++ if(first==absent||first>uint32_t(i)||g.loop_id>e||g.order!=uint32_t(i)-first){atomicExch(invalid,1u);return;}auto origin=edges[first];if(origin.component!=g.component||origin.loop_id!=g.loop_id||origin.order!=0||(i>0&&edges[i-1].loop_id>g.loop_id)){atomicExch(invalid,1u);return;}
++ uint32_t next_index=(i+1<int(count)&&edges[i+1].loop_id==g.loop_id)?uint32_t(i+1):first;auto next=edges[next_index];if(next.component!=g.component||g.x1!=next.x0||g.y1!=next.y0){atomicExch(invalid,1u);return;}
++ int vx=g.x1,vy=g.y1;const int turns[]={1,0,3,2};uint32_t wanted=absent;
++ for(int turn=0;turn<4;++turn){int qd=(d+turns[turn])%4,qx=vx-(qd==0||qd==3),qy=vy-(qd==2||qd==3);if(qx<0||qy<0||qx>=w||qy>=h)continue;uint32_t q=4*(qy*w+qx)+qd;if(label_at(labels,pitch,qx,qy)==g.component&&pitched_edge_valid(labels,pitch,w,h,q)){wanted=q;break;}}
++ if(wanted==absent||seen[wanted]!=next_index){atomicExch(invalid,1u);return;}if(g.order==0)atomicAdd(&info[g.component].loop_count,1u);
++}
++__global__ void compare_render_info(const rocm_image_contour_info*actual,const rocm_image_contour_info*expected,uint32_t k,uint32_t*invalid){int i=blockIdx.x*threads+threadIdx.x;if(i>=int(k))return;auto a=actual[i],b=expected[i];if(b.min_x==absent||a.contour_pixels!=b.contour_pixels||a.edge_count!=b.edge_count||a.loop_count!=b.loop_count||a.min_x!=b.min_x||a.min_y!=b.min_y||a.max_x!=b.max_x||a.max_y!=b.max_y)atomicExch(invalid,1u);}
+ __global__ void rasterize_geometry_vertices(const uint32_t*labels,uint64_t pitch,const rocm_image_contour_info*info,const rocm_image_contour_edge*geometry,uint32_t count,uint32_t start,uint32_t stop,uint32_t limit,uint32_t*flags,int w,int h){
+  int i=blockIdx.x*threads+threadIdx.x;if(i>=int(count))return;auto g=geometry[i];uint32_t c=g.component;if(c<start||c>=stop||(stop-start>1&&info[c].contour_pixels>=limit))return;int d=direction_of(g),nx=int(g.pixel_x)+(d==3)-(d==1),ny=int(g.pixel_y)+(d==2)-(d==0);if(nx<0||ny<0||nx>=w||ny>=h)return;
+  for(int endpoint=0;endpoint<2;++endpoint){int vx=endpoint?g.x1:g.x0,vy=endpoint?g.y1:g.y0;for(int dy=-1;dy<=0;++dy)for(int dx=-1;dx<=0;++dx){int x=vx+dx,y=vy+dy;if(x>=0&&y>=0&&x<w&&y<h&&label_at(labels,pitch,x,y)==c)atomicExch(flags+y*w+x,1u);}}
+ }
+ __global__ void output_reconstruction(const uint32_t*flags,uint8_t*output,uint64_t pitch,int w,int n){int i=blockIdx.x*threads+threadIdx.x;if(i<n)output[uint64_t(i/w)*pitch+i%w]=flags[i]?0:255;}
+ }
++extern "C" hipError_t rocm_image_contour_reconstruct_workspace_size(int w,int h,uint32_t k,uint64_t*bytes){if(!bytes)return hipErrorInvalidValue;*bytes=0;if(!shape(w,h)||k==0||k>uint64_t(w)*h)return hipErrorInvalidValue;*bytes=4*(5*uint64_t(w)*h+7*uint64_t(k)+1);return hipSuccess;}
+ extern "C" hipError_t rocm_image_contour_reconstruct(const uint32_t*labels,uint64_t lp,const rocm_image_contour_info*info,uint32_t k,const rocm_image_contour_edge*edges,uint32_t count,uint32_t start,uint32_t stop,uint32_t limit,uint8_t*output,uint64_t op,void*workspace,uint64_t wb,int w,int h,hipStream_t stream){
+- if(!shape(w,h)||!labels||!info||(!edges&&count)||!output||!workspace||k==0||k>uint64_t(w)*h||count>4*uint64_t(w)*h||start>stop||stop>k||lp<uint64_t(w)*4||lp%4||op<uint64_t(w)||lp>UINT64_MAX/uint64_t(h)||op>UINT64_MAX/uint64_t(h)||reinterpret_cast<uintptr_t>(labels)%4||reinterpret_cast<uintptr_t>(info)%4||reinterpret_cast<uintptr_t>(edges)%4||reinterpret_cast<uintptr_t>(workspace)%4||wb<4*(uint64_t(w)*h+1))return hipErrorInvalidValue;
+- try{int device=-1;R(stream_device(stream,device));uint64_t n=uint64_t(w)*h;std::vector<Range>ranges{{labels,uint64_t(h-1)*lp+uint64_t(w)*4},{info,uint64_t(k)*sizeof(rocm_image_contour_info)},{output,uint64_t(h-1)*op+w},{workspace,4*(n+1)}};if(count)ranges.push_back({edges,uint64_t(count)*sizeof(rocm_image_contour_edge)});R(ranges_ok(ranges,device));auto*flags=static_cast<uint32_t*>(workspace);auto*invalid=flags+n;R(hipMemsetAsync(flags,0,4*(n+1),stream));validate_render<<<(std::max(n,uint64_t(count))+255)/256,threads,0,stream>>>(labels,lp,k,edges,count,invalid,w,h);R(hipGetLastError());uint32_t bad=0;R(read_flag(invalid,bad,stream));if(bad)return hipErrorInvalidValue;
+- if(count){rasterize_geometry_vertices<<<(count+255)/256,threads,0,stream>>>(labels,lp,info,edges,count,start,stop,limit,flags,w,h);R(hipGetLastError());}output_reconstruction<<<(n+255)/256,threads,0,stream>>>(flags,output,op,w,n);return hipGetLastError();
++ uint64_t needed=0;if(rocm_image_contour_reconstruct_workspace_size(w,h,k,&needed)!=hipSuccess||!labels||!info||!edges||!output||!workspace||count<4||count>4*uint64_t(w)*h||start>stop||stop>k||lp<uint64_t(w)*4||lp%4||op<uint64_t(w)||lp>UINT64_MAX/uint64_t(h)||op>UINT64_MAX/uint64_t(h)||reinterpret_cast<uintptr_t>(labels)%4||reinterpret_cast<uintptr_t>(info)%4||reinterpret_cast<uintptr_t>(edges)%4||reinterpret_cast<uintptr_t>(workspace)%4||wb<needed)return hipErrorInvalidValue;
++ try{int device=-1;R(stream_device(stream,device));uint64_t n=uint64_t(w)*h;R(ranges_ok({{labels,uint64_t(h-1)*lp+uint64_t(w)*4},{info,uint64_t(k)*sizeof(rocm_image_contour_info)},{edges,uint64_t(count)*sizeof(rocm_image_contour_edge)},{output,uint64_t(h-1)*op+w},{workspace,needed}},device));auto*flags=static_cast<uint32_t*>(workspace);auto*seen=flags+n;auto*expected=reinterpret_cast<rocm_image_contour_info*>(seen+4*n);auto*invalid=reinterpret_cast<uint32_t*>(expected+k);R(hipMemsetAsync(flags,0,n*4,stream));R(hipMemsetAsync(seen,255,4*n*4,stream));R(hipMemsetAsync(invalid,0,4,stream));
++ validate_render<<<(std::max(n,uint64_t(count))+255)/256,threads,0,stream>>>(labels,lp,k,edges,count,seen,invalid,w,h);R(hipGetLastError());uint32_t bad=0;R(read_flag(invalid,bad,stream));if(bad)return hipErrorInvalidValue;
++ init_render_info<<<(k+255)/256,threads,0,stream>>>(expected,k);R(hipGetLastError());complete_render_info<<<(n+255)/256,threads,0,stream>>>(labels,lp,seen,expected,invalid,w,h);R(hipGetLastError());validate_render_topology<<<(count+255)/256,threads,0,stream>>>(labels,lp,edges,count,seen,expected,invalid,w,h);R(hipGetLastError());compare_render_info<<<(k+255)/256,threads,0,stream>>>(info,expected,k,invalid);R(hipGetLastError());R(read_flag(invalid,bad,stream));if(bad)return hipErrorInvalidValue;
++ rasterize_geometry_vertices<<<(count+255)/256,threads,0,stream>>>(labels,lp,info,edges,count,start,stop,limit,flags,w,h);R(hipGetLastError());output_reconstruction<<<(n+255)/256,threads,0,stream>>>(flags,output,op,w,n);return hipGetLastError();
+  }catch(...){return hipErrorOutOfMemory;}
+ }
+diff --git a/rocm/common/image/contour_sample.hpp b/rocm/common/image/contour_sample.hpp
+index 3212703dd..d138fad0a 100644
+--- a/rocm/common/image/contour_sample.hpp
++++ b/rocm/common/image/contour_sample.hpp
+@@ -12,7 +12,8 @@
+ namespace rocm_image_contour_sample {
+ inline void check(hipError_t s){if(s!=hipSuccess)throw std::runtime_error(hipGetErrorString(s));}
+ inline uint64_t workspace(int w,int h){uint64_t n=0;check(rocm_image_contour_workspace_size(w,h,&n));return n;}
+-inline size_t pixels(int w,int h){workspace(w,h);return size_t(w)*h;}
++inline size_t pixels(int w,int h){uint64_t bytes=0;if(rocm_image_contour_workspace_size(w,h,&bytes)!=hipSuccess)throw std::runtime_error("invalid image dimensions");return size_t(w)*h;}
++inline uint64_t render_workspace(int w,int h,uint32_t k){uint64_t bytes=0;check(rocm_image_contour_reconstruct_workspace_size(w,h,k,&bytes));return bytes;}
+ inline std::vector<uint8_t> read(const std::string&path,size_t bytes){std::ifstream f(path,std::ios::binary);if(!f)throw std::runtime_error("missing input: "+path);std::vector<uint8_t>out(bytes);f.read(reinterpret_cast<char*>(out.data()),bytes);if(f.gcount()!=long(bytes)||f.peek()!=EOF)throw std::runtime_error("invalid raw input length: "+path);return out;}
+ inline void write(const std::string&path,const void*data,size_t bytes){std::ofstream f(path,std::ios::binary|std::ios::trunc);if(!f)throw std::runtime_error("cannot create output: "+path);f.write(static_cast<const char*>(data),bytes);f.close();if(!f)throw std::runtime_error("cannot write output: "+path);}
+ struct Device {void*p=nullptr;explicit Device(size_t n){check(hipMalloc(&p,n));}~Device(){if(p)hipFree(p);}Device(const Device&)=delete;Device&operator=(const Device&)=delete;};
+@@ -23,12 +24,12 @@ public:
+  Device d_input,d_raw,d_labels,d_mask,d_info,d_geometry,d_totals,d_workspace,d_reconstruction,d_flags;
+  // Destruction synchronizes the stream before every device and host buffer.
+  Stream stream;
+- Image(int width,int height,const std::string&file):w(width),h(height),n(pixels(w,h)),input(read(file,n)),mask(n),reconstruction(n),raw(n),labels(n),d_input(n),d_raw(4*n),d_labels(4*n),d_mask(n),d_info(n*sizeof(rocm_image_contour_info)),d_geometry(4*n*sizeof(rocm_image_contour_edge)),d_totals(12),d_workspace(workspace(w,h)),d_reconstruction(n),d_flags(4*(n+1)){}
++ Image(int width,int height,const std::string&file):w(width),h(height),n(pixels(w,h)),input(read(file,n)),mask(n),reconstruction(n),raw(n),labels(n),d_input(n),d_raw(4*n),d_labels(4*n),d_mask(n),d_info(n*sizeof(rocm_image_contour_info)),d_geometry(4*n*sizeof(rocm_image_contour_edge)),d_totals(12),d_workspace(workspace(w,h)),d_reconstruction(n),d_flags(render_workspace(w,h,uint32_t(n))){}
+  Image(const Image&)=delete;Image&operator=(const Image&)=delete;
+  void process(){
+   check(hipMemcpyAsync(d_input.p,input.data(),n,hipMemcpyHostToDevice,stream.s));rocm_image_contour_descriptor d{static_cast<const uint8_t*>(d_input.p),uint64_t(w),static_cast<uint32_t*>(d_raw.p),uint64_t(w)*4,static_cast<uint32_t*>(d_labels.p),uint64_t(w)*4,static_cast<uint8_t*>(d_mask.p),uint64_t(w),static_cast<rocm_image_contour_info*>(d_info.p),n,static_cast<rocm_image_contour_edge*>(d_geometry.p),4*n,static_cast<uint32_t*>(d_totals.p),d_workspace.p,workspace(w,h),w,h};check(rocm_image_contour_run(&d,stream.s));check(hipMemcpyAsync(totals,d_totals.p,12,hipMemcpyDeviceToHost,stream.s));check(hipStreamSynchronize(stream.s));if(!totals[0]||totals[0]>n||totals[1]>4*n||totals[2]>totals[1])throw std::runtime_error("invalid GPU contour totals");info.resize(totals[0]);geometry.resize(totals[1]);check(hipMemcpyAsync(raw.data(),d_raw.p,n*4,hipMemcpyDeviceToHost,stream.s));check(hipMemcpyAsync(labels.data(),d_labels.p,n*4,hipMemcpyDeviceToHost,stream.s));check(hipMemcpyAsync(mask.data(),d_mask.p,n,hipMemcpyDeviceToHost,stream.s));check(hipMemcpyAsync(info.data(),d_info.p,info.size()*sizeof(info[0]),hipMemcpyDeviceToHost,stream.s));check(hipMemcpyAsync(geometry.data(),d_geometry.p,geometry.size()*sizeof(geometry[0]),hipMemcpyDeviceToHost,stream.s));check(hipStreamSynchronize(stream.s));
+  }
+- void reconstruct(uint32_t start,uint32_t stop,uint32_t limit){if(start>stop||stop>totals[0])throw std::runtime_error("marker range must satisfy 0 <= start <= stop <= component count");check(rocm_image_contour_reconstruct(static_cast<const uint32_t*>(d_labels.p),uint64_t(w)*4,static_cast<const rocm_image_contour_info*>(d_info.p),totals[0],static_cast<const rocm_image_contour_edge*>(d_geometry.p),totals[1],start,stop,limit,static_cast<uint8_t*>(d_reconstruction.p),w,d_flags.p,4*(n+1),w,h,stream.s));check(hipMemcpyAsync(reconstruction.data(),d_reconstruction.p,n,hipMemcpyDeviceToHost,stream.s));check(hipStreamSynchronize(stream.s));}
++ void reconstruct(uint32_t start,uint32_t stop,uint32_t limit){if(start>stop||stop>totals[0])throw std::runtime_error("marker range must satisfy 0 <= start <= stop <= component count");check(rocm_image_contour_reconstruct(static_cast<const uint32_t*>(d_labels.p),uint64_t(w)*4,static_cast<const rocm_image_contour_info*>(d_info.p),totals[0],static_cast<const rocm_image_contour_edge*>(d_geometry.p),totals[1],start,stop,limit,static_cast<uint8_t*>(d_reconstruction.p),w,d_flags.p,render_workspace(w,h,totals[0]),w,h,stream.s));check(hipMemcpyAsync(reconstruction.data(),d_reconstruction.p,n,hipMemcpyDeviceToHost,stream.s));check(hipStreamSynchronize(stream.s));}
+  void save(const std::string&directory,bool plus){std::string shape=std::to_string(w)+"x"+std::to_string(h);write(directory+"/CircuitBoard_LabelMarkersUF_8Way_"+shape+"_32u.raw",raw.data(),n*4);write(directory+"/CircuitBoard_CompressedMarkerLabelsUF_8Way_"+shape+"_32u.raw",labels.data(),n*4);write(directory+"/CircuitBoard_Contours_8Way_"+shape+"_8u.raw",mask.data(),n);if(plus)write(directory+"/CircuitBoard_ContoursReconstructed_8Way_"+shape+"_8u.raw",reconstruction.data(),n);}
+  void diagnostics(uint32_t start,uint32_t stop,uint32_t limit){
+   for(uint32_t c=start;c<stop;++c){const auto&i=info[c];std::cout<<"nID "<<c<<" Cnt "<<i.contour_pixels<<" Edges "<<i.edge_count<<" Loops "<<i.loop_count<<" BB "<<i.min_x<<" "<<i.min_y<<" "<<i.max_x<<" "<<i.max_y<<"\n";if(stop-start>1&&i.contour_pixels>=limit)std::cout<<"nID "<<c<<" geometry diagnostics bypassed at "<<limit<<" contour pixels\n";}
+@@ -37,7 +38,7 @@ public:
+  }
+  void audit(const std::string&directory,bool plus,uint32_t start,uint32_t stop,uint32_t limit){std::filesystem::create_directories(directory);write(directory+"/input.bin",input.data(),n);write(directory+"/info.bin",info.data(),info.size()*sizeof(info[0]));write(directory+"/geometry.bin",geometry.data(),geometry.size()*sizeof(geometry[0]));write(directory+"/totals.bin",totals,12);std::ofstream f(directory+"/workflow.json");f<<"{\"width\":"<<w<<",\"height\":"<<h<<",\"plus\":"<<(plus?"true":"false")<<",\"start\":"<<start<<",\"stop\":"<<stop<<",\"limit\":"<<limit<<",\"components\":"<<totals[0]<<",\"edges\":"<<totals[1]<<",\"loops\":"<<totals[2]<<"}\n";f.close();if(!f)throw std::runtime_error("cannot write audit metadata");}
+ };
+-inline int integer(const std::string&s){size_t used=0;int n=std::stoi(s,&used);if(used!=s.size())throw std::runtime_error("invalid integer: "+s);return n;}
++inline int integer(const std::string&s){try{size_t used=0;int n=std::stoi(s,&used);if(used==s.size())return n;}catch(const std::exception&){}throw std::runtime_error("invalid integer: "+s);}
+ inline int application(int argc,char**argv,bool plus){try{
+  int w=2048,h=1024,start=1,stop=-1;uint32_t limit=262144;std::string input="images/CircuitBoard_2048x1024_8u.raw",output="images";bool explicit_stop=false;
+  for(int i=1;i<argc;++i){std::string arg=argv[i];if(arg=="-h"||arg=="--help"){std::cout<<"Usage: "<<argv[0]<<" [--input RAW] [--output-dir DIR] [--width W --height H]"<<(plus?" [--start-id ID --stop-id ID --limit N]":"")<<"\n";return 0;}
+diff --git a/tools/moat/image_contour_build.py b/tools/moat/image_contour_build.py
+index b7962167b..222707793 100644
+--- a/tools/moat/image_contour_build.py
++++ b/tools/moat/image_contour_build.py
+@@ -1,6 +1,6 @@
+ #!/usr/bin/env python3
+ """Build the first full GPU contour graph/order/rasterization backend."""
+-import json
++import ctypes,json
+ from pathlib import Path
+ from experiment import ROOT,Experiment,write,digest
+ from snapshot import capture
+@@ -14,5 +14,8 @@ def main():
+   if rc:break
+  lib=e.path/'libimage_contour.so'
+  if not rc:rc=e.command(flags+['-shared',*map(str,objects),'-L'+str(core/'lib'),'-Wl,-rpath,'+str(core/'lib'),'-lamdhip64','-o',str(lib)],'link-full-GPU-contour-library',timeout=300)
+- r=dict(status='BUILT' if not rc else 'BUILD_ERROR',experiment_id=e.id,library=str(lib.relative_to(ROOT)),library_sha256=digest(lib) if not rc else None,dependencies={str(p.relative_to(ROOT)):digest(p) for p in dependencies()},build_recipe_sha256=digest(__file__));write(e.path/'build.json',r);r['evidence']=e.finish('EXECUTED' if not rc else 'BUILD_ERROR');write(ROOT/'migration/reports/image-contour-build.json',r);record('I2','HIP contour标签/边图/循环并查集/指针跳跃排序/前缀压缩/geometry顶点重建共享库构建：'+r['status']+'；尚待GPU数值与完整入口验收。',[r['evidence']]);print(r['status'],r['evidence']);return rc
++ abi=None
++ if not rc:
++  library=ctypes.CDLL(str(lib));library.rocm_image_contour_abi_version.restype=ctypes.c_uint32;abi=library.rocm_image_contour_abi_version();rc=0 if abi==2 else 1
++ r=dict(status='BUILT' if not rc else 'BUILD_ERROR',experiment_id=e.id,abi_version=abi,library=str(lib.relative_to(ROOT)),library_sha256=digest(lib) if not rc else None,dependencies={str(p.relative_to(ROOT)):digest(p) for p in dependencies()},build_recipe_sha256=digest(__file__));write(e.path/'build.json',r);r['evidence']=e.finish('EXECUTED' if not rc else 'BUILD_ERROR');write(ROOT/'migration/reports/image-contour-build.json',r);record('I2','HIP contour标签/边图/循环并查集/指针跳跃排序/前缀压缩/geometry顶点重建共享库构建：'+r['status']+'；尚待GPU数值与完整入口验收。',[r['evidence']]);print(r['status'],r['evidence']);return rc
+ if __name__=='__main__':raise SystemExit(main())
+diff --git a/tools/moat/image_contour_contracts.py b/tools/moat/image_contour_contracts.py
+index efba75837..a56bdc112 100644
+--- a/tools/moat/image_contour_contracts.py
++++ b/tools/moat/image_contour_contracts.py
+@@ -29,6 +29,6 @@ def main():
+  # at least three IDs, covering multi-ID bypass and a one-ID override.
+  yy,xx=np.indices((513,1025));a=((xx+yy)%2).astype(np.uint8);add('large-single-selected-ID-override',a);yy,xx=np.indices((515,1027));b=((xx+yy)%2).astype(np.uint8);b[0,:]=2;b[-1,:]=2;b[:,0]=2;b[:,-1]=2;add('large-multiple-ID-bypass',b)
+  profile=dict(schema_version=1,sample_ids=['NPP/findContour::findContour.cpp','NPP+/findContour::findContourNPPPlus.cpp'],comparison_mode='EXACT_PROJECT_GEOMETRY_WITH_NATIVE_PARTITION_FAILURES_SEPARATE',sources={str(p.relative_to(ROOT)):digest(p) for p in sources[1:]},cases=cases,labeling='All byte values including zero form maximal eight-connected components; raw IDs minimum row-major pixel index+1; compact IDs zero-based root order.',mask='0 for pixels with any in-ROI eight-neighbor of a different component; 255 otherwise. ROI exterior is ignored for the pixel mask, as observed in native output.',geometry=dict(representation='Oriented edges of unit pixel cells. Include every side whose neighbor is another component or ROI exterior; geometry closes at ROI borders. Geometry output is project ABI, not an NPP packed-struct binary ABI.',component='zero-based compact ID',edge_id='4*(pixel_y*width+pixel_x)+direction',directions=['top: (x+1,y)->(x,y)','left: (x,y)->(x,y+1)','bottom: (x,y+1)->(x+1,y+1)','right: (x+1,y+1)->(x+1,y)'],next='At the end vertex, choose a same-component outgoing edge by left turn, straight, right turn, reverse. This separates point-touching loops while retaining the shared eight-connected component.',loop_id='minimum edge ID in the closed loop',order='start at loop_id and follow next; loops sorted by loop_id',orientation='component on left in Cartesian coordinates after mapping image y to -y; outer CCW and holes CW',record=['component','loop_id','order','x0','y0','x1','y1','pixel_x','pixel_y'],reconstruction='Rasterize actual geometry edges: for each internal edge with an in-ROI foreign neighbor, mark same-component cells incident to either endpoint; cast flags to 0/255. This reconstructs the exact eight-neighbor pixel contour, including diagonal corner pixels. ROI-exterior closure edges do not create pixel boundaries by themselves.'),marker_info=['unique_contour_pixel_count','oriented_edge_count','loop_count','min_pixel_x','min_pixel_y','max_pixel_x','max_pixel_y'],originals=dict(default_size=[2048,1024],NPP_outputs=['LabelMarkersUF','CompressedMarkerLabelsUF','Contours'],NPP_plus_outputs=['LabelMarkersUF','CompressedMarkerLabelsUF','Contours','ContoursReconstructed'],NPP_declared_but_unused='OUTPUT_GEOMETRY is never written',NPP_plus_disabled='Direction-image and alternate CPU geometry calls are #if0',geometry_selection=dict(start_id=1,stop_id='component_count',range='half-open; empty ranges are valid',bypass_unique_contour_pixels=262144,single_selected_ID_overrides_bypass=True),NPP_plus_diagnostics='For each selected region, report counts and bbox, ordered closed-loop geometry/pixel owners; suppress huge per-pixel diagnostics under original multi-ID bypass. Project edge-loop representation/order can differ from proprietary pixel geometry.',production='Labeling, boundary pixels, edge graph, loop construction/order, counts/offsets/bbox and reconstruction execute on GPU. CPU reads scalar convergence/counts, handles files/printing/allocation/CLI only.'),required_cases=['all-original-pixels-files-and-geometry','correct-components-even-if-native-splits','constant-and-empty-contour','holes-nested-and-multiple-loops','diagonal-touch-and-frame-closure','single-row-column-pitched-and-padding','repeat-changed-input-streams-concurrent-instances','all-actual-range-and-large-contour-bypass-branches','ABI-size-span-alignment-device-overlap-errors','default-missing-bad-input-output-errors-no-device','raw-GPU-trace-including-geometry-rasterization','independent-CPU-geometry-and-mask-oracles','validator-missing-wrong-loop-order-bbox-count-range-negative','clean-checkout-independent-review-first-Git-publication'])
+- profile['C_ABI']=dict(version=1,dimensions='1..32768 each, pixels<=2^26',workspace='queried bytes, four-byte aligned device storage',info='28-byte seven-u32 records; capacity>=pixels, write only actual component prefix',geometry='36-byte nine-u32 records; capacity>=4*pixels, write only actual edge prefix',totals='three device u32 values: components,edges,loops',reconstruct='separate geometry-input rasterizer; flags workspace 4*(pixels+1); fixed half-open range and unique-contour-pixel bypass rule; malformed device geometry validates before output writes')
++ profile['C_ABI']=dict(version=2,dimensions='1..32768 each, pixels<=2^26',workspace='queried bytes, four-byte aligned device storage',info='28-byte seven-u32 records; capacity>=pixels, write only actual component prefix',geometry='36-byte nine-u32 records; capacity>=4*pixels, write only actual edge prefix',totals='three device u32 values: components,edges,loops',reconstruct='ABI2 requires complete unique canonical closed-cell geometry and matching marker info; query workspace 4*(5*pixels+7*components+1); validate all edges, loop roots/order/left-turn closure and all counts/bbox before any output writes; fixed half-open range and unique-contour-pixel bypass rule')
+  write(ROOT/'migration/rewrite/image-contour-profile.json',profile);write(e.path/'profile.json',profile);ref=e.finish('OBSERVED');write(ROOT/'migration/reports/image-contour-contracts.json',dict(status='FROZEN',case_count=len(cases),evidence=ref));record('I2',f'冻结两contour完整入口及{len(cases)}输入：0边界/255非边界、正确8连通分区、闭合像素单元有向边geometry与从geometry精确重建8邻域mask；包含单ID强制和多ID的262144真实阈值分支，原始输出3/4文件、有序几何/计数/bbox/范围均保留。',[ref]);print(len(cases),ref)
+ if __name__=='__main__':main()
+diff --git a/tools/moat/image_contour_original_reference.py b/tools/moat/image_contour_original_reference.py
+index c23b8ed85..61684f3ff 100644
+--- a/tools/moat/image_contour_original_reference.py
++++ b/tools/moat/image_contour_original_reference.py
+@@ -10,11 +10,12 @@ from image_progress import record
+ 
+ def validate_one(r,rule,raw_override=None):
+  if (r['family'],r['case'],r['mode'],r['fixture_case'])!=(rule['family'],rule['case'],rule['mode'],rule['source_case']) or r['return_code']!=0:raise ValueError('fixed actual original case/status')
+- profile=json.loads((ROOT/'migration/rewrite/image-contour-profile.json').read_text());case=next(c for c in profile['cases'] if c['case']==rule['source_case']);w,h=case['width'],case['height'];source=np.fromfile(ROOT/case['fixture']/'input.bin',np.uint8).reshape(h,case['pitch'])[:,:w].copy();expected=model(source);k,m,loops=map(int,expected['totals']);start=rule['start'];stop=k if rule['stop']=='component_count' else rule['stop'];limit=rule['limit'];out=ROOT/r['outputs'];audit=ROOT/r['audit'];meta=json.loads((ROOT/r['evidence']/'manifest.json').read_text());raw=Path(raw_override) if raw_override is not None else ROOT/meta['raw_artifact_dir'];checks=[dict(check='exact-original-input-bytes-and-receipt',passed=bytes_file(ROOT/r['input'],w*h,r['input_sha256'])==source.tobytes()),dict(check='actual-original-process-zero',passed=r['return_code']==0)];shape=f'{w}x{h}';files={}
++ profile=json.loads((ROOT/'migration/rewrite/image-contour-profile.json').read_text());case=next(c for c in profile['cases'] if c['case']==rule['source_case']);w,h=case['width'],case['height'];source=np.fromfile(ROOT/case['fixture']/'input.bin',np.uint8).reshape(h,case['pitch'])[:,:w].copy();expected=model(source);k,m,loops=map(int,expected['totals']);start=rule['start'];stop=k if rule['stop']=='component_count' else rule['stop'];limit=rule['limit'];out=ROOT/r['outputs'];audit=ROOT/r['audit'];meta=json.loads((ROOT/r['evidence']/'manifest.json').read_text());raw=Path(raw_override) if raw_override is not None else ROOT/meta['raw_artifact_dir'];checks=[dict(check='exact-original-input-bytes-and-receipt',passed=bytes_file(ROOT/r['input'],w*h,r['input_sha256'])==source.tobytes()),dict(check='actual-original-process-zero',passed=r['return_code']==0)];commands=json.loads((raw/'commands.json').read_text());command=commands[-1];argv=command['argv'];actual_input=Path(command['cwd'])/'images/CircuitBoard_2048x1024_8u.raw' if rule['default_paths'] else Path(argv[argv.index('--input')+1]);actual_output=Path(command['cwd'])/'images' if rule['default_paths'] else Path(argv[argv.index('--output-dir')+1]);checks.append(dict(check='actual-C++-command-input-output-and-audit-binding',passed=command['return_code']==0 and argv[0]==str(ROOT/r['binary']['binary']) and (not rule['default_paths'] or len(argv)==1) and (ROOT/r['input']).resolve()==actual_input.resolve() and out.resolve()==actual_output.resolve() and command['environment_changes']['MIGRATION_IMAGE_CONTOUR_AUDIT_DIR']==str(audit)));shape=f'{w}x{h}';files={}
+  for name,value,kind in [('LabelMarkersUF',expected['raw'],'32u'),('CompressedMarkerLabelsUF',expected['labels'],'32u'),('Contours',expected['mask'],'8u')]:files[f'CircuitBoard_{name}_8Way_{shape}_{kind}.raw']=value
+  if rule['plus']:files[f'CircuitBoard_ContoursReconstructed_8Way_{shape}_8u.raw']=reconstruct(expected['geometry'],expected['labels'],expected['info'],start,stop,limit)
+  allowed=set(files)
+- if rule['default_paths']:allowed.add('CircuitBoard_2048x1024_8u.raw')
++ if rule['default_paths']:
++  allowed.add('CircuitBoard_2048x1024_8u.raw');actual_default=out/'CircuitBoard_2048x1024_8u.raw';checks.append(dict(check='actual-default-input-path-and-frozen-bytes',passed=(ROOT/r['input']).resolve()==actual_default.resolve() and bytes_file(actual_default,w*h,case['original']['sha256'])==source.tobytes()))
+  checks.append(dict(check='exact-three-or-four-original-files',passed={p.name for p in out.iterdir()}==allowed))
+  for name,expect in files.items():a=np.frombuffer(bytes_file(out/name,expect.nbytes),expect.dtype).reshape(expect.shape);checks.append(check_array(name+'/complete-original-pixels',a,expect))
+  if {p.name for p in audit.iterdir()}!={'input.bin','info.bin','geometry.bin','totals.bin','workflow.json'}:raise ValueError('complete original audit sidecars')
+diff --git a/tools/moat/image_contour_reference.py b/tools/moat/image_contour_reference.py
+index a6b84ffb8..ebb44b27a 100644
+--- a/tools/moat/image_contour_reference.py
++++ b/tools/moat/image_contour_reference.py
+@@ -24,8 +24,9 @@ def geometry_invariants(g,labels):
+  area2=x1*y0-x0*y1;summed=np.zeros(k,np.int64);np.add.at(summed,c,area2);expected=2*np.bincount(labels.ravel(),minlength=k);area=bool(np.array_equal(summed,expected) and np.all(np.add.reduceat(area2,starts)!=0))
+  return dict(check='closed-geometry-structural-invariants',passed=chain and ordinal and minimum and ownership and area,closed_chains=chain,ordered_loops=ordinal,unique_minimum_edge_ids=minimum,component_left_ownership=ownership,exact_signed_component_area=area)
+ 
+-def validate(run):
+- spec=json.loads((ROOT/'migration/rewrite/image-contour-profile.json').read_text());cases={c['case']:c for c in spec['cases'] if not run['small'] or c['width']*c['height']<=5000};out=ROOT/run['outputs'];rows=json.loads((out/'runs.json').read_text());results=[]
++def validate(run,expected_small=False):
++ if type(run.get('small')) is not bool or run['small'] is not expected_small:raise ValueError('independently fixed full/small obligation')
++ spec=json.loads((ROOT/'migration/rewrite/image-contour-profile.json').read_text());cases={c['case']:c for c in spec['cases'] if not expected_small or c['width']*c['height']<=5000};out=ROOT/run['outputs'];rows=json.loads((out/'runs.json').read_text());results=[]
+  if run['return_code'] or len(rows)!=len(cases) or {r['case'] for r in rows}!=set(cases):raise ValueError('all unique complete successful geometry cases')
+  for r in rows:
+   c=cases[r['case']];w,h,pitch=c['width'],c['height'],c['pitch'];d=out/r['case'];source=bytes_file(ROOT/c['fixture']/'input.bin',h*pitch);image=np.frombuffer(source,np.uint8).reshape(h,pitch)[:,:w];expected=model(image);k,m,loops=map(int,expected['totals']);checks=[dict(check='actual-GPU-success-and-frozen-geometry',passed=r['return_code']==0 and [r['width'],r['height'],r['input_pitch']]==[w,h,pitch]),dict(check='actual-device-component-edge-loop-counts',passed=r['totals']==[k,m,loops])];n=w*h
+@@ -50,7 +51,7 @@ def validate(run):
+ 
+ def main():
+  p=argparse.ArgumentParser();p.add_argument('--small',action='store_true');a=p.parse_args();name='small' if a.small else 'all';run=json.loads((ROOT/f'migration/reports/image-contour-{name}.json').read_text());e=Experiment('I2','Contour-full-geometry-'+name+'-CPU','CPU-reference',sources=[__file__,ROOT/'tools/moat/image_contour_model.py',ROOT/'tools/moat/image_ccl_reference.py',ROOT/'migration/rewrite/image-contour-profile.json'],parent=run['experiment_id'])
+- try:results=validate(run);v=dict(status='PASSED' if all(r['status']=='PASSED' for r in results) else 'FAILED',case_count=len(results),results=results)
++ try:results=validate(run,a.small);v=dict(status='PASSED' if all(r['status']=='PASSED' for r in results) else 'FAILED',case_count=len(results),results=results)
+  except Exception as error:v=dict(status='FAILED',results=[],error=repr(error))
+  write(e.path/'results.json',v);v['evidence']=e.finish('PASSED' if v['status']=='PASSED' else 'NUMERIC_MISMATCH',dict(status=v['status'],checks=[dict(check='independent-complete-geometry-and-pixels',passed=v['status']=='PASSED')]));write(ROOT/f'migration/reports/image-contour-{name}-validation.json',v);record('I2','Contour '+name+'全部像素/逐edge循环顺序/marker计数与bbox/真实geometry重建独立CPU：'+v['status']+'；尚非完整原入口资格。',[v['evidence']]);print(v['status'],v.get('error'),[(r['case'],[c for c in r['checks'] if not c['passed']]) for r in v['results'] if r['status']=='FAILED'][:3]);return int(v['status']!='PASSED')
+ if __name__=='__main__':raise SystemExit(main())
+diff --git a/tools/moat/image_contour_worker.py b/tools/moat/image_contour_worker.py
+index 89ce43cec..d74c57a24 100644
+--- a/tools/moat/image_contour_worker.py
++++ b/tools/moat/image_contour_worker.py
+@@ -9,7 +9,7 @@ class Descriptor(C.Structure):
+  _fields_=[('input',C.c_void_p),('input_pitch',C.c_uint64),('raw_labels',C.c_void_p),('raw_pitch',C.c_uint64),('labels',C.c_void_p),('labels_pitch',C.c_uint64),('mask',C.c_void_p),('mask_pitch',C.c_uint64),('info',C.c_void_p),('info_capacity',C.c_uint64),('geometry',C.c_void_p),('geometry_capacity',C.c_uint64),('totals',C.c_void_p),('workspace',C.c_void_p),('workspace_bytes',C.c_uint64),('width',C.c_int),('height',C.c_int)]
+ def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+ def main():
+- p=argparse.ArgumentParser();p.add_argument('--library',required=True);p.add_argument('--sha',required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--small',action='store_true');a=p.parse_args();assert sha(a.library)==a.sha;l=C.CDLL(a.library);l.rocm_image_contour_workspace_size.argtypes=[C.c_int,C.c_int,C.POINTER(C.c_uint64)];l.rocm_image_contour_run.argtypes=[C.POINTER(Descriptor),C.c_void_p];l.rocm_image_contour_reconstruct.argtypes=[C.c_void_p,C.c_uint64,C.c_void_p,C.c_uint32,C.c_void_p,C.c_uint32,C.c_uint32,C.c_uint32,C.c_uint32,C.c_void_p,C.c_uint64,C.c_void_p,C.c_uint64,C.c_int,C.c_int,C.c_void_p];spec=json.loads((ROOT/'migration/rewrite/image-contour-profile.json').read_text());a.output.mkdir(parents=True);rows=[];stream=torch.cuda.Stream()
++ p=argparse.ArgumentParser();p.add_argument('--library',required=True);p.add_argument('--sha',required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--small',action='store_true');a=p.parse_args();assert sha(a.library)==a.sha;l=C.CDLL(a.library);l.rocm_image_contour_abi_version.restype=C.c_uint32;assert l.rocm_image_contour_abi_version()==2;l.rocm_image_contour_reconstruct_workspace_size.argtypes=[C.c_int,C.c_int,C.c_uint32,C.POINTER(C.c_uint64)];l.rocm_image_contour_workspace_size.argtypes=[C.c_int,C.c_int,C.POINTER(C.c_uint64)];l.rocm_image_contour_run.argtypes=[C.POINTER(Descriptor),C.c_void_p];l.rocm_image_contour_reconstruct.argtypes=[C.c_void_p,C.c_uint64,C.c_void_p,C.c_uint32,C.c_void_p,C.c_uint32,C.c_uint32,C.c_uint32,C.c_uint32,C.c_void_p,C.c_uint64,C.c_void_p,C.c_uint64,C.c_int,C.c_int,C.c_void_p];spec=json.loads((ROOT/'migration/rewrite/image-contour-profile.json').read_text());a.output.mkdir(parents=True);rows=[];stream=torch.cuda.Stream()
+  for c in spec['cases']:
+   w,h,pitch=c['width'],c['height'],c['pitch'];n=w*h
+   if a.small and n>5000:continue
+@@ -25,7 +25,7 @@ def main():
+    intervals=[('all',0,k,2**32-1),('default',1,k,262144),('empty',k,k,262144)]+([('single-ID-override',1,2,262144)] if c['case']=='large-multiple-ID-bypass' else [])
+    for name,start,stop,limit in intervals:
+     with torch.cuda.stream(stream):
+-     output=torch.full((h*op,),173,dtype=torch.uint8,device='cuda');scratch=torch.full((4*(n+1),),219,dtype=torch.uint8,device='cuda');code=l.rocm_image_contour_reconstruct(labels.data_ptr(),lp,info.data_ptr(),k,geometry.data_ptr(),edges,start,stop,limit,output.data_ptr(),op,scratch.data_ptr(),4*(n+1),w,h,stream.cuda_stream)
++     output=torch.full((h*op,),173,dtype=torch.uint8,device='cuda');rwb=C.c_uint64();assert l.rocm_image_contour_reconstruct_workspace_size(w,h,k,C.byref(rwb))==0;scratch=torch.full((rwb.value,),219,dtype=torch.uint8,device='cuda');code=l.rocm_image_contour_reconstruct(labels.data_ptr(),lp,info.data_ptr(),k,geometry.data_ptr(),edges,start,stop,limit,output.data_ptr(),op,scratch.data_ptr(),rwb.value,w,h,stream.cuda_stream)
+     stream.synchronize();filename='reconstruction-'+name+'.bin';output.cpu().numpy().tofile(where/filename);row['ranges'].append(dict(case=name,start=start,stop=stop,limit=limit,return_code=code,output_pitch=op,file=filename))
+    # On small cases preserve every unused record byte for strict canary checks.
+    if n<=5000:

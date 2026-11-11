@@ -1,0 +1,513 @@
+{
+  "schema_version": 1,
+  "source_case": "independent-noise-875231",
+  "ABI": 2,
+  "policy": "Fixed API identity and exact descriptor/argument/query mutations. Rejected calls preserve every source/output/scratch byte; tiny raw HIP allocation must have observed physical extent below the required span before testing.",
+  "cases": {
+    "null-descriptor": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "descriptor": null
+      },
+      "params": []
+    },
+    "null-input": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "input": 0
+      },
+      "params": []
+    },
+    "null-raw_labels": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "raw_labels": 0
+      },
+      "params": []
+    },
+    "null-labels": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "labels": 0
+      },
+      "params": []
+    },
+    "null-mask": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "mask": 0
+      },
+      "params": []
+    },
+    "null-info": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "info": 0
+      },
+      "params": []
+    },
+    "null-geometry": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "geometry": 0
+      },
+      "params": []
+    },
+    "null-totals": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "totals": 0
+      },
+      "params": []
+    },
+    "null-workspace": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "workspace": 0
+      },
+      "params": []
+    },
+    "zero-width": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "width": 0
+      },
+      "params": []
+    },
+    "negative-height": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "height": -1
+      },
+      "params": []
+    },
+    "overwide": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "width": 32769
+      },
+      "params": []
+    },
+    "too-many-pixels": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "width": 16384,
+        "height": 16384
+      },
+      "params": []
+    },
+    "input-pitch-small": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "input_pitch": 30
+      },
+      "params": []
+    },
+    "raw-pitch-small": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "raw_pitch": 120
+      },
+      "params": []
+    },
+    "labels-pitch-small": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "labels_pitch": 120
+      },
+      "params": []
+    },
+    "mask-pitch-small": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "mask_pitch": 30
+      },
+      "params": []
+    },
+    "raw-pitch-unaligned": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "raw_pitch": 125
+      },
+      "params": []
+    },
+    "labels-pitch-unaligned": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "labels_pitch": 125
+      },
+      "params": []
+    },
+    "input-pitch-overflow": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "input_pitch": 18446744073709551615
+      },
+      "params": []
+    },
+    "info-capacity-small": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "info_capacity": 526
+      },
+      "params": []
+    },
+    "geometry-capacity-small": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "geometry_capacity": 2107
+      },
+      "params": []
+    },
+    "workspace-one-byte-short": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "workspace_bytes": "$workspace_bytes-1"
+      },
+      "params": []
+    },
+    "raw-labels-overlap": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "labels": "$raw_labels"
+      },
+      "params": []
+    },
+    "input-mask-overlap": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "mask": "$input"
+      },
+      "params": []
+    },
+    "totals-info-overlap": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "totals": "$info"
+      },
+      "params": []
+    },
+    "physical-geometry-allocation-too-small": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "geometry": "$tiny"
+      },
+      "params": []
+    },
+    "physical-workspace-allocation-too-small": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "workspace": "$tiny"
+      },
+      "params": []
+    },
+    "host-input": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "input": "$host"
+      },
+      "params": []
+    },
+    "unaligned-raw_labels": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "raw_labels": "$raw_labels+1"
+      },
+      "params": []
+    },
+    "unaligned-labels": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "labels": "$labels+1"
+      },
+      "params": []
+    },
+    "unaligned-info": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "info": "$info+1"
+      },
+      "params": []
+    },
+    "unaligned-geometry": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "geometry": "$geometry+1"
+      },
+      "params": []
+    },
+    "unaligned-totals": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "totals": "$totals+1"
+      },
+      "params": []
+    },
+    "unaligned-workspace": {
+      "api": "run",
+      "return_code": 1,
+      "changes": {
+        "workspace": "$workspace+1"
+      },
+      "params": []
+    },
+    "render-null-labels": {
+      "api": "render",
+      "return_code": 1,
+      "changes": {
+        "labels": 0
+      },
+      "params": []
+    },
+    "render-null-info": {
+      "api": "render",
+      "return_code": 1,
+      "changes": {
+        "info": 0
+      },
+      "params": []
+    },
+    "render-null-geometry": {
+      "api": "render",
+      "return_code": 1,
+      "changes": {
+        "geometry": 0
+      },
+      "params": []
+    },
+    "render-null-output": {
+      "api": "render",
+      "return_code": 1,
+      "changes": {
+        "output": 0
+      },
+      "params": []
+    },
+    "render-inverted-range": {
+      "api": "render",
+      "return_code": 1,
+      "changes": {
+        "start": 2,
+        "stop": 1
+      },
+      "params": []
+    },
+    "render-range-too-high": {
+      "api": "render",
+      "return_code": 1,
+      "changes": {
+        "stop": "$components+1"
+      },
+      "params": []
+    },
+    "render-zero-components": {
+      "api": "render",
+      "return_code": 1,
+      "changes": {
+        "components": 0
+      },
+      "params": []
+    },
+    "render-too-many-edges": {
+      "api": "render",
+      "return_code": 1,
+      "changes": {
+        "edge_count": 2109
+      },
+      "params": []
+    },
+    "render-label-pitch-small": {
+      "api": "render",
+      "return_code": 1,
+      "changes": {
+        "labels_pitch": 120
+      },
+      "params": []
+    },
+    "render-output-pitch-small": {
+      "api": "render",
+      "return_code": 1,
+      "changes": {
+        "output_pitch": 30
+      },
+      "params": []
+    },
+    "render-short-workspace": {
+      "api": "render",
+      "return_code": 1,
+      "changes": {
+        "workspace_bytes": "$workspace_bytes-1"
+      },
+      "params": []
+    },
+    "render-unaligned-workspace": {
+      "api": "render",
+      "return_code": 1,
+      "changes": {
+        "workspace": "$workspace+1"
+      },
+      "params": []
+    },
+    "render-output-label-overlap": {
+      "api": "render",
+      "return_code": 1,
+      "changes": {
+        "output": "$labels"
+      },
+      "params": []
+    },
+    "run-query-single": {
+      "api": "run-query",
+      "return_code": 0,
+      "changes": {},
+      "params": [
+        1,
+        1
+      ]
+    },
+    "run-query-maximum": {
+      "api": "run-query",
+      "return_code": 0,
+      "changes": {},
+      "params": [
+        32768,
+        2048
+      ]
+    },
+    "run-query-zero": {
+      "api": "run-query",
+      "return_code": 1,
+      "changes": {},
+      "params": [
+        0,
+        1
+      ]
+    },
+    "run-query-negative": {
+      "api": "run-query",
+      "return_code": 1,
+      "changes": {},
+      "params": [
+        -1,
+        1
+      ]
+    },
+    "run-query-overwide": {
+      "api": "run-query",
+      "return_code": 1,
+      "changes": {},
+      "params": [
+        32769,
+        1
+      ]
+    },
+    "run-query-overpixels": {
+      "api": "run-query",
+      "return_code": 1,
+      "changes": {},
+      "params": [
+        16384,
+        16384
+      ]
+    },
+    "run-query-null": {
+      "api": "run-query-null",
+      "return_code": 1,
+      "changes": {},
+      "params": [
+        1,
+        1
+      ]
+    },
+    "render-query-single": {
+      "api": "render-query",
+      "return_code": 0,
+      "changes": {},
+      "params": [
+        1,
+        1,
+        1
+      ]
+    },
+    "render-query-two": {
+      "api": "render-query",
+      "return_code": 0,
+      "changes": {},
+      "params": [
+        2,
+        1,
+        2
+      ]
+    },
+    "render-query-zero-components": {
+      "api": "render-query",
+      "return_code": 1,
+      "changes": {},
+      "params": [
+        2,
+        1,
+        0
+      ]
+    },
+    "render-query-too-many-components": {
+      "api": "render-query",
+      "return_code": 1,
+      "changes": {},
+      "params": [
+        2,
+        1,
+        3
+      ]
+    },
+    "render-query-null": {
+      "api": "render-query-null",
+      "return_code": 1,
+      "changes": {},
+      "params": [
+        2,
+        1,
+        2
+      ]
+    },
+    "after-errors-valid-run": {
+      "api": "positive",
+      "return_code": 0,
+      "changes": {},
+      "params": []
+    }
+  }
+}

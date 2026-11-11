@@ -1,0 +1,1 @@
+Test CPU-reference for Contour-arguments-fixed-CPU-check, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T154029.438048Z-I2-rocm-runtime-6f58396312.

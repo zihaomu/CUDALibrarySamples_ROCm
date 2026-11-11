@@ -1,0 +1,1 @@
+Test CPU-reference for Contour-data-errors-CPU, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T152729.051437Z-I2-rocm-data-errors-fa120d65b7.

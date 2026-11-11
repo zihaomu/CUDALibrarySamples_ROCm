@@ -25,10 +25,12 @@
 | CPU 算法定义 | 17 小图的闭环排列与从 geometry 精确重建八邻域 mask 通过。[检查](image-contour-model-check.json) |
 | GPU 全部输入 | 22 组全部原标签/紧凑标签/mask、marker 信息、逐 edge/loop/order、输入/padding 和各 range 重建对独立 CPU 精确。[执行](image-contour-all.json)、[CPU](image-contour-all-validation.json) |
 | 实际阈值 | 单 ID 输入边界计数262913/262912；多 ID 输入计数3080/262913/262912。确实覆盖262144阈值及单ID强制，初版加框后未超过阈值的构造已在执行前扩大，不更改原阈值。[合同检查](image-contour-large-threshold-contract.json) |
-| C ABI | 共享 HIP 库已构建；规模为各维1..32768且像素≤2^26，info容量≥像素数，geometry容量≥4×像素数；仅写实际前缀。非法参数/stream/并发等完整验收待补。[构建](image-contour-build.json) |
-| 两真实 C++ 入口 | 已构建并开始默认文件/范围/大轮廓/诊断完整流程验收。[构建](image-contour-frontends-build.json)、[逐次执行](image-contour-originals.json) |
+| C ABI | 共享 HIP 库已构建；规模为各维1..32768且像素≤2^26，info容量≥像素数，geometry容量≥4×像素数；仅写实际前缀。ABI2 renderer先独立验证边集合完整、唯一、闭环次序和全部marker统计，再写目标；61项参数/query和26项真实畸形设备数据验收通过。[构建](image-contour-build.json) |
+| 两真实 C++ 入口 | 15个默认文件/范围/大轮廓/诊断完整流程、55个实际RAW文件和逐点stdout独立CPU验收通过。[构建](image-contour-frontends-build.json)、[逐次执行](image-contour-originals.json) |
 
-初版小图及各构建证据继续保留；最终资格只使用当前固定 source/profile 及完整输入的最新证明。尚需完成原入口独立验收、CLI/运行语义、真实 GPU trace、验收器反例、冷检出、独立复审及先 Git 后发布。
+初版小图及各构建证据继续保留；最终资格只使用当前固定 source/profile 及完整输入的最新证明。已完成32项真实CLI、11项默认流/输入变化复用/并发实例/外设备及销毁stream、61项参数/query、26项设备数据合同与17图真实trace（10类关键kernel），47项验收器正反例全部通过。早期ABI1接受缺边几何的真实失败保留，不计支持。接下来进行冷检出、最终独立复审及先Git后发布。
+
+[CLI](image-contour-cli-validation.json) · [状态/stream](image-contour-states-validation.json) · [参数](image-contour-arguments-validation.json) · [设备数据](image-contour-data-errors-validation.json) · [trace](image-contour-trace-validation.json) · [47项反例](image-contour-checks.json) · [ABI1失败](image-contour-legacy-data-error-validation.json)
 
 ## 复现
 

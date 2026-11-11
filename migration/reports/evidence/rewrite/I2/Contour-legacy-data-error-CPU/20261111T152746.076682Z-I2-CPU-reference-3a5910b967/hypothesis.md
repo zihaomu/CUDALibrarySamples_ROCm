@@ -1,0 +1,1 @@
+Test CPU-reference for Contour-legacy-data-error-CPU, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T152739.949794Z-I2-rocm-data-errors-c5f127f306.

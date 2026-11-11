@@ -1,0 +1,1 @@
+Test rocm-CLI for NPP+/findContour-CLI, case trailing-input. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T151952.557947Z-I2-rocm-build-4f8e18523d.

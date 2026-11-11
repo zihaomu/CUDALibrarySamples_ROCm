@@ -8,13 +8,26 @@ from image_contour_model import model,reconstruct
 from image_contour_reference import check_array,bytes_file,geometry_invariants
 from image_progress import record
 
+def command_binding(r,rule,raw,meta,w,h,audit,out):
+ commands=json.loads((raw/'commands.json').read_text())
+ if len(commands)!=1:return dict(check='actual-C++-command-input-output-and-audit-binding',passed=False)
+ command=commands[0];stored_raw=Path(command['cwd']).parent;origin=stored_raw
+ for part in Path(meta['raw_artifact_dir']).parts:origin=origin.parent
+ if origin/Path(meta['raw_artifact_dir'])!=stored_raw:return dict(check='actual-C++-command-input-output-and-audit-binding',passed=False)
+ original_input=stored_raw/'work/images/CircuitBoard_2048x1024_8u.raw' if rule['default_paths'] else stored_raw/'inputs/input.raw';original_output=stored_raw/'work/images' if rule['default_paths'] else stored_raw/'outputs';expected=[str(origin/r['binary']['binary'])]
+ if not rule['default_paths']:expected+=['--input',str(original_input),'--output-dir',str(original_output),'--width',str(w),'--height',str(h)]
+ modes={'single-ID-override':['--start-id','1','--stop-id','2'],'all-markers':['--start-id','0','--stop-id','3'],'empty':['--start-id','2','--stop-id','2']};expected+=modes.get(rule['mode'],[])
+ relocated_input=raw/original_input.relative_to(stored_raw);relocated_output=raw/original_output.relative_to(stored_raw)
+ return dict(check='actual-C++-command-input-output-and-audit-binding',passed=command['return_code']==0 and command['argv']==expected and command['cwd']==str(stored_raw/'work') and (ROOT/r['input']).resolve()==relocated_input.resolve() and out.resolve()==relocated_output.resolve() and command['environment_changes']['MIGRATION_IMAGE_CONTOUR_AUDIT_DIR']==str(stored_raw/'audit') and audit.resolve()==(raw/'audit').resolve())
+
 def validate_one(r,rule,raw_override=None):
  if (r['family'],r['case'],r['mode'],r['fixture_case'])!=(rule['family'],rule['case'],rule['mode'],rule['source_case']) or r['return_code']!=0:raise ValueError('fixed actual original case/status')
- profile=json.loads((ROOT/'migration/rewrite/image-contour-profile.json').read_text());case=next(c for c in profile['cases'] if c['case']==rule['source_case']);w,h=case['width'],case['height'];source=np.fromfile(ROOT/case['fixture']/'input.bin',np.uint8).reshape(h,case['pitch'])[:,:w].copy();expected=model(source);k,m,loops=map(int,expected['totals']);start=rule['start'];stop=k if rule['stop']=='component_count' else rule['stop'];limit=rule['limit'];out=ROOT/r['outputs'];audit=ROOT/r['audit'];meta=json.loads((ROOT/r['evidence']/'manifest.json').read_text());raw=Path(raw_override) if raw_override is not None else ROOT/meta['raw_artifact_dir'];checks=[dict(check='exact-original-input-bytes-and-receipt',passed=bytes_file(ROOT/r['input'],w*h,r['input_sha256'])==source.tobytes()),dict(check='actual-original-process-zero',passed=r['return_code']==0)];shape=f'{w}x{h}';files={}
+ profile=json.loads((ROOT/'migration/rewrite/image-contour-profile.json').read_text());case=next(c for c in profile['cases'] if c['case']==rule['source_case']);w,h=case['width'],case['height'];source=np.fromfile(ROOT/case['fixture']/'input.bin',np.uint8).reshape(h,case['pitch'])[:,:w].copy();expected=model(source);k,m,loops=map(int,expected['totals']);start=rule['start'];stop=k if rule['stop']=='component_count' else rule['stop'];limit=rule['limit'];out=ROOT/r['outputs'];audit=ROOT/r['audit'];meta=json.loads((ROOT/r['evidence']/'manifest.json').read_text());raw=Path(raw_override) if raw_override is not None else ROOT/meta['raw_artifact_dir'];checks=[dict(check='exact-original-input-bytes-and-receipt',passed=bytes_file(ROOT/r['input'],w*h,r['input_sha256'])==source.tobytes()),dict(check='actual-original-process-zero',passed=r['return_code']==0)];checks.append(command_binding(r,rule,raw,meta,w,h,audit,out));shape=f'{w}x{h}';files={}
  for name,value,kind in [('LabelMarkersUF',expected['raw'],'32u'),('CompressedMarkerLabelsUF',expected['labels'],'32u'),('Contours',expected['mask'],'8u')]:files[f'CircuitBoard_{name}_8Way_{shape}_{kind}.raw']=value
  if rule['plus']:files[f'CircuitBoard_ContoursReconstructed_8Way_{shape}_8u.raw']=reconstruct(expected['geometry'],expected['labels'],expected['info'],start,stop,limit)
  allowed=set(files)
- if rule['default_paths']:allowed.add('CircuitBoard_2048x1024_8u.raw')
+ if rule['default_paths']:
+  allowed.add('CircuitBoard_2048x1024_8u.raw');actual_default=out/'CircuitBoard_2048x1024_8u.raw';checks.append(dict(check='actual-default-input-path-and-frozen-bytes',passed=(ROOT/r['input']).resolve()==actual_default.resolve() and bytes_file(actual_default,w*h,case['original']['sha256'])==source.tobytes()))
  checks.append(dict(check='exact-three-or-four-original-files',passed={p.name for p in out.iterdir()}==allowed))
  for name,expect in files.items():a=np.frombuffer(bytes_file(out/name,expect.nbytes),expect.dtype).reshape(expect.shape);checks.append(check_array(name+'/complete-original-pixels',a,expect))
  if {p.name for p in audit.iterdir()}!={'input.bin','info.bin','geometry.bin','totals.bin','workflow.json'}:raise ValueError('complete original audit sidecars')

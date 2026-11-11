@@ -31,8 +31,12 @@ hipError_t rocm_image_contour_run(const rocm_image_contour_descriptor*image,hipS
 // Rasterize supplied closed-cell geometry into the exact 0-boundary/255-other
 // eight-neighbor mask. [start,stop) selects zero-based component IDs; regions
 // with contour_pixels >= limit are bypassed unless stop-start<=1. A zero
-// limit is legal (bypass all under a multi-ID range). Pixel flags require
-// width*height uint32 values plus one uint32 validation flag. Synchronizes
+// limit is legal (bypass all under a multi-ID range). ABI2 validates the
+// complete unique edge set, canonical closed loops and all marker metadata
+// before writing output. Query scratch for the actual component count.
+hipError_t rocm_image_contour_reconstruct_workspace_size(int width,int height,
+ uint32_t components,uint64_t*bytes);
+// Synchronizes
 // validation scalars; final pixel kernels remain queued on the caller stream.
 hipError_t rocm_image_contour_reconstruct(const uint32_t*labels,uint64_t labels_pitch,
  const rocm_image_contour_info*info,uint32_t components,

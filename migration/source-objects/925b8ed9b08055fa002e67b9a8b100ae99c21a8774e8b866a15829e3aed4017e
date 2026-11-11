@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "ABI": 2,
+  "width": 2,
+  "height": 1,
+  "pitch": 13,
+  "input_pixels": [
+    0,
+    1
+  ],
+  "input_padding": 197,
+  "expected_totals": [
+    2,
+    8,
+    2
+  ],
+  "output_pitch": 19,
+  "output_sentinel": 173,
+  "policy": "Independently fixed roles. Read-only caller storage remains equal to the recorded mutated before-state; invalid geometry/info returns1 before any output write. Scratch is temporary and may change.",
+  "cases": {
+    "zero-edge-count": {
+      "kind": "expected-error",
+      "return_code": 1
+    },
+    "one-edge-count": {
+      "kind": "expected-error",
+      "return_code": 1
+    },
+    "missing-last-edge": {
+      "kind": "expected-error",
+      "return_code": 1
+    },
+    "missing-root-edge": {
+      "kind": "expected-error",
+      "return_code": 1
+    },
+    "duplicate-edge": {
+      "kind": "expected-error",
+      "return_code": 1
+    },
+    "swapped-edge-order": {
+      "kind": "expected-error",
+      "return_code": 1
+    },
+    "wrong-order": {
+      "kind": "expected-error",
+      "return_code": 1
+    },
+    "wrong-loop-ID": {
+      "kind": "expected-error",
+      "return_code": 1
+    },
+    "unknown-loop-ID": {
+      "kind": "expected-error",
+      "return_code": 1
+    },
+    "invalid-component": {
+      "kind": "expected-error",
+      "return_code": 1
+    },
+    "out-of-ROI-vertex": {
+      "kind": "expected-error",
+      "return_code": 1
+    },
+    "wrong-owner": {
+      "kind": "expected-error",
+      "return_code": 1
+    },
+    "wrong-contour-count": {
+      "kind": "expected-error",
+      "return_code": 1
+    },
+    "wrong-edge-count": {
+      "kind": "expected-error",
+      "return_code": 1
+    },
+    "wrong-loop-count": {
+      "kind": "expected-error",
+      "return_code": 1
+    },
+    "wrong-bbox": {
+      "kind": "expected-error",
+      "return_code": 1
+    },
+    "forged-bypass-count": {
+      "kind": "expected-error",
+      "return_code": 1
+    },
+    "out-of-range-label": {
+      "kind": "expected-error",
+      "return_code": 1
+    },
+    "valid-all": {
+      "kind": "pixels",
+      "return_code": 0,
+      "start": 0,
+      "stop": 2,
+      "limit": 4294967295
+    },
+    "valid-default": {
+      "kind": "pixels",
+      "return_code": 0,
+      "start": 1,
+      "stop": 2,
+      "limit": 262144
+    },
+    "valid-empty": {
+      "kind": "pixels",
+      "return_code": 0,
+      "start": 1,
+      "stop": 1,
+      "limit": 262144
+    },
+    "limit-zero-multi": {
+      "kind": "pixels",
+      "return_code": 0,
+      "start": 0,
+      "stop": 2,
+      "limit": 0
+    },
+    "limit-zero-single": {
+      "kind": "pixels",
+      "return_code": 0,
+      "start": 0,
+      "stop": 1,
+      "limit": 0
+    },
+    "after-errors": {
+      "kind": "pixels",
+      "return_code": 0,
+      "start": 0,
+      "stop": 2,
+      "limit": 4294967295
+    },
+    "empty-range-missing-edge": {
+      "kind": "expected-error",
+      "return_code": 1,
+      "start": 1,
+      "stop": 1
+    },
+    "empty-range-bad-info": {
+      "kind": "expected-error",
+      "return_code": 1,
+      "start": 1,
+      "stop": 1
+    }
+  }
+}

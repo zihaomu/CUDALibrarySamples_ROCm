@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "ABI": 2,
+  "visible_physical_devices": [
+    0,
+    1
+  ],
+  "pixel_compute_physical_device": 1,
+  "policy": "Independent ordered case roles and source identities; reuse tails remain exactly untouched; independent nondefault streams/instances, changed input, default stream and foreign/destroyed rejection. GPU0 only creates a stream, all pixels execute on1.",
+  "cases": [
+    {
+      "case": "default-core",
+      "kind": "core",
+      "state": "X",
+      "source_case": "independent-noise-875231",
+      "all_input_bytes_zero": false,
+      "return_code": 0
+    },
+    {
+      "case": "default-render",
+      "kind": "render",
+      "state": "X",
+      "source_case": "independent-noise-875231",
+      "all_input_bytes_zero": false,
+      "return_code": 0
+    },
+    {
+      "case": "repeat-core",
+      "kind": "core",
+      "state": "X",
+      "source_case": "independent-noise-875231",
+      "all_input_bytes_zero": false,
+      "return_code": 0
+    },
+    {
+      "case": "changed-core",
+      "kind": "core",
+      "state": "X",
+      "source_case": "independent-noise-875231",
+      "all_input_bytes_zero": true,
+      "return_code": 0
+    },
+    {
+      "case": "changed-render",
+      "kind": "render",
+      "state": "X",
+      "source_case": "independent-noise-875231",
+      "all_input_bytes_zero": true,
+      "return_code": 0
+    },
+    {
+      "case": "concurrent-A",
+      "kind": "core",
+      "state": "A",
+      "source_case": "independent-noise-875231",
+      "all_input_bytes_zero": false,
+      "return_code": 0
+    },
+    {
+      "case": "concurrent-B",
+      "kind": "core",
+      "state": "B",
+      "source_case": "annulus",
+      "all_input_bytes_zero": false,
+      "return_code": 0
+    },
+    {
+      "case": "foreign-run",
+      "kind": "error-run",
+      "state": "X",
+      "source_case": "independent-noise-875231",
+      "all_input_bytes_zero": true,
+      "stream_query_return_code": 0,
+      "return_code": 101
+    },
+    {
+      "case": "foreign-render",
+      "kind": "error-render",
+      "state": "X",
+      "source_case": "independent-noise-875231",
+      "all_input_bytes_zero": true,
+      "stream_query_return_code": 0,
+      "return_code": 101
+    },
+    {
+      "case": "destroyed-run",
+      "kind": "error-run",
+      "state": "X",
+      "source_case": "independent-noise-875231",
+      "all_input_bytes_zero": true,
+      "stream_query_return_code": 709,
+      "return_code": 709
+    },
+    {
+      "case": "destroyed-render",
+      "kind": "error-render",
+      "state": "X",
+      "source_case": "independent-noise-875231",
+      "all_input_bytes_zero": true,
+      "stream_query_return_code": 709,
+      "return_code": 709
+    }
+  ]
+}

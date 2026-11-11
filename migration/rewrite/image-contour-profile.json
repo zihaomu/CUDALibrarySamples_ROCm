@@ -300,12 +300,12 @@
     "clean-checkout-independent-review-first-Git-publication"
   ],
   "C_ABI": {
-    "version": 1,
+    "version": 2,
     "dimensions": "1..32768 each, pixels<=2^26",
     "workspace": "queried bytes, four-byte aligned device storage",
     "info": "28-byte seven-u32 records; capacity>=pixels, write only actual component prefix",
     "geometry": "36-byte nine-u32 records; capacity>=4*pixels, write only actual edge prefix",
     "totals": "three device u32 values: components,edges,loops",
-    "reconstruct": "separate geometry-input rasterizer; flags workspace 4*(pixels+1); fixed half-open range and unique-contour-pixel bypass rule; malformed device geometry validates before output writes"
+    "reconstruct": "ABI2 requires complete unique canonical closed-cell geometry and matching marker info; query workspace 4*(5*pixels+7*components+1); validate all edges, loop roots/order/left-turn closure and all counts/bbox before any output writes; fixed half-open range and unique-contour-pixel bypass rule"
   }
 }

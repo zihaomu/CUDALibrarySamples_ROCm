@@ -1,0 +1,1 @@
+Test rocm-runtime for Contour-real-state-streams-and-concurrent-instances, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T151937.250014Z-I2-rocm-build-af6a53236d.
