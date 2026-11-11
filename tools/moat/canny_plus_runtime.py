@@ -18,6 +18,8 @@ ABI_ERRORS=['zero-width','negative-height','large-width','bad-channels','negativ
 
 def contract():
  return dict(schema_version=1,outputs=OUTPUT_CASES,python_errors=PY_ERRORS,ABI_errors=ABI_ERRORS,
+  output_file_set=['input.bin','config.json','output.bin'],storage_file_set=['buffer.bin'],
+  python_exception_types={n:'TypeError' if n=='fractional-threshold' else 'ValueError' for n in PY_ERRORS},
   expected_ABI_status=1,actual_device='Guarded single gfx1201 device; two caller-owned nondefault streams',
   wrong_device_scope='Cross-device handles are rejected by the API; no extra busy or forbidden GPU is opened for this single-device qualification.')
 
@@ -65,7 +67,7 @@ def worker(out,library,expected_sha,trace_only=False):
   thresholds=[(72,256)]*3+[(-1,256),(257,256),(72,32768),(1.5,256),(72,256)]
   for name,tensor,(lo,hi) in zip(PY_ERRORS,bad,thresholds):
    try:detector(tensor,lo,hi)
-   except (ValueError,TypeError):rows.append(dict(case='python/'+name,passed=True))
+   except (ValueError,TypeError) as error:rows.append(dict(case='python/'+name,passed=True,exception_type=type(error).__name__,diagnostic=str(error)))
    else:rows.append(dict(case='python/'+name,passed=False))
   h,w=base.shape;output=torch.full_like(gpu,173);space=torch.empty(h*w*8,dtype=torch.uint8,device='cuda')
   original=[gpu.data_ptr(),gpu.numel(),w,w,h,1,72,256,output.data_ptr(),output.numel(),w,space.data_ptr(),space.numel(),0]
@@ -79,8 +81,9 @@ def worker(out,library,expected_sha,trace_only=False):
    rc=detector.call(*args);rows.append(dict(case='ABI/'+name,status=rc,passed=rc==1))
   # All rejected calls must leave caller storage and input untouched.
   torch.cuda.synchronize()
-  rows.append(dict(case='rejected-call-output-preserved',passed=bool(torch.all(output==173).item())))
-  rows.append(dict(case='rejected-call-input-preserved',passed=bool(np.array_equal(gpu.cpu().numpy(),base))))
+  for name,buffer,expected in [('rejected-call-output-preserved',output,np.full_like(base,173)),('rejected-call-input-preserved',gpu,base)]:
+   d=out/name;d.mkdir();actual=buffer.cpu().numpy();actual.tofile(d/'buffer.bin')
+   rows.append(dict(case=name,passed=bool(np.array_equal(actual,expected)),files={'buffer.bin':dict(sha256=digest(d/'buffer.bin'),bytes=(d/'buffer.bin').stat().st_size)}))
   submit('after-errors',gpu,base)
  torch.cuda.synchronize()
  for name,result,expected,stream in pending:

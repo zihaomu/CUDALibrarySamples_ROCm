@@ -42,10 +42,15 @@ def main():
    a.tofile(p);nr[0]['output_sha256']['output.bin']=digest(p)
   write(out/'results.json',rows);v=validate(r,mini,nr);write(root/'validation.json',v)
   expected=fault in {'good-exact','native-within-budget'};checks.append(dict(check=fault,passed=(v['status']=='PASSED')==expected,expected_accept=expected,rejected=[c['check'] for c in v['checks'] if not c['passed']]))
- for fault in ['runtime-missing-case','runtime-wrong-status','empty-trace']:
+ for fault in ['runtime-missing-case','runtime-wrong-status','runtime-missing-payload','runtime-ABI-wrong-status','runtime-Python-wrong-exception','runtime-storage-corruption','empty-trace']:
   trace=fault=='empty-trace';r=json.loads((ROOT/('migration/reports/canny-plus-'+('trace' if trace else 'runtime')+'.json')).read_text());dest=e.path/fault;shutil.copytree(ROOT/r['outputs'],dest/'outputs');r['outputs']=str((dest/'outputs').relative_to(ROOT));rows=json.loads((dest/'outputs/results.json').read_text())
   if fault=='runtime-missing-case':rows.pop()
   elif fault=='runtime-wrong-status':rows[0]['passed']=False
+  elif fault=='runtime-missing-payload':next(r for r in rows if r['case']=='stream-a').pop('files')
+  elif fault=='runtime-ABI-wrong-status':next(r for r in rows if r['case']=='ABI/zero-width')['status']=0
+  elif fault=='runtime-Python-wrong-exception':next(r for r in rows if r['case']=='python/zero-size')['exception_type']='RuntimeError'
+  elif fault=='runtime-storage-corruption':
+   row=next(r for r in rows if r['case']=='rejected-call-output-preserved');p=dest/'outputs'/row['case']/'buffer.bin';data=bytearray(p.read_bytes());data[0]^=1;p.write_bytes(data);row['files']['buffer.bin']['sha256']=digest(p)
   else:(dest/'trace').mkdir();r['trace']=str((dest/'trace').relative_to(ROOT))
   write(dest/'outputs/results.json',rows)
   try:v=runtime_validate(r,trace)

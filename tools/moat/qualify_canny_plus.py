@@ -7,6 +7,9 @@ from audit import check as audit
 from canny_plus_validate import validate
 from canny_plus_runtime_validate import validate as runtime_validate
 from canny_plus_build import dependencies
+import qualify_first as review_gate
+
+REVIEW_SCOPES={'kernel-stream','acceptance-publication','workflow-reproduction'}
 
 def load(name):return json.loads((ROOT/('migration/reports/canny-plus-'+name+'.json')).read_text())
 
@@ -19,7 +22,13 @@ def sealed(ref):
  return d,json.loads((d/'manifest.json').read_text()),src
 
 def reviewed(review,names,refs):
- if not review or review.get('verdict')!='APPROVED' or len(review.get('reviewers',[]))<3 or any(r.get('verdict')!='APPROVED' for r in review['reviewers']):return False
+ if not review or review.get('verdict')!='APPROVED':return False
+ reviewers=review.get('reviewers',[])
+ if len(reviewers)!=3 or {r.get('scope') for r in reviewers}!=REVIEW_SCOPES or any(not isinstance(r.get('reviewer_id'),str) or not r['reviewer_id'] or r.get('verdict')!='APPROVED' for r in reviewers) or len({r['reviewer_id'] for r in reviewers})!=3:return False
+ # Include additions/removals and current worktree bytes, rather than checking
+ # only the old list of dependencies. A new Python startup/import hook changes
+ # the executable surface even if all formerly listed files are unchanged.
+ if not review_gate.review_identity(review):return False
  commit=review['source_commit']
  for name in names:
   data=subprocess.check_output(['git','show',commit+':'+name],cwd=ROOT,stderr=subprocess.DEVNULL)
@@ -42,6 +51,10 @@ def collect(review=None):
   return json.loads((d/member).read_text())=={k:v for k,v in record.items() if k not in {'evidence','parent'}}
  gate('fixed-31-cases-8-original-sizes',lambda:len(spec['cases'])==31 and len({c['case'] for c in spec['cases']})==31 and len([c for c in spec['cases'] if c['kind']=='original'])==8 and spec['original']['warmup']==5 and spec['original']['iterations']==1000)
  gate('unmodified-original-source-and-image',lambda:digest(ROOT/spec['source'])==spec['original_source_sha256'] and digest(ROOT/'NPP+/cannyEdgeDetectorPython/Teapot.jpg')==spec['original_image_sha256'])
+ def environment_ok():
+  env=load('environment');refs.add(env['evidence']);d,m,_=sealed(env['evidence']);commands=json.loads((d/'commands.json').read_text())
+  return env['status']=='READY' and m['backend']=='rocm-setup' and all(c['return_code']==0 for c in commands) and len(commands)==3 and commands[0]['phase']=='create-project-SDK-overlay' and 'opencv-python-headless==4.12.0.88' in env['packages'] and commands[-1]['phase']=='verify-pairing-and-actual-imports'
+ gate('explicit-private-dependencies-and-SDK-bootstrap',environment_ok)
  def fixture_ok():
   refs.add(spec['fixture_evidence']);d,m,_=sealed(spec['fixture_evidence']);expected=dict(spec);expected.pop('fixture_evidence')
   return m['backend']=='CPU-fixtures' and json.loads((d/'profile.json').read_text())==expected
@@ -79,10 +92,10 @@ def collect(review=None):
   gate(name+'/recomputed-independent-full-validation',validation_ok)
  def checks_ok():
   refs.add(negative['evidence']);d,m,_=sealed(negative['evidence']);v=json.loads((d/'checks.json').read_text())
-  return m['experiment_outcome']=='PASSED' and v=={k:x for k,x in negative.items() if k!='evidence'} and v==json.loads((d/'validation.json').read_text()) and v['case_count']==24 and v['status']=='PASSED' and len(v['checks'])==24 and all(c['passed'] is True for c in v['checks'])
- gate('complete-24-positive-negative-validator-checks',checks_ok)
+  return m['experiment_outcome']=='PASSED' and v=={k:x for k,x in negative.items() if k!='evidence'} and v==json.loads((d/'validation.json').read_text()) and v['case_count']==28 and v['status']=='PASSED' and len(v['checks'])==28 and all(c['passed'] is True for c in v['checks'])
+ gate('complete-28-positive-negative-validator-checks',checks_ok)
  gate('original-CUDA-script-status-distinct-from-native-API',lambda:report(cuda_original,'result.json','cuda-original') and cuda_original['original_source_sha256']==spec['original_source_sha256'] and cuda_original['status'] in {'BLOCKED','FAILED','EXECUTED'})
- sources=set(build['dependencies'])|{'tools/moat/qualify_canny_plus.py','tools/moat/publish_canny_plus.py','migration/rewrite/image-acceptance-policy.json','tools/moat/audit.py'}
+ sources=set(build['dependencies'])|{'tools/moat/qualify_canny_plus.py','tools/moat/publish_canny_plus.py','tools/moat/qualify_first.py','migration/rewrite/image-acceptance-policy.json','tools/moat/audit.py'}
  for ref in refs:
   try:sources.update(sealed(ref)[2]['dependencies'])
   except (OSError,ValueError):pass

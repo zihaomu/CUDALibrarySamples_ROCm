@@ -1,0 +1,105 @@
+diff --git a/tools/moat/canny_plus_environment.py b/tools/moat/canny_plus_environment.py
+index 26e5ba11b..dd9bd0d24 100644
+--- a/tools/moat/canny_plus_environment.py
++++ b/tools/moat/canny_plus_environment.py
+@@ -4,9 +4,10 @@ from experiment import ROOT,Experiment,write
+ from snapshot import capture
+ from image_progress import record
+ def main():
+- e=Experiment('I1','CannyPlus-private-Python-dependencies','rocm-setup',sources=[__file__]);write(e.path/'backend.observed.json',capture())
+- packages=['pandas==2.3.3','tabulate==0.9.0','python-dateutil==2.9.0.post0','pytz==2025.2','tzdata==2025.2','six==1.17.0']
+- rc=e.command(['python3','-m','pip','install','--no-deps','--target',str(ROOT/'build/image-gpu-site'),*packages],'install-private-original-benchmark-packages',timeout=300)
++ e=Experiment('I1','CannyPlus-private-Python-dependencies','rocm-setup',sources=[__file__,ROOT/'tools/migration/bootstrap_sdk.py']);write(e.path/'backend.observed.json',capture())
++ packages=['opencv-python-headless==4.12.0.88','pandas==2.3.3','tabulate==0.9.0','python-dateutil==2.9.0.post0','pytz==2025.2','tzdata==2025.2','six==1.17.0']
++ rc=e.command(['python3','tools/migration/bootstrap_sdk.py'],'create-project-SDK-overlay',timeout=300)
++ if not rc:rc=e.command(['python3','-m','pip','install','--upgrade','--no-deps','--target',str(ROOT/'build/image-gpu-site'),*packages],'install-private-original-benchmark-packages',timeout=300)
+  if not rc:rc=e.command(['env','PYTHONPATH='+str(ROOT/'build/image-gpu-site'),'python3','-c','import torch,torchvision,numpy,pandas,tabulate,cv2;assert torch.version.hip.startswith("7.16.");print(torch.__version__,torchvision.__version__,numpy.__version__,pandas.__version__,tabulate.__version__,cv2.__version__)'],'verify-pairing-and-actual-imports')
+  ref=e.finish('EXECUTED' if not rc else 'ENV_BLOCKED');write(ROOT/'migration/reports/canny-plus-environment.json',dict(status='READY' if not rc else 'FAILED',evidence=ref,packages=packages));record('I1','原始benchmark的pandas/tabulate等依赖已在私有site安装/检查，基础Torch/NumPy不替换。',[ref]);return rc
+ if __name__=='__main__':raise SystemExit(main())
+diff --git a/tools/moat/canny_plus_runtime.py b/tools/moat/canny_plus_runtime.py
+index aa2ad8096..a993033f6 100644
+--- a/tools/moat/canny_plus_runtime.py
++++ b/tools/moat/canny_plus_runtime.py
+@@ -18,6 +18,8 @@ ABI_ERRORS=['zero-width','negative-height','large-width','bad-channels','negativ
+ 
+ def contract():
+  return dict(schema_version=1,outputs=OUTPUT_CASES,python_errors=PY_ERRORS,ABI_errors=ABI_ERRORS,
++  output_file_set=['input.bin','config.json','output.bin'],storage_file_set=['buffer.bin'],
++  python_exception_types={n:'TypeError' if n=='fractional-threshold' else 'ValueError' for n in PY_ERRORS},
+   expected_ABI_status=1,actual_device='Guarded single gfx1201 device; two caller-owned nondefault streams',
+   wrong_device_scope='Cross-device handles are rejected by the API; no extra busy or forbidden GPU is opened for this single-device qualification.')
+ 
+@@ -65,7 +67,7 @@ def worker(out,library,expected_sha,trace_only=False):
+   thresholds=[(72,256)]*3+[(-1,256),(257,256),(72,32768),(1.5,256),(72,256)]
+   for name,tensor,(lo,hi) in zip(PY_ERRORS,bad,thresholds):
+    try:detector(tensor,lo,hi)
+-   except (ValueError,TypeError):rows.append(dict(case='python/'+name,passed=True))
++   except (ValueError,TypeError) as error:rows.append(dict(case='python/'+name,passed=True,exception_type=type(error).__name__,diagnostic=str(error)))
+    else:rows.append(dict(case='python/'+name,passed=False))
+   h,w=base.shape;output=torch.full_like(gpu,173);space=torch.empty(h*w*8,dtype=torch.uint8,device='cuda')
+   original=[gpu.data_ptr(),gpu.numel(),w,w,h,1,72,256,output.data_ptr(),output.numel(),w,space.data_ptr(),space.numel(),0]
+@@ -79,8 +81,9 @@ def worker(out,library,expected_sha,trace_only=False):
+    rc=detector.call(*args);rows.append(dict(case='ABI/'+name,status=rc,passed=rc==1))
+   # All rejected calls must leave caller storage and input untouched.
+   torch.cuda.synchronize()
+-  rows.append(dict(case='rejected-call-output-preserved',passed=bool(torch.all(output==173).item())))
+-  rows.append(dict(case='rejected-call-input-preserved',passed=bool(np.array_equal(gpu.cpu().numpy(),base))))
++  for name,buffer,expected in [('rejected-call-output-preserved',output,np.full_like(base,173)),('rejected-call-input-preserved',gpu,base)]:
++   d=out/name;d.mkdir();actual=buffer.cpu().numpy();actual.tofile(d/'buffer.bin')
++   rows.append(dict(case=name,passed=bool(np.array_equal(actual,expected)),files={'buffer.bin':dict(sha256=digest(d/'buffer.bin'),bytes=(d/'buffer.bin').stat().st_size)}))
+   submit('after-errors',gpu,base)
+  torch.cuda.synchronize()
+  for name,result,expected,stream in pending:
+diff --git a/tools/moat/canny_plus_runtime_validate.py b/tools/moat/canny_plus_runtime_validate.py
+index 173f67406..60b65fdfb 100644
+--- a/tools/moat/canny_plus_runtime_validate.py
++++ b/tools/moat/canny_plus_runtime_validate.py
+@@ -15,10 +15,21 @@ def validate(run,trace=False):
+  checks=[dict(check='actual-process-success',passed=run['return_code']==0),coverage(rows,[dict(case=c) for c in expected])]
+  for row in rows:
+   name=row['case'];checks.append(dict(check=name+'/runtime-status',passed=row['passed'] is True))
+-  if 'files' not in row:continue
+-  d=out/name;checks.append(file_set(d,['input.bin','config.json','output.bin']))
++  if name.startswith('ABI/'):
++   checks.append(dict(check=name+'/actual-status-code',passed=type(row.get('status')) is int and row['status']==spec['expected_ABI_status']));continue
++  if name.startswith('python/'):
++   checks.append(dict(check=name+'/actual-exception-type',passed=row.get('exception_type')==spec['python_exception_types'].get(name.removeprefix('python/')) and isinstance(row.get('diagnostic'),str) and bool(row['diagnostic'])));continue
++  storage=name.startswith('rejected-call-')
++  required=spec['storage_file_set'] if storage else spec['output_file_set']
++  complete=isinstance(row.get('files'),dict) and set(row['files'])==set(required)
++  checks.append(dict(check=name+'/complete-payload-manifest',passed=complete))
++  if not complete:continue
++  d=out/name;checks.append(file_set(d,required))
+   for n,v in row['files'].items():checks.append(dict(check=name+'/'+n+'/identity',passed=(d/n).is_file() and (d/n).stat().st_size==v['bytes'] and digest(d/n)==v['sha256']))
+-  if all(c['passed'] for c in checks):
++  if storage:
++   expected=np.full((37,49),173,np.uint8) if name=='rejected-call-output-preserved' else np.random.default_rng(20261111).integers(0,256,(37,49),dtype=np.uint8)
++   checks.append(array_check(d/'buffer.bin',expected,row['files']['buffer.bin']['sha256']))
++  elif all(c['passed'] for c in checks):
+    mask=local_mask(reference(d),72,256);checks.append(array_check(d/'output.bin',mask,row['files']['output.bin']['sha256']))
+  if trace:
+   paths=list((ROOT/run['trace']).rglob('*kernel_trace.csv'));dispatches=[]
+@@ -30,7 +41,7 @@ def validate(run,trace=False):
+   checks.append(dict(check='two-real-complete-three-stage-GPU-dispatches',passed=names==Counter({'::sobel(':2,'::suppress(':2,'::local_threshold(':2}) and all(int(r['End_Timestamp'])>int(r['Start_Timestamp']) for r in dispatches),counts=dict(names)))
+   checks.append(dict(check='changed-input-changes-traced-mask',passed=(out/'trace-first/output.bin').read_bytes()!=(out/'trace-changed/output.bin').read_bytes()))
+  else:
+-  masks={r['case']:(out/r['case']/'output.bin').read_bytes() for r in rows if 'files' in r}
++  masks={r['case']:(out/r['case']/'output.bin').read_bytes() for r in rows if r['case'] in spec['outputs'] and 'files' in r and (out/r['case']/'output.bin').is_file()}
+   checks.append(dict(check='repeat-stable-and-changed-input-effective',passed=masks['repeat-first']==masks['repeat-second'] and masks['repeat-first']!=masks['changed-input']))
+   streams={r['case']:r.get('stream') for r in rows};checks.append(dict(check='distinct-nondefault-caller-streams',passed=bool(streams['stream-a']) and bool(streams['stream-b']) and streams['stream-a']!=streams['stream-b']))
+  return dict(status='PASSED' if checks and all(c['passed'] is True for c in checks) else 'FAILED',checks=checks,case_count=len(rows))
+diff --git a/tools/moat/qualify_canny_plus.py b/tools/moat/qualify_canny_plus.py
+index cd8f2dec5..1b8037a21 100644
+--- a/tools/moat/qualify_canny_plus.py
++++ b/tools/moat/qualify_canny_plus.py
+@@ -42,6 +42,10 @@ def collect(review=None):
+   return json.loads((d/member).read_text())=={k:v for k,v in record.items() if k not in {'evidence','parent'}}
+  gate('fixed-31-cases-8-original-sizes',lambda:len(spec['cases'])==31 and len({c['case'] for c in spec['cases']})==31 and len([c for c in spec['cases'] if c['kind']=='original'])==8 and spec['original']['warmup']==5 and spec['original']['iterations']==1000)
+  gate('unmodified-original-source-and-image',lambda:digest(ROOT/spec['source'])==spec['original_source_sha256'] and digest(ROOT/'NPP+/cannyEdgeDetectorPython/Teapot.jpg')==spec['original_image_sha256'])
++ def environment_ok():
++  env=load('environment');refs.add(env['evidence']);d,m,_=sealed(env['evidence']);commands=json.loads((d/'commands.json').read_text())
++  return env['status']=='READY' and m['backend']=='rocm-setup' and all(c['return_code']==0 for c in commands) and len(commands)==3 and commands[0]['phase']=='create-project-SDK-overlay' and 'opencv-python-headless==4.12.0.88' in env['packages'] and commands[-1]['phase']=='verify-pairing-and-actual-imports'
++ gate('explicit-private-dependencies-and-SDK-bootstrap',environment_ok)
+  def fixture_ok():
+   refs.add(spec['fixture_evidence']);d,m,_=sealed(spec['fixture_evidence']);expected=dict(spec);expected.pop('fixture_evidence')
+   return m['backend']=='CPU-fixtures' and json.loads((d/'profile.json').read_text())==expected

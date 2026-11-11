@@ -1,6 +1,6 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-11T12:13:30.109667+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-11T12:21:54.431258+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
 26入口当前：2 PASSED / 8 PARTIAL / 16 FAILED。
 
@@ -242,3 +242,13 @@
 | 2026-11-11T12:09:37.228905+00:00 | I1 | Canny验收器24项正向/反向检查：PASSED；包括容差内native差异、超限、尾字节、padding、丢例、失败rc、错误CSV/循环和空trace。 | [20261111T120931.420748Z-I1-CPU-validator-test-6d381db67f](evidence/rewrite/I1/CannyPlus-acceptance-mutations/20261111T120931.420748Z-I1-CPU-validator-test-6d381db67f) |
 | 2026-11-11T12:12:05.869343+00:00 | I1 | NPP+ C1完整实现、31组CPU/native、8尺寸1000次原例、49项运行合同/2输入trace与24项验收器检查已完成；复合验收预检仅余独立代码复审。尚未升级catalog，先提交固定代码和证据供审查。 | [canny-plus.md](canny-plus.md)；[canny-plus-checks.json](canny-plus-checks.json)；[canny-plus-runtime-validation.json](canny-plus-runtime-validation.json)；[canny-plus-trace-validation.json](canny-plus-trace-validation.json) |
 | 2026-11-11T12:13:30.109667+00:00 | I1 | 31组原始/随机/几何输入从源码重新生成：PASSED；未替换冻结profile或历史来源。 | [20261111T121328.945896Z-I1-CPU-fixtures-5afa78314d](evidence/rewrite/I1/CannyPlus-deterministic-fixture-replay/20261111T121328.945896Z-I1-CPU-fixtures-5afa78314d) |
+| 2026-11-11T12:17:41.460277+00:00 | I1 | 独立复审发现冷安装缺少显式OpenCV/PYTHONPATH/SDK overlay步骤；已补固定私有依赖与overlay初始化，按新入口准备真正干净clone重放。资格仍未发布。 | [canny-plus.md](canny-plus.md) |
+| 2026-11-11T12:17:56.414005+00:00 | I1 | 原始benchmark的pandas/tabulate等依赖已在私有site安装/检查，基础Torch/NumPy不替换。 | [20261111T121742.460205Z-I1-rocm-setup-ff119bde51](evidence/rewrite/I1/CannyPlus-private-Python-dependencies/20261111T121742.460205Z-I1-rocm-setup-ff119bde51) |
+| 2026-11-11T12:18:10.540668+00:00 | I1 | 冷构建缺口修复已记录，生产数值代码不变；等待全新checkout实测而非引用旧build目录。 | [20261111T121809.736688Z-I1-host-review-fix-0e0298924c](evidence/rewrite/I1/CannyPlus-build-recipe-fix/20261111T121809.736688Z-I1-host-review-fix-0e0298924c) |
+| 2026-11-11T12:19:12.963745+00:00 | I1 | Canny stream/并发/ABI负向执行rc=0；独立数值核对与资格仍单列。 | [20261111T121908.423889Z-I1-rocm-runtime-0da5ed7409](evidence/rewrite/I1/CannyPlus-runtime/20261111T121908.423889Z-I1-rocm-runtime-0da5ed7409) |
+| 2026-11-11T12:19:38.021324+00:00 | I1 | Canny 实际GPU trace执行rc=0；独立数值核对与资格仍单列。 | [20261111T121934.116530Z-I1-rocm-trace-fddd584fae](evidence/rewrite/I1/CannyPlus-runtime/20261111T121934.116530Z-I1-rocm-trace-fddd584fae) |
+| 2026-11-11T12:20:16.136158+00:00 | I1 | Canny trace独立核对：PASSED；所有返回码/输入输出字节与原始GPU dispatch记录已检查。 | [20261111T122015.237954Z-I1-CPU-reference-b2783c37e8](evidence/rewrite/I1/CannyPlus-trace-independent-CPU/20261111T122015.237954Z-I1-CPU-reference-b2783c37e8) |
+| 2026-11-11T12:20:16.503603+00:00 | I1 | Canny runtime独立核对：PASSED；所有返回码/输入输出字节与原始GPU dispatch记录已检查。 | [20261111T122015.228557Z-I1-CPU-reference-ef78184026](evidence/rewrite/I1/CannyPlus-runtime-independent-CPU/20261111T122015.228557Z-I1-CPU-reference-ef78184026) |
+| 2026-11-11T12:20:22.994360+00:00 | I1 | Canny验收器28项正向/反向检查：PASSED；包括容差内native差异、超限、尾字节、padding、丢例、失败rc、错误CSV/循环和空trace。 | [20261111T122016.417050Z-I1-CPU-validator-test-99c40e5688](evidence/rewrite/I1/CannyPlus-acceptance-mutations/20261111T122016.417050Z-I1-CPU-validator-test-99c40e5688) |
+| 2026-11-11T12:20:42.705753+00:00 | I1 | 第二项复审问题已修复：runtime验收必须独立检查15组完整payload、24项实际ABI码、8项异常类型和拒绝调用前后raw存储，不能只信worker passed字段；49项GPU重跑，新增4个复审反例，正反向总28项重验。 | [canny-plus-runtime.json](canny-plus-runtime.json)；[canny-plus-trace.json](canny-plus-trace.json) |
+| 2026-11-11T12:21:54.431258+00:00 | I1 | 资格复审补齐当前执行源码文件集合（包含新增/未跟踪Python启动钩子）及三个不同审查者/固定scope门槛；新增对应正向和篡改自测。等待固定修复提交和冷重放复核。 | [canny-plus.md](canny-plus.md) |

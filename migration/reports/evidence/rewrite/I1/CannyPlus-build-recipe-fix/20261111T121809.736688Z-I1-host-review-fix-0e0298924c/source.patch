@@ -1,0 +1,33 @@
+diff --git a/tools/moat/canny_plus_environment.py b/tools/moat/canny_plus_environment.py
+index 26e5ba11b..dd9bd0d24 100644
+--- a/tools/moat/canny_plus_environment.py
++++ b/tools/moat/canny_plus_environment.py
+@@ -4,9 +4,10 @@ from experiment import ROOT,Experiment,write
+ from snapshot import capture
+ from image_progress import record
+ def main():
+- e=Experiment('I1','CannyPlus-private-Python-dependencies','rocm-setup',sources=[__file__]);write(e.path/'backend.observed.json',capture())
+- packages=['pandas==2.3.3','tabulate==0.9.0','python-dateutil==2.9.0.post0','pytz==2025.2','tzdata==2025.2','six==1.17.0']
+- rc=e.command(['python3','-m','pip','install','--no-deps','--target',str(ROOT/'build/image-gpu-site'),*packages],'install-private-original-benchmark-packages',timeout=300)
++ e=Experiment('I1','CannyPlus-private-Python-dependencies','rocm-setup',sources=[__file__,ROOT/'tools/migration/bootstrap_sdk.py']);write(e.path/'backend.observed.json',capture())
++ packages=['opencv-python-headless==4.12.0.88','pandas==2.3.3','tabulate==0.9.0','python-dateutil==2.9.0.post0','pytz==2025.2','tzdata==2025.2','six==1.17.0']
++ rc=e.command(['python3','tools/migration/bootstrap_sdk.py'],'create-project-SDK-overlay',timeout=300)
++ if not rc:rc=e.command(['python3','-m','pip','install','--upgrade','--no-deps','--target',str(ROOT/'build/image-gpu-site'),*packages],'install-private-original-benchmark-packages',timeout=300)
+  if not rc:rc=e.command(['env','PYTHONPATH='+str(ROOT/'build/image-gpu-site'),'python3','-c','import torch,torchvision,numpy,pandas,tabulate,cv2;assert torch.version.hip.startswith("7.16.");print(torch.__version__,torchvision.__version__,numpy.__version__,pandas.__version__,tabulate.__version__,cv2.__version__)'],'verify-pairing-and-actual-imports')
+  ref=e.finish('EXECUTED' if not rc else 'ENV_BLOCKED');write(ROOT/'migration/reports/canny-plus-environment.json',dict(status='READY' if not rc else 'FAILED',evidence=ref,packages=packages));record('I1','原始benchmark的pandas/tabulate等依赖已在私有site安装/检查，基础Torch/NumPy不替换。',[ref]);return rc
+ if __name__=='__main__':raise SystemExit(main())
+diff --git a/tools/moat/qualify_canny_plus.py b/tools/moat/qualify_canny_plus.py
+index cd8f2dec5..1b8037a21 100644
+--- a/tools/moat/qualify_canny_plus.py
++++ b/tools/moat/qualify_canny_plus.py
+@@ -42,6 +42,10 @@ def collect(review=None):
+   return json.loads((d/member).read_text())=={k:v for k,v in record.items() if k not in {'evidence','parent'}}
+  gate('fixed-31-cases-8-original-sizes',lambda:len(spec['cases'])==31 and len({c['case'] for c in spec['cases']})==31 and len([c for c in spec['cases'] if c['kind']=='original'])==8 and spec['original']['warmup']==5 and spec['original']['iterations']==1000)
+  gate('unmodified-original-source-and-image',lambda:digest(ROOT/spec['source'])==spec['original_source_sha256'] and digest(ROOT/'NPP+/cannyEdgeDetectorPython/Teapot.jpg')==spec['original_image_sha256'])
++ def environment_ok():
++  env=load('environment');refs.add(env['evidence']);d,m,_=sealed(env['evidence']);commands=json.loads((d/'commands.json').read_text())
++  return env['status']=='READY' and m['backend']=='rocm-setup' and all(c['return_code']==0 for c in commands) and len(commands)==3 and commands[0]['phase']=='create-project-SDK-overlay' and 'opencv-python-headless==4.12.0.88' in env['packages'] and commands[-1]['phase']=='verify-pairing-and-actual-imports'
++ gate('explicit-private-dependencies-and-SDK-bootstrap',environment_ok)
+  def fixture_ok():
+   refs.add(spec['fixture_evidence']);d,m,_=sealed(spec['fixture_evidence']);expected=dict(spec);expected.pop('fixture_evidence')
+   return m['backend']=='CPU-fixtures' and json.loads((d/'profile.json').read_text())==expected

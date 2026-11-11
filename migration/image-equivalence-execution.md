@@ -99,11 +99,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-11T12:13:30.109667+00:00。26入口当前2通过/8部分/16失败。
+更新时间：2026-11-11T12:21:54.431258+00:00。26入口当前2通过/8部分/16失败。
 
-I1：31组原始/随机/几何输入从源码重新生成：PASSED；未替换冻结profile或历史来源。
+I1：资格复审补齐当前执行源码文件集合（包含新增/未跟踪Python启动钩子）及三个不同审查者/固定scope门槛；新增对应正向和篡改自测。等待固定修复提交和冷重放复核。
 
-证据：`migration/reports/evidence/rewrite/I1/CannyPlus-deterministic-fixture-replay/20261111T121328.945896Z-I1-CPU-fixtures-5afa78314d`
+证据：`migration/reports/canny-plus.md`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

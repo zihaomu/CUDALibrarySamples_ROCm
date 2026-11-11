@@ -9,6 +9,7 @@ def main():
  q=load('qualification');review=load('review');checks,refs,sources,build,spec=collect(review)
  catalog=json.loads((ROOT/'migration/samples.yaml').read_text());sample=next(s for s in catalog['samples'] if s['id']==spec['sample_id'])
  d,m,_=sealed(q['evidence']);frozen=json.loads((d/'qualification.json').read_text())
+ if m['backend']!='composite-qualification' or m['sample_id']!=spec['sample_id'] or m['experiment_id']!=q['qualification_id'] or m['experiment_outcome']!='PASSED' or q['kind']!='image-canny-c1-full-python' or q['implementation']!=spec['implementation'] or q['implementation_sha256']!=digest(ROOT/spec['implementation']):raise ValueError('Wrong qualification or original-entry implementation identity')
  if q['status']!='PASSED' or q['checks']!=checks or not checks or not all(c['passed'] for c in checks) or set(q['evidence_references'])!=refs or q['dependencies']!=build['dependencies'] or any(q.get(k)!=v for k,v in frozen.items()) or q['source_commit']!=review['source_commit'] or q['case_ids']!=[c['case'] for c in spec['cases']] or q['case_count']!=31:raise ValueError('Incomplete or changed qualification')
  proposal=dict(sample,implementation=q['implementation'],selected_validation=q)
  result=inspect(proposal)

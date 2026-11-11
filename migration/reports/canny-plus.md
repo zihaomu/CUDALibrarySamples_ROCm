@@ -14,18 +14,21 @@
 | 原始CUDA Python | [原始脚本环境](canny-plus-original-cuda.json)：5090系统Python无Torch，BLOCKED；真实native API对照单列 |
 | 运行语义 | [运行检查](canny-plus-runtime-validation.json)：CPU uint8/float16/32/64、GPU float16/32、非连续、两stream、并发实例、重复和修改输入、非法参数及调用后存储保持 |
 | GPU执行 | [原始trace](canny-plus-trace-validation.json)：两次输入变化调用各有Sobel/NMS/阈值三阶段dispatch |
-| 验收器 | [24项正反向](canny-plus-checks.json)：接受约定内native差异，拒绝超预算、错像素/padding、错误hash、尾字节、失败rc、丢结果、错误CSV/循环与空trace |
+| 验收器 | [28项正反向](canny-plus-checks.json)：接受约定内native差异，拒绝超预算、错像素/padding、错误hash、尾字节、失败rc、丢结果/运行payload、错误ABI返回码/异常类型、错误CSV/循环与空trace |
 
 构建和运行使用项目已固定的 ROCm 10.1 foundation。先按工作区设备政策启动该环境，在其中执行：
 
 ```bash
 python3 tools/moat/canny_plus_environment.py
+export PYTHONPATH="$PWD/build/image-gpu-site:$PWD/rocm/python"
 python3 tools/moat/canny_plus_replay_fixtures.py
 python3 tools/moat/canny_plus_build.py
 PYTHONPATH=build/image-gpu-site:rocm/python \
   python3 rocm/ported/NPP+/cannyEdgeDetectorPython/cannyEdgeDetector.py \
   --input NPP+/cannyEdgeDetectorPython/Teapot.jpg --output build/canny-output
 ```
+
+安装步骤显式创建私有 SDK overlay 和安装固定 OpenCV/pandas 依赖；不依赖既有 build 目录，也不替换 foundation 的 Torch/torchvision/NumPy。后续所有命令共用上面的私有 PYTHONPATH。
 
 共享库默认 `build/image/libimage_canny.so`，可用 `MIGRATION_IMAGE_LIBRARY` 指定。C ABI workspace 由调用方持有，stream 属于调用方；输入/输出/workspace必须是当前设备的不同有效分配。Python 模块自动保留异步 tensor/临时 buffer 的 stream 生命周期。只声明实际验收的 gfx1201/Linux 范围，wave64/Windows 仍待验证。
 

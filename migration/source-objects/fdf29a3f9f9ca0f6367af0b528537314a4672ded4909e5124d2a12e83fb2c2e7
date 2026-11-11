@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "outputs": [
+    "repeat-first",
+    "repeat-second",
+    "changed-input",
+    "cpu-uint8",
+    "cpu-float16",
+    "cpu-float32",
+    "cpu-float64",
+    "gpu-float16",
+    "gpu-float32",
+    "noncontiguous",
+    "stream-a",
+    "stream-b",
+    "concurrent-a",
+    "concurrent-b",
+    "after-errors"
+  ],
+  "python_errors": [
+    "rank-one",
+    "rank-three",
+    "zero-size",
+    "negative-threshold",
+    "reverse-threshold",
+    "large-threshold",
+    "fractional-threshold",
+    "not-tensor"
+  ],
+  "ABI_errors": [
+    "zero-width",
+    "negative-height",
+    "large-width",
+    "bad-channels",
+    "negative-low",
+    "reverse-threshold",
+    "large-high",
+    "null-source",
+    "null-output",
+    "null-workspace",
+    "short-source-pitch",
+    "short-output-pitch",
+    "short-source-span",
+    "short-output-span",
+    "short-workspace",
+    "overstated-source-allocation",
+    "overstated-output-allocation",
+    "overstated-workspace-allocation",
+    "alias-input-output",
+    "alias-input-workspace",
+    "alias-output-workspace",
+    "misaligned-workspace",
+    "host-source",
+    "overflow-pitch"
+  ],
+  "output_file_set": [
+    "input.bin",
+    "config.json",
+    "output.bin"
+  ],
+  "storage_file_set": [
+    "buffer.bin"
+  ],
+  "python_exception_types": {
+    "rank-one": "ValueError",
+    "rank-three": "ValueError",
+    "zero-size": "ValueError",
+    "negative-threshold": "ValueError",
+    "reverse-threshold": "ValueError",
+    "large-threshold": "ValueError",
+    "fractional-threshold": "TypeError",
+    "not-tensor": "ValueError"
+  },
+  "expected_ABI_status": 1,
+  "actual_device": "Guarded single gfx1201 device; two caller-owned nondefault streams",
+  "wrong_device_scope": "Cross-device handles are rejected by the API; no extra busy or forbidden GPU is opened for this single-device qualification."
+}

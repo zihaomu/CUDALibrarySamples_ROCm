@@ -15,10 +15,21 @@ def validate(run,trace=False):
  checks=[dict(check='actual-process-success',passed=run['return_code']==0),coverage(rows,[dict(case=c) for c in expected])]
  for row in rows:
   name=row['case'];checks.append(dict(check=name+'/runtime-status',passed=row['passed'] is True))
-  if 'files' not in row:continue
-  d=out/name;checks.append(file_set(d,['input.bin','config.json','output.bin']))
+  if name.startswith('ABI/'):
+   checks.append(dict(check=name+'/actual-status-code',passed=type(row.get('status')) is int and row['status']==spec['expected_ABI_status']));continue
+  if name.startswith('python/'):
+   checks.append(dict(check=name+'/actual-exception-type',passed=row.get('exception_type')==spec['python_exception_types'].get(name.removeprefix('python/')) and isinstance(row.get('diagnostic'),str) and bool(row['diagnostic'])));continue
+  storage=name.startswith('rejected-call-')
+  required=spec['storage_file_set'] if storage else spec['output_file_set']
+  complete=isinstance(row.get('files'),dict) and set(row['files'])==set(required)
+  checks.append(dict(check=name+'/complete-payload-manifest',passed=complete))
+  if not complete:continue
+  d=out/name;checks.append(file_set(d,required))
   for n,v in row['files'].items():checks.append(dict(check=name+'/'+n+'/identity',passed=(d/n).is_file() and (d/n).stat().st_size==v['bytes'] and digest(d/n)==v['sha256']))
-  if all(c['passed'] for c in checks):
+  if storage:
+   expected=np.full((37,49),173,np.uint8) if name=='rejected-call-output-preserved' else np.random.default_rng(20261111).integers(0,256,(37,49),dtype=np.uint8)
+   checks.append(array_check(d/'buffer.bin',expected,row['files']['buffer.bin']['sha256']))
+  elif all(c['passed'] for c in checks):
    mask=local_mask(reference(d),72,256);checks.append(array_check(d/'output.bin',mask,row['files']['output.bin']['sha256']))
  if trace:
   paths=list((ROOT/run['trace']).rglob('*kernel_trace.csv'));dispatches=[]
@@ -30,7 +41,7 @@ def validate(run,trace=False):
   checks.append(dict(check='two-real-complete-three-stage-GPU-dispatches',passed=names==Counter({'::sobel(':2,'::suppress(':2,'::local_threshold(':2}) and all(int(r['End_Timestamp'])>int(r['Start_Timestamp']) for r in dispatches),counts=dict(names)))
   checks.append(dict(check='changed-input-changes-traced-mask',passed=(out/'trace-first/output.bin').read_bytes()!=(out/'trace-changed/output.bin').read_bytes()))
  else:
-  masks={r['case']:(out/r['case']/'output.bin').read_bytes() for r in rows if 'files' in r}
+  masks={r['case']:(out/r['case']/'output.bin').read_bytes() for r in rows if r['case'] in spec['outputs'] and 'files' in r and (out/r['case']/'output.bin').is_file()}
   checks.append(dict(check='repeat-stable-and-changed-input-effective',passed=masks['repeat-first']==masks['repeat-second'] and masks['repeat-first']!=masks['changed-input']))
   streams={r['case']:r.get('stream') for r in rows};checks.append(dict(check='distinct-nondefault-caller-streams',passed=bool(streams['stream-a']) and bool(streams['stream-b']) and streams['stream-a']!=streams['stream-b']))
  return dict(status='PASSED' if checks and all(c['passed'] is True for c in checks) else 'FAILED',checks=checks,case_count=len(rows))
