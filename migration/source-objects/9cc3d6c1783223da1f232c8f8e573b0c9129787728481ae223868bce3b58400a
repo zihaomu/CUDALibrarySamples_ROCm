@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "status": "DRAFT_BEFORE_FIXTURE_FREEZE",
+  "sample_id": "NPP+/distanceTransform::unsignedAndSignedDistanceTransformNPPPlus.cpp",
+  "comparison_mode": "ALGORITHM_VARIANT",
+  "definition": "Unsigned exact Euclidean distance to zero-valued pixel centers. Signed exact Euclidean distance to all linearly interpolated horizontal/vertical threshold crossings plus exact-zero pixel centers, with sign of input minus threshold.",
+  "signed_types": [
+    "float32",
+    "float64"
+  ],
+  "unsigned_types": [
+    "uint8"
+  ],
+  "circle_preprocess": "(float64_input-0.5)*2, threshold=0",
+  "Lith_threshold": 0.10000000149011612,
+  "site_id": "Horizontal edge: source linear pixel ID; vertical edge: pixels+source ID; exact-zero pixel:2*pixels+source ID. Unsigned site ID=source pixel ID. Equal squared distance selects minimum site ID.",
+  "Voronoi": "Absolute short2=floor(subpixel site x,y); relative short2=query pixel minus anchor; no-site sentinel -32768 in both pairs.",
+  "comparison": {
+    "floating_distance": {
+      "atol": 2e-11,
+      "rtol": 1e-12,
+      "zero": "exact",
+      "infinity": "exact sign and position",
+      "NaN": "reject input before any output writes"
+    },
+    "indices_relative_siteID_visualization_padding": "EXACT",
+    "native": "Full outputs and mathematical/algorithm differences recorded; no vendor-equality or hidden fitted tolerance"
+  },
+  "visualization": {
+    "unsigned": "trunc then saturate0..65535",
+    "signed": "add32700 then trunc/saturate0..65535",
+    "infinities": "negative->0 positive->65535"
+  },
+  "implementation": "HIP unsigned row/column integer-site search; signed compacted GPU site set and direct all-site search with global squared-cost then site-ID ties. CPU file/metadata/scalar only.",
+  "oracle": {
+    "algorithm": "SciPy cKDTree of independent explicit subpixel sites, with exact squared-distance recomputation and deterministic tie selection",
+    "SciPy": "1.18.1",
+    "NumPy": "2.2.6",
+    "wheel_sha256": "f55fa87b6c612ecd6b058f167c53231b1d14e412efe361d3d6e38b3631c73218"
+  },
+  "required": [
+    "all-five-original-inputs-and-twelve-files",
+    "unsigned-signed-32f-signed-64f-and-circle-remap",
+    "fractional-threshold-boundary-movement",
+    "exact-zero-constant-no-site-single-pixel-row-column",
+    "symmetric-tie-and-independent-random-fields",
+    "original-default-paths-and-CLI",
+    "full-device-span-overlap-alignment-dimensions-pitches",
+    "default-nondefault-foreign-destroyed-streams",
+    "changed-input-reuse-and-concurrent-independent-instances",
+    "actual-GPU-dispatch",
+    "independent-CPU-and-native-comparisons",
+    "validator-positive-negative-checks",
+    "clean-checkout-exact-commit-independent-review",
+    "existing-NPP-EDT-and-NCC-regression"
+  ]
+}

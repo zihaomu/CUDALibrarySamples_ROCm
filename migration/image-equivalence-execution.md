@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-11T16:27:50.800157+00:00。26入口当前9通过/7部分/10失败。
+更新时间：2026-11-11T16:44:25.892013+00:00。26入口当前9通过/7部分/10失败。
 
-I2：Contour发布后的整体一致性、38项当前资格依赖和3821份完整实验记录均PASSED，639原入口/866原源/477构建定义保持。补齐新轮廓功能族的文档生成映射，首页仅显示当前248/22/369与125功能族。后续signed EDT仍未支持。
+I2：Signed/unsigned EDT四真实C++完整流程/48产品文件与全量实际GPU site/Voronoi审计独立CPU：PASSED
 
-证据：`migration/reports/final-validation.json`；`migration/reports/rewrite-selected-proof-audit.json`；`migration/reports/rewrite-evidence-audit.json`
+证据：`migration/reports/evidence/rewrite/I2/Distance-original-four-workflows-independent-CPU/20261111T164419.927269Z-I2-CPU-reference-c6f8055b31`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

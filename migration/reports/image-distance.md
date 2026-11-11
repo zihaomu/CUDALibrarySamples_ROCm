@@ -1,0 +1,47 @@
+# NPP+ signed / unsigned EDT 实现与实验记录
+
+状态：**实施中，未签发整例资格**。当前项目248通过、图像9/26通过保持不变。
+
+原始入口：`NPP+/distanceTransform::unsignedAndSignedDistanceTransformNPPPlus.cpp`。实际后端为项目 HIP；CPU 负责文件、标量和调度，不承担生产距离/Voronoi/可视化计算。
+
+## 定义与兼容范围
+
+[30组完整输入和固定合同](../rewrite/image-distance-profile.json)覆盖原始五张图、uint8 unsigned、float32/float64 signed、圆图原例预处理、子像素阈值、同距、反相、常量、单像素/行/列、独立噪声、完整padding。数学定义详见[合同说明](../image-signed-edt-contract.md)。
+
+Unsigned 为零像素中心的精确欧氏最近距离；signed 为水平/垂直线性阈值交点与恰零像素中心构成的点集距离，符号来自有效输入场。signed 使用GPU紧凑site集和完整二维平方距离搜索后按最小site ID破同距，避免分离搜索中间舍入提前丢弃全局同距候选。恰零像素的唯一零距离site直接输出，避免常量图的二次搜索。原始输入转换、site生成、距离、Voronoi和16u可视化均在GPU。
+
+项目采用 `ALGORITHM_VARIANT`，不声明复制NPP+ PBA反走样算法或Voronoi编号。输出绝对short2为所选子像素site向下取整的anchor，相对short2为像素减anchor，实际距离仍使用子像素坐标。距离对独立CPU预算固定为 `atol=2e-11, rtol=1e-12`，零/符号/无穷位置严格；site ID、坐标、索引、相对值、可视化和padding检查精确。
+
+无site返回相应符号无穷和-32768坐标sentinel。可视化保持原例unsigned截断、signed加32700后截断，并明确定义端点饱和；不继承越界浮点转无符号整数的未定义行为。
+
+## 当前证据
+
+| 范围 | 当前结果与证据 |
+| --- | --- |
+| 原生CUDA完整样例 | 5090未改源码实际build/run，五原图与12输出保存。[执行](image-I2-distance-native-original.json) |
+| 原生符号/类型/Voronoi研究 | 全文件读取，记录cutoff、符号、值域和绝对/相对坐标。[研究](image-I2-distance-native-research.json) |
+| 数学变体与native | 圆图maxAbs约29.9444，Lith约0.86533；这是不同算法的完整观测，不作为拟合容差。[独立点集研究](image-I2-distance-definition-research.json) |
+| 固定输入 | 30组、五原图12原始产品文件；首次GPU数值执行前把workspace与实现调整为完整site搜索，原数学定义和数值预算不变。[合同](image-distance-contracts.json) |
+| HIP共享库 | ABI1，160字节descriptor，独立输出和workspace；实际ROCm10.1/gfx1201构建。[构建](image-distance-build.json) |
+| GPU全量结果 | 30组完整实际执行；独立cKDTree参考核对所有距离/sites/索引/可视化、符号与Lipschitz、padding。[GPU](image-distance-all.json)、[CPU](image-distance-all-validation.json) |
+| 独立CPU解析检查 | 子像素直线、同距编号、无site/无穷、零、circle remap、有限端点差值溢出、nonfinite拒绝。[检查](image-distance-model-checks.json) |
+| 完整C++入口 | 五图12文件；固定默认/显式/完整规模变化/零level常量四流程，共48产品文件；GPU site审计单独保存。[合同](image-distance-original-contracts.json)、[构建](image-distance-frontend-build.json)、[执行](image-distance-originals.json)、[48文件独立CPU](image-distance-originals-validation.json) |
+
+最初device math普通符号无法链接的构建失败保留，改用HIP编译器内建数学操作后构建成功。CPU解析测试曾误将恰零site ID写成n+pixel而非合同的2n+pixel，修正测试期望后通过，生产模型未修改；全部失败和后续运行见[逐步记录](image-libraries-progress.md)及[实验索引](rewrite-experiments.jsonl)。
+
+四完整C++流程/48文件及全部site审计已独立CPU通过。尚需CLI/ABI/默认与外设备及销毁stream、变化后复用和并发实例、实际kernel trace、验收器正反例、原生完整输出绑定与差异重算、旧NPP EDT/NCC回归、冷检出、最终复审和先Git后发布。组件结果不提前增加整例支持。
+
+## 复现
+
+先在私有CPU环境生成固定输入，再在工作区ROCm10.1 launcher/device guard内构建与执行：
+
+```bash
+python3 tools/moat/image_distance_contracts.py
+python3 tools/moat/image_distance_original_contracts.py
+python3 tools/moat/image_distance_build.py
+python3 tools/moat/image_distance_run.py
+python3 tools/moat/image_distance_frontend_build.py
+python3 tools/moat/image_distance_originals.py
+```
+
+独立CPU环境含NumPy2.2.6、SciPy1.18.1，运行 `image_distance_reference.py`、`image_distance_original_reference.py` 和 `image_distance_model_checks.py`。所有GPU像素计算在物理GPU1；未验证性能、wave64和Windows。

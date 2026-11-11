@@ -31,7 +31,7 @@
     "signed": "add32700 then trunc/saturate0..65535",
     "infinities": "negative->0 positive->65535"
   },
-  "implementation": "HIP row/column candidate search and final minimum; all pixel/entropy-independent image calculation remains GPU. CPU file/metadata/scalar only.",
+  "implementation": "HIP unsigned row/column integer-site search; signed compacted GPU site set and direct all-site search with global squared-cost then site-ID ties. CPU file/metadata/scalar only.",
   "oracle": {
     "algorithm": "SciPy cKDTree of independent explicit subpixel sites, with exact squared-distance recomputation and deterministic tie selection",
     "SciPy": "1.18.1",

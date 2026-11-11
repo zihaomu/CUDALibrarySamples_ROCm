@@ -280,7 +280,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-11T16:27:50.800157+00:00。26入口当前9通过/7部分/10失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-11T16:44:25.892013+00:00。26入口当前9通过/7部分/10失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -1157,5 +1157,25 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-11T16:24:00.212972+00:00 | I2 | 真实发布器两项负测均正确拒绝且主表SHA不变；记录器拒绝把预期非零命令标成PASSED，原记录恢复封存，独立审核按EXPECTED_REJECTION保存。先Git后发布保护有效。 | `migration/reports/evidence/rewrite/I2/Contour-real-first-Git-publication-guards/20261111T162211.383563Z-I2-CPU-publication-test-d163696219`；`migration/reports/evidence/rewrite/I2/Contour-independent-publication-guard-audit/20261111T162359.328000Z-I2-CPU-publication-test-c551cec31a` |
 | 2026-11-11T16:26:04.929578+00:00 | I2 | 两个Contour完整原始入口已先Git锚定资格666eb8480后发布；全项目248通过/22部分/369失败，图像9/7/10。22输入、15流程55RAW、61参数、26设备数据、11状态stream、32CLI、58反例、22子记录冷重放及三个固定提交复审全部通过。继续signed/unsigned EDT和旧EDT/NCC回归，I2不提前完成。 | `migration/reports/image-contour-qualification.json`；`migration/reports/image-contour-review.json`；`migration/reports/image-contour-publication-tests.json` |
 | 2026-11-11T16:27:50.800157+00:00 | I2 | Contour发布后的整体一致性、38项当前资格依赖和3821份完整实验记录均PASSED，639原入口/866原源/477构建定义保持。补齐新轮廓功能族的文档生成映射，首页仅显示当前248/22/369与125功能族。后续signed EDT仍未支持。 | `migration/reports/final-validation.json`；`migration/reports/rewrite-selected-proof-audit.json`；`migration/reports/rewrite-evidence-audit.json` |
+| 2026-11-11T16:29:18.053030+00:00 | I2 | 固定signed/unsigned EDT定义、30组完整/pitched输入、五原图12文件、子像素siteID/Voronoi/可视化及误差预算。已有未执行kernel草稿，首个GPU构建前固定独立输入身份；不计支持。 | `migration/reports/evidence/rewrite/I2/Distance-frozen-complete-contracts/20261111T162917.020973Z-I2-CPU-contract-5a3cde127a` |
+| 2026-11-11T16:31:33.427896+00:00 | I2 | Signed/unsigned HIP距离/插值site/Voronoi/可视化共享库首构建：BUILD_ERROR；30输入与完整原入口及运行验收另列，不增加支持数。 | `migration/reports/evidence/rewrite/I2/Distance-GPU-shared-backend-build/20261111T163130.821304Z-I2-rocm-build-ab05162eba` |
+| 2026-11-11T16:33:06.964128+00:00 | I2 | Signed/unsigned HIP距离/插值site/Voronoi/可视化共享库首构建：BUILT；30输入与完整原入口及运行验收另列，不增加支持数。 | `migration/reports/evidence/rewrite/I2/Distance-GPU-shared-backend-build/20261111T163303.868250Z-I2-rocm-build-5f89ba5687` |
+| 2026-11-11T16:34:48.374734+00:00 | I2 | 固定signed/unsigned EDT定义、30组完整/pitched输入、五原图12文件、子像素siteID/Voronoi/可视化及误差预算。已有未执行kernel草稿，首个GPU构建前固定独立输入身份；不计支持。 | `migration/reports/evidence/rewrite/I2/Distance-frozen-complete-contracts/20261111T163447.419142Z-I2-CPU-contract-8b0d4e0a1b` |
+| 2026-11-11T16:35:19.869206+00:00 | I2 | Signed/unsigned HIP距离/插值site/Voronoi/可视化共享库首构建：BUILT；30输入与完整原入口及运行验收另列，不增加支持数。 | `migration/reports/evidence/rewrite/I2/Distance-GPU-shared-backend-build/20261111T163516.719350Z-I2-rocm-build-336648c023` |
+| 2026-11-11T16:35:51.279418+00:00 | I2 | 30组signed/unsigned原始完整输入实际HIP执行rc=0；独立CPU全数组和原入口验收待完成，不计支持。 | `migration/reports/evidence/rewrite/I2/Distance-thirty-complete-inputs/20261111T163546.945599Z-I2-rocm-prototype-d6f021cb3b` |
+| 2026-11-11T16:36:42.511431+00:00 | I2 | Signed/unsigned独立CPU数学参考的解析直线/子像素/同距编号/符号/无site/溢出安全插值/nonfinite：FAILED | `migration/reports/evidence/rewrite/I2/Distance-independent-CPU-analytic-checks/20261111T163641.590863Z-I2-CPU-model-622e25d89f` |
+| 2026-11-11T16:36:43.469809+00:00 | I2 | Signed/unsigned EDT30全量输入/子像素sites/确定性Voronoi/可视化/符号/距离结构/padding独立CPU：PASSED；完整原入口/运行/负测/trace/冷检出/复审另列。 | `migration/reports/evidence/rewrite/I2/Distance-full-independent-spatial-CPU/20261111T163640.411530Z-I2-CPU-reference-868827b0e3` |
+| 2026-11-11T16:37:02.181492+00:00 | I2 | Signed/unsigned独立CPU数学参考的解析直线/子像素/同距编号/符号/无site/溢出安全插值/nonfinite：FAILED | `migration/reports/evidence/rewrite/I2/Distance-independent-CPU-analytic-checks/20261111T163701.190393Z-I2-CPU-model-1328e2aa8d` |
+| 2026-11-11T16:37:13.059151+00:00 | I2 | Signed/unsigned独立CPU数学参考的解析直线/子像素/同距编号/符号/无site/溢出安全插值/nonfinite：PASSED | `migration/reports/evidence/rewrite/I2/Distance-independent-CPU-analytic-checks/20261111T163712.089816Z-I2-CPU-model-c1521f444b` |
+| 2026-11-11T16:38:49.423408+00:00 | I2 | EDT真实原入口实现前固定4完整流程：默认/显式原图、独立完整规模变化、零level常量；每次五输入12输出，共48产品文件，实际GPU sites审计另目录。 | `migration/reports/evidence/rewrite/I2/Distance-five-image-original-workflow-contracts/20261111T163848.440971Z-I2-CPU-contract-0f67f53e4d` |
+| 2026-11-11T16:42:32.882361+00:00 | I2 | Signed/unsigned HIP距离/插值site/Voronoi/可视化共享库首构建：BUILT；30输入与完整原入口及运行验收另列，不增加支持数。 | `migration/reports/evidence/rewrite/I2/Distance-GPU-shared-backend-build/20261111T164229.865099Z-I2-rocm-build-a221deef64` |
+| 2026-11-11T16:42:53.215163+00:00 | I2 | 30组signed/unsigned原始完整输入实际HIP执行rc=0；独立CPU全数组和原入口验收待完成，不计支持。 | `migration/reports/evidence/rewrite/I2/Distance-thirty-complete-inputs/20261111T164249.303945Z-I2-rocm-prototype-8f6c798584` |
+| 2026-11-11T16:42:59.489607+00:00 | I2 | Signed/unsigned完整五图C++原入口构建：BUILT；待四实际完整流程、48产品文件及审计独立验收。 | `migration/reports/evidence/rewrite/I2/Distance-full-original-C__-build/20261111T164256.114831Z-I2-rocm-build-690d648ef0` |
+| 2026-11-11T16:43:04.601317+00:00 | I2 | Signed/unsigned EDT真实C++/default-original五图12文件实际执行rc=0；全部像素/sites/原始命名和stdout由独立CPU另验。 | `migration/reports/evidence/rewrite/I2/NPP__distanceTransform__unsignedAndSignedDistanceTransformNPPPlus.cpp/20261111T164302.341701Z-I2-rocm-original-a08b2823d1` |
+| 2026-11-11T16:43:06.744239+00:00 | I2 | Signed/unsigned EDT真实C++/explicit-original五图12文件实际执行rc=0；全部像素/sites/原始命名和stdout由独立CPU另验。 | `migration/reports/evidence/rewrite/I2/NPP__distanceTransform__unsignedAndSignedDistanceTransformNPPPlus.cpp/20261111T164304.930332Z-I2-rocm-original-e848e14aa3` |
+| 2026-11-11T16:43:08.899604+00:00 | I2 | Signed/unsigned EDT真实C++/changed-full-size五图12文件实际执行rc=0；全部像素/sites/原始命名和stdout由独立CPU另验。 | `migration/reports/evidence/rewrite/I2/NPP__distanceTransform__unsignedAndSignedDistanceTransformNPPPlus.cpp/20261111T164307.057198Z-I2-rocm-original-8dfed26bf6` |
+| 2026-11-11T16:43:11.034070+00:00 | I2 | Signed/unsigned EDT真实C++/constant-zero-level五图12文件实际执行rc=0；全部像素/sites/原始命名和stdout由独立CPU另验。 | `migration/reports/evidence/rewrite/I2/NPP__distanceTransform__unsignedAndSignedDistanceTransformNPPPlus.cpp/20261111T164309.204860Z-I2-rocm-original-4df824750e` |
+| 2026-11-11T16:44:22.753877+00:00 | I2 | Signed/unsigned EDT30全量输入/子像素sites/确定性Voronoi/可视化/符号/距离结构/padding独立CPU：PASSED；完整原入口/运行/负测/trace/冷检出/复审另列。 | `migration/reports/evidence/rewrite/I2/Distance-full-independent-spatial-CPU/20261111T164419.890563Z-I2-CPU-reference-bfddc1307f` |
+| 2026-11-11T16:44:25.892013+00:00 | I2 | Signed/unsigned EDT四真实C++完整流程/48产品文件与全量实际GPU site/Voronoi审计独立CPU：PASSED | `migration/reports/evidence/rewrite/I2/Distance-original-four-workflows-independent-CPU/20261111T164419.927269Z-I2-CPU-reference-c6f8055b31` |
 
 <!-- IMAGE_EXECUTION:END -->

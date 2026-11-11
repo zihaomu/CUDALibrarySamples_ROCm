@@ -1,0 +1,1 @@
+Test rocm-build for Distance-full-original-C++-build, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T164229.865099Z-I2-rocm-build-a221deef64.

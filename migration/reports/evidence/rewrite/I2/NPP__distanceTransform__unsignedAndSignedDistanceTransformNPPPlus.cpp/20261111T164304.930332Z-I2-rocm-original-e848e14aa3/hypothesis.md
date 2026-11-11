@@ -1,0 +1,1 @@
+Test rocm-original for NPP+/distanceTransform::unsignedAndSignedDistanceTransformNPPPlus.cpp, case explicit-original. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T164256.114831Z-I2-rocm-build-690d648ef0.

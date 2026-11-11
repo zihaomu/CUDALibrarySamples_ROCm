@@ -1,0 +1,42 @@
+#!/usr/bin/env python3
+"""Freeze signed/unsigned distance definitions and full independent input bytes."""
+import json
+from pathlib import Path
+import numpy as np
+from experiment import ROOT,Experiment,write,digest
+from image_progress import record
+
+ORIGINALS=[
+ ('unsigned-original','DistanceSampler_512x512_8u.raw','u1',512,512,0,0.,0,'DistanceSamplerTransform_512x512'),
+ ('unsigned-original-inverted','DistanceSampler_512x512_Inverted_8u.raw','u1',512,512,0,0.,0,'DistanceSamplerTransform_512x512_Inverted'),
+ ('signed-circle-original','SignedCircle_256x206_64f.raw','<f8',256,206,1,0.,1,'SignedDistanceCircleTransform_256x206'),
+ ('signed-circle-original-inverted','SignedCircle_256x206_Inverted_64f.raw','<f8',256,206,1,0.,1,'SignedDistanceCircleTransform_256x206_Inverted'),
+ ('signed-lith-original','SignedLith_554x554_32f.raw','<f4',554,554,1,float(np.float32(.1)),0,'SignedDistanceLithTransform_554x554')]
+
+def main():
+ policy_path=ROOT/'migration/rewrite/image-distance-policy.json';policy=json.loads(policy_path.read_text());asset=ROOT/'NPP+/distanceTransform/images';source=ROOT/'NPP+/distanceTransform/unsignedAndSignedDistanceTransformNPPPlus.cpp';e=Experiment('I2','Distance-frozen-complete-contracts','CPU-contract',sources=[__file__,policy_path,source,*[asset/r[1] for r in ORIGINALS]]);cases=[];base=ROOT/'build/image-distance-fixtures';base.mkdir(parents=True,exist_ok=True)
+ def add(name,a,mode=1,cutoff=0.,remap=0,original=None,output_prefix=None):
+  h,w=a.shape;a=np.asarray(a,dtype=a.dtype.newbyteorder('<'));item=a.dtype.itemsize;pitch=w*item+24;payload=np.full((h,pitch),197,np.uint8);payload[:,:w*item]=a.view(np.uint8).reshape(h,w*item);d=base/name;d.mkdir(exist_ok=True);payload.tofile(d/'input.bin');config=dict(case=name,width=w,height=h,pitch=pitch,dtype=a.dtype.str,input_type={'|u1':0,'<f4':1,'<f8':2}[a.dtype.str],mode=mode,cutoff=cutoff,remap_circle=remap);write(d/'config.json',config);write(d/'manifest.json',dict(files={n:dict(bytes=(d/n).stat().st_size,sha256=digest(d/n)) for n in ['input.bin','config.json']}));cases.append(dict(**config,fixture=str(d.relative_to(ROOT)),manifest_sha256=digest(d/'manifest.json'),original=original,output_prefix=output_prefix))
+ for name,file,dtype,w,h,mode,cutoff,remap,prefix in ORIGINALS:
+  p=asset/file;add(name,np.fromfile(p,dtype).reshape(h,w),mode,cutoff,remap,dict(source=str(p.relative_to(ROOT)),sha256=digest(p),bytes=p.stat().st_size),prefix)
+ a=np.full((17,23),255,np.uint8);a[7,11]=0;add('unsigned-one-site',a,0)
+ a=np.full((19,21),255,np.uint8);a[9,5]=a[9,15]=0;add('unsigned-symmetric-ties',a,0)
+ add('unsigned-all-zero',np.zeros((17,31),np.uint8),0);add('unsigned-no-site',np.ones((13,29),np.uint8),0)
+ a=np.ones((1,521),np.uint8);a[0,61]=a[0,409]=0;add('unsigned-single-row',a,0)
+ a=np.ones((519,1),np.uint8);a[77,0]=a[401,0]=0;add('unsigned-single-column',a,0)
+ a=np.random.default_rng(773711).choice(np.array([0,255],np.uint8),(127,131),p=[.15,.85]);add('unsigned-independent-noise-773711',a,0)
+ for value,name in [(-1.,'negative'),(1.,'positive'),(0.,'zero')]:
+  add('signed-constant-'+name,np.full((17,31),value,np.float64));add('signed-one-pixel-'+name,np.array([[value]],np.float64))
+ yy,xx=np.indices((33,47));add('signed-horizontal-fractional',xx.astype(np.float64)-18.375)
+ yy,xx=np.indices((35,37));add('signed-vertical-float32',(yy-12.25+.1).astype(np.float32),cutoff=float(np.float32(.1)))
+ yy,xx=np.indices((31,49));add('signed-diagonal-float64',xx+.7*yy-21.375+.125,cutoff=.125)
+ yy,xx=np.indices((29,31));add('signed-step-subpixel',np.where(xx<13,-.375,.875).astype(np.float64))
+ yy,xx=np.indices((67,65));a=(np.hypot(xx-32.25,yy-33.75)-20.375).astype(np.float32);add('signed-fractional-ring',a);add('signed-fractional-ring-inverted',-a)
+ add('signed-independent-noise-773971',np.random.default_rng(773971).uniform(-1,1,(17,23)).astype(np.float32),cutoff=float(np.float32(.1)))
+ add('signed-independent-noise-999783',np.random.default_rng(999783).normal(size=(19,29)).astype(np.float64))
+ yy,xx=np.indices((21,13));add('signed-small-magnitude-gradient',(xx.astype(np.float64)-4.25)*1e-12)
+ yy,xx=np.indices((53,67));add('signed-saddle',np.clip((xx-33.25)*(yy-26.75)*.01,-.4,.4).astype(np.float64))
+ add('signed-single-row',np.cos(np.arange(521)*.137)[None,:].astype(np.float32));add('signed-single-column',np.sin(np.arange(519)*.113)[:,None].astype(np.float64))
+ profile=dict(schema_version=1,status='FROZEN',sample_id=policy['sample_id'],original_source=str(source.relative_to(ROOT)),original_source_sha256=digest(source),policy=policy,cases=cases,case_count=len(cases),original_case_ids=[r[0] for r in ORIGINALS],original_output_count=12,source_policy_sha256=digest(policy_path),required_cases=policy['required'],arithmetic='float32 inputs convert exactly to float64; circle remap then cutoff subtraction in float64. alpha=-a/(b-a), scaled absolute values only when finite endpoints have an overflowing difference. Compare squared distances with exact == tie then minimum site ID; compile GPU with FP contraction disabled.',C_ABI=dict(version=1,dimensions='1..32768 each; pixels<=2^26',workspace='40*pixels+8 bytes, 8-byte aligned, disjoint device spans',pitches='byte pitch; each optional absent pointer requires pitch=0',errors='Invalid arguments preserve all buffers; nonfinite effective field may change only workspace, never destination. Query default/foreign/destroyed stream owners before launches.',outputs='distance64f required; optional visualization16u/absolute-short2/relative-short2/siteID-u64/subpixel-double2. No-site sentinel IDs UINT64_MAX; coordinates -32768.'))
+ write(ROOT/'migration/rewrite/image-distance-profile.json',profile);write(e.path/'profile.json',profile);r=dict(status='FROZEN',case_count=len(cases),original_inputs=5,original_outputs=12);write(e.path/'contracts.json',r);r['evidence']=e.finish('OBSERVED');write(ROOT/'migration/reports/image-distance-contracts.json',r);record('I2',f'固定signed/unsigned EDT定义、{len(cases)}组完整/pitched输入、五原图12文件、子像素siteID/Voronoi/可视化及误差预算。已有未执行kernel草稿，首个GPU构建前固定独立输入身份；不计支持。',[r['evidence']]);print(r['status'],len(cases),r['evidence']);return 0
+if __name__=='__main__':raise SystemExit(main())
