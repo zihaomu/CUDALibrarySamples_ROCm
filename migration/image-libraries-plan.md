@@ -280,7 +280,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-11T13:33:46.213542+00:00。26入口当前3通过/8部分/15失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-11T13:42:37.939100+00:00。26入口当前3通过/8部分/15失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -627,5 +627,8 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-11T13:27:25.143341+00:00 | I1 | C3 CLI python/no-GPU实际rc=1；具体诊断与默认输出由独立CPU验收。 | `migration/reports/evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.py/20261111T132721.980476Z-I1-rocm-CLI-8b9044dd47` |
 | 2026-11-11T13:33:45.830971+00:00 | I1 | 两语言10项默认文件/错误文件/输出失败/无GPU分支独立检查：PASSED。 | `migration/reports/evidence/rewrite/I1/C3-Canny-CLI-independent-check/20261111T133344.842713Z-I1-CPU-reference-437b1ac188` |
 | 2026-11-11T13:33:46.213542+00:00 | I1 | C3最终构建闭包重放：22mask、两语言10原流程、55运行/trace、C++12项含两独立实例并发及39反例全部通过；NVIDIA未改C++三PNG与native API/OpenCV精确。正在完成合法空设备mask重验和干净clone；主表仍242/23/374，尚未发布C3资格。 | `migration/reports/canny-color-validation.json`；`migration/reports/canny-color-originals-validation.json`；`migration/reports/canny-color-cpp-runtime-validation.json`；`migration/reports/canny-color-checks.json`；`migration/reports/canny-color-original-cuda-validation.json` |
+| 2026-11-11T13:39:07.798496+00:00 | I1 | C3干净clone私有SDK/依赖/输入/编译/22mask及两语言10完整入口重放：PASSED；全部子raw与source objects由父seal保留。 | `migration/reports/evidence/rewrite/I1/C3-Canny-clean-checkout/20261111T133732.314009Z-I1-host-cold-replay-000ee189ff` |
+| 2026-11-11T13:41:18.544667+00:00 | I1 | C3资格器真实metadata/SDK/二进制/缺例/错误执行码13项正反向绑定测试：FAILED。 | `migration/reports/evidence/rewrite/I1/C3-Canny-qualification-binding-tests/20261111T134113.519794Z-I1-CPU-selftest-2ae433a954` |
+| 2026-11-11T13:42:37.939100+00:00 | I1 | C3冷重放PASSED：全新clone无build/SDK，固定OpenCV/依赖/22输入和新C++/HIP库全部重建，22mask/两语言10完整流程独立CPU复验通过；15子记录/source objects父封存。合法空设备mask下10 CLI全部正确拒绝/成功；复合预检仅余独立复审。 | `migration/reports/canny-color-cold.json`；`migration/reports/canny-color-cli-validation.json`；`migration/reports/canny-color-qualification-tests.json` |
 
 <!-- IMAGE_EXECUTION:END -->

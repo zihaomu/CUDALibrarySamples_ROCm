@@ -1,0 +1,1 @@
+Test rocm-original for NPP/nppCanny::npp_canny_simple.py, case original-teapot. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T133821.307495Z-I1-rocm-build-6953c423a4.

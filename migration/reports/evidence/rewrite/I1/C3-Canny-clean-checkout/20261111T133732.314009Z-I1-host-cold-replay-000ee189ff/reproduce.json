@@ -1,0 +1,211 @@
+{
+  "commands": [
+    {
+      "command_id": 1,
+      "phase": "fresh-clone",
+      "argv": [
+        "git",
+        "clone",
+        "--shared",
+        "--quiet",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-color-cold-cep09ezi/src"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T13:37:32.906681+00:00",
+      "timeout_seconds": 180,
+      "environment": {},
+      "stdout": "logs/0001-fresh-clone.stdout.log",
+      "stderr": "logs/0001-fresh-clone.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T13:37:38.536941+00:00",
+      "seconds": 5.629438077972736
+    },
+    {
+      "command_id": 2,
+      "phase": "fixed-checkout",
+      "argv": [
+        "git",
+        "checkout",
+        "--quiet",
+        "8e71c946f4e5f001b521d9586fd73e0f67d1e338"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-color-cold-cep09ezi/src",
+      "started_at_utc": "2026-11-11T13:37:38.554689+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0002-fixed-checkout.stdout.log",
+      "stderr": "logs/0002-fixed-checkout.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T13:37:38.971773+00:00",
+      "seconds": 0.4161616620258428
+    },
+    {
+      "command_id": 3,
+      "phase": "cold-private-host-OpenCV-SDK",
+      "argv": [
+        "python3",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-color-cold-cep09ezi/src/tools/moat/image_opencv_setup.py"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-color-cold-cep09ezi/src",
+      "started_at_utc": "2026-11-11T13:37:38.975896+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0003-cold-private-host-OpenCV-SDK.stdout.log",
+      "stderr": "logs/0003-cold-private-host-OpenCV-SDK.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T13:37:41.197012+00:00",
+      "seconds": 2.2203718739910983
+    },
+    {
+      "command_id": 4,
+      "phase": "cold-canny_plus_environment",
+      "argv": [
+        "/home/zihaomu/zihaomu_workspace/rocm10-launch.sh",
+        "env",
+        "ROCR_VISIBLE_DEVICES=3",
+        "HIP_VISIBLE_DEVICES=0",
+        "PYTHONPATH=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-color-cold-cep09ezi/src/build/image-gpu-site:/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-color-cold-cep09ezi/src/rocm/python",
+        "python3",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-color-cold-cep09ezi/src/tools/moat/canny_plus_environment.py"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-color-cold-cep09ezi/src",
+      "started_at_utc": "2026-11-11T13:37:41.199155+00:00",
+      "timeout_seconds": 1800,
+      "environment": {},
+      "stdout": "logs/0004-cold-canny_plus_environment.stdout.log",
+      "stderr": "logs/0004-cold-canny_plus_environment.stderr.log",
+      "environment_changes": {
+        "HIP_VISIBLE_DEVICES": "2"
+      },
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T13:38:14.598718+00:00",
+      "seconds": 33.398611878976226
+    },
+    {
+      "command_id": 5,
+      "phase": "cold-canny_color_replay_fixtures",
+      "argv": [
+        "/home/zihaomu/zihaomu_workspace/rocm10-launch.sh",
+        "env",
+        "ROCR_VISIBLE_DEVICES=3",
+        "HIP_VISIBLE_DEVICES=0",
+        "PYTHONPATH=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-color-cold-cep09ezi/src/build/image-gpu-site:/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-color-cold-cep09ezi/src/rocm/python",
+        "python3",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-color-cold-cep09ezi/src/tools/moat/canny_color_replay_fixtures.py"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-color-cold-cep09ezi/src",
+      "started_at_utc": "2026-11-11T13:38:14.601310+00:00",
+      "timeout_seconds": 1800,
+      "environment": {},
+      "stdout": "logs/0005-cold-canny_color_replay_fixtures.stdout.log",
+      "stderr": "logs/0005-cold-canny_color_replay_fixtures.stderr.log",
+      "environment_changes": {
+        "HIP_VISIBLE_DEVICES": "2"
+      },
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T13:38:18.726878+00:00",
+      "seconds": 4.124444147979375
+    },
+    {
+      "command_id": 6,
+      "phase": "cold-canny_color_build",
+      "argv": [
+        "/home/zihaomu/zihaomu_workspace/rocm10-launch.sh",
+        "env",
+        "ROCR_VISIBLE_DEVICES=3",
+        "HIP_VISIBLE_DEVICES=0",
+        "PYTHONPATH=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-color-cold-cep09ezi/src/build/image-gpu-site:/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-color-cold-cep09ezi/src/rocm/python",
+        "python3",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-color-cold-cep09ezi/src/tools/moat/canny_color_build.py"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-color-cold-cep09ezi/src",
+      "started_at_utc": "2026-11-11T13:38:18.728071+00:00",
+      "timeout_seconds": 1800,
+      "environment": {},
+      "stdout": "logs/0006-cold-canny_color_build.stdout.log",
+      "stderr": "logs/0006-cold-canny_color_build.stderr.log",
+      "environment_changes": {
+        "HIP_VISIBLE_DEVICES": "2"
+      },
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T13:38:29.066202+00:00",
+      "seconds": 10.337718536960892
+    },
+    {
+      "command_id": 7,
+      "phase": "cold-canny_color_run",
+      "argv": [
+        "/home/zihaomu/zihaomu_workspace/rocm10-launch.sh",
+        "env",
+        "ROCR_VISIBLE_DEVICES=3",
+        "HIP_VISIBLE_DEVICES=0",
+        "PYTHONPATH=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-color-cold-cep09ezi/src/build/image-gpu-site:/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-color-cold-cep09ezi/src/rocm/python",
+        "python3",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-color-cold-cep09ezi/src/tools/moat/canny_color_run.py"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-color-cold-cep09ezi/src",
+      "started_at_utc": "2026-11-11T13:38:29.068312+00:00",
+      "timeout_seconds": 1800,
+      "environment": {},
+      "stdout": "logs/0007-cold-canny_color_run.stdout.log",
+      "stderr": "logs/0007-cold-canny_color_run.stderr.log",
+      "environment_changes": {
+        "HIP_VISIBLE_DEVICES": "2"
+      },
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T13:38:35.598911+00:00",
+      "seconds": 6.52961134002544
+    },
+    {
+      "command_id": 8,
+      "phase": "cold-canny_color_run-originals",
+      "argv": [
+        "/home/zihaomu/zihaomu_workspace/rocm10-launch.sh",
+        "env",
+        "ROCR_VISIBLE_DEVICES=3",
+        "HIP_VISIBLE_DEVICES=0",
+        "PYTHONPATH=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-color-cold-cep09ezi/src/build/image-gpu-site:/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-color-cold-cep09ezi/src/rocm/python",
+        "python3",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-color-cold-cep09ezi/src/tools/moat/canny_color_run.py",
+        "--originals"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-color-cold-cep09ezi/src",
+      "started_at_utc": "2026-11-11T13:38:35.601077+00:00",
+      "timeout_seconds": 1800,
+      "environment": {},
+      "stdout": "logs/0008-cold-canny_color_run-originals.stdout.log",
+      "stderr": "logs/0008-cold-canny_color_run-originals.stderr.log",
+      "environment_changes": {
+        "HIP_VISIBLE_DEVICES": "2"
+      },
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T13:39:06.839306+00:00",
+      "seconds": 31.237079826998524
+    },
+    {
+      "command_id": 9,
+      "phase": "independent-22-masks-and-ten-original-files",
+      "argv": [
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-cpu-venv/bin/python",
+        "-c",
+        "import json,sys,pathlib\nsys.path.insert(0,sys.argv[1]+\"/tools/moat\")\nimport canny_color_reference as oracle\nclone=pathlib.Path(sys.argv[1]);original=pathlib.Path(sys.argv[2]);out=pathlib.Path(sys.argv[3]);oracle.ROOT=clone\nspec=json.loads((clone/\"migration/rewrite/canny-color-profile.json\").read_text());native=json.loads((original/\"migration/reports/canny-color-native.json\").read_text())\nfor row in native:row[\"outputs\"]=str(original/row[\"outputs\"]);row[\"evidence\"]=str(original/row[\"evidence\"])\nruns=json.loads((clone/\"migration/reports/canny-color-rocm.json\").read_text());masks=oracle.validate_masks(runs[0],spec,native);runs=json.loads((clone/\"migration/reports/canny-color-originals.json\").read_text());originals=oracle.validate_originals(runs,spec)\nfor name,v in [(\"masks\",masks),(\"originals\",originals)]:\n (out/(name+\"-CPU.json\")).write_text(json.dumps(v,indent=2));print(name,v[\"status\"],v[\"case_count\"],flush=True)\nassert masks[\"status\"]==originals[\"status\"]==\"PASSED\"\n",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-color-cold-cep09ezi/src",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I1/C3-Canny-clean-checkout/20261111T133732.314009Z-I1-host-cold-replay-000ee189ff"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T13:39:06.841905+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0009-independent-22-masks-and-ten-original-files.stdout.log",
+      "stderr": "logs/0009-independent-22-masks-and-ten-original-files.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T13:39:07.360024+00:00",
+      "seconds": 0.5171587550430559
+    }
+  ],
+  "source": "source.json",
+  "inputs": "inputs/manifest.json",
+  "expected_environment": "environment.expected.json"
+}

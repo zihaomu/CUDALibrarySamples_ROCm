@@ -1,6 +1,6 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-11T13:33:46.213542+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-11T13:42:37.939100+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
 26入口当前：3 PASSED / 8 PARTIAL / 15 FAILED。
 
@@ -364,3 +364,6 @@
 | 2026-11-11T13:27:25.143341+00:00 | I1 | C3 CLI python/no-GPU实际rc=1；具体诊断与默认输出由独立CPU验收。 | [20261111T132721.980476Z-I1-rocm-CLI-8b9044dd47](evidence/rewrite/I1/NPP_nppCanny__npp_canny_simple.py/20261111T132721.980476Z-I1-rocm-CLI-8b9044dd47) |
 | 2026-11-11T13:33:45.830971+00:00 | I1 | 两语言10项默认文件/错误文件/输出失败/无GPU分支独立检查：PASSED。 | [20261111T133344.842713Z-I1-CPU-reference-437b1ac188](evidence/rewrite/I1/C3-Canny-CLI-independent-check/20261111T133344.842713Z-I1-CPU-reference-437b1ac188) |
 | 2026-11-11T13:33:46.213542+00:00 | I1 | C3最终构建闭包重放：22mask、两语言10原流程、55运行/trace、C++12项含两独立实例并发及39反例全部通过；NVIDIA未改C++三PNG与native API/OpenCV精确。正在完成合法空设备mask重验和干净clone；主表仍242/23/374，尚未发布C3资格。 | [canny-color-validation.json](canny-color-validation.json)；[canny-color-originals-validation.json](canny-color-originals-validation.json)；[canny-color-cpp-runtime-validation.json](canny-color-cpp-runtime-validation.json)；[canny-color-checks.json](canny-color-checks.json)；[canny-color-original-cuda-validation.json](canny-color-original-cuda-validation.json) |
+| 2026-11-11T13:39:07.798496+00:00 | I1 | C3干净clone私有SDK/依赖/输入/编译/22mask及两语言10完整入口重放：PASSED；全部子raw与source objects由父seal保留。 | [20261111T133732.314009Z-I1-host-cold-replay-000ee189ff](evidence/rewrite/I1/C3-Canny-clean-checkout/20261111T133732.314009Z-I1-host-cold-replay-000ee189ff) |
+| 2026-11-11T13:41:18.544667+00:00 | I1 | C3资格器真实metadata/SDK/二进制/缺例/错误执行码13项正反向绑定测试：FAILED。 | [20261111T134113.519794Z-I1-CPU-selftest-2ae433a954](evidence/rewrite/I1/C3-Canny-qualification-binding-tests/20261111T134113.519794Z-I1-CPU-selftest-2ae433a954) |
+| 2026-11-11T13:42:37.939100+00:00 | I1 | C3冷重放PASSED：全新clone无build/SDK，固定OpenCV/依赖/22输入和新C++/HIP库全部重建，22mask/两语言10完整流程独立CPU复验通过；15子记录/source objects父封存。合法空设备mask下10 CLI全部正确拒绝/成功；复合预检仅余独立复审。 | [canny-color-cold.json](canny-color-cold.json)；[canny-color-cli-validation.json](canny-color-cli-validation.json)；[canny-color-qualification-tests.json](canny-color-qualification-tests.json) |
