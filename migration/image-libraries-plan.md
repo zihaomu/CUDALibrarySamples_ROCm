@@ -280,7 +280,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-11T14:41:45.108898+00:00。26入口当前5通过/7部分/14失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-11T14:44:07.285248+00:00。26入口当前7通过/7部分/12失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -1003,5 +1003,8 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-11T14:39:25.329090+00:00 | I0 | NPP findContour未改原例默认完整输入：build=0 run=0，逐文件完整字节已保留；不从rc推断geometry正确或ROCm支持。 | `migration/reports/evidence/rewrite/I0/NPP_findContour__findContour.cpp/20261111T143920.643375Z-I0-cuda-original-44dd678001` |
 | 2026-11-11T14:39:30.596903+00:00 | I0 | NPP+ findContour未改原例默认完整输入：build=0 run=0，逐文件完整字节已保留；不从rc推断geometry正确或ROCm支持。 | `migration/reports/evidence/rewrite/I0/NPP__findContour__findContourNPPPlus.cpp/20261111T143925.653981Z-I0-cuda-original-8d2d32ef8b` |
 | 2026-11-11T14:41:45.108898+00:00 | I2 | CCL两个已签发资格发布前实测拒绝：未首次Git封存及不完整两入口组均在主表修改前阻断；catalog SHA完全不变。PASSED | `migration/reports/evidence/rewrite/I2/CCL-first-publication-and-complete-group-guards/20261111T144131.655597Z-I2-CPU-publication-test-d4b32abc5d` |
+| 2026-11-11T14:43:06.470879+00:00 | I2 | 两个CCL完整入口已发布：三范围e2c01dab批准，复合资格先Git提交b6d771dd0；首次Git/不完整组实际拒绝后才改主表。项目246通过/22部分/371失败，123算子/功能族，图像7通过/7部分/12失败；I2其余两contour和signed/unsigned EDT继续。原厂分区失败、允许编号差异与CPU精确分区分开显示；首页/算子表已生成。 | `migration/reports/image-ccl-qualification.json`；`migration/reports/image-ccl-review.json`；`migration/reports/image-ccl.md` |
+| 2026-11-11T14:43:50.289499+00:00 | I0 | 原生两contour完整输出独立检查：CCL分区及4/8邻域、ROI外边界四种观察均逐像素保留，不以拟合native替代项目定义。标准3文件与NPP+4文件集合/长度确认，有序geometry仍需独立合同和GPU实现。 | `migration/reports/evidence/rewrite/I0/I2-contour-native-label-boundary-research/20261111T144347.540300Z-I0-CPU-research-a6d5a9e7f7` |
+| 2026-11-11T14:44:07.285248+00:00 | I2 | CCL发布后整体校验PASSED：639入口/866原源/477原构建保持，246整例/123功能族，36个当前重写资格闭包全部有效；15,582相对链接及所有旧批次数值/反例一致。全量证据审计检查点3667条无孤立/未封存/未归档。接续两contour实现及EDT，不把I2标完成。 | `migration/reports/final-validation.json`；`migration/reports/rewrite-selected-proof-audit.json`；`migration/reports/rewrite-evidence-audit.json` |
 
 <!-- IMAGE_EXECUTION:END -->

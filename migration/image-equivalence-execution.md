@@ -2,7 +2,7 @@
 
 日期：2026-11-11。状态：**IN_PROGRESS**。逐步实施中；仅封存资格会增加支持数。
 
-本方案落实用户“合理差异可以接受”的要求，是[完整图像库计划](image-libraries-plan.md)的执行细化。[生效验收政策](rewrite/image-acceptance-policy.json)和[差异复评](reports/image-difference-acceptance.md)作为依据。目标仍为原定 26 个入口：方案起点为 2 通过、8 部分、16 失败，新增目标为 24 个；完整模式和输入分支不删减。当前已发布 5 通过、7 部分、14 失败。
+本方案落实用户“合理差异可以接受”的要求，是[完整图像库计划](image-libraries-plan.md)的执行细化。[生效验收政策](rewrite/image-acceptance-policy.json)和[差异复评](reports/image-difference-acceptance.md)作为依据。目标仍为原定 26 个入口：方案起点为 2 通过、8 部分、16 失败，新增目标为 24 个；完整模式和输入分支不删减。当前已发布 7 通过、7 部分、12 失败。
 
 ## 1. 执行原则与前置工作
 
@@ -42,6 +42,10 @@ C1 的步骤 1–7 已全部完成并发布：[完整验收](reports/canny-plus.
 当前 NPP 对照中存在数千像素的差异，与已接受的 NPP+ 3 个边界点不是同一结论。先固定并分析连接算法；可选择合理、明确的 Canny 算法变体，但需给出独立 CPU 与构造几何图的效果证据，报告与原生 NPP 的实际差异，不声称 mask 精确兼容。若这一功能判断尚不成立，两项保持 PARTIAL；不阻塞已完成入口的发布。
 
 C3 两入口现已完成并发布：[完整验收](reports/canny-color.md)、[固定资格](reports/canny-color-qualification.json)、[三项独立复核](reports/canny-color-review.json)。22 组完整 mask、两语言 10 个完整文件流程、55 项运行合同、12 项 C++ 类检查、10 项 CLI、39 项验收器检查及干净检出重放通过。项目采用经典八连接强种子滞后，原图比 native NPP 少 4328 个像素，完整差异及结构说明保留。I1 状态为 COMPLETED_SCOPED，不代表后续图像范围完成。
+
+### I2 当前进展
+
+两个 CCL 完整入口已发布：[支持方式和验收](reports/image-ccl.md)、[固定资格](reports/image-ccl-qualification.json)、[独立复核](reports/image-ccl-review.json)。覆盖原始五图、单图/异构batch、NPP+默认及条件编译、全部batch 1..5；27mask、44运行、3默认/外设备/销毁stream、15完整流程165文件、39CLI、31正反例、3原生预检反例及20子记录冷重放通过。当前NPP/NPP+分区缺陷独立保留，项目与CPU正确分区精确。I2剩余两项轮廓与一项signed/unsigned EDT继续实施，I2保持IN_PROGRESS。
 
 ## 4. JPEG 路线
 
@@ -96,18 +100,18 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 容差内的扰动是正向检查，超预算数值偏差和错通道/ROI/模式/丢 batch 是反向检查；不要求所有 1 LSB 扰动都被判错。无损数据、位深/通道/尺寸、ROI/padding、错误行为和 GPU 实际执行仍有硬约束。水印、tile/ROI、连通结构等另作局部/语义检查，不能只用全图 SSIM 判断。
 
-首页仍只展示当前支持情况；批次过程与完整日志保留在[逐步记录](reports/image-libraries-progress.md)和[支持日志总表](reports/support-log-index.md)。当前已发布项目 244/22/373、图像 5/7/14；新增数只来自已经签发并先提交 Git 的完整入口资格。
+首页仍只展示当前支持情况；批次过程与完整日志保留在[逐步记录](reports/image-libraries-progress.md)和[支持日志总表](reports/support-log-index.md)。当前已发布项目 246/22/371、图像 7/7/12；新增数只来自已经签发并先提交 Git 的完整入口资格。
 
 
 <!-- IMAGE_EXECUTION:START -->
 
 ## 当前实施检查点
 
-更新时间：2026-11-11T14:41:45.108898+00:00。26入口当前5通过/7部分/14失败。
+更新时间：2026-11-11T14:44:07.285248+00:00。26入口当前7通过/7部分/12失败。
 
-I2：CCL两个已签发资格发布前实测拒绝：未首次Git封存及不完整两入口组均在主表修改前阻断；catalog SHA完全不变。PASSED
+I2：CCL发布后整体校验PASSED：639入口/866原源/477原构建保持，246整例/123功能族，36个当前重写资格闭包全部有效；15,582相对链接及所有旧批次数值/反例一致。全量证据审计检查点3667条无孤立/未封存/未归档。接续两contour实现及EDT，不把I2标完成。
 
-证据：`migration/reports/evidence/rewrite/I2/CCL-first-publication-and-complete-group-guards/20261111T144131.655597Z-I2-CPU-publication-test-d4b32abc5d`
+证据：`migration/reports/final-validation.json`；`migration/reports/rewrite-selected-proof-audit.json`；`migration/reports/rewrite-evidence-audit.json`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 
