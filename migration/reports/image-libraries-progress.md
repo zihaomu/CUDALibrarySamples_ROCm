@@ -1,6 +1,6 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-11T13:42:37.939100+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-11T13:43:39.281751+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
 26入口当前：3 PASSED / 8 PARTIAL / 15 FAILED。
 
@@ -367,3 +367,4 @@
 | 2026-11-11T13:39:07.798496+00:00 | I1 | C3干净clone私有SDK/依赖/输入/编译/22mask及两语言10完整入口重放：PASSED；全部子raw与source objects由父seal保留。 | [20261111T133732.314009Z-I1-host-cold-replay-000ee189ff](evidence/rewrite/I1/C3-Canny-clean-checkout/20261111T133732.314009Z-I1-host-cold-replay-000ee189ff) |
 | 2026-11-11T13:41:18.544667+00:00 | I1 | C3资格器真实metadata/SDK/二进制/缺例/错误执行码13项正反向绑定测试：FAILED。 | [20261111T134113.519794Z-I1-CPU-selftest-2ae433a954](evidence/rewrite/I1/C3-Canny-qualification-binding-tests/20261111T134113.519794Z-I1-CPU-selftest-2ae433a954) |
 | 2026-11-11T13:42:37.939100+00:00 | I1 | C3冷重放PASSED：全新clone无build/SDK，固定OpenCV/依赖/22输入和新C++/HIP库全部重建，22mask/两语言10完整流程独立CPU复验通过；15子记录/source objects父封存。合法空设备mask下10 CLI全部正确拒绝/成功；复合预检仅余独立复审。 | [canny-color-cold.json](canny-color-cold.json)；[canny-color-cli-validation.json](canny-color-cli-validation.json)；[canny-color-qualification-tests.json](canny-color-qualification-tests.json) |
+| 2026-11-11T13:43:39.281751+00:00 | I1 | 资格13自测首轮因测试cache遗漏fixture-replay报告而拒绝正例，已补回必需报告（未降低覆盖门槛）重跑：PASSED；原失败保留。 | [20261111T134334.521258Z-I1-CPU-selftest-f069c31963](evidence/rewrite/I1/C3-Canny-qualification-binding-tests/20261111T134334.521258Z-I1-CPU-selftest-f069c31963) |

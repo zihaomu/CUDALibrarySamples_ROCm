@@ -7,7 +7,7 @@ import qualify_canny_color as q
 class MetadataBindings(unittest.TestCase):
  @classmethod
  def setUpClass(cls):
-  cls.original=q.load;cls.cache={n:cls.original(n) for n in ['build','native-build','native','rocm','originals','validation','originals-validation','runtime','runtime-validation','trace','trace-validation','cpp-runtime','cpp-runtime-validation','checks','original-cuda-cpp','original-cuda-validation','original-cuda-python','cli','cli-validation','cold']}
+  cls.original=q.load;cls.cache={n:cls.original(n) for n in ['fixture-replay','build','native-build','native','rocm','originals','validation','originals-validation','runtime','runtime-validation','trace','trace-validation','cpp-runtime','cpp-runtime-validation','checks','original-cuda-cpp','original-cuda-validation','original-cuda-python','cli','cli-validation','cold']}
  def collect(self,mutate=None):
   values=copy.deepcopy(self.cache)
   if mutate:mutate(values)
