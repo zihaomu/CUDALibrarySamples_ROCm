@@ -135,7 +135,7 @@ Python 使用 ROCm PyTorch 与共享 HIP C ABI。`torch.cuda` 在 ROCm 中仍是
 
 GPU decoder 先实现 Huffman 表/MCU、restart、dequant/IDCT，再补 progressive 多 scan 的 spectral selection、successive approximation、DC/AC refinement 和 EOB run。所有 scan 对同一 coefficient buffer 的累积顺序与每个分量尺寸都验收；仅成功解出 baseline 不能升级 progressive。
 
-GPU encoder 实现色度下采样、DCT、量化、DC predictor、AC RLE、Huffman（含优化表）、位流长度 prefix-scan 和 byte stuffing；支持原例采样/quality、encoding 类型及 resize/watermark 的量化表和 APP/COM metadata 复制流程。多实例保留独立 state、slot、host pinned buffer、device workspace、异步事件、输出命名和故障传播，不能退化成一个串行 CPU codec。
+GPU encoder 实现色度下采样、DCT、量化、DC predictor、AC RLE、Huffman（含优化表）、位流长度 prefix-scan 和 byte stuffing；resize/watermark 原例会复制源 JPEG encoding，若该有效输入要求 progressive 输出，则还必须实现 progressive 多 scan 编码和 refinement，不能静默改成 baseline；支持原例采样/quality、encoding 类型及 resize/watermark 的量化表和 APP/COM metadata 复制流程。多实例保留独立 state、slot、host pinned buffer、device workspace、异步事件、输出命名和故障传播，不能退化成一个串行 CPU codec。
 
 baseline/progressive、grayscale/RGB/YCbCr、所有实际接受的 subsampling、ROI/scale、奇数尺寸和 batch 尾部都建矩阵。有效输入原图完整跑，损坏/截断/缺表/错误 scan 不崩溃且返回规定错误。硬件只能按真实 AMD 能力报告；NVIDIA backend ID 通过适配层解释，不能硬编码“hardware available”。
 
@@ -190,6 +190,8 @@ sealed.json                    所有归档文件大小与hash
 纯进程内复合资格没有外部命令时可不生成 commands.json；其引用的真实构建/GPU/CPU/CUDA实验必须核对命令。大二进制留 artifacts/远端时仍保存明确位置/大小/hash与CPU实际读取记录；可重建 fixture 必须有seed/生成器hash和文件hash。
 
 通过流程：合同冻结 → 项目环境构建 → 每个GPU/CPU/native场景 → 故障/ABI/CLI/执行语义 → 固定源码独立复审 → 复合资格封存 → **先提交资格与引用seal到Git** → publisher重新验证完整case、类型/语言/实现/hash、所有引用与当前依赖 → 更新 samples/tasks/library registry → render。记录每次失败、超时和中断；不覆盖旧结果。
+
+首次发布新入口前补齐 `tools/migration/operator_support.py` 中 NPP 的新增算法及 NPP+/nvJPEG/nvJPEG2000 的显式算子映射。按模块和原核心功能去重，Python、batch 和精度变体不增加功能族；每个被声明的操作都要有对应原例与独立验收，不能只改计数绕过缺项。
 
 首页仅展示当前总量和模块支持矩阵；具体支持方式、效果、未支持原因与日志继续在 `migration/reports/support-log-index.md` 及模块子页。I0–I9进展写入 `migration/reports/image-libraries-progress.md`，不重新放回首页。开发历史保留在独立归档。
 
