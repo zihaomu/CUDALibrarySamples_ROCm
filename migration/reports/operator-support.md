@@ -2,7 +2,7 @@
 
 ## 已验收算子与验证范围
 
-**18 个模块已有整例通过，覆盖 117 个按模块去重的算子/功能族，对应 231 个通过的样例入口。**
+**18 个模块已有整例通过，覆盖 119 个按模块去重的算子/功能族，对应 241 个通过的样例入口。**
 
 计数按数学算子或原例核心功能归并；同模块的精度、尺寸、语言、batch、存储格式和算法变体不重复增加算子数。例如 cuRAND 是 4 种分布、36 个 generator/distribution profile；cuDSS simple 的 3 种语言入口算 1 个功能族。跨模块总数保留不同库接口的实现，GEMM 可分别出现在 cuBLAS 与 cuBLASLt。每个族至少有一个通过独立验收的样例，支持范围限于下表和逐例 required cases。
 
@@ -11,7 +11,7 @@
 | [cuBLAS](../../cuBLAS/README.md) | 52 | `amax`、`amin`、`asum`、`axpy`、`copy`、`dgmm`、`dot`、`dotc`、`gbmv`、`geam`、`gemm`、`gemv`、`ger`、`hbmv`、`hemm`、`hemv`、`her`、`her2`、`her2k`、`herk`、`herkx`、`hpmv`、`hpr`、`hpr2`、`nrm2`、`rot`、`rotg`、`rotm`、`rotmg`、`sbmv`、`scal`、`spmv`、`spr`、`spr2`、`swap`、`symm`、`symv`、`syr`、`syr2`、`syr2k`、`syrk`、`syrkx`、`tbmv`、`tbsv`、`tpmv`、`tpsv`、`tpttr`、`trmm`、`trmv`、`trsm`、`trsv`、`trttp` | 72 | 固定教学profile与所列扩展cases；含复杂rank-k类型化适配、HIP GPU packed转换、FP32分组batched及FP64项目策略调优。rotmg极端缩放使用HIP修正；调优/批量变体按同一数学族去重。 |
 | [cuBLASLt](../../cuBLASLt/README.md) | 1 | `GEMM` | 8 | 既有6个profile为FP32 SGEMM、HSH pointer-array/strided、grouped分发及custom-find/autotune。MOAT新资格分别登记FP16 planar负偏移转换/FP32 3M/FP16输出，以及真实COL32/COL4 packing + native INT8/INT32 GemmEx；按样例链接与资格状态限定范围。 |
 | [cuBLASMp](../../cuBLASMp/README.md) | 2 | `block-cyclic 重分布`、`分布式 GEADD` | 2 | 已登记FP64 GEADD与1024阶block-cyclic重分布/往返；双MPI进程和不同GPU实际通信。GEMM子矩阵与低精度collective/quantized scale模式等缺口保持PARTIAL，未覆盖多节点。 |
-| [cuDSS](../../cuDSS/README.md) | 2 | `稀疏直接求解`、`稀疏重排序与求解` | 14 | FP64 CSR：simple、异构/均匀batch、重排后完整求解及GENERAL多RHS残差；CPU符号/matching + rocSOLVER CSRRF或项目HIP CSR pivot LU。R9新增9个矩阵helper入口（按稠密/CSR两种描述符功能去重，batch与语言不另计）：项目host描述符＋真实HIP数据/指针表，非GPU求解算法；MOAT另有8个真实ISO_C_BINDING Fortran求解入口，uniform保留GPU factor并选择性重算，residual应用实际检查；原CUDA Fortran工具链仍缺。CPP重排严格METIS向量不同及get_set缺项保持PARTIAL，不把历史analysis-only计为完整求解。规模/动态pivot按逐例范围。 |
+| [cuDSS](../../cuDSS/README.md) | 4 | `CSR 矩阵描述符管理`、`稀疏直接求解`、`稀疏重排序与求解`、`稠密矩阵描述符管理` | 23 | FP64 CSR：simple、异构/均匀batch、重排后完整求解及GENERAL多RHS残差；CPU符号/matching + rocSOLVER CSRRF或项目HIP CSR pivot LU。R9新增9个矩阵helper入口（按稠密/CSR两种描述符功能去重，batch与语言不另计）：项目host描述符＋真实HIP数据/指针表，非GPU求解算法；MOAT另有8个真实ISO_C_BINDING Fortran求解入口，uniform保留GPU factor并选择性重算，residual应用实际检查；原CUDA Fortran工具链仍缺。CPP重排严格METIS向量不同及get_set缺项保持PARTIAL，不把历史analysis-only计为完整求解。规模/动态pivot按逐例范围。 |
 | [cuFFT](../../cuFFT/README.md) | 3 | `C2C 复数 FFT`、`FFT 窗口过滤 callback`、`R2C/C2R 实数 FFT` | 10 | 10 个 profile：原始单卡/双卡 C2C、实数正逆变换和 legacy/离线 SPIR-V/HIPRTC callback。1D 多卡使用 hipFFT + RCCL + HIP。 |
 | [cuFFTMp](../../cuFFTMp/README.md) | 1 | `多进程 slab C2C FFT` | 1 | 双MPI rank，原始16³及不均匀17×13×9；hipFFT本地YZ/X FFT + RCCL Send/Recv + HIP pack/unpack/归一化，完整频域与逆变换输出。 |
 | [cuPQC](../../cuPQC/README.md) | 2 | `SHA-256`、`SHA3-256` | 2 | SHA-256 单线程与 SHA3-256 的 32-lane 协作 GPU kernel；各 14 输入与 hashlib 精确一致，PQC 其它算法未实现。 |
@@ -25,7 +25,7 @@
 | [MathDx/cuFFTDx](../../MathDx/cuFFTDx/README.md) | 1 | `设备内 C2C FFT` | 1 | HIP调用方kernel内协作128点双C2C FFT、ElementsPerThread=8/共32线程及扩展线程块；全部CPU频谱输出与兼容CUDA数学基线。 |
 | [MathDx/cuSolverDx](../../MathDx/cuSolverDx/README.md) | 4 | `设备内 Cholesky 分解/求解`、`设备内 complex Cholesky`、`设备内 partial-pivot LU`、`设备内三角求解` | 4 | HIP调用方kernel内complex Cholesky；MOAT新增complex FP32 48×32 pivot LU、complex FP64 32阶双batch POSV、FP64 right/lower 32×33 TRSM。原生MathDx26.06.1原例实际device输出、同字节HIP与独立CPU分别记录；只按已通过样例的登记范围统计。 |
 | [NPP](../../NPP/README.md) | 2 | `Euclidean 距离变换/Voronoi`、`零均值 NCC` | 2 | 精确Euclidean距离/Voronoi/整数截断；NCC原始2048×1024 RAW、全部CLI、完整score/GPU argmax、PGM与HIP-event计时已收口，常量模板/图块按原生大图路径实测；Canny原生像素策略与其它未完成入口继续逐例记录。 |
-| [nvCOMP](../../nvCOMP/README.md) | 3 | `CRC32`、`LZ4`、`Snappy` | 7 | hipCOMP LZ4/Snappy原生批处理；CPU↔GPU与hipCOMP↔nvCOMP双向互解、逐chunk status/实际长度、空/边界/损坏流；LZ4 native manager/factory +项目CRC32C及100 raw buffers。独立CRC32入口采用项目HIP IEEE/PKZIP算法，与zlib及真实nvCOMP逐chunk比较，空输入按原生语义拒绝；具体资格见逐例状态。R9 CRC32 benchmark保留CLI/默认16GiB/CSV/完整GPU搜索和最终重算；四个小输入同字节三方，默认各后端RNG独立CPU验收，性能及完整32GiB complete扫描未验收。完整NVBENCH框架仍单列PARTIAL。 |
+| [nvCOMP](../../nvCOMP/README.md) | 3 | `CRC32`、`LZ4`、`Snappy` | 8 | hipCOMP LZ4/Snappy原生批处理；CPU↔GPU与hipCOMP↔nvCOMP双向互解、逐chunk status/实际长度、空/边界/损坏流；LZ4 native manager/factory +项目CRC32C及100 raw buffers。独立CRC32入口采用项目HIP IEEE/PKZIP算法，与zlib及真实nvCOMP逐chunk比较，空输入按原生语义拒绝；具体资格见逐例状态。R9 CRC32 benchmark保留CLI/默认16GiB/CSV/完整GPU搜索和最终重算；四个小输入同字节三方，默认各后端RNG独立CPU验收，性能及完整32GiB complete扫描未验收。完整NVBENCH框架仍单列PARTIAL。 |
 
 以下仅有子集/能力探针，**不计入上述整例支持数**：
 

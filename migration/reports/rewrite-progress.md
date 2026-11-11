@@ -1,6 +1,6 @@
 # MOAT 重写实时进展
 
-更新时间：2026-11-11T07:19:51.300300+00:00。样例支持结论仍以 samples.yaml 为准。
+更新时间：2026-11-11T07:26:49.261714+00:00。样例支持结论仍以 samples.yaml 为准。
 
 | 批次 / 样例 | AMD 已运行 / CPU通过 | CUDA 已运行 / CPU通过 | 当前验收结论 |
 | --- | ---: | ---: | --- |
@@ -15,7 +15,7 @@
 
 反向检查：27/27；原生与兼容 CUDA 数学对照分别登记。
 
-当前全项目状态：231 PASSED、375 FAILED、33 PARTIAL。
+当前全项目状态：241 PASSED、375 FAILED、23 PARTIAL。
 
 日志：[实验事件索引](rewrite-experiments.jsonl)；[AMD运行](rewrite-first-rocm.json)；[独立CPU验收](rewrite-first-rocm-validation.json)；[CUDA运行](rewrite-first-cuda.json)。
 
@@ -28,16 +28,16 @@ R1–R2完整记录：[批次验收](rewrite-R1-R2.md)。其它批次见下表�
 | R1 | 5 | 0 | COMPLETED_SCOPED；5个 BLAS/Lt 整例 |
 | R2 | 3 | 0 | COMPLETED_SCOPED；3个 device solver 整例 |
 | R3 | 2 | 22 | ASSESSMENT_COMPLETE_22_GAPS；原24项复审，NCC/SVD两例收口 |
-| R4 | 1 | 96 | SCOPED_BATCHES_96_PENDING；按资格签发的小批推进；R9含C++ helper及CRC benchmark |
-| R5 | 8 | 66 | PARTIALLY_IMPLEMENTED_65_FRONTENDS_PENDING；真实 Fortran 入口；65前端与额外CPP项仍待支持 |
+| R4 | 5 | 92 | SCOPED_BATCHES_92_PENDING；按资格签发的小批推进；R9含C++ helper及CRC benchmark |
+| R5 | 14 | 60 | PARTIALLY_IMPLEMENTED_59_FRONTENDS_PENDING；真实 Fortran 入口；59前端与额外CPP项仍待支持 |
 | R6 | 0 | 224 | ASSESSMENT_COMPLETE_PORTS_PENDING；224项专题研究与最小基础探针；未签发整例 |
 | R7 | 2 | 0 | COMPLETED_SCOPED；2个真实GPU packed sparse2:4 整例 |
 | R8 | 0 | 0 | COMPLETED_SCOPED；总回归、依赖封存、干净检出与交付 |
 
-累计新增资格21项，另撤销旧C++排序样例资格1项，支持211→231，净增20。当前231/639通过、408待支持；117功能族、18模块。
+累计新增资格31项，另撤销旧C++排序样例资格1项，支持211→241，净增30。当前241/639通过、398待支持；119功能族、18模块。
 
-[R3](rewrite-R3.md) · [R4](rewrite-R4.md) · [R5](rewrite-R5.md) · [R6](rewrite-R6.md) · [R7](rewrite-R7.md) · [408项逐例原因与后续实验](rewrite-remaining-assessment.md)。
+[R3](rewrite-R3.md) · [R4](rewrite-R4.md) · [R5](rewrite-R5.md) · [R6](rewrite-R6.md) · [R7](rewrite-R7.md) · [398项逐例原因与后续实验](rewrite-remaining-assessment.md)。
 
-计划第1.2节区分阶段执行和整例支持；R5剩余65个前端及其它待实现项没有被登记为完成。wave64、Windows、多节点与全项目MOAT surface仍未验证。
+计划第1.2节区分阶段执行和整例支持；R5剩余59个前端及其它待实现项没有被登记为完成。wave64、Windows、多节点与全项目MOAT surface仍未验证。
 
-[R9：九个helper与CRC32 benchmark实时记录](rewrite-R9.md)：0/10资格。描述符覆盖按稠密/CSR功能去重，不计成9个GPU求解算法；原CUDA Fortran编译器基线另列。
+[R9：九个helper与CRC32 benchmark实时记录](rewrite-R9.md)：10/10资格。描述符覆盖按稠密/CSR功能去重，不计成9个GPU求解算法；原CUDA Fortran编译器基线另列。

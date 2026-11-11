@@ -1,29 +1,29 @@
 # cuDSS/simple_dense_matrix_helpers::simple_dense_matrix_helpers.cpp
 
-**PARTIAL / L3**
+**PASSED / L4**
 
-R9候选实现已完成构建并进入独立CPU/native CUDA及原始合同验收；尚未签发复合资格，不计整例通过。历史原生API自动移植失败保留。
+9入口中的一个：真实C++/标准Fortran调用项目描述符C ABI，HIP分配/指针表与完整数据读回；5场景AMD/独立CPU/原生cuDSS API对照、生命周期/别名/故障和独立复审通过。仅描述符管理，不是GPU稀疏求解算法。
 
 | 字段 | 当前记录 |
 | --- | --- |
 | 原始入口 | [cuDSS/simple_dense_matrix_helpers/simple_dense_matrix_helpers.cpp](../../../../cuDSS/simple_dense_matrix_helpers/simple_dense_matrix_helpers.cpp) |
-| 实际库 / 后端 | Project host matrix-descriptor C ABI + HIP device storage/pointer tables / Project HIP runtime adapter |
+| 实际库 / 后端 | ProjectMatrixHelpers + HIP (host descriptors; real device storage/pointer tables) / project host descriptor C ABI / real HIP buffers |
 | 候选路线 | rocSOLVER CSRRF, rocSPARSE/HIP, ISO_C_BINDING |
 | 代码 | [rocm/ported/cuDSS/simple_dense_matrix_helpers/simple_dense_matrix_helpers.cpp](../../../../rocm/ported/cuDSS/simple_dense_matrix_helpers/simple_dense_matrix_helpers.cpp) |
-| required cases | 1/5 |
-| CUDA baseline / comparison | PASSED / BLOCKED |
-| 性能 | NOT_RUN |
+| required cases | 8/8 |
+| CUDA baseline / comparison | PASSED / PASSED |
+| 性能 | NOT_QUALIFIED |
 | 原始源码 SHA256 | `9b41e9c37c3ae9f0f4b25e19ad1e4c08bd3e75d959b04daeb2d44420c3ba5743` |
 
 编译/运行返回 0 仅对应 L3；通过独立参考检查后才记 L4。失败的候选库不列为已使用库。
 
-必需用例：`rewrite-R9/current-build`, `rewrite-R9/frozen-inputs-and-original-contract`, `rewrite-R9/CPU-and-native-CUDA`, `rewrite-R9/negative-and-runtime`, `rewrite-R9/independent-review-and-qualification`。
+必需用例：`rewrite/original`, `rewrite/changed-values`, `rewrite/irregular`, `rewrite/padding`, `rewrite/repeat`, `rewrite/negative-and-runtime`, `rewrite/sealed-build-and-native-identities`, `rewrite/independent-source-review`。
 
-实现方式：`API_PORT`。
+实现方式：`PROJECT_DESCRIPTOR_ABI_WITH_HIP_STORAGE`。
 
-恢复/扩展条件：完成当前源码完整原始合同、实际语言/CLI、独立CPU/native CUDA、故障及边界检查和固定提交独立复审后再签发资格。
+恢复/扩展条件：扩展API/精度/布局/设备或性能声明时重新冻结合同并完成实际GPU与独立参考验收。
 
-CUDA 对照限制：CUDA 原始 SDK、绑定或输入前置条件未满足，见该例 CUDA 基线证据。
+CUDA 对照限制：原始CUDA C++程序及同输入native cuDSS API对照通过。
 
 ## 原始 API 自动移植稿最近一次尝试
 
@@ -37,7 +37,12 @@ build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_mi
 
 从仓库根目录，先核对物理 GPU 占用。HIP ordinal 与物理编号不同；项目 guard 根据 PCI 地址拒绝 GPU3 和被预约的卡。
 
-具体命令见该入口证据目录中的 `commands.json`，运行环境见同批 `environment.json`。批量入口：`tools/migration/bulk_run.py --families <family>`；特殊驱动见专项报告。
+在已锁定并通过 guard 的 ROCm 10.1.0 容器中（多 GPU 用例须暴露两个允许的设备）：
+
+```bash
+python3 tools/moat/build_helpers.py
+python3 tools/moat/run_helpers.py
+```
 
 - [migration/reports/evidence/20261109T083217.050455Z/original-rocm/cuDSS_simple_dense_matrix_helpers_simple_dense_matrix_helpers.cpp](../../../reports/evidence/20261109T083217.050455Z/original-rocm/cuDSS_simple_dense_matrix_helpers_simple_dense_matrix_helpers.cpp)
 - [migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuDSS_simple_dense_matrix_helpers_simple_dense_matrix_helpers.cpp](../../../reports/evidence/20261109T084256.329631Z/original-rocm/cuDSS_simple_dense_matrix_helpers_simple_dense_matrix_helpers.cpp)
@@ -45,3 +50,21 @@ build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_mi
 - [migration/reports/rewrite-R9.md](../../../reports/rewrite-R9.md)
 - [migration/reports/rewrite-R9-helper-originals.json](../../../reports/rewrite-R9-helper-originals.json)
 - [migration/reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T062641.870114Z-R9-cuda-original-6459d33c5d](../../../reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T062641.870114Z-R9-cuda-original-6459d33c5d)
+- [migration/reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T071904.827741Z-R9-composite-qualification-fd4a24c952](../../../reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T071904.827741Z-R9-composite-qualification-fd4a24c952)
+- [migration/reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T063726.837225Z-R9-rocm-helper-b7922e87cb](../../../reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T063726.837225Z-R9-rocm-helper-b7922e87cb)
+- [migration/reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T063728.290414Z-R9-rocm-helper-bbbf9606d7](../../../reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T063728.290414Z-R9-rocm-helper-bbbf9606d7)
+- [migration/reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T063729.548076Z-R9-rocm-helper-718bd7a0d4](../../../reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T063729.548076Z-R9-rocm-helper-718bd7a0d4)
+- [migration/reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T063730.824801Z-R9-rocm-helper-2f9623c650](../../../reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T063730.824801Z-R9-rocm-helper-2f9623c650)
+- [migration/reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T063732.087733Z-R9-rocm-helper-8789be7f61](../../../reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T063732.087733Z-R9-rocm-helper-8789be7f61)
+- [migration/reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T063741.366091Z-R9-cuda-helper-abe172ca02](../../../reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T063741.366091Z-R9-cuda-helper-abe172ca02)
+- [migration/reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T063743.632383Z-R9-cuda-helper-da6580c60d](../../../reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T063743.632383Z-R9-cuda-helper-da6580c60d)
+- [migration/reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T063745.843751Z-R9-cuda-helper-d49ba08869](../../../reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T063745.843751Z-R9-cuda-helper-d49ba08869)
+- [migration/reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T063748.033303Z-R9-cuda-helper-ac27920e5c](../../../reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T063748.033303Z-R9-cuda-helper-ac27920e5c)
+- [migration/reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T063750.251185Z-R9-cuda-helper-ddfad7646c](../../../reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T063750.251185Z-R9-cuda-helper-ddfad7646c)
+- [migration/reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T063824.180927Z-R9-CPU-negative-167b05056a](../../../reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T063824.180927Z-R9-CPU-negative-167b05056a)
+- [migration/reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T063824.965058Z-R9-CPU-negative-82948e9412](../../../reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T063824.965058Z-R9-CPU-negative-82948e9412)
+- [migration/reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T063825.727593Z-R9-CPU-negative-4c558cde76](../../../reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T063825.727593Z-R9-CPU-negative-4c558cde76)
+- [migration/reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T063850.539721Z-R9-invalid-entry-486a532d19](../../../reports/evidence/rewrite/R9/cuDSS_simple_dense_matrix_helpers__simple_dense_matrix_helpers.cpp/20261111T063850.539721Z-R9-invalid-entry-486a532d19)
+- [migration/reports/evidence/rewrite/R9/matrix-helper-ABI-negative/20261111T063900.215664Z-R9-rocm-ABI-037c056597](../../../reports/evidence/rewrite/R9/matrix-helper-ABI-negative/20261111T063900.215664Z-R9-rocm-ABI-037c056597)
+- [migration/reports/evidence/rewrite/R9/matrix-helper-language-builds/20261111T063716.921772Z-R9-rocm-build-af4c1c9735](../../../reports/evidence/rewrite/R9/matrix-helper-language-builds/20261111T063716.921772Z-R9-rocm-build-af4c1c9735)
+- [migration/reports/evidence/rewrite/R9/matrix-helpers-native-cuDSS/20261111T063715.699322Z-R9-cuda-build-1ecd936b9d](../../../reports/evidence/rewrite/R9/matrix-helpers-native-cuDSS/20261111T063715.699322Z-R9-cuda-build-1ecd936b9d)

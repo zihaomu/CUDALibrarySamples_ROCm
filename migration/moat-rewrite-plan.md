@@ -1,6 +1,6 @@
 # CUDA Library Samples on ROCm：MOAT 重写与库整理实施计划
 
-日期：2026-11-10。状态：**R9实施中：九个helper与CRC32 benchmark；R1–R8交付已归档，资格按主表统计**。
+日期：2026-11-11。状态：**R9本批10入口完成；241通过、119功能族，398项未支持范围保留**。
 
 用户决定：后续代码重写和库整理采用 MOAT。本文定义接入方式、任务顺序、交付物、验收条件和详细实验记录规范。2026-11-10 用户已授权按计划持续实施；实际进展和实验结果追加到第 13 节，候选不预记为通过。
 
@@ -33,7 +33,7 @@
 | `migration/reports/operator-support.json` | `8fe27749a0505a27c5611e2a67ce50b1c47942e38e1d5c146459264a61af62b3` |
 | `migration/environments/project.lock.json` | `f252224f1eb1656102bb934781eeac165050e8a828d1e19a2e21ccc4dbf1bed3` |
 
-基线来源：[设计与实施日志](cuda_samples_on_rocm_design.md)、[B4–B15 路线图](cuda_samples_on_rocm_roadmap.md)、[支持方式和详细日志总表](../CUDALibrarySamples_ROCm/migration/reports/support-log-index.md)、[算子支持表](../CUDALibrarySamples_ROCm/migration/reports/operator-support.md)。639 是源入口数，111 是功能族数，case 数另计；后续报表分别展示。
+基线来源：[设计与实施日志](design.md)、[B4–B15 路线图](roadmap.md)、[支持方式和详细日志总表](../migration/reports/support-log-index.md)、[算子支持表](../migration/reports/operator-support.md)。639 是源入口数，111 是功能族数，case 数另计；后续报表分别展示。
 
 ### 1.2 完成的定义
 
@@ -396,7 +396,7 @@ artifacts/rewrite/<batch>/<sample-key>/<experiment-id>/
 
 ## 9. 环境、CUDA 对照与实验纪律
 
-新 AMD 实验执行工作区 [AGENTS.md](../../AGENTS.md) 与现有环境锁要求：
+新 AMD 实验执行工作区 [AGENTS.md](../AGENTS.md) 与现有环境锁要求：
 
 | 项目 | 实施要求 |
 | --- | --- |
@@ -542,7 +542,7 @@ PLAN-01 至 PLAN-03 是规划阶段记录，不代表实验结果。实施中的
 
 <!-- MOAT_EXEC_PROGRESS:START -->
 
-最近更新：2026-11-11T06:50:56.136855+00:00。首批 AMD/独立CPU/CUDA 51/51；首批资格 8/8。累计21项新资格，撤销1项旧资格，当前231 PASSED/33 PARTIAL/375 FAILED。剩余408项全部有路线与重试条件；R5仍有65前端和额外CPP项待支持。R8：COMPLETED_SCOPED；全项目surface与其它平台仍owed。
+最近更新：2026-11-11T07:26:49.333978+00:00。首批 AMD/独立CPU/CUDA 51/51；首批资格 8/8。累计31项新资格，撤销1项旧资格，当前241 PASSED/23 PARTIAL/375 FAILED。剩余398项全部有路线与重试条件；R5仍有59前端和额外CPP项待支持。R8：COMPLETED_SCOPED；全项目surface与其它平台仍owed。
 
 <!-- MOAT_EXEC_PROGRESS:END -->
 
@@ -577,7 +577,7 @@ PLAN-01 至 PLAN-03 是规划阶段记录，不代表实验结果。实施中的
 
 ## 14. R9：2026-11-11 下一批10入口
 
-状态：IN_PROGRESS。目标为3种cuDSS helper×C++/Fortran/nvfortran来源共9入口，以及CRC32 benchmark。实现前冻结原始源码SHA与合同到 migration/rewrite/helpers-benchmark.json。描述符/指针/所有权覆盖不算新GPU求解算法。更新CSR指针不修改创建时nnz；批量host形状数组与device指针表分别记录。CRC benchmark保留默认storage和完整CLI/网格/实际搜索/计时，数值用同字节fixture独立CPU与native cuDSS/nvCOMP核对；原CUDA Fortran工具链仍单列。所有build/run/失败/注入留独立封存实验，资格前不增加支持数。
+状态：COMPLETED_SCOPED，10/10本批入口资格已签发。目标为3种cuDSS helper×C++/Fortran/nvfortran来源共9入口，以及CRC32 benchmark。实现前冻结原始源码SHA与合同到 migration/rewrite/helpers-benchmark.json。描述符/指针/所有权覆盖不算新GPU求解算法。更新CSR指针不修改创建时nnz；批量host形状数组与device指针表分别记录。CRC benchmark保留默认storage和完整CLI/网格/实际搜索/计时，数值用同字节fixture独立CPU与native cuDSS/nvCOMP核对；原CUDA Fortran工具链仍单列。所有build/run/失败/注入留独立封存实验，资格前不增加支持数。
 
 | 2026-11-11 | R9-02 | 第一版9入口45 AMD/CPU与45 native cuDSS/CPU场景通过，原C++稀疏列序重复、Fortran值更新差异均按源码保留。前置独立复核指出batch host形状指针原始别名及稀疏irregular场景重复问题；已补别名观测和真实CSR/ldb变化后重验。CRC原harness保留，分段CRC+GPU GF2、真实搜索实现进入构建。首轮flang参数不兼容失败已归档并修正。 | 当前仍231通过，不以运行/基础候选升级资格 |
 
@@ -591,3 +591,12 @@ PLAN-01 至 PLAN-03 是规划阶段记录，不代表实验结果。实施中的
 
 
 | 2026-11-11 | R9-06 | 18项资格正向/篡改测试通过。最终任务发布复核补ASSESSED_GAP_REMAINS→QUALIFIED并保留历史评估；全部2887份证据/schema/中断审计通过。第三位审查进一步指出publisher不能只信任摘要或seal旁未封存qualification文件，已补复合资格必需成员、backend/ID/outcome、完整5case、非空完整引用、独立门槛重算及Git首次发布闭包校验，并增加对应普通run旁伪造qualification反例。 | 最小复审publisher，先提交资格seal再发布主表，最后核对31项当前资格和全部未支持路线 |
+
+
+| 2026-11-11 | R9-07 | 三角色最终固定内容批准。九helper及CRC benchmark复合资格10/10通过并先提交Git；publisher补齐复合seal/完整case/Git锚与语言身份，首次合法资格缺commands.json的过严拒绝安全失败留档后修正，重新完整预检十项通过。主表241 PASSED/23 PARTIAL/375 FAILED，119功能族/18模块；10任务QUALIFIED且历史评估保留，R5前端59项仍待支持。 | 最终源码/31资格闭包/全部证据/schema/控制bundle冷恢复审计及fork推送 |
+
+
+| 2026-11-11 | R9-08 | 本批10/10支持已发布到主表，31项当前MOAT资格闭包、原始866源/477构建定义与639入口一致性、全部封存记录/schema/失败与中断核算通过；21项资格/真实发布正负测试通过。当前241通过/119族/18模块，398未通过和446 owed组件继续保留；原CUDA Fortran工具链、默认RNG差异及性能/其它平台边界不变。 | 控制bundle冷恢复与fork交付核验 |
+
+
+| 2026-11-11 | R9-09 | 保存当前MOAT状态/计划/notes/surface并更新bundle；实际冷恢复/续接/来源拒绝3测试通过，bundle SHA与原始输出已归档。全部封存记录复核无未封存、失联、未匹配start或仍活动尝试。 | 推送用户fork默认rocm并核对远端SHA与首页；本批不设置整项目platform完成 |

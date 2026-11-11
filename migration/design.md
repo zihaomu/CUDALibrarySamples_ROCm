@@ -644,3 +644,10 @@ python3 tools/migration/render.py
 本轮新增21个整例资格并撤销1个旧C++排序错误资格，净增20：231 PASSED、23 PARTIAL、385 FAILED，117个功能族、18个模块。原始866源文件、477构建定义和639入口保持。R1/R2八例、R3两例、R4 CRC32、R5八个真实Fortran入口、R7两个真实packed sparse2:4已验收。16 CTest及fresh clone的21原始AMD profile/独立CPU复验通过，固定源码97dab620三方独立复审通过。
 
 R6仅完成专题研究和能力探针；R5仍有65个原前端及额外C++合同缺口。剩余408项逐一登记路线/原因/实验/成本/重试条件，不预记支持。详见 [MOAT实施计划](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/moat-rewrite-plan.md)、[R8交付报告](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/reports/rewrite-R8.md) 和 [逐项未支持清单](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/reports/rewrite-remaining-assessment.md)。原生库失败、CUDA工具链限制、原生数值失败与所有中断记录保留。
+
+
+### 2026-11-11 R9：矩阵helper与CRC32 benchmark
+
+本批10/10入口通过复合资格，累计241 PASSED、23 PARTIAL、375 FAILED，119功能族/18模块，398入口尚未通过。9个C++/标准Fortran helper使用项目host描述符C ABI＋真实HIP GPU存储/指针表，按稠密/CSR两类功能去重，不能解释成9个GPU求解算法。45场景AMD/CPU/native cuDSS、30故障、9非法入口、22 ABI检查通过；六个原CUDA Fortran编译器基线继续BLOCKED。CRC32 benchmark使用原harness＋HIP分段IEEE CRC32/GPU GF2/hipRAND；原始默认16GiB在AMD与5090分别实跑，四个小场景同字节三方检查，7故障/8CLI/6长度边界/真实GPU trace与重复通过。默认RNG各自输入由CPU校验，不要求跨库逐位同序列；性能未验收。
+
+[本批实现与资格/失败记录](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/reports/rewrite-R9.md) · [剩余逐例原因](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/reports/rewrite-remaining-assessment.md)。原始866源/477构建定义/639入口不变。

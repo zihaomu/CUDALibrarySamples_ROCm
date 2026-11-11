@@ -2,9 +2,9 @@
   "schema_version": 1,
   "counting_rule": "Operator/functional families are deduplicated within each module; dtypes, sizes, language, batch, storage formats and algorithm variants do not create extra operators. At least one explicitly scoped PASSED source profile is required. Cross-module totals may include the same mathematical operation implemented through different library interfaces.",
   "qualification_rule": "A verified family proves only its linked PASSED source profiles/required cases, not every API configuration. PARTIAL examples and capability probes are excluded.",
-  "verified_operator_families": 117,
+  "verified_operator_families": 119,
   "modules_with_verified_operators": 18,
-  "passed_source_profiles": 231,
+  "passed_source_profiles": 241,
   "modules": {
     "cuBLAS": {
       "verified_operator_family_count": 52,
@@ -654,8 +654,28 @@
       }
     },
     "cuDSS": {
-      "verified_operator_family_count": 2,
+      "verified_operator_family_count": 4,
       "verified_operators": [
+        {
+          "name": "CSR 矩阵描述符管理",
+          "sample_ids": [
+            "cuDSS/fortran/batch_sparse_matrix_helpers::batch_sparse_matrix_helpers.f90",
+            "cuDSS/fortran/sparse_matrix_helpers::sparse_matrix_helpers.f90",
+            "cuDSS/nvfortran/batch_sparse_matrix_helpers::batch_sparse_matrix_helpers.cuf",
+            "cuDSS/nvfortran/sparse_matrix_helpers::sparse_matrix_helpers.cuf",
+            "cuDSS/simple_batch_sparse_matrix_helpers::simple_batch_sparse_matrix_helpers.cpp",
+            "cuDSS/simple_sparse_matrix_helpers::simple_sparse_matrix_helpers.cpp"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuDSS/fortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.f90.md",
+            "migration/sample-reports/cuDSS/fortran/sparse_matrix_helpers/sparse_matrix_helpers.f90.md",
+            "migration/sample-reports/cuDSS/nvfortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.cuf.md",
+            "migration/sample-reports/cuDSS/nvfortran/sparse_matrix_helpers/sparse_matrix_helpers.cuf.md",
+            "migration/sample-reports/cuDSS/simple_batch_sparse_matrix_helpers/simple_batch_sparse_matrix_helpers.cpp.md",
+            "migration/sample-reports/cuDSS/simple_sparse_matrix_helpers/simple_sparse_matrix_helpers.cpp.md"
+          ],
+          "source_profiles": 6
+        },
         {
           "name": "稀疏直接求解",
           "sample_ids": [
@@ -699,13 +719,27 @@
             "migration/sample-reports/cuDSS/nvfortran/reordering_phase/reordering_phase.cuf.md"
           ],
           "source_profiles": 2
+        },
+        {
+          "name": "稠密矩阵描述符管理",
+          "sample_ids": [
+            "cuDSS/fortran/dense_matrix_helpers::dense_matrix_helpers.f90",
+            "cuDSS/nvfortran/dense_matrix_helpers::dense_matrix_helpers.cuf",
+            "cuDSS/simple_dense_matrix_helpers::simple_dense_matrix_helpers.cpp"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/cuDSS/fortran/dense_matrix_helpers/dense_matrix_helpers.f90.md",
+            "migration/sample-reports/cuDSS/nvfortran/dense_matrix_helpers/dense_matrix_helpers.cuf.md",
+            "migration/sample-reports/cuDSS/simple_dense_matrix_helpers/simple_dense_matrix_helpers.cpp.md"
+          ],
+          "source_profiles": 3
         }
       ],
       "sample_count": 59,
       "sample_outcomes": {
-        "PASSED": 14,
-        "PARTIAL": 11,
-        "FAILED": 34
+        "PASSED": 23,
+        "FAILED": 34,
+        "PARTIAL": 2
       },
       "validation_scope": "FP64 CSR：simple、异构/均匀batch、重排后完整求解及GENERAL多RHS残差；CPU符号/matching + rocSOLVER CSRRF或项目HIP CSR pivot LU。R9新增9个矩阵helper入口（按稠密/CSR两种描述符功能去重，batch与语言不另计）：项目host描述符＋真实HIP数据/指针表，非GPU求解算法；MOAT另有8个真实ISO_C_BINDING Fortran求解入口，uniform保留GPU factor并选择性重算，residual应用实际检查；原CUDA Fortran工具链仍缺。CPP重排严格METIS向量不同及get_set缺项保持PARTIAL，不把历史analysis-only计为完整求解。规模/动态pivot按逐例范围。",
       "failure_reason_counts": {
@@ -1747,12 +1781,14 @@
         {
           "name": "CRC32",
           "sample_ids": [
+            "nvCOMP/benchmarks::benchmark_crc32.cpp",
             "nvCOMP/examples::nvcomp_crc32.cu"
           ],
           "sample_reports": [
+            "migration/sample-reports/nvCOMP/benchmarks/benchmark_crc32.cpp.md",
             "migration/sample-reports/nvCOMP/examples/nvcomp_crc32.cu.md"
           ],
-          "source_profiles": 1
+          "source_profiles": 2
         },
         {
           "name": "LZ4",
@@ -1786,8 +1822,8 @@
       "sample_count": 32,
       "sample_outcomes": {
         "FAILED": 22,
-        "PARTIAL": 3,
-        "PASSED": 7
+        "PASSED": 8,
+        "PARTIAL": 2
       },
       "validation_scope": "hipCOMP LZ4/Snappy原生批处理；CPU↔GPU与hipCOMP↔nvCOMP双向互解、逐chunk status/实际长度、空/边界/损坏流；LZ4 native manager/factory +项目CRC32C及100 raw buffers。独立CRC32入口采用项目HIP IEEE/PKZIP算法，与zlib及真实nvCOMP逐chunk比较，空输入按原生语义拒绝；具体资格见逐例状态。R9 CRC32 benchmark保留CLI/默认16GiB/CSV/完整GPU搜索和最终重算；四个小输入同字节三方，默认各后端RNG独立CPU验收，性能及完整32GiB complete扫描未验收。完整NVBENCH框架仍单列PARTIAL。",
       "failure_reason_counts": {
