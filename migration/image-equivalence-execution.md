@@ -103,11 +103,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-11T14:22:19.802486+00:00。26入口当前5通过/7部分/14失败。
+更新时间：2026-11-11T14:33:16.933221+00:00。26入口当前5通过/7部分/14失败。
 
-I2：CCL冷重放已通过：固定47b97a596空build，27输入profile逐字节重建、新HIP库/三个C++编译配置、27完整mask、44运行合同和15原始文件流程再次独立CPU通过；19子raw和source objects封存。最新54 native API均有实际binary/input SHA运行前receipt，三项原CUDA身份绑定独立目录亦成功；等待三项独立复审，暂不增加支持数。
+I2：三项复审缺口已修复并重验：native原始编译rc汇总/封存预检、GetDevice默认/外设备/销毁流预检、独立runtime角色/源身份/几何/query约束。新HIP库27mask/44runtime/trace/15全流程165文件/39CLI均重跑；3额外stream默认0/外设备101/销毁709与完整存储通过，GPU0只建外设备流、仅GPU1计算；31数值/结构/绕过反例及3原生预检反例通过。下一步新固定源码的20子记录冷检出和最终复审。
 
-证据：`migration/reports/image-ccl-cold.json`；`migration/reports/image-ccl-native-validation.json`；`migration/reports/image-ccl-native-originals-validation.json`
+证据：`migration/reports/image-ccl-streams-validation.json`；`migration/reports/image-ccl-checks.json`；`migration/reports/image-ccl-native-guard-tests.json`；`migration/rewrite/image-ccl-runtime-contract.json`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

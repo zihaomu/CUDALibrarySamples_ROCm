@@ -1,0 +1,1 @@
+Test rocm-CLI for CCL-original-NPP+, case batch-compression/no-GPU. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T142747.097863Z-I2-rocm-build-d0924b4190.

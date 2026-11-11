@@ -44,7 +44,7 @@ extern "C" hipError_t rocm_image_ccl8_workspace_size(int w,int h,uint64_t*bytes)
 extern "C" hipError_t rocm_image_ccl8_run(const rocm_image_ccl8_descriptor*d,hipStream_t stream){return rocm_image_ccl8_batch(d,1,stream);}
 extern "C" hipError_t rocm_image_ccl8_batch(const rocm_image_ccl8_descriptor*d,int count,hipStream_t stream){
  if(!d||count<=0||count>65536)return hipErrorInvalidValue;
- try{int device=-1;auto s=hipGetDevice(&device);if(s!=hipSuccess)return s;unsigned flags=0;s=hipStreamGetFlags(stream,&flags);if(s!=hipSuccess)return s;std::vector<Range>ranges;ranges.reserve(size_t(count)*5);
+ try{int device=-1;auto s=hipGetDevice(&device);if(s!=hipSuccess)return s;hipDevice_t stream_device=-1;s=hipStreamGetDevice(stream,&stream_device);if(s!=hipSuccess)return s;if(stream_device!=device)return hipErrorInvalidDevice;std::vector<Range>ranges;ranges.reserve(size_t(count)*5);
  for(int i=0;i<count;++i){s=validate(d[i],device,ranges);if(s!=hipSuccess)return s;}
  for(int i=0;i<count;++i){s=run(d[i],stream);if(s!=hipSuccess)return s;}return hipSuccess;
  }catch(...){return hipErrorOutOfMemory;}

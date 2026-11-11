@@ -6,6 +6,11 @@ from image_progress import record
 
 def main():
  b=json.loads((ROOT/'migration/reports/image-ccl-native-build.json').read_text());spec=json.loads((ROOT/'migration/rewrite/image-ccl-profile.json').read_text());rows=[]
+ preflight=Experiment('I2','CCL-native-original-preflight','host-preflight',sources=[__file__,ROOT/'migration/rewrite/image-ccl-profile.json'])
+ expected={('NPP','default'),('NPP+','default'),('NPP+','batch-compression')}
+ checks=[dict(check='complete-successful-native-build',passed=b.get('status')=='BUILT' and len(b.get('originals',[]))==3 and {(r.get('family'),r.get('mode')) for r in b.get('originals',[])}==expected and all(r.get('return_code')==0 for r in b.get('originals',[]))),dict(check='all-original-binary-identities-present',passed=all(isinstance(b.get('identities',{}).get(r.get('binary')),str) and len(b['identities'][r['binary']])==64 for r in b.get('originals',[])))]
+ ready=all(c['passed'] for c in checks);v=dict(status='READY' if ready else 'REJECTED',checks=checks);write(preflight.path/'preflight.json',v);v['evidence']=preflight.finish('PASSED' if ready else 'EXPECTED_REJECTION',dict(status='PASSED' if ready else 'FAILED',checks=checks));write(ROOT/'migration/reports/image-ccl-native-originals-preflight.json',v);record('I2','原生完整入口执行前构建状态/三分支/二进制身份预检：'+v['status']+'；拒绝时不创建逐例执行。',[v['evidence']])
+ if not ready:return 1
  for original in b['originals']:
   family=original['family'];e=Experiment('I2','CCL-identity-bound-original-'+family,'cuda-original',case=original['mode'],sources=[__file__,ROOT/'migration/rewrite/image-ccl-profile.json',*[ROOT/n for n in spec['original_sources']]],parent=json.loads((ROOT/b['evidence']/'manifest.json').read_text())['experiment_id']);config=dict(binary=original['binary'],binary_sha256=b['identities'][original['binary']],cwd='/tmp/'+e.id+'/work',inputs=[dict(path='/tmp/'+e.id+'/images/'+(ROOT/x['source']).name,source=b['remote']+'/'+family+'/images/'+(ROOT/x['source']).name,sha256=x['sha256'],bytes=x['bytes']) for x in spec['originals'] if x['source'].startswith(family+'/')]);wrapper='''import json,pathlib,hashlib,os,sys,subprocess,shutil
 c=json.loads(__CONFIG__);pathlib.Path(c['cwd']).mkdir(parents=True);(pathlib.Path(c['cwd']).parent/'images').mkdir();assert hashlib.file_digest(open(c['binary'],'rb'),'sha256').hexdigest()==c['binary_sha256']

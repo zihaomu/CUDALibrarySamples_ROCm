@@ -38,11 +38,11 @@ def collect(review=None):
  def gpu(name):
   r=load(name)
   if not report(r,'run.json','rocm-'+name) or r['build']!=b or r['return_code'] or not observed(r):return False
-  cs=commands(r);m=json.loads((ROOT/r['evidence']/'manifest.json').read_text());return len(cs)==1 and cs[0]['return_code']==0 and m['parent_experiment_id']==b['experiment_id'] and str(ROOT/'tools/moat/image_ccl_worker.py') in cs[0]['argv'] and str(ROOT/b['library']) in cs[0]['argv'] and b['library_sha256'] in cs[0]['argv'] and ('rocprofv3' in cs[0]['argv'])==(name=='trace') and ('--runtime' in cs[0]['argv'])==(name=='runtime')
- for name in ['masks','runtime','trace']:gate(name+'/actual-guarded-current-library-and-worker',lambda name=name:gpu(name))
+  cs=commands(r);m=json.loads((ROOT/r['evidence']/'manifest.json').read_text());worker='image_ccl_streams.py' if name=='streams' else 'image_ccl_worker.py';return len(cs)==1 and cs[0]['return_code']==0 and m['parent_experiment_id']==b['experiment_id'] and str(ROOT/'tools/moat'/worker) in cs[0]['argv'] and str(ROOT/b['library']) in cs[0]['argv'] and b['library_sha256'] in cs[0]['argv'] and ('rocprofv3' in cs[0]['argv'])==(name=='trace') and ('--runtime' in cs[0]['argv'])==(name=='runtime')
+ for name in ['masks','runtime','trace','streams']:gate(name+'/actual-guarded-current-library-and-worker',lambda name=name:gpu(name))
  def cpu(kind,fn,count):
   v=load(kind+'-validation');actual=fn();return report(v,'results.json','CPU-reference') and v['status']=='PASSED' and v['case_count']==count and v['results']==actual and all(r.get('status','PASSED')=='PASSED' for r in actual) and json.loads((ROOT/v['evidence']/'manifest.json').read_text())['experiment_outcome']=='PASSED'
- for name,count,fn in [('masks',27,oracle.validate_masks),('runtime',44,oracle.validate_runtime),('trace',28,oracle.validate_trace)]:gate(name+'/independent-full-numerical-and-execution-checks',lambda name=name,count=count,fn=fn:cpu(name,lambda:fn(load(name)),count))
+ for name,count,fn in [('masks',27,oracle.validate_masks),('runtime',44,oracle.validate_runtime),('trace',28,oracle.validate_trace),('streams',3,oracle.validate_streams)]:gate(name+'/independent-full-numerical-and-execution-checks',lambda name=name,count=count,fn=fn:cpu(name,lambda:fn(load(name)),count))
  def originals(kind):
   rs=load(kind);expected=15 if kind=='originals' else 39
   modes=[('NPP','default'),('NPP+','default'),('NPP+','batch-compression')];cases=[str(n) for n in range(1,6)] if kind=='originals' else ['default-directory','help','missing-b','zero','negative','above-five','noninteger','duplicate','unknown-option','missing-input','truncated-input','unwritable-output','no-GPU'];matrix={(f,m,c) for f,m in modes for c in cases}
@@ -77,14 +77,23 @@ def collect(review=None):
    if len(cs)!=2 or any(c['return_code'] for c in cs) or config['binary_sha256']!=nb['identities'][config['binary']] or receipt!=dict(binary_sha256=config['binary_sha256'],inputs=config['inputs']) or {Path(x['path']).name:(x['sha256'],x['bytes']) for x in config['inputs']}!=expected:return False
   return True
  gate('three-unchanged-native-originals-actual-binary-input-receipts',native_originals)
+ gate('native-original-execution-has-sealed-successful-preflight',lambda:report(load('native-originals-preflight'),'preflight.json','host-preflight') and load('native-originals-preflight')['status']=='READY' and all(c['passed'] for c in load('native-originals-preflight')['checks']))
+ def native_guard_tests():
+  r=load('native-guard-tests')
+  if not report(r,'checks.json','CPU-selftest') or r['status']!='PASSED' or r['case_count']!=3 or len(r['checks'])!=3 or not all(c['passed'] for c in r['checks']) or len(r['child_evidence'])!=3:return False
+  for ref in r['child_evidence']:
+   refs.add(ref);d,m,src=sealed(ref);sources.update(src['dependencies']);v=json.loads((d/'preflight.json').read_text())
+   if m['backend']!='host-preflight' or m['experiment_outcome']!='EXPECTED_REJECTION' or v['status']!='REJECTED' or not any(c['passed'] is False for c in v['checks']):return False
+  return True
+ gate('three-real-native-original-preflight-failure-paths',native_guard_tests)
  gate('all-55-native-original-outputs-CPU-partition-comparison',lambda:cpu('native-originals',lambda:oracle.validate_native_originals(load('native-originals')),3))
  def mutations():
-  r=load('checks');return report(r,'checks.json','CPU-validator-test') and r['status']=='PASSED' and r['case_count']==len(r['checks'])==27 and all(c['passed'] for c in r['checks']) and len({c['check'] for c in r['checks']})==27
- gate('27-actual-validator-positive-negative-and-BFS-checks',mutations)
+  r=load('checks');return report(r,'checks.json','CPU-validator-test') and r['status']=='PASSED' and r['case_count']==len(r['checks'])==31 and all(c['passed'] for c in r['checks']) and len({c['check'] for c in r['checks']})==31
+ gate('31-actual-validator-positive-negative-and-BFS-checks',mutations)
  def cold():
   r=load('cold')
-  if not report(r,'cold.json','host-cold-replay') or r['status']!='PASSED' or r['return_code'] or not r['checks'] or not all(c['passed'] for c in r['checks']) or len(r['children'])!=19:return False
-  d,m,_=sealed(r['evidence']);raw=ROOT/m['raw_artifact_dir'];groups={n:[c for c in r['children'] if c['name']==n] for n in ['contracts','build','masks','runtime','originals']}
+  if not report(r,'cold.json','host-cold-replay') or r['status']!='PASSED' or r['return_code'] or not r['checks'] or not all(c['passed'] for c in r['checks']) or len(r['children'])!=20:return False
+  d,m,_=sealed(r['evidence']);raw=ROOT/m['raw_artifact_dir'];groups={n:[c for c in r['children'] if c['name']==n] for n in ['contracts','build','masks','runtime','streams','originals']}
   if any(len(groups[n])!=(15 if n=='originals' else 1) for n in groups):return False
   cb=groups['build'][0]['report'];binary=raw/groups['build'][0]['relative']/Path(cb['library']).name
   if cb['dependencies']!=b['dependencies'] or digest(binary)!=cb['library_sha256']:return False
@@ -92,16 +101,16 @@ def collect(review=None):
    p=raw/child['relative'];seal=json.loads((p/'child-seal.json').read_text())['files'];src=json.loads((p/'source.json').read_text());meta=json.loads((p/'manifest.json').read_text());cs=json.loads((p/'commands.json').read_text()) if (p/'commands.json').exists() else []
    if src['commit']!=r['source_commit'] or meta['experiment_outcome'] not in {'OBSERVED','EXECUTED','PASSED'} or any(c['return_code'] for c in cs) or any(not(p/n).is_file() or (p/n).stat().st_size!=v['bytes'] or digest(p/n)!=v['sha256'] for n,v in seal.items()) or any(digest(ROOT/src['source_objects'][n])!=sha for n,sha in src['dependencies'].items()):return False
    sources.update(src['dependencies'])
-   if child['name'] in {'masks','runtime','originals'} and child['report']['build']!=cb:return False
-  for name,fn in [('masks',oracle.validate_masks),('runtime',oracle.validate_runtime)]:
+   if child['name'] in {'masks','runtime','streams','originals'} and child['report']['build']!=cb:return False
+  for name,fn in [('masks',oracle.validate_masks),('runtime',oracle.validate_runtime),('streams',oracle.validate_streams)]:
    entry=groups[name][0];run=dict(entry['report'],outputs=str(raw/entry['relative']/'outputs'));actual=fn(run)
    if actual!=json.loads((d/(name+'-CPU.json')).read_text()) or not all(v['status']=='PASSED' for v in actual):return False
   actual=[]
   for entry in groups['originals']:
    p=raw/entry['relative'];run=dict(entry['report'],outputs=str(p/'outputs'),evidence=str(p));actual.append(original_validate(run,raw_override=p))
   return actual==json.loads((d/'originals-CPU.json').read_text()) and all(v['status']=='PASSED' for v in actual)
- gate('clean-clone-rebuilt-library-27-masks-44-runtime-and-15-full-workflows',cold)
- sources.update({'tools/moat/qualify_image_ccl.py','tools/moat/publish_image_ccl.py','tools/moat/qualify_canny_plus.py','tools/moat/qualify_first.py','tools/moat/audit.py','tools/moat/snapshot.py','tools/migration/device_guard.py','migration/environments/project.lock.json','migration/rewrite/image-acceptance-policy.json'})
+ gate('clean-clone-rebuilt-library-27-masks-44-runtime-three-streams-and-15-full-workflows',cold)
+ sources.update({'migration/rewrite/image-ccl-stream-contract.json','migration/rewrite/image-ccl-runtime-contract.json','tools/moat/qualify_image_ccl.py','tools/moat/publish_image_ccl.py','tools/moat/qualify_canny_plus.py','tools/moat/qualify_first.py','tools/moat/audit.py','tools/moat/snapshot.py','tools/migration/device_guard.py','migration/environments/project.lock.json','migration/rewrite/image-acceptance-policy.json'})
  gate('three-independent-review-scopes-current-executable-tree-and-proofs',lambda:reviewed(review,sorted(sources),refs))
  return checks,refs,sorted(sources),b,spec
 

@@ -1,0 +1,1 @@
+Test CPU-selftest for CCL-native-original-preflight-negative-tests, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: none.

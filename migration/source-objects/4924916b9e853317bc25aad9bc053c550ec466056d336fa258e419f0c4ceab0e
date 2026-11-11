@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "source_case": "noise-847",
+  "pixel_compute_physical_gpu": 1,
+  "visible_physical_gpus": [0, 1],
+  "cases": {
+    "default-stream": {"kind": "pixels", "return_code": 0, "stream_query_return_code": 0},
+    "foreign-device-stream": {"kind": "expected-error", "return_code": 101, "stream_query_return_code": 0},
+    "destroyed-stream": {"kind": "expected-error", "return_code": 709, "stream_query_return_code": 709}
+  },
+  "policy": "Use GPU1 for every pixel/buffer operation. GPU0 is used only to create and query a stream for device-mismatch rejection. GPU3 is excluded. Keep all storage unchanged on rejected streams."
+}

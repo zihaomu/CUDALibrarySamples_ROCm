@@ -28,6 +28,7 @@ def main():
    out=remote+'/'+family+'/'+mode;code=ssh(e,['mkdir','-p',out],'create-original-'+family+'-'+mode)
    if not code:code=ssh(e,[*flags,*(['-DCUDA11U1'] if mode=='batch-compression' else []),remote+'/'+family+'/'+sourcefile,'-lnppif','-lnppc','-o',out+'/original'],'build-original-'+family+'-'+mode)
    builds.append(dict(family=family,mode=mode,binary=out+'/original',cwd=out,return_code=code))
+ rc=rc or next((b['return_code'] for b in builds if b['return_code']),0)
  identities={}
  if not rc:
   names=[remote+'/'+f+'-probe' for f in ['NPP','NPP+']]+[b['binary'] for b in builds if not b['return_code']]+[SDK+'/lib64/libnppif.so',SDK+'/lib64/libnppc.so',PLUS+'/lib/libnpp_plus_if.so',PLUS+'/lib/libnpp_plus_c.so'];rc=ssh(e,['sha256sum',*names],'actual-native-binaries-and-libraries');identities={line.split()[1]:line.split()[0] for line in (e.path/e.commands[-1]['stdout']).read_text().splitlines()}

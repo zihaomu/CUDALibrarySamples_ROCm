@@ -1,0 +1,180 @@
+diff --git a/rocm/common/image/ccl.hip b/rocm/common/image/ccl.hip
+index 4f4256232..e4003873d 100644
+--- a/rocm/common/image/ccl.hip
++++ b/rocm/common/image/ccl.hip
+@@ -44,7 +44,7 @@ extern "C" hipError_t rocm_image_ccl8_workspace_size(int w,int h,uint64_t*bytes)
+ extern "C" hipError_t rocm_image_ccl8_run(const rocm_image_ccl8_descriptor*d,hipStream_t stream){return rocm_image_ccl8_batch(d,1,stream);}
+ extern "C" hipError_t rocm_image_ccl8_batch(const rocm_image_ccl8_descriptor*d,int count,hipStream_t stream){
+  if(!d||count<=0||count>65536)return hipErrorInvalidValue;
+- try{int device=-1;auto s=hipGetDevice(&device);if(s!=hipSuccess)return s;unsigned flags=0;s=hipStreamGetFlags(stream,&flags);if(s!=hipSuccess)return s;std::vector<Range>ranges;ranges.reserve(size_t(count)*5);
++ try{int device=-1;auto s=hipGetDevice(&device);if(s!=hipSuccess)return s;hipDevice_t stream_device=-1;s=hipStreamGetDevice(stream,&stream_device);if(s!=hipSuccess)return s;if(stream_device!=device)return hipErrorInvalidDevice;std::vector<Range>ranges;ranges.reserve(size_t(count)*5);
+  for(int i=0;i<count;++i){s=validate(d[i],device,ranges);if(s!=hipSuccess)return s;}
+  for(int i=0;i<count;++i){s=run(d[i],stream);if(s!=hipSuccess)return s;}return hipSuccess;
+  }catch(...){return hipErrorOutOfMemory;}
+diff --git a/tools/moat/image_ccl_checks.py b/tools/moat/image_ccl_checks.py
+index 0d4f44b44..5010edff5 100644
+--- a/tools/moat/image_ccl_checks.py
++++ b/tools/moat/image_ccl_checks.py
+@@ -71,6 +71,12 @@ def run_checks():
+   check('runtime-error-storage-changed',lambda:runtime_mutation('error-storage',lambda r:r[0]['after'].__setitem__(0,'0'*64)),False)
+   check('runtime-query-wrong-bytes',lambda:runtime_mutation('query-bytes',lambda r:next(x for x in r if x['kind']=='workspace-query').update(bytes=0)),False)
+   check('runtime-missing-branch',lambda:runtime_mutation('runtime-drop',lambda r:r.pop()),False)
++  def replace_pixel_role(rs):
++   positive=next(r for r in rs if r['case']=='after-errors');negative=rs[0];positive.update(kind='expected-error',return_code=1,expected_return_code=1,before=negative['before'],after=negative['after'])
++  check('runtime-pixel-replaced-with-error-rejected',lambda:runtime_mutation('pixel-role',replace_pixel_role),False)
++  check('runtime-query-redefined-as-invalid-rejected',lambda:runtime_mutation('query-role',lambda rs:next(r for r in rs if r['case']=='workspace-recursive').update(valid=False,width=0,height=0,return_code=1,bytes=0)),False)
++  check('runtime-error-replaced-with-query-rejected',lambda:runtime_mutation('error-role',lambda rs:rs[0].update(kind='workspace-query',valid=True,width=1,height=1,return_code=0,bytes=12)),False)
++  check('runtime-frozen-source-removed-rejected',lambda:runtime_mutation('source-role',lambda rs:next(r for r in rs if r['case']=='after-errors').update(source_case=None)),False)
+   check('native-all-actual-cases-recorded',lambda:len(validate_native(native))==54)
+   target=next(r for r in native if r.get('case')=='constant-0' and r['family']=='NPP');where=d/'native-remap';shutil.copytree(ROOT/target['outputs'],where)
+   for name in ['labels.bin','compact.bin']:
+@@ -81,5 +87,5 @@ def run_checks():
+   original=json.loads((ROOT/'migration/reports/image-ccl-originals.json').read_text())[0];check('actual-C++-files-pass',lambda:original_validate(original)['status']=='PASSED');check('C++-nonzero-rejected',lambda:original_validate(dict(original,return_code=1))['status']=='PASSED',False)
+  return dict(status='PASSED' if all(c['passed'] for c in checks) else 'FAILED',case_count=len(checks),checks=checks)
+ def main():
+- e=Experiment('I2','CCL-independent-validator-mutations','CPU-validator-test',sources=[__file__,ROOT/'tools/moat/image_ccl_reference.py',ROOT/'tools/moat/image_ccl_original_reference.py',ROOT/'migration/rewrite/image-ccl-profile.json']);v=run_checks();write(e.path/'checks.json',v);v['evidence']=e.finish('PASSED' if v['status']=='PASSED' else 'SELF_TEST_FAILED',dict(v));write(ROOT/'migration/reports/image-ccl-checks.json',v);record('I2','CCL独立BFS/OpenCV交叉、任意native编号正例和像素/压缩/padding/输入/缺例/ABI/文件等验收器正反向检查：'+v['status'],[v['evidence']]);print(v['status'],v['case_count'],[c for c in v['checks'] if not c['passed']]);return int(v['status']!='PASSED')
++ e=Experiment('I2','CCL-independent-validator-mutations','CPU-validator-test',sources=[__file__,ROOT/'tools/moat/image_ccl_reference.py',ROOT/'tools/moat/image_ccl_original_reference.py',ROOT/'migration/rewrite/image-ccl-profile.json',ROOT/'migration/rewrite/image-ccl-runtime-contract.json']);v=run_checks();write(e.path/'checks.json',v);v['evidence']=e.finish('PASSED' if v['status']=='PASSED' else 'SELF_TEST_FAILED',dict(v));write(ROOT/'migration/reports/image-ccl-checks.json',v);record('I2','CCL独立BFS/OpenCV交叉、任意native编号正例和像素/压缩/padding/输入/缺例/ABI/文件等验收器正反向检查：'+v['status'],[v['evidence']]);print(v['status'],v['case_count'],[c for c in v['checks'] if not c['passed']]);return int(v['status']!='PASSED')
+ if __name__=='__main__':raise SystemExit(main())
+diff --git a/tools/moat/image_ccl_cold.py b/tools/moat/image_ccl_cold.py
+index 5e83cbea9..6a9a9487a 100644
+--- a/tools/moat/image_ccl_cold.py
++++ b/tools/moat/image_ccl_cold.py
+@@ -6,7 +6,7 @@ from experiment import ROOT,Experiment,write,digest,git
+ from image_ccl_build import dependencies
+ from image_progress import record
+ def main():
+- commit=git('rev-parse','HEAD').strip();names=['image_ccl_contracts.py','image_ccl_build.py','image_ccl_run.py','image_ccl_worker.py','image_ccl_originals.py','image_ccl_reference.py','image_ccl_original_reference.py','image_progress.py','snapshot.py'];sources=[__file__,*dependencies(),*[ROOT/'tools/moat'/n for n in names],ROOT/'tools/migration/bootstrap_sdk.py'];e=Experiment('I2','CCL-clean-checkout','host-cold-replay',sources=sources);where=Path(tempfile.mkdtemp(prefix='image-ccl-cold-',dir=ROOT.parent));clone=where/'src';checks=[];children=[];rc=e.command(['git','clone','--shared','--quiet',str(ROOT),str(clone)],'fresh-clone',timeout=180)
++ commit=git('rev-parse','HEAD').strip();names=['image_ccl_contracts.py','image_ccl_build.py','image_ccl_run.py','image_ccl_worker.py','image_ccl_originals.py','image_ccl_reference.py','image_ccl_original_reference.py','image_progress.py','snapshot.py'];sources=[__file__,ROOT/'migration/rewrite/image-ccl-runtime-contract.json',*dependencies(),*[ROOT/'tools/moat'/n for n in names],ROOT/'tools/migration/bootstrap_sdk.py'];e=Experiment('I2','CCL-clean-checkout','host-cold-replay',sources=sources);where=Path(tempfile.mkdtemp(prefix='image-ccl-cold-',dir=ROOT.parent));clone=where/'src';checks=[];children=[];rc=e.command(['git','clone','--shared','--quiet',str(ROOT),str(clone)],'fresh-clone',timeout=180)
+  if not rc:rc=e.command(['git','checkout','--quiet',commit],'fixed-source-commit',cwd=clone)
+  checks.append(dict(check='no-preexisting-build',passed=not(clone/'build').exists()))
+  if not rc:rc=e.command([str(ROOT/'build/image-cpu-venv/bin/python'),str(clone/'tools/moat/image_ccl_contracts.py')],'reconstruct-27-frozen-inputs',cwd=clone,timeout=300)
+diff --git a/tools/moat/image_ccl_native.py b/tools/moat/image_ccl_native.py
+index e921e3776..173462ead 100644
+--- a/tools/moat/image_ccl_native.py
++++ b/tools/moat/image_ccl_native.py
+@@ -28,6 +28,7 @@ def main():
+    out=remote+'/'+family+'/'+mode;code=ssh(e,['mkdir','-p',out],'create-original-'+family+'-'+mode)
+    if not code:code=ssh(e,[*flags,*(['-DCUDA11U1'] if mode=='batch-compression' else []),remote+'/'+family+'/'+sourcefile,'-lnppif','-lnppc','-o',out+'/original'],'build-original-'+family+'-'+mode)
+    builds.append(dict(family=family,mode=mode,binary=out+'/original',cwd=out,return_code=code))
++ rc=rc or next((b['return_code'] for b in builds if b['return_code']),0)
+  identities={}
+  if not rc:
+   names=[remote+'/'+f+'-probe' for f in ['NPP','NPP+']]+[b['binary'] for b in builds if not b['return_code']]+[SDK+'/lib64/libnppif.so',SDK+'/lib64/libnppc.so',PLUS+'/lib/libnpp_plus_if.so',PLUS+'/lib/libnpp_plus_c.so'];rc=ssh(e,['sha256sum',*names],'actual-native-binaries-and-libraries');identities={line.split()[1]:line.split()[0] for line in (e.path/e.commands[-1]['stdout']).read_text().splitlines()}
+diff --git a/tools/moat/image_ccl_native_original_verify.py b/tools/moat/image_ccl_native_original_verify.py
+index d824d1f6f..34420f2fc 100644
+--- a/tools/moat/image_ccl_native_original_verify.py
++++ b/tools/moat/image_ccl_native_original_verify.py
+@@ -6,6 +6,11 @@ from image_progress import record
+ 
+ def main():
+  b=json.loads((ROOT/'migration/reports/image-ccl-native-build.json').read_text());spec=json.loads((ROOT/'migration/rewrite/image-ccl-profile.json').read_text());rows=[]
++ preflight=Experiment('I2','CCL-native-original-preflight','host-preflight',sources=[__file__,ROOT/'migration/rewrite/image-ccl-profile.json'])
++ expected={('NPP','default'),('NPP+','default'),('NPP+','batch-compression')}
++ checks=[dict(check='complete-successful-native-build',passed=b.get('status')=='BUILT' and len(b.get('originals',[]))==3 and {(r.get('family'),r.get('mode')) for r in b.get('originals',[])}==expected and all(r.get('return_code')==0 for r in b.get('originals',[]))),dict(check='all-original-binary-identities-present',passed=all(isinstance(b.get('identities',{}).get(r.get('binary')),str) and len(b['identities'][r['binary']])==64 for r in b.get('originals',[])))]
++ ready=all(c['passed'] for c in checks);v=dict(status='READY' if ready else 'REJECTED',checks=checks);write(preflight.path/'preflight.json',v);v['evidence']=preflight.finish('PASSED' if ready else 'EXPECTED_REJECTION',dict(status='PASSED' if ready else 'FAILED',checks=checks));write(ROOT/'migration/reports/image-ccl-native-originals-preflight.json',v);record('I2','原生完整入口执行前构建状态/三分支/二进制身份预检：'+v['status']+'；拒绝时不创建逐例执行。',[v['evidence']])
++ if not ready:return 1
+  for original in b['originals']:
+   family=original['family'];e=Experiment('I2','CCL-identity-bound-original-'+family,'cuda-original',case=original['mode'],sources=[__file__,ROOT/'migration/rewrite/image-ccl-profile.json',*[ROOT/n for n in spec['original_sources']]],parent=json.loads((ROOT/b['evidence']/'manifest.json').read_text())['experiment_id']);config=dict(binary=original['binary'],binary_sha256=b['identities'][original['binary']],cwd='/tmp/'+e.id+'/work',inputs=[dict(path='/tmp/'+e.id+'/images/'+(ROOT/x['source']).name,source=b['remote']+'/'+family+'/images/'+(ROOT/x['source']).name,sha256=x['sha256'],bytes=x['bytes']) for x in spec['originals'] if x['source'].startswith(family+'/')]);wrapper='''import json,pathlib,hashlib,os,sys,subprocess,shutil
+ c=json.loads(__CONFIG__);pathlib.Path(c['cwd']).mkdir(parents=True);(pathlib.Path(c['cwd']).parent/'images').mkdir();assert hashlib.file_digest(open(c['binary'],'rb'),'sha256').hexdigest()==c['binary_sha256']
+diff --git a/tools/moat/image_ccl_reference.py b/tools/moat/image_ccl_reference.py
+index 509ac3add..aa0447964 100644
+--- a/tools/moat/image_ccl_reference.py
++++ b/tools/moat/image_ccl_reference.py
+@@ -44,14 +44,27 @@ def validate_runtime(run):
+  out=ROOT/run['outputs'];rows=json.loads((out/'runs.json').read_text());expected_names=['null-input','null-labels','null-compact','null-count','null-workspace','zero-width','negative-height','excess-width','input-pitch-small','labels-pitch-small','compact-pitch-small','unaligned-label-pitch','unaligned-compact-pitch','unaligned-workspace','unaligned-label','unaligned-count','short-workspace','input-output-overlap','output-output-overlap','count-workspace-overlap','pitch-overflow','host-memory','device-allocation-too-small','workspace-1','workspace-recursive','query-zero','query-negative','query-too-large','null-descriptors','zero-batch','negative-batch','excess-batch','batch-full-preflight','batch-cross-image-overlap','after-errors','repeat','changed-input',*['heterogeneous-batch-'+str(i) for i in range(5)],'concurrent-0','concurrent-1']
+  if run['return_code']!=0 or len(rows)!=len(expected_names) or {r['case'] for r in rows}!=set(expected_names):raise ValueError('runtime complete unique matrix')
+  spec=json.loads((ROOT/'migration/rewrite/image-ccl-profile.json').read_text());cases={c['case']:c for c in spec['cases']};results=[]
++ obligations=json.loads((ROOT/'migration/rewrite/image-ccl-runtime-contract.json').read_text())['cases']
++ if set(obligations)!=set(expected_names):raise ValueError('independent runtime obligations')
++ def workspace_bytes(w,h):
++  n=w*h;words=2*n+1
++  while n>256:n=(n+255)//256;words+=2*n
++  return words*4
++ def initialized_storage(source):
++  c=cases[source];w,h=c['width'],c['height'];payload=(ROOT/c['fixture']/'input.bin').read_bytes()
++  return [hashlib.sha256(x).hexdigest() for x in [payload,bytes([167])*(h*(4*w+20)),bytes([185])*(h*(4*w+28)),int(-19).to_bytes(4,'little',signed=True),bytes([211])*workspace_bytes(w,h)]]
+  for r in rows:
++  obligation=obligations[r['case']]
++  if r['kind']!=obligation['kind'] or r['return_code']!=obligation['return_code']:raise ValueError('runtime role and actual status '+r['case'])
++  if r['kind']=='pixels' and (r['source_case']!=obligation['source_case'] or any(r[k]!=obligation[k] for k in ['width','height','input_pitch','labels_pitch','compact_pitch'])):raise ValueError('runtime frozen source and geometry '+r['case'])
++  if r['kind']=='workspace-query' and any(type(r[k]) is not type(obligation[k]) or r[k]!=obligation[k] for k in ['valid','width','height']):raise ValueError('runtime frozen query parameters '+r['case'])
+   if r['kind']=='pixels':
+    c=cases.get(r['source_case']);input_bytes=(out/r['case']/'input-before.bin').read_bytes()
+    if c is not None and input_bytes!=(ROOT/c['fixture']/'input.bin').read_bytes():raise ValueError('runtime original fixture')
+    if r['case']=='changed-input' and any(input_bytes):raise ValueError('changed-input must really change to zero')
+    v=validate_output(c,r,out/r['case'],input_bytes);v['checks'].append(dict(check='actual-GPU-return-code',passed=r['return_code']==0));v['status']='PASSED' if all(c['passed'] for c in v['checks']) else 'FAILED';results.append(v)
+   elif r['kind']=='expected-error':
+-   checks=[dict(check='actual-return-code',passed=r['return_code']==1 and r['expected_return_code']==1),dict(check='all-storage-unchanged',passed=len(r['before'])>=5 and r['before']==r['after'])];results.append(dict(case=r['case'],status='PASSED' if all(c['passed'] for c in checks) else 'FAILED',checks=checks))
++   expected_storage=initialized_storage(obligation['source_case'])*obligation['states'];checks=[dict(check='actual-return-code',passed=r['return_code']==1 and r['expected_return_code']==1),dict(check='all-storage-unchanged',passed=r['before']==r['after']==expected_storage)];results.append(dict(case=r['case'],status='PASSED' if all(c['passed'] for c in checks) else 'FAILED',checks=checks))
+   elif r['kind']=='workspace-query':
+    n=r['width']*r['height'];size=2*n+1
+    if r['valid']:
+@@ -108,11 +121,29 @@ def validate_native_originals(rows):
+   results.append(dict(family=r['family'],mode=r['mode'],file_count=len(values),results=values))
+  return results
+ 
++def validate_streams(run):
++ if run['return_code']!=0:raise ValueError('stream producer failed')
++ out=ROOT/run['outputs'];rows=json.loads((out/'runs.json').read_text());spec=json.loads((ROOT/'migration/rewrite/image-ccl-stream-contract.json').read_text());obligations=spec['cases'];profile=json.loads((ROOT/'migration/rewrite/image-ccl-profile.json').read_text());case=next(c for c in profile['cases'] if c['case']==spec['source_case']);devices=json.loads((out/'devices.json').read_text())['devices'];mapping={d['logical_id']:d['physical_id'] for d in devices}
++ if set(mapping.values())!=set(spec['visible_physical_gpus']) or len(rows)!=3 or {r['case'] for r in rows}!=set(obligations):raise ValueError('complete guarded stream cases')
++ results=[];positive=next(r for r in rows if r['case']=='default-stream')
++ for r in rows:
++  rule=obligations[r['case']]
++  if r['kind']!=rule['kind'] or r['return_code']!=rule['return_code'] or r['stream_query_return_code']!=rule['stream_query_return_code'] or mapping[r['current_device']]!=1:raise ValueError('fixed stream role/status/device')
++  if r['case']=='default-stream':
++   if r['source_case']!=case['case'] or r['stream_device']!=r['current_device']:raise ValueError('actual default stream identity')
++   results.append(validate_output(case,r,out/r['case']))
++  else:
++   before=r['before'];after=r['after'];expected=[positive['files']['input-after.bin']['sha256'],positive['files']['labels.bin']['sha256'],positive['files']['compact.bin']['sha256'],hashlib.sha256(int(positive['reported_count']).to_bytes(4,'little',signed=True)).hexdigest()]
++   if len(before)!=5 or before!=after or before[:4]!=expected or not isinstance(before[4],str) or len(before[4])!=64:raise ValueError('rejected stream storage unchanged and bound to actual positive output')
++   if r['case']=='foreign-device-stream' and (r['stream_device']!=r['foreign_device'] or mapping[r['foreign_device']]!=0 or r['foreign_device']==r['current_device']):raise ValueError('actual foreign stream identity')
++   results.append(dict(case=r['case'],status='PASSED',checks=[dict(check='actual-stream-query-and-CCL-rejection',passed=True),dict(check='complete-storage-preserved',passed=True)]))
++ return results
++
+ def main():
+- p=argparse.ArgumentParser();p.add_argument('--kind',choices=['masks','runtime','native','native-originals','trace'],default='masks');a=p.parse_args();run=json.loads((ROOT/f'migration/reports/image-ccl-{a.kind}.json').read_text());e=Experiment('I2','CCL-'+a.kind+'-independent-CPU','CPU-reference',sources=[__file__,ROOT/'migration/rewrite/image-ccl-profile.json'],parent=run.get('experiment_id') if isinstance(run,dict) else None)
++ p=argparse.ArgumentParser();p.add_argument('--kind',choices=['masks','runtime','native','native-originals','trace','streams'],default='masks');a=p.parse_args();run=json.loads((ROOT/f'migration/reports/image-ccl-{a.kind}.json').read_text());e=Experiment('I2','CCL-'+a.kind+'-independent-CPU','CPU-reference',sources=[__file__,ROOT/'migration/rewrite/image-ccl-profile.json',ROOT/'migration/rewrite/image-ccl-runtime-contract.json',ROOT/'migration/rewrite/image-ccl-stream-contract.json'],parent=run.get('experiment_id') if isinstance(run,dict) else None)
+  try:
+   if a.kind in {'native','native-originals'}:results=validate_native(run) if a.kind=='native' else validate_native_originals(run);status='PASSED';note='Comparison completed; native partition conformance is reported separately, including failures.'
+-  else:results=validate_runtime(run) if a.kind=='runtime' else validate_trace(run) if a.kind=='trace' else validate_masks(run);status='PASSED' if all(r['status']=='PASSED' for r in results) else 'FAILED';note='All GPU pixels/partition/compact/count/padding and complete runtime storage checks.'
++  else:results=validate_runtime(run) if a.kind=='runtime' else validate_trace(run) if a.kind=='trace' else validate_streams(run) if a.kind=='streams' else validate_masks(run);status='PASSED' if all(r['status']=='PASSED' for r in results) else 'FAILED';note='All GPU pixels/partition/compact/count/padding and complete runtime storage checks.'
+   v=dict(status=status,case_count=len(results),results=results,note=note,opencv_version=cv2.__version__)
+  except Exception as error:v=dict(status='FAILED',error=repr(error),results=[])
+  write(e.path/'results.json',v);v['evidence']=e.finish('PASSED' if v['status']=='PASSED' else 'NUMERIC_MISMATCH',dict(status=v['status'],checks=[dict(check='independent-full-contract',passed=v['status']=='PASSED')]));write(ROOT/f'migration/reports/image-ccl-{a.kind}-validation.json',v);record('I2','CCL '+a.kind+'独立CPU完整验收：'+v['status']+'；native分区正确性与项目GPU验收分别记录。',[v['evidence']]);print(v['status'],v.get('error'),[(r['case'],[c for c in r.get('checks',[]) if not c['passed']]) for r in v['results'] if r.get('status')=='FAILED'][:4]);return int(v['status']!='PASSED')
+diff --git a/tools/moat/publish_image_ccl.py b/tools/moat/publish_image_ccl.py
+index 6e0c4a16f..f8cd068ae 100644
+--- a/tools/moat/publish_image_ccl.py
++++ b/tools/moat/publish_image_ccl.py
+@@ -17,7 +17,7 @@ def main():
+  if group['status']!='PASSED' or len(rows)!=2 or {q['sample_id'] for q in rows}!=set(ENTRIES):raise ValueError('Complete two-entry CCL publication required')
+  for q in rows:validate(q,samples[q['sample_id']],review)
+  for q in rows:
+-  s=samples[q['sample_id']];required=['image-CCL/'+c for c in q['case_ids']]+['image-CCL/full-original-individual-and-heterogeneous-batch','image-CCL/all-five-batch-counts','image-CCL/conditional-batch-compression','image-CCL/actual-runtime-ABI-streams-instances','image-CCL/complete-CLI-errors-and-no-device','image-CCL/raw-GPU-dispatch','image-CCL/independent-BFS-and-validator-mutations','image-CCL/cold-checkout','image-CCL/independent-review'];s.update(status='PASSED',level='L4',reason_code='VALIDATED_MOAT_REWRITE',implementation=q['implementation'],selected_validation=q,required_cases=required,passed_cases=required,actual_library='Project HIP equal-value 8-connected union/find + hierarchical GPU prefix-scan compression',backend_library='project HIP CCL',equivalence='EXACT_CPU_PARTITION_ARBITRARY_VENDOR_IDS',reason='原始五输入/单图与异构batch、NPP+默认及CUDA11U1压缩分支完整；27组全像素/padding、44运行合同、1..5 batch共15个完整流程/165文件、39CLI、27正反例/BFS、trace/冷检出/三复审通过。包括零值所有区域，编号按最小像素确定；当前NPP/NPP+原生分区错误单列，不复制厂商错误。',cuda_baseline='PASSED',cuda_baseline_reason='5090未改原始NPP与NPP+默认/条件编译三配置均运行成功，55原始输出完整保留；原生数学分区验收另外记录FAILED项。',cuda_comparison='OBSERVED',cuda_comparison_mode='NATIVE_NPP_AND_NPPPLUS_CONFORMANCE_RECORDED',cuda_comparison_reason='54次真实API及55原始输出对独立CPU完整比较。3x3两库返回5分量，CPU/HIP为4；其它分裂/合并均逐输入记录，native程序成功不等于数学正确。',benchmark='NOT_QUALIFIED',active_batch='I2',retry_condition='修改连接、编号、类型、布局、范围或平台须重新冻结并实测。',next_step='两个CCL完整入口已完成；I2的轮廓与signed/unsigned EDT继续单列。',reproduce='python3 tools/moat/image_ccl_contracts.py\npython3 tools/moat/image_ccl_build.py\npython3 tools/moat/image_ccl_run.py\npython3 tools/moat/image_ccl_originals.py')
++  s=samples[q['sample_id']];required=['image-CCL/'+c for c in q['case_ids']]+['image-CCL/full-original-individual-and-heterogeneous-batch','image-CCL/all-five-batch-counts','image-CCL/conditional-batch-compression','image-CCL/actual-runtime-ABI-streams-instances','image-CCL/complete-CLI-errors-and-no-device','image-CCL/raw-GPU-dispatch','image-CCL/independent-BFS-and-validator-mutations','image-CCL/cold-checkout','image-CCL/independent-review'];s.update(status='PASSED',level='L4',reason_code='VALIDATED_MOAT_REWRITE',implementation=q['implementation'],selected_validation=q,required_cases=required,passed_cases=required,actual_library='Project HIP equal-value 8-connected union/find + hierarchical GPU prefix-scan compression',backend_library='project HIP CCL',equivalence='EXACT_CPU_PARTITION_ARBITRARY_VENDOR_IDS',reason='原始五输入/单图与异构batch、NPP+默认及CUDA11U1压缩分支完整；27组全像素/padding、44运行合同、1..5 batch共15个完整流程/165文件、39CLI、31正反例/BFS、trace/冷检出/三复审通过。包括零值所有区域，编号按最小像素确定；当前NPP/NPP+原生分区错误单列，不复制厂商错误。',cuda_baseline='PASSED',cuda_baseline_reason='5090未改原始NPP与NPP+默认/条件编译三配置均运行成功，55原始输出完整保留；原生数学分区验收另外记录FAILED项。',cuda_comparison='OBSERVED',cuda_comparison_mode='NATIVE_NPP_AND_NPPPLUS_CONFORMANCE_RECORDED',cuda_comparison_reason='54次真实API及55原始输出对独立CPU完整比较。3x3两库返回5分量，CPU/HIP为4；其它分裂/合并均逐输入记录，native程序成功不等于数学正确。',benchmark='NOT_QUALIFIED',active_batch='I2',retry_condition='修改连接、编号、类型、布局、范围或平台须重新冻结并实测。',next_step='两个CCL完整入口已完成；I2的轮廓与signed/unsigned EDT继续单列。',reproduce='python3 tools/moat/image_ccl_contracts.py\npython3 tools/moat/image_ccl_build.py\npython3 tools/moat/image_ccl_run.py\npython3 tools/moat/image_ccl_originals.py')
+   for ref in ['migration/reports/image-ccl.md',q['evidence'],*q['evidence_references']]:
+    if ref not in s['evidence']:s['evidence'].append(ref)
+   if not any(a.get('qualification_id')==q['qualification_id'] for a in s['attempts']):s['attempts'].append(q)
+diff --git a/tools/moat/qualify_image_ccl.py b/tools/moat/qualify_image_ccl.py
+index 86f3ebbfd..eae46ec8c 100644
+--- a/tools/moat/qualify_image_ccl.py
++++ b/tools/moat/qualify_image_ccl.py
+@@ -79,8 +79,8 @@ def collect(review=None):
+  gate('three-unchanged-native-originals-actual-binary-input-receipts',native_originals)
+  gate('all-55-native-original-outputs-CPU-partition-comparison',lambda:cpu('native-originals',lambda:oracle.validate_native_originals(load('native-originals')),3))
+  def mutations():
+-  r=load('checks');return report(r,'checks.json','CPU-validator-test') and r['status']=='PASSED' and r['case_count']==len(r['checks'])==27 and all(c['passed'] for c in r['checks']) and len({c['check'] for c in r['checks']})==27
+- gate('27-actual-validator-positive-negative-and-BFS-checks',mutations)
++  r=load('checks');return report(r,'checks.json','CPU-validator-test') and r['status']=='PASSED' and r['case_count']==len(r['checks'])==31 and all(c['passed'] for c in r['checks']) and len({c['check'] for c in r['checks']})==31
++ gate('31-actual-validator-positive-negative-and-BFS-checks',mutations)
+  def cold():
+   r=load('cold')
+   if not report(r,'cold.json','host-cold-replay') or r['status']!='PASSED' or r['return_code'] or not r['checks'] or not all(c['passed'] for c in r['checks']) or len(r['children'])!=19:return False
+@@ -101,7 +101,7 @@ def collect(review=None):
+    p=raw/entry['relative'];run=dict(entry['report'],outputs=str(p/'outputs'),evidence=str(p));actual.append(original_validate(run,raw_override=p))
+   return actual==json.loads((d/'originals-CPU.json').read_text()) and all(v['status']=='PASSED' for v in actual)
+  gate('clean-clone-rebuilt-library-27-masks-44-runtime-and-15-full-workflows',cold)
+- sources.update({'tools/moat/qualify_image_ccl.py','tools/moat/publish_image_ccl.py','tools/moat/qualify_canny_plus.py','tools/moat/qualify_first.py','tools/moat/audit.py','tools/moat/snapshot.py','tools/migration/device_guard.py','migration/environments/project.lock.json','migration/rewrite/image-acceptance-policy.json'})
++ sources.update({'migration/rewrite/image-ccl-runtime-contract.json','tools/moat/qualify_image_ccl.py','tools/moat/publish_image_ccl.py','tools/moat/qualify_canny_plus.py','tools/moat/qualify_first.py','tools/moat/audit.py','tools/moat/snapshot.py','tools/migration/device_guard.py','migration/environments/project.lock.json','migration/rewrite/image-acceptance-policy.json'})
+  gate('three-independent-review-scopes-current-executable-tree-and-proofs',lambda:reviewed(review,sorted(sources),refs))
+  return checks,refs,sorted(sources),b,spec
+ 

@@ -44,14 +44,27 @@ def validate_runtime(run):
  out=ROOT/run['outputs'];rows=json.loads((out/'runs.json').read_text());expected_names=['null-input','null-labels','null-compact','null-count','null-workspace','zero-width','negative-height','excess-width','input-pitch-small','labels-pitch-small','compact-pitch-small','unaligned-label-pitch','unaligned-compact-pitch','unaligned-workspace','unaligned-label','unaligned-count','short-workspace','input-output-overlap','output-output-overlap','count-workspace-overlap','pitch-overflow','host-memory','device-allocation-too-small','workspace-1','workspace-recursive','query-zero','query-negative','query-too-large','null-descriptors','zero-batch','negative-batch','excess-batch','batch-full-preflight','batch-cross-image-overlap','after-errors','repeat','changed-input',*['heterogeneous-batch-'+str(i) for i in range(5)],'concurrent-0','concurrent-1']
  if run['return_code']!=0 or len(rows)!=len(expected_names) or {r['case'] for r in rows}!=set(expected_names):raise ValueError('runtime complete unique matrix')
  spec=json.loads((ROOT/'migration/rewrite/image-ccl-profile.json').read_text());cases={c['case']:c for c in spec['cases']};results=[]
+ obligations=json.loads((ROOT/'migration/rewrite/image-ccl-runtime-contract.json').read_text())['cases']
+ if set(obligations)!=set(expected_names):raise ValueError('independent runtime obligations')
+ def workspace_bytes(w,h):
+  n=w*h;words=2*n+1
+  while n>256:n=(n+255)//256;words+=2*n
+  return words*4
+ def initialized_storage(source):
+  c=cases[source];w,h=c['width'],c['height'];payload=(ROOT/c['fixture']/'input.bin').read_bytes()
+  return [hashlib.sha256(x).hexdigest() for x in [payload,bytes([167])*(h*(4*w+20)),bytes([185])*(h*(4*w+28)),int(-19).to_bytes(4,'little',signed=True),bytes([211])*workspace_bytes(w,h)]]
  for r in rows:
+  obligation=obligations[r['case']]
+  if r['kind']!=obligation['kind'] or r['return_code']!=obligation['return_code']:raise ValueError('runtime role and actual status '+r['case'])
+  if r['kind']=='pixels' and (r['source_case']!=obligation['source_case'] or any(r[k]!=obligation[k] for k in ['width','height','input_pitch','labels_pitch','compact_pitch'])):raise ValueError('runtime frozen source and geometry '+r['case'])
+  if r['kind']=='workspace-query' and any(type(r[k]) is not type(obligation[k]) or r[k]!=obligation[k] for k in ['valid','width','height']):raise ValueError('runtime frozen query parameters '+r['case'])
   if r['kind']=='pixels':
    c=cases.get(r['source_case']);input_bytes=(out/r['case']/'input-before.bin').read_bytes()
    if c is not None and input_bytes!=(ROOT/c['fixture']/'input.bin').read_bytes():raise ValueError('runtime original fixture')
    if r['case']=='changed-input' and any(input_bytes):raise ValueError('changed-input must really change to zero')
    v=validate_output(c,r,out/r['case'],input_bytes);v['checks'].append(dict(check='actual-GPU-return-code',passed=r['return_code']==0));v['status']='PASSED' if all(c['passed'] for c in v['checks']) else 'FAILED';results.append(v)
   elif r['kind']=='expected-error':
-   checks=[dict(check='actual-return-code',passed=r['return_code']==1 and r['expected_return_code']==1),dict(check='all-storage-unchanged',passed=len(r['before'])>=5 and r['before']==r['after'])];results.append(dict(case=r['case'],status='PASSED' if all(c['passed'] for c in checks) else 'FAILED',checks=checks))
+   expected_storage=initialized_storage(obligation['source_case'])*obligation['states'];checks=[dict(check='actual-return-code',passed=r['return_code']==1 and r['expected_return_code']==1),dict(check='all-storage-unchanged',passed=r['before']==r['after']==expected_storage)];results.append(dict(case=r['case'],status='PASSED' if all(c['passed'] for c in checks) else 'FAILED',checks=checks))
   elif r['kind']=='workspace-query':
    n=r['width']*r['height'];size=2*n+1
    if r['valid']:
@@ -108,11 +121,29 @@ def validate_native_originals(rows):
   results.append(dict(family=r['family'],mode=r['mode'],file_count=len(values),results=values))
  return results
 
+def validate_streams(run):
+ if run['return_code']!=0:raise ValueError('stream producer failed')
+ out=ROOT/run['outputs'];rows=json.loads((out/'runs.json').read_text());spec=json.loads((ROOT/'migration/rewrite/image-ccl-stream-contract.json').read_text());obligations=spec['cases'];profile=json.loads((ROOT/'migration/rewrite/image-ccl-profile.json').read_text());case=next(c for c in profile['cases'] if c['case']==spec['source_case']);devices=json.loads((out/'devices.json').read_text())['devices'];mapping={d['logical_id']:d['physical_id'] for d in devices}
+ if set(mapping.values())!=set(spec['visible_physical_gpus']) or len(rows)!=3 or {r['case'] for r in rows}!=set(obligations):raise ValueError('complete guarded stream cases')
+ results=[];positive=next(r for r in rows if r['case']=='default-stream')
+ for r in rows:
+  rule=obligations[r['case']]
+  if r['kind']!=rule['kind'] or r['return_code']!=rule['return_code'] or r['stream_query_return_code']!=rule['stream_query_return_code'] or mapping[r['current_device']]!=1:raise ValueError('fixed stream role/status/device')
+  if r['case']=='default-stream':
+   if r['source_case']!=case['case'] or r['stream_device']!=r['current_device']:raise ValueError('actual default stream identity')
+   results.append(validate_output(case,r,out/r['case']))
+  else:
+   before=r['before'];after=r['after'];expected=[positive['files']['input-after.bin']['sha256'],positive['files']['labels.bin']['sha256'],positive['files']['compact.bin']['sha256'],hashlib.sha256(int(positive['reported_count']).to_bytes(4,'little',signed=True)).hexdigest()]
+   if len(before)!=5 or before!=after or before[:4]!=expected or not isinstance(before[4],str) or len(before[4])!=64:raise ValueError('rejected stream storage unchanged and bound to actual positive output')
+   if r['case']=='foreign-device-stream' and (r['stream_device']!=r['foreign_device'] or mapping[r['foreign_device']]!=0 or r['foreign_device']==r['current_device']):raise ValueError('actual foreign stream identity')
+   results.append(dict(case=r['case'],status='PASSED',checks=[dict(check='actual-stream-query-and-CCL-rejection',passed=True),dict(check='complete-storage-preserved',passed=True)]))
+ return results
+
 def main():
- p=argparse.ArgumentParser();p.add_argument('--kind',choices=['masks','runtime','native','native-originals','trace'],default='masks');a=p.parse_args();run=json.loads((ROOT/f'migration/reports/image-ccl-{a.kind}.json').read_text());e=Experiment('I2','CCL-'+a.kind+'-independent-CPU','CPU-reference',sources=[__file__,ROOT/'migration/rewrite/image-ccl-profile.json'],parent=run.get('experiment_id') if isinstance(run,dict) else None)
+ p=argparse.ArgumentParser();p.add_argument('--kind',choices=['masks','runtime','native','native-originals','trace','streams'],default='masks');a=p.parse_args();run=json.loads((ROOT/f'migration/reports/image-ccl-{a.kind}.json').read_text());e=Experiment('I2','CCL-'+a.kind+'-independent-CPU','CPU-reference',sources=[__file__,ROOT/'migration/rewrite/image-ccl-profile.json',ROOT/'migration/rewrite/image-ccl-runtime-contract.json',ROOT/'migration/rewrite/image-ccl-stream-contract.json'],parent=run.get('experiment_id') if isinstance(run,dict) else None)
  try:
   if a.kind in {'native','native-originals'}:results=validate_native(run) if a.kind=='native' else validate_native_originals(run);status='PASSED';note='Comparison completed; native partition conformance is reported separately, including failures.'
-  else:results=validate_runtime(run) if a.kind=='runtime' else validate_trace(run) if a.kind=='trace' else validate_masks(run);status='PASSED' if all(r['status']=='PASSED' for r in results) else 'FAILED';note='All GPU pixels/partition/compact/count/padding and complete runtime storage checks.'
+  else:results=validate_runtime(run) if a.kind=='runtime' else validate_trace(run) if a.kind=='trace' else validate_streams(run) if a.kind=='streams' else validate_masks(run);status='PASSED' if all(r['status']=='PASSED' for r in results) else 'FAILED';note='All GPU pixels/partition/compact/count/padding and complete runtime storage checks.'
   v=dict(status=status,case_count=len(results),results=results,note=note,opencv_version=cv2.__version__)
  except Exception as error:v=dict(status='FAILED',error=repr(error),results=[])
  write(e.path/'results.json',v);v['evidence']=e.finish('PASSED' if v['status']=='PASSED' else 'NUMERIC_MISMATCH',dict(status=v['status'],checks=[dict(check='independent-full-contract',passed=v['status']=='PASSED')]));write(ROOT/f'migration/reports/image-ccl-{a.kind}-validation.json',v);record('I2','CCL '+a.kind+'独立CPU完整验收：'+v['status']+'；native分区正确性与项目GPU验收分别记录。',[v['evidence']]);print(v['status'],v.get('error'),[(r['case'],[c for c in r.get('checks',[]) if not c['passed']]) for r in v['results'] if r.get('status')=='FAILED'][:4]);return int(v['status']!='PASSED')
