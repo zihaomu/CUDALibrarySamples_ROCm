@@ -280,7 +280,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-11T16:15:54.564084+00:00。26入口当前7通过/7部分/12失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-11T16:24:00.212972+00:00。26入口当前7通过/7部分/12失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -1153,5 +1153,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-11T16:15:33.199106+00:00 | I2 | NPP+ contour CLI/negative-limit实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP__findContour-CLI/20261111T161531.602817Z-I2-rocm-CLI-7164dac7f1` |
 | 2026-11-11T16:15:35.000771+00:00 | I2 | NPP+ contour CLI/noninteger-limit实际返回1；固定诊断和输出集合由独立CPU验收。 | `migration/reports/evidence/rewrite/I2/NPP__findContour-CLI/20261111T161533.497791Z-I2-rocm-CLI-bde261ccb8` |
 | 2026-11-11T16:15:54.564084+00:00 | I2 | Contour32项CLI实际返回码/具体诊断/空输出/无设备mask独立验收：PASSED | `migration/reports/evidence/rewrite/I2/Contour-CLI-independent-CPU/20261111T161553.608888Z-I2-CPU-reference-92eb0daa07` |
+| 2026-11-11T16:17:59.488759+00:00 | I0 | Signed/unsigned EDT拟采用保留小数的线性阈值交点集欧氏距离定义；64f圆图与native有约29.94差异，不能当作数值容差放宽。已落独立合同草案，后续冻结JSON和独立输入后实现；五图12输出、Voronoi、运行合同均保留。 | `migration/reports/image-I2-distance-definition-research.json`；`migration/image-signed-edt-contract.md` |
+| 2026-11-11T16:24:00.212972+00:00 | I2 | 真实发布器两项负测均正确拒绝且主表SHA不变；记录器拒绝把预期非零命令标成PASSED，原记录恢复封存，独立审核按EXPECTED_REJECTION保存。先Git后发布保护有效。 | `migration/reports/evidence/rewrite/I2/Contour-real-first-Git-publication-guards/20261111T162211.383563Z-I2-CPU-publication-test-d163696219`；`migration/reports/evidence/rewrite/I2/Contour-independent-publication-guard-audit/20261111T162359.328000Z-I2-CPU-publication-test-c551cec31a` |
 
 <!-- IMAGE_EXECUTION:END -->

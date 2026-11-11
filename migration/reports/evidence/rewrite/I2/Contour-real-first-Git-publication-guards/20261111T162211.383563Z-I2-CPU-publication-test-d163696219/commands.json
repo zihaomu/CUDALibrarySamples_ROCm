@@ -1,0 +1,37 @@
+[
+  {
+    "command_id": 1,
+    "phase": "real-unpublished-complete-group",
+    "argv": [
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-cpu-venv/bin/python",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/tools/moat/publish_image_contour.py"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T16:22:12.047890+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0001-real-unpublished-complete-group.stdout.log",
+    "stderr": "logs/0001-real-unpublished-complete-group.stderr.log",
+    "return_code": 1,
+    "finished_at_utc": "2026-11-11T16:22:54.658744+00:00",
+    "seconds": 42.609968430013396
+  },
+  {
+    "command_id": 2,
+    "phase": "real-incomplete-group",
+    "argv": [
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-cpu-venv/bin/python",
+      "-c",
+      "import sys;sys.path.insert(0,\"tools/moat\");import publish_image_contour as p;actual=p.load;group=actual(\"qualification\");group[\"qualifications\"]=group[\"qualifications\"][:1];p.load=lambda n:group if n==\"qualification\" else actual(n);p.main()"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T16:22:54.681303+00:00",
+    "timeout_seconds": 30,
+    "environment": {},
+    "stdout": "logs/0002-real-incomplete-group.stdout.log",
+    "stderr": "logs/0002-real-incomplete-group.stderr.log",
+    "return_code": 1,
+    "finished_at_utc": "2026-11-11T16:22:55.147111+00:00",
+    "seconds": 0.46527306200005114
+  }
+]

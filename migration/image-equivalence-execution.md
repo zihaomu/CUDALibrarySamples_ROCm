@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-11T16:15:54.564084+00:00。26入口当前7通过/7部分/12失败。
+更新时间：2026-11-11T16:24:00.212972+00:00。26入口当前7通过/7部分/12失败。
 
-I2：Contour32项CLI实际返回码/具体诊断/空输出/无设备mask独立验收：PASSED
+I2：真实发布器两项负测均正确拒绝且主表SHA不变；记录器拒绝把预期非零命令标成PASSED，原记录恢复封存，独立审核按EXPECTED_REJECTION保存。先Git后发布保护有效。
 
-证据：`migration/reports/evidence/rewrite/I2/Contour-CLI-independent-CPU/20261111T161553.608888Z-I2-CPU-reference-92eb0daa07`
+证据：`migration/reports/evidence/rewrite/I2/Contour-real-first-Git-publication-guards/20261111T162211.383563Z-I2-CPU-publication-test-d163696219`；`migration/reports/evidence/rewrite/I2/Contour-independent-publication-guard-audit/20261111T162359.328000Z-I2-CPU-publication-test-c551cec31a`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 
