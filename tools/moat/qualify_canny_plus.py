@@ -95,6 +95,22 @@ def collect(review=None):
   return m['experiment_outcome']=='PASSED' and v=={k:x for k,x in negative.items() if k!='evidence'} and v==json.loads((d/'validation.json').read_text()) and v['case_count']==28 and v['status']=='PASSED' and len(v['checks'])==28 and all(c['passed'] is True for c in v['checks'])
  gate('complete-28-positive-negative-validator-checks',checks_ok)
  gate('original-CUDA-script-status-distinct-from-native-API',lambda:report(cuda_original,'result.json','cuda-original') and cuda_original['original_source_sha256']==spec['original_source_sha256'] and cuda_original['status'] in {'BLOCKED','FAILED','EXECUTED'})
+ def cold_ok():
+  cold=load('cold')
+  if not report(cold,'cold.json','host-cold-replay') or cold['status']!='PASSED' or cold['return_code'] or not cold['checks'] or not all(c['passed'] is True for c in cold['checks']):return False
+  d,m,_=sealed(cold['evidence']);raw=ROOT/m['raw_artifact_dir'];children={r['name']:r for r in cold['children']}
+  if len(cold['children'])!=5 or set(children)!={'environment','fixture-replay','build','rocm','original'}:return False
+  child_build=children['build']['report'];library=raw/children['build']['relative']/Path(child_build['library']).name
+  if child_build['dependencies']!=build['dependencies'] or digest(library)!=child_build['library_sha256']:return False
+  for name,entry in children.items():
+   path=raw/entry['relative'];seal=json.loads((path/'child-seal.json').read_text())['files'];meta=json.loads((path/'manifest.json').read_text());commands=json.loads((path/'commands.json').read_text()) if (path/'commands.json').exists() else []
+   if meta['experiment_outcome'] not in {'EXECUTED','PASSED'} or any(c['return_code']!=0 for c in commands) or any(not (path/n).is_file() or (path/n).stat().st_size!=v['bytes'] or digest(path/n)!=v['sha256'] for n,v in seal.items()):return False
+  for name,is_original in [('rocm',False),('original',True)]:
+   entry=children[name];run=dict(entry['report']);child=raw/entry['relative'];run['outputs']=str(child/'outputs');run['audit']=str(child/'audit');run['build']=dict(run['build'],library=str(Path(cold['clone'])/run['build']['library']))
+   actual=validate(run,spec,natives,is_original);stored=json.loads((d/(name+'-CPU.json')).read_text())
+   if actual!=stored or actual['status']!='PASSED' or actual['case_count']!=(8 if is_original else 31):return False
+  return True
+ gate('fresh-checkout-bootstrap-compile-and-complete-CPU-replay',cold_ok)
  sources=set(build['dependencies'])|{'tools/moat/qualify_canny_plus.py','tools/moat/publish_canny_plus.py','tools/moat/qualify_first.py','migration/rewrite/image-acceptance-policy.json','tools/moat/audit.py'}
  for ref in refs:
   try:sources.update(sealed(ref)[2]['dependencies'])
