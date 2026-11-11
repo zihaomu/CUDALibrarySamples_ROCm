@@ -1,0 +1,226 @@
+{
+  "batch": "R9",
+  "baseline_commit": "b1f9cb1a72518f14b1c9b4d3bdc4f1671a52964d",
+  "baseline_passed": 231,
+  "helpers": [
+    {
+      "kind": "dense_matrix_helpers",
+      "language": "cpp",
+      "source": "cuDSS/simple_dense_matrix_helpers/simple_dense_matrix_helpers.cpp",
+      "sample_id": "cuDSS/simple_dense_matrix_helpers::simple_dense_matrix_helpers.cpp",
+      "original_sha256": "9b41e9c37c3ae9f0f4b25e19ad1e4c08bd3e75d959b04daeb2d44420c3ba5743",
+      "cases": [
+        "original",
+        "changed-values",
+        "irregular",
+        "padding",
+        "repeat"
+      ],
+      "implementation": "rocm/ported/cuDSS/simple_dense_matrix_helpers/simple_dense_matrix_helpers.cpp",
+      "contract": [
+        "FP64 values / INT32 indices / INT64 scalar dimensions",
+        "actual HIP device allocations and device pointer tables for batches",
+        "query returns borrowed pointers and metadata; optional fields preserve caller storage",
+        "in-place update, SetValues rebind, SetCsrPointers rebind with original nnz metadata retained",
+        "batch format flags, caller-owned arrays and post-destroy device storage lifetime",
+        "actual C++ or standard Fortran ISO_C_BINDING caller; no GPU solve claim for descriptor-only sample"
+      ]
+    },
+    {
+      "kind": "sparse_matrix_helpers",
+      "language": "cpp",
+      "source": "cuDSS/simple_sparse_matrix_helpers/simple_sparse_matrix_helpers.cpp",
+      "sample_id": "cuDSS/simple_sparse_matrix_helpers::simple_sparse_matrix_helpers.cpp",
+      "original_sha256": "a14782439936e4e0db1bd1f1877419c4e3d9593bb0d3e43ea4b2a831eb499764",
+      "cases": [
+        "original",
+        "changed-values",
+        "irregular",
+        "alternate-base",
+        "repeat"
+      ],
+      "implementation": "rocm/ported/cuDSS/simple_sparse_matrix_helpers/simple_sparse_matrix_helpers.cpp",
+      "contract": [
+        "FP64 values / INT32 indices / INT64 scalar dimensions",
+        "actual HIP device allocations and device pointer tables for batches",
+        "query returns borrowed pointers and metadata; optional fields preserve caller storage",
+        "in-place update, SetValues rebind, SetCsrPointers rebind with original nnz metadata retained",
+        "batch format flags, caller-owned arrays and post-destroy device storage lifetime",
+        "actual C++ or standard Fortran ISO_C_BINDING caller; no GPU solve claim for descriptor-only sample"
+      ]
+    },
+    {
+      "kind": "batch_sparse_matrix_helpers",
+      "language": "cpp",
+      "source": "cuDSS/simple_batch_sparse_matrix_helpers/simple_batch_sparse_matrix_helpers.cpp",
+      "sample_id": "cuDSS/simple_batch_sparse_matrix_helpers::simple_batch_sparse_matrix_helpers.cpp",
+      "original_sha256": "6dbf150c67e3faa31e178f18a45dc87a8b443dc59c546db3153967837bf39428",
+      "cases": [
+        "original",
+        "changed-values",
+        "irregular",
+        "alternate-base",
+        "repeat"
+      ],
+      "implementation": "rocm/ported/cuDSS/simple_batch_sparse_matrix_helpers/simple_batch_sparse_matrix_helpers.cpp",
+      "contract": [
+        "FP64 values / INT32 indices / INT64 scalar dimensions",
+        "actual HIP device allocations and device pointer tables for batches",
+        "query returns borrowed pointers and metadata; optional fields preserve caller storage",
+        "in-place update, SetValues rebind, SetCsrPointers rebind with original nnz metadata retained",
+        "batch format flags, caller-owned arrays and post-destroy device storage lifetime",
+        "actual C++ or standard Fortran ISO_C_BINDING caller; no GPU solve claim for descriptor-only sample"
+      ]
+    },
+    {
+      "kind": "dense_matrix_helpers",
+      "language": "fortran",
+      "source": "cuDSS/fortran/dense_matrix_helpers/dense_matrix_helpers.f90",
+      "sample_id": "cuDSS/fortran/dense_matrix_helpers::dense_matrix_helpers.f90",
+      "original_sha256": "73ae92f810e32324ee25d6d281b2ee0a0eacf3f67b2177d8240f02ef326a446f",
+      "cases": [
+        "original",
+        "changed-values",
+        "irregular",
+        "padding",
+        "repeat"
+      ],
+      "implementation": "rocm/ported/cuDSS/fortran/dense_matrix_helpers/dense_matrix_helpers.f90",
+      "contract": [
+        "FP64 values / INT32 indices / INT64 scalar dimensions",
+        "actual HIP device allocations and device pointer tables for batches",
+        "query returns borrowed pointers and metadata; optional fields preserve caller storage",
+        "in-place update, SetValues rebind, SetCsrPointers rebind with original nnz metadata retained",
+        "batch format flags, caller-owned arrays and post-destroy device storage lifetime",
+        "actual C++ or standard Fortran ISO_C_BINDING caller; no GPU solve claim for descriptor-only sample"
+      ]
+    },
+    {
+      "kind": "sparse_matrix_helpers",
+      "language": "fortran",
+      "source": "cuDSS/fortran/sparse_matrix_helpers/sparse_matrix_helpers.f90",
+      "sample_id": "cuDSS/fortran/sparse_matrix_helpers::sparse_matrix_helpers.f90",
+      "original_sha256": "e4ccf1af16a190572ca85480b2263d3a6bdfa78d568ace65af09f45a619909a5",
+      "cases": [
+        "original",
+        "changed-values",
+        "irregular",
+        "alternate-base",
+        "repeat"
+      ],
+      "implementation": "rocm/ported/cuDSS/fortran/sparse_matrix_helpers/sparse_matrix_helpers.f90",
+      "contract": [
+        "FP64 values / INT32 indices / INT64 scalar dimensions",
+        "actual HIP device allocations and device pointer tables for batches",
+        "query returns borrowed pointers and metadata; optional fields preserve caller storage",
+        "in-place update, SetValues rebind, SetCsrPointers rebind with original nnz metadata retained",
+        "batch format flags, caller-owned arrays and post-destroy device storage lifetime",
+        "actual C++ or standard Fortran ISO_C_BINDING caller; no GPU solve claim for descriptor-only sample"
+      ]
+    },
+    {
+      "kind": "batch_sparse_matrix_helpers",
+      "language": "fortran",
+      "source": "cuDSS/fortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.f90",
+      "sample_id": "cuDSS/fortran/batch_sparse_matrix_helpers::batch_sparse_matrix_helpers.f90",
+      "original_sha256": "30ef22aac987bbb0048be4e390fba2f9a8fea4032d2d1854febaea08940dd870",
+      "cases": [
+        "original",
+        "changed-values",
+        "irregular",
+        "alternate-base",
+        "repeat"
+      ],
+      "implementation": "rocm/ported/cuDSS/fortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.f90",
+      "contract": [
+        "FP64 values / INT32 indices / INT64 scalar dimensions",
+        "actual HIP device allocations and device pointer tables for batches",
+        "query returns borrowed pointers and metadata; optional fields preserve caller storage",
+        "in-place update, SetValues rebind, SetCsrPointers rebind with original nnz metadata retained",
+        "batch format flags, caller-owned arrays and post-destroy device storage lifetime",
+        "actual C++ or standard Fortran ISO_C_BINDING caller; no GPU solve claim for descriptor-only sample"
+      ]
+    },
+    {
+      "kind": "dense_matrix_helpers",
+      "language": "nvfortran",
+      "source": "cuDSS/nvfortran/dense_matrix_helpers/dense_matrix_helpers.cuf",
+      "sample_id": "cuDSS/nvfortran/dense_matrix_helpers::dense_matrix_helpers.cuf",
+      "original_sha256": "0ad5c2bca1694aa127d1c26465bdd73030cab151ccf0e3d5c67cb825e267d0d3",
+      "cases": [
+        "original",
+        "changed-values",
+        "irregular",
+        "padding",
+        "repeat"
+      ],
+      "implementation": "rocm/ported/cuDSS/nvfortran/dense_matrix_helpers/dense_matrix_helpers.cuf",
+      "contract": [
+        "FP64 values / INT32 indices / INT64 scalar dimensions",
+        "actual HIP device allocations and device pointer tables for batches",
+        "query returns borrowed pointers and metadata; optional fields preserve caller storage",
+        "in-place update, SetValues rebind, SetCsrPointers rebind with original nnz metadata retained",
+        "batch format flags, caller-owned arrays and post-destroy device storage lifetime",
+        "actual C++ or standard Fortran ISO_C_BINDING caller; no GPU solve claim for descriptor-only sample"
+      ]
+    },
+    {
+      "kind": "sparse_matrix_helpers",
+      "language": "nvfortran",
+      "source": "cuDSS/nvfortran/sparse_matrix_helpers/sparse_matrix_helpers.cuf",
+      "sample_id": "cuDSS/nvfortran/sparse_matrix_helpers::sparse_matrix_helpers.cuf",
+      "original_sha256": "b43ee60fe823851ca7fe271048ec3ffdc0e57a9bbd564acd02dd349a6c367713",
+      "cases": [
+        "original",
+        "changed-values",
+        "irregular",
+        "alternate-base",
+        "repeat"
+      ],
+      "implementation": "rocm/ported/cuDSS/nvfortran/sparse_matrix_helpers/sparse_matrix_helpers.cuf",
+      "contract": [
+        "FP64 values / INT32 indices / INT64 scalar dimensions",
+        "actual HIP device allocations and device pointer tables for batches",
+        "query returns borrowed pointers and metadata; optional fields preserve caller storage",
+        "in-place update, SetValues rebind, SetCsrPointers rebind with original nnz metadata retained",
+        "batch format flags, caller-owned arrays and post-destroy device storage lifetime",
+        "actual C++ or standard Fortran ISO_C_BINDING caller; no GPU solve claim for descriptor-only sample"
+      ]
+    },
+    {
+      "kind": "batch_sparse_matrix_helpers",
+      "language": "nvfortran",
+      "source": "cuDSS/nvfortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.cuf",
+      "sample_id": "cuDSS/nvfortran/batch_sparse_matrix_helpers::batch_sparse_matrix_helpers.cuf",
+      "original_sha256": "c9540ea356dde1ad33eaf2d3d250d0054b9083d4178d5d52a861660b8ae06d8e",
+      "cases": [
+        "original",
+        "changed-values",
+        "irregular",
+        "alternate-base",
+        "repeat"
+      ],
+      "implementation": "rocm/ported/cuDSS/nvfortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.cuf",
+      "contract": [
+        "FP64 values / INT32 indices / INT64 scalar dimensions",
+        "actual HIP device allocations and device pointer tables for batches",
+        "query returns borrowed pointers and metadata; optional fields preserve caller storage",
+        "in-place update, SetValues rebind, SetCsrPointers rebind with original nnz metadata retained",
+        "batch format flags, caller-owned arrays and post-destroy device storage lifetime",
+        "actual C++ or standard Fortran ISO_C_BINDING caller; no GPU solve claim for descriptor-only sample"
+      ]
+    }
+  ],
+  "crc_benchmark": {
+    "source": "nvCOMP/benchmarks/benchmark_crc32.cpp",
+    "original_sha256": "e343816ec5a4af1af1b907da5534aa010f2c579658883559b913465463a69f7e",
+    "contract": [
+      "original -o/-c/-s/-h CLI and errors",
+      "default total-memory-based power-of-two storage policy, x8 grid and complete x2 grid, skipped-cell -1 CSV",
+      "real per-shape GPU configuration search, final HIP-event timing and GB/s",
+      "IEEE CRC32, same-byte frozen CPU/native CUDA checks; original random initialization uses backend RNG seed42 and is not a bitwise RNG sample",
+      "default original policy executed; complete mode bounded only through original -s option",
+      "original CUDA sources untouched; original Fortran toolchain limitations separate"
+    ]
+  }
+}
