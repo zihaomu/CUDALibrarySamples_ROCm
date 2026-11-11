@@ -1,0 +1,1 @@
+Test CPU-negative for cuDSS/nvfortran/batch_sparse_matrix_helpers::batch_sparse_matrix_helpers.cuf, case lifetime. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T061647.009423Z-R9-rocm-helper-7e75d1056b.

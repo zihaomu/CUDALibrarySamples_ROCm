@@ -1,0 +1,1 @@
+Test CPU-negative for cuDSS/nvfortran/dense_matrix_helpers::dense_matrix_helpers.cuf, case device-bytes. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T061634.808463Z-R9-rocm-helper-ac1f3135b0.

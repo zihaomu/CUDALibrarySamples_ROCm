@@ -1,27 +1,27 @@
 # cuDSS/fortran/sparse_matrix_helpers::sparse_matrix_helpers.f90
 
-**FAILED / L0**
+**PARTIAL / L3**
 
-Fortran 原始入口使用 iso_fortran_env, iso_c_binding, cudautils, cudss；当前 flang 编译失败，CUDA/cuDSS/cuFFT/NVFortran module 和 device 语法需用经验证的 ISO_C_BINDING 与 AMD API 重写。C ABI 探针另记，不代表该例已实现。 日志：CUDALibrarySamples_ROCm/rocm/ported/cuDSS/fortran/sparse_matrix_helpers/sparse_matrix_helpers.f90:155:8: error: No explicit type declared for 'cudssmatrixdestroy'     st = cudssMatrixDestroy(A)          ^^^^^^^^^^^^^^^^^^ /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/fortran/sparse_matrix_helpers/sparse_matrix_helpers.f90:156:8: error: No explicit type declared for 'cudssdestroy'     st = cudssDestroy(handle)          ^^^^^^^^^^^^
+R9候选实现已完成构建并进入独立CPU/native CUDA及原始合同验收；尚未签发复合资格，不计整例通过。历史原生API自动移植失败保留。
 
 | 字段 | 当前记录 |
 | --- | --- |
 | 原始入口 | [cuDSS/fortran/sparse_matrix_helpers/sparse_matrix_helpers.f90](../../../../../cuDSS/fortran/sparse_matrix_helpers/sparse_matrix_helpers.f90) |
-| 实际库 / 后端 | — / — |
+| 实际库 / 后端 | Project host matrix-descriptor C ABI + HIP device storage/pointer tables / Project HIP runtime adapter |
 | 候选路线 | rocSOLVER CSRRF, rocSPARSE/HIP, ISO_C_BINDING |
-| 代码 | 无实现 |
-| required cases | 0/2 |
+| 代码 | [rocm/ported/cuDSS/fortran/sparse_matrix_helpers/sparse_matrix_helpers.f90](../../../../../rocm/ported/cuDSS/fortran/sparse_matrix_helpers/sparse_matrix_helpers.f90) |
+| required cases | 1/5 |
 | CUDA baseline / comparison | BLOCKED / BLOCKED |
 | 性能 | NOT_RUN |
 | 原始源码 SHA256 | `e4ccf1af16a190572ca85480b2263d3a6bdfa78d568ace65af09f45a619909a5` |
 
 编译/运行返回 0 仅对应 L3；通过独立参考检查后才记 L4。失败的候选库不列为已使用库。
 
-必需用例：`original-functional-contract`, `independent-numerical-or-semantic-reference`。
+必需用例：`rewrite-R9/current-build`, `rewrite-R9/frozen-inputs-and-original-contract`, `rewrite-R9/CPU-and-native-CUDA`, `rewrite-R9/negative-and-runtime`, `rewrite-R9/independent-review-and-qualification`。
 
 实现方式：`UNIMPLEMENTED_BINDING`。
 
-恢复/扩展条件：实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。
+恢复/扩展条件：完成当前源码完整原始合同、实际语言/CLI、独立CPU/native CUDA、故障及边界检查和固定提交独立复审后再签发资格。
 
 CUDA 对照限制：CUDA 原始 SDK、绑定或输入前置条件未满足，见该例 CUDA 基线证据。
 
@@ -33,3 +33,4 @@ CUDA 对照限制：CUDA 原始 SDK、绑定或输入前置条件未满足，见
 
 - [migration/reports/evidence/20261109T084354.110802Z/languages/cuDSS_fortran_sparse_matrix_helpers_sparse_matrix_helpers.f90](../../../../reports/evidence/20261109T084354.110802Z/languages/cuDSS_fortran_sparse_matrix_helpers_sparse_matrix_helpers.f90)
 - [migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_fortran_sparse_matrix_helpers_sparse_matrix_helpers.f90](../../../../reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_fortran_sparse_matrix_helpers_sparse_matrix_helpers.f90)
+- [migration/reports/rewrite-R9.md](../../../../reports/rewrite-R9.md)

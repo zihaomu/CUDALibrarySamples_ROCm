@@ -1,0 +1,1 @@
+Test CPU-negative for cuDSS/simple_batch_sparse_matrix_helpers::simple_batch_sparse_matrix_helpers.cpp, case shape-alias. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T061610.102251Z-R9-rocm-helper-7edda6b1fe.

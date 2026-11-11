@@ -1,6 +1,6 @@
 # CUDA Library Samples on ROCm：MOAT 重写与库整理实施计划
 
-日期：2026-11-10。状态：**本轮阶段交付完成：21项新资格、1项撤销；R5/R6等408项未支持范围保留**。
+日期：2026-11-10。状态：**R9实施中：九个helper与CRC32 benchmark；R1–R8交付已归档，资格按主表统计**。
 
 用户决定：后续代码重写和库整理采用 MOAT。本文定义接入方式、任务顺序、交付物、验收条件和详细实验记录规范。2026-11-10 用户已授权按计划持续实施；实际进展和实验结果追加到第 13 节，候选不预记为通过。
 
@@ -33,7 +33,7 @@
 | `migration/reports/operator-support.json` | `8fe27749a0505a27c5611e2a67ce50b1c47942e38e1d5c146459264a61af62b3` |
 | `migration/environments/project.lock.json` | `f252224f1eb1656102bb934781eeac165050e8a828d1e19a2e21ccc4dbf1bed3` |
 
-基线来源：[设计与实施日志](design.md)、[B4–B15 路线图](roadmap.md)、[支持方式和详细日志总表](../migration/reports/support-log-index.md)、[算子支持表](../migration/reports/operator-support.md)。639 是源入口数，111 是功能族数，case 数另计；后续报表分别展示。
+基线来源：[设计与实施日志](cuda_samples_on_rocm_design.md)、[B4–B15 路线图](cuda_samples_on_rocm_roadmap.md)、[支持方式和详细日志总表](../CUDALibrarySamples_ROCm/migration/reports/support-log-index.md)、[算子支持表](../CUDALibrarySamples_ROCm/migration/reports/operator-support.md)。639 是源入口数，111 是功能族数，case 数另计；后续报表分别展示。
 
 ### 1.2 完成的定义
 
@@ -396,7 +396,7 @@ artifacts/rewrite/<batch>/<sample-key>/<experiment-id>/
 
 ## 9. 环境、CUDA 对照与实验纪律
 
-新 AMD 实验执行工作区 [AGENTS.md](../AGENTS.md) 与现有环境锁要求：
+新 AMD 实验执行工作区 [AGENTS.md](../../AGENTS.md) 与现有环境锁要求：
 
 | 项目 | 实施要求 |
 | --- | --- |
@@ -542,7 +542,7 @@ PLAN-01 至 PLAN-03 是规划阶段记录，不代表实验结果。实施中的
 
 <!-- MOAT_EXEC_PROGRESS:START -->
 
-最近更新：2026-11-10T12:22:25.085273+00:00。首批 AMD/独立CPU/CUDA 51/51；首批资格 8/8。本轮累计21项新资格，撤销1项旧资格，当前231 PASSED/23 PARTIAL/385 FAILED。剩余408项全部有路线与重试条件；R5仍有65前端和额外CPP项待实现。R8：COMPLETED_SCOPED；全项目surface与其它平台仍owed。
+最近更新：2026-11-11T06:50:56.136855+00:00。首批 AMD/独立CPU/CUDA 51/51；首批资格 8/8。累计21项新资格，撤销1项旧资格，当前231 PASSED/33 PARTIAL/375 FAILED。剩余408项全部有路线与重试条件；R5仍有65前端和额外CPP项待支持。R8：COMPLETED_SCOPED；全项目surface与其它平台仍owed。
 
 <!-- MOAT_EXEC_PROGRESS:END -->
 
@@ -573,3 +573,15 @@ PLAN-01 至 PLAN-03 是规划阶段记录，不代表实验结果。实施中的
 | 2026-11-10 | EXEC-27 | 固定97dab620通过三位独立复审；四类资格闭包注入漏洞与两类干净复现缺口均闭合，新增6项反例单测通过。第二次fresh clone从零编译并运行16 M1＋21新原始profile，独立CPU全通过；347输出文件与51 Fortran构建证据纳入父seal，实际image/release/GPU0及LP64库身份已核对。 | 进行最终封存/schema/控制bundle恢复审计及用户fork推送；不宣称R5剩余65前端、R6 224入口和其它平台完成 |
 
 | 2026-11-10 | EXEC-28 | 最终宿主审计通过：639稳定入口、231当前支持证明、117功能族/18模块、2454份sealed记录/schema、21资格的690唯一引用传递闭包；无失联或未封存尝试。更新后的MOAT bundle完成真实冷恢复/续接/来源拒绝测试，6项篡改反例测试通过。全量README、算子表、详细日志索引、逐例表与设计文档同步。 | 本轮交付目标为用户fork默认rocm分支；全项目surface456组件及408入口未完成支持范围继续保留，无全平台完成声明 |
+
+
+## 14. R9：2026-11-11 下一批10入口
+
+状态：IN_PROGRESS。目标为3种cuDSS helper×C++/Fortran/nvfortran来源共9入口，以及CRC32 benchmark。实现前冻结原始源码SHA与合同到 migration/rewrite/helpers-benchmark.json。描述符/指针/所有权覆盖不算新GPU求解算法。更新CSR指针不修改创建时nnz；批量host形状数组与device指针表分别记录。CRC benchmark保留默认storage和完整CLI/网格/实际搜索/计时，数值用同字节fixture独立CPU与native cuDSS/nvCOMP核对；原CUDA Fortran工具链仍单列。所有build/run/失败/注入留独立封存实验，资格前不增加支持数。
+
+| 2026-11-11 | R9-02 | 第一版9入口45 AMD/CPU与45 native cuDSS/CPU场景通过，原C++稀疏列序重复、Fortran值更新差异均按源码保留。前置独立复核指出batch host形状指针原始别名及稀疏irregular场景重复问题；已补别名观测和真实CSR/ldb变化后重验。CRC原harness保留，分段CRC+GPU GF2、真实搜索实现进入构建。首轮flang参数不兼容失败已归档并修正。 | 当前仍231通过，不以运行/基础候选升级资格 |
+
+| 2026-11-11 | R9-03 | 新版45 helper入口场景AMD/CPU/native cuDSS重验通过；原始3个未改CUDA C++程序实测通过。30项输出故障注入全部拒绝、9个真实语言非法profile及22项实际C ABI宽度/字段/生命周期/非法调用通过。CRC bounded四场景AMD/zlib通过（complete 11×11/66有效/55跳过），native CPU检查曾通过但归档tar在被读目录创建自身导致收集失败，已保留失败并改为目录外打包；默认完整auto与原生重试进行中。 | 固定源码独立复审，CRC完整原始扫描、边界与故障检查；未签发资格 |
+
+
+| 2026-11-11 | R9-04 | 最终上下文/stream生命周期版45 helper AMD/CPU和45 native cuDSS/CPU全部通过；30故障、9非法语言入口、22 ABI检查保持。CRC原始默认16 GiB分别在AMD物理GPU1及5090执行，6×6网格26有效/10跳过；四个冻结小场景同字节对照通过。7故障、8 CLI、6实际GPU 64位长度对libz检查通过。rocprof trace为1 MiB场景记录12次分段、74次合并，符合三配置搜索及最终完整重算，另一次实际重复结果一致。最初物理GPU0因其它任务占用显存导致默认分配失败，保留证据后在符合GPU禁用政策的物理GPU1运行完整原规模；未缩小输入冒充通过。 | 源码冻结、独立审查、复合资格与干净构建；计数仍231通过 |

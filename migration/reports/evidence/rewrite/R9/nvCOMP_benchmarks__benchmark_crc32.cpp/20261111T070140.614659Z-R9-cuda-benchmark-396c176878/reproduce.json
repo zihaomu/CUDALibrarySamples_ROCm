@@ -1,0 +1,97 @@
+{
+  "commands": [
+    {
+      "command_id": 1,
+      "phase": "original-native-benchmark-CLI",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "python3 -c 'import os,subprocess,pathlib,json,hashlib;pathlib.Path('\"'\"'/tmp/20261111T065629.694235Z-R9-cuda-build-a85c454dc1/outputs/changed-input'\"'\"').mkdir(parents=True,exist_ok=True);sha=hashlib.file_digest(open('\"'\"'/tmp/20261111T065629.694235Z-R9-cuda-build-a85c454dc1/native'\"'\"',\"rb\"),\"sha256\").hexdigest();assert sha=='\"'\"'26150338e7b9517c8fc93e4618861e31c2b644c8ea7ca999663923f497f1efc6'\"'\"';p=subprocess.run(['\"'\"'/tmp/20261111T065629.694235Z-R9-cuda-build-a85c454dc1/native'\"'\"', '\"'\"'-s'\"'\"', '\"'\"'1048576'\"'\"', '\"'\"'-o'\"'\"', '\"'\"'changed.csv'\"'\"'],cwd='\"'\"'/tmp/20261111T065629.694235Z-R9-cuda-build-a85c454dc1/outputs/changed-input'\"'\"',env=dict(os.environ,**{'\"'\"'CUDA_VISIBLE_DEVICES'\"'\"': '\"'\"'0'\"'\"', '\"'\"'REWRITE_OUTPUT'\"'\"': '\"'\"'/tmp/20261111T065629.694235Z-R9-cuda-build-a85c454dc1/outputs/changed-input'\"'\"', '\"'\"'LD_PRELOAD'\"'\"': '\"'\"''\"'\"', '\"'\"'LD_LIBRARY_PATH'\"'\"': '\"'\"'/tmp/20261111T065629.694235Z-R9-cuda-build-a85c454dc1/lib:/usr/local/cuda-13.4/lib64'\"'\"', '\"'\"'REWRITE_BENCH_INPUT'\"'\"': '\"'\"'/tmp/20261111T065629.694235Z-R9-cuda-build-a85c454dc1/inputs/changed-input/input.bin'\"'\"'}));pathlib.Path('\"'\"'/tmp/20261111T065629.694235Z-R9-cuda-build-a85c454dc1/outputs/changed-input/native-process.json'\"'\"').write_text(json.dumps(dict(return_code=p.returncode,binary_sha256=sha)));raise SystemExit(p.returncode)'"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T07:01:41.127585+00:00",
+      "timeout_seconds": 1200,
+      "environment": {},
+      "stdout": "logs/0001-original-native-benchmark-CLI.stdout.log",
+      "stderr": "logs/0001-original-native-benchmark-CLI.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T07:01:42.447228+00:00",
+      "seconds": 1.3182507830206305
+    },
+    {
+      "command_id": 2,
+      "phase": "independent-remote-zlib-and-grid",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "python3 /tmp/20261111T065629.694235Z-R9-cuda-build-a85c454dc1/reference.py --output /tmp/20261111T065629.694235Z-R9-cuda-build-a85c454dc1/outputs/changed-input --case /tmp/20261111T065629.694235Z-R9-cuda-build-a85c454dc1/inputs/changed-input/case.json --report /tmp/20261111T065629.694235Z-R9-cuda-build-a85c454dc1/outputs/changed-input/cpu-validation.json --backend cuda"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T07:01:42.449182+00:00",
+      "timeout_seconds": 900,
+      "environment": {},
+      "stdout": "logs/0002-independent-remote-zlib-and-grid.stdout.log",
+      "stderr": "logs/0002-independent-remote-zlib-and-grid.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T07:01:42.766401+00:00",
+      "seconds": 0.31628116097999737
+    },
+    {
+      "command_id": 3,
+      "phase": "remote-original-payload-identities",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "python3 -c 'import pathlib,hashlib,json;p=pathlib.Path('\"'\"'/tmp/20261111T065629.694235Z-R9-cuda-build-a85c454dc1/outputs/changed-input'\"'\"');files={str(f.relative_to(p)):dict(bytes=f.stat().st_size,sha256=hashlib.file_digest(f.open(\"rb\"),\"sha256\").hexdigest()) for f in p.rglob(\"*\") if f.is_file()};(p/\"remote-payload-manifest.json\").write_text(json.dumps(dict(root=str(p),files=files)))'"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T07:01:42.768284+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0003-remote-original-payload-identities.stdout.log",
+      "stderr": "logs/0003-remote-original-payload-identities.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T07:01:43.084839+00:00",
+      "seconds": 0.3156760949641466
+    },
+    {
+      "command_id": 4,
+      "phase": "package-observations",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "tar -czf /tmp/20261111T065629.694235Z-R9-cuda-build-a85c454dc1/changed-input-observations.tar.gz --exclude=input.bin -C /tmp/20261111T065629.694235Z-R9-cuda-build-a85c454dc1/outputs/changed-input ."
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T07:01:43.086776+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0004-package-observations.stdout.log",
+      "stderr": "logs/0004-package-observations.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T07:01:43.403502+00:00",
+      "seconds": 0.31580813403707
+    },
+    {
+      "command_id": 5,
+      "phase": "collect-observations",
+      "argv": [
+        "scp",
+        "nvidia-5090x2:/tmp/20261111T065629.694235Z-R9-cuda-build-a85c454dc1/changed-input-observations.tar.gz",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/R9/nvCOMP_benchmarks__benchmark_crc32.cpp/20261111T070140.614659Z-R9-cuda-benchmark-396c176878/observations.tar.gz"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T07:01:43.405650+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0005-collect-observations.stdout.log",
+      "stderr": "logs/0005-collect-observations.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T07:01:43.722817+00:00",
+      "seconds": 0.3162407720228657
+    }
+  ],
+  "source": "source.json",
+  "inputs": "inputs/manifest.json",
+  "expected_environment": "environment.expected.json"
+}

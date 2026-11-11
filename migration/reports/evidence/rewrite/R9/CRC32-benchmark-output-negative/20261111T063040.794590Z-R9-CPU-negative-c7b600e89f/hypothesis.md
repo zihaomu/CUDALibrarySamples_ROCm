@@ -1,0 +1,1 @@
+Test CPU-negative for CRC32-benchmark-output-negative, case missing-cell. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T062100.202385Z-R9-rocm-benchmark-fe17b2a08f.

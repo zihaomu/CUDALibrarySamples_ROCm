@@ -1,0 +1,1 @@
+Test CPU-negative for cuDSS/simple_dense_matrix_helpers::simple_dense_matrix_helpers.cpp, case metadata. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T063726.837225Z-R9-rocm-helper-b7922e87cb.

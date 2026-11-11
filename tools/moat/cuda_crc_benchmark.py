@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+"""Run the unchanged native CRC benchmark with observation-only hooks."""
+import argparse,json,shlex,shutil,tarfile
+from pathlib import Path
+from experiment import ROOT,Experiment,write,digest
+from prepare_crc_benchmark import prepare
+
+def main():
+ parser=argparse.ArgumentParser();parser.add_argument('--only',nargs='*',default=[]);a=parser.parse_args();host='nvidia-5090x2';sdk=ROOT/'build/cuda-sdk';original=ROOT/'nvCOMP/benchmarks/benchmark_crc32.cpp';sources=[__file__,original,ROOT/'tools/moat/prepare_crc_benchmark.py',ROOT/'tools/moat/crc_benchmark_reference.py',ROOT/'rocm/backends/codec/crc_benchmark_observe.hpp'];e=Experiment('R9','CRC32-benchmark-native-build','cuda-build',sources=sources);remote='/tmp/'+e.id;source=e.path/'sample.cu';source.write_text(prepare(native=True));bundle=e.path/'native.tar.gz';libs=[p for p in (sdk/'lib').glob('libnvcomp*') if p.is_file()];write(e.path/'sdk-identity.json',dict(headers={str(p.relative_to(sdk)):digest(p) for p in (sdk/'include').rglob('*.h')},libraries={p.name:dict(sha256=digest(p),bytes=p.stat().st_size) for p in libs},original_sha256=digest(original),instrumented_sha256=digest(source)))
+ with tarfile.open(bundle,'w:gz') as f:
+  f.add(source,arcname='sample.cu');f.add(sdk/'include',arcname='include');f.add(ROOT/'rocm/backends/codec/crc_benchmark_observe.hpp',arcname='crc_benchmark_observe.hpp');f.add(ROOT/'nvCOMP/benchmarks/benchmark_common.h',arcname='benchmark_common.h');f.add(ROOT/'tools/moat/crc_benchmark_reference.py',arcname='reference.py');f.add(ROOT/'tests/fixtures/rewrite-crc-benchmark',arcname='inputs')
+  for p in libs:f.add(p.resolve(),arcname='lib/'+p.name)
+ steps=[(['ssh',host,shlex.join(['mkdir','-p',remote])],'prepare'),(['scp',str(bundle),host+':'+remote+'/native.tar.gz'],'upload'),(['ssh',host,shlex.join(['tar','-xzf',remote+'/native.tar.gz','-C',remote])],'unpack'),(['ssh',host,shlex.join(['/usr/local/cuda-13.4/bin/nvcc','-std=c++17','-O2','-arch=sm_120',remote+'/sample.cu','-I'+remote+'/include','-L'+remote+'/lib','-Xlinker','-rpath='+remote+'/lib','-lnvcomp','-lcurand','-o',remote+'/native'])],'original-native-benchmark-build'),(['ssh',host,'nvidia-smi --query-gpu=index,name,uuid,memory.total,memory.free,driver_version --format=csv,noheader'],'native-device-and-capacity')]
+ for cmd,phase in steps:
+  rc=e.command(cmd,phase,timeout=240)
+  if rc:print(e.finish('NATIVE_BUILD_FAILED'));return 1
+ identity='import pathlib,hashlib,subprocess,os,json,re;root=pathlib.Path('+repr(remote)+');env=dict(os.environ,LD_PRELOAD="",LD_LIBRARY_PATH='+repr(remote+'/lib:/usr/local/cuda-13.4/lib64')+');text=subprocess.check_output(["ldd",str(root/"native")],env=env,text=True);paths=re.findall(r"=> (/[^ ]+)",text);print(json.dumps(dict(binary_sha256=hashlib.file_digest((root/"native").open("rb"),"sha256").hexdigest(),linked_libraries={p:hashlib.file_digest(open(p,"rb"),"sha256").hexdigest() for p in paths if any(k in p for k in ["nvcomp","curand","cudart"])})))'
+ rc=e.command(['ssh',host,shlex.join(['python3','-c',identity])],'native-binary-and-actual-loader-identities')
+ if rc:print(e.finish('NATIVE_BUILD_FAILED'));return 1
+ identities=json.loads((e.path/e.commands[-1]['stdout']).read_text());write(e.path/'binary-identities.json',identities);build=dict(experiment_id=e.id,remote=remote,instrumented_sha256=digest(source),**identities);write(e.path/'build-result.json',build);build['evidence']=e.finish('EXECUTED');write(ROOT/'migration/reports/rewrite-R9-crc-benchmark-native-build.json',build);cases=json.loads((ROOT/'migration/rewrite/crc-benchmark-cases.json').read_text());report=ROOT/'migration/reports/rewrite-R9-crc-benchmark-cuda.json';results=json.loads(report.read_text()) if report.exists() else {}
+ for case in cases:
+  if a.only and case['case'] not in a.only:continue
+  src=ROOT/'tests/fixtures/rewrite-crc-benchmark'/case['case'];mh=digest(src/'manifest.json');r=Experiment('R9','nvCOMP/benchmarks::benchmark_crc32.cpp','cuda-benchmark',case=case['case'],sources=sources,parent=e.id,comparison_id='crc32-benchmark/'+case['case']+'/'+mh);shutil.copytree(src,r.path/'inputs');out=r.path/'outputs';out.mkdir();where=remote+'/outputs/'+case['case'];argv=[remote+'/native']+case['argv'];env=dict(CUDA_VISIBLE_DEVICES='0',REWRITE_OUTPUT=where,LD_PRELOAD='',LD_LIBRARY_PATH=remote+'/lib:/usr/local/cuda-13.4/lib64')
+  if case['storage']:env['REWRITE_BENCH_INPUT']=remote+'/inputs/'+case['case']+'/input.bin'
+  code='import os,subprocess,pathlib,json,hashlib;pathlib.Path('+repr(where)+').mkdir(parents=True,exist_ok=True);sha=hashlib.file_digest(open('+repr(remote+'/native')+',"rb"),"sha256").hexdigest();assert sha=='+repr(build['binary_sha256'])+';p=subprocess.run('+repr(argv)+',cwd='+repr(where)+',env=dict(os.environ,**'+repr(env)+'));pathlib.Path('+repr(where+'/native-process.json')+').write_text(json.dumps(dict(return_code=p.returncode,binary_sha256=sha)));raise SystemExit(p.returncode)'
+  rc=r.command(['ssh',host,shlex.join(['python3','-c',code])],'original-native-benchmark-CLI',timeout=1200)
+  cpu=1
+  if rc==0:cpu=r.command(['ssh',host,shlex.join(['python3',remote+'/reference.py','--output',where,'--case',remote+'/inputs/'+case['case']+'/case.json','--report',where+'/cpu-validation.json','--backend','cuda'])],'independent-remote-zlib-and-grid',timeout=900)
+  # Keep the hardware-sized input on the CUDA host. Its bytes are actually read
+  # by the independent zlib checker; retain an explicit hash/location receipt.
+  manifest='import pathlib,hashlib,json;p=pathlib.Path('+repr(where)+');files={str(f.relative_to(p)):dict(bytes=f.stat().st_size,sha256=hashlib.file_digest(f.open("rb"),"sha256").hexdigest()) for f in p.rglob("*") if f.is_file()};(p/"remote-payload-manifest.json").write_text(json.dumps(dict(root=str(p),files=files)))'
+  seal=r.command(['ssh',host,shlex.join(['python3','-c',manifest])],'remote-original-payload-identities',timeout=300)
+  packed=remote+'/'+case['case']+'-observations.tar.gz'
+  archive='tar -czf '+shlex.quote(packed)+' --exclude=input.bin -C '+shlex.quote(where)+' .'
+  collect=r.command(['ssh',host,archive],'package-observations');collect=collect or r.command(['scp',host+':'+packed,str(r.path/'observations.tar.gz')],'collect-observations')
+  if not collect:
+   with tarfile.open(r.path/'observations.tar.gz','r:gz') as f:f.extractall(out,filter='data')
+  if case['storage']:shutil.copyfile(src/'input.bin',out/'input.bin')
+  valid=json.loads((out/'cpu-validation.json').read_text()) if (out/'cpu-validation.json').exists() else dict(status='FAILED',checks=[dict(check='remote-CPU-validation-completed',passed=False)])
+  row=dict(case=case['case'],status=valid['status'],return_code=rc,cpu_return_code=cpu,collection_return_code=collect,manifest_return_code=seal,validation=valid,experiment_id=r.id,comparison_id=r.meta['comparison_id'],input_manifest_sha256=mh,input_snapshot=str((r.path/'inputs').relative_to(ROOT)),output=str(out.relative_to(ROOT)),remote_output=where,build=build,comparison_kind='IDENTICAL_FROZEN_BYTES' if case['storage'] else 'ORIGINAL_NATIVE_RNG_AND_AUTO_POLICY_INDEPENDENT_CPU_VERIFIED')
+  ok=not any([rc,cpu,collect,seal]) and valid['status']=='PASSED';row['status']='PASSED' if ok else 'FAILED';write(r.path/'case-result.json',row);row['evidence']=r.finish('PASSED' if ok else 'NATIVE_MISMATCH',valid);results[case['case']]=row;write(report,results);print(case['case'],row['status'],valid.get('valid_cells'),flush=True)
+ return int(any(r['status']!='PASSED' for r in results.values()))
+if __name__=='__main__':raise SystemExit(main())

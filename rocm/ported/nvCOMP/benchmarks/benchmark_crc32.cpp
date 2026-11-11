@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#include <hip/hip_runtime.h>
+#include "crc_benchmark_compat.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -28,23 +28,23 @@
 #include <string>
 #include <vector>
 
-#include "benchmark_common.h"
-#include "hipcomp.h"
 
-#include <hiprand/hiprand.h>
+
+
+
 
 #define CURAND_CHECK(call)                                                                                             \
   do                                                                                                                   \
   {                                                                                                                    \
-    hiprandStatus_t err = call;                                                                                         \
-    if (err != HIPRAND_STATUS_SUCCESS)                                                                                  \
+    curandStatus_t err = call;                                                                                         \
+    if (err != CURAND_STATUS_SUCCESS)                                                                                  \
     {                                                                                                                  \
       fprintf(stderr, "cuRAND error: %d at %s:%d\n", err, __FILE__, __LINE__);                                         \
       exit(1);                                                                                                         \
     }                                                                                                                  \
   } while (0)
 
-using hipcomp::cudaMallocSafe;
+using nvcomp::cudaMallocSafe;
 
 size_t next_lower_power_of_two(size_t n)
 {
@@ -174,7 +174,8 @@ args_type parse_args(int argc, char *argv[])
   // Auto-detect storage size from GPU memory if not specified
   size_t free_mem = 0;
   size_t total_mem = 0;
-  CUDA_CHECK(hipMemGetInfo(&free_mem, &total_mem));
+  CUDA_CHECK(cudaMemGetInfo(&free_mem, &total_mem));
+  cb_memory(total_mem, free_mem);
 
   std::cout << "Total GPU memory: " << total_mem << " (" << human_readable_byte_size(total_mem) << ")" << std::endl;
   std::cout << "Free GPU memory: " << free_mem << " (" << human_readable_byte_size(free_mem) << ")" << std::endl;
@@ -243,16 +244,17 @@ void initialize_data(void *storage_buf, size_t storage_size)
 {
   constexpr size_t PseudorandomSeed = 42;
 
-  hiprandGenerator_t gen;
-  CURAND_CHECK(hiprandCreateGenerator(&gen, HIPRAND_RNG_PSEUDO_DEFAULT));
-  CURAND_CHECK(hiprandSetPseudoRandomGeneratorSeed(gen, PseudorandomSeed));
+  curandGenerator_t gen;
+  CURAND_CHECK(curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT));
+  CURAND_CHECK(curandSetPseudoRandomGeneratorSeed(gen, PseudorandomSeed));
 
   // Fill buffer with random data (treating as uint32_t array)
   size_t num_uint32 = storage_size / sizeof(uint32_t);
-  CURAND_CHECK(hiprandGenerate(gen, static_cast<uint32_t *>(storage_buf), num_uint32));
+  CURAND_CHECK(curandGenerate(gen, static_cast<uint32_t *>(storage_buf), num_uint32));
 
   assert(storage_size % sizeof(uint32_t) == 0);
-  CURAND_CHECK(hiprandDestroyGenerator(gen));
+  CURAND_CHECK(curandDestroyGenerator(gen));
+  cb_input(storage_buf, storage_size);
 }
 
 struct BenchmarkContext
@@ -263,9 +265,9 @@ struct BenchmarkContext
   size_t *chunk_sizes_h_{};
   size_t *chunk_sizes_d_{};
   uint32_t *crc_results_d_{};
-  hipStream_t stream_{};
-  hipEvent_t start_{};
-  hipEvent_t stop_{};
+  cudaStream_t stream_{};
+  cudaEvent_t start_{};
+  cudaEvent_t stop_{};
 
   // Quell compiler warnings.
   BenchmarkContext(const BenchmarkContext &) = delete;
@@ -274,29 +276,29 @@ struct BenchmarkContext
   BenchmarkContext(void *storage_buf, size_t max_buf_count)
   {
     storage_buf_ = storage_buf;
-    CUDA_CHECK(hipStreamCreate(&stream_));
-    CUDA_CHECK(hipEventCreate(&start_));
-    CUDA_CHECK(hipEventCreate(&stop_));
+    CUDA_CHECK(cudaStreamCreate(&stream_));
+    CUDA_CHECK(cudaEventCreate(&start_));
+    CUDA_CHECK(cudaEventCreate(&stop_));
 
     // Allocate chunk arrays
-    CUDA_CHECK(hipHostAlloc(&chunk_ptrs_h_, max_buf_count * sizeof(void *), hipHostMallocDefault));
+    CUDA_CHECK(cudaHostAlloc(&chunk_ptrs_h_, max_buf_count * sizeof(void *), cudaHostAllocDefault));
     CUDA_CHECK(cudaMallocSafe(&chunk_ptrs_d_, max_buf_count * sizeof(void *)));
-    CUDA_CHECK(hipHostAlloc(&chunk_sizes_h_, max_buf_count * sizeof(size_t), hipHostMallocDefault));
+    CUDA_CHECK(cudaHostAlloc(&chunk_sizes_h_, max_buf_count * sizeof(size_t), cudaHostAllocDefault));
     CUDA_CHECK(cudaMallocSafe(&chunk_sizes_d_, max_buf_count * sizeof(size_t)));
     CUDA_CHECK(cudaMallocSafe(&crc_results_d_, max_buf_count * sizeof(uint32_t)));
   }
 
   ~BenchmarkContext()
   {
-    hipFree(storage_buf_);
-    hipHostFree(chunk_ptrs_h_);
-    hipFree(chunk_ptrs_d_);
-    hipHostFree(chunk_sizes_h_);
-    hipFree(chunk_sizes_d_);
-    hipFree(crc_results_d_);
-    hipEventDestroy(start_);
-    hipEventDestroy(stop_);
-    hipStreamDestroy(stream_);
+    cudaFree(storage_buf_);
+    cudaFreeHost(chunk_ptrs_h_);
+    cudaFree(chunk_ptrs_d_);
+    cudaFreeHost(chunk_sizes_h_);
+    cudaFree(chunk_sizes_d_);
+    cudaFree(crc_results_d_);
+    cudaEventDestroy(start_);
+    cudaEventDestroy(stop_);
+    cudaStreamDestroy(stream_);
   }
 
   double run_single_benchmark(size_t buf_size, size_t buf_count);
@@ -314,12 +316,12 @@ double BenchmarkContext::run_single_benchmark(size_t buf_size, size_t buf_count)
     chunk_ptrs_h_[i] = static_cast<uint8_t *>(storage_buf_) + i * buf_size;
   }
 
-  CUDA_CHECK(hipMemcpyAsync(chunk_ptrs_d_, chunk_ptrs_h_, buf_count * sizeof(void *), hipMemcpyHostToDevice));
-  CUDA_CHECK(hipMemcpyAsync(chunk_sizes_d_, chunk_sizes_h_, buf_count * sizeof(size_t), hipMemcpyHostToDevice));
+  CUDA_CHECK(cudaMemcpyAsync(chunk_ptrs_d_, chunk_ptrs_h_, buf_count * sizeof(void *), cudaMemcpyHostToDevice));
+  CUDA_CHECK(cudaMemcpyAsync(chunk_sizes_d_, chunk_sizes_h_, buf_count * sizeof(size_t), cudaMemcpyHostToDevice));
 
   // Search for optimal kernel configuration
   nvcompCRC32KernelConf_t kernel_conf;
-  hipcompStatus_t status = nvcompBatchedCRC32SearchConf(
+  nvcompStatus_t status = nvcompBatchedCRC32SearchConf(
     chunk_ptrs_d_,
     chunk_sizes_d_,
     buf_count,
@@ -329,14 +331,14 @@ double BenchmarkContext::run_single_benchmark(size_t buf_size, size_t buf_count)
     stream_
   );
 
-  if (status != hipcompSuccess)
+  if (status != nvcompSuccess)
   {
     std::cerr << "Error in nvcompBatchedCRC32SearchConf: " << status << std::endl;
     return -std::numeric_limits<double>::infinity();
   }
 
   // Timing run
-  CUDA_CHECK(hipEventRecord(start_, stream_));
+  CUDA_CHECK(cudaEventRecord(start_, stream_));
 
   status = nvcompBatchedCRC32Async(
     chunk_ptrs_d_,
@@ -349,10 +351,10 @@ double BenchmarkContext::run_single_benchmark(size_t buf_size, size_t buf_count)
     stream_
   );
 
-  CUDA_CHECK(hipEventRecord(stop_, stream_));
-  CUDA_CHECK(hipStreamSynchronize(stream_));
+  CUDA_CHECK(cudaEventRecord(stop_, stream_));
+  CUDA_CHECK(cudaStreamSynchronize(stream_));
 
-  if (status != hipcompSuccess)
+  if (status != nvcompSuccess)
   {
     std::cerr << "Error in nvcompBatchedCRC32Async: " << status << std::endl;
     return -std::numeric_limits<double>::infinity();
@@ -360,7 +362,8 @@ double BenchmarkContext::run_single_benchmark(size_t buf_size, size_t buf_count)
 
   // Get timing result and calculate throughput
   float elapsed_ms;
-  CUDA_CHECK(hipEventElapsedTime(&elapsed_ms, start_, stop_));
+  CUDA_CHECK(cudaEventElapsedTime(&elapsed_ms, start_, stop_));
+  cb_cell(buf_size, buf_count, crc_results_d_, elapsed_ms, kernel_conf);
 
   // Calculate throughput in GB/s
   size_t total_bytes = buf_size * buf_count;
@@ -410,6 +413,8 @@ int main(int argc, char *argv[])
     args_type args = parse_args(argc, argv);
 
     ThroughputTable table = make_throughput_table(args);
+    cb_config(args, table);
+    if(table.buf_sizes.empty() || table.buf_counts.empty()) throw std::runtime_error("storage cannot contain a minimum-sized buffer");
 
     void *storage_buf = nullptr;
     CUDA_CHECK(cudaMallocSafe(&storage_buf, args.storage_size));

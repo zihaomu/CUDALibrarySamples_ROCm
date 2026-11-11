@@ -1,0 +1,1 @@
+Test rocm-helper for cuDSS/nvfortran/dense_matrix_helpers::dense_matrix_helpers.cuf, case irregular. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T061548.454230Z-R9-rocm-build-9332e1002c.

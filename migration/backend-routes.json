@@ -7503,52 +7503,58 @@
     {
       "sample_id": "cuDSS/fortran/batch_sparse_matrix_helpers::batch_sparse_matrix_helpers.f90",
       "route_id": "cuDSS/fortran/batch_sparse_matrix_helpers::batch_sparse_matrix_helpers.f90::catalog",
-      "actual_library": null,
-      "backend_library": null,
+      "actual_library": "Project host matrix-descriptor C ABI + HIP device storage/pointer tables",
+      "backend_library": "Project HIP runtime adapter",
       "candidate_libraries": [
         "rocSOLVER CSRRF",
         "rocSPARSE/HIP",
         "ISO_C_BINDING"
       ],
-      "components": [],
-      "implementation": null,
+      "components": [
+        "HIP"
+      ],
+      "implementation": "rocm/ported/cuDSS/fortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.f90",
       "method": "UNIMPLEMENTED_BINDING",
-      "status": "FAILED",
-      "scope": "Fortran 原始入口使用 iso_fortran_env, iso_c_binding, cudautils, cudss；当前 flang 编译失败，CUDA/cuDSS/cuFFT/NVFortran module 和 device 语法需用经验证的 ISO_C_BINDING 与 AMD API 重写。C ABI 探针另记，不代表该例已实现。 日志：/cuDSS/fortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.f90:246:8: error: No explicit type declared for 'cudssdestroy'     st = cudssDestroy(handle)          ^^^^^^^^^^^^ /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/fortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.f90:247:12: error: No explicit type declared for 'cudastreamdestroy'     status = cudaStreamDestroy(stream)              ^^^^^^^^^^^^^^^^^ ",
+      "status": "PARTIAL",
+      "scope": "R9候选实现已完成构建并进入独立CPU/native CUDA及原始合同验收；尚未签发复合资格，不计整例通过。历史原生API自动移植失败保留。",
       "evidence": [
         "migration/reports/evidence/20261109T084354.110802Z/languages/cuDSS_fortran_batch_sparse_matrix_helpers_batch_sparse_matrix_helpers.f90",
-        "migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_fortran_batch_sparse_matrix_helpers_batch_sparse_matrix_helpers.f90"
+        "migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_fortran_batch_sparse_matrix_helpers_batch_sparse_matrix_helpers.f90",
+        "migration/reports/rewrite-R9.md"
       ],
       "cpu_stage_review": "NOT_IN_DECLARED_LIBRARY_STRING",
-      "candidate_rewrite": "Shared HIP sparse C ABI + symbolic analysis / optional external sparse library",
-      "retry_condition": "Bind original language only after its GPU core works; replay original CSR/type/phase/refactor/error behavior and scalable sparse storage, residual oracle and factor/solve trace. Complete frozen original contract, independent review and immutable qualification before changing support status.",
-      "cost_class": "L",
-      "assessment": "SPARSE_PHASE_AND_BINDING"
+      "candidate_rewrite": "Project host matrix-descriptor C ABI + HIP device storage/pointer tables",
+      "retry_condition": "Complete current-source original-contract, independent CPU/native CUDA, runtime/fault gates and fixed-commit review before issuing the R9 qualification. Complete frozen original contract, independent review and immutable qualification before changing support status.",
+      "cost_class": "M",
+      "assessment": "IMPLEMENTED_CANDIDATE_VALIDATING"
     },
     {
       "sample_id": "cuDSS/fortran/dense_matrix_helpers::dense_matrix_helpers.f90",
       "route_id": "cuDSS/fortran/dense_matrix_helpers::dense_matrix_helpers.f90::catalog",
-      "actual_library": null,
-      "backend_library": null,
+      "actual_library": "Project host matrix-descriptor C ABI + HIP device storage/pointer tables",
+      "backend_library": "Project HIP runtime adapter",
       "candidate_libraries": [
         "rocSOLVER CSRRF",
         "rocSPARSE/HIP",
         "ISO_C_BINDING"
       ],
-      "components": [],
-      "implementation": null,
+      "components": [
+        "HIP"
+      ],
+      "implementation": "rocm/ported/cuDSS/fortran/dense_matrix_helpers/dense_matrix_helpers.f90",
       "method": "UNIMPLEMENTED_BINDING",
-      "status": "FAILED",
-      "scope": "Fortran 原始入口使用 iso_fortran_env, iso_c_binding, cudautils, cudss, cudssutils；当前 flang 编译失败，CUDA/cuDSS/cuFFT/NVFortran module 和 device 语法需用经验证的 ISO_C_BINDING 与 AMD API 重写。C ABI 探针另记，不代表该例已实现。 日志：gra/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/fortran/dense_matrix_helpers/dense_matrix_helpers.f90:110:8: error: No explicit type declared for 'cudssmatrixdestroy'     st = cudssMatrixDestroy(B)          ^^^^^^^^^^^^^^^^^^ /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/fortran/dense_matrix_helpers/dense_matrix_helpers.f90:111:8: error: No explicit type declared for 'cudssdestroy'     st = cudssDestroy(handle)          ^^^^^^^^^^^^ ",
+      "status": "PARTIAL",
+      "scope": "R9候选实现已完成构建并进入独立CPU/native CUDA及原始合同验收；尚未签发复合资格，不计整例通过。历史原生API自动移植失败保留。",
       "evidence": [
         "migration/reports/evidence/20261109T084354.110802Z/languages/cuDSS_fortran_dense_matrix_helpers_dense_matrix_helpers.f90",
-        "migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_fortran_dense_matrix_helpers_dense_matrix_helpers.f90"
+        "migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_fortran_dense_matrix_helpers_dense_matrix_helpers.f90",
+        "migration/reports/rewrite-R9.md"
       ],
       "cpu_stage_review": "NOT_IN_DECLARED_LIBRARY_STRING",
-      "candidate_rewrite": "Shared HIP sparse C ABI + symbolic analysis / optional external sparse library",
-      "retry_condition": "Bind original language only after its GPU core works; replay original CSR/type/phase/refactor/error behavior and scalable sparse storage, residual oracle and factor/solve trace. Complete frozen original contract, independent review and immutable qualification before changing support status.",
-      "cost_class": "L",
-      "assessment": "SPARSE_PHASE_AND_BINDING"
+      "candidate_rewrite": "Project host matrix-descriptor C ABI + HIP device storage/pointer tables",
+      "retry_condition": "Complete current-source original-contract, independent CPU/native CUDA, runtime/fault gates and fixed-commit review before issuing the R9 qualification. Complete frozen original contract, independent review and immutable qualification before changing support status.",
+      "cost_class": "M",
+      "assessment": "IMPLEMENTED_CANDIDATE_VALIDATING"
     },
     {
       "sample_id": "cuDSS/fortran/get_set::get_set.f90",
@@ -7881,27 +7887,30 @@
     {
       "sample_id": "cuDSS/fortran/sparse_matrix_helpers::sparse_matrix_helpers.f90",
       "route_id": "cuDSS/fortran/sparse_matrix_helpers::sparse_matrix_helpers.f90::catalog",
-      "actual_library": null,
-      "backend_library": null,
+      "actual_library": "Project host matrix-descriptor C ABI + HIP device storage/pointer tables",
+      "backend_library": "Project HIP runtime adapter",
       "candidate_libraries": [
         "rocSOLVER CSRRF",
         "rocSPARSE/HIP",
         "ISO_C_BINDING"
       ],
-      "components": [],
-      "implementation": null,
+      "components": [
+        "HIP"
+      ],
+      "implementation": "rocm/ported/cuDSS/fortran/sparse_matrix_helpers/sparse_matrix_helpers.f90",
       "method": "UNIMPLEMENTED_BINDING",
-      "status": "FAILED",
-      "scope": "Fortran 原始入口使用 iso_fortran_env, iso_c_binding, cudautils, cudss；当前 flang 编译失败，CUDA/cuDSS/cuFFT/NVFortran module 和 device 语法需用经验证的 ISO_C_BINDING 与 AMD API 重写。C ABI 探针另记，不代表该例已实现。 日志：CUDALibrarySamples_ROCm/rocm/ported/cuDSS/fortran/sparse_matrix_helpers/sparse_matrix_helpers.f90:155:8: error: No explicit type declared for 'cudssmatrixdestroy'     st = cudssMatrixDestroy(A)          ^^^^^^^^^^^^^^^^^^ /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/fortran/sparse_matrix_helpers/sparse_matrix_helpers.f90:156:8: error: No explicit type declared for 'cudssdestroy'     st = cudssDestroy(handle)          ^^^^^^^^^^^^ ",
+      "status": "PARTIAL",
+      "scope": "R9候选实现已完成构建并进入独立CPU/native CUDA及原始合同验收；尚未签发复合资格，不计整例通过。历史原生API自动移植失败保留。",
       "evidence": [
         "migration/reports/evidence/20261109T084354.110802Z/languages/cuDSS_fortran_sparse_matrix_helpers_sparse_matrix_helpers.f90",
-        "migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_fortran_sparse_matrix_helpers_sparse_matrix_helpers.f90"
+        "migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_fortran_sparse_matrix_helpers_sparse_matrix_helpers.f90",
+        "migration/reports/rewrite-R9.md"
       ],
       "cpu_stage_review": "NOT_IN_DECLARED_LIBRARY_STRING",
-      "candidate_rewrite": "Shared HIP sparse C ABI + symbolic analysis / optional external sparse library",
-      "retry_condition": "Bind original language only after its GPU core works; replay original CSR/type/phase/refactor/error behavior and scalable sparse storage, residual oracle and factor/solve trace. Complete frozen original contract, independent review and immutable qualification before changing support status.",
-      "cost_class": "L",
-      "assessment": "SPARSE_PHASE_AND_BINDING"
+      "candidate_rewrite": "Project host matrix-descriptor C ABI + HIP device storage/pointer tables",
+      "retry_condition": "Complete current-source original-contract, independent CPU/native CUDA, runtime/fault gates and fixed-commit review before issuing the R9 qualification. Complete frozen original contract, independent review and immutable qualification before changing support status.",
+      "cost_class": "M",
+      "assessment": "IMPLEMENTED_CANDIDATE_VALIDATING"
     },
     {
       "sample_id": "cuDSS/fortran/uniform_batch::uniform_batch.f90",
@@ -7958,52 +7967,58 @@
     {
       "sample_id": "cuDSS/nvfortran/batch_sparse_matrix_helpers::batch_sparse_matrix_helpers.cuf",
       "route_id": "cuDSS/nvfortran/batch_sparse_matrix_helpers::batch_sparse_matrix_helpers.cuf::catalog",
-      "actual_library": null,
-      "backend_library": null,
+      "actual_library": "Project host matrix-descriptor C ABI + HIP device storage/pointer tables",
+      "backend_library": "Project HIP runtime adapter",
       "candidate_libraries": [
         "rocSOLVER CSRRF",
         "rocSPARSE/HIP",
         "ISO_C_BINDING"
       ],
-      "components": [],
-      "implementation": null,
+      "components": [
+        "HIP"
+      ],
+      "implementation": "rocm/ported/cuDSS/nvfortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.cuf",
       "method": "UNIMPLEMENTED_BINDING",
-      "status": "FAILED",
-      "scope": "Fortran 原始入口使用 iso_fortran_env, iso_c_binding, cudafor, cudss；当前 flang 编译失败，CUDA/cuDSS/cuFFT/NVFortran module 和 device 语法需用经验证的 ISO_C_BINDING 与 AMD API 重写。C ABI 探针另记，不代表该例已实现。 日志：    st = cudssDataDestroy(handle, dat); st = cudssConfigDestroy(cfg); st = cudssDestroy(handle)                                                                            ^^^^^^^^^^^^ /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/nvfortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.cuf:185:12: error: No explicit type declared for 'cudastreamdestroy'     status = cudaStreamDestroy(stream)              ^^^^^^^^^^^^^^^^^ ",
+      "status": "PARTIAL",
+      "scope": "R9候选实现已完成构建并进入独立CPU/native CUDA及原始合同验收；尚未签发复合资格，不计整例通过。历史原生API自动移植失败保留。",
       "evidence": [
         "migration/reports/evidence/20261109T084354.110802Z/languages/cuDSS_nvfortran_batch_sparse_matrix_helpers_batch_sparse_matrix_helpers.cuf",
-        "migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_nvfortran_batch_sparse_matrix_helpers_batch_sparse_matrix_helpers.cuf"
+        "migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_nvfortran_batch_sparse_matrix_helpers_batch_sparse_matrix_helpers.cuf",
+        "migration/reports/rewrite-R9.md"
       ],
       "cpu_stage_review": "NOT_IN_DECLARED_LIBRARY_STRING",
-      "candidate_rewrite": "Shared HIP sparse C ABI + symbolic analysis / optional external sparse library",
-      "retry_condition": "Bind original language only after its GPU core works; replay original CSR/type/phase/refactor/error behavior and scalable sparse storage, residual oracle and factor/solve trace. Complete frozen original contract, independent review and immutable qualification before changing support status.",
-      "cost_class": "L",
-      "assessment": "SPARSE_PHASE_AND_BINDING"
+      "candidate_rewrite": "Project host matrix-descriptor C ABI + HIP device storage/pointer tables",
+      "retry_condition": "Complete current-source original-contract, independent CPU/native CUDA, runtime/fault gates and fixed-commit review before issuing the R9 qualification. Complete frozen original contract, independent review and immutable qualification before changing support status.",
+      "cost_class": "M",
+      "assessment": "IMPLEMENTED_CANDIDATE_VALIDATING"
     },
     {
       "sample_id": "cuDSS/nvfortran/dense_matrix_helpers::dense_matrix_helpers.cuf",
       "route_id": "cuDSS/nvfortran/dense_matrix_helpers::dense_matrix_helpers.cuf::catalog",
-      "actual_library": null,
-      "backend_library": null,
+      "actual_library": "Project host matrix-descriptor C ABI + HIP device storage/pointer tables",
+      "backend_library": "Project HIP runtime adapter",
       "candidate_libraries": [
         "rocSOLVER CSRRF",
         "rocSPARSE/HIP",
         "ISO_C_BINDING"
       ],
-      "components": [],
-      "implementation": null,
+      "components": [
+        "HIP"
+      ],
+      "implementation": "rocm/ported/cuDSS/nvfortran/dense_matrix_helpers/dense_matrix_helpers.cuf",
       "method": "UNIMPLEMENTED_BINDING",
-      "status": "FAILED",
-      "scope": "Fortran 原始入口使用 iso_fortran_env, iso_c_binding, cudafor, cudss, cudssutils；当前 flang 编译失败，CUDA/cuDSS/cuFFT/NVFortran module 和 device 语法需用经验证的 ISO_C_BINDING 与 AMD API 重写。C ABI 探针另记，不代表该例已实现。 日志：rix_helpers.cuf:85:8: error: No explicit type declared for 'cudssmatrixdestroy'     st = cudssMatrixDestroy(B); st = cudssDestroy(handle)          ^^^^^^^^^^^^^^^^^^ /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/nvfortran/dense_matrix_helpers/dense_matrix_helpers.cuf:85:36: error: No explicit type declared for 'cudssdestroy'     st = cudssMatrixDestroy(B); st = cudssDestroy(handle)                                      ^^^^^^^^^^^^ ",
+      "status": "PARTIAL",
+      "scope": "R9候选实现已完成构建并进入独立CPU/native CUDA及原始合同验收；尚未签发复合资格，不计整例通过。历史原生API自动移植失败保留。",
       "evidence": [
         "migration/reports/evidence/20261109T084354.110802Z/languages/cuDSS_nvfortran_dense_matrix_helpers_dense_matrix_helpers.cuf",
-        "migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_nvfortran_dense_matrix_helpers_dense_matrix_helpers.cuf"
+        "migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_nvfortran_dense_matrix_helpers_dense_matrix_helpers.cuf",
+        "migration/reports/rewrite-R9.md"
       ],
       "cpu_stage_review": "NOT_IN_DECLARED_LIBRARY_STRING",
-      "candidate_rewrite": "Shared HIP sparse C ABI + symbolic analysis / optional external sparse library",
-      "retry_condition": "Bind original language only after its GPU core works; replay original CSR/type/phase/refactor/error behavior and scalable sparse storage, residual oracle and factor/solve trace. Complete frozen original contract, independent review and immutable qualification before changing support status.",
-      "cost_class": "L",
-      "assessment": "SPARSE_PHASE_AND_BINDING"
+      "candidate_rewrite": "Project host matrix-descriptor C ABI + HIP device storage/pointer tables",
+      "retry_condition": "Complete current-source original-contract, independent CPU/native CUDA, runtime/fault gates and fixed-commit review before issuing the R9 qualification. Complete frozen original contract, independent review and immutable qualification before changing support status.",
+      "cost_class": "M",
+      "assessment": "IMPLEMENTED_CANDIDATE_VALIDATING"
     },
     {
       "sample_id": "cuDSS/nvfortran/get_set::get_set.cuf",
@@ -8336,27 +8351,30 @@
     {
       "sample_id": "cuDSS/nvfortran/sparse_matrix_helpers::sparse_matrix_helpers.cuf",
       "route_id": "cuDSS/nvfortran/sparse_matrix_helpers::sparse_matrix_helpers.cuf::catalog",
-      "actual_library": null,
-      "backend_library": null,
+      "actual_library": "Project host matrix-descriptor C ABI + HIP device storage/pointer tables",
+      "backend_library": "Project HIP runtime adapter",
       "candidate_libraries": [
         "rocSOLVER CSRRF",
         "rocSPARSE/HIP",
         "ISO_C_BINDING"
       ],
-      "components": [],
-      "implementation": null,
+      "components": [
+        "HIP"
+      ],
+      "implementation": "rocm/ported/cuDSS/nvfortran/sparse_matrix_helpers/sparse_matrix_helpers.cuf",
       "method": "UNIMPLEMENTED_BINDING",
-      "status": "FAILED",
-      "scope": "Fortran 原始入口使用 iso_fortran_env, iso_c_binding, cudafor, cudss；当前 flang 编译失败，CUDA/cuDSS/cuFFT/NVFortran module 和 device 语法需用经验证的 ISO_C_BINDING 与 AMD API 重写。C ABI 探针另记，不代表该例已实现。 日志：helpers.cuf:109:8: error: No explicit type declared for 'cudssmatrixdestroy'     st = cudssMatrixDestroy(A); st = cudssDestroy(handle)          ^^^^^^^^^^^^^^^^^^ /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/nvfortran/sparse_matrix_helpers/sparse_matrix_helpers.cuf:109:36: error: No explicit type declared for 'cudssdestroy'     st = cudssMatrixDestroy(A); st = cudssDestroy(handle)                                      ^^^^^^^^^^^^ ",
+      "status": "PARTIAL",
+      "scope": "R9候选实现已完成构建并进入独立CPU/native CUDA及原始合同验收；尚未签发复合资格，不计整例通过。历史原生API自动移植失败保留。",
       "evidence": [
         "migration/reports/evidence/20261109T084354.110802Z/languages/cuDSS_nvfortran_sparse_matrix_helpers_sparse_matrix_helpers.cuf",
-        "migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_nvfortran_sparse_matrix_helpers_sparse_matrix_helpers.cuf"
+        "migration/reports/evidence/20261109T092217.782813Z/cuda-language-prerequisites/cuDSS_nvfortran_sparse_matrix_helpers_sparse_matrix_helpers.cuf",
+        "migration/reports/rewrite-R9.md"
       ],
       "cpu_stage_review": "NOT_IN_DECLARED_LIBRARY_STRING",
-      "candidate_rewrite": "Shared HIP sparse C ABI + symbolic analysis / optional external sparse library",
-      "retry_condition": "Bind original language only after its GPU core works; replay original CSR/type/phase/refactor/error behavior and scalable sparse storage, residual oracle and factor/solve trace. Complete frozen original contract, independent review and immutable qualification before changing support status.",
-      "cost_class": "L",
-      "assessment": "SPARSE_PHASE_AND_BINDING"
+      "candidate_rewrite": "Project host matrix-descriptor C ABI + HIP device storage/pointer tables",
+      "retry_condition": "Complete current-source original-contract, independent CPU/native CUDA, runtime/fault gates and fixed-commit review before issuing the R9 qualification. Complete frozen original contract, independent review and immutable qualification before changing support status.",
+      "cost_class": "M",
+      "assessment": "IMPLEMENTED_CANDIDATE_VALIDATING"
     },
     {
       "sample_id": "cuDSS/nvfortran/uniform_batch::uniform_batch.cuf",
@@ -8441,28 +8459,31 @@
     {
       "sample_id": "cuDSS/simple_batch_sparse_matrix_helpers::simple_batch_sparse_matrix_helpers.cpp",
       "route_id": "cuDSS/simple_batch_sparse_matrix_helpers::simple_batch_sparse_matrix_helpers.cpp::catalog",
-      "actual_library": null,
-      "backend_library": null,
+      "actual_library": "Project host matrix-descriptor C ABI + HIP device storage/pointer tables",
+      "backend_library": "Project HIP runtime adapter",
       "candidate_libraries": [
         "rocSOLVER CSRRF",
         "rocSPARSE/HIP",
         "ISO_C_BINDING"
       ],
-      "components": [],
+      "components": [
+        "HIP"
+      ],
       "implementation": "rocm/ported/cuDSS/simple_batch_sparse_matrix_helpers/simple_batch_sparse_matrix_helpers.cpp",
       "method": "API_PORT",
-      "status": "FAILED",
-      "scope": "build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/simple_batch_sparse_matrix_helpers/simple_batch_sparse_matrix_helpers.cpp:25:10: fatal error: 'cudss.h' file not found",
+      "status": "PARTIAL",
+      "scope": "R9候选实现已完成构建并进入独立CPU/native CUDA及原始合同验收；尚未签发复合资格，不计整例通过。历史原生API自动移植失败保留。",
       "evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/cuDSS_simple_batch_sparse_matrix_helpers_simple_batch_sparse_matrix_helpers.cpp",
         "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuDSS_simple_batch_sparse_matrix_helpers_simple_batch_sparse_matrix_helpers.cpp",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuDSS_simple_batch_sparse_matrix_helpers_simple_batch_sparse_matrix_helpers.cpp"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuDSS_simple_batch_sparse_matrix_helpers_simple_batch_sparse_matrix_helpers.cpp",
+        "migration/reports/rewrite-R9.md"
       ],
       "cpu_stage_review": "NOT_IN_DECLARED_LIBRARY_STRING",
-      "candidate_rewrite": "Shared HIP sparse C ABI + symbolic analysis / optional external sparse library",
-      "retry_condition": "Bind original language only after its GPU core works; replay original CSR/type/phase/refactor/error behavior and scalable sparse storage, residual oracle and factor/solve trace. Complete frozen original contract, independent review and immutable qualification before changing support status.",
-      "cost_class": "L",
-      "assessment": "SPARSE_PHASE_AND_BINDING"
+      "candidate_rewrite": "Project host matrix-descriptor C ABI + HIP device storage/pointer tables",
+      "retry_condition": "Complete current-source original-contract, independent CPU/native CUDA, runtime/fault gates and fixed-commit review before issuing the R9 qualification. Complete frozen original contract, independent review and immutable qualification before changing support status.",
+      "cost_class": "M",
+      "assessment": "IMPLEMENTED_CANDIDATE_VALIDATING"
     },
     {
       "sample_id": "cuDSS/simple_complex::simple_complex.cpp",
@@ -8493,28 +8514,31 @@
     {
       "sample_id": "cuDSS/simple_dense_matrix_helpers::simple_dense_matrix_helpers.cpp",
       "route_id": "cuDSS/simple_dense_matrix_helpers::simple_dense_matrix_helpers.cpp::catalog",
-      "actual_library": null,
-      "backend_library": null,
+      "actual_library": "Project host matrix-descriptor C ABI + HIP device storage/pointer tables",
+      "backend_library": "Project HIP runtime adapter",
       "candidate_libraries": [
         "rocSOLVER CSRRF",
         "rocSPARSE/HIP",
         "ISO_C_BINDING"
       ],
-      "components": [],
+      "components": [
+        "HIP"
+      ],
       "implementation": "rocm/ported/cuDSS/simple_dense_matrix_helpers/simple_dense_matrix_helpers.cpp",
       "method": "API_PORT",
-      "status": "FAILED",
-      "scope": "build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/simple_dense_matrix_helpers/simple_dense_matrix_helpers.cpp:24:10: fatal error: 'cudss.h' file not found",
+      "status": "PARTIAL",
+      "scope": "R9候选实现已完成构建并进入独立CPU/native CUDA及原始合同验收；尚未签发复合资格，不计整例通过。历史原生API自动移植失败保留。",
       "evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/cuDSS_simple_dense_matrix_helpers_simple_dense_matrix_helpers.cpp",
         "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuDSS_simple_dense_matrix_helpers_simple_dense_matrix_helpers.cpp",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuDSS_simple_dense_matrix_helpers_simple_dense_matrix_helpers.cpp"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuDSS_simple_dense_matrix_helpers_simple_dense_matrix_helpers.cpp",
+        "migration/reports/rewrite-R9.md"
       ],
       "cpu_stage_review": "NOT_IN_DECLARED_LIBRARY_STRING",
-      "candidate_rewrite": "Shared HIP sparse C ABI + symbolic analysis / optional external sparse library",
-      "retry_condition": "Bind original language only after its GPU core works; replay original CSR/type/phase/refactor/error behavior and scalable sparse storage, residual oracle and factor/solve trace. Complete frozen original contract, independent review and immutable qualification before changing support status.",
-      "cost_class": "L",
-      "assessment": "SPARSE_PHASE_AND_BINDING"
+      "candidate_rewrite": "Project host matrix-descriptor C ABI + HIP device storage/pointer tables",
+      "retry_condition": "Complete current-source original-contract, independent CPU/native CUDA, runtime/fault gates and fixed-commit review before issuing the R9 qualification. Complete frozen original contract, independent review and immutable qualification before changing support status.",
+      "cost_class": "M",
+      "assessment": "IMPLEMENTED_CANDIDATE_VALIDATING"
     },
     {
       "sample_id": "cuDSS/simple_get_set::simple_get_set.cpp",
@@ -8900,28 +8924,31 @@
     {
       "sample_id": "cuDSS/simple_sparse_matrix_helpers::simple_sparse_matrix_helpers.cpp",
       "route_id": "cuDSS/simple_sparse_matrix_helpers::simple_sparse_matrix_helpers.cpp::catalog",
-      "actual_library": null,
-      "backend_library": null,
+      "actual_library": "Project host matrix-descriptor C ABI + HIP device storage/pointer tables",
+      "backend_library": "Project HIP runtime adapter",
       "candidate_libraries": [
         "rocSOLVER CSRRF",
         "rocSPARSE/HIP",
         "ISO_C_BINDING"
       ],
-      "components": [],
+      "components": [
+        "HIP"
+      ],
       "implementation": "rocm/ported/cuDSS/simple_sparse_matrix_helpers/simple_sparse_matrix_helpers.cpp",
       "method": "API_PORT",
-      "status": "FAILED",
-      "scope": "build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/cuDSS/simple_sparse_matrix_helpers/simple_sparse_matrix_helpers.cpp:24:10: fatal error: 'cudss.h' file not found",
+      "status": "PARTIAL",
+      "scope": "R9候选实现已完成构建并进入独立CPU/native CUDA及原始合同验收；尚未签发复合资格，不计整例通过。历史原生API自动移植失败保留。",
       "evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/cuDSS_simple_sparse_matrix_helpers_simple_sparse_matrix_helpers.cpp",
         "migration/reports/evidence/20261109T084256.329631Z/original-rocm/cuDSS_simple_sparse_matrix_helpers_simple_sparse_matrix_helpers.cpp",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuDSS_simple_sparse_matrix_helpers_simple_sparse_matrix_helpers.cpp"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/cuDSS_simple_sparse_matrix_helpers_simple_sparse_matrix_helpers.cpp",
+        "migration/reports/rewrite-R9.md"
       ],
       "cpu_stage_review": "NOT_IN_DECLARED_LIBRARY_STRING",
-      "candidate_rewrite": "Shared HIP sparse C ABI + symbolic analysis / optional external sparse library",
-      "retry_condition": "Bind original language only after its GPU core works; replay original CSR/type/phase/refactor/error behavior and scalable sparse storage, residual oracle and factor/solve trace. Complete frozen original contract, independent review and immutable qualification before changing support status.",
-      "cost_class": "L",
-      "assessment": "SPARSE_PHASE_AND_BINDING"
+      "candidate_rewrite": "Project host matrix-descriptor C ABI + HIP device storage/pointer tables",
+      "retry_condition": "Complete current-source original-contract, independent CPU/native CUDA, runtime/fault gates and fixed-commit review before issuing the R9 qualification. Complete frozen original contract, independent review and immutable qualification before changing support status.",
+      "cost_class": "M",
+      "assessment": "IMPLEMENTED_CANDIDATE_VALIDATING"
     },
     {
       "sample_id": "cuDSS/simple_uniform_batch::simple_uniform_batch.cpp",
@@ -14151,10 +14178,10 @@
         "migration/reports/evidence/20261109T081122.138627Z/original-cuda/cuSPARSE_compression_compression_example.cpp"
       ],
       "cpu_stage_review": "NOT_IN_DECLARED_LIBRARY_STRING",
-      "candidate_rewrite": "hipSPARSE/rocSPARSE + HIP format conversion",
-      "retry_condition": "Probe original index widths/base/layout and operation; independent CSR/dense oracle, native CUDA plus error/empty/batch checks. Complete frozen original contract, independent review and immutable qualification before changing support status.",
-      "cost_class": "M",
-      "assessment": "SPARSE_API_ADAPTER"
+      "candidate_rewrite": "HIP driver allocation/property probe + hipSPARSE only if an actual equivalent compression capability exists",
+      "retry_condition": "Verify actual AMD driver/allocation compression support and reported properties on the locked GPU; then validate Axpby and the original comparison. Retain a gap if hardware compression cannot be demonstrated. Complete frozen original contract, independent review and immutable qualification before changing support status.",
+      "cost_class": "XL",
+      "assessment": "HARDWARE_TRANSPARENT_MEMORY_COMPRESSION"
     },
     {
       "sample_id": "cuSPARSE/coosort::coosort_example.c",
@@ -15713,26 +15740,30 @@
     {
       "sample_id": "nvCOMP/benchmarks::benchmark_crc32.cpp",
       "route_id": "nvCOMP/benchmarks::benchmark_crc32.cpp::catalog",
-      "actual_library": null,
-      "backend_library": null,
+      "actual_library": "Project HIP segmented IEEE CRC32 + GPU GF2 combine + original benchmark harness + hipRAND",
+      "backend_library": "Project HIP runtime adapter",
       "candidate_libraries": [
         "hipCOMP"
       ],
-      "components": [],
+      "components": [
+        "hipRAND",
+        "HIP"
+      ],
       "implementation": "rocm/ported/nvCOMP/benchmarks/benchmark_crc32.cpp",
       "method": "API_PORT",
-      "status": "FAILED",
-      "scope": "build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvCOMP/benchmarks/benchmark_crc32.cpp:321:3: error: unknown type name 'nvcompCRC32KernelConf_t'；/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvCOMP/benchmarks/benchmark_crc32.cpp:327:5: error: use of undeclared identifier 'nvcompCRC32'",
+      "status": "PARTIAL",
+      "scope": "R9候选实现已完成构建并进入独立CPU/native CUDA及原始合同验收；尚未签发复合资格，不计整例通过。历史原生API自动移植失败保留。",
       "evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/nvCOMP_benchmarks_benchmark_crc32.cpp",
         "migration/reports/evidence/20261109T084256.329631Z/original-rocm/nvCOMP_benchmarks_benchmark_crc32.cpp",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/nvCOMP_benchmarks_benchmark_crc32.cpp"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/nvCOMP_benchmarks_benchmark_crc32.cpp",
+        "migration/reports/rewrite-R9.md"
       ],
       "cpu_stage_review": "NOT_IN_DECLARED_LIBRARY_STRING",
-      "candidate_rewrite": "hipCOMP for verified codec APIs + project GPU codec/harness",
-      "retry_condition": "Probe exact source codec/options; test encode/decode separately, cross-vendor streams, chunk bounds, malformed input and original CLI/GPU work. Complete frozen original contract, independent review and immutable qualification before changing support status.",
-      "cost_class": "L",
-      "assessment": "CODEC_BITSTREAM_OR_FRAMEWORK"
+      "candidate_rewrite": "Project HIP segmented IEEE CRC32 + GPU GF2 combine + original benchmark harness + hipRAND",
+      "retry_condition": "Complete current-source original-contract, independent CPU/native CUDA, runtime/fault gates and fixed-commit review before issuing the R9 qualification. Complete frozen original contract, independent review and immutable qualification before changing support status.",
+      "cost_class": "M",
+      "assessment": "IMPLEMENTED_CANDIDATE_VALIDATING"
     },
     {
       "sample_id": "nvCOMP/benchmarks::benchmark_deflate_chunked.cu",

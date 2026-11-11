@@ -1,0 +1,42 @@
+----------------------------------------------------------
+cuDSS example: creating, modifying, and destroying cuDSS
+sparse and dense matrix object batches
+----------------------------------------------------------
+The first matrix A in the batch:
+(0, 4.000e+00) (2, 1.000e+00) 
+(1, 3.000e+00) (2, 2.000e+00) 
+(2, 5.000e+00) (4, 1.000e+00) 
+(3, 1.000e+00) 
+(4, 2.000e+00) 
+The second matrix A in the batch:
+(0, 3.000e+00) (5, 1.000e+00) 
+(1, 2.000e+00) (4, 1.000e+00) 
+(2, 6.000e+00) (4, 2.000e+00) (5, 2.000e+00) 
+(3, 5.000e+00) 
+(4, 7.000e+00) (5, 3.000e+00) 
+(5, 8.000e+00) 
+Success: Check for matrix A from cudssMatrixGetBatchCsr passed
+Success: Check for matrix B from cudssMatrixGetBatchDn passed
+Success: After modifying out-of-place value of A in each batch
+equals -4.000e+00 and -3.000e+00 (expected -4.000e+00, -3.000e+00)
+Success: After modifying out-of-place value of B in each batch
+equals -2.000e+00 and -5.000e+00 (expected -2.000e+00, -5.000e+00)
+Note: Changing the matrix structure does not change the nnz returned by
+cudssMatrixGetBatchCsr. The original value = 8 and 11 passed to cudssMatrixCreateBatchCsr are
+returned
+First matrix A (after changing the matrix structure):
+(0, 4.000e+00) (2, 1.000e+00) 
+(1, 3.000e+00) (2, 2.000e+00) 
+(2, 5.000e+00) 
+(3, 1.000e+00) 
+(4, 2.000e+00) 
+Second matrix A (after changing the matrix structure):
+(0, 3.000e+00) (5, 1.000e+00) 
+(1, 2.000e+00) (4, 1.000e+00) 
+(2, 6.000e+00) (4, 2.000e+00) 
+(3, 5.000e+00) 
+(4, 7.000e+00) (5, 3.000e+00) 
+(5, 8.000e+00) 
+Success: Matrix A format returned as 6 (CSR + batch)
+Success: Matrix b format returned as 5 (dense + batch)
+Example PASSED

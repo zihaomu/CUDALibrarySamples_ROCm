@@ -1,0 +1,2351 @@
+diff --git a/rocm/ported/cuDSS/fortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.f90 b/rocm/ported/cuDSS/fortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.f90
+index 3ead37c07..8d157a911 100644
+--- a/rocm/ported/cuDSS/fortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.f90
++++ b/rocm/ported/cuDSS/fortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.f90
+@@ -1,276 +1,7 @@
+-! SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ ! SPDX-License-Identifier: Apache-2.0
+-!
+-! Licensed under the Apache License, Version 2.0 (the "License");
+-! you may not use this file except in compliance with the License.
+-! You may obtain a copy of the License at
+-!
+-! http://www.apache.org/licenses/LICENSE-2.0
+-!
+-! Unless required by applicable law or agreed to in writing, software
+-! distributed under the License is distributed on an "AS IS" BASIS,
+-! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-! See the License for the specific language governing permissions and
+-! limitations under the License.
+-!
+-! This example demonstrates usage of cuDSS helper APIs for matrix objects.
+-! Matches examples/cudss_batch_sparse_matrix_helpers.cpp (batched CSR helpers; 1-based indices).
+-
++! Standard Fortran adaptation of cuDSS/fortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.f90
+ program main
+-  use iso_fortran_env, only: wp => real64
+-  use iso_c_binding, only: c_int64_t
+-  use cudautils
+-  use cudss
+-  implicit none
+-
+-  integer, parameter :: batchCount = 2
+-  integer, parameter :: n1 = 5, n2 = 6, nnz1 = 8, nnz2 = 11
+-  integer, parameter :: nnz1b = 7, nnz2b = 10
+-
+-  integer :: csr1_offsets(n1+1), csr1_columns(nnz1)
+-  integer :: csr2_offsets(n2+1), csr2_columns(nnz2)
+-  real(wp) :: csr1_values(nnz1), csr2_values(nnz2)
+-
+-  integer :: csr1_offsets_b(n1+1), csr1_columns_b(nnz1b)
+-  integer :: csr2_offsets_b(n2+1), csr2_columns_b(nnz2b)
+-  real(wp) :: csr1_values_b(nnz1b), csr2_values_b(nnz2b)
+-
+-  type(c_ptr) :: d1_off, d1_col, d2_off, d2_col
+-  type(c_ptr) :: d1_val, d2_val
+-  type(c_ptr) :: d1_off_b, d1_col_b, d2_off_b, d2_col_b
+-  type(c_ptr) :: d1_val_b, d2_val_b
+-  type(c_ptr) :: b1_d, b2_d, b1_b, b2_b
+-
+-  real(wp) :: h1_val_b(max(nnz1, nnz1b)), h2_val_b(max(nnz2, nnz2b))
+-  real(wp) :: hb1(n1), hb2(n2), hb1_b(n1), hb2_b(n2)
+-
+-  type(cuda_devptr) :: p_off(batchCount), p_col(batchCount), p_val(batchCount), p_b(batchCount)
+-  type(cuda_devptr) :: p_off_b(batchCount), p_col_b(batchCount), p_val_b(batchCount), p_b_b(batchCount)
+-  type(c_ptr) :: p_off_d, p_col_d, p_val_d, p_b_d
+-  type(c_ptr) :: p_off_db, p_col_db, p_val_db, p_b_db
+-
+-  integer :: nrows(batchCount), ncols(batchCount), nnz(batchCount), nrhs(batchCount), ldb(batchCount)
+-  integer(c_int64_t) :: bc_out
+-  integer(c_int) :: offsetType_out, indexType_out, valueType_out
+-  type(cudssMatrixType) :: mtype_out
+-  type(cudssMatrixViewType) :: mview_out
+-  type(cudssIndexBase) :: indexBase_out
+-  integer(c_int) :: indexType_out_b, valueType_out_b
+-  type(cudssLayout) :: layout_out_b
+-  type(c_ptr) :: nnz_out
+-  type(c_ptr) :: off_out, col_out, val_out, b_val_out
+-  type(cudssHandle) :: handle
+-  type(cudssConfig) :: cfg
+-  type(cudssData) :: dat
+-  type(cudssMatrix) :: A, b
+-  type(cudssStatus) :: st
+-  type(cudssMatrixType) :: mtype = CUDSS_MTYPE_SPD
+-  type(cudssMatrixViewType) :: mview = CUDSS_MVIEW_UPPER
+-  type(cudssIndexBase) :: base = CUDSS_BASE_ONE
+-  type(cudssMatrixFormat) :: mf
+-
+-  integer(cuda_stream_kind) :: stream
+-  integer :: status
+-  real(wp) :: new_csr(2), new_b(2), out_csr(2), out_b(2)
+-
+-  csr1_offsets = [1, 3, 5, 7, 8, 9]
+-  csr1_columns = [1, 3, 2, 3, 3, 5, 4, 5]
+-  csr1_values = [4.0_wp, 1.0_wp, 3.0_wp, 2.0_wp, 5.0_wp, 1.0_wp, 1.0_wp, 2.0_wp]
+-
+-  csr2_offsets = [1, 3, 5, 8, 9, 11, 12]
+-  csr2_columns = [1, 6, 2, 5, 3, 5, 4, 6, 5, 6, 6]
+-  csr2_values = [3.0_wp, 1.0_wp, 2.0_wp, 1.0_wp, 6.0_wp, 2.0_wp, 2.0_wp, 5.0_wp, 7.0_wp, 3.0_wp, 8.0_wp]
+-
+-  hb1 = [7.0_wp, 12.0_wp, 25.0_wp, 4.0_wp, 13.0_wp]
+-  hb2 = [9.0_wp, 9.0_wp, 40.0_wp, 20.0_wp, 61.0_wp, 70.0_wp]
+-
+-  call dev_malloc_i4(d1_off, csr1_offsets)
+-  call dev_malloc_i4(d1_col, csr1_columns)
+-  call dev_malloc_r8(d1_val, csr1_values)
+-  call dev_malloc_i4(d2_off, csr2_offsets)
+-  call dev_malloc_i4(d2_col, csr2_columns)
+-  call dev_malloc_r8(d2_val, csr2_values)
+-  call dev_malloc_r8(b1_d, hb1)
+-  call dev_malloc_r8(b2_d, hb2)
+-
+-  p_off = [c_devloc(d1_off), c_devloc(d2_off)]
+-  p_col = [c_devloc(d1_col), c_devloc(d2_col)]
+-  p_val = [c_devloc(d1_val), c_devloc(d2_val)]
+-  p_b = [c_devloc(b1_d), c_devloc(b2_d)]
+-
+-  h1_val_b(1:nnz1) = csr1_values
+-  h2_val_b(1:nnz2) = csr2_values
+-  call dev_malloc_r8(d1_val_b, h1_val_b(1:max(nnz1, nnz1b)))
+-  call dev_malloc_r8(d2_val_b, h2_val_b(1:max(nnz2, nnz2b)))
+-  hb1_b = hb1
+-  hb2_b = hb2
+-  call dev_malloc_r8(b1_b, hb1_b)
+-  call dev_malloc_r8(b2_b, hb2_b)
+-  p_off_b = p_off
+-  p_col_b = p_col
+-  p_val_b = [c_devloc(d1_val_b), c_devloc(d2_val_b)]
+-  p_b_b = [c_devloc(b1_b), c_devloc(b2_b)]
+-
+-  call dev_upload_ptr_array(p_off_d, p_off, batchCount)
+-  call dev_upload_ptr_array(p_col_d, p_col, batchCount)
+-  call dev_upload_ptr_array(p_val_d, p_val, batchCount)
+-  call dev_upload_ptr_array(p_b_d, p_b, batchCount)
+-  call dev_upload_ptr_array(p_off_db, p_off_b, batchCount)
+-  call dev_upload_ptr_array(p_col_db, p_col_b, batchCount)
+-  call dev_upload_ptr_array(p_val_db, p_val_b, batchCount)
+-  call dev_upload_ptr_array(p_b_db, p_b_b, batchCount)
+-
+-  nrows = [n1, n2]
+-  ncols = [n1, n2]
+-  nnz = [nnz1, nnz2]
+-  nrhs = [1, 1]
+-  ldb = nrows
+-
+-  status = cudaStreamCreate(stream)
+-  st = cudssCreate(handle)
+-  st = cudssSetStream(handle, stream)
+-  st = cudssConfigCreate(cfg)
+-  st = cudssDataCreate(handle, dat)
+-
+-  st = cudssMatrixCreateBatchDn(b, int(batchCount,8), nrows, nrhs, ldb, p_b_d, &
+-       CUDSS_R_32I, CUDSS_R_64F, CUDSS_LAYOUT_COL_MAJOR)
+-  st = cudssMatrixCreateBatchCsr(A, int(batchCount,8), nrows, ncols, nnz, &
+-       p_off_d, p_col_d, p_val_d, CUDSS_R_32I, CUDSS_R_32I, CUDSS_R_64F, mtype, mview, base)
+-
+-  ! Note: cuDSS matrix objects are lightweight wrappers around the user data.
+-  st = cudssMatrixGetBatchCsr(A, batchCount=bc_out, rowStart=off_out, colIndices=col_out, &
+-       values=val_out, offsetType=offsetType_out, indexType=indexType_out, &
+-       valueType=valueType_out, mtype=mtype_out, mview=mview_out, indexBase=indexBase_out)
+-  if (bc_out /= int(batchCount,8) .or. .not. c_associated(off_out, p_off_d) .or. &
+-       .not. c_associated(col_out, p_col_d) .or. .not. c_associated(val_out, p_val_d) .or. &
+-       offsetType_out /= CUDSS_R_32I .or. indexType_out /= CUDSS_R_32I .or. &
+-       valueType_out /= CUDSS_R_64F .or. mtype_out /= mtype .or. mview_out /= mview .or. &
+-       indexBase_out /= base) then
+-     print *, 'FAILED GetBatchCsr for A'
+-     error stop 2
+-  end if
+-  print *, 'Success: Check for matrix A from cudssMatrixGetBatchCsr passed'
+-
+-  st = cudssMatrixGetBatchDn(b, batchCount=bc_out, values=b_val_out, integerType=indexType_out_b, &
+-       valueType=valueType_out_b, layout=layout_out_b)
+-  if (bc_out /= int(batchCount,8) .or. .not. c_associated(b_val_out, p_b_d) .or. &
+-       indexType_out_b /= CUDSS_R_32I .or. valueType_out_b /= CUDSS_R_64F &
+-       .or. layout_out_b /= CUDSS_LAYOUT_COL_MAJOR) then
+-     print *, 'FAILED GetBatchDn for b'
+-     error stop 2
+-  end if
+-  print *, 'Success: Check for matrix B from cudssMatrixGetBatchDn passed'
+-
+-  new_csr = [-4.0_wp, -3.0_wp]
+-  new_b = [-2.0_wp, -5.0_wp]
+-  h1_val_b(1) = new_csr(1)
+-  h2_val_b(1) = new_csr(2)
+-  hb1_b(1) = new_b(1)
+-  hb2_b(1) = new_b(2)
+-  call dev_copy_h2d(d1_val_b, h1_val_b(1:1))
+-  call dev_copy_h2d(d2_val_b, h2_val_b(1:1))
+-  call dev_copy_h2d(b1_b, hb1_b(1:1))
+-  call dev_copy_h2d(b2_b, hb2_b(1:1))
+-
+-  st = cudssMatrixSetBatchValues(A, p_val_db)
+-  st = cudssMatrixSetBatchValues(b, p_b_db)
+-
+-  block
+-    real(wp) :: t1(1), t2(1), tb1(1), tb2(1)
+-    call dev_copy_d2h_r8(t1, d1_val_b, 1)
+-    call dev_copy_d2h_r8(t2, d2_val_b, 1)
+-    call dev_copy_d2h_r8(tb1, b1_b, 1)
+-    call dev_copy_d2h_r8(tb2, b2_b, 1)
+-    out_csr = [t1(1), t2(1)]
+-    out_b = [tb1(1), tb2(1)]
+-  end block
+-  if (any(abs(out_csr - new_csr) > epsilon(1.0_wp)) .or. any(abs(out_b - new_b) > epsilon(1.0_wp))) then
+-     print *, 'FAILED SetBatchValues'
+-     error stop 3
+-  end if
+-
+-  csr1_offsets_b = [1, 3, 5, 6, 7, 8]
+-  csr1_columns_b = [1, 3, 2, 3, 3, 4, 5]
+-  csr1_values_b = [4.0_wp, 1.0_wp, 3.0_wp, 2.0_wp, 5.0_wp, 1.0_wp, 2.0_wp]
+-
+-  csr2_offsets_b = [1, 3, 5, 7, 8, 10, 11]
+-  csr2_columns_b = [1, 6, 2, 5, 3, 5, 4, 5, 6, 6]
+-  csr2_values_b = [3.0_wp, 1.0_wp, 2.0_wp, 1.0_wp, 6.0_wp, 2.0_wp, 5.0_wp, 7.0_wp, 3.0_wp, 8.0_wp]
+-
+-  call dev_malloc_i4(d1_off_b, csr1_offsets_b)
+-  call dev_malloc_i4(d1_col_b, csr1_columns_b)
+-  call dev_malloc_i4(d2_off_b, csr2_offsets_b)
+-  call dev_malloc_i4(d2_col_b, csr2_columns_b)
+-  h1_val_b(1:nnz1b) = csr1_values_b
+-  h2_val_b(1:nnz2b) = csr2_values_b
+-  call dev_copy_h2d(d1_val_b, h1_val_b(1:max(nnz1, nnz1b)))
+-  call dev_copy_h2d(d2_val_b, h2_val_b(1:max(nnz2, nnz2b)))
+-
+-  p_off_b = [c_devloc(d1_off_b), c_devloc(d2_off_b)]
+-  p_col_b = [c_devloc(d1_col_b), c_devloc(d2_col_b)]
+-  p_val_b = [c_devloc(d1_val_b), c_devloc(d2_val_b)]
+-  call dev_upload_ptr_array(p_off_db, p_off_b, batchCount)
+-  call dev_upload_ptr_array(p_col_db, p_col_b, batchCount)
+-  call dev_upload_ptr_array(p_val_db, p_val_b, batchCount)
+-
+-  st = cudssMatrixSetBatchCsrPointers(A, p_off_db, p_col_db, p_val_db)
+-
+-  ! Note: changing the matrix structure does not change the nnz returned by
+-  ! cudssMatrixGetBatchCsr; the original nnz array passed to cudssMatrixCreateBatchCsr
+-  ! is still returned.
+-  st = cudssMatrixGetBatchCsr(A, nnz=nnz_out)
+-  block
+-    integer, pointer :: nnz_new(:)
+-    call c_f_pointer(nnz_out, nnz_new, [batchCount])
+-    if (any(nnz_new /= nnz)) then
+-       print *, 'FAILED nnz after SetBatchCsrPointers', nnz_new
+-       error stop 6
+-    end if
+-  end block
+-
+-  st = cudssMatrixGetFormat(A, mf)
+-  if (iand(mf%val, CUDSS_MFORMAT_CSR%val) == 0 .or. iand(mf%val, CUDSS_MFORMAT_BATCH%val) == 0) then
+-     print *, 'FAILED format A', mf%val
+-     error stop 4
+-  end if
+-  st = cudssMatrixGetFormat(b, mf)
+-  if (iand(mf%val, CUDSS_MFORMAT_DENSE%val) == 0 .or. iand(mf%val, CUDSS_MFORMAT_BATCH%val) == 0) then
+-     print *, 'FAILED format b', mf%val
+-     error stop 5
+-  end if
+-
+-  st = cudssMatrixDestroy(A)
+-  st = cudssMatrixDestroy(b)
+-  st = cudssDataDestroy(handle, dat)
+-  st = cudssConfigDestroy(cfg)
+-  st = cudssDestroy(handle)
+-  status = cudaStreamDestroy(stream)
+-
+-  call dev_free(d1_off)
+-  call dev_free(d1_col)
+-  call dev_free(d2_off)
+-  call dev_free(d2_col)
+-  call dev_free(d1_val)
+-  call dev_free(d2_val)
+-  call dev_free(d1_off_b)
+-  call dev_free(d1_col_b)
+-  call dev_free(d2_off_b)
+-  call dev_free(d2_col_b)
+-  call dev_free(d1_val_b)
+-  call dev_free(d2_val_b)
+-  call dev_free(b1_d)
+-  call dev_free(b2_d)
+-  call dev_free(b1_b)
+-  call dev_free(b2_b)
+-  call dev_free(p_off_d)
+-  call dev_free(p_col_d)
+-  call dev_free(p_val_d)
+-  call dev_free(p_b_d)
+-  call dev_free(p_off_db)
+-  call dev_free(p_col_db)
+-  call dev_free(p_val_db)
+-  call dev_free(p_b_db)
+-
+-  print *, 'Example cudss_batch_sparse_matrix_helpers PASSED'
+-
+-end program main
++ use rewrite_helper_samples
++ implicit none
++ call run_helper(3)
++end program
+diff --git a/rocm/ported/cuDSS/fortran/dense_matrix_helpers/dense_matrix_helpers.f90 b/rocm/ported/cuDSS/fortran/dense_matrix_helpers/dense_matrix_helpers.f90
+index c700e1ff8..f1e38db22 100644
+--- a/rocm/ported/cuDSS/fortran/dense_matrix_helpers/dense_matrix_helpers.f90
++++ b/rocm/ported/cuDSS/fortran/dense_matrix_helpers/dense_matrix_helpers.f90
+@@ -1,118 +1,7 @@
+-! SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ ! SPDX-License-Identifier: Apache-2.0
+-!
+-! Licensed under the Apache License, Version 2.0 (the "License");
+-! you may not use this file except in compliance with the License.
+-! You may obtain a copy of the License at
+-!
+-! http://www.apache.org/licenses/LICENSE-2.0
+-!
+-! Unless required by applicable law or agreed to in writing, software
+-! distributed under the License is distributed on an "AS IS" BASIS,
+-! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-! See the License for the specific language governing permissions and
+-! limitations under the License.
+-!
+-! This example demonstrates usage of cuDSS helper APIs for matrix objects.
+-! Matches examples/cudss_dense_matrix_helpers.cpp (dense helpers only; no full linear solve).
+-
++! Standard Fortran adaptation of cuDSS/fortran/dense_matrix_helpers/dense_matrix_helpers.f90
+ program main
+-  use iso_fortran_env, only: wp => real64
+-  use iso_c_binding, only: c_int, c_int64_t
+-  use cudautils
+-  use cudss
+-  use cudssutils
+-  implicit none
+-
+-  integer(c_int64_t) :: nrows, ncols, ld
+-  integer :: i, j, lin
+-  real(wp), allocatable, target :: dense_h(:), dense_h2(:)
+-  type(c_ptr) :: dense_d, dense_d2
+-  type(cudssHandle) :: handle
+-  type(cudssMatrix) :: B
+-  type(cudssStatus) :: st
+-  type(cudssMatrixFormat) :: mf
+-  integer(c_int64_t) :: nr_o, nc_o, ldb_o
+-  type(c_ptr), target :: vals_o
+-  integer(c_int) :: dt_o
+-  type(cudssLayout) :: lay_o
+-
+-  real(wp) :: newv
+-  integer(c_int) :: fm
+-
+-  print "('Maj/Min/Patch:', 3(1x, i0))", CUDSS_VERSION_MAJOR, CUDSS_VERSION_MINOR, CUDSS_VERSION_PATCH
+-
+-  nrows = 6
+-  ncols = nrows/2
+-  ld = 2*nrows
+-
+-  allocate(dense_h(ld*ncols), dense_h2(ld*ncols))
+-
+-  lin = 0
+-  do j = 1, ncols
+-    do i = 1, ld
+-      lin = lin + 1
+-      dense_h(lin) = real(lin, kind=wp)
+-    end do
+-  end do
+-
+-  dense_h2 = dense_h
+-  call dev_malloc_r8(dense_d, dense_h)
+-  call dev_malloc_r8(dense_d2, dense_h2)
+-
+-  st = cudssCreate(handle)
+-  if (st /= cudss_status_success) print *, 'cudssCreate ', st
+-
+-  st = cudssMatrixCreateDn(B, nrows, ncols, ld, dense_d, CUDSS_R_64F, CUDSS_LAYOUT_COL_MAJOR)
+-  if (st /= cudss_status_success) print *, 'cudssMatrixCreateDn ', st
+-
+-  st = cudssMatrixGetDn(B, nr_o, nc_o, ldb_o, vals_o, dt_o, lay_o)
+-  if (st /= cudss_status_success) print *, 'cudssMatrixGetDn ', st
+-
+-  if (nr_o /= nrows .or. nc_o /= ncols .or. ldb_o /= ld .or. dt_o /= CUDSS_R_64F &
+-       .or. lay_o /= CUDSS_LAYOUT_COL_MAJOR .or. dev_ptr_value(vals_o) /= dev_ptr_value(dense_d)) then
+-     print *, 'FAILED: cudssMatrixGetDn consistency'
+-     error stop 2
+-  end if
+-  call printMatrix(B)
+-
+-  newv = -1.0_wp
+-  dense_h(1) = newv
+-  call dev_copy_h2d(dense_d, dense_h)
+-  st = cudssMatrixGetDn(B, values=vals_o)
+-  call dev_copy_d2h_r8(dense_h, vals_o, size(dense_h))
+-  if (abs(dense_h(1) - newv) > epsilon(1.0_wp)) then
+-     print *, 'FAILED: in-place value'
+-     error stop 3
+-  end if
+-  call printMatrix(B)
+-
+-  newv = -4.0_wp
+-  dense_h2(2) = newv
+-  call dev_copy_h2d(dense_d2, dense_h2)
+-  st = cudssMatrixSetValues(B, dense_d2)
+-  if (st /= cudss_status_success) print *, 'cudssMatrixSetValues ', st
+-  st = cudssMatrixGetDn(B, values=vals_o)
+-  call dev_copy_d2h_r8(dense_h, vals_o, size(dense_h))
+-  if (abs(dense_h(2) - newv) > epsilon(1.0_wp)) then
+-     print *, 'FAILED: SetValues'
+-     error stop 4
+-  end if
+-  call printMatrix(B)
+-
+-  st = cudssMatrixGetFormat(B, mf)
+-  fm = mf%val
+-  if (iand(fm, CUDSS_MFORMAT_DENSE%val) == 0) then
+-     print *, 'FAILED: format', fm
+-     error stop 5
+-  end if
+-
+-  st = cudssMatrixDestroy(B)
+-  st = cudssDestroy(handle)
+-
+-  call dev_free(dense_d)
+-  call dev_free(dense_d2)
+-  deallocate(dense_h, dense_h2)
+-
+-  print *, 'Example cudss_dense_matrix_helpers PASSED'
+-end program main
++ use rewrite_helper_samples
++ implicit none
++ call run_helper(1)
++end program
+diff --git a/rocm/ported/cuDSS/fortran/sparse_matrix_helpers/sparse_matrix_helpers.f90 b/rocm/ported/cuDSS/fortran/sparse_matrix_helpers/sparse_matrix_helpers.f90
+index 62b7f466c..6fe0dc062 100644
+--- a/rocm/ported/cuDSS/fortran/sparse_matrix_helpers/sparse_matrix_helpers.f90
++++ b/rocm/ported/cuDSS/fortran/sparse_matrix_helpers/sparse_matrix_helpers.f90
+@@ -1,166 +1,7 @@
+-! SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ ! SPDX-License-Identifier: Apache-2.0
+-!
+-! Licensed under the Apache License, Version 2.0 (the "License");
+-! you may not use this file except in compliance with the License.
+-! You may obtain a copy of the License at
+-!
+-! http://www.apache.org/licenses/LICENSE-2.0
+-!
+-! Unless required by applicable law or agreed to in writing, software
+-! distributed under the License is distributed on an "AS IS" BASIS,
+-! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-! See the License for the specific language governing permissions and
+-! limitations under the License.
+-!
+-! This example demonstrates usage of cuDSS helper APIs for matrix objects.
+-! Matches examples/cudss_sparse_matrix_helpers.cpp (CSR helpers; 0-based indices in this port).
+-
++! Standard Fortran adaptation of cuDSS/fortran/sparse_matrix_helpers/sparse_matrix_helpers.f90
+ program main
+-  use iso_fortran_env, only: wp => real64
+-  use iso_c_binding, only: c_int, c_int64_t, c_size_t, c_sizeof, c_loc
+-  use cudautils
+-  use cudss
+-  implicit none
+-
+-  integer, parameter :: nrows = 5, ncols = 5, nnz = 9, nnz2 = 5
+-
+-  integer, target :: csr_offsets(0:nrows), csr_columns(0:nnz-1), csr_offsets2(0:nrows), csr_columns2(0:nnz2-1)
+-  real(wp), target :: csr_values(0:nnz-1), csr_values2(0:nnz2-1)
+-
+-  type(c_ptr) :: csr_offsets_d, csr_columns_d, csr_values_d
+-  type(c_ptr) :: csr_offsets_d2, csr_columns_d2, csr_values_d2
+-
+-  type(cudssHandle) :: handle
+-  type(cudssMatrix) :: A
+-  type(cudssStatus) :: st
+-  type(cudssMatrixType) :: mtype = CUDSS_MTYPE_SYMMETRIC
+-  type(cudssMatrixViewType) :: mview = CUDSS_MVIEW_UPPER
+-  type(cudssIndexBase) :: base = CUDSS_BASE_ZERO
+-
+-  integer(c_int64_t) :: nr_o, nc_o, nz_o, nz_new
+-  type(c_ptr), target :: ro, co, vo
+-  integer(c_int) :: ot, it, vt
+-  type(cudssMatrixType) :: mt_o
+-  type(cudssMatrixViewType) :: mv_o
+-  type(cudssIndexBase) :: ib_o
+-
+-  real(wp) :: newv
+-  type(cudssMatrixFormat) :: mf
+-  integer :: i, status
+-  integer(c_size_t) :: nbytes
+-
+-  ! Note: this example uses 0-based indexing (CUDSS_BASE_ZERO) with zero-offset
+-  ! Fortran arrays (a(0:n)) for demonstration. One-based indexing (CUDSS_BASE_ONE)
+-  ! with natural unit-offset arrays (a(n+1)) is usually more idiomatic in Fortran;
+-  ! see cudss_simple / cudss_high_precision for that style.
+-  print *, 'CUDSS Version (Major,Minor,PatchLevel): ', CUDSS_VERSION_MAJOR, CUDSS_VERSION_MINOR, CUDSS_VERSION_PATCH
+-
+-  csr_offsets = [0, 2, 4, 6, 8, 9]
+-  csr_columns = [0, 1, 1, 2, 2, 3, 3, 4, 4]
+-  do i = 0, nnz-1
+-    csr_values(i) = real(2*i, kind=wp)
+-  end do
+-
+-  csr_offsets2 = [0, 1, 2, 3, 4, 5]
+-  do i = 0, nrows-1
+-    csr_columns2(i) = i
+-  end do
+-  do i = 0, nnz2-1
+-    csr_values2(i) = real(4*i, kind=wp)
+-  end do
+-
+-  call dev_malloc_i4_lb(csr_offsets_d, csr_offsets, 0, nrows)
+-  call dev_malloc_i4_lb(csr_columns_d, csr_columns, 0, nnz-1)
+-  call dev_malloc_r8_lb(csr_values_d, csr_values, 0, nnz-1)
+-  call dev_malloc_i4_lb(csr_offsets_d2, csr_offsets2, 0, nrows)
+-  call dev_malloc_i4_lb(csr_columns_d2, csr_columns2, 0, nnz2-1)
+-  block
+-    real(wp), target :: buf(0:max(nnz, nnz2)-1)
+-    buf(0:nnz2-1) = csr_values2
+-    call dev_malloc_r8_lb(csr_values_d2, buf, 0, max(nnz, nnz2)-1)
+-  end block
+-
+-  st = cudssCreate(handle)
+-
+-  st = cudssMatrixCreateCsr(A, int(nrows,8), int(ncols,8), int(nnz,8), &
+-       csr_offsets_d, csr_columns_d, csr_values_d, &
+-       CUDSS_R_32I, CUDSS_R_32I, CUDSS_R_64F, mtype, mview, base)
+-
+-  ! rowEnd sits between rowStart and colIndices; use keywords so rowEnd is omitted (NULL in C).
+-  st = cudssMatrixGetCsr(A, nrows=nr_o, ncols=nc_o, nnz=nz_o, rowStart=ro, colIndices=co, values=vo, &
+-       offsetType=ot, indexType=it, valueType=vt, mtype=mt_o, mview=mv_o, indexBase=ib_o)
+-
+-  if (nr_o /= nrows .or. nc_o /= ncols .or. nz_o /= nnz .or. ot /= CUDSS_R_32I .or. it /= CUDSS_R_32I &
+-       .or. vt /= CUDSS_R_64F .or. mt_o /= mtype .or. mv_o /= mview .or. ib_o /= base &
+-       .or. dev_ptr_value(ro) /= dev_ptr_value(csr_offsets_d) .or. dev_ptr_value(co) /= dev_ptr_value(csr_columns_d) &
+-       .or. dev_ptr_value(vo) /= dev_ptr_value(csr_values_d)) then
+-     print *, 'FAILED GetCsr initial'
+-     error stop 2
+-  end if
+-
+-  ! Modifying values of the matrix A in-place
+-  newv = -1.0_wp
+-  csr_values(0) = newv
+-  call dev_copy_h2d_r8_lb(csr_values_d, csr_values, 0, nnz-1)
+-  st = cudssMatrixGetCsr(A, values=vo)
+-  nbytes = int(nnz, c_size_t) * c_sizeof(csr_values(0))
+-  status = cudaMemcpy(c_loc(csr_values(0)), vo, nbytes, cudaMemcpyDeviceToHost)
+-  if (status /= cudaSuccess) error stop 'cudaMemcpy D2H failed (csr_values)'
+-  if (abs(csr_values(0) - newv) > epsilon(1.0_wp)) then
+-     print *, 'FAILED in-place val'
+-     error stop 3
+-  end if
+-
+-  ! Replacing values of matrix A with new data
+-  newv = -4.0_wp
+-  block
+-    real(wp), target :: buf(0:max(nnz, nnz2)-1)
+-    nbytes = int(max(nnz, nnz2), c_size_t) * c_sizeof(buf(0))
+-    status = cudaMemcpy(c_loc(buf(0)), csr_values_d2, nbytes, cudaMemcpyDeviceToHost)
+-    if (status /= cudaSuccess) error stop 'cudaMemcpy D2H failed (csr_values_d2)'
+-    buf(1) = newv
+-    status = cudaMemcpy(csr_values_d2, c_loc(buf(0)), nbytes, cudaMemcpyHostToDevice)
+-    if (status /= cudaSuccess) error stop 'cudaMemcpy H2D failed (csr_values_d2)'
+-  end block
+-  st = cudssMatrixSetValues(A, csr_values_d2)
+-  st = cudssMatrixGetCsr(A, values=vo)
+-  nbytes = int(nnz, c_size_t) * c_sizeof(csr_values(0))
+-  status = cudaMemcpy(c_loc(csr_values(0)), vo, nbytes, cudaMemcpyDeviceToHost)
+-  if (status /= cudaSuccess) error stop 'cudaMemcpy D2H failed (csr_values after SetValues)'
+-  if (abs(csr_values(1) - newv) > epsilon(1.0_wp)) then
+-     print *, 'FAILED SetValues'
+-     error stop 4
+-  end if
+-
+-  ! Changing the matrix structure (here: removing the last entry)
+-  st = cudssMatrixSetCsrPointers(A, csr_offsets_d2, csr_columns_d2, csr_values_d2)
+-  st = cudssMatrixGetCsr(A, nnz=nz_new, rowStart=ro, colIndices=co, values=vo)
+-
+-  ! Note: changing the matrix structure does not change the nnz returned by
+-  ! cudssMatrixGetCsr; the original value passed to cudssMatrixCreateCsr is returned.
+-  if (nz_new /= nz_o) then
+-     print *, 'FAILED nnz after SetCsrPointers', nz_new, nz_o
+-     error stop 6
+-  end if
+-
+-  ! Demonstrating cudssMatrixGetFormat
+-  st = cudssMatrixGetFormat(A, mf)
+-  if (mf%val /= CUDSS_MFORMAT_CSR%val) then
+-     print *, 'FAILED format', mf%val
+-     error stop 5
+-  end if
+-
+-  ! Destroying opaque objects, matrix wrappers and the cuDSS library handle
+-  st = cudssMatrixDestroy(A)
+-  st = cudssDestroy(handle)
+-
+-  call dev_free(csr_offsets_d)
+-  call dev_free(csr_columns_d)
+-  call dev_free(csr_values_d)
+-  call dev_free(csr_offsets_d2)
+-  call dev_free(csr_columns_d2)
+-  call dev_free(csr_values_d2)
+-
+-  print *, 'Example cudss_sparse_matrix_helpers PASSED'
+-end program main
++ use rewrite_helper_samples
++ implicit none
++ call run_helper(2)
++end program
+diff --git a/rocm/ported/cuDSS/nvfortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.cuf b/rocm/ported/cuDSS/nvfortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.cuf
+index 368e65723..f57fc84ad 100644
+--- a/rocm/ported/cuDSS/nvfortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.cuf
++++ b/rocm/ported/cuDSS/nvfortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.cuf
+@@ -1,194 +1,7 @@
+-! SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ ! SPDX-License-Identifier: Apache-2.0
+-!
+-! Licensed under the Apache License, Version 2.0 (the "License");
+-! you may not use this file except in compliance with the License.
+-! You may obtain a copy of the License at
+-!
+-! http://www.apache.org/licenses/LICENSE-2.0
+-!
+-! Unless required by applicable law or agreed to in writing, software
+-! distributed under the License is distributed on an "AS IS" BASIS,
+-! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-! See the License for the specific language governing permissions and
+-! limitations under the License.
+-!
+-! CUDA Fortran port: cudafor device arrays + pointer tables via = copies.
+-
++! Standard Fortran adaptation of cuDSS/nvfortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.cuf
+ program main
+-  use iso_fortran_env, only: wp => real64
+-  use iso_c_binding, only: c_int64_t, c_ptr, c_loc, c_f_pointer, c_associated
+-  use cudafor
+-  use cudss
+-  implicit none
+-
+-  integer, parameter :: batchCount = 2
+-  integer, parameter :: n1 = 5, n2 = 6, nnz1 = 8, nnz2 = 11
+-  integer, parameter :: nnz1b = 7, nnz2b = 10
+-
+-  integer :: csr1_offsets(n1+1), csr1_columns(nnz1), csr2_offsets(n2+1), csr2_columns(nnz2)
+-  real(wp) :: csr1_values(nnz1), csr2_values(nnz2)
+-  integer :: csr1_offsets_b(n1+1), csr1_columns_b(nnz1b), csr2_offsets_b(n2+1), csr2_columns_b(nnz2b)
+-  real(wp) :: csr1_values_b(nnz1b), csr2_values_b(nnz2b)
+-  real(wp) :: h1_val_b(max(nnz1, nnz1b)), h2_val_b(max(nnz2, nnz2b))
+-  real(wp) :: hb1(n1), hb2(n2), hb1_b(n1), hb2_b(n2)
+-
+-  integer, device, allocatable, target :: csr1_offsets_d(:), csr1_columns_d(:), csr2_offsets_d(:), csr2_columns_d(:)
+-  real(wp), device, allocatable, target :: csr1_values_d(:), csr2_values_d(:), d1_val_b(:), d2_val_b(:)
+-  real(wp), device, allocatable, target :: hb1_d(:), hb2_d(:), hb1_db(:), hb2_db(:)
+-  integer, device, allocatable, target :: csr1_offsets_db(:), csr1_columns_db(:), csr2_offsets_db(:), csr2_columns_db(:)
+-
+-  type(c_ptr), allocatable, target :: p_off(:), p_col(:), p_val(:), p_b(:)
+-  type(c_ptr), allocatable, target :: p_off_b(:), p_col_b(:), p_val_b(:), p_b_b(:)
+-  type(c_ptr), device, allocatable, target :: p_off_d(:), p_col_d(:), p_val_d(:), p_b_d(:)
+-  type(c_ptr), device, allocatable, target :: p_off_db(:), p_col_db(:), p_val_db(:), p_b_db(:)
+-
+-  integer :: nrows(batchCount), ncols(batchCount), nnz(batchCount), nrhs(batchCount), ldb(batchCount)
+-  integer(c_int64_t) :: bc_out
+-  integer(c_int) :: offsetType_out, indexType_out, valueType_out
+-  type(cudssMatrixType) :: mtype_out
+-  type(cudssMatrixViewType) :: mview_out
+-  type(cudssIndexBase) :: indexBase_out
+-  integer(c_int) :: indexType_out_b, valueType_out_b
+-  type(cudssLayout) :: layout_out_b
+-  type(c_ptr) :: nnz_out
+-  type(c_ptr) :: off_out, col_out, val_out, b_val_out
+-  type(cudssHandle) :: handle
+-  type(cudssConfig) :: cfg
+-  type(cudssData) :: dat
+-  type(cudssMatrix) :: A, b
+-  type(cudssStatus) :: st
+-  type(cudssMatrixType) :: mtype = CUDSS_MTYPE_SPD
+-  type(cudssMatrixViewType) :: mview = CUDSS_MVIEW_UPPER
+-  type(cudssIndexBase) :: base = CUDSS_BASE_ONE
+-  type(cudssMatrixFormat) :: mf
+-  integer(cuda_stream_kind) :: stream
+-  integer :: status
+-  real(wp) :: new_csr(2), new_b(2), out_csr(2), out_b(2)
+-
+-  allocate(csr1_offsets_d(n1+1), csr1_columns_d(nnz1), csr1_values_d(nnz1))
+-  allocate(csr2_offsets_d(n2+1), csr2_columns_d(nnz2), csr2_values_d(nnz2))
+-  allocate(hb1_d(n1), hb2_d(n2), d1_val_b(max(nnz1, nnz1b)), d2_val_b(max(nnz2, nnz2b)))
+-  allocate(hb1_db(n1), hb2_db(n2))
+-  allocate(p_off(batchCount), p_col(batchCount), p_val(batchCount), p_b(batchCount))
+-  allocate(p_off_b(batchCount), p_col_b(batchCount), p_val_b(batchCount), p_b_b(batchCount))
+-  allocate(p_off_d(batchCount), p_col_d(batchCount), p_val_d(batchCount), p_b_d(batchCount))
+-  allocate(p_off_db(batchCount), p_col_db(batchCount), p_val_db(batchCount), p_b_db(batchCount))
+-
+-  csr1_offsets = [1, 3, 5, 7, 8, 9]
+-  csr1_columns = [1, 3, 2, 3, 3, 5, 4, 5]
+-  csr1_values = [4.0_wp, 1.0_wp, 3.0_wp, 2.0_wp, 5.0_wp, 1.0_wp, 1.0_wp, 2.0_wp]
+-  csr2_offsets = [1, 3, 5, 8, 9, 11, 12]
+-  csr2_columns = [1, 6, 2, 5, 3, 5, 4, 6, 5, 6, 6]
+-  csr2_values = [3.0_wp, 1.0_wp, 2.0_wp, 1.0_wp, 6.0_wp, 2.0_wp, 2.0_wp, 5.0_wp, 7.0_wp, 3.0_wp, 8.0_wp]
+-  hb1 = [7.0_wp, 12.0_wp, 25.0_wp, 4.0_wp, 13.0_wp]
+-  hb2 = [9.0_wp, 9.0_wp, 40.0_wp, 20.0_wp, 61.0_wp, 70.0_wp]
+-
+-  csr1_offsets_d = csr1_offsets; csr1_columns_d = csr1_columns; csr1_values_d = csr1_values
+-  csr2_offsets_d = csr2_offsets; csr2_columns_d = csr2_columns; csr2_values_d = csr2_values
+-  hb1_d = hb1; hb2_d = hb2
+-
+-  p_off(1) = c_loc(csr1_offsets_d(1)); p_off(2) = c_loc(csr2_offsets_d(1))
+-  p_col(1) = c_loc(csr1_columns_d(1)); p_col(2) = c_loc(csr2_columns_d(1))
+-  p_val(1) = c_loc(csr1_values_d(1)); p_val(2) = c_loc(csr2_values_d(1))
+-  p_b(1) = c_loc(hb1_d(1)); p_b(2) = c_loc(hb2_d(1))
+-  p_off_d = p_off; p_col_d = p_col; p_val_d = p_val; p_b_d = p_b
+-
+-  d1_val_b(1:nnz1) = csr1_values; d2_val_b(1:nnz2) = csr2_values
+-  hb1_db = hb1; hb2_db = hb2
+-  p_off_b = p_off; p_col_b = p_col
+-  p_val_b(1) = c_loc(d1_val_b(1)); p_val_b(2) = c_loc(d2_val_b(1))
+-  p_b_b(1) = c_loc(hb1_db(1)); p_b_b(2) = c_loc(hb2_db(1))
+-  p_off_db = p_off_b; p_col_db = p_col_b; p_val_db = p_val_b; p_b_db = p_b_b
+-
+-  nrows = [n1, n2]; ncols = [n1, n2]; nnz = [nnz1, nnz2]; nrhs = [1, 1]; ldb = nrows
+-
+-  status = cudaStreamCreate(stream)
+-  st = cudssCreate(handle); st = cudssSetStream(handle, stream)
+-  st = cudssConfigCreate(cfg); st = cudssDataCreate(handle, dat)
+-
+-  st = cudssMatrixCreateBatchDn(b, int(batchCount,8), nrows, nrhs, ldb, c_loc(p_b_d(1)), &
+-       CUDSS_R_32I, CUDSS_R_64F, CUDSS_LAYOUT_COL_MAJOR)
+-  st = cudssMatrixCreateBatchCsr(A, int(batchCount,8), nrows, ncols, nnz, &
+-       c_loc(p_off_d(1)), c_loc(p_col_d(1)), c_loc(p_val_d(1)), &
+-       CUDSS_R_32I, CUDSS_R_32I, CUDSS_R_64F, mtype, mview, base)
+-
+-  ! Note: cuDSS matrix objects are lightweight wrappers around the user data.
+-  st = cudssMatrixGetBatchCsr(A, batchCount=bc_out, rowStart=off_out, colIndices=col_out, &
+-       values=val_out, offsetType=offsetType_out, indexType=indexType_out, &
+-       valueType=valueType_out, mtype=mtype_out, mview=mview_out, indexBase=indexBase_out)
+-  if (bc_out /= int(batchCount,8) .or. .not. c_associated(off_out, c_loc(p_off_d(1))) .or. &
+-       .not. c_associated(col_out, c_loc(p_col_d(1))) .or. .not. c_associated(val_out, c_loc(p_val_d(1))) .or. &
+-       offsetType_out /= CUDSS_R_32I .or. indexType_out /= CUDSS_R_32I .or. &
+-       valueType_out /= CUDSS_R_64F .or. mtype_out /= mtype .or. mview_out /= mview .or. &
+-       indexBase_out /= base) error stop 2
+-  print *, 'Success: Check for matrix A from cudssMatrixGetBatchCsr passed'
+-
+-  st = cudssMatrixGetBatchDn(b, batchCount=bc_out, values=b_val_out, integerType=indexType_out_b, &
+-       valueType=valueType_out_b, layout=layout_out_b)
+-  if (bc_out /= int(batchCount,8) .or. .not. c_associated(b_val_out, c_loc(p_b_d(1))) .or. &
+-       indexType_out_b /= CUDSS_R_32I .or. valueType_out_b /= CUDSS_R_64F &
+-       .or. layout_out_b /= CUDSS_LAYOUT_COL_MAJOR) error stop 2
+-  print *, 'Success: Check for matrix B from cudssMatrixGetBatchDn passed'
+-
+-  new_csr = [-4.0_wp, -3.0_wp]; new_b = [-2.0_wp, -5.0_wp]
+-  d1_val_b(1) = new_csr(1); d2_val_b(1) = new_csr(2)
+-  hb1_db(1) = new_b(1); hb2_db(1) = new_b(2)
+-  p_val_b(1) = c_loc(d1_val_b(1)); p_val_b(2) = c_loc(d2_val_b(1))
+-  p_b_b(1) = c_loc(hb1_db(1)); p_b_b(2) = c_loc(hb2_db(1))
+-  p_val_db = p_val_b; p_b_db = p_b_b
+-
+-  st = cudssMatrixSetBatchValues(A, c_loc(p_val_db(1)))
+-  st = cudssMatrixSetBatchValues(b, c_loc(p_b_db(1)))
+-
+-  out_csr(1) = d1_val_b(1)
+-  out_csr(2) = d2_val_b(1)
+-  out_b(1) = hb1_db(1)
+-  out_b(2) = hb2_db(1)
+-  if (any(abs(out_csr - new_csr) > epsilon(1.0_wp)) .or. any(abs(out_b - new_b) > epsilon(1.0_wp))) error stop 3
+-
+-  csr1_offsets_b = [1, 3, 5, 6, 7, 8]
+-  csr1_columns_b = [1, 3, 2, 3, 3, 4, 5]
+-  csr1_values_b = [4.0_wp, 1.0_wp, 3.0_wp, 2.0_wp, 5.0_wp, 1.0_wp, 2.0_wp]
+-  csr2_offsets_b = [1, 3, 5, 7, 8, 10, 11]
+-  csr2_columns_b = [1, 6, 2, 5, 3, 5, 4, 5, 6, 6]
+-  csr2_values_b = [3.0_wp, 1.0_wp, 2.0_wp, 1.0_wp, 6.0_wp, 2.0_wp, 5.0_wp, 7.0_wp, 3.0_wp, 8.0_wp]
+-
+-  allocate(csr1_offsets_db(n1+1), csr1_columns_db(nnz1b), csr2_offsets_db(n2+1), csr2_columns_db(nnz2b))
+-  csr1_offsets_db = csr1_offsets_b; csr1_columns_db = csr1_columns_b
+-  csr2_offsets_db = csr2_offsets_b; csr2_columns_db = csr2_columns_b
+-  d1_val_b(1:nnz1b) = csr1_values_b; d2_val_b(1:nnz2b) = csr2_values_b
+-  p_off_b(1) = c_loc(csr1_offsets_db(1)); p_off_b(2) = c_loc(csr2_offsets_db(1))
+-  p_col_b(1) = c_loc(csr1_columns_db(1)); p_col_b(2) = c_loc(csr2_columns_db(1))
+-  p_val_b(1) = c_loc(d1_val_b(1)); p_val_b(2) = c_loc(d2_val_b(1))
+-  p_off_db = p_off_b; p_col_db = p_col_b; p_val_db = p_val_b
+-
+-  st = cudssMatrixSetBatchCsrPointers(A, c_loc(p_off_db(1)), c_loc(p_col_db(1)), c_loc(p_val_db(1)))
+-
+-  ! Note: changing the matrix structure does not change the nnz returned by
+-  ! cudssMatrixGetBatchCsr; the original nnz array passed to cudssMatrixCreateBatchCsr
+-  ! is still returned.
+-  st = cudssMatrixGetBatchCsr(A, nnz=nnz_out)
+-  block
+-    integer, pointer :: nnz_new(:)
+-    call c_f_pointer(nnz_out, nnz_new, [batchCount])
+-    if (any(nnz_new /= nnz)) error stop 6
+-  end block
+-
+-  st = cudssMatrixGetFormat(A, mf)
+-  if (iand(mf%val, CUDSS_MFORMAT_CSR%val) == 0 .or. iand(mf%val, CUDSS_MFORMAT_BATCH%val) == 0) error stop 4
+-  st = cudssMatrixGetFormat(b, mf)
+-  if (iand(mf%val, CUDSS_MFORMAT_DENSE%val) == 0 .or. iand(mf%val, CUDSS_MFORMAT_BATCH%val) == 0) error stop 5
+-
+-  st = cudssMatrixDestroy(A); st = cudssMatrixDestroy(b)
+-  st = cudssDataDestroy(handle, dat); st = cudssConfigDestroy(cfg); st = cudssDestroy(handle)
+-  status = cudaStreamDestroy(stream)
+-
+-  deallocate(csr1_offsets_d, csr1_columns_d, csr1_values_d, csr2_offsets_d, csr2_columns_d, csr2_values_d)
+-  deallocate(hb1_d, hb2_d, d1_val_b, d2_val_b, hb1_db, hb2_db)
+-  deallocate(csr1_offsets_db, csr1_columns_db, csr2_offsets_db, csr2_columns_db)
+-  deallocate(p_off, p_col, p_val, p_b, p_off_b, p_col_b, p_val_b, p_b_b)
+-  deallocate(p_off_d, p_col_d, p_val_d, p_b_d, p_off_db, p_col_db, p_val_db, p_b_db)
+-
+-  print *, 'Example cudss_batch_sparse_matrix_helpers PASSED'
+-end program main
++ use rewrite_helper_samples
++ implicit none
++ call run_helper(3)
++end program
+diff --git a/rocm/ported/cuDSS/nvfortran/dense_matrix_helpers/dense_matrix_helpers.cuf b/rocm/ported/cuDSS/nvfortran/dense_matrix_helpers/dense_matrix_helpers.cuf
+index 4a2302e8c..ec8930633 100644
+--- a/rocm/ported/cuDSS/nvfortran/dense_matrix_helpers/dense_matrix_helpers.cuf
++++ b/rocm/ported/cuDSS/nvfortran/dense_matrix_helpers/dense_matrix_helpers.cuf
+@@ -1,98 +1,7 @@
+-! SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ ! SPDX-License-Identifier: Apache-2.0
+-!
+-! Licensed under the Apache License, Version 2.0 (the "License");
+-! you may not use this file except in compliance with the License.
+-! You may obtain a copy of the License at
+-!
+-! http://www.apache.org/licenses/LICENSE-2.0
+-!
+-! Unless required by applicable law or agreed to in writing, software
+-! distributed under the License is distributed on an "AS IS" BASIS,
+-! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-! See the License for the specific language governing permissions and
+-! limitations under the License.
+-!
+-! This example demonstrates usage of cuDSS helper APIs for matrix objects.
+-! Matches examples/cudss_dense_matrix_helpers.cpp (dense helpers only; no full linear solve).
+-! CUDA Fortran port: cudafor device arrays + = for host/device copies.
+-
++! Standard Fortran adaptation of cuDSS/nvfortran/dense_matrix_helpers/dense_matrix_helpers.cuf
+ program main
+-  use iso_fortran_env, only: wp => real64
+-  use iso_c_binding, only: c_int, c_int64_t, c_ptr, c_intptr_t, c_f_pointer, c_loc
+-  use cudafor
+-  use cudss
+-  use cudssutils
+-  implicit none
+-
+-  integer(c_int64_t) :: nrows, ncols, ld
+-  integer :: i, j, lin
+-  real(wp), allocatable :: dense_h(:), dense_h2(:)
+-  real(wp), device, allocatable, target :: dense_d(:), dense_d2(:)
+-  type(cudssHandle) :: handle
+-  type(cudssMatrix) :: B
+-  type(cudssStatus) :: st
+-  type(cudssMatrixFormat) :: mf
+-  integer(c_int64_t) :: nr_o, nc_o, ldb_o
+-  type(c_ptr), target :: vals_o
+-  integer(c_int) :: dt_o
+-  type(cudssLayout) :: lay_o
+-  real(wp) :: newv
+-  integer(c_int) :: fm
+-
+-  print "('Maj/Min/Patch:', 3(1x, i0))", CUDSS_VERSION_MAJOR, CUDSS_VERSION_MINOR, CUDSS_VERSION_PATCH
+-
+-  nrows = 6; ncols = nrows/2; ld = 2*nrows
+-  allocate(dense_h(ld*ncols), dense_h2(ld*ncols), dense_d(ld*ncols), dense_d2(ld*ncols))
+-  lin = 0
+-  do j = 1, ncols
+-    do i = 1, ld
+-      lin = lin + 1
+-      dense_h(lin) = real(lin, kind=wp)
+-    end do
+-  end do
+-  dense_h2 = dense_h
+-  dense_d = dense_h
+-  dense_d2 = dense_h2
+-
+-  st = cudssCreate(handle)
+-  st = cudssMatrixCreateDn(B, nrows, ncols, ld, c_loc(dense_d(1)), CUDSS_R_64F, CUDSS_LAYOUT_COL_MAJOR)
+-  st = cudssMatrixGetDn(B, nr_o, nc_o, ldb_o, vals_o, dt_o, lay_o)
+-
+-  if (nr_o /= nrows .or. nc_o /= ncols .or. ldb_o /= ld .or. dt_o /= CUDSS_R_64F &
+-       .or. lay_o /= CUDSS_LAYOUT_COL_MAJOR &
+-       .or. transfer(vals_o, 0_c_intptr_t) /= transfer(c_loc(dense_d(1)), 0_c_intptr_t)) then
+-     print *, 'FAILED: cudssMatrixGetDn consistency'; error stop 2
+-  end if
+-  call printMatrix(B)
+-
+-  newv = -1.0_wp; dense_h(1) = newv; dense_d = dense_h
+-  st = cudssMatrixGetDn(B, values=vals_o)
+-  call copy_cptr_to_host_r8(dense_h, vals_o, size(dense_h))
+-  if (abs(dense_h(1) - newv) > epsilon(1.0_wp)) error stop 3
+-  call printMatrix(B)
+-
+-  newv = -4.0_wp; dense_h2(2) = newv; dense_d2 = dense_h2
+-  st = cudssMatrixSetValues(B, c_loc(dense_d2(1)))
+-  st = cudssMatrixGetDn(B, values=vals_o)
+-  call copy_cptr_to_host_r8(dense_h, vals_o, size(dense_h))
+-  if (abs(dense_h(2) - newv) > epsilon(1.0_wp)) error stop 4
+-  call printMatrix(B)
+-
+-  st = cudssMatrixGetFormat(B, mf)
+-  if (iand(mf%val, CUDSS_MFORMAT_DENSE%val) == 0) error stop 5
+-
+-  st = cudssMatrixDestroy(B); st = cudssDestroy(handle)
+-  deallocate(dense_h, dense_h2, dense_d, dense_d2)
+-  print *, 'Example cudss_dense_matrix_helpers PASSED'
+-
+-contains
+-  subroutine copy_cptr_to_host_r8(host, dev_cptr, n)
+-    real(wp), intent(out) :: host(:)
+-    type(c_ptr), intent(in) :: dev_cptr
+-    integer, intent(in) :: n
+-    real(wp), device, pointer :: dev_p(:)
+-    call c_f_pointer(dev_cptr, dev_p, [n])
+-    host = dev_p
+-  end subroutine copy_cptr_to_host_r8
+-end program main
++ use rewrite_helper_samples
++ implicit none
++ call run_helper(1)
++end program
+diff --git a/rocm/ported/cuDSS/nvfortran/sparse_matrix_helpers/sparse_matrix_helpers.cuf b/rocm/ported/cuDSS/nvfortran/sparse_matrix_helpers/sparse_matrix_helpers.cuf
+index 05825a1de..8696b1e12 100644
+--- a/rocm/ported/cuDSS/nvfortran/sparse_matrix_helpers/sparse_matrix_helpers.cuf
++++ b/rocm/ported/cuDSS/nvfortran/sparse_matrix_helpers/sparse_matrix_helpers.cuf
+@@ -1,121 +1,7 @@
+-! SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ ! SPDX-License-Identifier: Apache-2.0
+-!
+-! Licensed under the Apache License, Version 2.0 (the "License");
+-! you may not use this file except in compliance with the License.
+-! You may obtain a copy of the License at
+-!
+-! http://www.apache.org/licenses/LICENSE-2.0
+-!
+-! Unless required by applicable law or agreed to in writing, software
+-! distributed under the License is distributed on an "AS IS" BASIS,
+-! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-! See the License for the specific language governing permissions and
+-! limitations under the License.
+-!
+-! CUDA Fortran port: cudafor device arrays (0-based) + = for host/device copies.
+-
++! Standard Fortran adaptation of cuDSS/nvfortran/sparse_matrix_helpers/sparse_matrix_helpers.cuf
+ program main
+-  use iso_fortran_env, only: wp => real64
+-  use iso_c_binding, only: c_int, c_int64_t, c_ptr, c_intptr_t, c_f_pointer, c_loc
+-  use cudafor
+-  use cudss
+-  implicit none
+-
+-  integer, parameter :: nrows = 5, ncols = 5, nnz = 9, nnz2 = 5
+-  integer :: csr_offsets(0:nrows), csr_columns(0:nnz-1), csr_offsets2(0:nrows), csr_columns2(0:nnz2-1)
+-  real(wp) :: csr_values(0:nnz-1), csr_values2(0:nnz2-1)
+-  integer, device, target :: csr_offsets_d(0:nrows), csr_columns_d(0:nnz-1)
+-  real(wp), device, target :: csr_values_d(0:nnz-1)
+-  integer, device, target :: csr_offsets_d2(0:nrows), csr_columns_d2(0:nnz2-1)
+-  real(wp), device, target :: csr_values_d2(0:max(nnz, nnz2)-1)
+-
+-  type(cudssHandle) :: handle
+-  type(cudssMatrix) :: A
+-  type(cudssStatus) :: st
+-  type(cudssMatrixType) :: mtype = CUDSS_MTYPE_SYMMETRIC
+-  type(cudssMatrixViewType) :: mview = CUDSS_MVIEW_UPPER
+-  type(cudssIndexBase) :: base = CUDSS_BASE_ZERO
+-  integer(c_int64_t) :: nr_o, nc_o, nz_o, nz_new
+-  type(c_ptr), target :: ro, co, vo
+-  integer(c_int) :: ot, it, vt
+-  type(cudssMatrixType) :: mt_o
+-  type(cudssMatrixViewType) :: mv_o
+-  type(cudssIndexBase) :: ib_o
+-  real(wp) :: newv
+-  type(cudssMatrixFormat) :: mf
+-  integer :: i
+-
+-  print *, 'CUDSS Version (Major,Minor,PatchLevel): ', CUDSS_VERSION_MAJOR, CUDSS_VERSION_MINOR, CUDSS_VERSION_PATCH
+-
+-  csr_offsets = [0, 2, 4, 6, 8, 9]
+-  csr_columns = [0, 1, 1, 2, 2, 3, 3, 4, 4]
+-  do i = 0, nnz-1; csr_values(i) = real(2*i, kind=wp); end do
+-  csr_offsets2 = [0, 1, 2, 3, 4, 5]
+-  do i = 0, nrows-1; csr_columns2(i) = i; end do
+-  do i = 0, nnz2-1; csr_values2(i) = real(4*i, kind=wp); end do
+-
+-  csr_offsets_d = csr_offsets; csr_columns_d = csr_columns; csr_values_d = csr_values
+-  csr_offsets_d2 = csr_offsets2; csr_columns_d2 = csr_columns2
+-  csr_values_d2(0:nnz2-1) = csr_values2
+-
+-  st = cudssCreate(handle)
+-  st = cudssMatrixCreateCsr(A, int(nrows,8), int(ncols,8), int(nnz,8), &
+-       c_loc(csr_offsets_d(0)), c_loc(csr_columns_d(0)), c_loc(csr_values_d(0)), &
+-       CUDSS_R_32I, CUDSS_R_32I, CUDSS_R_64F, mtype, mview, base)
+-
+-  st = cudssMatrixGetCsr(A, nrows=nr_o, ncols=nc_o, nnz=nz_o, rowStart=ro, colIndices=co, values=vo, &
+-       offsetType=ot, indexType=it, valueType=vt, mtype=mt_o, mview=mv_o, indexBase=ib_o)
+-
+-  if (nr_o /= nrows .or. nc_o /= ncols .or. nz_o /= nnz .or. ot /= CUDSS_R_32I .or. it /= CUDSS_R_32I &
+-       .or. vt /= CUDSS_R_64F .or. mt_o /= mtype .or. mv_o /= mview .or. ib_o /= base &
+-       .or. transfer(ro, 0_c_intptr_t) /= transfer(c_loc(csr_offsets_d(0)), 0_c_intptr_t) &
+-       .or. transfer(co, 0_c_intptr_t) /= transfer(c_loc(csr_columns_d(0)), 0_c_intptr_t) &
+-       .or. transfer(vo, 0_c_intptr_t) /= transfer(c_loc(csr_values_d(0)), 0_c_intptr_t)) then
+-     print *, 'FAILED GetCsr initial'; error stop 2
+-  end if
+-
+-  ! Modifying values of the matrix A in-place
+-  newv = -1.0_wp; csr_values(0) = newv; csr_values_d = csr_values
+-  st = cudssMatrixGetCsr(A, values=vo)
+-  call copy_cptr_to_host_r8_lb(csr_values, vo, 0, nnz-1)
+-  if (abs(csr_values(0) - newv) > epsilon(1.0_wp)) error stop 3
+-
+-  ! Replacing values of matrix A with new data
+-  newv = -4.0_wp
+-  block
+-    real(wp) :: buf(0:max(nnz, nnz2)-1)
+-    buf = csr_values_d2
+-    buf(1) = newv
+-    csr_values_d2 = buf
+-  end block
+-  st = cudssMatrixSetValues(A, c_loc(csr_values_d2(0)))
+-  st = cudssMatrixGetCsr(A, values=vo)
+-  call copy_cptr_to_host_r8_lb(csr_values, vo, 0, nnz-1)
+-  if (abs(csr_values(1) - newv) > epsilon(1.0_wp)) error stop 4
+-
+-  ! Changing the matrix structure (here: removing the last entry)
+-  st = cudssMatrixSetCsrPointers(A, c_loc(csr_offsets_d2(0)), c_loc(csr_columns_d2(0)), c_loc(csr_values_d2(0)))
+-  st = cudssMatrixGetCsr(A, nnz=nz_new, rowStart=ro, colIndices=co, values=vo)
+-  ! Note: changing the matrix structure does not change the nnz returned by
+-  ! cudssMatrixGetCsr; the original value passed to cudssMatrixCreateCsr is returned.
+-  if (nz_new /= nz_o) error stop 6
+-
+-  ! Demonstrating cudssMatrixGetFormat
+-  st = cudssMatrixGetFormat(A, mf)
+-  if (mf%val /= CUDSS_MFORMAT_CSR%val) error stop 5
+-
+-  ! Destroying opaque objects, matrix wrappers and the cuDSS library handle
+-  st = cudssMatrixDestroy(A); st = cudssDestroy(handle)
+-  print *, 'Example cudss_sparse_matrix_helpers PASSED'
+-
+-contains
+-  subroutine copy_cptr_to_host_r8_lb(host, dev_cptr, lo, hi)
+-    real(wp), intent(out) :: host(lo:)
+-    type(c_ptr), intent(in) :: dev_cptr
+-    integer, intent(in) :: lo, hi
+-    real(wp), device, pointer :: dev_p(:)
+-    call c_f_pointer(dev_cptr, dev_p, [hi-lo+1])
+-    host(lo:hi) = dev_p
+-  end subroutine copy_cptr_to_host_r8_lb
+-end program main
++ use rewrite_helper_samples
++ implicit none
++ call run_helper(2)
++end program
+diff --git a/rocm/ported/cuDSS/simple_batch_sparse_matrix_helpers/simple_batch_sparse_matrix_helpers.cpp b/rocm/ported/cuDSS/simple_batch_sparse_matrix_helpers/simple_batch_sparse_matrix_helpers.cpp
+index a856574aa..90fdf0bda 100644
+--- a/rocm/ported/cuDSS/simple_batch_sparse_matrix_helpers/simple_batch_sparse_matrix_helpers.cpp
++++ b/rocm/ported/cuDSS/simple_batch_sparse_matrix_helpers/simple_batch_sparse_matrix_helpers.cpp
+@@ -1,678 +1,4 @@
+-/*
+- * SPDX-FileCopyrightText: Copyright (c) 2023-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+- * SPDX-License-Identifier: Apache-2.0
+- *
+- * Licensed under the Apache License, Version 2.0 (the "License");
+- * you may not use this file except in compliance with the License.
+- * You may obtain a copy of the License at
+- *
+- * http://www.apache.org/licenses/LICENSE-2.0
+- *
+- * Unless required by applicable law or agreed to in writing, software
+- * distributed under the License is distributed on an "AS IS" BASIS,
+- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+- * See the License for the specific language governing permissions and
+- * limitations under the License.
+- */
+-
+-
+-#include <assert.h>
+-#include <hip/hip_runtime.h>
+-#include <math.h>
+-#include <stdio.h>
+-#include <stdlib.h>
+-
+-#include "cudss.h"
+-
+-/*
+-    This example demonstrates usage of cuDSS helper APIs for
+-    matrix objects.
+-*/
+-
+-#define CUDSS_EXAMPLE_FREE                                                               \
+-    do {                                                                                 \
+-        for (int i = 0; i < batchCount; i++) {                                           \
+-            free(csr_offsets_h[i]);                                                      \
+-            free(csr_columns_h[i]);                                                      \
+-            free(csr_values_h[i]);                                                       \
+-            free(csr_offsets_h2[i]);                                                     \
+-            free(csr_columns_h2[i]);                                                     \
+-            free(csr_values_h2[i]);                                                      \
+-            free(b_values_h[i]);                                                         \
+-            hipFree(batch_csr_offsets_h[i]);                                            \
+-            hipFree(batch_csr_columns_h[i]);                                            \
+-            hipFree(batch_csr_values_h[i]);                                             \
+-            hipFree(batch_b_values_h[i]);                                               \
+-            hipFree(batch_csr_offsets_h2[i]);                                           \
+-            hipFree(batch_csr_columns_h2[i]);                                           \
+-            hipFree(batch_csr_values_h2[i]);                                            \
+-            hipFree(batch_b_values_h2[i]);                                              \
+-        }                                                                                \
+-        hipFree(batch_csr_offsets_d);                                                   \
+-        hipFree(batch_csr_columns_d);                                                   \
+-        hipFree(batch_csr_values_d);                                                    \
+-        hipFree(batch_b_values_d);                                                      \
+-        hipFree(batch_csr_offsets_d2);                                                  \
+-        hipFree(batch_csr_columns_d2);                                                  \
+-        hipFree(batch_csr_values_d2);                                                   \
+-        hipFree(batch_b_values_d2);                                                     \
+-    } while (0);
+-
+-#define CUDA_CALL_AND_CHECK(call, msg)                                                   \
+-    do {                                                                                 \
+-        cuda_error = call;                                                               \
+-        if (cuda_error != hipSuccess) {                                                 \
+-            printf("Example FAILED: CUDA API returned error = %d, details: " #msg "\n",  \
+-                   cuda_error);                                                          \
+-            CUDSS_EXAMPLE_FREE;                                                          \
+-            return -1;                                                                   \
+-        }                                                                                \
+-    } while (0);
+-
+-
+-#define CUDSS_CALL_AND_CHECK(call, status, msg)                                          \
+-    do {                                                                                 \
+-        status = call;                                                                   \
+-        if (status != CUDSS_STATUS_SUCCESS) {                                            \
+-            printf("Example FAILED: CUDSS call ended unsuccessfully with status = %d, "  \
+-                   "details: " #msg "\n",                                                \
+-                   status);                                                              \
+-            CUDSS_EXAMPLE_FREE;                                                          \
+-            return -2;                                                                   \
+-        }                                                                                \
+-    } while (0);
+-
+-static void print_sparse_matrix(int nrows, int *csr_offsets, int *csr_columns,
+-                                double *csr_values) {
+-    for (int i = 0; i < nrows; i++) {
+-        for (int j = csr_offsets[i]; j < csr_offsets[i + 1]; j++) {
+-            printf("(%d, %3.3e) ", csr_columns[j], csr_values[j]);
+-        }
+-        printf("\n");
+-    }
+-}
+-
+-int main(int argc, char *argv[]) {
+-    printf("----------------------------------------------------------\n");
+-    printf("cuDSS example: creating, modifying, and destroying cuDSS\n"
+-           "sparse and dense matrix object batches\n");
+-    printf("----------------------------------------------------------\n");
+-    hipError_t   cuda_error = hipSuccess;
+-    cudssStatus_t status     = CUDSS_STATUS_SUCCESS;
+-
+-    int batchCount = 2;
+-    int n[2]       = {5, 6};
+-    int nnz[2]     = {8, 11};
+-    int nnz2[2]    = {7, 10};
+-    int nrhs[2]    = {1, 1};
+-
+-    int    *csr_offsets_h[2]  = {NULL};
+-    int    *csr_columns_h[2]  = {NULL};
+-    double *csr_values_h[2]   = {NULL};
+-    int    *csr_offsets_h2[2] = {NULL};
+-    int    *csr_columns_h2[2] = {NULL};
+-    double *csr_values_h2[2]  = {NULL};
+-    double *b_values_h[2]     = {NULL};
+-
+-    // (intermediate) host arrays with device pointers for the batch
+-    int    *batch_csr_offsets_h[2] = {NULL}, *batch_csr_offsets_h2[2] = {NULL};
+-    int    *batch_csr_columns_h[2] = {NULL}, *batch_csr_columns_h2[2] = {NULL};
+-    double *batch_csr_values_h[2] = {NULL}, *batch_csr_values_h2[2] = {NULL};
+-    double *batch_b_values_h[2] = {NULL}, *batch_b_values_h2[2] = {NULL};
+-
+-    void **batch_csr_offsets_d = NULL, **batch_csr_offsets_d2 = NULL;
+-    void **batch_csr_columns_d = NULL, **batch_csr_columns_d2 = NULL;
+-    void **batch_csr_values_d = NULL, **batch_csr_values_d2 = NULL;
+-    void **batch_b_values_d = NULL, **batch_b_values_d2 = NULL;
+-
+-    /* Allocate host memory for the sparse input matrix A,
+-       right-hand side b*/
+-    for (int i = 0; i < batchCount; i++) {
+-        csr_offsets_h[i]  = (int *)malloc((n[i] + 1) * sizeof(int));
+-        csr_columns_h[i]  = (int *)malloc(nnz[i] * sizeof(int));
+-        csr_values_h[i]   = (double *)malloc(nnz[i] * sizeof(double));
+-        csr_offsets_h2[i] = (int *)malloc((n[i] + 1) * sizeof(int));
+-        csr_columns_h2[i] = (int *)malloc(nnz[i] * sizeof(int));
+-        csr_values_h2[i]  = (double *)malloc(nnz[i] * sizeof(double));
+-        b_values_h[i]     = (double *)malloc(nrhs[i] * n[i] * sizeof(double));
+-
+-        if (!csr_offsets_h[i] || !csr_columns_h[i] || !csr_values_h[i] ||
+-            !b_values_h[i]) {
+-            printf("Error: host memory allocation failed\n");
+-            return -1;
+-        }
+-    }
+-
+-    /* Initialize host memory for the first A and b in the batch*/
+-    int i                 = 0;
+-    csr_offsets_h[0][i++] = 0;
+-    csr_offsets_h[0][i++] = 2;
+-    csr_offsets_h[0][i++] = 4;
+-    csr_offsets_h[0][i++] = 6;
+-    csr_offsets_h[0][i++] = 7;
+-    csr_offsets_h[0][i++] = 8;
+-
+-    i                     = 0;
+-    csr_columns_h[0][i++] = 0;
+-    csr_columns_h[0][i++] = 2;
+-    csr_columns_h[0][i++] = 1;
+-    csr_columns_h[0][i++] = 2;
+-    csr_columns_h[0][i++] = 2;
+-    csr_columns_h[0][i++] = 4;
+-    csr_columns_h[0][i++] = 3;
+-    csr_columns_h[0][i++] = 4;
+-
+-    i                    = 0;
+-    csr_values_h[0][i++] = 4.0;
+-    csr_values_h[0][i++] = 1.0;
+-    csr_values_h[0][i++] = 3.0;
+-    csr_values_h[0][i++] = 2.0;
+-    csr_values_h[0][i++] = 5.0;
+-    csr_values_h[0][i++] = 1.0;
+-    csr_values_h[0][i++] = 1.0;
+-    csr_values_h[0][i++] = 2.0;
+-
+-    /* Note: Right-hand side b is initialized with values which correspond
+-       to the exact solution vector {1, 2, 3, 4, 5} */
+-    i                  = 0;
+-    b_values_h[0][i++] = 7.0;
+-    b_values_h[0][i++] = 12.0;
+-    b_values_h[0][i++] = 25.0;
+-    b_values_h[0][i++] = 4.0;
+-    b_values_h[0][i++] = 13.0;
+-
+-    /* Initialize host memory for the second A and b in the batch*/
+-    i                     = 0;
+-    csr_offsets_h[1][i++] = 0;
+-    csr_offsets_h[1][i++] = 2;
+-    csr_offsets_h[1][i++] = 4;
+-    csr_offsets_h[1][i++] = 7;
+-    csr_offsets_h[1][i++] = 8;
+-    csr_offsets_h[1][i++] = 10;
+-    csr_offsets_h[1][i++] = 11;
+-
+-    i                     = 0;
+-    csr_columns_h[1][i++] = 0;
+-    csr_columns_h[1][i++] = 5;
+-    csr_columns_h[1][i++] = 1;
+-    csr_columns_h[1][i++] = 4;
+-    csr_columns_h[1][i++] = 2;
+-    csr_columns_h[1][i++] = 4;
+-    csr_columns_h[1][i++] = 5;
+-    csr_columns_h[1][i++] = 3;
+-    csr_columns_h[1][i++] = 4;
+-    csr_columns_h[1][i++] = 5;
+-    csr_columns_h[1][i++] = 5;
+-
+-    i                    = 0;
+-    csr_values_h[1][i++] = 3.0;
+-    csr_values_h[1][i++] = 1.0;
+-    csr_values_h[1][i++] = 2.0;
+-    csr_values_h[1][i++] = 1.0;
+-    csr_values_h[1][i++] = 6.0;
+-    csr_values_h[1][i++] = 2.0;
+-    csr_values_h[1][i++] = 2.0;
+-    csr_values_h[1][i++] = 5.0;
+-    csr_values_h[1][i++] = 7.0;
+-    csr_values_h[1][i++] = 3.0;
+-    csr_values_h[1][i++] = 8.0;
+-
+-    /* Print the initialized matrices A */
+-    printf("The first matrix A in the batch:\n");
+-    print_sparse_matrix(n[0], csr_offsets_h[0], csr_columns_h[0], csr_values_h[0]);
+-
+-    printf("The second matrix A in the batch:\n");
+-    print_sparse_matrix(n[1], csr_offsets_h[1], csr_columns_h[1], csr_values_h[1]);
+-
+-    /* Note: Right-hand side b is initialized with values which correspond
+-       to the exact solution vector {1, 2, 3, 4, 5} */
+-    i                  = 0;
+-    b_values_h[1][i++] = 9.0;
+-    b_values_h[1][i++] = 9.0;
+-    b_values_h[1][i++] = 40.0;
+-    b_values_h[1][i++] = 20.0;
+-    b_values_h[1][i++] = 61.0;
+-    b_values_h[1][i++] = 70.0;
+-
+-    for (int i = 0; i < batchCount; i++) {
+-        /* Allocate device memory for A, x and b */
+-        CUDA_CALL_AND_CHECK(hipMalloc(&batch_csr_offsets_h[i], (n[i] + 1) * sizeof(int)),
+-                            "hipMalloc for csr_offsets");
+-        CUDA_CALL_AND_CHECK(hipMalloc(&batch_csr_columns_h[i], nnz[i] * sizeof(int)),
+-                            "hipMalloc for csr_columns");
+-        CUDA_CALL_AND_CHECK(hipMalloc(&batch_csr_values_h[i], nnz[i] * sizeof(double)),
+-                            "hipMalloc for csr_values");
+-        CUDA_CALL_AND_CHECK(
+-            hipMalloc(&batch_b_values_h[i], nrhs[i] * n[i] * sizeof(double)),
+-            "hipMalloc for b_values");
+-
+-        CUDA_CALL_AND_CHECK(
+-            hipMalloc(&batch_csr_offsets_h2[i], (n[i] + 1) * sizeof(int)),
+-            "hipMalloc for csr_offsets2");
+-        CUDA_CALL_AND_CHECK(hipMalloc(&batch_csr_columns_h2[i], nnz[i] * sizeof(int)),
+-                            "hipMalloc for csr_columns2");
+-        CUDA_CALL_AND_CHECK(hipMalloc(&batch_csr_values_h2[i], nnz[i] * sizeof(double)),
+-                            "hipMalloc for csr_values2");
+-        CUDA_CALL_AND_CHECK(
+-            hipMalloc(&batch_b_values_h2[i], nrhs[i] * n[i] * sizeof(double)),
+-            "hipMalloc for b2_values");
+-
+-        /* Copy host memory to device for A and b */
+-        CUDA_CALL_AND_CHECK(hipMemcpy(batch_csr_offsets_h[i], csr_offsets_h[i],
+-                                       (n[i] + 1) * sizeof(int), hipMemcpyHostToDevice),
+-                            "hipMemcpy for csr_offsets");
+-        CUDA_CALL_AND_CHECK(hipMemcpy(batch_csr_columns_h[i], csr_columns_h[i],
+-                                       nnz[i] * sizeof(int), hipMemcpyHostToDevice),
+-                            "hipMemcpy for csr_columns");
+-        CUDA_CALL_AND_CHECK(hipMemcpy(batch_csr_values_h[i], csr_values_h[i],
+-                                       nnz[i] * sizeof(double), hipMemcpyHostToDevice),
+-                            "hipMemcpy for csr_values");
+-        CUDA_CALL_AND_CHECK(hipMemcpy(batch_b_values_h[i], b_values_h[i],
+-                                       nrhs[i] * n[i] * sizeof(double),
+-                                       hipMemcpyHostToDevice),
+-                            "hipMemcpy for b_values");
+-        CUDA_CALL_AND_CHECK(hipMemcpy(batch_csr_values_h2[i], csr_values_h[i],
+-                                       nnz[i] * sizeof(double), hipMemcpyHostToDevice),
+-                            "hipMemcpy for csr_values2");
+-        CUDA_CALL_AND_CHECK(hipMemcpy(batch_b_values_h2[i], b_values_h[i],
+-                                       nrhs[i] * n[i] * sizeof(double),
+-                                       hipMemcpyHostToDevice),
+-                            "hipMemcpy for batch_b_values_h2");
+-    }
+-
+-    /* Allocate device memory for batch pointers of A, x and b */
+-    CUDA_CALL_AND_CHECK(hipMalloc(&batch_csr_offsets_d, batchCount * sizeof(int *)),
+-                        "hipMalloc for csr_offsets");
+-    CUDA_CALL_AND_CHECK(hipMalloc(&batch_csr_columns_d, batchCount * sizeof(int *)),
+-                        "hipMalloc for csr_columns");
+-    CUDA_CALL_AND_CHECK(hipMalloc(&batch_csr_values_d, batchCount * sizeof(double *)),
+-                        "hipMalloc for csr_values");
+-    CUDA_CALL_AND_CHECK(hipMalloc(&batch_csr_values_d2, batchCount * sizeof(double *)),
+-                        "hipMalloc for csr_values");
+-    CUDA_CALL_AND_CHECK(hipMalloc(&batch_b_values_d, batchCount * sizeof(double *)),
+-                        "hipMalloc for csr_values");
+-    CUDA_CALL_AND_CHECK(hipMalloc(&batch_b_values_d2, batchCount * sizeof(double *)),
+-                        "hipMalloc for csr_values");
+-
+-    /* Copy host batch pointers to device */
+-    CUDA_CALL_AND_CHECK(hipMemcpy(batch_csr_offsets_d, batch_csr_offsets_h,
+-                                   batchCount * sizeof(int *), hipMemcpyHostToDevice),
+-                        "hipMemcpy for batch_csr_offsets");
+-    CUDA_CALL_AND_CHECK(hipMemcpy(batch_csr_columns_d, batch_csr_columns_h,
+-                                   batchCount * sizeof(int *), hipMemcpyHostToDevice),
+-                        "hipMemcpy for csr_columns");
+-    CUDA_CALL_AND_CHECK(hipMemcpy(batch_csr_values_d, batch_csr_values_h,
+-                                   batchCount * sizeof(double *), hipMemcpyHostToDevice),
+-                        "hipMemcpy for batch_csr_values");
+-    CUDA_CALL_AND_CHECK(hipMemcpy(batch_b_values_d, batch_b_values_h,
+-                                   batchCount * sizeof(double *), hipMemcpyHostToDevice),
+-                        "hipMemcpy for batch_b_values_d");
+-    CUDA_CALL_AND_CHECK(hipMemcpy(batch_csr_values_d2, batch_csr_values_h2,
+-                                   batchCount * sizeof(double *), hipMemcpyHostToDevice),
+-                        "hipMemcpy for batch_csr_values2");
+-    CUDA_CALL_AND_CHECK(hipMemcpy(batch_b_values_d2, batch_b_values_h2,
+-                                   batchCount * sizeof(double *), hipMemcpyHostToDevice),
+-                        "hipMemcpy for batch_b_values_d2");
+-
+-    /* Create a CUDA stream */
+-    hipStream_t stream = NULL;
+-    CUDA_CALL_AND_CHECK(hipStreamCreate(&stream), "hipStreamCreate");
+-
+-    /* Creating the cuDSS library handle */
+-    cudssHandle_t handle;
+-
+-    CUDSS_CALL_AND_CHECK(cudssCreate(&handle), status, "cudssCreate");
+-
+-    /* (optional) Setting the custom stream for the library handle */
+-    CUDSS_CALL_AND_CHECK(cudssSetStream(handle, stream), status, "cudssSetStream");
+-
+-    /* Creating cuDSS solver configuration and data objects */
+-    cudssConfig_t solverConfig;
+-    cudssData_t   solverData;
+-
+-    CUDSS_CALL_AND_CHECK(cudssConfigCreate(&solverConfig), status, "cudssConfigCreate");
+-    CUDSS_CALL_AND_CHECK(cudssDataCreate(handle, &solverData), status, "cudssDataCreate");
+-
+-    /* Create matrix objects for the right-hand side b and solution x (as batches of dense
+-     * matrices). */
+-    cudssMatrix_t b;
+-
+-    int *nrows = n, *ncols = n;
+-    int *ldb = nrows;
+-    CUDSS_CALL_AND_CHECK(cudssMatrixCreateBatchDn(&b, batchCount, nrows, nrhs, ldb,
+-                                                  batch_b_values_d, HIP_R_32I,
+-                                                  HIP_R_64F, CUDSS_LAYOUT_COL_MAJOR),
+-                         status, "cudssMatrixCreateBatchDn for b");
+-
+-    /* Create a matrix object for the batch of sparse input matrices. */
+-    cudssMatrix_t         A;
+-    cudssMatrixType_t     mtype = CUDSS_MTYPE_SPD;
+-    cudssMatrixViewType_t mview = CUDSS_MVIEW_UPPER;
+-    cudssIndexBase_t      base  = CUDSS_BASE_ZERO;
+-    CUDSS_CALL_AND_CHECK(cudssMatrixCreateBatchCsr(
+-                             &A, batchCount, nrows, ncols, nnz, batch_csr_offsets_d, NULL,
+-                             batch_csr_columns_d, batch_csr_values_d, HIP_R_32I,
+-                             HIP_R_32I, HIP_R_64F, mtype, mview, base),
+-                         status, "cudssMatrixCreateBatchCsr");
+-
+-    /* Note: cuDSS matrix objects are lightweight wrappers around the user data.*/
+-    int64_t               batchCount_out;
+-    void                 *nrows_out, *ncols_out, *nnz_out, *nrhs_out, *ldb_out;
+-    void                **batch_csr_offsets_out = NULL;
+-    void                **batch_csr_columns_out = NULL;
+-    void                **batch_csr_values_out  = NULL;
+-    hipDataType       offset_type_out, index_type_out, value_type_out;
+-    cudssMatrixType_t     mtype_out;
+-    cudssMatrixViewType_t mview_out;
+-    cudssIndexBase_t      index_base_out;
+-    CUDSS_CALL_AND_CHECK(
+-        cudssMatrixGetBatchCsr(A, &batchCount_out, &nrows_out, &ncols_out, &nnz_out,
+-                               &batch_csr_offsets_out, NULL, &batch_csr_columns_out,
+-                               &batch_csr_values_out, &offset_type_out, &index_type_out,
+-                               &value_type_out, &mtype_out, &mview_out, &index_base_out),
+-        status, "cudssMatrixGetBatchCsr for A");
+-
+-    if (batch_csr_offsets_out != batch_csr_offsets_d ||
+-        batch_csr_columns_out != batch_csr_columns_d ||
+-        batch_csr_values_out != batch_csr_values_d || batchCount_out != batchCount ||
+-        nrows_out != nrows || ncols_out != ncols || nnz_out != nnz ||
+-        index_type_out != HIP_R_32I || value_type_out != HIP_R_64F ||
+-        mtype_out != mtype || mview_out != mview || index_base_out != base) {
+-        printf("Error: Example FAILED: wrong data returned for matrix A\n");
+-        CUDSS_EXAMPLE_FREE;
+-        return -4;
+-    } else {
+-        printf("Success: Check for matrix A from cudssMatrixGetBatchCsr passed\n");
+-    }
+-
+-    void        **batch_b_values_out = NULL;
+-    cudssLayout_t layout_out;
+-    CUDSS_CALL_AND_CHECK(cudssMatrixGetBatchDn(b, &batchCount_out, &nrows_out, &nrhs_out,
+-                                               &ldb_out, &batch_b_values_out,
+-                                               &index_type_out, &value_type_out,
+-                                               &layout_out),
+-                         status, "cudssMatrixGetBatchDn for B");
+-
+-    if (batch_b_values_out != batch_b_values_d || batchCount_out != batchCount ||
+-        nrows_out != nrows || nrhs_out != nrhs || ldb_out != ldb ||
+-        index_type_out != HIP_R_32I || value_type_out != HIP_R_64F ||
+-        layout_out != CUDSS_LAYOUT_COL_MAJOR) {
+-        printf("Error: Example FAILED: wrong data returned for matrix B\n");
+-        CUDSS_EXAMPLE_FREE;
+-        return -4;
+-    } else {
+-        printf("Success: Check for matrix B from cudssMatrixGetBatchDn passed\n");
+-    }
+-
+-    /* Replacing values of matrix A and B with new data */
+-    double new_csr_value[2] = {-4.0, -3.0};
+-    double new_b_value[2]   = {-2.0, -5.0};
+-
+-    CUDA_CALL_AND_CHECK(hipMemcpy(&batch_csr_values_h2[0][0], &new_csr_value[0],
+-                                   1 * sizeof(double), hipMemcpyHostToDevice),
+-                        "hipMemset with new values");
+-
+-    CUDA_CALL_AND_CHECK(hipMemcpy(&batch_csr_values_h2[1][0], &new_csr_value[1],
+-                                   1 * sizeof(double), hipMemcpyHostToDevice),
+-                        "hipMemset with new values");
+-
+-    CUDA_CALL_AND_CHECK(hipMemcpy(&batch_b_values_h2[0][0], &new_b_value[0],
+-                                   1 * sizeof(double), hipMemcpyHostToDevice),
+-                        "hipMemset with new values");
+-
+-    CUDA_CALL_AND_CHECK(hipMemcpy(&batch_b_values_h2[1][0], &new_b_value[1],
+-                                   1 * sizeof(double), hipMemcpyHostToDevice),
+-                        "hipMemset with new values");
+-
+-    CUDSS_CALL_AND_CHECK(cudssMatrixSetBatchValues(A, batch_csr_values_d2), status,
+-                         "cudssMatrixSetBatchValues for A");
+-
+-    CUDSS_CALL_AND_CHECK(cudssMatrixSetBatchValues(b, batch_b_values_d2), status,
+-                         "cudssMatrixSetBatchValues for B");
+-
+-    CUDSS_CALL_AND_CHECK(cudssMatrixGetBatchCsr(A, NULL, NULL, NULL, NULL, NULL, NULL,
+-                                                NULL, &batch_csr_values_out, NULL, NULL,
+-                                                NULL, NULL, NULL, NULL),
+-                         status, "cudssMatrixGetBatchCsr for A");
+-
+-    CUDSS_CALL_AND_CHECK(cudssMatrixGetBatchDn(b, NULL, NULL, NULL, NULL,
+-                                               &batch_b_values_out, NULL, NULL, NULL),
+-                         status, "cudssMatrixGetBatchDn for B");
+-
+-    double *batch_csr_values_out_h[2] = {NULL}, *batch_b_values_out_h[2] = {NULL};
+-    CUDA_CALL_AND_CHECK(hipMemcpy(batch_csr_values_out_h, batch_csr_values_out,
+-                                   batchCount * sizeof(double *), hipMemcpyDeviceToHost),
+-                        "hipMemcpy for batch_csr_values_out");
+-    CUDA_CALL_AND_CHECK(hipMemcpy(batch_b_values_out_h, batch_b_values_out,
+-                                   batchCount * sizeof(double *), hipMemcpyDeviceToHost),
+-                        "hipMemcpy for batch_b_values_out");
+-
+-    double out_csr_value[2];
+-    double out_b_value[2];
+-
+-    CUDA_CALL_AND_CHECK(hipMemcpy(&out_csr_value[0], &batch_csr_values_out_h[0][0],
+-                                   1 * sizeof(double), hipMemcpyDeviceToHost),
+-                        "hipMemcpy with out values");
+-    CUDA_CALL_AND_CHECK(hipMemcpy(&out_csr_value[1], &batch_csr_values_out_h[1][0],
+-                                   1 * sizeof(double), hipMemcpyDeviceToHost),
+-                        "hipMemcpy with out values");
+-    CUDA_CALL_AND_CHECK(hipMemcpy(&out_b_value[0], &batch_b_values_out_h[0][0],
+-                                   1 * sizeof(double), hipMemcpyDeviceToHost),
+-                        "hipMemcpy with out values");
+-    CUDA_CALL_AND_CHECK(hipMemcpy(&out_b_value[1], &batch_b_values_out_h[1][0],
+-                                   1 * sizeof(double), hipMemcpyDeviceToHost),
+-                        "hipMemcpy with out values");
+-
+-    if (out_csr_value[0] != new_csr_value[0] || out_csr_value[1] != new_csr_value[1]) {
+-        printf("Error: Example FAILED: modification of A values out-of-place failed\n"
+-               "value of matrix A in each batch equals %3.3e and %3.3e (expected %3.3e "
+-               "%3.3e)\n",
+-               out_csr_value[0], out_csr_value[1], new_csr_value[0], new_csr_value[1]);
+-        CUDSS_EXAMPLE_FREE;
+-        return -6;
+-    } else {
+-        printf("Success: After modifying out-of-place value of A in each batch\n"
+-               "equals %3.3e and %3.3e (expected %3.3e, %3.3e)\n",
+-               out_csr_value[0], out_csr_value[1], new_csr_value[0], new_csr_value[1]);
+-    }
+-
+-    if (out_b_value[0] != new_b_value[0] || out_b_value[1] != new_b_value[1]) {
+-        printf("Error: Example FAILED: modification of B values out-of-place failed\n"
+-               "value of matrix B in each batch equals %3.3e and %3.3e (expected %3.3e "
+-               "%3.3e)\n",
+-               out_b_value[0], out_b_value[1], new_b_value[0], new_b_value[1]);
+-        CUDSS_EXAMPLE_FREE;
+-        return -6;
+-    } else {
+-        printf("Success: After modifying out-of-place value of B in each batch\n"
+-               "equals %3.3e and %3.3e (expected %3.3e, %3.3e)\n",
+-               out_b_value[0], out_b_value[1], new_b_value[0], new_b_value[1]);
+-    }
+-
+-    /* Changing the matrix structure (here: removing one of the entries) */
+-    /* Initialize host memory for the first A and b in the batch*/
+-    i                      = 0;
+-    csr_offsets_h2[0][i++] = 0;
+-    csr_offsets_h2[0][i++] = 2;
+-    csr_offsets_h2[0][i++] = 4;
+-    csr_offsets_h2[0][i++] = 5;
+-    csr_offsets_h2[0][i++] = 6;
+-    csr_offsets_h2[0][i++] = 7;
+-
+-    i                      = 0;
+-    csr_columns_h2[0][i++] = 0;
+-    csr_columns_h2[0][i++] = 2;
+-    csr_columns_h2[0][i++] = 1;
+-    csr_columns_h2[0][i++] = 2;
+-    csr_columns_h2[0][i++] = 2;
+-    csr_columns_h2[0][i++] = 3;
+-    csr_columns_h2[0][i++] = 4;
+-
+-    i                     = 0;
+-    csr_values_h2[0][i++] = 4.0;
+-    csr_values_h2[0][i++] = 1.0;
+-    csr_values_h2[0][i++] = 3.0;
+-    csr_values_h2[0][i++] = 2.0;
+-    csr_values_h2[0][i++] = 5.0;
+-    csr_values_h2[0][i++] = 1.0;
+-    csr_values_h2[0][i++] = 2.0;
+-
+-    /* Initialize host memory for the second A and b in the batch*/
+-    i                      = 0;
+-    csr_offsets_h2[1][i++] = 0;
+-    csr_offsets_h2[1][i++] = 2;
+-    csr_offsets_h2[1][i++] = 4;
+-    csr_offsets_h2[1][i++] = 6;
+-    csr_offsets_h2[1][i++] = 7;
+-    csr_offsets_h2[1][i++] = 9;
+-    csr_offsets_h2[1][i++] = 10;
+-
+-    i                      = 0;
+-    csr_columns_h2[1][i++] = 0;
+-    csr_columns_h2[1][i++] = 5;
+-    csr_columns_h2[1][i++] = 1;
+-    csr_columns_h2[1][i++] = 4;
+-    csr_columns_h2[1][i++] = 2;
+-    csr_columns_h2[1][i++] = 4;
+-    csr_columns_h2[1][i++] = 3;
+-    csr_columns_h2[1][i++] = 4;
+-    csr_columns_h2[1][i++] = 5;
+-    csr_columns_h2[1][i++] = 5;
+-
+-    i                     = 0;
+-    csr_values_h2[1][i++] = 3.0;
+-    csr_values_h2[1][i++] = 1.0;
+-    csr_values_h2[1][i++] = 2.0;
+-    csr_values_h2[1][i++] = 1.0;
+-    csr_values_h2[1][i++] = 6.0;
+-    csr_values_h2[1][i++] = 2.0;
+-    csr_values_h2[1][i++] = 5.0;
+-    csr_values_h2[1][i++] = 7.0;
+-    csr_values_h2[1][i++] = 3.0;
+-    csr_values_h2[1][i++] = 8.0;
+-
+-    /* Copy host memory for new matrix arrays to device */
+-    for (int i = 0; i < batchCount; i++) {
+-        CUDA_CALL_AND_CHECK(hipMemcpy(batch_csr_offsets_h2[i], csr_offsets_h2[i],
+-                                       (n[i] + 1) * sizeof(int), hipMemcpyHostToDevice),
+-                            "hipMemcpy for csr_offsets2");
+-        CUDA_CALL_AND_CHECK(hipMemcpy(batch_csr_columns_h2[i], csr_columns_h2[i],
+-                                       nnz2[i] * sizeof(int), hipMemcpyHostToDevice),
+-                            "hipMemcpy for csr_columns2");
+-        CUDA_CALL_AND_CHECK(hipMemcpy(batch_csr_values_h2[i], csr_values_h2[i],
+-                                       nnz2[i] * sizeof(double), hipMemcpyHostToDevice),
+-                            "hipMemcpy for csr_values2");
+-    }
+-    CUDA_CALL_AND_CHECK(hipMalloc(&batch_csr_offsets_d2, batchCount * sizeof(int *)),
+-                        "hipMalloc for batch_csr_offsets2");
+-    CUDA_CALL_AND_CHECK(hipMalloc(&batch_csr_columns_d2, batchCount * sizeof(int *)),
+-                        "hipMalloc for batch_csr_columns2");
+-
+-    CUDA_CALL_AND_CHECK(hipMemcpy(batch_csr_offsets_d2, batch_csr_offsets_h2,
+-                                   batchCount * sizeof(int *), hipMemcpyHostToDevice),
+-                        "hipMemcpy for batch_csr_offsets2");
+-    CUDA_CALL_AND_CHECK(hipMemcpy(batch_csr_columns_d2, batch_csr_columns_h2,
+-                                   batchCount * sizeof(int *), hipMemcpyHostToDevice),
+-                        "hipMemcpy for csr_columns2");
+-    CUDA_CALL_AND_CHECK(hipMemcpy(batch_csr_values_d2, batch_csr_values_h2,
+-                                   batchCount * sizeof(double *), hipMemcpyHostToDevice),
+-                        "hipMemcpy for batch_csr_values2");
+-
+-    /* Resetting the CSR pointers for the matrix A */
+-    CUDSS_CALL_AND_CHECK(cudssMatrixSetBatchCsrPointers(A, batch_csr_offsets_d2, NULL,
+-                                                        batch_csr_columns_d2,
+-                                                        batch_csr_values_d2),
+-                         status, "cudssMatrixSetBatchCsrPointers for A");
+-    int *new_nnz_out;
+-    CUDSS_CALL_AND_CHECK(
+-        cudssMatrixGetBatchCsr(A, NULL, NULL, NULL, (void **)&new_nnz_out,
+-                               &batch_csr_offsets_out, NULL, &batch_csr_columns_out,
+-                               &batch_csr_values_out, NULL, NULL, NULL, NULL, NULL, NULL),
+-        status, "cudssMatrixGetBatchCsr for A");
+-
+-    int *batch_csr_offsets_out_h[2] = {NULL};
+-    int *batch_csr_columns_out_h[2] = {NULL};
+-    CUDA_CALL_AND_CHECK(hipMemcpy(batch_csr_offsets_out_h, batch_csr_offsets_out,
+-                                   batchCount * sizeof(int *), hipMemcpyDeviceToHost),
+-                        "hipMemcpy for batch_csr_offsets_out");
+-    CUDA_CALL_AND_CHECK(hipMemcpy(batch_csr_columns_out_h, batch_csr_columns_out,
+-                                   batchCount * sizeof(int *), hipMemcpyDeviceToHost),
+-                        "hipMemcpy for batch_csr_columns_out");
+-    CUDA_CALL_AND_CHECK(hipMemcpy(batch_csr_values_out_h, batch_csr_values_out,
+-                                   batchCount * sizeof(double *), hipMemcpyDeviceToHost),
+-                        "hipMemcpy for batch_csr_values_out");
+-
+-    /* Copy device memory for new matrices back to host */
+-    for (int i = 0; i < batchCount; i++) {
+-        CUDA_CALL_AND_CHECK(hipMemcpy(csr_offsets_h2[i], batch_csr_offsets_h2[i],
+-                                       (n[i] + 1) * sizeof(int), hipMemcpyDeviceToHost),
+-                            "hipMemcpy for csr_offsets2");
+-        CUDA_CALL_AND_CHECK(hipMemcpy(csr_columns_h2[i], batch_csr_columns_h2[i],
+-                                       nnz2[i] * sizeof(int), hipMemcpyDeviceToHost),
+-                            "hipMemcpy for csr_columns2");
+-        CUDA_CALL_AND_CHECK(hipMemcpy(csr_values_h2[i], batch_csr_values_h2[i],
+-                                       nnz2[i] * sizeof(double), hipMemcpyDeviceToHost),
+-                            "hipMemcpy for csr_values2");
+-    }
+-
+-    if (new_nnz_out[0] == nnz[0] && new_nnz_out[1] == nnz[1]) {
+-        printf("Note: Changing the matrix structure does not change the nnz returned by\n"
+-               "cudssMatrixGetBatchCsr. The original value = %d and %d passed to "
+-               "cudssMatrixCreateBatchCsr are\n"
+-               "returned\n",
+-               new_nnz_out[0], new_nnz_out[1]);
+-        printf("First matrix A (after changing the matrix structure):\n");
+-        print_sparse_matrix(n[0], csr_offsets_h2[0], csr_columns_h2[0], csr_values_h2[0]);
+-        printf("Second matrix A (after changing the matrix structure):\n");
+-        print_sparse_matrix(n[1], csr_offsets_h2[1], csr_columns_h2[1], csr_values_h2[1]);
+-    } else {
+-        printf("Error: Example FAILED: unexpected nnz = %d and %d are returned after "
+-               "changing the\n"
+-               " matrix structure (expected %d and %d)\n",
+-               new_nnz_out[0], new_nnz_out[1], nnz[0], nnz[1]);
+-        CUDSS_EXAMPLE_FREE;
+-        return -7;
+-    }
+-
+-
+-    /* Demonstrating cudssMatrixGetFormat */
+-    int format;
+-    CUDSS_CALL_AND_CHECK(cudssMatrixGetFormat(A, &format), status,
+-                         "cudssMatrixGetFormat for A");
+-    if (!(format & (CUDSS_MFORMAT_CSR | CUDSS_MFORMAT_BATCH))) {
+-        printf("Error: Example FAILED: wrong format = %d was returned for A\n", format);
+-        CUDSS_EXAMPLE_FREE;
+-        return -8;
+-    } else
+-        printf("Success: Matrix A format returned as %d (CSR + batch)\n", format);
+-
+-    CUDSS_CALL_AND_CHECK(cudssMatrixGetFormat(b, &format), status,
+-                         "cudssMatrixGetFormat for b");
+-    if (!(format & (CUDSS_MFORMAT_DENSE | CUDSS_MFORMAT_BATCH))) {
+-        printf("Error: Example FAILED: wrong format = %d was returned for b\n", format);
+-        CUDSS_EXAMPLE_FREE;
+-        return -9;
+-    } else
+-        printf("Success: Matrix b format returned as %d (dense + batch)\n", format);
+-
+-    /* Destroying opaque objects, matrix wrappers and the cuDSS library handle */
+-    CUDSS_CALL_AND_CHECK(cudssMatrixDestroy(A), status, "cudssMatrixDestroy for A");
+-    CUDSS_CALL_AND_CHECK(cudssMatrixDestroy(b), status, "cudssMatrixDestroy for b");
+-    CUDSS_CALL_AND_CHECK(cudssDataDestroy(handle, solverData), status,
+-                         "cudssDataDestroy");
+-    CUDSS_CALL_AND_CHECK(cudssConfigDestroy(solverConfig), status, "cudssConfigDestroy");
+-    CUDSS_CALL_AND_CHECK(cudssDestroy(handle), status, "cudssHandleDestroy");
+-
+-    CUDA_CALL_AND_CHECK(hipStreamSynchronize(stream), "hipStreamSynchronize");
+-
+-    /* Release the data allocated on the user side */
+-    CUDSS_EXAMPLE_FREE;
+-
+-    if (status == CUDSS_STATUS_SUCCESS) {
+-        printf("Example PASSED\n");
+-        return 0;
+-    } else {
+-        printf("Example FAILED\n");
+-        return -1;
+-    }
+-}
++// SPDX-License-Identifier: Apache-2.0
++// Original contract: cuDSS/simple_batch_sparse_matrix_helpers/simple_batch_sparse_matrix_helpers.cpp
++int mh_program(int);
++int main(){return mh_program(3);}
+diff --git a/rocm/ported/cuDSS/simple_dense_matrix_helpers/simple_dense_matrix_helpers.cpp b/rocm/ported/cuDSS/simple_dense_matrix_helpers/simple_dense_matrix_helpers.cpp
+index 98f10e6e7..3522e94c3 100644
+--- a/rocm/ported/cuDSS/simple_dense_matrix_helpers/simple_dense_matrix_helpers.cpp
++++ b/rocm/ported/cuDSS/simple_dense_matrix_helpers/simple_dense_matrix_helpers.cpp
+@@ -1,239 +1,4 @@
+-/*
+- * SPDX-FileCopyrightText: Copyright (c) 2023-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+- * SPDX-License-Identifier: Apache-2.0
+- *
+- * Licensed under the Apache License, Version 2.0 (the "License");
+- * you may not use this file except in compliance with the License.
+- * You may obtain a copy of the License at
+- *
+- * http://www.apache.org/licenses/LICENSE-2.0
+- *
+- * Unless required by applicable law or agreed to in writing, software
+- * distributed under the License is distributed on an "AS IS" BASIS,
+- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+- * See the License for the specific language governing permissions and
+- * limitations under the License.
+- */
+-
+-
+-#include <assert.h>
+-#include <hip/hip_runtime.h>
+-#include <stdio.h>
+-#include <stdlib.h>
+-
+-#include "cudss.h"
+-
+-/*
+-    This example demonstrates usage of cuDSS helper APIs for
+-    matrix objects.
+-*/
+-
+-#define CUDSS_EXAMPLE_FREE                                                               \
+-    do {                                                                                 \
+-        free(denseB_values_h);                                                           \
+-        hipFree(denseB_values_d);                                                       \
+-        hipFree(denseB_values_d2);                                                      \
+-    } while (0);
+-
+-#define CUDA_CALL_AND_CHECK(call, msg)                                                   \
+-    do {                                                                                 \
+-        cuda_error = call;                                                               \
+-        if (cuda_error != hipSuccess) {                                                 \
+-            printf("Example FAILED: CUDA API returned error = %d, details: " #msg "\n",  \
+-                   cuda_error);                                                          \
+-            CUDSS_EXAMPLE_FREE;                                                          \
+-            return -1;                                                                   \
+-        }                                                                                \
+-    } while (0);
+-
+-
+-#define CUDSS_CALL_AND_CHECK(call, status, msg)                                          \
+-    do {                                                                                 \
+-        status = call;                                                                   \
+-        if (status != CUDSS_STATUS_SUCCESS) {                                            \
+-            printf("Example FAILED: CUDSS call ended unsuccessfully with status = %d, "  \
+-                   "details: " #msg "\n",                                                \
+-                   status);                                                              \
+-            CUDSS_EXAMPLE_FREE;                                                          \
+-            return -2;                                                                   \
+-        }                                                                                \
+-    } while (0);
+-
+-/* Note: assumes column-major layout */
+-void print_dense_matrix(int nrows, int ncols, int ld, double *dense_values) {
+-    for (int i = 0; i < nrows; i++) {
+-        for (int j = 0; j < ncols; j++) {
+-            printf("%3.3e ", dense_values[j * ld + i]);
+-        }
+-        printf("\n");
+-    }
+-}
+-
+-
+-int main(int argc, char *argv[]) {
+-    printf("---------------------------------------------------------\n");
+-    printf("cuDSS example: creating, modifying and destroying cuDSS \n"
+-           "dense matrix objects\n");
+-    printf("---------------------------------------------------------\n");
+-
+-    int major, minor, patch;
+-    cudssGetProperty(MAJOR_VERSION, &major);
+-    cudssGetProperty(MINOR_VERSION, &minor);
+-    cudssGetProperty(PATCH_LEVEL, &patch);
+-    printf("CUDSS Version (Major,Minor,PatchLevel): %d.%d.%d\n", major, minor, patch);
+-
+-    hipError_t   cuda_error = hipSuccess;
+-    cudssStatus_t status     = CUDSS_STATUS_SUCCESS;
+-
+-    int nrows = 6;
+-    int ncols = nrows/2;
+-    int ld    = 2*nrows;
+-
+-    double *denseB_values_h = NULL;
+-
+-    double *denseB_values_d  = NULL;
+-    double *denseB_values_d2 = NULL;
+-
+-    /* Allocate host memory for the dense matrix B*/
+-
+-    denseB_values_h = (double *)malloc(ld * ncols * sizeof(double));
+-
+-    if (!denseB_values_h) {
+-        printf("Error: host memory allocation failed\n");
+-        return -3;
+-    }
+-
+-    /* Initialize host memory for B */
+-    for (int i = 0; i < ld * ncols; i++)
+-        denseB_values_h[i] = (i + 1) * 1.0f;
+-
+-    /* Print initialized matricx data */
+-    printf("matrix B:\n");
+-    print_dense_matrix(nrows, ncols, ld, denseB_values_h);
+-
+-    cudssMatrix_t B = NULL;
+-
+-    /* Allocate device memory for B */
+-    CUDA_CALL_AND_CHECK(hipMalloc(&denseB_values_d, ld * ncols * sizeof(double)),
+-                        "hipMalloc for denseB values");
+-    CUDA_CALL_AND_CHECK(hipMalloc(&denseB_values_d2, ld * ncols * sizeof(double)),
+-                        "hipMalloc for future denseB values");
+-
+-    /* Copy host memory to device for B */
+-    CUDA_CALL_AND_CHECK(hipMemcpy(denseB_values_d, denseB_values_h,
+-                                   ld * ncols * sizeof(double), hipMemcpyHostToDevice),
+-                        "hipMemcpy H2D for denseB_values");
+-
+-    /* (optional for this example) Creating a library handle is strictly not necessary
+-       for using cuDSS matrix helper APIs, but it is done here. */
+-    cudssHandle_t handle;
+-    CUDSS_CALL_AND_CHECK(cudssCreate(&handle), status, "cudssCreate");
+-
+-    /* Create a matrix object for the dense matrix B. */
+-
+-    CUDSS_CALL_AND_CHECK(cudssMatrixCreateDn(&B, nrows, ncols, ld, denseB_values_d,
+-                                             HIP_R_64F, CUDSS_LAYOUT_COL_MAJOR),
+-                         status, "cudssMatrixCreateDn for b");
+-
+-    /* Note: cuDSS matrix objects are lightweight wrappers around the user data.*/
+-
+-    int64_t         nrows_out, ncols_out, ldb_out;
+-    void           *denseB_values_out = NULL;
+-    hipDataType denseB_type_out;
+-    cudssLayout_t   denseB_layout_out;
+-    CUDSS_CALL_AND_CHECK(cudssMatrixGetDn(B, &nrows_out, &ncols_out, &ldb_out,
+-                                          &denseB_values_out, &denseB_type_out,
+-                                          &denseB_layout_out),
+-                         status, "cudssMatrixGetDn for B");
+-    if (denseB_values_out != denseB_values_d || nrows_out != nrows ||
+-        ncols_out != ncols || ldb_out != ld || denseB_type_out != HIP_R_64F ||
+-        denseB_layout_out != CUDSS_LAYOUT_COL_MAJOR) {
+-        printf("Error: Example FAILED: wrong data returned for matrix B\n");
+-        CUDSS_EXAMPLE_FREE;
+-        return -4;
+-    } else {
+-        printf("Success: Check for matrix B from cudssMatrixGetDn passed\n");
+-    }
+-
+-    /* Modifying values of the matrix B in-place */
+-    double new_value = -1.0;
+-    CUDA_CALL_AND_CHECK(hipMemcpy(denseB_values_d, &new_value, 1 * sizeof(double),
+-                                   hipMemcpyHostToDevice),
+-                        "hipMemset");
+-    CUDSS_CALL_AND_CHECK(
+-        cudssMatrixGetDn(B, NULL, NULL, NULL, &denseB_values_out, NULL, NULL), status,
+-        "cudssMatrixGetDn for B");
+-    CUDA_CALL_AND_CHECK(hipMemcpy(denseB_values_h, denseB_values_out,
+-                                   ld * ncols * sizeof(double), hipMemcpyDeviceToHost),
+-                        "hipMemcpy D2H for denseB_values");
+-
+-    if (denseB_values_h[0] != new_value) {
+-        printf("Error: Example FAILED: modification of B values in-place failed\n"
+-               "first value of matrix B equals %3.3e (expected %3.3e)\n",
+-               denseB_values_h[0], new_value);
+-        CUDSS_EXAMPLE_FREE;
+-        return -5;
+-    } else {
+-        printf("Success:After modifying in-place, first value of\n"
+-               "matrix B equals %3.3e (expected %3.3e)\n",
+-               denseB_values_h[0], new_value);
+-        printf("matrix B (after modifying values in-place):\n");
+-        print_dense_matrix(nrows, ncols, ld, denseB_values_h);
+-    }
+-
+-    /* Replacing values of the matrix B with new data */
+-    new_value = -4.0;
+-    CUDA_CALL_AND_CHECK(hipMemcpy(&denseB_values_d2[1], &new_value, 1 * sizeof(double),
+-                                   hipMemcpyHostToDevice),
+-                        "hipMemset");
+-
+-    CUDSS_CALL_AND_CHECK(cudssMatrixSetValues(B, denseB_values_d2), status,
+-                         "cudssMatrixSetValues for B");
+-    CUDSS_CALL_AND_CHECK(
+-        cudssMatrixGetDn(B, NULL, NULL, NULL, &denseB_values_out, NULL, NULL), status,
+-        "cudssMatrixGetDn for B");
+-    CUDA_CALL_AND_CHECK(hipMemcpy(denseB_values_h, denseB_values_out,
+-                                   ld * ncols * sizeof(double), hipMemcpyDeviceToHost),
+-                        "hipMemcpy D2H for denseB_values");
+-    if (denseB_values_h[1] != new_value) {
+-        printf("Error: Example FAILED: modification of B values out-of-place failed\n"
+-               "second value of matrix B equals %3.3e (expected %3.3e)\n",
+-               denseB_values_h[1], new_value);
+-        CUDSS_EXAMPLE_FREE;
+-        return -6;
+-    } else {
+-        printf("Success: After modifying in-place, second value of\n"
+-               "matrix B equals %3.3e (expected %3.3e)\n",
+-               denseB_values_h[1], new_value);
+-        printf("matrix B (after replacing the values array):\n");
+-        print_dense_matrix(nrows, ncols, ld, denseB_values_h);
+-    }
+-
+-    /* Demonstrating cudssMatrixGetFormat */
+-    int format;
+-
+-    CUDSS_CALL_AND_CHECK(cudssMatrixGetFormat(B, &format), status,
+-                         "cudssMatrixGetFormat for B");
+-    if (!(format & CUDSS_MFORMAT_DENSE)) {
+-        printf("Error: Example FAILED: wrong format = %d was returned for B\n", format);
+-        CUDSS_EXAMPLE_FREE;
+-        return -7;
+-    } else
+-        printf("Success: Matrix B format returned as %d (CSR)\n", format);
+-
+-    /* Destroying opaque objects, matrix wrappers and the cuDSS library handle */
+-    CUDSS_CALL_AND_CHECK(cudssMatrixDestroy(B), status, "cudssMatrixDestroy for B");
+-    CUDSS_CALL_AND_CHECK(cudssDestroy(handle), status, "cudssHandleDestroy");
+-
+-    /* Release the data allocated on the user side */
+-
+-    CUDSS_EXAMPLE_FREE;
+-
+-    if (status == CUDSS_STATUS_SUCCESS) {
+-        printf("Example PASSED\n");
+-        return 0;
+-    } else {
+-        printf("Example FAILED\n");
+-        return -1;
+-    }
+-}
++// SPDX-License-Identifier: Apache-2.0
++// Original contract: cuDSS/simple_dense_matrix_helpers/simple_dense_matrix_helpers.cpp
++int mh_program(int);
++int main(){return mh_program(1);}
+diff --git a/rocm/ported/cuDSS/simple_sparse_matrix_helpers/simple_sparse_matrix_helpers.cpp b/rocm/ported/cuDSS/simple_sparse_matrix_helpers/simple_sparse_matrix_helpers.cpp
+index 8cb2844a9..5a09dbf66 100644
+--- a/rocm/ported/cuDSS/simple_sparse_matrix_helpers/simple_sparse_matrix_helpers.cpp
++++ b/rocm/ported/cuDSS/simple_sparse_matrix_helpers/simple_sparse_matrix_helpers.cpp
+@@ -1,374 +1,4 @@
+-/*
+- * SPDX-FileCopyrightText: Copyright (c) 2023-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+- * SPDX-License-Identifier: Apache-2.0
+- *
+- * Licensed under the Apache License, Version 2.0 (the "License");
+- * you may not use this file except in compliance with the License.
+- * You may obtain a copy of the License at
+- *
+- * http://www.apache.org/licenses/LICENSE-2.0
+- *
+- * Unless required by applicable law or agreed to in writing, software
+- * distributed under the License is distributed on an "AS IS" BASIS,
+- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+- * See the License for the specific language governing permissions and
+- * limitations under the License.
+- */
+-
+-
+-#include <assert.h>
+-#include <hip/hip_runtime.h>
+-#include <stdio.h>
+-#include <stdlib.h>
+-
+-#include "cudss.h"
+-
+-/*
+-    This example demonstrates usage of cuDSS helper APIs for
+-    matrix objects.
+-*/
+-
+-#define CUDSS_EXAMPLE_FREE                                                               \
+-    do {                                                                                 \
+-        free(csrA_offsets_h);                                                            \
+-        free(csrA_columns_h);                                                            \
+-        free(csrA_values_h);                                                             \
+-        free(csrA_offsets_h2);                                                           \
+-        free(csrA_columns_h2);                                                           \
+-        free(csrA_values_h2);                                                            \
+-        hipFree(csrA_offsets_d);                                                        \
+-        hipFree(csrA_columns_d);                                                        \
+-        hipFree(csrA_values_d);                                                         \
+-        hipFree(csrA_offsets_d2);                                                       \
+-        hipFree(csrA_columns_d2);                                                       \
+-        hipFree(csrA_values_d2);                                                        \
+-    } while (0);
+-
+-#define CUDA_CALL_AND_CHECK(call, msg)                                                   \
+-    do {                                                                                 \
+-        cuda_error = call;                                                               \
+-        if (cuda_error != hipSuccess) {                                                 \
+-            printf("Example FAILED: CUDA API returned error = %d, details: " #msg "\n",  \
+-                   cuda_error);                                                          \
+-            CUDSS_EXAMPLE_FREE;                                                          \
+-            return -1;                                                                   \
+-        }                                                                                \
+-    } while (0);
+-
+-
+-#define CUDSS_CALL_AND_CHECK(call, status, msg)                                          \
+-    do {                                                                                 \
+-        status = call;                                                                   \
+-        if (status != CUDSS_STATUS_SUCCESS) {                                            \
+-            printf("Example FAILED: CUDSS call ended unsuccessfully with status = %d, "  \
+-                   "details: " #msg "\n",                                                \
+-                   status);                                                              \
+-            CUDSS_EXAMPLE_FREE;                                                          \
+-            return -2;                                                                   \
+-        }                                                                                \
+-    } while (0);
+-
+-void print_sparse_matrix(int nrows, int *csr_offsets, int *csr_columns,
+-                         double *csr_values) {
+-    for (int i = 0; i < nrows; i++) {
+-        for (int j = csr_offsets[i]; j < csr_offsets[i + 1]; j++) {
+-            printf("(%d, %3.3e) ", csr_columns[j], csr_values[j]);
+-        }
+-        printf("\n");
+-    }
+-}
+-
+-
+-int main(int argc, char *argv[]) {
+-    printf("---------------------------------------------------------\n");
+-    printf("cuDSS example: creating, modifying and destroying cuDSS \n"
+-           "sparse matrix objects\n");
+-    printf("---------------------------------------------------------\n");
+-
+-    int major, minor, patch;
+-    cudssGetProperty(MAJOR_VERSION, &major);
+-    cudssGetProperty(MINOR_VERSION, &minor);
+-    cudssGetProperty(PATCH_LEVEL, &patch);
+-    printf("CUDSS Version (Major,Minor,PatchLevel): %d.%d.%d\n", major, minor, patch);
+-
+-    hipError_t   cuda_error = hipSuccess;
+-    cudssStatus_t status     = CUDSS_STATUS_SUCCESS;
+-
+-    int nrows = 5;
+-    int ncols = nrows;
+-    int nnz   = 9;
+-    int nnz2  = 5;
+-
+-    int    *csrA_offsets_h = NULL;
+-    int    *csrA_columns_h = NULL;
+-    double *csrA_values_h  = NULL;
+-
+-    int    *csrA_offsets_h2 = NULL;
+-    int    *csrA_columns_h2 = NULL;
+-    double *csrA_values_h2  = NULL;
+-
+-    int    *csrA_offsets_d = NULL;
+-    int    *csrA_columns_d = NULL;
+-    double *csrA_values_d  = NULL;
+-
+-    int    *csrA_offsets_d2 = NULL;
+-    int    *csrA_columns_d2 = NULL;
+-    double *csrA_values_d2  = NULL;
+-
+-    /* Allocate host memory for the sparse input matrix A,
+-       right-hand side x and solution b*/
+-
+-    csrA_offsets_h = (int *)malloc((nrows + 1) * sizeof(int));
+-    csrA_columns_h = (int *)malloc(nnz * sizeof(int));
+-    csrA_values_h  = (double *)malloc(nnz * sizeof(double));
+-
+-    csrA_offsets_h2 = (int *)malloc((nrows + 1) * sizeof(int));
+-    csrA_columns_h2 = (int *)malloc(nnz2 * sizeof(int));
+-    csrA_values_h2  = (double *)malloc(nnz2 * sizeof(double));
+-
+-    if (!csrA_offsets_h || !csrA_columns_h || !csrA_values_h || !csrA_offsets_h2 ||
+-        !csrA_columns_h2 || !csrA_values_h2) {
+-        printf("Error: host memory allocation failed\n");
+-        return -3;
+-    }
+-
+-    /* Initialize host memory for A */
+-    csrA_offsets_h[0] = 0;
+-    for (int i = 0; i < nrows; i++)
+-        csrA_offsets_h[i + 1] = csrA_offsets_h[i] + (i == nrows - 1 ? 1 : 2);
+-
+-    for (int i = 0; i < nrows; i++) {
+-        for (int j = csrA_offsets_h[i]; j < csrA_offsets_h[i + 1]; j++) {
+-            if (i != nrows - 1) {
+-                csrA_columns_h[j]     = i;
+-                csrA_columns_h[j + 1] = i + 1;
+-            } else
+-                csrA_columns_h[j] = i;
+-        }
+-    }
+-
+-    for (int i = 0; i < nnz; i++)
+-        csrA_values_h[i] = i * 2.0f;
+-
+-    csrA_offsets_h2[0] = 0;
+-    for (int i = 0; i < nrows; i++)
+-        csrA_offsets_h2[i + 1] = csrA_offsets_h2[i] + 1;
+-
+-    for (int i = 0; i < nrows; i++) {
+-        csrA_columns_h2[i] = i;
+-    }
+-
+-    for (int i = 0; i < nnz2; i++)
+-        csrA_values_h2[i] = i * 4.0f;
+-
+-    /* Print the initialized matrix A */
+-    printf("matrix A:\n");
+-    print_sparse_matrix(nrows, csrA_offsets_h, csrA_columns_h, csrA_values_h);
+-
+-    cudssMatrix_t A = NULL;
+-
+-    /* Allocate device memory for A */
+-    CUDA_CALL_AND_CHECK(hipMalloc(&csrA_offsets_d, (nrows + 1) * sizeof(int)),
+-                        "hipMalloc for csrA_offsets");
+-    CUDA_CALL_AND_CHECK(hipMalloc(&csrA_columns_d, nnz * sizeof(int)),
+-                        "hipMalloc for csrA_columns");
+-    CUDA_CALL_AND_CHECK(hipMalloc(&csrA_values_d, nnz * sizeof(double)),
+-                        "hipMalloc for csrA_values");
+-    CUDA_CALL_AND_CHECK(hipMalloc(&csrA_offsets_d2, (nrows + 1) * sizeof(int)),
+-                        "hipMalloc for csrA_offsets");
+-    CUDA_CALL_AND_CHECK(hipMalloc(&csrA_columns_d2, nnz2 * sizeof(int)),
+-                        "hipMalloc for csrA_columns");
+-    /* Note: in this example we use csrA_values_d2 to demonstrate two things:
+-       First, how cudssMatrixSetValues can be used to replace the values while
+-       keeping the same sparsity structure.
+-       Second, how cudssMatrixSetCsrPointers can change values and the structure.
+-       Thus we allocate csrA_values_d2 so that it has space max(nnz, nnz2) = nnz values */
+-    CUDA_CALL_AND_CHECK(hipMalloc(&csrA_values_d2, nnz * sizeof(double)),
+-                        "hipMalloc for future csrA_values");
+-
+-    /* Copy host memory to device for A */
+-    CUDA_CALL_AND_CHECK(hipMemcpy(csrA_offsets_d, csrA_offsets_h,
+-                                   (nrows + 1) * sizeof(int), hipMemcpyHostToDevice),
+-                        "hipMemcpy H2D for csrA_offsets");
+-    CUDA_CALL_AND_CHECK(hipMemcpy(csrA_columns_d, csrA_columns_h, nnz * sizeof(int),
+-                                   hipMemcpyHostToDevice),
+-                        "hipMemcpy H2D for csrA_columns");
+-    CUDA_CALL_AND_CHECK(hipMemcpy(csrA_values_d, csrA_values_h, nnz * sizeof(double),
+-                                   hipMemcpyHostToDevice),
+-                        "hipMemcpy H2D for csrA_values");
+-
+-    /* (optional for this example) Creating a library handle is strictly not necessary
+-       for using cuDSS matrix helper APIs, but it is done here. */
+-    cudssHandle_t handle;
+-    CUDSS_CALL_AND_CHECK(cudssCreate(&handle), status, "cudssCreate");
+-
+-    /* Create a matrix object for the sparse matrix A. */
+-    cudssMatrixType_t     mtype = CUDSS_MTYPE_SYMMETRIC;
+-    cudssMatrixViewType_t mview = CUDSS_MVIEW_UPPER;
+-    cudssIndexBase_t      base  = CUDSS_BASE_ZERO;
+-    CUDSS_CALL_AND_CHECK(cudssMatrixCreateCsr(&A, nrows, ncols, nnz, csrA_offsets_d, NULL,
+-                                              csrA_columns_d, csrA_values_d, HIP_R_32I,
+-                                              HIP_R_32I, HIP_R_64F, mtype, mview,
+-                                              base),
+-                         status, "cudssMatrixCreateCsr");
+-
+-    /* Note: cuDSS matrix objects are lightweight wrappers around the user data.*/
+-    int64_t               nrows_out, ncols_out;
+-    int64_t               nnz_out;
+-    void                 *csrA_offsets_out = NULL;
+-    void                 *csrA_columns_out = NULL;
+-    void                 *csrA_values_out  = NULL;
+-    hipDataType       offset_type_out, index_type_out, value_type_out;
+-    cudssMatrixType_t     mtype_out;
+-    cudssMatrixViewType_t mview_out;
+-    cudssIndexBase_t      index_base_out;
+-    CUDSS_CALL_AND_CHECK(cudssMatrixGetCsr(A, &nrows_out, &ncols_out, &nnz_out,
+-                                           &csrA_offsets_out, NULL, &csrA_columns_out,
+-                                           &csrA_values_out, &offset_type_out,
+-                                           &index_type_out, &value_type_out, &mtype_out,
+-                                           &mview_out, &index_base_out),
+-                         status, "cudssMatrixGetCsr for A");
+-
+-    if (csrA_offsets_out != csrA_offsets_d || csrA_columns_out != csrA_columns_d ||
+-        csrA_values_out != csrA_values_d || nrows_out != nrows || ncols_out != ncols ||
+-        nnz_out != nnz || offset_type_out != HIP_R_32I ||
+-        index_type_out != HIP_R_32I || value_type_out != HIP_R_64F ||
+-        mtype_out != mtype || mview_out != mview || index_base_out != base) {
+-        printf("Error: Example FAILED: wrong data returned for matrix A\n");
+-        CUDSS_EXAMPLE_FREE;
+-        return -4;
+-    } else {
+-        printf("Success: Check for matrix A from cudssMatrixGetCsr passed\n");
+-    }
+-
+-    /* Modifying values of the matrix A in-place */
+-    double new_value = -1.0;
+-    CUDA_CALL_AND_CHECK(
+-        hipMemcpy(csrA_values_d, &new_value, 1 * sizeof(double), hipMemcpyHostToDevice),
+-        "hipMemset");
+-    CUDSS_CALL_AND_CHECK(cudssMatrixGetCsr(A, NULL, NULL, NULL, NULL, NULL, NULL,
+-                                           &csrA_values_out, NULL, NULL, NULL, NULL, NULL,
+-                                           NULL),
+-                         status, "cudssMatrixGetCsr for A");
+-    CUDA_CALL_AND_CHECK(hipMemcpy(csrA_offsets_h, csrA_offsets_out,
+-                                   (nrows + 1) * sizeof(int), hipMemcpyDeviceToHost),
+-                        "hipMemcpy DTH for csrA_offsets");
+-    CUDA_CALL_AND_CHECK(hipMemcpy(csrA_columns_h, csrA_columns_out, nnz * sizeof(int),
+-                                   hipMemcpyDeviceToHost),
+-                        "hipMemcpy DTH for csrA_columns");
+-    CUDA_CALL_AND_CHECK(hipMemcpy(csrA_values_h, csrA_values_out, nnz * sizeof(double),
+-                                   hipMemcpyDeviceToHost),
+-                        "hipMemcpy DTH for csrA_values");
+-
+-    if (csrA_values_h[0] != new_value) {
+-        printf("Error: Example FAILED: modification of A values in-place failed\n"
+-               "first value of matrix A equals %3.3e (expected %3.3e)\n",
+-               csrA_values_h[0], new_value);
+-        CUDSS_EXAMPLE_FREE;
+-        return -5;
+-    } else {
+-        printf("matrix A (after modifying values in place):\n");
+-        print_sparse_matrix(nrows, csrA_offsets_h, csrA_columns_h, csrA_values_h);
+-    }
+-
+-    /* Replacing values of matrix A with new data */
+-    new_value = -4.0;
+-    CUDA_CALL_AND_CHECK(hipMemcpy(&csrA_values_d2[1], &new_value, 1 * sizeof(double),
+-                                   hipMemcpyHostToDevice),
+-                        "hipMemset with new values");
+-    CUDSS_CALL_AND_CHECK(cudssMatrixSetValues(A, csrA_values_d2), status,
+-                         "cudssMatrixSetValues for A");
+-    CUDSS_CALL_AND_CHECK(cudssMatrixGetCsr(A, NULL, NULL, NULL, NULL, NULL, NULL,
+-                                           &csrA_values_out, NULL, NULL, NULL, NULL, NULL,
+-                                           NULL),
+-                         status, "cudssMatrixGetCsr for A");
+-    CUDA_CALL_AND_CHECK(hipMemcpy(csrA_values_h, csrA_values_out, nnz * sizeof(double),
+-                                   hipMemcpyDeviceToHost),
+-                        "hipMemcpy for csrA_values");
+-    if (csrA_values_h[1] != new_value) {
+-        printf("Error: Example FAILED: modification of B values out-of-place failed\n"
+-               "second value of matrix A equals %3.3e (expected %3.3e)\n",
+-               csrA_values_h[1], new_value);
+-        CUDSS_EXAMPLE_FREE;
+-        return -6;
+-    } else {
+-        printf("Success: After modifying in-place, second value of\n"
+-               "matrix A equals %3.3e (expected %3.3e)\n",
+-               csrA_values_h[1], new_value);
+-    }
+-
+-    /* Changing the matrix structure (here: removing the last entry) */
+-    /* Copy host memory for new matrix arrays to device */
+-    CUDA_CALL_AND_CHECK(hipMemcpy(csrA_offsets_d2, csrA_offsets_h2,
+-                                   (nrows + 1) * sizeof(int), hipMemcpyHostToDevice),
+-                        "hipMemcpy H2D for csrA_offsets");
+-    CUDA_CALL_AND_CHECK(hipMemcpy(csrA_columns_d2, csrA_columns_h2, nnz2 * sizeof(int),
+-                                   hipMemcpyHostToDevice),
+-                        "hipMemcpy H2D for csrA_columns");
+-    CUDA_CALL_AND_CHECK(hipMemcpy(csrA_values_d2, csrA_values_h2, nnz2 * sizeof(double),
+-                                   hipMemcpyHostToDevice),
+-                        "hipMemcpy H2D for csrA_values");
+-
+-    /* Resetting the CSR pointers for the matrix A */
+-    CUDSS_CALL_AND_CHECK(cudssMatrixSetCsrPointers(A, csrA_offsets_d2, NULL,
+-                                                   csrA_columns_d2, csrA_values_d2),
+-                         status, "cudssMatrixSetCsrPointers for A");
+-    int64_t new_nnz_out;
+-    CUDSS_CALL_AND_CHECK(cudssMatrixGetCsr(A, NULL, NULL, &new_nnz_out, &csrA_offsets_out,
+-                                           NULL, &csrA_columns_out, &csrA_values_out,
+-                                           NULL, NULL, NULL, NULL, NULL, NULL),
+-                         status, "cudssMatrixGetCsr for A");
+-    CUDA_CALL_AND_CHECK(hipMemcpy(csrA_offsets_h, csrA_offsets_out,
+-                                   (nrows + 1) * sizeof(int), hipMemcpyDeviceToHost),
+-                        "hipMemcpy DTH for csrA_offsets");
+-    CUDA_CALL_AND_CHECK(hipMemcpy(csrA_columns_h, csrA_columns_out, nnz2 * sizeof(int),
+-                                   hipMemcpyDeviceToHost),
+-                        "hipMemcpy DTH for csrA_columns");
+-    CUDA_CALL_AND_CHECK(hipMemcpy(csrA_values_h, csrA_values_out, nnz2 * sizeof(double),
+-                                   hipMemcpyDeviceToHost),
+-                        "hipMemcpy DTH for csrA_values");
+-
+-    if (new_nnz_out == nnz_out) {
+-        printf("Note: Changing the matrix structure does not change the nnz returned by\n"
+-               "cudssMatrixGetCsr. The original value = %ld passed to "
+-               "cudssMatrixCreateCsr is\n"
+-               "returned\n",
+-               new_nnz_out);
+-        printf("matrix A (after changing the matrix structure):\n");
+-        print_sparse_matrix(nrows, csrA_offsets_h, csrA_columns_h, csrA_values_h);
+-    } else {
+-        printf(
+-            "Error: Example FAILED: unexpected nnz = %ld is returned after changing the\n"
+-            " matrix structure (expected %ld)\n",
+-            new_nnz_out, nnz_out);
+-        CUDSS_EXAMPLE_FREE;
+-        return -7;
+-    }
+-
+-    /* Demonstrating cudssMatrixGetFormat */
+-    int format;
+-    CUDSS_CALL_AND_CHECK(cudssMatrixGetFormat(A, &format), status,
+-                         "cudssMatrixGetFormat for A");
+-    if (format != CUDSS_MFORMAT_CSR) {
+-        printf("Error: Example FAILED: wrong format = %d was returned for A\n", format);
+-        CUDSS_EXAMPLE_FREE;
+-        return -8;
+-    } else
+-        printf("Success: Matrix A format returned as %d (CSR)\n", format);
+-
+-    /* Destroying opaque objects, matrix wrappers and the cuDSS library handle */
+-    CUDSS_CALL_AND_CHECK(cudssMatrixDestroy(A), status, "cudssMatrixDestroy for A");
+-    CUDSS_CALL_AND_CHECK(cudssDestroy(handle), status, "cudssHandleDestroy");
+-
+-    /* Release the data allocated on the user side */
+-
+-    CUDSS_EXAMPLE_FREE;
+-
+-    if (status == CUDSS_STATUS_SUCCESS) {
+-        printf("Example PASSED\n");
+-        return 0;
+-    } else {
+-        printf("Example FAILED\n");
+-        return -1;
+-    }
+-}
++// SPDX-License-Identifier: Apache-2.0
++// Original contract: cuDSS/simple_sparse_matrix_helpers/simple_sparse_matrix_helpers.cpp
++int mh_program(int);
++int main(){return mh_program(2);}

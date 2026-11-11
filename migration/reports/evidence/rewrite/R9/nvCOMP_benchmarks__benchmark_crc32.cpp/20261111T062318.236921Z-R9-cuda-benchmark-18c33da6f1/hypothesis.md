@@ -1,0 +1,1 @@
+Test cuda-benchmark for nvCOMP/benchmarks::benchmark_crc32.cpp, case storage-small. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T062309.795265Z-R9-cuda-build-a27767282e.

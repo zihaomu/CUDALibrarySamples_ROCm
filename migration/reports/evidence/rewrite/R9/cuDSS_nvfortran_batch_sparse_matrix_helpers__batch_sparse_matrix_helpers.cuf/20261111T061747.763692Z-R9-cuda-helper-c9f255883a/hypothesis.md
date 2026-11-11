@@ -1,0 +1,1 @@
+Test cuda-helper for cuDSS/nvfortran/batch_sparse_matrix_helpers::batch_sparse_matrix_helpers.cuf, case changed-values. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T061547.331734Z-R9-cuda-build-21b0ad4904.

@@ -6,6 +6,8 @@ from experiment import ROOT,digest,write
 REPORT=ROOT/'migration/reports'
 def route(s):
     f,p=s['family'],s['source'];low=p.lower()
+    if s.get('reason_code')=='R9_CANDIDATE_PENDING_QUALIFICATION':
+        return ('IMPLEMENTED_CANDIDATE_VALIDATING',s.get('actual_library') or 'Project HIP adapter',s['reason'],'Complete current-source original-contract, independent CPU/native CUDA, runtime/fault gates and fixed-commit review before issuing the R9 qualification.','M')
     # Each recommendation is coupled below to this entry's original source hash,
     # API tokens, missing cases and actual failed attempt, rather than declaring
     # that a related ecosystem library implements the whole vendor contract.
@@ -42,7 +44,7 @@ def route(s):
     if f=='nvMatmulHeuristics':return ('HEURISTIC_MODEL_AND_FRONTEND','hipBLASLt measured algorithm enumeration + project result schema','NVIDIA model scores/algorithm IDs are vendor-specific; no AMD cost model or original-language adapter has been qualified.','Implement AMD-specific measured recommendations for original shapes; run chosen algorithm, validate output and report model/ranking scope without claiming identical NVIDIA IDs.','L')
     if f in ['NPP','NPP+']:return ('IMAGE_KERNEL_OR_FRONTEND','RPP where exact API matches; project HIP + CPU file/metadata adapter','This original image algorithm or Python frontend is still unmigrated; available image primitives do not establish its pixel/border/ROI contract.','Implement exact source operation, dtype/channel/ROI/border/stride and original image CLI; independent native pixels plus GPU trace and invalid input.','L')
     if f=='cuTENSOR':return ('TENSOR_DESCRIPTOR_OR_BINDING','hipTensor / hipBLAS + HIP layout and original-language adapter','Generic tensor operation availability does not cover this entry’s descriptor, contraction options, plan or binding.','Probe original dtype/modes/strides/plan; independent CPU contraction, native CUDA and real entry ownership/error checks.','L')
-    if f=='cuSPARSE':return ('SPARSE_API_ADAPTER','hipSPARSE/rocSPARSE + HIP format conversion','The source sparse API or its exact descriptor/algorithm contract has not been implemented.','Probe original index widths/base/layout and operation; independent CSR/dense oracle, native CUDA plus error/empty/batch checks.','M')
+    if f=='cuSPARSE':return ('HARDWARE_TRANSPARENT_MEMORY_COMPRESSION','HIP driver allocation/property probe + hipSPARSE only if an actual equivalent compression capability exists','This source uses CU_MEM_ALLOCATION_COMP_GENERIC and queries allocation properties: it demonstrates transparent device-memory compression, not CSR compression. A normal Axpby result or a software codec does not meet that hardware contract.','Verify actual AMD driver/allocation compression support and reported properties on the locked GPU; then validate Axpby and the original comparison. Retain a gap if hardware compression cannot be demonstrated.','XL')
     raise ValueError('Unclassified entry: '+p)
 
 def main():
@@ -57,7 +59,7 @@ def main():
             if t.get('selected_validation',{}):t['historical_selected_validation']=t.pop('selected_validation')
         retry=probe+' Complete frozen original contract, independent review and immutable qualification before changing support status.'
         row=dict(sample_id=s['id'],source=s['source'],source_sha256=digest(ROOT/s['source']),phase=t['primary_phase'],current_status=s['status'],
-            disposition=code,candidate_route=library,blocking_reason=why,first_observed_failure=s['reason'],
+            disposition=code,candidate_route=library,blocking_reason=why,first_observed_failure=(s.get('original_port') or {}).get('reason',s['reason']),
             original_api_tokens=s.get('original_semantics',{}).get('api_tokens',[]),required_cases=s['required_cases'],missing_cases=sorted(set(s['required_cases'])-set(s['passed_cases'])),
             original_contract=s.get('original_semantics'),cost_class=cost,minimum_next_experiment=probe,retry_condition=retry,
             evidence=s['evidence'],qualification='NOT_QUALIFIED',assessment_scope='Source and recorded failure review; no new GPU sample execution or qualification')

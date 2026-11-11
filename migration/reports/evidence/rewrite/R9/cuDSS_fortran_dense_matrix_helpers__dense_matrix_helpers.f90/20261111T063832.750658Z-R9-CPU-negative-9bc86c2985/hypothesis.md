@@ -1,0 +1,1 @@
+Test CPU-negative for cuDSS/fortran/dense_matrix_helpers::dense_matrix_helpers.f90, case device-bytes. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T063746.248096Z-R9-rocm-helper-140d983790.

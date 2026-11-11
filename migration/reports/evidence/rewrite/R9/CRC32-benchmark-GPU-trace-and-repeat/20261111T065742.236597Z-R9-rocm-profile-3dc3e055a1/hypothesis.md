@@ -1,0 +1,1 @@
+Test rocm-profile for CRC32-benchmark-GPU-trace-and-repeat, case storage-small. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T061849.276951Z-R9-rocm-build-0828d8560b.

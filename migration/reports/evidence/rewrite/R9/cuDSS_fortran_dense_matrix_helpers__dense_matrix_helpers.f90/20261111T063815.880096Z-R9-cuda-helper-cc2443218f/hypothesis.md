@@ -1,0 +1,1 @@
+Test cuda-helper for cuDSS/fortran/dense_matrix_helpers::dense_matrix_helpers.f90, case original. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T063715.699322Z-R9-cuda-build-1ecd936b9d.

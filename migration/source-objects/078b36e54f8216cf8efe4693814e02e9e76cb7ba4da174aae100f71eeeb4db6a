@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+"""Use real cuDSS descriptor helpers for the same frozen bytes and mutations."""
+import json,shlex,shutil,tarfile
+from experiment import ROOT,Experiment,write,digest
+from helper_reference import validate
+
+def main():
+ host='nvidia-5090x2';profiles=json.loads((ROOT/'migration/rewrite/helpers-benchmark.json').read_text())['helpers'];sdk=ROOT/'build/cuda-sdk';headers=list((sdk/'include').glob('cudss*.h'));library=sdk/'lib/libcudss.so.1';sources=list((ROOT/'rocm/adapters/helpers').glob('*.h'))+list((ROOT/'rocm/adapters/helpers').glob('*.cpp'))+[ROOT/p['implementation'] for p in profiles if p['language']=='cpp']+[ROOT/p['source'] for p in profiles]+[ROOT/'tools/moat/helper_reference.py',ROOT/'tools/moat/helper_fixtures.py',__file__]
+ e=Experiment('R9','matrix-helpers-native-cuDSS','cuda-build',sources=sources);remote='/tmp/'+e.id;bundle=e.path/'native.tar.gz';write(e.path/'sdk-identity.json',dict(headers={p.name:digest(p) for p in headers},library=dict(sha256=digest(library),bytes=library.stat().st_size)))
+ with tarfile.open(bundle,'w:gz') as f:
+  for p in sources:
+   path=ROOT/p if not hasattr(p,'relative_to') else p;f.add(path,arcname=str(path.relative_to(ROOT)))
+  for p in headers:f.add(p,arcname='sdk/include/'+p.name)
+  f.add(library,arcname='sdk/lib/libcudss.so.1');f.add(ROOT/'tests/fixtures/rewrite-helpers',arcname='inputs')
+ steps=[(['ssh',host,shlex.join(['mkdir','-p',remote])],'prepare'),(['scp',str(bundle),host+':'+remote+'/native.tar.gz'],'upload'),(['ssh',host,shlex.join(['tar','-xzf',remote+'/native.tar.gz','-C',remote])],'unpack'),(['ssh',host,'nvidia-smi --query-gpu=index,name,uuid,memory.free,driver_version --format=csv,noheader'],'native-device-identity')]
+ for cmd,phase in steps:
+  rc=e.command(cmd,phase,timeout=240)
+  if rc:print(e.finish('NATIVE_BUILD_FAILED'));return 1
+ for p in [p for p in profiles if p['language']=='cpp']:
+  main=remote+'/'+p['implementation'];binary=remote+'/'+p['kind'];cmd=['/usr/local/cuda-13.4/bin/nvcc','-x','cu','-std=c++17','-O2','-arch=sm_120','-DMH_NATIVE_CUDA',remote+'/rocm/adapters/helpers/matrix_helpers.cpp',remote+'/rocm/adapters/helpers/helper_client.cpp',main,'-I'+remote+'/rocm/adapters/helpers','-I'+remote+'/sdk/include','-L'+remote+'/sdk/lib','-Xlinker','-rpath='+remote+'/sdk/lib','-l:libcudss.so.1','-o',binary]
+  rc=e.command(['ssh',host,shlex.join(cmd)],'native-'+p['kind'],timeout=240)
+  if rc:print(e.finish('NATIVE_BUILD_FAILED'));return 1
+ kinds=[p['kind'] for p in profiles if p['language']=='cpp'];identity_code='import pathlib,hashlib,json;root=pathlib.Path('+repr(remote)+');print(json.dumps({k:hashlib.file_digest((root/k).open("rb"),"sha256").hexdigest() for k in '+repr(kinds+['sdk/lib/libcudss.so.1'])+'}))'
+ rc=e.command(['ssh',host,shlex.join(['python3','-c',identity_code])],'native-binary-and-library-identities')
+ if rc:print(e.finish('NATIVE_BUILD_FAILED'));return 1
+ identities=json.loads((e.path/e.commands[-1]['stdout']).read_text());write(e.path/'binary-identities.json',identities)
+ build=dict(experiment_id=e.id,remote=remote,binary_sha256={k:identities[k] for k in kinds},library_sha256=identities['sdk/lib/libcudss.so.1'],scope='Real C++ cuDSS API counterpart for frozen C++ and Fortran inputs; no NVIDIA Fortran compiler claim');write(e.path/'build-result.json',build);build['evidence']=e.finish('EXECUTED');write(ROOT/'migration/reports/rewrite-R9-helper-native-build.json',build);results=[]
+ for p in profiles:
+  for case in p['cases']:
+   src=ROOT/'tests/fixtures/rewrite-helpers'/p['language']/p['kind']/case;mh=digest(src/'manifest.json');r=Experiment('R9',p['sample_id'],'cuda-helper',case=case,sources=sources,parent=build['experiment_id'],comparison_id=p['sample_id']+'/'+case+'/'+mh);shutil.copytree(src,r.path/'inputs');out=r.path/'outputs';out.mkdir();where=remote+'/outputs/'+p['language']+'/'+p['kind']+'/'+case
+   rc=r.command(['ssh',host,shlex.join(['mkdir','-p',where])],'prepare-output');argv=[remote+'/'+p['kind']];code='import os,subprocess,hashlib,json,pathlib;binary='+repr(argv[0])+';sha=hashlib.file_digest(open(binary,"rb"),"sha256").hexdigest();assert sha=='+repr(build['binary_sha256'][p['kind']])+';pathlib.Path('+repr(where+'/native-binary.json')+').write_text(json.dumps(dict(path=binary,sha256=sha)));raise SystemExit(subprocess.run('+repr(argv)+',env=dict(os.environ,CUDA_VISIBLE_DEVICES="0",LD_PRELOAD="",LD_LIBRARY_PATH='+repr(remote+'/sdk/lib:/usr/local/cuda-13.4/lib64')+',REWRITE_INPUT='+repr(remote+'/inputs/'+p['language']+'/'+p['kind']+'/'+case)+',REWRITE_OUTPUT='+repr(where)+')).returncode)'
+   rc=rc or r.command(['ssh',host,shlex.join(['python3','-c',code])],'real-native-helper-entry');copy=r.command(['scp','-r',host+':'+where+'/.',str(out)],'collect-original-output');valid=validate(r.path/'inputs',out) if rc==0 and copy==0 else dict(status='FAILED',checks=[dict(check='native-execution-and-collection',passed=False)])
+   row=dict(sample_id=p['sample_id'],kind=p['kind'],language=p['language'],case=case,input_manifest_sha256=mh,return_code=rc,collection_return_code=copy,experiment_id=r.id,comparison_id=r.meta['comparison_id'],build=build,output=str(out.relative_to(ROOT)),input_snapshot=str((r.path/'inputs').relative_to(ROOT)),status=valid['status'],checks=valid['checks']);write(r.path/'case-result.json',row);row['evidence']=r.finish('PASSED' if valid['status']=='PASSED' else 'NATIVE_MISMATCH',valid);results.append(row);write(ROOT/'migration/reports/rewrite-R9-helper-cuda.json',results);print(p['language'],p['kind'],case,row['status'],flush=True)
+ return int(any(r['status']!='PASSED' for r in results))
+if __name__=='__main__':raise SystemExit(main())

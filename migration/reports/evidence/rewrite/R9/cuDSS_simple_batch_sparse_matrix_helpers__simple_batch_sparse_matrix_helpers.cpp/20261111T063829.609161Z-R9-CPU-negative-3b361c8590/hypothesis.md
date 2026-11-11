@@ -1,0 +1,1 @@
+Test CPU-negative for cuDSS/simple_batch_sparse_matrix_helpers::simple_batch_sparse_matrix_helpers.cpp, case device-bytes. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T063739.756050Z-R9-rocm-helper-780d060d31.

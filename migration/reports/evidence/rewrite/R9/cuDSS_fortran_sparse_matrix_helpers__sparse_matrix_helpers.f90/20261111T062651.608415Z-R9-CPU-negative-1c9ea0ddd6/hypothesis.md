@@ -1,0 +1,1 @@
+Test CPU-negative for cuDSS/fortran/sparse_matrix_helpers::sparse_matrix_helpers.f90, case device-bytes. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T061622.407015Z-R9-rocm-helper-90dfdcd2a1.

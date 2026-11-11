@@ -1,0 +1,43 @@
+{
+  "commands": [
+    {
+      "command_id": 1,
+      "phase": "unmodified-original-build",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "/usr/local/cuda-13.4/bin/nvcc -x cu -std=c++17 -O2 -arch=sm_120 /tmp/20261111T061547.331734Z-R9-cuda-build-21b0ad4904/cuDSS/simple_sparse_matrix_helpers/simple_sparse_matrix_helpers.cpp -I/tmp/20261111T061547.331734Z-R9-cuda-build-21b0ad4904/sdk/include -L/tmp/20261111T061547.331734Z-R9-cuda-build-21b0ad4904/sdk/lib -Xlinker -rpath=/tmp/20261111T061547.331734Z-R9-cuda-build-21b0ad4904/sdk/lib -l:libcudss.so.1 -o /tmp/20261111T061547.331734Z-R9-cuda-build-21b0ad4904/original-sparse_matrix_helpers"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T06:26:45.452448+00:00",
+      "timeout_seconds": 240,
+      "environment": {},
+      "stdout": "logs/0001-unmodified-original-build.stdout.log",
+      "stderr": "logs/0001-unmodified-original-build.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T06:26:46.971784+00:00",
+      "seconds": 1.5181194830220193
+    },
+    {
+      "command_id": 2,
+      "phase": "unmodified-original-execution",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "env CUDA_VISIBLE_DEVICES=0 /tmp/20261111T061547.331734Z-R9-cuda-build-21b0ad4904/original-sparse_matrix_helpers"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T06:26:46.972584+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0002-unmodified-original-execution.stdout.log",
+      "stderr": "logs/0002-unmodified-original-execution.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T06:26:47.789245+00:00",
+      "seconds": 0.8161298889899626
+    }
+  ],
+  "source": "source.json",
+  "inputs": "inputs/manifest.json",
+  "expected_environment": "environment.expected.json"
+}

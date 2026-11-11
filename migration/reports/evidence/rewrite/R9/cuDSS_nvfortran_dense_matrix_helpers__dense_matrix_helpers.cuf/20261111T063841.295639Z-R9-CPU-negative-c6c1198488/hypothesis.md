@@ -1,0 +1,1 @@
+Test CPU-negative for cuDSS/nvfortran/dense_matrix_helpers::dense_matrix_helpers.cuf, case lifetime. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T063805.344962Z-R9-rocm-helper-4ec7818252.

@@ -1,0 +1,217 @@
+! SPDX-License-Identifier: Apache-2.0
+module rewrite_helper_samples
+ use iso_c_binding
+ implicit none
+ type,bind(C) :: query_t
+  integer(c_int64_t) :: sizes(5)
+  type(c_ptr) :: pointers(8)
+  integer(c_int32_t) :: codes(8)
+ end type
+ interface
+  integer(c_int) function context_create(b,p) bind(C,name='mh_context_create')
+   import
+   integer(c_int),value::b
+   type(c_ptr),intent(out)::p
+  end function
+  integer(c_int) function context_destroy(p) bind(C,name='mh_context_destroy')
+   import
+   type(c_ptr),value::p
+  end function
+  integer(c_int) function malloc_gpu(p,n) bind(C,name='mh_alloc')
+   import
+   type(c_ptr),intent(out)::p
+   integer(c_size_t),value::n
+  end function
+  integer(c_int) function upload(p,h,n) bind(C,name='mh_upload')
+   import
+   type(c_ptr),value::p,h
+   integer(c_size_t),value::n
+  end function
+  integer(c_int) function free_gpu(p) bind(C,name='mh_free')
+   import
+   type(c_ptr),value::p
+  end function
+  integer(c_int) function create(f,b,nr,nc,nz,ld,r,c,v,base,h) bind(C,name='mh_create')
+   import
+   integer(c_int),value::f,b,base
+   type(c_ptr),value::nr,nc,nz,ld,r,c,v
+   type(c_ptr),intent(out)::h
+  end function
+  integer(c_int) function get(h,q,mask) bind(C,name='mh_get')
+   import
+   type(c_ptr),value::h
+   type(query_t),intent(inout)::q
+   integer(c_int),value::mask
+  end function
+  integer(c_int) function set_values(h,v) bind(C,name='mh_set_values')
+   import
+   type(c_ptr),value::h,v
+  end function
+  integer(c_int) function set_csr(h,r,c,v) bind(C,name='mh_set_csr')
+   import
+   type(c_ptr),value::h,r,c,v
+  end function
+  integer(c_int) function destroy(h) bind(C,name='mh_destroy')
+   import
+   type(c_ptr),value::h
+  end function
+  integer(c_int) function snapshot(name,q,r,c,v,nr,nc,nz,ld) bind(C,name='mh_snapshot')
+   import
+   character(c_char),intent(in)::name(*)
+   type(query_t),intent(in)::q
+   type(c_ptr),value::r,c,v,nr,nc,nz,ld
+  end function
+  integer(c_int) function save(name,p,n) bind(C,name='mh_save')
+   import
+   character(c_char),intent(in)::name(*)
+   type(c_ptr),value::p
+   integer(c_size_t),value::n
+  end function
+  integer(c_size_t) function query_bytes() bind(C,name='mh_query_bytes')
+   import
+  end function
+ end interface
+contains
+ subroutine check(rc)
+  integer(c_int),intent(in)::rc
+  if(rc/=0) then
+   print *, 'helper ABI status',rc
+   error stop 1
+  endif
+ end subroutine
+ subroutine run_helper(expected)
+  integer,intent(in)::expected
+  character(4096)::root,path
+  character(40)::key,prefix,label
+  integer::kind,count,base,loops,iteration,i,u,status,capacity,stage,j,owned_count,f,alias
+  integer(c_int),target::nr(2),nc(2),nz(2),nz2(2),ld(2),bnc(2),bnz(2),flags(4),life(3)
+  integer(c_int),allocatable,target::ri(:),ci(:),rri(:),cci(:)
+  real(c_double),allocatable,target::values(:),replacement(:),rhs(:),rhs2(:)
+  real(c_double),target::inplace
+  type(c_ptr),target::r(2),c(2),v(2),rr(2),cc(2),vv(2),b(2),bb(2)
+  type(c_ptr)::pr,pc,pv,pbr,pbc,pbv,pb,pbb,a,dense,context,owned(32)
+  type(query_t)::q,qb,opt
+  logical::csr,batched
+  call get_environment_variable('REWRITE_INPUT',root,status=status)
+  if(status/=0) error stop 'fixture required'
+  open(newunit=u,file=trim(root)//'/config.txt',status='old');read(u,*)kind,count,base,loops,inplace,alias
+  if(alias/=0)error stop 'Fortran profiles have independent original host shape arrays'
+  if(kind/=expected.or.count/=merge(2,1,kind==3).or.loops<1.or.loops>8) error stop 'profile'
+  do i=1,count
+   read(u,*)nr(i),nc(i),nz(i),nz2(i),ld(i)
+  enddo
+  close(u);csr=kind/=1;batched=kind==3;bnc=1;bnz=0
+  do iteration=0,loops-1
+   owned_count=0;r=c_null_ptr;c=c_null_ptr;rr=c_null_ptr;cc=c_null_ptr;b=c_null_ptr;bb=c_null_ptr
+   do i=1,count
+    write(key,'("b",i0)')i-1
+    capacity=merge(nz(i),ld(i)*nc(i),csr)
+    allocate(values(capacity),replacement(capacity))
+    call read_real(trim(key)//'_values',values);call read_real(trim(key)//'_replacement',replacement)
+    call put(v(i),c_loc(values),int(capacity,c_size_t)*8);call put(vv(i),c_loc(replacement),int(capacity,c_size_t)*8)
+    deallocate(values,replacement)
+    if(csr) then
+     allocate(ri(nr(i)+1),ci(nz(i)),rri(nr(i)+1),cci(nz2(i)))
+     call read_int(trim(key)//'_rows',ri);call read_int(trim(key)//'_columns',ci)
+     call read_int(trim(key)//'_new_rows',rri);call read_int(trim(key)//'_new_columns',cci)
+     call put(r(i),c_loc(ri),int(nr(i)+1,c_size_t)*4);call put(c(i),c_loc(ci),int(nz(i),c_size_t)*4)
+     call put(rr(i),c_loc(rri),int(nr(i)+1,c_size_t)*4);call put(cc(i),c_loc(cci),int(nz2(i),c_size_t)*4)
+     deallocate(ri,ci,rri,cci)
+    endif
+    if(batched) then
+     allocate(rhs(ld(i)),rhs2(ld(i)))
+     call read_real(trim(key)//'_B',rhs);call read_real(trim(key)//'_B_replacement',rhs2)
+     call put(b(i),c_loc(rhs),int(ld(i),c_size_t)*8);call put(bb(i),c_loc(rhs2),int(ld(i),c_size_t)*8)
+     deallocate(rhs,rhs2)
+    endif
+   enddo
+   if(batched) then
+    call put(pr,c_loc(r),int(count,c_size_t)*c_sizeof(r(1)));call put(pc,c_loc(c),int(count,c_size_t)*c_sizeof(c(1)))
+    call put(pv,c_loc(v),int(count,c_size_t)*c_sizeof(v(1)));call put(pbr,c_loc(rr),int(count,c_size_t)*c_sizeof(rr(1)))
+    call put(pbc,c_loc(cc),int(count,c_size_t)*c_sizeof(cc(1)));call put(pbv,c_loc(vv),int(count,c_size_t)*c_sizeof(vv(1)))
+    call put(pb,c_loc(b),int(count,c_size_t)*c_sizeof(b(1)));call put(pbb,c_loc(bb),int(count,c_size_t)*c_sizeof(bb(1)))
+   else
+    pr=r(1);pc=c(1);pv=v(1);pbr=rr(1);pbc=cc(1);pbv=vv(1);pb=c_null_ptr;pbb=c_null_ptr
+   endif
+   f=merge(2,1,csr)+merge(4,0,batched)
+   call check(context_create(merge(1,0,batched),context))
+   call check(create(f,count,c_loc(nr),c_loc(nc),c_loc(nz),c_loc(ld),pr,pc,pv,base,a))
+   if(batched)call check(create(5,count,c_loc(nr),c_loc(bnc),c_loc(bnz),c_loc(ld),c_null_ptr,c_null_ptr,pb,0,dense))
+   write(prefix,'("r",i0)')iteration
+   call take(0)
+   opt%sizes=int(z'5a5a5a5a5a5a5a5a',c_int64_t);opt%codes=int(z'5a5a5a5a',c_int32_t);opt%pointers=c_null_ptr
+   call check(get(a,opt,2));flags=[merge(1,0,all(opt%sizes==int(z'5a5a5a5a5a5a5a5a',c_int64_t))), &
+    merge(1,0,all(opt%codes==int(z'5a5a5a5a',c_int32_t))),merge(1,0,c_associated(opt%pointers(3),pv)), &
+    merge(1,0,query_bytes()==c_sizeof(opt))]
+   if(any(flags/=1))error stop 'optional/ABI fields'
+   call check(save(trim(prefix)//'_optional'//c_null_char,c_loc(flags),c_sizeof(flags)))
+   if(.not.batched)call check(upload(v(1),c_loc(inplace),8_c_size_t))
+   call take(1)
+   call check(set_values(a,pbv));pv=pbv
+   if(batched)then
+    call check(set_values(dense,pbb));pb=pbb
+   endif
+   call take(2)
+   if(csr)then
+    do i=1,count
+     write(key,'("b",i0)')i-1;allocate(values(nz(i)));call read_real(trim(key)//'_final',values)
+     call check(upload(vv(i),c_loc(values),int(nz(i),c_size_t)*8));deallocate(values)
+    enddo
+    call check(set_csr(a,pbr,pbc,pbv));pr=pbr;pc=pbc
+   endif
+   call take(3)
+   call check(destroy(a));life=[merge(1,0,get(a,opt,7)/=0),merge(1,0,destroy(a)/=0),1]
+   if(batched)then
+    call check(destroy(dense))
+   endif
+   call check(context_destroy(context));flags(1:3)=[1,merge(1,0,context_destroy(context)/=0),merge(1,0,batched)]
+   call check(save(trim(prefix)//'_context'//c_null_char,c_loc(flags),3_c_size_t*4))
+   call check(snapshot(trim(prefix)//'_A_after_destroy'//c_null_char,q,pr,pc,pv,c_loc(nr),c_loc(nc),c_loc(nz),c_loc(ld)))
+   if(batched)then
+    call check(snapshot(trim(prefix)//'_B_after_destroy'//c_null_char,qb,c_null_ptr,c_null_ptr,pb, &
+     c_loc(nr),c_loc(bnc),c_loc(bnz),c_loc(ld)))
+   endif
+   call check(save(trim(prefix)//'_lifetime'//c_null_char,c_loc(life),c_sizeof(life)))
+   do j=1,owned_count
+    call check(free_gpu(owned(j)))
+   enddo
+  enddo
+  print *,'PASSED actual Fortran helper caller profile',kind
+ contains
+  subroutine put(p,host,n)
+   type(c_ptr),intent(out)::p
+   type(c_ptr),value::host
+   integer(c_size_t),value::n
+   call check(malloc_gpu(p,n));owned_count=owned_count+1
+   if(owned_count>size(owned))error stop 'allocation count'
+   owned(owned_count)=p;call check(upload(p,host,n))
+  end subroutine
+  subroutine read_real(name,data)
+   character(*),intent(in)::name
+   real(c_double),intent(out)::data(:)
+   integer::unit
+   open(newunit=unit,file=trim(root)//'/'//name//'.bin',access='stream',form='unformatted',status='old')
+   read(unit)data;close(unit)
+  end subroutine
+  subroutine read_int(name,data)
+   character(*),intent(in)::name
+   integer(c_int),intent(out)::data(:)
+   integer::unit
+   open(newunit=unit,file=trim(root)//'/'//name//'.bin',access='stream',form='unformatted',status='old')
+   read(unit)data;close(unit)
+  end subroutine
+  subroutine take(s)
+   integer,intent(in)::s
+   write(label,'(a,"_A",i0)')trim(prefix),s;call check(get(a,q,7))
+   call check(snapshot(trim(label)//c_null_char,q,pr,pc,pv,c_loc(nr),c_loc(nc),c_loc(nz),c_loc(ld)))
+   if(batched)then
+    write(label,'(a,"_B",i0)')trim(prefix),s;call check(get(dense,qb,7))
+    call check(snapshot(trim(label)//c_null_char,qb,c_null_ptr,c_null_ptr,pb,c_loc(nr),c_loc(bnc),c_loc(bnz),c_loc(ld)))
+    flags=[merge(1,0,c_associated(q%pointers(4),q%pointers(5))),merge(1,0,c_associated(q%pointers(4),qb%pointers(4))), &
+     merge(1,0,c_associated(q%pointers(4),qb%pointers(7))),merge(1,0,c_associated(q%pointers(5),qb%pointers(7)))]
+    write(label,'(a,"_aliases",i0)')trim(prefix),s
+    call check(save(trim(label)//c_null_char,c_loc(flags),c_sizeof(flags)))
+   endif
+  end subroutine
+ end subroutine
+end module

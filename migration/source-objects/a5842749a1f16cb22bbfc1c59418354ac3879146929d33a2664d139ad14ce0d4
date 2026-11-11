@@ -1,0 +1,40 @@
+// SPDX-License-Identifier: Apache-2.0
+#include "matrix_helpers.h"
+#include <vector>
+#include <fstream>
+#include <string>
+#include <cstdlib>
+#include <iostream>
+#include <cstring>
+#include <stdexcept>
+namespace {
+void check(int rc){if(rc)throw std::runtime_error("helper ABI status "+std::to_string(rc));}
+template<class T>std::vector<T> read(const std::string&name,size_t count){std::ifstream f(std::string(std::getenv("REWRITE_INPUT"))+"/"+name+".bin",std::ios::binary);std::vector<T>v(count);f.read((char*)v.data(),v.size()*sizeof(T));if(!f||f.peek()!=EOF)throw std::runtime_error("fixture length "+name);return v;}
+struct Owned{
+ std::vector<void*>buffers;
+ template<class T>void*put(const std::vector<T>&v){void*p=nullptr;check(mh_alloc(&p,v.size()*sizeof(T)));buffers.push_back(p);check(mh_upload(p,v.data(),v.size()*sizeof(T)));return p;}
+ ~Owned(){for(auto p:buffers)mh_free(p);}
+};
+}
+int mh_program(int expected){try{
+ if(!std::getenv("REWRITE_INPUT"))throw std::runtime_error("fixture required");std::ifstream f(std::string(std::getenv("REWRITE_INPUT"))+"/config.txt");int kind,count,base,loops;double inplace;
+ int alias;f>>kind>>count>>base>>loops>>inplace>>alias;if(!f||kind!=expected||count!=((kind==3)?2:1)||loops<1||loops>8||alias<0||alias>1)throw std::runtime_error("profile/config");std::vector<int32_t>nr(count),nc(count),nz(count),nz2(count),ld(count),bcols(count,1),bnz(count,0);
+ for(int i=0;i<count;++i)f>>nr[i]>>nc[i]>>nz[i]>>nz2[i]>>ld[i];if(!f)throw std::runtime_error("shape/config");
+ for(int iteration=0;iteration<loops;++iteration){Owned owner;std::vector<void*>r(count),c(count),v(count),rr(count),cc(count),vv(count),b(count),bb(count);bool csr=kind!=1,batched=kind==3;
+  for(int i=0;i<count;++i){std::string key="b"+std::to_string(i);int capacity=csr?nz[i]:ld[i]*nc[i];v[i]=owner.put(read<double>(key+"_values",capacity));vv[i]=owner.put(read<double>(key+"_replacement",capacity));
+   if(csr){r[i]=owner.put(read<int32_t>(key+"_rows",nr[i]+1));c[i]=owner.put(read<int32_t>(key+"_columns",nz[i]));rr[i]=owner.put(read<int32_t>(key+"_new_rows",nr[i]+1));cc[i]=owner.put(read<int32_t>(key+"_new_columns",nz2[i]));}
+   if(batched){b[i]=owner.put(read<double>(key+"_B",ld[i]));bb[i]=owner.put(read<double>(key+"_B_replacement",ld[i]));}
+  }
+  void*pr=batched?owner.put(r):r[0],*pc=batched?owner.put(c):c[0],*pv=batched?owner.put(v):v[0],*pbr=batched?owner.put(rr):rr[0],*pbc=batched?owner.put(cc):cc[0],*pbv=batched?owner.put(vv):vv[0],*pb=batched?owner.put(b):nullptr,*pbb=batched?owner.put(bb):nullptr;
+  int32_t*ncptr=alias?nr.data():nc.data(),*ldptr=alias?nr.data():ld.data();if(alias&&(!batched||nr!=nc||nr!=ld))throw std::runtime_error("inconsistent aliased shapes");
+  void*a=nullptr,*dense=nullptr;int format=csr?2:1;if(batched)format|=4;check(mh_create(format,count,nr.data(),ncptr,nz.data(),ldptr,pr,pc,pv,base,&a));if(batched)check(mh_create(5,count,nr.data(),bcols.data(),bnz.data(),ldptr,nullptr,nullptr,pb,0,&dense));
+  mh_query q{},qb{};std::string prefix="r"+std::to_string(iteration);
+  auto snapshot=[&](int stage){check(mh_get(a,&q,7));check(mh_snapshot((prefix+"_A"+std::to_string(stage)).c_str(),&q,pr,pc,pv,nr.data(),ncptr,nz.data(),ldptr));if(batched){check(mh_get(dense,&qb,7));check(mh_snapshot((prefix+"_B"+std::to_string(stage)).c_str(),&qb,nullptr,nullptr,pb,nr.data(),bcols.data(),bnz.data(),ldptr));int aliases[]={int(q.pointers[3]==q.pointers[4]),int(q.pointers[3]==qb.pointers[3]),int(q.pointers[3]==qb.pointers[6]),int(q.pointers[4]==qb.pointers[6])};check(mh_save((prefix+"_aliases"+std::to_string(stage)).c_str(),aliases,sizeof aliases));}};
+  snapshot(0);mh_query optional;std::memset(&optional,0x5a,sizeof optional);auto prior=optional;check(mh_get(a,&optional,2));int flags[]={int(!std::memcmp(optional.sizes,prior.sizes,sizeof optional.sizes)),int(!std::memcmp(optional.codes,prior.codes,sizeof optional.codes)),int(optional.pointers[2]==pv),int(mh_query_bytes()==sizeof optional)};check(mh_save((prefix+"_optional").c_str(),flags,sizeof flags));for(auto flag:flags)if(!flag)throw std::runtime_error("optional ABI field overwrite");
+  if(!batched)check(mh_upload(v[0],&inplace,sizeof inplace));snapshot(1);
+  check(mh_set_values(a,pbv));pv=pbv;if(batched){check(mh_set_values(dense,pbb));pb=pbb;}snapshot(2);
+  if(csr){for(int i=0;i<count;++i)check(mh_upload(vv[i],read<double>("b"+std::to_string(i)+"_final",nz[i]).data(),size_t(nz[i])*8));check(mh_set_csr(a,pbr,pbc,pbv));pr=pbr;pc=pbc;}snapshot(3);
+  check(mh_destroy(a));int life[]={int(mh_get(a,&optional,7)!=0),int(mh_destroy(a)!=0),1};check(mh_snapshot((prefix+"_A_after_destroy").c_str(),&q,pr,pc,pv,nr.data(),ncptr,nz.data(),ldptr));if(batched){check(mh_destroy(dense));check(mh_snapshot((prefix+"_B_after_destroy").c_str(),&qb,nullptr,nullptr,pb,nr.data(),bcols.data(),bnz.data(),ldptr));}check(mh_save((prefix+"_lifetime").c_str(),life,sizeof life));
+ }
+ std::cout<<"PASSED actual C++ helper caller profile "<<kind<<"\n";return 0;
+}catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 1;}}

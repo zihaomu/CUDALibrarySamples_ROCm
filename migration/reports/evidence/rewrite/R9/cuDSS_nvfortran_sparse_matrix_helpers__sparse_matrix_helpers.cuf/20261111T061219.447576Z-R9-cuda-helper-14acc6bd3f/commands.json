@@ -1,0 +1,57 @@
+[
+  {
+    "command_id": 1,
+    "phase": "prepare-output",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "mkdir -p /tmp/20261111T061032.430125Z-R9-cuda-build-0826019dd5/outputs/nvfortran/sparse_matrix_helpers/original"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T06:12:19.978605+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0001-prepare-output.stdout.log",
+    "stderr": "logs/0001-prepare-output.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T06:12:20.295262+00:00",
+    "seconds": 0.31556992599507794
+  },
+  {
+    "command_id": 2,
+    "phase": "real-native-helper-entry",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "python3 -c 'import os,subprocess; raise SystemExit(subprocess.run(['\"'\"'/tmp/20261111T061032.430125Z-R9-cuda-build-0826019dd5/sparse_matrix_helpers'\"'\"'],env=dict(os.environ,CUDA_VISIBLE_DEVICES=\"0\",REWRITE_INPUT='\"'\"'/tmp/20261111T061032.430125Z-R9-cuda-build-0826019dd5/inputs/nvfortran/sparse_matrix_helpers/original'\"'\"',REWRITE_OUTPUT='\"'\"'/tmp/20261111T061032.430125Z-R9-cuda-build-0826019dd5/outputs/nvfortran/sparse_matrix_helpers/original'\"'\"')).returncode)'"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T06:12:20.297154+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0002-real-native-helper-entry.stdout.log",
+    "stderr": "logs/0002-real-native-helper-entry.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T06:12:21.115601+00:00",
+    "seconds": 0.8174421220319346
+  },
+  {
+    "command_id": 3,
+    "phase": "collect-original-output",
+    "argv": [
+      "scp",
+      "-r",
+      "nvidia-5090x2:/tmp/20261111T061032.430125Z-R9-cuda-build-0826019dd5/outputs/nvfortran/sparse_matrix_helpers/original/.",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/R9/cuDSS_nvfortran_sparse_matrix_helpers__sparse_matrix_helpers.cuf/20261111T061219.447576Z-R9-cuda-helper-14acc6bd3f/outputs"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T06:12:21.117454+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0003-collect-original-output.stdout.log",
+    "stderr": "logs/0003-collect-original-output.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T06:12:21.483947+00:00",
+    "seconds": 0.36560987000120804
+  }
+]

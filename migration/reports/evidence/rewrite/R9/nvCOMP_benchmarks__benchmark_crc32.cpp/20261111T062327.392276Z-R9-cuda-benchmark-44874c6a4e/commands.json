@@ -1,0 +1,74 @@
+[
+  {
+    "command_id": 1,
+    "phase": "original-native-benchmark-CLI",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "python3 -c 'import os,subprocess,pathlib,json;pathlib.Path('\"'\"'/tmp/20261111T062309.795265Z-R9-cuda-build-a27767282e/outputs/repeat'\"'\"').mkdir(parents=True,exist_ok=True);p=subprocess.run(['\"'\"'/tmp/20261111T062309.795265Z-R9-cuda-build-a27767282e/native'\"'\"', '\"'\"'-s'\"'\"', '\"'\"'65536'\"'\"', '\"'\"'-o'\"'\"', '\"'\"'output with spaces.csv'\"'\"'],cwd='\"'\"'/tmp/20261111T062309.795265Z-R9-cuda-build-a27767282e/outputs/repeat'\"'\"',env=dict(os.environ,**{'\"'\"'CUDA_VISIBLE_DEVICES'\"'\"': '\"'\"'0'\"'\"', '\"'\"'REWRITE_OUTPUT'\"'\"': '\"'\"'/tmp/20261111T062309.795265Z-R9-cuda-build-a27767282e/outputs/repeat'\"'\"', '\"'\"'REWRITE_BENCH_INPUT'\"'\"': '\"'\"'/tmp/20261111T062309.795265Z-R9-cuda-build-a27767282e/inputs/repeat/input.bin'\"'\"'}));pathlib.Path('\"'\"'/tmp/20261111T062309.795265Z-R9-cuda-build-a27767282e/outputs/repeat/native-process.json'\"'\"').write_text(json.dumps(dict(return_code=p.returncode)));raise SystemExit(p.returncode)'"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T06:23:27.907007+00:00",
+    "timeout_seconds": 1200,
+    "environment": {},
+    "stdout": "logs/0001-original-native-benchmark-CLI.stdout.log",
+    "stderr": "logs/0001-original-native-benchmark-CLI.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T06:23:28.675680+00:00",
+    "seconds": 0.7670068190200254
+  },
+  {
+    "command_id": 2,
+    "phase": "independent-remote-zlib-and-grid",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "python3 /tmp/20261111T062309.795265Z-R9-cuda-build-a27767282e/reference.py --output /tmp/20261111T062309.795265Z-R9-cuda-build-a27767282e/outputs/repeat --case /tmp/20261111T062309.795265Z-R9-cuda-build-a27767282e/inputs/repeat/case.json --report /tmp/20261111T062309.795265Z-R9-cuda-build-a27767282e/outputs/repeat/cpu-validation.json --backend cuda"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T06:23:28.677801+00:00",
+    "timeout_seconds": 900,
+    "environment": {},
+    "stdout": "logs/0002-independent-remote-zlib-and-grid.stdout.log",
+    "stderr": "logs/0002-independent-remote-zlib-and-grid.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T06:23:28.994179+00:00",
+    "seconds": 0.3153958769980818
+  },
+  {
+    "command_id": 3,
+    "phase": "remote-original-payload-identities",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "python3 -c 'import pathlib,hashlib,json;p=pathlib.Path('\"'\"'/tmp/20261111T062309.795265Z-R9-cuda-build-a27767282e/outputs/repeat'\"'\"');files={str(f.relative_to(p)):dict(bytes=f.stat().st_size,sha256=hashlib.file_digest(f.open(\"rb\"),\"sha256\").hexdigest()) for f in p.rglob(\"*\") if f.is_file()};(p/\"remote-payload-manifest.json\").write_text(json.dumps(dict(root=str(p),files=files)))'"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T06:23:28.995843+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0003-remote-original-payload-identities.stdout.log",
+    "stderr": "logs/0003-remote-original-payload-identities.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T06:23:29.312431+00:00",
+    "seconds": 0.3157426349935122
+  },
+  {
+    "command_id": 4,
+    "phase": "package-observations",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "tar -czf /tmp/20261111T062309.795265Z-R9-cuda-build-a27767282e/outputs/repeat/observations.tar.gz --exclude=input.bin --exclude=observations.tar.gz -C /tmp/20261111T062309.795265Z-R9-cuda-build-a27767282e/outputs/repeat ."
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T06:23:29.314318+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0004-package-observations.stdout.log",
+    "stderr": "logs/0004-package-observations.stderr.log",
+    "return_code": 1,
+    "finished_at_utc": "2026-11-11T06:23:29.630685+00:00",
+    "seconds": 0.3155252159922384
+  }
+]

@@ -1,0 +1,1 @@
+Test invalid-entry for cuDSS/simple_dense_matrix_helpers::simple_dense_matrix_helpers.cpp, case wrong-profile. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T061548.454230Z-R9-rocm-build-9332e1002c.

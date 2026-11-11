@@ -1,0 +1,1 @@
+Test rocm-helper for cuDSS/simple_sparse_matrix_helpers::simple_sparse_matrix_helpers.cpp, case alternate-base. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T063716.921772Z-R9-rocm-build-af4c1c9735.

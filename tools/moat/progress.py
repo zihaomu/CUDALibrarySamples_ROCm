@@ -28,25 +28,28 @@ lines+=['',f'反向检查：{sum(bool(x["passed"]) for x in negative.get("checks
 tasks=json.loads((ROOT/'migration/moat/tasks.json').read_text())['tasks'];by={t['sample_id']:t for t in tasks}
 pending=collections.Counter(by[s['id']]['primary_phase'] for s in cat['samples'] if s['status']!='PASSED')
 new_qualified=collections.Counter(by[s['id']]['primary_phase'] for s in cat['samples'] if s['status']=='PASSED' and s.get('reason_code')=='VALIDATED_MOAT_REWRITE')
+remaining_frontends=sum(s['status']!='PASSED' and by[s['id']]['primary_phase']=='R5' and by[s['id']]['baseline_status']=='FAILED' for s in cat['samples'])
+operators=read('operator-support.json');new_total=sum(new_qualified.values());remaining=sum(v for k,v in counts.items() if k!='PASSED')
 phase_rows=[]
-descriptions={'R1':'5个 BLAS/Lt 整例','R2':'3个 device solver 整例','R3':'原24项复审，NCC/SVD两例收口','R4':'冻结并完成 CRC32 小批；其余逐例评估','R5':'8个真实 Fortran 入口；65前端与额外CPP项待实现','R6':'224项专题研究与最小基础探针；未签发整例','R7':'2个真实GPU packed sparse2:4 整例','R8':'总回归、依赖封存、干净检出与交付'}
-states={'R1':'COMPLETED_SCOPED','R2':'COMPLETED_SCOPED','R3':'ASSESSMENT_COMPLETE_22_GAPS','R4':'COMPLETED_SCOPED_96_PENDING','R5':'PARTIALLY_IMPLEMENTED_65_FRONTENDS_PENDING','R6':'ASSESSMENT_COMPLETE_PORTS_PENDING','R7':'COMPLETED_SCOPED','R8':'IN_PROGRESS'}
+descriptions={'R1':'5个 BLAS/Lt 整例','R2':'3个 device solver 整例','R3':'原24项复审，NCC/SVD两例收口','R4':'按资格签发的小批推进；R9含C++ helper及CRC benchmark','R5':f'真实 Fortran 入口；{remaining_frontends}前端与额外CPP项仍待支持','R6':'224项专题研究与最小基础探针；未签发整例','R7':'2个真实GPU packed sparse2:4 整例','R8':'总回归、依赖封存、干净检出与交付'}
+states={'R1':'COMPLETED_SCOPED','R2':'COMPLETED_SCOPED','R3':'ASSESSMENT_COMPLETE_22_GAPS','R4':f'SCOPED_BATCHES_{pending["R4"]}_PENDING','R5':f'PARTIALLY_IMPLEMENTED_{remaining_frontends}_FRONTENDS_PENDING','R6':'ASSESSMENT_COMPLETE_PORTS_PENDING','R7':'COMPLETED_SCOPED','R8':'IN_PROGRESS'}
 delivery=read('rewrite-R8-review.json');clean=read('rewrite-clean-checkout.json');final=read('final-validation.json')
 if delivery.get('verdict')=='APPROVED' and clean.get('status')=='PASSED' and final.get('status')=='PASSED':states['R8']='COMPLETED_SCOPED'
 lines+=['','## 全阶段与未完成范围','','| 阶段 | 本轮新整例资格 | 仍未通过 | 当前结果与范围 |','| --- | ---: | ---: | --- |']
 for phase in descriptions:
  row=dict(phase=phase,new_qualified=new_qualified[phase],pending=pending[phase],state=states[phase],scope=descriptions[phase]);phase_rows.append(row)
  lines.append(f'| {phase} | {row["new_qualified"]} | {row["pending"]} | {row["state"]}；{row["scope"]} |')
-lines+=['','新增资格21项，另撤销旧C++排序样例资格1项，支持211→231，净增20。当前231/639通过、408待支持；117功能族、18模块。','',
- '[R3](rewrite-R3.md) · [R4](rewrite-R4.md) · [R5](rewrite-R5.md) · [R6](rewrite-R6.md) · [R7](rewrite-R7.md) · [408项逐例原因与后续实验](rewrite-remaining-assessment.md)。',
- '', '计划第1.2节区分阶段执行和整例支持；R5剩余65个前端及其它待实现项没有被登记为完成。wave64、Windows、多节点与全项目MOAT surface仍未验证。']
+lines+=['',f'累计新增资格{new_total}项，另撤销旧C++排序样例资格1项，支持211→{counts["PASSED"]}，净增{counts["PASSED"]-211}。当前{counts["PASSED"]}/639通过、{remaining}待支持；{operators.get("verified_operator_families")}功能族、{operators.get("modules_with_verified_operators")}模块。','',
+ f'[R3](rewrite-R3.md) · [R4](rewrite-R4.md) · [R5](rewrite-R5.md) · [R6](rewrite-R6.md) · [R7](rewrite-R7.md) · [{remaining}项逐例原因与后续实验](rewrite-remaining-assessment.md)。',
+ '', f'计划第1.2节区分阶段执行和整例支持；R5剩余{remaining_frontends}个前端及其它待实现项没有被登记为完成。wave64、Windows、多节点与全项目MOAT surface仍未验证。']
+if (ROOT/'migration/reports/rewrite-R9.md').exists():lines+=['','[R9：九个helper与CRC32 benchmark实时记录](rewrite-R9.md)。候选实现不预记整例资格。']
 (ROOT/'migration/reports/rewrite-progress.md').write_text('\n'.join(lines)+'\n')
 write(ROOT/'migration/reports/rewrite-progress.json',dict(updated_at=now(),rows=rows,baseline_counts=dict(counts),phases=phase_rows))
 doc=ROOT.parent/'doc/cuda_samples_on_rocm_moat_rewrite_plan.md';body=doc.read_text();start='<!-- MOAT_EXEC_PROGRESS:START -->';end='<!-- MOAT_EXEC_PROGRESS:END -->'
 total=sum(x['required'] for x in rows)
 first_ids={p['sample_id'] for p in spec}
 qualified=sum(s['id'] in first_ids and s.get('reason_code')=='VALIDATED_MOAT_REWRITE' and s['status']=='PASSED' for s in cat['samples'])
-section='\n'.join([start,'',f'最近更新：{now()}。首批 AMD/独立CPU/CUDA 51/51；首批资格 {qualified}/8。本轮累计21项新资格，撤销1项旧资格，当前231 PASSED/23 PARTIAL/385 FAILED。剩余408项全部有路线与重试条件；R5仍有65前端和额外CPP项待实现。R8：{states["R8"]}；全项目surface与其它平台仍owed。','',end])
+section='\n'.join([start,'',f'最近更新：{now()}。首批 AMD/独立CPU/CUDA 51/51；首批资格 {qualified}/8。累计{new_total}项新资格，撤销1项旧资格，当前{counts["PASSED"]} PASSED/{counts["PARTIAL"]} PARTIAL/{counts["FAILED"]} FAILED。剩余{remaining}项全部有路线与重试条件；R5仍有{remaining_frontends}前端和额外CPP项待支持。R8：{states["R8"]}；全项目surface与其它平台仍owed。','',end])
 if start in body:body=re.sub(re.escape(start)+'.*?'+re.escape(end),section,body,flags=re.S)
 else:body+='\n'+section+'\n'
 doc.write_text(body)

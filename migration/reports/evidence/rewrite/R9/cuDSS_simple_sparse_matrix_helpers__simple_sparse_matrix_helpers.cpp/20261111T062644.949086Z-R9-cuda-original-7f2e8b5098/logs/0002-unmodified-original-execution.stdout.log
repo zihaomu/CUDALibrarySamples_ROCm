@@ -1,0 +1,31 @@
+---------------------------------------------------------
+cuDSS example: creating, modifying and destroying cuDSS 
+sparse matrix objects
+---------------------------------------------------------
+CUDSS Version (Major,Minor,PatchLevel): 1.0.0
+matrix A:
+(0, 0.000e+00) (0, 2.000e+00) 
+(1, 4.000e+00) (1, 6.000e+00) 
+(2, 8.000e+00) (2, 1.000e+01) 
+(3, 1.200e+01) (3, 1.400e+01) 
+(4, 1.600e+01) 
+Success: Check for matrix A from cudssMatrixGetCsr passed
+matrix A (after modifying values in place):
+(0, -1.000e+00) (0, 2.000e+00) 
+(1, 4.000e+00) (1, 6.000e+00) 
+(2, 8.000e+00) (2, 1.000e+01) 
+(3, 1.200e+01) (3, 1.400e+01) 
+(4, 1.600e+01) 
+Success: After modifying in-place, second value of
+matrix A equals -4.000e+00 (expected -4.000e+00)
+Note: Changing the matrix structure does not change the nnz returned by
+cudssMatrixGetCsr. The original value = 9 passed to cudssMatrixCreateCsr is
+returned
+matrix A (after changing the matrix structure):
+(0, 0.000e+00) 
+(1, 4.000e+00) 
+(2, 8.000e+00) 
+(3, 1.200e+01) 
+(4, 1.600e+01) 
+Success: Matrix A format returned as 2 (CSR)
+Example PASSED

@@ -1,0 +1,1 @@
+Test rocm-helper for cuDSS/simple_dense_matrix_helpers::simple_dense_matrix_helpers.cpp, case changed-values. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T060746.210035Z-R9-rocm-build-1cac7b218b.
