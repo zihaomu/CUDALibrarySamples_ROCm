@@ -1,0 +1,70 @@
+[
+  {
+    "command_id": 1,
+    "phase": "fresh-clone",
+    "argv": [
+      "git",
+      "clone",
+      "--shared",
+      "--quiet",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-gkr5_e_y/src"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T12:23:42.193016+00:00",
+    "timeout_seconds": 180,
+    "environment": {},
+    "stdout": "logs/0001-fresh-clone.stdout.log",
+    "stderr": "logs/0001-fresh-clone.stderr.log",
+    "environment_changes": {
+      "HIP_VISIBLE_DEVICES": "2"
+    },
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T12:23:47.620524+00:00",
+    "seconds": 5.426868634996936
+  },
+  {
+    "command_id": 2,
+    "phase": "fixed-checkout",
+    "argv": [
+      "git",
+      "checkout",
+      "--quiet",
+      "502328bbc22f8fb3ab11553e395c6ffc3cab5a21"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-gkr5_e_y/src",
+    "started_at_utc": "2026-11-11T12:23:47.624742+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0002-fixed-checkout.stdout.log",
+    "stderr": "logs/0002-fixed-checkout.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T12:23:48.140998+00:00",
+    "seconds": 0.5156780739780515
+  },
+  {
+    "command_id": 3,
+    "phase": "cold-canny_plus_environment",
+    "argv": [
+      "/home/zihaomu/zihaomu_workspace/rocm10-launch.sh",
+      "env",
+      "ROCR_VISIBLE_DEVICES=3",
+      "HIP_VISIBLE_DEVICES=0",
+      "PYTHONPATH=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-gkr5_e_y/src/build/image-gpu-site:/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-gkr5_e_y/src/rocm/python",
+      "python3",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-gkr5_e_y/src/tools/moat/canny_plus_environment.py"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-gkr5_e_y/src",
+    "started_at_utc": "2026-11-11T12:23:48.144701+00:00",
+    "timeout_seconds": 1800,
+    "environment": {},
+    "stdout": "logs/0003-cold-canny_plus_environment.stdout.log",
+    "stderr": "logs/0003-cold-canny_plus_environment.stderr.log",
+    "environment_changes": {
+      "HIP_VISIBLE_DEVICES": "2"
+    },
+    "return_code": 1,
+    "finished_at_utc": "2026-11-11T12:24:19.433306+00:00",
+    "seconds": 31.287654277984984
+  }
+]

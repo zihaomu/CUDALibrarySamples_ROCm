@@ -1,0 +1,271 @@
+{
+  "status": "PASSED",
+  "checks": [
+    {
+      "check": "no-preexisting-build-cache",
+      "passed": true
+    },
+    {
+      "check": "cold-bootstrap-fixtures-compile-and-both-GPU-workflows",
+      "passed": true
+    },
+    {
+      "check": "fresh-31-masks-and-eight-original-files-CPU",
+      "passed": true
+    },
+    {
+      "check": "fresh-compiled-source-closure",
+      "passed": true
+    },
+    {
+      "check": "all-five-fresh-child-records",
+      "passed": true
+    },
+    {
+      "check": "cold-final-process-success",
+      "passed": true
+    }
+  ],
+  "source_commit": "40fddd881f1ea5ec054948777abdfa7122149a20",
+  "clone": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-7u0ctw63/src",
+  "children": [
+    {
+      "name": "environment",
+      "relative": "child-evidence/environment",
+      "report": {
+        "status": "READY",
+        "evidence": "migration/reports/evidence/rewrite/I1/CannyPlus-private-Python-dependencies/20261111T122558.314662Z-I1-rocm-setup-90ed3cdfb5",
+        "packages": [
+          "opencv-python-headless==4.12.0.88",
+          "pandas==2.3.3",
+          "tabulate==0.9.0",
+          "python-dateutil==2.9.0.post0",
+          "pytz==2025.2",
+          "tzdata==2025.2",
+          "six==1.17.0"
+        ]
+      }
+    },
+    {
+      "name": "fixture-replay",
+      "relative": "child-evidence/fixture-replay",
+      "report": {
+        "status": "PASSED",
+        "checks": [
+          {
+            "check": "original-320x180",
+            "passed": true
+          },
+          {
+            "check": "original-640x360",
+            "passed": true
+          },
+          {
+            "check": "original-800x600",
+            "passed": true
+          },
+          {
+            "check": "original-1280x720",
+            "passed": true
+          },
+          {
+            "check": "original-1920x1080",
+            "passed": true
+          },
+          {
+            "check": "original-2560x1440",
+            "passed": true
+          },
+          {
+            "check": "original-3840x2160",
+            "passed": true
+          },
+          {
+            "check": "original-5120x2880",
+            "passed": true
+          },
+          {
+            "check": "registered-teapot-c1",
+            "passed": true
+          },
+          {
+            "check": "registered-noise-c1",
+            "passed": true
+          },
+          {
+            "check": "registered-ties-c1",
+            "passed": true
+          },
+          {
+            "check": "registered-step-c1",
+            "passed": true
+          },
+          {
+            "check": "registered-tiny-c1",
+            "passed": true
+          },
+          {
+            "check": "registered-holdout-weak-step-c1",
+            "passed": true
+          },
+          {
+            "check": "registered-holdout-weak-cross-c1",
+            "passed": true
+          },
+          {
+            "check": "registered-holdout-weak-diagonal-c1",
+            "passed": true
+          },
+          {
+            "check": "registered-holdout-low-noise-c1",
+            "passed": true
+          },
+          {
+            "check": "registered-holdout-mixed-noise-c1",
+            "passed": true
+          },
+          {
+            "check": "registered-border-check91203-c1",
+            "passed": true
+          },
+          {
+            "check": "registered-border-check40519-c1",
+            "passed": true
+          },
+          {
+            "check": "registered-border-check83914-c1",
+            "passed": true
+          },
+          {
+            "check": "new-one-pixel",
+            "passed": true
+          },
+          {
+            "check": "new-single-row",
+            "passed": true
+          },
+          {
+            "check": "new-single-column",
+            "passed": true
+          },
+          {
+            "check": "new-flat",
+            "passed": true
+          },
+          {
+            "check": "new-odd-noise",
+            "passed": true
+          },
+          {
+            "check": "new-boundary-step",
+            "passed": true
+          },
+          {
+            "check": "new-weak-cross",
+            "passed": true
+          },
+          {
+            "check": "new-impulse",
+            "passed": true
+          },
+          {
+            "check": "new-equal-threshold",
+            "passed": true
+          },
+          {
+            "check": "new-high-threshold",
+            "passed": true
+          }
+        ],
+        "evidence": "migration/reports/evidence/rewrite/I1/CannyPlus-deterministic-fixture-replay/20261111T122629.399020Z-I1-CPU-fixtures-f0a46bca41"
+      }
+    },
+    {
+      "name": "build",
+      "relative": "child-evidence/build",
+      "report": {
+        "status": "BUILT",
+        "dependencies": {
+          "rocm/common/image/canny_stages.h": "afd4be4bedbfc218a36169437f086f86ce82d6486e174db2bc534de208dce4b9",
+          "rocm/common/image/canny_stages.hip": "dd0a7b1c89003532626ad73e9f6355f866f015fad0d7cf6629aee92a2c6e06b6",
+          "rocm/common/image/canny.h": "b0fd6536f299550aa30357067fa56d5d599318aeee274e1146a6645720c29424",
+          "rocm/common/image/canny.hip": "250f0704d2d66038a04e7990a5c49a17628c64674a834c8124304fb48cc7592b",
+          "rocm/python/image/canny.py": "219b6089c040e4fc0a157f70d838951f0882b32af658994677adcb2f25503aec",
+          "rocm/python/image/__init__.py": "aedba5972c103917e72898f3e7eb3c1384980e2ad27e9c6b7efcd743403b4d5e",
+          "rocm/ported/NPP+/cannyEdgeDetectorPython/cannyEdgeDetector.py": "60817bb85ddd906810dcb4703bf825957ae69732a434215fc49a8b8b6f1b4371",
+          "migration/rewrite/canny-plus-profile.json": "25916a11e46f95f85556ded316024b13e9e1398b474c340329a9237d1dfddbae"
+        },
+        "library": "artifacts/rewrite/I1/CannyPlus-full-library-build/20261111T122633.964918Z-I1-rocm-build-4e5b2193b4/libimage_canny.so",
+        "experiment_id": "20261111T122633.964918Z-I1-rocm-build-4e5b2193b4",
+        "build_recipe_sha256": "c74b1a34c291b0e0123d269bb2ed31aef79b633d47a5200a47cc316f4d972be1",
+        "library_sha256": "6ed1eb9ceacd61cf5204645aaaca10738189ceb27fa3bcf424084e1d7962930c",
+        "installed_library": "build/image/libimage_canny.so",
+        "evidence": "migration/reports/evidence/rewrite/I1/CannyPlus-full-library-build/20261111T122633.964918Z-I1-rocm-build-4e5b2193b4"
+      }
+    },
+    {
+      "name": "rocm",
+      "relative": "child-evidence/rocm",
+      "report": {
+        "status": "EXECUTED",
+        "return_code": 0,
+        "experiment_id": "20261111T122641.067808Z-I1-rocm-run-87e6cd2485",
+        "build": {
+          "status": "BUILT",
+          "dependencies": {
+            "rocm/common/image/canny_stages.h": "afd4be4bedbfc218a36169437f086f86ce82d6486e174db2bc534de208dce4b9",
+            "rocm/common/image/canny_stages.hip": "dd0a7b1c89003532626ad73e9f6355f866f015fad0d7cf6629aee92a2c6e06b6",
+            "rocm/common/image/canny.h": "b0fd6536f299550aa30357067fa56d5d599318aeee274e1146a6645720c29424",
+            "rocm/common/image/canny.hip": "250f0704d2d66038a04e7990a5c49a17628c64674a834c8124304fb48cc7592b",
+            "rocm/python/image/canny.py": "219b6089c040e4fc0a157f70d838951f0882b32af658994677adcb2f25503aec",
+            "rocm/python/image/__init__.py": "aedba5972c103917e72898f3e7eb3c1384980e2ad27e9c6b7efcd743403b4d5e",
+            "rocm/ported/NPP+/cannyEdgeDetectorPython/cannyEdgeDetector.py": "60817bb85ddd906810dcb4703bf825957ae69732a434215fc49a8b8b6f1b4371",
+            "migration/rewrite/canny-plus-profile.json": "25916a11e46f95f85556ded316024b13e9e1398b474c340329a9237d1dfddbae"
+          },
+          "library": "artifacts/rewrite/I1/CannyPlus-full-library-build/20261111T122633.964918Z-I1-rocm-build-4e5b2193b4/libimage_canny.so",
+          "experiment_id": "20261111T122633.964918Z-I1-rocm-build-4e5b2193b4",
+          "build_recipe_sha256": "c74b1a34c291b0e0123d269bb2ed31aef79b633d47a5200a47cc316f4d972be1",
+          "library_sha256": "6ed1eb9ceacd61cf5204645aaaca10738189ceb27fa3bcf424084e1d7962930c",
+          "installed_library": "build/image/libimage_canny.so",
+          "evidence": "migration/reports/evidence/rewrite/I1/CannyPlus-full-library-build/20261111T122633.964918Z-I1-rocm-build-4e5b2193b4"
+        },
+        "outputs": "artifacts/rewrite/I1/NPP__cannyEdgeDetectorPython__cannyEdgeDetector.py/20261111T122641.067808Z-I1-rocm-run-87e6cd2485/outputs",
+        "audit": "artifacts/rewrite/I1/NPP__cannyEdgeDetectorPython__cannyEdgeDetector.py/20261111T122641.067808Z-I1-rocm-run-87e6cd2485/audit",
+        "evidence": "migration/reports/evidence/rewrite/I1/NPP__cannyEdgeDetectorPython__cannyEdgeDetector.py/20261111T122641.067808Z-I1-rocm-run-87e6cd2485"
+      }
+    },
+    {
+      "name": "original",
+      "relative": "child-evidence/original",
+      "report": {
+        "status": "EXECUTED",
+        "return_code": 0,
+        "experiment_id": "20261111T122647.649016Z-I1-rocm-original-8d92ccd504",
+        "build": {
+          "status": "BUILT",
+          "dependencies": {
+            "rocm/common/image/canny_stages.h": "afd4be4bedbfc218a36169437f086f86ce82d6486e174db2bc534de208dce4b9",
+            "rocm/common/image/canny_stages.hip": "dd0a7b1c89003532626ad73e9f6355f866f015fad0d7cf6629aee92a2c6e06b6",
+            "rocm/common/image/canny.h": "b0fd6536f299550aa30357067fa56d5d599318aeee274e1146a6645720c29424",
+            "rocm/common/image/canny.hip": "250f0704d2d66038a04e7990a5c49a17628c64674a834c8124304fb48cc7592b",
+            "rocm/python/image/canny.py": "219b6089c040e4fc0a157f70d838951f0882b32af658994677adcb2f25503aec",
+            "rocm/python/image/__init__.py": "aedba5972c103917e72898f3e7eb3c1384980e2ad27e9c6b7efcd743403b4d5e",
+            "rocm/ported/NPP+/cannyEdgeDetectorPython/cannyEdgeDetector.py": "60817bb85ddd906810dcb4703bf825957ae69732a434215fc49a8b8b6f1b4371",
+            "migration/rewrite/canny-plus-profile.json": "25916a11e46f95f85556ded316024b13e9e1398b474c340329a9237d1dfddbae"
+          },
+          "library": "artifacts/rewrite/I1/CannyPlus-full-library-build/20261111T122633.964918Z-I1-rocm-build-4e5b2193b4/libimage_canny.so",
+          "experiment_id": "20261111T122633.964918Z-I1-rocm-build-4e5b2193b4",
+          "build_recipe_sha256": "c74b1a34c291b0e0123d269bb2ed31aef79b633d47a5200a47cc316f4d972be1",
+          "library_sha256": "6ed1eb9ceacd61cf5204645aaaca10738189ceb27fa3bcf424084e1d7962930c",
+          "installed_library": "build/image/libimage_canny.so",
+          "evidence": "migration/reports/evidence/rewrite/I1/CannyPlus-full-library-build/20261111T122633.964918Z-I1-rocm-build-4e5b2193b4"
+        },
+        "outputs": "artifacts/rewrite/I1/NPP__cannyEdgeDetectorPython__cannyEdgeDetector.py/20261111T122647.649016Z-I1-rocm-original-8d92ccd504/outputs",
+        "audit": "artifacts/rewrite/I1/NPP__cannyEdgeDetectorPython__cannyEdgeDetector.py/20261111T122647.649016Z-I1-rocm-original-8d92ccd504/audit",
+        "evidence": "migration/reports/evidence/rewrite/I1/NPP__cannyEdgeDetectorPython__cannyEdgeDetector.py/20261111T122647.649016Z-I1-rocm-original-8d92ccd504"
+      }
+    }
+  ],
+  "return_code": 0,
+  "evidence": "migration/reports/evidence/rewrite/I1/CannyPlus-clean-checkout/20261111T122544.406349Z-I1-host-cold-replay-4540da489b"
+}

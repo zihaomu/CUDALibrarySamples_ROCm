@@ -1,0 +1,87 @@
+[
+  {
+    "command_id": 1,
+    "phase": "create-project-SDK-overlay",
+    "argv": [
+      "python3",
+      "tools/migration/bootstrap_sdk.py"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-7u0ctw63/src",
+    "started_at_utc": "2026-11-11T12:25:59.800683+00:00",
+    "timeout_seconds": 300,
+    "environment": {
+      "HIP_VISIBLE_DEVICES": "0",
+      "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+      "DEEPINFER_ROCM_RELEASE": "10.1.0",
+      "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+      "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+    },
+    "stdout": "logs/0001-create-project-SDK-overlay.stdout.log",
+    "stderr": "logs/0001-create-project-SDK-overlay.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T12:26:07.733814+00:00",
+    "seconds": 7.93238359503448
+  },
+  {
+    "command_id": 2,
+    "phase": "install-private-original-benchmark-packages",
+    "argv": [
+      "python3",
+      "-m",
+      "pip",
+      "install",
+      "--upgrade",
+      "--no-deps",
+      "--target",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-7u0ctw63/src/build/image-gpu-site",
+      "opencv-python-headless==4.12.0.88",
+      "pandas==2.3.3",
+      "tabulate==0.9.0",
+      "python-dateutil==2.9.0.post0",
+      "pytz==2025.2",
+      "tzdata==2025.2",
+      "six==1.17.0"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-7u0ctw63/src",
+    "started_at_utc": "2026-11-11T12:26:07.735237+00:00",
+    "timeout_seconds": 300,
+    "environment": {
+      "HIP_VISIBLE_DEVICES": "0",
+      "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+      "DEEPINFER_ROCM_RELEASE": "10.1.0",
+      "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+      "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+    },
+    "stdout": "logs/0002-install-private-original-benchmark-packages.stdout.log",
+    "stderr": "logs/0002-install-private-original-benchmark-packages.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T12:26:23.032479+00:00",
+    "seconds": 15.296843393996824
+  },
+  {
+    "command_id": 3,
+    "phase": "verify-pairing-and-actual-imports",
+    "argv": [
+      "env",
+      "PYTHONPATH=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-7u0ctw63/src/build/image-gpu-site",
+      "python3",
+      "-c",
+      "import torch,torchvision,numpy,pandas,tabulate,cv2;assert torch.version.hip.startswith(\"7.16.\");print(torch.__version__,torchvision.__version__,numpy.__version__,pandas.__version__,tabulate.__version__,cv2.__version__)"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-7u0ctw63/src",
+    "started_at_utc": "2026-11-11T12:26:23.037353+00:00",
+    "timeout_seconds": 300,
+    "environment": {
+      "HIP_VISIBLE_DEVICES": "0",
+      "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+      "DEEPINFER_ROCM_RELEASE": "10.1.0",
+      "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+      "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+    },
+    "stdout": "logs/0003-verify-pairing-and-actual-imports.stdout.log",
+    "stderr": "logs/0003-verify-pairing-and-actual-imports.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T12:26:25.757677+00:00",
+    "seconds": 2.7195870249997824
+  }
+]

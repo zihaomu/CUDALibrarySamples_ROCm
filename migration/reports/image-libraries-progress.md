@@ -1,6 +1,6 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-11T12:21:54.431258+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-11T12:27:48.138541+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
 26入口当前：2 PASSED / 8 PARTIAL / 16 FAILED。
 
@@ -252,3 +252,8 @@
 | 2026-11-11T12:20:22.994360+00:00 | I1 | Canny验收器28项正向/反向检查：PASSED；包括容差内native差异、超限、尾字节、padding、丢例、失败rc、错误CSV/循环和空trace。 | [20261111T122016.417050Z-I1-CPU-validator-test-99c40e5688](evidence/rewrite/I1/CannyPlus-acceptance-mutations/20261111T122016.417050Z-I1-CPU-validator-test-99c40e5688) |
 | 2026-11-11T12:20:42.705753+00:00 | I1 | 第二项复审问题已修复：runtime验收必须独立检查15组完整payload、24项实际ABI码、8项异常类型和拒绝调用前后raw存储，不能只信worker passed字段；49项GPU重跑，新增4个复审反例，正反向总28项重验。 | [canny-plus-runtime.json](canny-plus-runtime.json)；[canny-plus-trace.json](canny-plus-trace.json) |
 | 2026-11-11T12:21:54.431258+00:00 | I1 | 资格复审补齐当前执行源码文件集合（包含新增/未跟踪Python启动钩子）及三个不同审查者/固定scope门槛；新增对应正向和篡改自测。等待固定修复提交和冷重放复核。 | [canny-plus.md](canny-plus.md) |
+| 2026-11-11T12:24:19.669403+00:00 | I1 | 全新checkout无build缓存：FAILED；重新安装私有依赖、重建31输入/共享库、重跑31mask与8尺寸1000循环、独立CPU复核。 | [20261111T122341.548807Z-I1-host-cold-replay-bf8fc284c3](evidence/rewrite/I1/CannyPlus-clean-checkout/20261111T122341.548807Z-I1-host-cold-replay-bf8fc284c3) |
+| 2026-11-11T12:25:15.767537+00:00 | I1 | 全新checkout无build缓存：FAILED；重新安装私有依赖、重建31输入/共享库、重跑31mask与8尺寸1000循环、独立CPU复核。 | [20261111T122440.113615Z-I1-host-cold-replay-864cb3a3c8](evidence/rewrite/I1/CannyPlus-clean-checkout/20261111T122440.113615Z-I1-host-cold-replay-864cb3a3c8) |
+| 2026-11-11T12:25:59.741512+00:00 | I1 | 冷检出两次setup在依赖安装成功后因缺少仓库外doc目录而失败，均保留日志；进度工具已支持仓库内plan镜像fallback，重新执行完整冷重放。未发生算法失败或资格提升。 | [20261111T122341.548807Z-I1-host-cold-replay-bf8fc284c3](evidence/rewrite/I1/CannyPlus-clean-checkout/20261111T122341.548807Z-I1-host-cold-replay-bf8fc284c3)；[20261111T122440.113615Z-I1-host-cold-replay-864cb3a3c8](evidence/rewrite/I1/CannyPlus-clean-checkout/20261111T122440.113615Z-I1-host-cold-replay-864cb3a3c8) |
+| 2026-11-11T12:27:05.182649+00:00 | I1 | 全新checkout无build缓存：PASSED；重新安装私有依赖、重建31输入/共享库、重跑31mask与8尺寸1000循环、独立CPU复核。 | [20261111T122544.406349Z-I1-host-cold-replay-4540da489b](evidence/rewrite/I1/CannyPlus-clean-checkout/20261111T122544.406349Z-I1-host-cold-replay-4540da489b) |
+| 2026-11-11T12:27:48.138541+00:00 | I1 | 干净clone最终重放通过：无预存build，私有依赖/overlay从零安装，31组输入hash重建及新共享库构建成功，31mask和8尺寸5/1000原例再次通过独立CPU/native检查；子记录由父seal完整保留。 | [canny-plus-cold.json](canny-plus-cold.json)；[20261111T122557.872555Z-I1-CPU-selftest-b2d9d7dbf2](evidence/rewrite/I1/CannyPlus-review-identity-tests/20261111T122557.872555Z-I1-CPU-selftest-b2d9d7dbf2) |

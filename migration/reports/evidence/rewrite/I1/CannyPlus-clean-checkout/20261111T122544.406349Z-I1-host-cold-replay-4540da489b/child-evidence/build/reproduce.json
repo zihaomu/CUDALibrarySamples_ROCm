@@ -1,0 +1,146 @@
+{
+  "commands": [
+    {
+      "command_id": 1,
+      "phase": "compile-canny_stages",
+      "argv": [
+        "hipcc",
+        "--rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-7u0ctw63/src/build/rocm-sdk-overlay",
+        "--hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-7u0ctw63/src/build/rocm-sdk-overlay",
+        "--rocm-device-lib-path=/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode",
+        "--offload-arch=gfx1201",
+        "-std=c++17",
+        "-O2",
+        "-fPIC",
+        "-D__HIP_PLATFORM_AMD__",
+        "-MMD",
+        "-MF",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-7u0ctw63/src/artifacts/rewrite/I1/CannyPlus-full-library-build/20261111T122633.964918Z-I1-rocm-build-4e5b2193b4/canny_stages.d",
+        "-x",
+        "hip",
+        "-c",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-7u0ctw63/src/rocm/common/image/canny_stages.hip",
+        "-o",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-7u0ctw63/src/artifacts/rewrite/I1/CannyPlus-full-library-build/20261111T122633.964918Z-I1-rocm-build-4e5b2193b4/canny_stages.o"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-7u0ctw63/src",
+      "started_at_utc": "2026-11-11T12:26:35.209803+00:00",
+      "timeout_seconds": 300,
+      "environment": {
+        "HIP_VISIBLE_DEVICES": "0",
+        "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "DEEPINFER_ROCM_RELEASE": "10.1.0",
+        "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+        "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+      },
+      "stdout": "logs/0001-compile-canny_stages.stdout.log",
+      "stderr": "logs/0001-compile-canny_stages.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T12:26:36.429612+00:00",
+      "seconds": 1.2189462400274351
+    },
+    {
+      "command_id": 2,
+      "phase": "compile-canny",
+      "argv": [
+        "hipcc",
+        "--rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-7u0ctw63/src/build/rocm-sdk-overlay",
+        "--hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-7u0ctw63/src/build/rocm-sdk-overlay",
+        "--rocm-device-lib-path=/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode",
+        "--offload-arch=gfx1201",
+        "-std=c++17",
+        "-O2",
+        "-fPIC",
+        "-D__HIP_PLATFORM_AMD__",
+        "-MMD",
+        "-MF",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-7u0ctw63/src/artifacts/rewrite/I1/CannyPlus-full-library-build/20261111T122633.964918Z-I1-rocm-build-4e5b2193b4/canny.d",
+        "-x",
+        "hip",
+        "-c",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-7u0ctw63/src/rocm/common/image/canny.hip",
+        "-o",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-7u0ctw63/src/artifacts/rewrite/I1/CannyPlus-full-library-build/20261111T122633.964918Z-I1-rocm-build-4e5b2193b4/canny.o"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-7u0ctw63/src",
+      "started_at_utc": "2026-11-11T12:26:36.432375+00:00",
+      "timeout_seconds": 300,
+      "environment": {
+        "HIP_VISIBLE_DEVICES": "0",
+        "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "DEEPINFER_ROCM_RELEASE": "10.1.0",
+        "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+        "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+      },
+      "stdout": "logs/0002-compile-canny.stdout.log",
+      "stderr": "logs/0002-compile-canny.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T12:26:37.601101+00:00",
+      "seconds": 1.1679694509948604
+    },
+    {
+      "command_id": 3,
+      "phase": "link-shared-Canny",
+      "argv": [
+        "hipcc",
+        "--rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-7u0ctw63/src/build/rocm-sdk-overlay",
+        "--hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-7u0ctw63/src/build/rocm-sdk-overlay",
+        "--rocm-device-lib-path=/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode",
+        "--offload-arch=gfx1201",
+        "-std=c++17",
+        "-O2",
+        "-fPIC",
+        "-D__HIP_PLATFORM_AMD__",
+        "-shared",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-7u0ctw63/src/artifacts/rewrite/I1/CannyPlus-full-library-build/20261111T122633.964918Z-I1-rocm-build-4e5b2193b4/canny_stages.o",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-7u0ctw63/src/artifacts/rewrite/I1/CannyPlus-full-library-build/20261111T122633.964918Z-I1-rocm-build-4e5b2193b4/canny.o",
+        "-L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib",
+        "-Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib",
+        "-lamdhip64",
+        "-o",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-7u0ctw63/src/artifacts/rewrite/I1/CannyPlus-full-library-build/20261111T122633.964918Z-I1-rocm-build-4e5b2193b4/libimage_canny.so"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-7u0ctw63/src",
+      "started_at_utc": "2026-11-11T12:26:37.603244+00:00",
+      "timeout_seconds": 300,
+      "environment": {
+        "HIP_VISIBLE_DEVICES": "0",
+        "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "DEEPINFER_ROCM_RELEASE": "10.1.0",
+        "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+        "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+      },
+      "stdout": "logs/0003-link-shared-Canny.stdout.log",
+      "stderr": "logs/0003-link-shared-Canny.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T12:26:37.719436+00:00",
+      "seconds": 0.11549558799015358
+    },
+    {
+      "command_id": 4,
+      "phase": "actual-library-links",
+      "argv": [
+        "ldd",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-7u0ctw63/src/artifacts/rewrite/I1/CannyPlus-full-library-build/20261111T122633.964918Z-I1-rocm-build-4e5b2193b4/libimage_canny.so"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/canny-cold-7u0ctw63/src",
+      "started_at_utc": "2026-11-11T12:26:37.720597+00:00",
+      "timeout_seconds": 300,
+      "environment": {
+        "HIP_VISIBLE_DEVICES": "0",
+        "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "DEEPINFER_ROCM_RELEASE": "10.1.0",
+        "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+        "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+      },
+      "stdout": "logs/0004-actual-library-links.stdout.log",
+      "stderr": "logs/0004-actual-library-links.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T12:26:37.738438+00:00",
+      "seconds": 0.017370447982102633
+    }
+  ],
+  "source": "source.json",
+  "inputs": "inputs/manifest.json",
+  "expected_environment": "environment.expected.json"
+}
