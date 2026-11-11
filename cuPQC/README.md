@@ -37,7 +37,7 @@ There are also SHA2, SHA3, Poseidon2 and Merkle Tree examples that demonstrate t
 For the detailed descriptions of the cuPQC API please visit [cuPQC SDK Docs](https://docs.nvidia.com/cuda/cupqc/index.html) section of the cuPQC documentation.
 
 <!-- ROCM-MIGRATION:START -->
-## ROCm 迁移实时状态
+## ROCm 支持情况
 
 6 个独立源入口；PASSED 2，PARTIAL 0，FAILED 4，BLOCKED 0，UNSUPPORTED 0，NOT_STARTED 0，IN_PROGRESS 0。
 

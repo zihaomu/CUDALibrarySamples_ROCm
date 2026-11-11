@@ -57,7 +57,7 @@ This folder demonstrates cuFFT APIs usage.
     The sample computes a low-pass filter using using R2C and C2R with LTO callbacks. See example for detailed description.
 
 <!-- ROCM-MIGRATION:START -->
-## ROCm 迁移实时状态
+## ROCm 支持情况
 
 10 个独立源入口；PASSED 10，PARTIAL 0，FAILED 0，BLOCKED 0，UNSUPPORTED 0，NOT_STARTED 0，IN_PROGRESS 0。
 

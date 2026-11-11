@@ -78,7 +78,7 @@ For the detailed descriptions of the examples please visit [Examples](https://do
 |                               | reg_least_squares                 | Regularized least squares solver (requires cuBLASDx)                                                                 |
 
 <!-- ROCM-MIGRATION:START -->
-## ROCm 迁移实时状态
+## ROCm 支持情况
 
 42 个独立源入口；PASSED 4，PARTIAL 0，FAILED 38，BLOCKED 0，UNSUPPORTED 0，NOT_STARTED 0，IN_PROGRESS 0。
 

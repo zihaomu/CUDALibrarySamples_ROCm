@@ -156,7 +156,7 @@ This folder demonstrates cuSPARSE Generic APIs usage.
     The sample describes how to use the cuSPARSE and cuBLAS libraries to implement the Incomplete-LU preconditioned iterative *Biconjugate Gradient Stabilized Method (BiCGStab)*
 
 <!-- ROCM-MIGRATION:START -->
-## ROCm 迁移实时状态
+## ROCm 支持情况
 
 37 个独立源入口；PASSED 36，PARTIAL 0，FAILED 1，BLOCKED 0，UNSUPPORTED 0，NOT_STARTED 0，IN_PROGRESS 0。
 

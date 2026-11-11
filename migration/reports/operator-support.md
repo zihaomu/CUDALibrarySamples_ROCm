@@ -31,7 +31,7 @@
 
 | 模块 | 已验证子集 | 原始样例尚缺什么 |
 | --- | --- | --- |
-| nvJPEG | rocJPEG baseline 解码；B10真实CLI/布局/缩放/ROI/多实例/后处理逐例验收 | progressive缺少原生GPU后端；显式CPU fallback/encode另标注；6 PARTIAL、0 PASSED |
-| NPP | 精确Euclidean距离/Voronoi已整例通过；Canny与NCC有数值子集 | 原生Canny像素策略、NCC文件harness及其它尚未完成合同按逐例状态记录 |
+| nvJPEG | rocJPEG baseline 解码；CLI/布局/缩放/ROI/多实例/后处理逐例验收 | progressive缺少原生GPU后端；显式CPU fallback/encode另标注；6 PARTIAL、0 PASSED |
+| NPP | 精确Euclidean距离/Voronoi与NCC已整例通过；Canny有数值子集 | 原生Canny像素策略及其它尚未完成合同按逐例状态记录 |
 
 逐个算子族与样例的可追溯映射见 [operator-support.json](../../migration/reports/operator-support.json)；失败仍按具体入口和原因保留。

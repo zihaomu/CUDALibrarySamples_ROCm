@@ -57,17 +57,20 @@ def main():
  require({s['family'] for s in samples}==set(CANDIDATES),'Missing family in inventory')
  # Check only generated migration sections, preserving unrelated upstream links.
  pages=list((ROOT/'migration/sample-reports').rglob('*.md'));require(len(pages)==639,'Expected 639 detail pages')
- generated=[ROOT/'README.md']+[ROOT/family/'README.md' for family in CANDIDATES]+pages
+ support_docs=[ROOT/'migration'/p for p in ['README.md','usage.md','upstream.md','history/README.md','reports/support-log-index.md','reports/operator-support.md']]+list((ROOT/'migration/reports/support-log-index').glob('*.md'))
+ generated=[ROOT/'README.md']+[ROOT/family/'README.md' for family in CANDIDATES]+pages+support_docs
  root_text=(ROOT/'README.md').read_text()
  operators=json.loads((ROOT/'migration/reports/operator-support.json').read_text());require(operators==summarize(cat),'Operator counts or source-profile mapping are stale')
  require(f'{operators["verified_operator_families"]} 个按模块去重的算子/功能族' in root_text,'Root README operator total is stale')
- matrix=root_text.split('## 模块支持矩阵',1)[-1].split('## 未通过和不支持的具体原因',1)[0];matrix_rows=[line for line in matrix.splitlines() if line.startswith('| [')];require(len(matrix_rows)==len(CANDIDATES),'Expected all 30 modules in homepage support matrix')
+ matrix=root_text.split('## 模块支持矩阵',1)[-1].split('## 验证范围',1)[0];matrix_rows=[line for line in matrix.splitlines() if line.startswith('| [')];require(len(matrix_rows)==len(CANDIDATES),'Expected all 30 modules in homepage support matrix')
  for family,row in operators['modules'].items():
   line=next((line for line in matrix_rows if line.startswith('| ['+family+'](')),None);c=collections.Counter(s['status'] for s in samples if s['family']==family)
   if line:
-   cells=[v.strip() for v in line.split('|')[1:-1]];expected=[str(row['verified_operator_family_count']),str(c['PASSED'])+'/'+str(row['sample_count']),str(c['PARTIAL']),str(c['FAILED']),str(c['UNSUPPORTED']),str(c['BLOCKED'])];require(cells[2:8]==expected,family+' homepage counts differ from evidence')
+   cells=[v.strip() for v in line.split('|')[1:-1]];expected=[str(row['verified_operator_family_count']),str(c['PASSED'])+'/'+str(row['sample_count']),str(c['PARTIAL']),str(c['FAILED'])];require(cells[2:6]==expected,family+' homepage counts differ from evidence')
   else:require(False,'Missing homepage module '+family)
- for state in ['PASSED','PARTIAL','FAILED','BLOCKED','UNSUPPORTED','NOT_STARTED','IN_PROGRESS']:require(f'{state}: {counts[state]}' in root_text,'Root README stale count for '+state)
+ for state in ['PASSED','PARTIAL','FAILED','BLOCKED','UNSUPPORTED']:
+  if counts[state] or state in {'PASSED','PARTIAL','FAILED'}:require(bool(re.search(r'\| [^|]*（'+state+r'） \| '+str(counts[state])+r' \|',root_text)),'Root README stale count for '+state)
+ require(not re.search(r'第二批|第三批|MOAT|\b[BR]\d{1,2}(?!\d)|已收口|实时进展',root_text),'Root README contains development history')
  for s in samples:
   p=ROOT/'migration/sample-reports'/(s['source']+'.md');text=p.read_text();require(f'**{s["status"]} / {s["level"]}**' in text and s['reason'].rstrip() in text and s['source_sha256'] in text,s['id']+' stale detail page')
  for family in CANDIDATES:
@@ -77,7 +80,7 @@ def main():
  for p in generated:
   text=p.read_text()
   if p==ROOT/'README.md':text=text.split('## 上游 CUDA Library Samples 说明')[0]
-  elif p not in pages:text=text.split('<!-- ROCM-MIGRATION:START -->')[-1].split('<!-- ROCM-MIGRATION:END -->')[0]
+  elif p not in pages and p not in support_docs:text=text.split('<!-- ROCM-MIGRATION:START -->')[-1].split('<!-- ROCM-MIGRATION:END -->')[0]
   for target in re.findall(r'\]\(([^)]+)\)',text):
    target=urllib.parse.unquote(target.split('#')[0])
    if not target or '://' in target or target.startswith('mailto:'):continue

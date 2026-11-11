@@ -72,7 +72,7 @@ For the detailed descriptions of the examples please visit the Examples section 
 |                     | nvcompdx_batch                           | End-to-end LZ4 compress/decompress round-trip across a batch of chunks          |
 
 <!-- ROCM-MIGRATION:START -->
-## ROCm 迁移实时状态
+## ROCm 支持情况
 
 12 个独立源入口；PASSED 0，PARTIAL 0，FAILED 12，BLOCKED 0，UNSUPPORTED 0，NOT_STARTED 0，IN_PROGRESS 0。
 

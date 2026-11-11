@@ -120,7 +120,7 @@ All examples use these exit codes:
 [nvJPEG2000](https://docs.nvidia.com/cuda/nvjpeg2000/index.html)
 
 <!-- ROCM-MIGRATION:START -->
-## ROCm 迁移实时状态
+## ROCm 支持情况
 
 4 个独立源入口；PASSED 0，PARTIAL 0，FAILED 4，BLOCKED 0，UNSUPPORTED 0，NOT_STARTED 0，IN_PROGRESS 0。
 

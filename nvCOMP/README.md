@@ -40,7 +40,7 @@ x86_64, aarch64
 - The latest nvCOMP release from the NVIDIA [developer zone](https://developer.nvidia.com/nvcomp).
 
 <!-- ROCM-MIGRATION:START -->
-## ROCm 迁移实时状态
+## ROCm 支持情况
 
 32 个独立源入口；PASSED 8，PARTIAL 2，FAILED 22，BLOCKED 0，UNSUPPORTED 0，NOT_STARTED 0，IN_PROGRESS 0。
 

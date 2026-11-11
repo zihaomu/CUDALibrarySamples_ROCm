@@ -157,7 +157,7 @@ Run examples with mpi command and number of processes according to process grid 
 `mpirun -n 2 ./mp_newton_schulz -p 2 -q 1 -m 16384 -n 2048`
 
 <!-- ROCM-MIGRATION:START -->
-## ROCm 迁移实时状态
+## ROCm 支持情况
 
 16 个独立源入口；PASSED 0，PARTIAL 2，FAILED 14，BLOCKED 0，UNSUPPORTED 0，NOT_STARTED 0，IN_PROGRESS 0。
 

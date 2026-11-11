@@ -41,7 +41,7 @@ x86_64
 - Install the [CUDA 11.0 toolkit and above](https://developer.nvidia.com/cuda-downloads).
 
 <!-- ROCM-MIGRATION:START -->
-## ROCm 迁移实时状态
+## ROCm 支持情况
 
 7 个独立源入口；PASSED 0，PARTIAL 6，FAILED 1，BLOCKED 0，UNSUPPORTED 0，NOT_STARTED 0，IN_PROGRESS 0。
 

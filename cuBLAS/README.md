@@ -285,7 +285,7 @@ This folder demonstrates cuBLAS APIs usage.
     The sample computes the product of a vector by a scalar.
 
 <!-- ROCM-MIGRATION:START -->
-## ROCm 迁移实时状态
+## ROCm 支持情况
 
 82 个独立源入口；PASSED 72，PARTIAL 0，FAILED 10，BLOCKED 0，UNSUPPORTED 0，NOT_STARTED 0，IN_PROGRESS 0。
 

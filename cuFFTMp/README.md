@@ -92,7 +92,7 @@ docker pull nvcr.io/nvidia/nvhpc:23.3-devel-cuda_multi-ubuntu20.04
 ```
 
 <!-- ROCM-MIGRATION:START -->
-## ROCm 迁移实时状态
+## ROCm 支持情况
 
 20 个独立源入口；PASSED 1，PARTIAL 0，FAILED 19，BLOCKED 0，UNSUPPORTED 0，NOT_STARTED 0，IN_PROGRESS 0。
 

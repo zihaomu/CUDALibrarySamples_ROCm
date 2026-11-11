@@ -72,7 +72,7 @@ For the detailed descriptions of the examples please visit [Examples](https://do
 |                     | Pipeline       | 21_sgemm_emulation_pipeline       | Runs pipelined single-precision emulation using the same mantissa-bit mechanism. Requires CUDA Toolkit 13.1 or newer. |
 
 <!-- ROCM-MIGRATION:START -->
-## ROCm 迁移实时状态
+## ROCm 支持情况
 
 34 个独立源入口；PASSED 1，PARTIAL 0，FAILED 33，BLOCKED 0，UNSUPPORTED 0，NOT_STARTED 0，IN_PROGRESS 0。
 

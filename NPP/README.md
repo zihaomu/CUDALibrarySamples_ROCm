@@ -127,7 +127,7 @@ nppiFilterGauss_8u_C1R_Ctx(..., nppCtx);
 For the most up-to-date details, refer to the official [NPP Documentation – Application-managed Context](https://docs.nvidia.com/cuda/npp/index.html#application-managed-context).
 
 <!-- ROCM-MIGRATION:START -->
-## ROCm 迁移实时状态
+## ROCm 支持情况
 
 9 个独立源入口；PASSED 2，PARTIAL 1，FAILED 6，BLOCKED 0，UNSUPPORTED 0，NOT_STARTED 0，IN_PROGRESS 0。
 

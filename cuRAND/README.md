@@ -155,7 +155,7 @@ This folder demonstrates cuRAND APIs usage.
     The sample demonstrates poisson scrambled sobol64 pseudorandom generation using Host API.
 
 <!-- ROCM-MIGRATION:START -->
-## ROCm 迁移实时状态
+## ROCm 支持情况
 
 36 个独立源入口；PASSED 36，PARTIAL 0，FAILED 0，BLOCKED 0，UNSUPPORTED 0，NOT_STARTED 0，IN_PROGRESS 0。
 

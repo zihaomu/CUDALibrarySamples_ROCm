@@ -77,7 +77,7 @@ For the detailed descriptions of the examples please visit [Examples](https://do
 |                          |                     | mixed_precision_fft_2d         | Mixed precision 2D FFT with benchmarking and accuracy comparison                                       |
 
 <!-- ROCM-MIGRATION:START -->
-## ROCm 迁移实时状态
+## ROCm 支持情况
 
 49 个独立源入口；PASSED 1，PARTIAL 0，FAILED 48，BLOCKED 0，UNSUPPORTED 0，NOT_STARTED 0，IN_PROGRESS 0。
 

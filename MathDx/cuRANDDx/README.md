@@ -43,7 +43,7 @@ For the detailed descriptions of the examples please visit [Examples](https://do
 | NVRTC Examples        | nvrtc_pcg_thread_api                | Use cuRANDDx with NVRTC runtime compilation                                                          |
 
 <!-- ROCM-MIGRATION:START -->
-## ROCm 迁移实时状态
+## ROCm 支持情况
 
 7 个独立源入口；PASSED 0，PARTIAL 1，FAILED 6，BLOCKED 0，UNSUPPORTED 0，NOT_STARTED 0，IN_PROGRESS 0。
 

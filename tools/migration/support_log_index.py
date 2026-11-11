@@ -3,6 +3,7 @@
 import collections, hashlib, json, os, pathlib
 from catalog import ROOT, CANDIDATES
 from run import digest
+from operator_support import render_overview, summarize
 
 METHODS={
     'API_PORT':'库 API 迁移',
@@ -11,6 +12,10 @@ METHODS={
     'LIBRARY_REWRITE':'改用 AMD 库重写算法流程',
     'API_PORT_WITH_EXECUTION_ADAPTER':'库 API 迁移 + 执行语义适配',
     'UNIMPLEMENTED_BINDING':'语言绑定尚未实现',
+    'ALGORITHM_REWRITE_WITH_STANDARD_FORTRAN_C_ABI':'标准 Fortran 入口 + 项目 C ABI / HIP 算法',
+    'PROJECT_DESCRIPTOR_ABI_WITH_HIP_STORAGE':'项目 host 描述符 ABI + HIP GPU 存储',
+    'PROJECT_HIP_ALGORITHM_REWRITE':'项目 HIP 算法重写',
+    'PROJECT_HIP_CRC_WITH_ORIGINAL_BENCHMARK_HARNESS':'原始 benchmark 框架 + 项目 HIP CRC 算法',
 }
 
 def logs(root):
@@ -55,6 +60,10 @@ def render_index(cat):
             cuda_basis='历史 CUDA 尝试' if cuda else '未归档 CUDA 日志，见详情中的前置条件'
         reports += [p for p in sample['evidence'] if p.endswith('.json') and (ROOT/p).is_file()]
         reports=list(dict.fromkeys(reports))
+        qualification=proof.get('evidence') if field=='selected_validation' else None
+        if qualification and (ROOT/qualification).is_dir():
+            reports += [str(pathlib.PurePosixPath(qualification)/name) for name in ['qualification.json','validation.json'] if (ROOT/qualification/name).is_file()]
+        evidence=list(dict.fromkeys(sample['evidence']+proof.get('evidence_references',[])))
         rows.append({
             'id':sample['id'],'family':sample['family'],'source':sample['source'],
             'status':sample['status'],'level':sample['level'],
@@ -66,8 +75,11 @@ def render_index(cat):
             'detail':'migration/sample-reports/'+sample['source']+'.md',
             'record_field':field,'amd_evidence':amd,'amd_logs':logs(amd),
             'cuda_comparison':sample['cuda_comparison'],'cuda_evidence':cuda,
+            'cuda_baseline':sample['cuda_baseline'],'cuda_baseline_reason':sample.get('cuda_baseline_reason'),
+            'cuda_comparison_reason':sample.get('cuda_comparison_reason'),'benchmark':sample['benchmark'],
+            'qualification_evidence':qualification,'reason_code':sample['reason_code'],
             'cuda_evidence_basis':cuda_basis,'cuda_logs':logs(cuda),
-            'validation_reports':reports,'all_evidence':sample['evidence'],
+            'validation_reports':list(dict.fromkeys(reports)),'all_evidence':evidence,
         })
     return {'scope':'All 639 entrypoints, including failures. PASSED is limited to registered cases. Logs point to current-source qualification where available, otherwise the recorded attempt; compilation/import logs are not GPU correctness proof.',
             'counts':dict(collections.Counter(r['status'] for r in rows)),
@@ -89,11 +101,24 @@ def write_index(cat):
             label=os.path.relpath(ROOT/p,root) if root.is_dir() else pathlib.Path(p).name
             parts.append(link(label,p))
         return '<br>'.join(parts)
-    text='# 样例支持方式与详细日志总表\n\n'
+    text='# 算子支持方式与完整验证记录\n\n'
+    text+=link('返回项目首页','README.md')+' · '+link('构建与复现','migration/usage.md')+' · '+link('机器可读记录','migration/reports/support-log-index.json')+'\n\n'
     text+='覆盖 **'+str(len(report['samples']))+' 个样例入口**：'+'、'.join(str(report['counts'].get(k,0))+' '+k for k in ['PASSED','PARTIAL','FAILED','UNSUPPORTED','BLOCKED'])+'。全部 '+str(len(CANDIDATES))+' 个模块逐项列出实现方式、范围/原因、AMD 日志、CUDA 日志与验收报告。数据直接来自 '+link('逐例清单','migration/samples.yaml')+'，'+link('JSON 索引','migration/reports/support-log-index.json')+' 另含全部历史证据路径、源码 SHA256、已通过/必需用例及恢复条件。\n\n'
     text+='**查阅方式：** 先看状态和“支持范围/失败原因”，再看实际库与实现源码。AMD 栏优先链接与当前源码 hash 匹配的选定验收日志；未通过项链接实际尝试。`build.log` 是编译/链接记录，`run.log` 是程序输出，`<case>/run.log` 是对应输入的输出。命令与环境位于同目录的 `commands.json` 和 `*.environment.json`，从“证据目录”进入。缺少运行日志时会明确标注，不将编译/import 成功视作 GPU 通过。\n\n'
     text+='CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历史尝试”；只有该行 `CUDA comparison = PASSED` 才表示已完成登记范围的对照。CPU 验收报告保存误差、阈值、残差等结构化检查，不要求每个样例另有一个 CPU 文本 log。所有历史失败与重试记录保留在“详情”。大二进制输出按 hash/生成方法保存，未全部提交 Git。\n\n'
     text+='实现方式是逐例登记值：库 API 迁移、生态库 + 项目 HIP、算法流程重写、执行语义适配或未实现语言绑定；**实际库名称和逐例范围决定具体支持边界**。例如 cuDSS 的 CPU 符号分析 + GPU CSRRF、rotmg 的项目 HIP 修正，不因同样标为 PASSED 而隐去区别。\n\n'
+    text+='原始 CUDA baseline 与 CUDA 数学对照分列：原语言工具链缺失时，即使兼容 C++ API 对照通过，原语言 baseline 仍保留 BLOCKED。每个入口的实际误差、残差、阈值和逐项检查结果在 CPU/复合验收 JSON 中；日志包含对应命令、环境和源码/输入 hash。GPU 计时不等于性能资格，'+link('性能验证','migration/reports/performance-comparison.md')+'单独登记。\n\n'
+    text+=render_overview(summarize(cat),'../../')
+    reasons=collections.Counter((r['status'],r['reason_code']) for r in report['samples'] if r['status']!='PASSED')
+    labels={'BUILD_ERROR':'当前移植稿的 API、类型、链接或算法实现未完成，实际构建失败。',
+            'BINDING_OR_FRONTEND_MIGRATION_REQUIRED':'原始语言前端或 vendor 绑定尚未完成迁移。',
+            'VALIDATED_B9_B11_SUBSET':'已有验收子集，原例框架、调度或配置/查询语义仍有缺口。',
+            'VALIDATED_B12_B15_SUBSET':'已有验收子集，原始 descriptor、低精度通信、序列或像素语义仍有缺口。',
+            'INDEPENDENT_VALIDATION_PENDING':'尚未完成对应独立数值及实际执行路径验收。',
+            'VENDOR_PERMUTATION_POLICY_DIFFERS':'置换/排序策略未满足原始 vendor 合同。'}
+    text+='## 未整例通过的原因\n\n尚未整例通过不表示算法永远不能在 AMD 上实现。以下按当前逐例结论汇总；具体失败调用、已覆盖子集与重试条件见后面的模块记录。\n\n| 当前结论 | 原因编码 | 入口数 | 说明 |\n| --- | --- | ---: | --- |\n'
+    for (status,code),count in sorted(reasons.items()):text+=f'| {status} | `{code}` | {count} | '+labels.get(code,'按该入口的失败日志和恢复条件处理。')+' |\n'
+    text+='\n## 逐入口实现、结果与日志\n\n'
     text+='模块导航：'+' · '.join('['+f+'](#module-'+str(i)+')' for i,f in enumerate(CANDIDATES))+'\n\n'
     order={'PASSED':0,'PARTIAL':1,'FAILED':2,'UNSUPPORTED':3,'BLOCKED':4}
     for i,family in enumerate(CANDIDATES):
@@ -110,14 +135,18 @@ def write_index(cat):
             implementation=link('源码' if r['status']=='PASSED' else '实现/草稿',r['implementation']) if r['implementation'] and (ROOT/r['implementation']).exists() else '无实现源码'
             amd=log_cell(r,'amd')+'<br>'+link('证据目录',r['amd_evidence']) if r['amd_evidence'] and (ROOT/r['amd_evidence']).exists() else log_cell(r,'amd')
             cpu='<br>'.join(link(pathlib.Path(p).name,p) for p in r['validation_reports']) or link('验收/缺项记录',r['detail'])
-            cuda='CUDA comparison = '+r['cuda_comparison']+'；'+r['cuda_evidence_basis']+'<br>'+log_cell(r,'cuda')
+            cuda='CUDA baseline = '+r['cuda_baseline']+'；comparison = '+r['cuda_comparison']+'；'+r['cuda_evidence_basis']+'<br>'+log_cell(r,'cuda')
+            if r['qualification_evidence']:cpu=link('当前复合验收与全部引用',r['qualification_evidence'])+'<br>'+cpu
+            results=safe(r['scope_and_reason'])+'<br>重试/扩展：'+safe(r['retry_condition'])+'<br>性能：'+safe(r['benchmark'])
+            if r['cuda_comparison_reason']:results+='<br>CUDA 对照范围：'+safe(r['cuda_comparison_reason'])
             label=str(pathlib.PurePosixPath(r['source']).relative_to(family));anchor='sample-'+hashlib.sha256(r['id'].encode()).hexdigest()[:12]
             text+='| '+link(label,r['detail'],base)+' | '+r['status']+' / '+str(len(r['passed_cases']))+'/'+str(len(r['required_cases']))+' | '+safe(actual)+'；'+safe(method)+' | '+link('日志、范围、源码',str(page.relative_to(ROOT)),base)[:-1]+'#'+anchor+') |\n'
-            module_text+='| <a id="'+anchor+'"></a>'+link(label,r['detail'])+' | '+r['status']+' / '+r['level']+'<br>'+str(len(r['passed_cases']))+'/'+str(len(r['required_cases']))+' | '+safe(actual)+'<br>'+safe(method)+'；'+implementation+' | '+safe(r['scope_and_reason'])+' | '+amd+' | '+cpu+'<br>'+cuda+' |\n'
+            module_text+='| <a id="'+anchor+'"></a>'+link(label,r['detail'])+' | '+r['status']+' / '+r['level']+'<br>'+str(len(r['passed_cases']))+'/'+str(len(r['required_cases']))+' | '+safe(actual)+'<br>'+safe(method)+'；'+implementation+' | '+results+' | '+amd+' | '+cpu+'<br>'+cuda+' |\n'
         page.write_text(module_text)
         link_parent=base
         text+='\n'
-    text+='重新生成：`python3 tools/migration/render.py`（同时更新总表和 JSON）。只生成文档，不重新执行 GPU 实验或更改验收结论。\n'
+    text+='## 原始记录与复现\n\n'+link('构建与复现','migration/usage.md')+' · '+link('源码与输入身份','migration/source-tree.json')+' · '+link('开发与实验历史归档','migration/history/README.md')+'\n\n'
+    text+='重新生成：`python3 tools/migration/render.py`（同时更新首页、总表和 JSON）。支持结论来自原始清单及验收证据。\n'
     (base/'support-log-index.md').write_text(text)
     return report
 

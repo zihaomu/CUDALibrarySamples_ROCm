@@ -34,7 +34,7 @@ cmake --build build
 To run the examples, make sure the library files are located in a directory included in your %PATH%
 
 <!-- ROCM-MIGRATION:START -->
-## ROCm 迁移实时状态
+## ROCm 支持情况
 
 13 个独立源入口；PASSED 9，PARTIAL 0，FAILED 4，BLOCKED 0，UNSUPPORTED 0，NOT_STARTED 0，IN_PROGRESS 0。
 

@@ -1,4 +1,6 @@
-# 样例支持方式与详细日志总表
+# 算子支持方式与完整验证记录
+
+[返回项目首页](../../README.md) · [构建与复现](../usage.md) · [机器可读记录](support-log-index.json)
 
 覆盖 **639 个样例入口**：241 PASSED、23 PARTIAL、375 FAILED、0 UNSUPPORTED、0 BLOCKED。全部 30 个模块逐项列出实现方式、范围/原因、AMD 日志、CUDA 日志与验收报告。数据直接来自 [逐例清单](../samples.yaml)，[JSON 索引](support-log-index.json) 另含全部历史证据路径、源码 SHA256、已通过/必需用例及恢复条件。
 
@@ -7,6 +9,59 @@
 CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历史尝试”；只有该行 `CUDA comparison = PASSED` 才表示已完成登记范围的对照。CPU 验收报告保存误差、阈值、残差等结构化检查，不要求每个样例另有一个 CPU 文本 log。所有历史失败与重试记录保留在“详情”。大二进制输出按 hash/生成方法保存，未全部提交 Git。
 
 实现方式是逐例登记值：库 API 迁移、生态库 + 项目 HIP、算法流程重写、执行语义适配或未实现语言绑定；**实际库名称和逐例范围决定具体支持边界**。例如 cuDSS 的 CPU 符号分析 + GPU CSRRF、rotmg 的项目 HIP 修正，不因同样标为 PASSED 而隐去区别。
+
+原始 CUDA baseline 与 CUDA 数学对照分列：原语言工具链缺失时，即使兼容 C++ API 对照通过，原语言 baseline 仍保留 BLOCKED。每个入口的实际误差、残差、阈值和逐项检查结果在 CPU/复合验收 JSON 中；日志包含对应命令、环境和源码/输入 hash。GPU 计时不等于性能资格，[性能验证](performance-comparison.md)单独登记。
+
+## 已验收算子与验证范围
+
+**18 个模块已有整例通过，覆盖 119 个按模块去重的算子/功能族，对应 241 个通过的样例入口。**
+
+计数按数学算子或原例核心功能归并；同模块的精度、尺寸、语言、batch、存储格式和算法变体不重复增加算子数。例如 cuRAND 是 4 种分布、36 个 generator/distribution profile；cuDSS simple 的 3 种语言入口算 1 个功能族。跨模块总数保留不同库接口的实现，GEMM 可分别出现在 cuBLAS 与 cuBLASLt。每个族至少有一个通过独立验收的样例，支持范围限于下表和逐例 required cases。
+
+| 模块 | 已验收算子/功能族数 | 已验收算子/功能 | 通过样例 | 验证范围 |
+| --- | ---: | --- | ---: | --- |
+| [cuBLAS](../../cuBLAS/README.md) | 52 | `amax`、`amin`、`asum`、`axpy`、`copy`、`dgmm`、`dot`、`dotc`、`gbmv`、`geam`、`gemm`、`gemv`、`ger`、`hbmv`、`hemm`、`hemv`、`her`、`her2`、`her2k`、`herk`、`herkx`、`hpmv`、`hpr`、`hpr2`、`nrm2`、`rot`、`rotg`、`rotm`、`rotmg`、`sbmv`、`scal`、`spmv`、`spr`、`spr2`、`swap`、`symm`、`symv`、`syr`、`syr2`、`syr2k`、`syrk`、`syrkx`、`tbmv`、`tbsv`、`tpmv`、`tpsv`、`tpttr`、`trmm`、`trmv`、`trsm`、`trsv`、`trttp` | 72 | 固定教学profile与所列扩展cases；含复杂rank-k类型化适配、HIP GPU packed转换、FP32分组batched及FP64项目策略调优。rotmg极端缩放使用HIP修正；调优/批量变体按同一数学族去重。 |
+| [cuBLASLt](../../cuBLASLt/README.md) | 1 | `GEMM` | 8 | 既有6个profile为FP32 SGEMM、HSH pointer-array/strided、grouped分发及custom-find/autotune。MOAT新资格分别登记FP16 planar负偏移转换/FP32 3M/FP16输出，以及真实COL32/COL4 packing + native INT8/INT32 GemmEx；按样例链接与资格状态限定范围。 |
+| [cuBLASMp](../../cuBLASMp/README.md) | 2 | `block-cyclic 重分布`、`分布式 GEADD` | 2 | 已登记FP64 GEADD与1024阶block-cyclic重分布/往返；双MPI进程和不同GPU实际通信。GEMM子矩阵与低精度collective/quantized scale模式等缺口保持PARTIAL，未覆盖多节点。 |
+| [cuDSS](../../cuDSS/README.md) | 4 | `CSR 矩阵描述符管理`、`稀疏直接求解`、`稀疏重排序与求解`、`稠密矩阵描述符管理` | 23 | FP64 CSR：simple、异构/均匀batch、重排后完整求解及GENERAL多RHS残差；CPU符号/matching + rocSOLVER CSRRF或项目HIP CSR pivot LU。R9新增9个矩阵helper入口（按稠密/CSR两种描述符功能去重，batch与语言不另计）：项目host描述符＋真实HIP数据/指针表，非GPU求解算法；MOAT另有8个真实ISO_C_BINDING Fortran求解入口，uniform保留GPU factor并选择性重算，residual应用实际检查；原CUDA Fortran工具链仍缺。CPP重排严格METIS向量不同及get_set缺项保持PARTIAL，不把历史analysis-only计为完整求解。规模/动态pivot按逐例范围。 |
+| [cuFFT](../../cuFFT/README.md) | 3 | `C2C 复数 FFT`、`FFT 窗口过滤 callback`、`R2C/C2R 实数 FFT` | 10 | 10 个 profile：原始单卡/双卡 C2C、实数正逆变换和 legacy/离线 SPIR-V/HIPRTC callback。1D 多卡使用 hipFFT + RCCL + HIP。 |
+| [cuFFTMp](../../cuFFTMp/README.md) | 1 | `多进程 slab C2C FFT` | 1 | 双MPI rank，原始16³及不均匀17×13×9；hipFFT本地YZ/X FFT + RCCL Send/Recv + HIP pack/unpack/归一化，完整频域与逆变换输出。 |
+| [cuPQC](../../cuPQC/README.md) | 2 | `SHA-256`、`SHA3-256` | 2 | SHA-256 单线程与 SHA3-256 的 32-lane 协作 GPU kernel；各 14 输入与 hashlib 精确一致，PQC 其它算法未实现。 |
+| [cuRAND](../../cuRAND/README.md) | 4 | `lognormal`、`normal`、`poisson`、`uniform` | 36 | 4 种分布 × 9 个 generator = 36 个 profile；原始参数、库内重复性和解析分布矩通过，跨库不要求逐位同序列。 |
+| [cuSOLVER](../../cuSOLVER/README.md) | 10 | `Cholesky 分解`、`LU 分解/求解`、`QR 分解`、`QR 的 Q 应用`、`QR 的 Q 生成`、`SVD`、`三角矩阵求逆`、`多 GPU LU 分解/求解`、`对称特征分解`、`广义对称特征分解` | 23 | B13补611阶双GPU LU/pivot/solve，tile256列分布+RCCL+HIP，全部CPU重构/残差；MgPotrf及Mp原始descriptor缺口另列。原始FP64教学矩阵；status/info、全量分解/重构、残差、正交性、未排序配对及实际meig检查。B6增加64位LU/三角求逆；SVD/eigen typed接口显式INT_MAX限制。 |
+| [cuSPARSE](../../cuSPARSE/README.md) | 20 | `SpVV Graph Capture/Replay`、`axpby`、`bicgstab`、`cg`、`coosort`、`dense2sparse`、`gather`、`gpsvinterleavedbatch`、`rot`、`scatter`、`sddmm`、`sparse2dense`、`spgemm`、`spmat`、`spmm`、`spmv`、`spmvop`、`spsm`、`spsv`、`spvv` | 36 | 已登记CSR/COO/SELL/BSR等格式、CG/BiCG残差/收敛、gpsv布局和真实Graph replay。B8补CSR→CSC、对称展开、HIP GPU预算分块SpGEMM和融合custom op；3项CUDA新API缺失，使用明确标注的兼容数学基线。 |
+| [cuSPARSELt](../../cuSPARSELt/README.md) | 1 | `2:4 结构化稀疏 GEMM（含裁剪/压缩）` | 2 | 默认FP16 A/B/C/bias、FP32累积；项目HIP 4×4 TILE最大L1裁剪、实际packed values/metadata及只读压缩数据的稀疏乘法，basic GPU搜索，advanced双batch/stride/bias/ReLU。14输入CPU/原生稀疏数学对照及两个原CUDA程序另验；原生hipSPARSELt/gfx1201失败另存，不声明原生加速/opaque格式兼容。 |
+| [cuTENSOR](../../cuTENSOR/README.md) | 7 | `三元逐元素运算`、`二元逐元素运算`、`张量 contraction`、`张量 einsum`、`张量 permutation`、`张量 plan cache`、`张量 reduction` | 9 | FP32：hipTensor逐元素/排列/规约；rocBLAS+HIP contraction；B5补HIP padding、einsum路由、三输入收缩和真实GPU分块搜索/持久化缓存。B2/B5全部原始规模输出均有全量FP64 CPU检查；早期M3 contraction仅抽样的历史证据另保留。 |
+| [cuTENSORMg](../../cuTENSORMg/README.md) | 1 | `多 GPU 张量 contraction` | 1 | 单进程双GPU；原始4096 extents/2048 block及i,k / k,j / i,j，hipBLAS + RCCL，全部FP64 CPU参考；其它分区/精度/多节点不外推。 |
+| [MathDx/cuBLASDx](../../MathDx/cuBLASDx/README.md) | 1 | `设备内 GEMM` | 1 | HIP调用方kernel内协作GEMM三阶段、128点双FFT、32阶complex上三角Cholesky/shared LDA33；原生SDK25.6版本差异与兼容CUDA数学对照分开。RNG LEGACY逐位合同仍PARTIAL。 |
+| [MathDx/cuFFTDx](../../MathDx/cuFFTDx/README.md) | 1 | `设备内 C2C FFT` | 1 | HIP调用方kernel内协作128点双C2C FFT、ElementsPerThread=8/共32线程及扩展线程块；全部CPU频谱输出与兼容CUDA数学基线。 |
+| [MathDx/cuSolverDx](../../MathDx/cuSolverDx/README.md) | 4 | `设备内 Cholesky 分解/求解`、`设备内 complex Cholesky`、`设备内 partial-pivot LU`、`设备内三角求解` | 4 | HIP调用方kernel内complex Cholesky；MOAT新增complex FP32 48×32 pivot LU、complex FP64 32阶双batch POSV、FP64 right/lower 32×33 TRSM。原生MathDx26.06.1原例实际device输出、同字节HIP与独立CPU分别记录；只按已通过样例的登记范围统计。 |
+| [NPP](../../NPP/README.md) | 2 | `Euclidean 距离变换/Voronoi`、`零均值 NCC` | 2 | 精确Euclidean距离/Voronoi/整数截断；NCC原始2048×1024 RAW、全部CLI、完整score/GPU argmax、PGM与HIP-event计时已收口，常量模板/图块按原生大图路径实测；Canny原生像素策略与其它未完成入口继续逐例记录。 |
+| [nvCOMP](../../nvCOMP/README.md) | 3 | `CRC32`、`LZ4`、`Snappy` | 8 | hipCOMP LZ4/Snappy原生批处理；CPU↔GPU与hipCOMP↔nvCOMP双向互解、逐chunk status/实际长度、空/边界/损坏流；LZ4 native manager/factory +项目CRC32C及100 raw buffers。独立CRC32入口采用项目HIP IEEE/PKZIP算法，与zlib及真实nvCOMP逐chunk比较，空输入按原生语义拒绝；具体资格见逐例状态。R9 CRC32 benchmark保留CLI/默认16GiB/CSV/完整GPU搜索和最终重算；四个小输入同字节三方，默认各后端RNG独立CPU验收，性能及完整32GiB complete扫描未验收。完整NVBENCH框架仍单列PARTIAL。 |
+
+以下仅有子集/能力探针，**不计入上述整例支持数**：
+
+| 模块 | 已验证子集 | 原始样例尚缺什么 |
+| --- | --- | --- |
+| nvJPEG | rocJPEG baseline 解码；CLI/布局/缩放/ROI/多实例/后处理逐例验收 | progressive缺少原生GPU后端；显式CPU fallback/encode另标注；6 PARTIAL、0 PASSED |
+| NPP | 精确Euclidean距离/Voronoi与NCC已整例通过；Canny有数值子集 | 原生Canny像素策略及其它尚未完成合同按逐例状态记录 |
+
+逐个算子族与样例的可追溯映射见 [operator-support.json](../../migration/reports/operator-support.json)；失败仍按具体入口和原因保留。
+
+## 未整例通过的原因
+
+尚未整例通过不表示算法永远不能在 AMD 上实现。以下按当前逐例结论汇总；具体失败调用、已覆盖子集与重试条件见后面的模块记录。
+
+| 当前结论 | 原因编码 | 入口数 | 说明 |
+| --- | --- | ---: | --- |
+| FAILED | `BINDING_OR_FRONTEND_MIGRATION_REQUIRED` | 59 | 原始语言前端或 vendor 绑定尚未完成迁移。 |
+| FAILED | `BUILD_ERROR` | 316 | 当前移植稿的 API、类型、链接或算法实现未完成，实际构建失败。 |
+| PARTIAL | `INDEPENDENT_VALIDATION_PENDING` | 3 | 尚未完成对应独立数值及实际执行路径验收。 |
+| PARTIAL | `VALIDATED_B12_B15_SUBSET` | 10 | 已有验收子集，原始 descriptor、低精度通信、序列或像素语义仍有缺口。 |
+| PARTIAL | `VALIDATED_B9_B11_SUBSET` | 9 | 已有验收子集，原例框架、调度或配置/查询语义仍有缺口。 |
+| PARTIAL | `VENDOR_PERMUTATION_POLICY_DIFFERS` | 1 | 置换/排序策略未满足原始 vendor 合同。 |
+
+## 逐入口实现、结果与日志
 
 模块导航：[cuBLAS](#module-0) · [cuBLASLt](#module-1) · [cuBLASMp](#module-2) · [cuDSS](#module-3) · [cuEST](#module-4) · [cuFFT](#module-5) · [cuFFTMp](#module-6) · [cuPQC](#module-7) · [cuRAND](#module-8) · [cuSOLVER](#module-9) · [cuSOLVERMp](#module-10) · [cuSOLVERSp2cuDSS](#module-11) · [cuSPARSE](#module-12) · [cuSPARSELt](#module-13) · [cuTENSOR](#module-14) · [cuTENSORMg](#module-15) · [cuTENSORMp](#module-16) · [MathDx/cuBLASDx](#module-17) · [MathDx/cuFFTDx](#module-18) · [MathDx/cuRANDDx](#module-19) · [MathDx/cuSolverDx](#module-20) · [MathDx/libmathdx](#module-21) · [MathDx/nvCOMPDx](#module-22) · [NPP](#module-23) · [NPP+](#module-24) · [nvJPEG](#module-25) · [nvJPEG2000](#module-26) · [nvTIFF](#module-27) · [nvCOMP](#module-28) · [nvMatmulHeuristics](#module-29)
 
@@ -153,28 +208,28 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 
 | 样例 / 详情 | 状态 / 用例 | 实际库与实现方式 | 详细日志与范围 |
 | --- | --- | --- | --- |
-| [fortran/batch/batch.f90](../sample-reports/cuDSS/fortran/batch/batch.f90.md) | PASSED / 12/12 | standard Fortran ISO_C_BINDING + project HIP CSR pivot LU/solve; CPU symbolic min-degree only；ALGORITHM_REWRITE_WITH_STANDARD_FORTRAN_C_ABI | [日志、范围、源码](support-log-index/cuDSS.md#sample-ed8e99db11a7) |
-| [fortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.f90](../sample-reports/cuDSS/fortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.f90.md) | PASSED / 8/8 | ProjectMatrixHelpers + HIP (host descriptors; real device storage/pointer tables) / project host descriptor C ABI / real HIP buffers；PROJECT_DESCRIPTOR_ABI_WITH_HIP_STORAGE | [日志、范围、源码](support-log-index/cuDSS.md#sample-c1497026978d) |
-| [fortran/dense_matrix_helpers/dense_matrix_helpers.f90](../sample-reports/cuDSS/fortran/dense_matrix_helpers/dense_matrix_helpers.f90.md) | PASSED / 8/8 | ProjectMatrixHelpers + HIP (host descriptors; real device storage/pointer tables) / project host descriptor C ABI / real HIP buffers；PROJECT_DESCRIPTOR_ABI_WITH_HIP_STORAGE | [日志、范围、源码](support-log-index/cuDSS.md#sample-fbaecb35f9cf) |
-| [fortran/reordering_phase/reordering_phase.f90](../sample-reports/cuDSS/fortran/reordering_phase/reordering_phase.f90.md) | PASSED / 12/12 | standard Fortran ISO_C_BINDING + project HIP CSR pivot LU/solve; CPU symbolic min-degree only；ALGORITHM_REWRITE_WITH_STANDARD_FORTRAN_C_ABI | [日志、范围、源码](support-log-index/cuDSS.md#sample-5cd3099a7877) |
-| [fortran/residual/residual.f90](../sample-reports/cuDSS/fortran/residual/residual.f90.md) | PASSED / 12/12 | standard Fortran ISO_C_BINDING + project HIP CSR pivot LU/solve; CPU symbolic min-degree only；ALGORITHM_REWRITE_WITH_STANDARD_FORTRAN_C_ABI | [日志、范围、源码](support-log-index/cuDSS.md#sample-da3a318cdcfe) |
+| [fortran/batch/batch.f90](../sample-reports/cuDSS/fortran/batch/batch.f90.md) | PASSED / 12/12 | standard Fortran ISO_C_BINDING + project HIP CSR pivot LU/solve; CPU symbolic min-degree only；标准 Fortran 入口 + 项目 C ABI / HIP 算法 | [日志、范围、源码](support-log-index/cuDSS.md#sample-ed8e99db11a7) |
+| [fortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.f90](../sample-reports/cuDSS/fortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.f90.md) | PASSED / 8/8 | ProjectMatrixHelpers + HIP (host descriptors; real device storage/pointer tables) / project host descriptor C ABI / real HIP buffers；项目 host 描述符 ABI + HIP GPU 存储 | [日志、范围、源码](support-log-index/cuDSS.md#sample-c1497026978d) |
+| [fortran/dense_matrix_helpers/dense_matrix_helpers.f90](../sample-reports/cuDSS/fortran/dense_matrix_helpers/dense_matrix_helpers.f90.md) | PASSED / 8/8 | ProjectMatrixHelpers + HIP (host descriptors; real device storage/pointer tables) / project host descriptor C ABI / real HIP buffers；项目 host 描述符 ABI + HIP GPU 存储 | [日志、范围、源码](support-log-index/cuDSS.md#sample-fbaecb35f9cf) |
+| [fortran/reordering_phase/reordering_phase.f90](../sample-reports/cuDSS/fortran/reordering_phase/reordering_phase.f90.md) | PASSED / 12/12 | standard Fortran ISO_C_BINDING + project HIP CSR pivot LU/solve; CPU symbolic min-degree only；标准 Fortran 入口 + 项目 C ABI / HIP 算法 | [日志、范围、源码](support-log-index/cuDSS.md#sample-5cd3099a7877) |
+| [fortran/residual/residual.f90](../sample-reports/cuDSS/fortran/residual/residual.f90.md) | PASSED / 12/12 | standard Fortran ISO_C_BINDING + project HIP CSR pivot LU/solve; CPU symbolic min-degree only；标准 Fortran 入口 + 项目 C ABI / HIP 算法 | [日志、范围、源码](support-log-index/cuDSS.md#sample-da3a318cdcfe) |
 | [fortran/simple/simple.f90](../sample-reports/cuDSS/fortran/simple/simple.f90.md) | PASSED / 2/2 | rocSOLVER + rocBLAS via ISO_C_BINDING/C ABI / GPU CSRRF sparse Cholesky; CPU sparse symbolic graph；改用 AMD 库重写算法流程 | [日志、范围、源码](support-log-index/cuDSS.md#sample-59fa745f5910) |
-| [fortran/sparse_matrix_helpers/sparse_matrix_helpers.f90](../sample-reports/cuDSS/fortran/sparse_matrix_helpers/sparse_matrix_helpers.f90.md) | PASSED / 8/8 | ProjectMatrixHelpers + HIP (host descriptors; real device storage/pointer tables) / project host descriptor C ABI / real HIP buffers；PROJECT_DESCRIPTOR_ABI_WITH_HIP_STORAGE | [日志、范围、源码](support-log-index/cuDSS.md#sample-3cf3c65f6040) |
-| [fortran/uniform_batch/uniform_batch.f90](../sample-reports/cuDSS/fortran/uniform_batch/uniform_batch.f90.md) | PASSED / 12/12 | standard Fortran ISO_C_BINDING + project HIP CSR pivot LU/solve; CPU symbolic min-degree only；ALGORITHM_REWRITE_WITH_STANDARD_FORTRAN_C_ABI | [日志、范围、源码](support-log-index/cuDSS.md#sample-c4fef2833c5e) |
-| [nvfortran/batch/batch.cuf](../sample-reports/cuDSS/nvfortran/batch/batch.cuf.md) | PASSED / 12/12 | standard Fortran ISO_C_BINDING + project HIP CSR pivot LU/solve; CPU symbolic min-degree only；ALGORITHM_REWRITE_WITH_STANDARD_FORTRAN_C_ABI | [日志、范围、源码](support-log-index/cuDSS.md#sample-2f7dbb46d786) |
-| [nvfortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.cuf](../sample-reports/cuDSS/nvfortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.cuf.md) | PASSED / 8/8 | ProjectMatrixHelpers + HIP (host descriptors; real device storage/pointer tables) / project host descriptor C ABI / real HIP buffers；PROJECT_DESCRIPTOR_ABI_WITH_HIP_STORAGE | [日志、范围、源码](support-log-index/cuDSS.md#sample-783da9a9437d) |
-| [nvfortran/dense_matrix_helpers/dense_matrix_helpers.cuf](../sample-reports/cuDSS/nvfortran/dense_matrix_helpers/dense_matrix_helpers.cuf.md) | PASSED / 8/8 | ProjectMatrixHelpers + HIP (host descriptors; real device storage/pointer tables) / project host descriptor C ABI / real HIP buffers；PROJECT_DESCRIPTOR_ABI_WITH_HIP_STORAGE | [日志、范围、源码](support-log-index/cuDSS.md#sample-f997bfe4c747) |
-| [nvfortran/reordering_phase/reordering_phase.cuf](../sample-reports/cuDSS/nvfortran/reordering_phase/reordering_phase.cuf.md) | PASSED / 12/12 | standard Fortran ISO_C_BINDING + project HIP CSR pivot LU/solve; CPU symbolic min-degree only；ALGORITHM_REWRITE_WITH_STANDARD_FORTRAN_C_ABI | [日志、范围、源码](support-log-index/cuDSS.md#sample-41fa55f0835f) |
-| [nvfortran/residual/residual.cuf](../sample-reports/cuDSS/nvfortran/residual/residual.cuf.md) | PASSED / 12/12 | standard Fortran ISO_C_BINDING + project HIP CSR pivot LU/solve; CPU symbolic min-degree only；ALGORITHM_REWRITE_WITH_STANDARD_FORTRAN_C_ABI | [日志、范围、源码](support-log-index/cuDSS.md#sample-2867130b869e) |
+| [fortran/sparse_matrix_helpers/sparse_matrix_helpers.f90](../sample-reports/cuDSS/fortran/sparse_matrix_helpers/sparse_matrix_helpers.f90.md) | PASSED / 8/8 | ProjectMatrixHelpers + HIP (host descriptors; real device storage/pointer tables) / project host descriptor C ABI / real HIP buffers；项目 host 描述符 ABI + HIP GPU 存储 | [日志、范围、源码](support-log-index/cuDSS.md#sample-3cf3c65f6040) |
+| [fortran/uniform_batch/uniform_batch.f90](../sample-reports/cuDSS/fortran/uniform_batch/uniform_batch.f90.md) | PASSED / 12/12 | standard Fortran ISO_C_BINDING + project HIP CSR pivot LU/solve; CPU symbolic min-degree only；标准 Fortran 入口 + 项目 C ABI / HIP 算法 | [日志、范围、源码](support-log-index/cuDSS.md#sample-c4fef2833c5e) |
+| [nvfortran/batch/batch.cuf](../sample-reports/cuDSS/nvfortran/batch/batch.cuf.md) | PASSED / 12/12 | standard Fortran ISO_C_BINDING + project HIP CSR pivot LU/solve; CPU symbolic min-degree only；标准 Fortran 入口 + 项目 C ABI / HIP 算法 | [日志、范围、源码](support-log-index/cuDSS.md#sample-2f7dbb46d786) |
+| [nvfortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.cuf](../sample-reports/cuDSS/nvfortran/batch_sparse_matrix_helpers/batch_sparse_matrix_helpers.cuf.md) | PASSED / 8/8 | ProjectMatrixHelpers + HIP (host descriptors; real device storage/pointer tables) / project host descriptor C ABI / real HIP buffers；项目 host 描述符 ABI + HIP GPU 存储 | [日志、范围、源码](support-log-index/cuDSS.md#sample-783da9a9437d) |
+| [nvfortran/dense_matrix_helpers/dense_matrix_helpers.cuf](../sample-reports/cuDSS/nvfortran/dense_matrix_helpers/dense_matrix_helpers.cuf.md) | PASSED / 8/8 | ProjectMatrixHelpers + HIP (host descriptors; real device storage/pointer tables) / project host descriptor C ABI / real HIP buffers；项目 host 描述符 ABI + HIP GPU 存储 | [日志、范围、源码](support-log-index/cuDSS.md#sample-f997bfe4c747) |
+| [nvfortran/reordering_phase/reordering_phase.cuf](../sample-reports/cuDSS/nvfortran/reordering_phase/reordering_phase.cuf.md) | PASSED / 12/12 | standard Fortran ISO_C_BINDING + project HIP CSR pivot LU/solve; CPU symbolic min-degree only；标准 Fortran 入口 + 项目 C ABI / HIP 算法 | [日志、范围、源码](support-log-index/cuDSS.md#sample-41fa55f0835f) |
+| [nvfortran/residual/residual.cuf](../sample-reports/cuDSS/nvfortran/residual/residual.cuf.md) | PASSED / 12/12 | standard Fortran ISO_C_BINDING + project HIP CSR pivot LU/solve; CPU symbolic min-degree only；标准 Fortran 入口 + 项目 C ABI / HIP 算法 | [日志、范围、源码](support-log-index/cuDSS.md#sample-2867130b869e) |
 | [nvfortran/simple/simple.cuf](../sample-reports/cuDSS/nvfortran/simple/simple.cuf.md) | PASSED / 2/2 | rocSOLVER + rocBLAS via ISO_C_BINDING/C ABI / GPU CSRRF sparse Cholesky; CPU sparse symbolic graph；改用 AMD 库重写算法流程 | [日志、范围、源码](support-log-index/cuDSS.md#sample-8d0ee8da6664) |
-| [nvfortran/sparse_matrix_helpers/sparse_matrix_helpers.cuf](../sample-reports/cuDSS/nvfortran/sparse_matrix_helpers/sparse_matrix_helpers.cuf.md) | PASSED / 8/8 | ProjectMatrixHelpers + HIP (host descriptors; real device storage/pointer tables) / project host descriptor C ABI / real HIP buffers；PROJECT_DESCRIPTOR_ABI_WITH_HIP_STORAGE | [日志、范围、源码](support-log-index/cuDSS.md#sample-110c494de4cb) |
-| [nvfortran/uniform_batch/uniform_batch.cuf](../sample-reports/cuDSS/nvfortran/uniform_batch/uniform_batch.cuf.md) | PASSED / 12/12 | standard Fortran ISO_C_BINDING + project HIP CSR pivot LU/solve; CPU symbolic min-degree only；ALGORITHM_REWRITE_WITH_STANDARD_FORTRAN_C_ABI | [日志、范围、源码](support-log-index/cuDSS.md#sample-1ecfa60d4a88) |
+| [nvfortran/sparse_matrix_helpers/sparse_matrix_helpers.cuf](../sample-reports/cuDSS/nvfortran/sparse_matrix_helpers/sparse_matrix_helpers.cuf.md) | PASSED / 8/8 | ProjectMatrixHelpers + HIP (host descriptors; real device storage/pointer tables) / project host descriptor C ABI / real HIP buffers；项目 host 描述符 ABI + HIP GPU 存储 | [日志、范围、源码](support-log-index/cuDSS.md#sample-110c494de4cb) |
+| [nvfortran/uniform_batch/uniform_batch.cuf](../sample-reports/cuDSS/nvfortran/uniform_batch/uniform_batch.cuf.md) | PASSED / 12/12 | standard Fortran ISO_C_BINDING + project HIP CSR pivot LU/solve; CPU symbolic min-degree only；标准 Fortran 入口 + 项目 C ABI / HIP 算法 | [日志、范围、源码](support-log-index/cuDSS.md#sample-1ecfa60d4a88) |
 | [simple/simple.cpp](../sample-reports/cuDSS/simple/simple.cpp.md) | PASSED / 3/3 | rocSOLVER CSRRF + rocBLAS / GPU sparse Cholesky; CPU sparse symbolic analysis；改用 AMD 库重写算法流程 | [日志、范围、源码](support-log-index/cuDSS.md#sample-f495b401e674) |
 | [simple_batch/simple_batch.cpp](../sample-reports/cuDSS/simple_batch/simple_batch.cpp.md) | PASSED / 8/8 | CPU sparse symbolic/matching + rocSOLVER CSRRF LU / HIP CSR pivot LU and GPU query adapter / rocSOLVER/HIP runtime；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/cuDSS.md#sample-84cae1939da0) |
-| [simple_batch_sparse_matrix_helpers/simple_batch_sparse_matrix_helpers.cpp](../sample-reports/cuDSS/simple_batch_sparse_matrix_helpers/simple_batch_sparse_matrix_helpers.cpp.md) | PASSED / 8/8 | ProjectMatrixHelpers + HIP (host descriptors; real device storage/pointer tables) / project host descriptor C ABI / real HIP buffers；PROJECT_DESCRIPTOR_ABI_WITH_HIP_STORAGE | [日志、范围、源码](support-log-index/cuDSS.md#sample-7d78c16b5bd9) |
-| [simple_dense_matrix_helpers/simple_dense_matrix_helpers.cpp](../sample-reports/cuDSS/simple_dense_matrix_helpers/simple_dense_matrix_helpers.cpp.md) | PASSED / 8/8 | ProjectMatrixHelpers + HIP (host descriptors; real device storage/pointer tables) / project host descriptor C ABI / real HIP buffers；PROJECT_DESCRIPTOR_ABI_WITH_HIP_STORAGE | [日志、范围、源码](support-log-index/cuDSS.md#sample-a0b16fa26f6c) |
+| [simple_batch_sparse_matrix_helpers/simple_batch_sparse_matrix_helpers.cpp](../sample-reports/cuDSS/simple_batch_sparse_matrix_helpers/simple_batch_sparse_matrix_helpers.cpp.md) | PASSED / 8/8 | ProjectMatrixHelpers + HIP (host descriptors; real device storage/pointer tables) / project host descriptor C ABI / real HIP buffers；项目 host 描述符 ABI + HIP GPU 存储 | [日志、范围、源码](support-log-index/cuDSS.md#sample-7d78c16b5bd9) |
+| [simple_dense_matrix_helpers/simple_dense_matrix_helpers.cpp](../sample-reports/cuDSS/simple_dense_matrix_helpers/simple_dense_matrix_helpers.cpp.md) | PASSED / 8/8 | ProjectMatrixHelpers + HIP (host descriptors; real device storage/pointer tables) / project host descriptor C ABI / real HIP buffers；项目 host 描述符 ABI + HIP GPU 存储 | [日志、范围、源码](support-log-index/cuDSS.md#sample-a0b16fa26f6c) |
 | [simple_residual/simple_residual.cpp](../sample-reports/cuDSS/simple_residual/simple_residual.cpp.md) | PASSED / 8/8 | CPU sparse symbolic/matching + rocSOLVER CSRRF LU / HIP CSR pivot LU and GPU query adapter / rocSOLVER/HIP runtime；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/cuDSS.md#sample-a2698a05926c) |
-| [simple_sparse_matrix_helpers/simple_sparse_matrix_helpers.cpp](../sample-reports/cuDSS/simple_sparse_matrix_helpers/simple_sparse_matrix_helpers.cpp.md) | PASSED / 8/8 | ProjectMatrixHelpers + HIP (host descriptors; real device storage/pointer tables) / project host descriptor C ABI / real HIP buffers；PROJECT_DESCRIPTOR_ABI_WITH_HIP_STORAGE | [日志、范围、源码](support-log-index/cuDSS.md#sample-d58b5f8ba98a) |
+| [simple_sparse_matrix_helpers/simple_sparse_matrix_helpers.cpp](../sample-reports/cuDSS/simple_sparse_matrix_helpers/simple_sparse_matrix_helpers.cpp.md) | PASSED / 8/8 | ProjectMatrixHelpers + HIP (host descriptors; real device storage/pointer tables) / project host descriptor C ABI / real HIP buffers；项目 host 描述符 ABI + HIP GPU 存储 | [日志、范围、源码](support-log-index/cuDSS.md#sample-d58b5f8ba98a) |
 | [simple_uniform_batch/simple_uniform_batch.cpp](../sample-reports/cuDSS/simple_uniform_batch/simple_uniform_batch.cpp.md) | PASSED / 8/8 | CPU sparse symbolic/matching + rocSOLVER CSRRF LU / HIP CSR pivot LU and GPU query adapter / rocSOLVER/HIP runtime；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/cuDSS.md#sample-c683e166ec18) |
 | [simple_get_set/simple_get_set.cpp](../sample-reports/cuDSS/simple_get_set/simple_get_set.cpp.md) | PARTIAL / 8/9 | CPU sparse symbolic/matching + rocSOLVER CSRRF LU / HIP CSR pivot LU and GPU query adapter / rocSOLVER/HIP runtime；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/cuDSS.md#sample-c93d8086c25d) |
 | [simple_reordering_phase/simple_reordering_phase.cpp](../sample-reports/cuDSS/simple_reordering_phase/simple_reordering_phase.cpp.md) | PARTIAL / 1/2 | CPU symbolic min-degree + project HIP CSR pivot LU/solve via shared C ABI / CPU analysis + HIP preparation；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/cuDSS.md#sample-97a634ce0b2f) |
@@ -504,8 +559,8 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 
 | 样例 / 详情 | 状态 / 用例 | 实际库与实现方式 | 详细日志与范围 |
 | --- | --- | --- | --- |
-| [matmul/matmul_example.cpp](../sample-reports/cuSPARSELt/matmul/matmul_example.cpp.md) | PASSED / 14/14 | project HIP GPU TILE prune + packed 2:4 values/metadata + sparse-only matmul / HIP GPU; CPU descriptor/constant-mask setup only；PROJECT_HIP_ALGORITHM_REWRITE | [日志、范围、源码](support-log-index/cuSPARSELt.md#sample-67e033d8a0a9) |
-| [matmul_advanced/matmul_advanced_example.cpp](../sample-reports/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp.md) | PASSED / 14/14 | project HIP GPU TILE prune + packed 2:4 values/metadata + sparse-only matmul / HIP GPU; CPU descriptor/constant-mask setup only；PROJECT_HIP_ALGORITHM_REWRITE | [日志、范围、源码](support-log-index/cuSPARSELt.md#sample-9068bb7b1039) |
+| [matmul/matmul_example.cpp](../sample-reports/cuSPARSELt/matmul/matmul_example.cpp.md) | PASSED / 14/14 | project HIP GPU TILE prune + packed 2:4 values/metadata + sparse-only matmul / HIP GPU; CPU descriptor/constant-mask setup only；项目 HIP 算法重写 | [日志、范围、源码](support-log-index/cuSPARSELt.md#sample-67e033d8a0a9) |
+| [matmul_advanced/matmul_advanced_example.cpp](../sample-reports/cuSPARSELt/matmul_advanced/matmul_advanced_example.cpp.md) | PASSED / 14/14 | project HIP GPU TILE prune + packed 2:4 values/metadata + sparse-only matmul / HIP GPU; CPU descriptor/constant-mask setup only；项目 HIP 算法重写 | [日志、范围、源码](support-log-index/cuSPARSELt.md#sample-9068bb7b1039) |
 
 <a id="module-14"></a>
 
@@ -812,7 +867,7 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 
 | 样例 / 详情 | 状态 / 用例 | 实际库与实现方式 | 详细日志与范围 |
 | --- | --- | --- | --- |
-| [benchmarks/benchmark_crc32.cpp](../sample-reports/nvCOMP/benchmarks/benchmark_crc32.cpp.md) | PASSED / 8/8 | HIP + hipRAND + project segmented IEEE CRC32/GPU GF2 search / project HIP segmented CRC/GF2 backend；PROJECT_HIP_CRC_WITH_ORIGINAL_BENCHMARK_HARNESS | [日志、范围、源码](support-log-index/nvCOMP.md#sample-8415662e606e) |
+| [benchmarks/benchmark_crc32.cpp](../sample-reports/nvCOMP/benchmarks/benchmark_crc32.cpp.md) | PASSED / 8/8 | HIP + hipRAND + project segmented IEEE CRC32/GPU GF2 search / project HIP segmented CRC/GF2 backend；原始 benchmark 框架 + 项目 HIP CRC 算法 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-8415662e606e) |
 | [examples/high_level_quickstart_example.cpp](../sample-reports/nvCOMP/examples/high_level_quickstart_example.cpp.md) | PASSED / 8/8 | hipCOMP LZ4/Snappy + CPU liblz4/Snappy + HIP checked stream/CRC manager adapter / hipCOMP/HIP runtime + independent CPU codecs；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-eb626e77bd0e) |
 | [examples/low_level_quickstart_example.cpp](../sample-reports/nvCOMP/examples/low_level_quickstart_example.cpp.md) | PASSED / 8/8 | hipCOMP LZ4/Snappy + CPU liblz4/Snappy + HIP checked stream/CRC manager adapter / hipCOMP/HIP runtime + independent CPU codecs；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-ca0296bde2fe) |
 | [examples/lz4_cpu_compression.cu](../sample-reports/nvCOMP/examples/lz4_cpu_compression.cu.md) | PASSED / 8/8 | hipCOMP LZ4/Snappy + CPU liblz4/Snappy + HIP checked stream/CRC manager adapter / hipCOMP/HIP runtime + independent CPU codecs；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/nvCOMP.md#sample-9b0a4172fece) |
@@ -859,4 +914,8 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 | [6_get_configs_ex.py](../sample-reports/nvMatmulHeuristics/6_get_configs_ex.py.md) | FAILED / 0/2 | 尚无已验证使用库；语言绑定尚未实现 | [日志、范围、源码](support-log-index/nvMatmulHeuristics.md#sample-0bf631378227) |
 | [7_smem_carveout.py](../sample-reports/nvMatmulHeuristics/7_smem_carveout.py.md) | FAILED / 0/2 | 尚无已验证使用库；语言绑定尚未实现 | [日志、范围、源码](support-log-index/nvMatmulHeuristics.md#sample-8d119ba9fc57) |
 
-重新生成：`python3 tools/migration/render.py`（同时更新总表和 JSON）。只生成文档，不重新执行 GPU 实验或更改验收结论。
+## 原始记录与复现
+
+[构建与复现](../usage.md) · [源码与输入身份](../source-tree.json) · [开发与实验历史归档](../history/README.md)
+
+重新生成：`python3 tools/migration/render.py`（同时更新首页、总表和 JSON）。支持结论来自原始清单及验收证据。

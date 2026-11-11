@@ -17,7 +17,7 @@ This folder demonstrates cuSPARSELt Generic APIs usage.
     The sample extends the previous code to demonstrate how to perform batched GEMM computation, Split-K, and how to set up the activation function and bias
 
 <!-- ROCM-MIGRATION:START -->
-## ROCm 迁移实时状态
+## ROCm 支持情况
 
 2 个独立源入口；PASSED 2，PARTIAL 0，FAILED 0，BLOCKED 0，UNSUPPORTED 0，NOT_STARTED 0，IN_PROGRESS 0。
 

@@ -159,7 +159,7 @@ This folder demonstrates cuSOLVER APIs usage.
     The sample preforms *triangular matrix mnversion*. See example for detailed description.
 
 <!-- ROCM-MIGRATION:START -->
-## ROCm 迁移实时状态
+## ROCm 支持情况
 
 39 个独立源入口；PASSED 23，PARTIAL 4，FAILED 12，BLOCKED 0，UNSUPPORTED 0，NOT_STARTED 0，IN_PROGRESS 0。
 

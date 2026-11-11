@@ -58,6 +58,4 @@ else:body+='\n'+section+'\n'
 doc.write_text(body)
 mirror=body.replace('](cuda_samples_on_rocm_design.md)','](design.md)').replace('](cuda_samples_on_rocm_roadmap.md)','](roadmap.md)').replace('](../CUDALibrarySamples_ROCm/','](../').replace('](../../AGENTS.md)','](../AGENTS.md)')
 (ROOT/'migration/moat-rewrite-plan.md').write_text(mirror)
-readme=ROOT/'README.md';text=readme.read_text();link='[MOAT 重写计划](migration/moat-rewrite-plan.md) · [重写实时进展与实验日志](migration/reports/rewrite-progress.md)'
-if link not in text:text=text.replace('# CUDA Library Samples on ROCm\n','# CUDA Library Samples on ROCm\n\n'+link+'\n',1);readme.write_text(text)
 print(json.dumps(rows))

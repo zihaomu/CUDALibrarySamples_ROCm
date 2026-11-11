@@ -71,7 +71,7 @@ The examples in this repository are optimized for the following Nvidia GPU archi
 This repository primarily demonstrates the use of the [NPP+](https://docs.nvidia.com/cuda/nppplus/introduction.html) library.
 
 <!-- ROCM-MIGRATION:START -->
-## ROCm 迁移实时状态
+## ROCm 支持情况
 
 6 个独立源入口；PASSED 0，PARTIAL 1，FAILED 5，BLOCKED 0，UNSUPPORTED 0，NOT_STARTED 0，IN_PROGRESS 0。
 

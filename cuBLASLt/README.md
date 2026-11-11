@@ -69,7 +69,7 @@ x86_64
 On Windows, instead of running the last build step, open the Visual Studio Solution that was created and build.
 
 <!-- ROCM-MIGRATION:START -->
-## ROCm 迁移实时状态
+## ROCm 支持情况
 
 20 个独立源入口；PASSED 8，PARTIAL 0，FAILED 12，BLOCKED 0，UNSUPPORTED 0，NOT_STARTED 0，IN_PROGRESS 0。
 

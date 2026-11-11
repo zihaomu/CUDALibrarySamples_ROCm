@@ -174,7 +174,7 @@ The `matmul_ag`, `matmul_rs`, and `matmul_ar` samples support both Hopper FP8 sc
 GPU architecture, CUDA Toolkit, and cuBLASLt support available at runtime.
 
 <!-- ROCM-MIGRATION:START -->
-## ROCm 迁移实时状态
+## ROCm 支持情况
 
 14 个独立源入口；PASSED 2，PARTIAL 4，FAILED 8，BLOCKED 0，UNSUPPORTED 0，NOT_STARTED 0，IN_PROGRESS 0。
 

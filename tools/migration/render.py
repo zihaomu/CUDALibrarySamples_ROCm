@@ -2,7 +2,7 @@
 """Generate per-entrypoint, family and root status pages from observed evidence."""
 import collections,json,os,pathlib,re,subprocess
 from catalog import ROOT,CANDIDATES,BASE
-from operator_support import write_reports,render_overview
+from operator_support import write_reports
 from support_log_index import write_index
 STATES=['PASSED','PARTIAL','FAILED','BLOCKED','UNSUPPORTED','NOT_STARTED','IN_PROGRESS']
 def link(label,target,parent):return '['+str(label).replace('|','/')+']('+os.path.relpath(target,parent).replace(' ','%20')+')'
@@ -35,7 +35,7 @@ def render():
    r=(ROOT/s['implementation']).parent/'README.md';r.write_text('# '+s['id']+' 的 ROCm 实现\n\n'+s['reason']+'\n\n'+link('逐例状态、命令与证据',q,r.parent)+'\n')
  for family in CANDIDATES:
   p=ROOT/family/'README.md';samples=groups[family];c=collections.Counter(s['status'] for s in samples);a='<!-- ROCM-MIGRATION:START -->';b='<!-- ROCM-MIGRATION:END -->'
-  rows=[a,'## ROCm 迁移实时状态','',f'{len(samples)} 个独立源入口；'+ '，'.join(f'{state} {c[state]}' for state in STATES)+ '。','', '候选库：'+', '.join(CANDIDATES[family])+'。候选不等于已使用；基础探针成功也不等于整库迁移成功。','',decisions[family]['reason'],'','| 原始样例 / 逐例详情 | 实际库 / 后端 | 程度 / 状态 | 已覆盖 / 缺失功能与成功或失败原因 | CUDA baseline / 对照 | 证据 |','| --- | --- | --- | --- | --- | --- |']
+  rows=[a,'## ROCm 支持情况','',f'{len(samples)} 个独立源入口；'+ '，'.join(f'{state} {c[state]}' for state in STATES)+ '。','', '候选库：'+', '.join(CANDIDATES[family])+'。候选不等于已使用；基础探针成功也不等于整库迁移成功。','',decisions[family]['reason'],'','| 原始样例 / 逐例详情 | 实际库 / 后端 | 程度 / 状态 | 已覆盖 / 缺失功能与成功或失败原因 | CUDA baseline / 对照 | 证据 |','| --- | --- | --- | --- | --- | --- |']
   for s in samples:
    libs=(s.get('actual_library') or '未验证使用库')+(' / '+s['backend_library'] if s.get('actual_library') and s.get('backend_library') else '');ev='；'.join(link('记录',ROOT/e,p.parent) for e in s['evidence'][-2:]) or '—';label=str(pathlib.Path(s['source']).relative_to(family));rows.append('| '+link(label,ROOT/s['source'],p.parent)+' · '+link('详情',detail_path(s),p.parent)+' | '+safe(libs)+' | '+s['level']+' / '+s['status']+' | '+safe(s['reason'])+' | '+s['cuda_baseline']+' / '+s['cuda_comparison']+' | '+ev+' |')
   rows+=['','生成来源：'+link('migration/samples.yaml',ROOT/'migration/samples.yaml',p.parent)+'；执行 `python3 tools/migration/render.py` 更新。',b]
@@ -44,103 +44,60 @@ def render():
   prefix=content.rstrip();original=subprocess.run(['git','show',BASE+':'+str(p.relative_to(ROOT))],cwd=ROOT,capture_output=True)
   if original.returncode==0 and original.stdout.decode().replace('\r\n','\n').rstrip()==prefix:prefix=original.stdout.decode().rstrip('\r\n')
   p.write_bytes((prefix+'\n\n'+'\n'.join(rows)+'\n').encode())
- p=ROOT/'README.md';content=p.read_text();upstream=content.split('## 上游 CUDA Library Samples 说明',1)[1];intro='''[![License](https://img.shields.io/badge/License-Apache_2.0-yellowgreen.svg)](https://opensource.org/licenses/Apache-2.0)
+ p=ROOT/'README.md'
+ routes={
+  'cuBLAS':'hipBLAS / rocBLAS + HIP',
+  'cuBLASLt':'hipBLASLt、hipBLAS / rocBLAS + HIP 布局转换',
+  'cuBLASMp':'MPI + RCCL + HIP',
+  'cuDSS':'rocSOLVER / rocBLAS + HIP、CPU 符号分析、项目描述符 ABI',
+  'cuFFT':'hipFFT / rocFFT + HIP / HIPRTC；多卡使用 RCCL',
+  'cuFFTMp':'MPI + hipFFT + RCCL + HIP',
+  'cuPQC':'项目 HIP SHA 实现',
+  'cuRAND':'hipRAND / rocRAND',
+  'cuSOLVER':'hipSOLVER / rocSOLVER + HIP；多卡使用 RCCL',
+  'cuSPARSE':'hipSPARSE / rocSPARSE + hipBLAS + HIP / HIP Graph',
+  'cuSPARSELt':'项目 HIP 2:4 裁剪、压缩和稀疏乘法',
+  'cuTENSOR':'hipTensor、rocBLAS + HIP',
+  'cuTENSORMg':'hipBLAS + RCCL + HIP',
+  'MathDx/cuBLASDx':'调用方 HIP kernel 内的协作计算',
+  'MathDx/cuFFTDx':'调用方 HIP kernel 内的 FFT',
+  'MathDx/cuSolverDx':'调用方 HIP kernel 内的分解和求解',
+  'NPP':'项目 HIP 图像处理实现',
+  'nvCOMP':'hipCOMP + 项目 HIP CRC 实现',
+ }
+ intro='''[![License](https://img.shields.io/badge/License-Apache_2.0-yellowgreen.svg)](LICENSE.md)
 
 # CUDA Library Samples on ROCm
 
-[MOAT 重写计划](migration/moat-rewrite-plan.md) · [重写实时进展与实验日志](migration/reports/rewrite-progress.md)
+将 NVIDIA CUDA Library Samples 逐例实现为 ROCm 版本，按原例功能选择 AMD 生态库、HIP 算法或明确标注的 CPU/GPU 混合实现。原始 CUDA 样例保留作参考。
 
-对照 NVIDIA CUDA Library Samples，逐例选择 AMD/ROCm 生态中适合的库并实现。每例公开实际使用库、实现程度、正确性结果、CUDA 对照及失败原因。保留 CUDA 原始源码作为参考；AMD 实验固定 ROCm 10.1.0 / Radeon AI PRO R9700（gfx1201），CUDA 对照使用双 RTX 5090 机器。
+[算子支持方式与完整验证记录](migration/reports/support-log-index.md) · [已验收算子清单](migration/reports/operator-support.md) · [构建与复现](migration/usage.md) · [项目文档](migration/README.md)
 
-[B12–B15 实施与缺口](migration/reports/batches12-15.md) · [B9–B11 验收](migration/reports/batches9-11.md) · [B4–B8 验收](migration/reports/batches4-8.md) · [后续批次计划与能力边界](migration/roadmap.md) · [支持方式与详细日志总表](migration/reports/support-log-index.md) · [模块支持矩阵](#模块支持矩阵) · [已验收算子](#已验收算子与验证范围) · [未通过的具体原因](#未通过和不支持的具体原因) · [设计与实施日志](migration/design.md) · [执行交付报告](migration/reports/plan-execution.md) · [逐例清单](migration/samples.yaml) · [环境锁](migration/environments/project.lock.json)
-
-## 当前结果
+## 整体支持情况
 
 '''
- intro+=f'上游固定为 `{BASE}`。静态审计覆盖 **866 个源文件、477 个构建定义、{len(cat["samples"])} 个独立可执行/脚本源入口**。链接辅助文件、外部 SDK binding、架构/静态链接/通信变体另存元数据，不重复计入入口分母；没有在所有专有 SDK 条件下展开并执行每个构建配置。\n\n'+totals+'。\n\n'
- intro+='`PASSED` 只表示该行明确登记的原始功能和必需用例通过，不能推及整库、其它精度/规模或性能。`PARTIAL` 包括数值子集已通过但原始功能/执行合同仍有缺口，或已运行尚缺独立验收的端口；`FAILED` 保留真实失败日志和重试条件。不存在“HIPIFY 退出成功即迁移成功”的统计。\n\n'
- intro+='专项证据：[M1 双端数值对照](migration/reports/m1-comparison.json)、[BLAS 三方对照](migration/reports/blas-three-way.json)、[稀疏 expected 检查](migration/reports/sparse-original-validation.json)、[新增双端数值/分布对照](migration/reports/additional-comparison.json)、[AMD 生态探针](migration/reports/native-probes.json)、[选型与缺口](migration/reports/ecosystem-decisions.md)、[最终一致性检查](migration/reports/final-validation.json)。**M0–M5 已逐批执行并记录结果；按逐例登记范围的成功率为 '+f'{100*counts["PASSED"]/len(cat["samples"]):.2f}%'+ '，失败/部分完成仍在分母。**\n\n'
- intro+='性能仅选择 6 个 GEMM profile；AMD GPU 有其它任务，空闲资格检查失败，因此 [性能报告](migration/reports/performance-comparison.md) 标为 BLOCKED，仅保留原始计时，不发布合格速度比。\n\n'
- if (ROOT/'migration/reports/batch2-validation.json').exists():
-  batch=json.loads((ROOT/'migration/reports/batch2-validation.json').read_text());qualified=[r for r in batch if r['status']=='PASSED'];intro+='**第二批已收口：'+str(len(qualified))+'/17 个样例、'+str(sum(len(r['cases']) for r in qualified))+' 个输入 case。** [详细验收报告](migration/reports/batch2.md) 包含稀疏 3 项、BLAS 8 项、tensor 4 项与 solver 2 项的 CPU/CUDA 对照、原始规模与边界检查。`rotmg` 的原生缩放错误及项目 GPU 修正[单独记录](migration/reports/rotmg-scale-fix.md)；大张量 fixture 支持按 seed 和 SHA256 完整重建。\n\n'
- if (ROOT/'migration/reports/batch3-validation.json').exists():
-  batch=json.loads((ROOT/'migration/reports/batch3-validation.json').read_text());qualified=[r for r in batch if r['status']==r['cuda_comparison']=='PASSED'];intro+='**第三批已收口：'+str(len(qualified))+'/8 个样例、'+str(sum(len(r['cases']) for r in qualified))+' 个输入 case，ROCm/独立 CPU/CUDA 三方通过。** [第三批详细验收与复现](migration/reports/batch3.md) 覆盖 CG、BiCGSTAB、五对角批量求解、4 项 solver 与 SpVV Graph Capture/Replay；包含 meig/未排序配对检查、2000 个实际 GPU 图节点、输入变化重放，以及 24 项反向检查。\n\n'
- live=ROOT/'migration/reports/batches4-8-progress.json'
- if live.exists():
-  progress=json.loads(live.read_text());intro+='**B4–B8：'+str(sum(x['samples_passed'] for x in progress['batches']))+'/26 个样例、'+str(sum(x['cases_passed'] for x in progress['batches']))+'/92 个预登记用例验收通过。** [逐例实际库、限制与详细日志](migration/reports/batches4-8.md)。3项CUDA新API在已安装SDK缺失，原生基线保持FAILED，兼容CUDA数学基线通过。\n\n| 批次 | 样例通过 | 用例通过 |\n| --- | ---: | ---: |\n'
-  for row in progress['batches']:intro+='| '+row['batch']+' | '+str(row['samples_passed'])+'/'+str(row['samples_required'])+' | '+str(row['cases_passed'])+'/'+str(row['cases_required'])+' |\n'
-  intro+='\n'
- live911=ROOT/'migration/reports/batches9-11-progress.json'
- if live911.exists():
-  progress=json.loads(live911.read_text());intro+='**B9–B11实施结果：** '+'；'.join(x['batch']+' '+str(x['samples_passed'])+'/'+str(x['samples_required'])+' 整例通过、'+str(x['samples_partial'])+' 部分支持' for x in progress['batches'])+'。[逐例支持方式、缺口与日志](migration/reports/batches9-11.md)。CPU progressive fallback、完整NVBENCH框架与cuDSS配置/查询缺口保留PARTIAL。\n\n'
- live1215=ROOT/'migration/reports/batches12-15-progress.json'
- if live1215.exists():
-  progress=json.loads(live1215.read_text());intro+='**B12–B15：** '+'；'.join(x['batch']+' '+str(x['samples_passed'])+'整例、'+str(x['samples_partial'])+'部分支持、'+str(x['cases_verified'])+'/'+str(x['cases_required'])+'cases' for x in progress['batches'])+'。[实际路线、逐例限制与详细日志](migration/reports/batches12-15.md)。原始vendor基线与兼容CUDA数学对照分别记录。\n\n'
-
- if (ROOT/'migration/reports/rewrite-first-qualification.json').exists():
-  q=json.loads((ROOT/'migration/reports/rewrite-first-qualification.json').read_text());qualified=[r for r in q['qualifications'] if r['status']=='PASSED'];intro+='**MOAT R1–R2：'+str(len(qualified))+'/8 个原始样例满足复合验收门槛，'+str(sum(r['case_count'] for r in qualified))+' 个预登记输入。** [逐例路线、原生/兼容 CUDA 区分与完整实验入口](migration/reports/rewrite-R1-R2.md)。支持计数以已写入主表的资格为准；失败、重试和证据勘误保留。\n\n'
- if (ROOT/'migration/reports/rewrite-R3-qualification.json').exists():
-  q=json.loads((ROOT/'migration/reports/rewrite-R3-qualification.json').read_text());qualified=[r for r in q['qualifications'] if r['status']=='PASSED'];intro+='**MOAT R3：'+str(len(qualified))+' 个原PARTIAL整例收口（NCC原始文件harness、rank-r batched SVD），15个输入、24项输出故障注入、18项实际运行边界。** [实际路线与详细实验](migration/reports/rewrite-R3.md)；[原24项逐例合同复审与剩余缺口](migration/reports/rewrite-R3-gaps.md)。静态合同审查不算新增GPU成功。\n\n'
- intro+=render_overview(operators)
- intro+='## 模块支持矩阵\n\n下表覆盖全部 30 个库级模块。“已验收算子族”按上文口径去重；“通过/总入口”是原始 sample 数，二者分别统计。部分完成、失败、明确不支持、前置条件阻塞分别列出；每个模块链接包含全部原始样例的实际库、代码、逐例原因和证据。候选库不计为实际使用库。\n\n| 模块 | 实际/候选 AMD 路线 | 已验收算子族 | 通过/总入口 | 部分 | 失败 | 不支持 | 阻塞 | 当前范围及未通过原因 |\n| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |\n'
+ intro+=f'覆盖 **{len(CANDIDATES)} 个模块、{len(cat["samples"])} 个独立样例入口**；其中 **{operators["modules_with_verified_operators"]} 个模块已有整例通过**，共 **{operators["verified_operator_families"]} 个按模块去重的算子/功能族**。\n\n'
+ intro+='| 当前结论 | 入口数 |\n| --- | ---: |\n'
+ for status,label in [('PASSED','已通过'),('PARTIAL','部分支持'),('FAILED','尚未通过'),('UNSUPPORTED','确认不支持'),('BLOCKED','前置条件阻塞')]:
+  if counts[status] or status in {'PASSED','PARTIAL','FAILED'}:intro+=f'| {label}（{status}） | {counts[status]} |\n'
+ pending=len(cat['samples'])-counts['PASSED']
+ intro+=f'\n尚未整例通过 **{pending} 个入口**。通过结论限于该入口登记的原始功能和必需用例；精度、规模、语言、batch 和存储变体不重复增加算子数。未通过原因、部分实现范围和重现日志统一列在[详细记录](migration/reports/support-log-index.md)。\n\n'
+ intro+='## 模块支持矩阵\n\n路线列对应已通过样例的实际实现。部分支持与失败入口的实现、限制和证据见各模块详情。\n\n'
+ intro+='| 模块 / 详细记录 | 已验收实现路线 | 算子/功能族 | 通过/总入口 | 部分 | 失败 |\n| --- | --- | ---: | ---: | ---: | ---: |\n'
  for family in CANDIDATES:
-  items=groups[family];c=collections.Counter(s['status'] for s in items);actual=sorted({display_library(s['actual_library']+(' → '+s['backend_library'] if s.get('backend_library') and s['backend_library'].lower() not in s['actual_library'].lower() else '')) for s in items if s.get('actual_library') and s['level'] in {'L2','L3','L4'}});route='; '.join(actual) if actual else '候选：'+', '.join(CANDIDATES[family]);intro+='| '+link(family,ROOT/family/'README.md',ROOT)+' | '+safe(route)+' | '+str(operators['modules'][family]['verified_operator_family_count'])+' | '+str(c['PASSED'])+'/'+str(len(items))+' | '+str(c['PARTIAL'])+' | '+str(c['FAILED'])+' | '+str(c['UNSUPPORTED'])+' | '+str(c['BLOCKED'])+' | '+safe(decisions[family]['reason'])+' |\n'
- reasons=collections.Counter((s['status'],s['reason_code']) for s in cat['samples'] if s['status']!='PASSED')
+  items=groups[family];c=collections.Counter(s['status'] for s in items)
+  route=routes[family] if c['PASSED'] else '尚无整例通过'
+  target=ROOT/'migration/reports/support-log-index'/(family.replace('/','__')+'.md')
+  intro+='| '+link(family,target,ROOT)+' | '+route+' | '+str(operators['modules'][family]['verified_operator_family_count'])+' | '+str(c['PASSED'])+'/'+str(len(items))+' | '+str(c['PARTIAL'])+' | '+str(c['FAILED'])+' |\n'
  intro+='''
-## 未通过和不支持的具体原因
+## 验证范围
 
-“本项目尚未实现/验收”与“锁定版本和硬件确实不支持”分别记录。当前只有 hipSPARSELt 的 2 个样例满足后者的证据条件；其它失败需按 API、构建、数值或执行错误继续定位，不能泛化为 ROCm 不支持。
+- AMD 验证环境为 ROCm 10.1.0 / Radeon AI PRO R9700（gfx1201），CUDA 对照使用双 RTX 5090。版本、设备和逐例执行条件见[环境锁](migration/environments/project.lock.json)与详细记录。
+- 每个通过入口均有对应正确性验收。独立 CPU 参考、原生 CUDA 基线与兼容 CUDA 数学对照分别登记；原始工具链缺失时明确保留限制。
+- 描述符管理等功能按原例语义统计；CPU 阶段、项目 HIP 重写和生态库调用均在详细记录中标明。
+- 性能独立验收，目前没有可发布的合格跨设备速度比。其它设备架构、Windows 与多节点范围尚未验证。
 
-| 当前结论 | 入口数 | 具体原因 | 证据与恢复条件 |
-| --- | ---: | --- | --- |
+[支持方式、覆盖用例与完整日志](migration/reports/support-log-index.md) · [机器可读清单](migration/samples.yaml) · [性能验证](migration/reports/performance-comparison.md) · [上游项目说明](migration/upstream.md) · [许可证](LICENSE.md)
 '''
- for status,code,reason,evidence in [
-  ('FAILED','BUILD_ERROR','自动移植稿未完成 API/枚举/类型/链接适配。例如 Lt grouped/scale/layout、FP4 观察代码、MathDx device DSL 和特殊 SDK 仍有编译缺口；不据此宣称硬件不支持。','各模块 README 列出首个有效编译错误；需完成保持原语义的 AMD 改写再验收。'),
-  ('FAILED','BINDING_OR_FRONTEND_MIGRATION_REQUIRED','Fortran/Python 的 NVIDIA module、CUDA Fortran device 语法或 Python vendor 绑定尚未改写；前端/import 尝试失败。','[语言资格记录](migration/reports/languages.json)；需补 AMD C ABI/ISO_C_BINDING 或真实 GPU Python 绑定。'),
-  ('FAILED','RUNTIME_ERROR','已编译但执行失败：包括原始 Xgetrf 路径、BSR SDDMM、SELL SpSV，以及 tensor cache/einsum/padding 场景；具体参数/架构/实现原因见逐例日志。','[原始 profile 尝试](migration/reports/original-rocm-latest.json)；修复失败调用，重新做独立数值检查。'),
-  ('FAILED','TIMEOUT','cuTENSOR trinary contraction 在记录的时限内未结束，未获得合格结果。','[逐例报告](migration/sample-reports/cuTENSOR/contraction_trinary.cu.md)；定位执行/规模问题后重跑。'),
-  ('PARTIAL','INDEPENDENT_VALIDATION_PENDING','剩余为 Xgeev 三例与 gesvdaStridedBatched：需排除 CPU 兼容执行，或确认近似算法和 residual norm 语义，并补齐对应独立验收。第三批稀疏与图捕获已通过。','逐例 required cases 保留缺项；补 CPU/数学参考和边界检查，返回 0 不能代替验收。'),
-  ('PARTIAL','SEMANTIC_GAP','LZ4 和 JPEG 仅完成上述子集，尚未保留完整原样例的 API、输入和执行流程。','[能力探针](migration/reports/native-probes.json)、[JPEG 像素对照](migration/reports/rocjpeg-cpu.json)；补完整原始功能。'),
-  ('PARTIAL','VALIDATED_B9_B11_SUBSET','B9两个NVBENCH框架、B10原生GPU progressive及部分调度/流水线、B11完整配置/查询语义仍未等价。','[逐例B9–B11缺口与日志](migration/reports/batches9-11.md)；缺失功能补齐后重验，不把CPU fallback当完整GPU支持。'),
-  ('PARTIAL','VALIDATED_B12_B15_SUBSET','B12部分子矩阵/低精度collective、B13部分原始descriptor、B14 RNG LEGACY序列和B15原生像素/metadata/文件harness合同仍有缺口。','[逐例B12–B15缺口与日志](migration/reports/batches12-15.md)；完整数值与兼容CUDA数学通过不代表所有原始合同均已等价。'),
-  ('UNSUPPORTED','HW_UNSUPPORTED','锁定 ROCm 10.1.0 hipSPARSELt/gfx1201 缺 Tensile kernel bundle；实际运行报错且固定源码的架构 gate 拒绝该目标。','[实测与源码证据](cuSPARSELt/README.md)；需匹配 kernel bundle、新实现或受支持 GPU，不能以 dense GEMM 替代。'),
-  ('BLOCKED','ENV_MISSING_DEP','nvJPEG Python 测试的 imports 已通过，但 AMD decoder 可执行文件/完整 CLI 测试前置条件尚未实现。','[逐例报告](migration/sample-reports/nvJPEG/nvJPEG-Decoder/tests/test_decoder.py.md)；补 GPU 可执行文件后执行原始测试。')]:
-  intro+=f'| {status} / `{code}` | {reasons[(status,code)]} | {reason} | {evidence} |\n'
- if (ROOT/'migration/reports/rewrite-R4.md').exists():intro+='**MOAT R4：IEEE/PKZIP CRC32 GPU实现，6数值+1原生空chunk拒绝。** [详细日志与资格](migration/reports/rewrite-R4.md)。\n\n'
- if (ROOT/'migration/reports/rewrite-R5.md').exists():intro+='**MOAT R5：8个标准Fortran来源入口完成真实语言绑定、批选择重算及应用残差检查。** [逐例范围、CUDA工具链限制和日志](migration/reports/rewrite-R5.md)。\n\n'
- if (ROOT/'migration/reports/rewrite-R7.md').exists():intro+='**MOAT R7：两个默认FP16结构化2:4样例通过，新增1个功能族。** [真实GPU裁剪/压缩/稀疏乘法、原生边界与日志](migration/reports/rewrite-R7.md)。\n\n'
- if (ROOT/'migration/reports/rewrite-R6.md').exists():intro+='**MOAT 本轮累计新增21项整例资格、撤销1项旧资格，支持211→231（净增20）。** R6基础探针与候选源码调查不计样例支持；R5尚有65个前端及额外1个C++合同缺口。[R6路线与边界](migration/reports/rewrite-R6.md) · [剩余408项的原因、路线、实验和成本](migration/reports/rewrite-remaining-assessment.md) · [全阶段实时进展](migration/reports/rewrite-progress.md)。\n\n'
- if (ROOT/'migration/reports/rewrite-R8.md').exists():intro+='**R8回归与交付：** [当前源码依赖审计、干净检出复现及未完成范围](migration/reports/rewrite-R8.md)。\n\n'
- if (ROOT/'migration/reports/rewrite-R9.md').exists():
-  r9_passed=sum(s.get('active_batch')=='R9' and s['status']=='PASSED' for s in cat['samples'])
-  intro+=f'**R9：{r9_passed}/10入口已签发资格，包含9个矩阵helper和CRC32 benchmark。** [实现、语言与原生CUDA边界、逐次实验](migration/reports/rewrite-R9.md)。helper按稠密/CSR描述符两种功能去重，使用host描述符＋真实HIP存储，不计成9个GPU求解算法；原CUDA Fortran编译器基线仍BLOCKED。\n\n'
- intro+='\n已验收模块内部也保留具体限制：hipTensor FP32 原生 contraction 的架构 gate 失败由 rocBLAS + HIP 保持精度的路线补足；hipFFT 单 batch 1D Xt 缺口由两卡分解/通信/合并补足。B12–B15已完成登记范围的分布/设备内GPU与图像数值试点；部分原始descriptor、低精度通信、RNG LEGACY、原生NPP像素与文件/metadata合同仍保持PARTIAL，多节点与其它未覆盖入口未完成；JPEG2000/TIFF 未找到并实现完整 AMD GPU codec 路线。上述原因在模块矩阵中逐项展示。\n\n'
- intro+='''
-## 构建与复现
-
-先核对物理 GPU 占用及共享预约；**HIP ordinal 2 对应物理 GPU0**，ordinal 3 对应物理 GPU1。项目 `device_guard.py` 按 PCI 地址校验；物理 GPU3 排除计算，预约卡也会拒绝。历史使用错误 ordinal 的结果已标记，不能用于验收。
-
-```bash
-HIP_VISIBLE_DEVICES=2 tools/migration/run_rocm.sh
-python3 tools/migration/compare.py
-python3 tools/migration/render.py
-```
-
-M1 的独立 CMake/CTest（在锁定 ROCm 10.1.0 容器中，并先运行 guard）：
-
-```bash
-python tools/migration/device_guard.py
-cmake -S rocm -B build/rocm -DCMAKE_BUILD_TYPE=Release
-cmake --build build/rocm -j2
-ctest --test-dir build/rocm --output-on-failure
-```
-
-原始 profile 批量构建：`bulk_run.py --families cuBLAS cuSPARSE ...`；先在锁定容器中运行 `bootstrap_sdk.py` 建项目 overlay。hipCOMP/hipTensor 的锁定源码重建使用 `bash tools/migration/build_optional.sh`。`python3 tools/migration/restore_observations.py` 从归档恢复 CUDA 输出观测/fixture 适配副本，原始 CUDA 树保持不变。每例复现链接在库级表中的“详情”；命令、原始日志、source/fixture hash 和环境随证据保存。[最终源码与 fixture 身份](migration/source-tree.json) 包含可恢复的内容寻址源码；大输出保留于 artifacts，输入生成方法/hash 在报告中。
-
-## 状态解释
-
-`NOT_STARTED` 未开始；`IN_PROGRESS` 实施中；`PARTIAL` 部分功能或仅运行通过；`PASSED` 登记的必需正确性用例全部通过；`FAILED` 实际尝试失败；`BLOCKED` 前置条件缺失；`UNSUPPORTED` 有指定版本/硬件的必要能力缺失证据。L0 无实现、L1 有源码、L2 编译通过、L3 AMD 执行通过、L4 必需正确性用例通过。性能单独登记。
-
-## 上游 CUDA Library Samples 说明'''
- p.write_text(intro+upstream);print(totals)
+ p.write_text(intro);print(totals)
 if __name__=='__main__':render()
