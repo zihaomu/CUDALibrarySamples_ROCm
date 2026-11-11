@@ -280,7 +280,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-11T12:29:47.172381+00:00。26入口当前2通过/8部分/16失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-11T12:32:49.720879+00:00。26入口当前3通过/8部分/15失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -521,5 +521,6 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-11T12:27:05.182649+00:00 | I1 | 全新checkout无build缓存：PASSED；重新安装私有依赖、重建31输入/共享库、重跑31mask与8尺寸1000循环、独立CPU复核。 | `migration/reports/evidence/rewrite/I1/CannyPlus-clean-checkout/20261111T122544.406349Z-I1-host-cold-replay-4540da489b` |
 | 2026-11-11T12:27:48.138541+00:00 | I1 | 干净clone最终重放通过：无预存build，私有依赖/overlay从零安装，31组输入hash重建及新共享库构建成功，31mask和8尺寸5/1000原例再次通过独立CPU/native检查；子记录由父seal完整保留。 | `migration/reports/canny-plus-cold.json`；`migration/reports/evidence/rewrite/I1/CannyPlus-review-identity-tests/20261111T122557.872555Z-I1-CPU-selftest-b2d9d7dbf2` |
 | 2026-11-11T12:29:47.172381+00:00 | I1 | C3两入口合同准备：保留原例三种输出/10次计时和C3最大梯度，采用单独明确的8连接滞后候选；原生数千像素差异继续单列，不能套用C1三外圈差异结论。 | `migration/reports/evidence/rewrite/I1/C3-Canny-original-entry-contract/20261111T122946.359147Z-I1-CPU-contract-ac3c6dd7e5` |
+| 2026-11-11T12:32:49.720879+00:00 | I1 | NPP+ C1整例资格已先提交Git后发布：31mask、8原始5/1000流程、49运行合同、28正反例及冷重放/三复审完整通过。项目242通过/23部分/374失败，图像3通过/8部分/15失败；I1其余C3两项和I2-I9继续实施。 | `migration/reports/canny-plus-qualification.json`；`migration/reports/canny-plus-review.json`；`migration/reports/canny-plus.md` |
 
 <!-- IMAGE_EXECUTION:END -->

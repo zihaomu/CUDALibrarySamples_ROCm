@@ -2,7 +2,7 @@
 
 日期：2026-11-11。状态：**IN_PROGRESS**。逐步实施中；仅封存资格会增加支持数。
 
-本方案落实用户“合理差异可以接受”的要求，是[完整图像库计划](image-libraries-plan.md)的执行细化。[生效验收政策](rewrite/image-acceptance-policy.json)和[差异复评](reports/image-difference-acceptance.md)作为依据。目标仍为原定 26 个入口：当前 2 通过、8 部分、16 失败，新增目标为 24 个；完整模式和输入分支不删减。
+本方案落实用户“合理差异可以接受”的要求，是[完整图像库计划](image-libraries-plan.md)的执行细化。[生效验收政策](rewrite/image-acceptance-policy.json)和[差异复评](reports/image-difference-acceptance.md)作为依据。目标仍为原定 26 个入口：方案起点为 2 通过、8 部分、16 失败，新增目标为 24 个；完整模式和输入分支不删减。当前已发布 3 通过、8 部分、15 失败。
 
 ## 1. 执行原则与前置工作
 
@@ -30,6 +30,8 @@ I0 调整为公共基线和各入口前置合同两部分。原始源码身份�
 | 7. 签发与发布 | 提交固定代码及复合证据，再发布对应样例、算子与支持日志 | 完整必需 cases 和审查均通过；原始 CUDA 脚本与修正绑定的 native API 基线分别记录；首页只更新当前支持 |
 
 首批新增独立 corpus 必须包括弱边缘、边界直线/交叉、平台/斜线、稀疏边缘、常量/空结果、奇数尺寸、非连续/pitched 输入和修改输入后的复用。保留全部逐点差异、边缘数、内部/边界统计及结构检查。不能通过忽略整个边界或全图差异占比让错误实现过关。
+
+C1 的步骤 1–7 已全部完成并发布：[完整验收](reports/canny-plus.md)、[固定资格](reports/canny-plus-qualification.json)、[三项独立复审](reports/canny-plus-review.json)。原始 8 分辨率、31 组完整 mask、49 项运行合同、28 项正反向检查及干净检出重放通过。仅此一个入口新增支持；I1 仍在推进 C3 两入口。
 
 ## 3. 第二批：完成 NPP 的两个 C3 Canny 入口
 
@@ -92,18 +94,18 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 容差内的扰动是正向检查，超预算数值偏差和错通道/ROI/模式/丢 batch 是反向检查；不要求所有 1 LSB 扰动都被判错。无损数据、位深/通道/尺寸、ROI/padding、错误行为和 GPU 实际执行仍有硬约束。水印、tile/ROI、连通结构等另作局部/语义检查，不能只用全图 SSIM 判断。
 
-首页仍只展示当前支持情况；批次过程与完整日志保留在[逐步记录](reports/image-libraries-progress.md)和[支持日志总表](reports/support-log-index.md)。当前计数维持项目 241/23/375、图像 2/8/16，直到实际入口资格签发。
+首页仍只展示当前支持情况；批次过程与完整日志保留在[逐步记录](reports/image-libraries-progress.md)和[支持日志总表](reports/support-log-index.md)。当前已发布项目 242/23/374、图像 3/8/15；新增数只来自已经签发并先提交 Git 的完整入口资格。
 
 
 <!-- IMAGE_EXECUTION:START -->
 
 ## 当前实施检查点
 
-更新时间：2026-11-11T12:29:47.172381+00:00。26入口当前2通过/8部分/16失败。
+更新时间：2026-11-11T12:32:49.720879+00:00。26入口当前3通过/8部分/15失败。
 
-I1：C3两入口合同准备：保留原例三种输出/10次计时和C3最大梯度，采用单独明确的8连接滞后候选；原生数千像素差异继续单列，不能套用C1三外圈差异结论。
+I1：NPP+ C1整例资格已先提交Git后发布：31mask、8原始5/1000流程、49运行合同、28正反例及冷重放/三复审完整通过。项目242通过/23部分/374失败，图像3通过/8部分/15失败；I1其余C3两项和I2-I9继续实施。
 
-证据：`migration/reports/evidence/rewrite/I1/C3-Canny-original-entry-contract/20261111T122946.359147Z-I1-CPU-contract-ac3c6dd7e5`
+证据：`migration/reports/canny-plus-qualification.json`；`migration/reports/canny-plus-review.json`；`migration/reports/canny-plus.md`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 
