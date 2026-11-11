@@ -103,11 +103,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-11T14:19:37.636505+00:00。26入口当前5通过/7部分/14失败。
+更新时间：2026-11-11T14:22:19.802486+00:00。26入口当前5通过/7部分/14失败。
 
-I2：干净clone发现真实复现缺口：fixture重建mkdir缺parents，build不存在即失败；冷收集器随后误读旧报告路径。两个初始化/冷记录已恢复封存；补父目录并跳过缺失/未封存子记录，重新固定源代码后从空build重试。原27输入profile保持逐字节相同，未改变数值合同。
+I2：CCL冷重放已通过：固定47b97a596空build，27输入profile逐字节重建、新HIP库/三个C++编译配置、27完整mask、44运行合同和15原始文件流程再次独立CPU通过；19子raw和source objects封存。最新54 native API均有实际binary/input SHA运行前receipt，三项原CUDA身份绑定独立目录亦成功；等待三项独立复审，暂不增加支持数。
 
-证据：`migration/reports/evidence/rewrite/I2/CCL-clean-checkout/20261111T141756.772700Z-I2-host-cold-replay-f4d02524dd`；`migration/reports/image-ccl-contracts.json`
+证据：`migration/reports/image-ccl-cold.json`；`migration/reports/image-ccl-native-validation.json`；`migration/reports/image-ccl-native-originals-validation.json`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

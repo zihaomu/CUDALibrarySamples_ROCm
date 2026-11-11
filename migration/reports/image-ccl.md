@@ -1,6 +1,6 @@
 # 等值连通域与 GPU 标签压缩
 
-状态：实现及已列运行/数值检查通过，冷检出、独立复审和资格发布进行中。尚未据此增加首页通过数。
+状态：实现、完整数值/运行验收及干净检出重放通过；独立复审和资格发布进行中。尚未据此增加首页通过数。
 
 两个原始入口分别为 NPP 与 NPP+ 的 `batchedLabelMarkersAndCompression`。AMD 实现采用项目 HIP 八连接并查集与分层 GPU 前缀扫描，覆盖输入的所有字节值，包含零值区域。CPU 只读取收敛标量和最终分量数，以及文件 IO；标签生成和压缩都在 GPU。
 
@@ -24,6 +24,7 @@
 | 两真实 C++ 原例 | 三个编译配置各跑 batch 1..5，15 个完整流程共 165 个 raw 输出逐值检查；不使用缩小图片代替原图。[执行](image-ccl-originals.json)、[验收](image-ccl-originals-validation.json) |
 | CLI | 三个配置共 39 项：默认目录、帮助、参数/输入/输出错误和合法空设备 mask；检查实际返回码、具体诊断、成功输出全集。[执行](image-ccl-cli.json)、[验收](image-ccl-cli-validation.json) |
 | 真实 GPU trace | 27 次 initialize/root_flags/output；53 次 hook/compress、61 次 block_scan、34 次 scan_offsets。时间、grid、PCI 检查均通过，执行物理 GPU1 `0000:23:00.0`。[执行](image-ccl-trace.json)、[验收](image-ccl-trace-validation.json) |
+| 干净检出 | 无预先 build，固定提交重新生成27输入并校验profile一致，创建SDK overlay、重编译库/三个原入口；27mask、44运行及15完整流程全部再次CPU通过。[冷重放](image-ccl-cold.json)；19子raw与源对象封存。 |
 | 验收器正反例 | 27 项，接受任意 native 标签重编号，拒绝错误分区、压缩、padding、计数、输入、缺例/重复、实际失败码和结构错误。[检查](image-ccl-checks.json) |
 
 ## NVIDIA 原生对照与真实差异
@@ -60,4 +61,4 @@ python3 tools/moat/image_ccl_originals.py --cli
 
 尺寸边界为单维 1..32768、像素数不超过 2^28；原始所有尺寸均在范围内。当前没有跨设备性能、wave64 或 Windows 结论。NPP+ 和 NVIDIA SDK 仅保留私有安装及哈希，仓库不分发 vendor payload。
 
-首轮 NPP+ 编译宏、库名/探针 include 顺序错误、额外身份工具的路径初始化错误，以及复用 native 输出目录导致的严格文件集合失败均已封存。最终使用正确 SDK 配置和独立新目录重试，不删除历史失败。
+首轮 NPP+ 编译宏、库名/探针 include 顺序错误、额外身份工具的路径初始化错误，复用 native 输出目录导致的严格文件集合失败、并行 git status 与提交锁争用，以及冷 fixture 父目录缺失和收集旧报告错误均已封存。最终使用正确 SDK 配置和独立新目录重试，不删除历史失败。

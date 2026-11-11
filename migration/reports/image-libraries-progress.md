@@ -1,6 +1,6 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-11T14:19:37.636505+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-11T14:22:19.802486+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
 26入口当前：5 PASSED / 7 PARTIAL / 14 FAILED。
 
@@ -589,3 +589,12 @@
 | 2026-11-11T14:19:25.059879+00:00 | I2 | NPP+/batch-compression未改CUDA完整原例 rc=0；所有原始输出保留。 | [20261111T141922.490221Z-I2-cuda-original-83bb8bfe52](evidence/rewrite/I2/CCL-original-NPP_/20261111T141922.490221Z-I2-cuda-original-83bb8bfe52) |
 | 2026-11-11T14:19:37.278995+00:00 | I2 | 冻结CCL 27组输入、两原始入口/完整条件分支、1..5实际batch及错误合同；30个历史golden全部出现同值相邻分裂，作为实测旧文件缺陷保留，当前SDK另测，不复制错误分区。 | [20261111T141936.193470Z-I2-CPU-contract-d4eba7f9c1](evidence/rewrite/I2/CCL-frozen-contracts-and-golden-audit/20261111T141936.193470Z-I2-CPU-contract-d4eba7f9c1) |
 | 2026-11-11T14:19:37.636505+00:00 | I2 | 干净clone发现真实复现缺口：fixture重建mkdir缺parents，build不存在即失败；冷收集器随后误读旧报告路径。两个初始化/冷记录已恢复封存；补父目录并跳过缺失/未封存子记录，重新固定源代码后从空build重试。原27输入profile保持逐字节相同，未改变数值合同。 | [20261111T141756.772700Z-I2-host-cold-replay-f4d02524dd](evidence/rewrite/I2/CCL-clean-checkout/20261111T141756.772700Z-I2-host-cold-replay-f4d02524dd)；[image-ccl-contracts.json](image-ccl-contracts.json) |
+| 2026-11-11T14:19:58.680970+00:00 | I2 | NPP/default未改CUDA完整原例以实际binary及五输入SHA绑定重跑rc=0；native分区缺陷单列。 | [20261111T141955.879941Z-I2-cuda-original-69cb09d5eb](evidence/rewrite/I2/CCL-identity-bound-original-NPP/20261111T141955.879941Z-I2-cuda-original-69cb09d5eb) |
+| 2026-11-11T14:20:01.393036+00:00 | I2 | NPP+/default未改CUDA完整原例以实际binary及五输入SHA绑定重跑rc=0；native分区缺陷单列。 | [20261111T141958.994697Z-I2-cuda-original-5cba73acf6](evidence/rewrite/I2/CCL-identity-bound-original-NPP_/20261111T141958.994697Z-I2-cuda-original-5cba73acf6) |
+| 2026-11-11T14:20:04.296040+00:00 | I2 | NPP+/batch-compression未改CUDA完整原例以实际binary及五输入SHA绑定重跑rc=0；native分区缺陷单列。 | [20261111T142001.709941Z-I2-cuda-original-03c8671711](evidence/rewrite/I2/CCL-identity-bound-original-NPP_/20261111T142001.709941Z-I2-cuda-original-03c8671711) |
+| 2026-11-11T14:20:09.304513+00:00 | I2 | CCL native独立CPU完整验收：PASSED；native分区正确性与项目GPU验收分别记录。 | [20261111T142004.719036Z-I2-CPU-reference-f69649814c](evidence/rewrite/I2/CCL-native-independent-CPU/20261111T142004.719036Z-I2-CPU-reference-f69649814c) |
+| 2026-11-11T14:20:14.620442+00:00 | I2 | CCL native-originals独立CPU完整验收：PASSED；native分区正确性与项目GPU验收分别记录。 | [20261111T142009.734187Z-I2-CPU-reference-64b85cbf63](evidence/rewrite/I2/CCL-native-originals-independent-CPU/20261111T142009.734187Z-I2-CPU-reference-64b85cbf63) |
+| 2026-11-11T14:20:26.118087+00:00 | I2 | CCL独立BFS/OpenCV交叉、任意native编号正例和像素/压缩/padding/输入/缺例/ABI/文件等验收器正反向检查：PASSED | [20261111T142015.048841Z-I2-CPU-validator-test-10421f642d](evidence/rewrite/I2/CCL-independent-validator-mutations/20261111T142015.048841Z-I2-CPU-validator-test-10421f642d) |
+| 2026-11-11T14:21:24.345861+00:00 | I2 | CCL干净检出/27输入重建/新HIP编译/两C++全15流程及44运行合同冷重放：PASSED；全部子raw和source objects封存。 | [20261111T141955.983908Z-I2-host-cold-replay-a70014d043](evidence/rewrite/I2/CCL-clean-checkout/20261111T141955.983908Z-I2-host-cold-replay-a70014d043) |
+| 2026-11-11T14:21:42.235311+00:00 | I0 | I2轮廓入口准备：两原始2MiB CircuitBoard输入/源码SHA、实际输出与禁用分支已记录。标准NPP只写3文件，NPP+写4文件且读取有序geometry作诊断；有序点/计数/偏移/边界框与重建均须保留，不能仅输出边缘mask。 | [20261111T142141.321139Z-I0-CPU-contract-7925aec430](evidence/rewrite/I0/I2-contour-original-contract-research/20261111T142141.321139Z-I0-CPU-contract-7925aec430) |
+| 2026-11-11T14:22:19.802486+00:00 | I2 | CCL冷重放已通过：固定47b97a596空build，27输入profile逐字节重建、新HIP库/三个C++编译配置、27完整mask、44运行合同和15原始文件流程再次独立CPU通过；19子raw和source objects封存。最新54 native API均有实际binary/input SHA运行前receipt，三项原CUDA身份绑定独立目录亦成功；等待三项独立复审，暂不增加支持数。 | [image-ccl-cold.json](image-ccl-cold.json)；[image-ccl-native-validation.json](image-ccl-native-validation.json)；[image-ccl-native-originals-validation.json](image-ccl-native-originals-validation.json) |
