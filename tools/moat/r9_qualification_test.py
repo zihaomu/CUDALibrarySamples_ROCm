@@ -48,6 +48,16 @@ class Promotion(unittest.TestCase):
   for name in ['tools/moat/audit.py','tools/moat/qualification_common.py']:
    with patch.object(q,'digest',side_effect=lambda p,n=name:'0'*64 if str(p)==str(ROOT/n) else original(p)):
     self.assertFalse(q.review_ok(self.review,[name]))
+ def test_unsealed_qualification_beside_ordinary_run_is_rejected(self):
+  import publish_r9
+  run=self.original_load('rewrite-R9-helper-rocm.json')[0]
+  forged=dict(sample_id=self.profile['sample_id'],evidence=run['evidence'],qualification_id=run['experiment_id'],status='PASSED',case_ids=['original'],case_count=1,evidence_references=[],checks=[dict(check='invented-qualification',passed=True)])
+  original=type(ROOT).read_text
+  def read(path,*args,**kwargs):
+   if path.name=='qualification.json':return json.dumps(forged)
+   return original(path,*args,**kwargs)
+  with patch.object(type(ROOT),'read_text',read):
+   with self.assertRaisesRegex(ValueError,'unsealed composite qualification'):publish_r9.validate_qualification(forged,dict(id=self.profile['sample_id']),self.profile,self.review)
  def test_complete_crc_proof(self):self.assertTrue(all(c['passed'] for c in self.crc()))
  def test_crc_output_redirect(self):self.rejected(self.crc('rewrite-R9-crc-benchmark-rocm.json',lambda r:r['original-auto'].update(output='nonexistent-output')))
  def test_crc_native_binary_identity(self):self.rejected(self.crc('rewrite-R9-crc-benchmark-native-build.json',lambda b:b.update(binary_sha256='0'*64)))

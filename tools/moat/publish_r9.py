@@ -3,6 +3,22 @@
 import json
 from experiment import ROOT,write,digest
 from audit import check
+from selected_proofs import inspect
+from qualify_r9 import helpers,crc_benchmark,load
+
+def validate_qualification(q,sample,profile,review):
+ directory=ROOT/q['evidence'];seal=json.loads((directory/'sealed.json').read_text())['files']
+ mandatory={'qualification.json','manifest.json','source.json','validation.json','commands.json'}
+ if not mandatory<=set(seal) or check(directory):raise ValueError('unsealed composite qualification')
+ m=json.loads((directory/'manifest.json').read_text());sealed=json.loads((directory/'qualification.json').read_text())
+ if any(q.get(k)!=v for k,v in sealed.items()) or m['backend']!='composite-qualification' or m['sample_id']!=sample['id'] or m['experiment_id']!=q['qualification_id'] or m['experiment_outcome']!='PASSED' or q['status']!='PASSED':raise ValueError('composite qualification identity')
+ expected=profile['cases'] if profile else [c['case'] for c in json.loads((ROOT/'migration/rewrite/crc-benchmark-cases.json').read_text())]
+ if q['case_ids']!=expected or q['case_count']!=len(expected) or len(expected)!=5 or not q['evidence_references'] or q['source_commit']!=review['source_commit']:raise ValueError('incomplete or unreviewed qualification contract')
+ checks,refs,sources,build=helpers(profile,review) if profile else crc_benchmark(review)
+ if not checks or not all(c['passed'] for c in checks) or q['checks']!=checks or set(q['evidence_references'])!=refs or q['dependencies']!=build['dependencies']:raise ValueError('qualification differs from recomputed complete proof')
+ proposal=dict(sample,implementation=q['implementation'],selected_validation=q)
+ inspected=inspect(proposal)
+ if inspected['status']!='PASSED':raise ValueError('qualification publication/current closure '+str(inspected['errors']))
 
 def main():
  groups=[json.loads((ROOT/'migration/reports'/name).read_text()) for name in ['rewrite-R9-helper-qualification.json','rewrite-R9-crc-benchmark-qualification.json']]
@@ -10,6 +26,12 @@ def main():
  rows=[r for g in groups for r in g['qualifications']];spec=json.loads((ROOT/'migration/rewrite/helpers-benchmark.json').read_text());expected={p['sample_id'] for p in spec['helpers']}|{'nvCOMP/benchmarks::benchmark_crc32.cpp'}
  if len(rows)!=10 or {r['sample_id'] for r in rows}!=expected:raise ValueError('R9 ten-entry denominator')
  catalog=json.loads((ROOT/'migration/samples.yaml').read_text());samples={s['id']:s for s in catalog['samples']}
+ profiles={p['sample_id']:p for p in spec['helpers']}
+ # Qualification and referenced seals must already have an immutable Git
+ # publication. Validate every row before preparing any catalog mutation.
+ for q in rows:
+  profile=profiles.get(q['sample_id']);review=load('rewrite-R9-'+('helper' if profile else 'crc-benchmark')+'-review.json')
+  validate_qualification(q,samples[q['sample_id']],profile,review)
  for q in rows:
   directory=ROOT/q['evidence'];sealed=json.loads((directory/'qualification.json').read_text())
   if check(directory) or any(q.get(k)!=v for k,v in sealed.items()) or not q['checks'] or not all(c['passed'] for c in q['checks']) or digest(ROOT/q['implementation'])!=q['implementation_sha256'] or any(digest(ROOT/n)!=h for n,h in q['dependencies'].items()):raise ValueError('invalid selected qualification '+q['sample_id'])

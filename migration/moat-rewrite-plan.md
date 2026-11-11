@@ -588,3 +588,6 @@ PLAN-01 至 PLAN-03 是规划阶段记录，不代表实验结果。实施中的
 
 
 | 2026-11-11 | R9-05 | 固定7ea83b593的干净clone，从零构建10入口及16 M1，9 helper原始场景＋4 bounded CRC独立CPU均通过；helper实现独立复审APPROVED。资格dryrun发现case.json/manifest身份及二元返回值笔误，已修。独立审查发现CRC状态汇总应合并子进程rc、非法CLI不能把timeout/loader故障当预期拒绝，以及Fortran inventory不能指向任意seal；已分别补严格退出码/对应诊断与真实SSH inventory身份。修复后AMD原始16GiB及全部5场景重验通过。 | 7fault/8CLI/6长度重验、资格篡改自测及固定内容最小复审；仍不增加资格数 |
+
+
+| 2026-11-11 | R9-06 | 18项资格正向/篡改测试通过。最终任务发布复核补ASSESSED_GAP_REMAINS→QUALIFIED并保留历史评估；全部2887份证据/schema/中断审计通过。第三位审查进一步指出publisher不能只信任摘要或seal旁未封存qualification文件，已补复合资格必需成员、backend/ID/outcome、完整5case、非空完整引用、独立门槛重算及Git首次发布闭包校验，并增加对应普通run旁伪造qualification反例。 | 最小复审publisher，先提交资格seal再发布主表，最后核对31项当前资格和全部未支持路线 |
