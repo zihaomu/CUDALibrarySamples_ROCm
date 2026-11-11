@@ -1,6 +1,6 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-11T17:41:33.546995+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-11T17:58:22.447718+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
 26入口当前：9 PASSED / 7 PARTIAL / 10 FAILED。
 
@@ -987,3 +987,5 @@
 | 2026-11-11T17:34:37.633163+00:00 | I2 | EDT当前30全量输入、4真实流程48产品文件、19CLI、69参数、27状态/极值/最大行列、34反例和31trace检查均通过。NPP+原生五图12输出实际重跑与loaded SDK/GPU receipt绑定完成：unsigned逐值精确，signed为公开阈值交点SDF变体，圆图maxAbs29.9444、Lith0.86533独立记载。旧NCC常量例按既有合同返回1（歧义拒绝），回归runner正修正预期并保留首次停止记录。I9还须核旧NPP EDT的原六RAW文件入口，既有资格是数学输出范围，不能仅凭该资格结束新完整文件目标。 | [image-distance-native-validation.json](image-distance-native-validation.json)；[image-distance-states-validation.json](image-distance-states-validation.json)；[image-distance-arguments-validation.json](image-distance-arguments-validation.json)；[image-distance-trace-validation.json](image-distance-trace-validation.json)；[image-distance-checks.json](image-distance-checks.json) |
 | 2026-11-11T17:35:58.558746+00:00 | I2 | 旧unsigned EDT6组及完整NCC8组/2048x1024/原50次计时、PGM、常量policy/完整scores独立CPU回归：PASSED | [20261111T173554.321556Z-I2-CPU-reference-47ccad9ccd](evidence/rewrite/I2/Distance-legacy-six-EDT-eight-NCC-independent-CPU/20261111T173554.321556Z-I2-CPU-reference-47ccad9ccd) |
 | 2026-11-11T17:41:33.546995+00:00 | I2 | EDT23项实际69参数/27状态/19CLI/4原流程验收器正反向role/输入/时序/stream/paired-hash/文件与诊断伪造：PASSED | [20261111T174128.275008Z-I2-CPU-validator-test-7454731bb4](evidence/rewrite/I2/Distance-runtime-CLI-original-validator-mutations/20261111T174128.275008Z-I2-CPU-validator-test-7454731bb4) |
+| 2026-11-11T17:49:23.493075+00:00 | I2 | EDT干净检出/三类输入重建/全新HIP编译/30输入/4完整原流程48RAW/69参数/27状态及极值、12子记录冷重放：PASSED | [20261111T174754.875439Z-I2-host-cold-replay-ce0109eb53](evidence/rewrite/I2/Distance-clean-checkout-complete-original-and-runtime/20261111T174754.875439Z-I2-host-cold-replay-ce0109eb53) |
+| 2026-11-11T17:58:22.447718+00:00 | I2 | EDT12子记录冷检出全部通过；完成复合资格器/发布器，覆盖全部冻结输入/完整C++编译闭包/CPU重算/原生receipt/14旧EDT-NCC回归及先Git门禁；准备固定源码三独立复审，暂不增加支持数。 | [image-distance-cold.json](image-distance-cold.json) |

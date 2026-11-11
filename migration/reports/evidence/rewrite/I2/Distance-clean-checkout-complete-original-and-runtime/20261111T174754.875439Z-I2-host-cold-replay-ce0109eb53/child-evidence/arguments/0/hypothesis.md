@@ -1,0 +1,1 @@
+Test rocm-runtime for Distance-actual-argument-query-and-physical-range-contracts, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T174830.132000Z-I2-rocm-build-c9707f8992.

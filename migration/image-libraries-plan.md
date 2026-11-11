@@ -280,7 +280,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-11T17:41:33.546995+00:00。26入口当前9通过/7部分/10失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-11T17:58:22.447718+00:00。26入口当前9通过/7部分/10失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -1250,5 +1250,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-11T17:34:37.633163+00:00 | I2 | EDT当前30全量输入、4真实流程48产品文件、19CLI、69参数、27状态/极值/最大行列、34反例和31trace检查均通过。NPP+原生五图12输出实际重跑与loaded SDK/GPU receipt绑定完成：unsigned逐值精确，signed为公开阈值交点SDF变体，圆图maxAbs29.9444、Lith0.86533独立记载。旧NCC常量例按既有合同返回1（歧义拒绝），回归runner正修正预期并保留首次停止记录。I9还须核旧NPP EDT的原六RAW文件入口，既有资格是数学输出范围，不能仅凭该资格结束新完整文件目标。 | `migration/reports/image-distance-native-validation.json`；`migration/reports/image-distance-states-validation.json`；`migration/reports/image-distance-arguments-validation.json`；`migration/reports/image-distance-trace-validation.json`；`migration/reports/image-distance-checks.json` |
 | 2026-11-11T17:35:58.558746+00:00 | I2 | 旧unsigned EDT6组及完整NCC8组/2048x1024/原50次计时、PGM、常量policy/完整scores独立CPU回归：PASSED | `migration/reports/evidence/rewrite/I2/Distance-legacy-six-EDT-eight-NCC-independent-CPU/20261111T173554.321556Z-I2-CPU-reference-47ccad9ccd` |
 | 2026-11-11T17:41:33.546995+00:00 | I2 | EDT23项实际69参数/27状态/19CLI/4原流程验收器正反向role/输入/时序/stream/paired-hash/文件与诊断伪造：PASSED | `migration/reports/evidence/rewrite/I2/Distance-runtime-CLI-original-validator-mutations/20261111T174128.275008Z-I2-CPU-validator-test-7454731bb4` |
+| 2026-11-11T17:49:23.493075+00:00 | I2 | EDT干净检出/三类输入重建/全新HIP编译/30输入/4完整原流程48RAW/69参数/27状态及极值、12子记录冷重放：PASSED | `migration/reports/evidence/rewrite/I2/Distance-clean-checkout-complete-original-and-runtime/20261111T174754.875439Z-I2-host-cold-replay-ce0109eb53` |
+| 2026-11-11T17:58:22.447718+00:00 | I2 | EDT12子记录冷检出全部通过；完成复合资格器/发布器，覆盖全部冻结输入/完整C++编译闭包/CPU重算/原生receipt/14旧EDT-NCC回归及先Git门禁；准备固定源码三独立复审，暂不增加支持数。 | `migration/reports/image-distance-cold.json` |
 
 <!-- IMAGE_EXECUTION:END -->

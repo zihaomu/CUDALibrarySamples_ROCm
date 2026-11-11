@@ -29,7 +29,7 @@ Unsigned 为零像素中心的精确欧氏最近距离；signed 为水平/垂直
 
 最初device math普通符号无法链接的构建失败保留，改用HIP编译器内建数学操作后构建成功。CPU解析测试曾误将恰零site ID写成n+pixel而非合同的2n+pixel，修正测试期望后通过，生产模型未修改；全部失败和后续运行见[逐步记录](image-libraries-progress.md)及[实验索引](rewrite-experiments.jsonl)。
 
-四完整C++流程/48文件及全部site审计已独立CPU通过。已完成19CLI、69参数/query、27默认/复用/并发/可选输出/外设备与销毁流/极值/次正规/32768行列、31项全trace检查及34反例；原生当前五图12输出及实际SDK/GPU receipt绑定和全量差异重算通过。尚需旧NPP EDT/NCC回归、冷检出、最终复审和先Git后发布。
+四完整C++流程/48文件及全部site审计已独立CPU通过。已完成19CLI、69参数/query、27默认/复用/并发/可选输出/外设备与销毁流/极值/次正规/32768行列、31项全trace检查及34反例；原生当前五图12输出及实际SDK/GPU receipt绑定和全量差异重算通过。旧NPP EDT6组/NCC8组回归与12子记录冷检出已通过；尚需最终固定提交复审和先Git后发布。
 
 [CLI](image-distance-cli-validation.json) · [参数](image-distance-arguments-validation.json) · [状态](image-distance-states-validation.json) · [trace](image-distance-trace-validation.json) · [34反例](image-distance-checks.json) · [当前原生绑定与全量比较](image-distance-native-validation.json)
 
@@ -55,3 +55,5 @@ python3 tools/moat/image_distance_originals.py
 原计划2/4ULP是I0前的候选；当前signed定义带子像素插值，首次GPU执行前另行固定绝对/相对数值预算，并严格保留零/符号/无穷及离散字段。该预算不由native差异拟合。当前30组实际GPU/CPU最大绝对误差见 `image-distance-all-validation.json`，与跨算法native差异分开报告。
 
 当前补充验收：100项CPU解析/穷举参考检查、69参数、27状态、19CLI、34核心与23运行/文件验收器正反例全部通过；旧EDT6组及完整NCC8组也通过。30组实际GPU/项目CPU距离最大绝对误差为0；与native不同signed定义的差异仍单列。
+
+冷启动复现通过：[12个封存子记录](image-distance-cold.json)，从提交7a4972d28干净检出、三类输入重建、新编译库/完整C++入口，30输入/4流程48RAW/69参数/27状态独立CPU重新核对。资格器和发布器重新计算全部必需证据、完整frontend编译闭包，发布前要求资格先进入Git。当前仍不提前增加支持数。
