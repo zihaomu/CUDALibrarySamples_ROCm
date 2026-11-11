@@ -1,0 +1,263 @@
+diff --git a/tools/moat/image_canny_stages.py b/tools/moat/image_canny_stages.py
+index 6d120617f..e658237da 100644
+--- a/tools/moat/image_canny_stages.py
++++ b/tools/moat/image_canny_stages.py
+@@ -12,8 +12,9 @@ def main():
+     header = folder/'canny_stages.h'
+     caller = ROOT/'rocm/probes/image/canny_stages.cpp'
+     contract = ROOT/'migration/rewrite/image-canny-stages-contract.json'
++    case_plan = ROOT/'migration/rewrite/image-canny-stage-cases.json'
+     observed = capture()
+-    e = Experiment('I1', 'Canny-GPU-stages-build', 'rocm-build', sources=[__file__, source, header, caller, contract])
++    e = Experiment('I1', 'Canny-GPU-stages-build', 'rocm-build', sources=[__file__, source, header, caller, contract, case_plan])
+     write(e.path/'backend.observed.json', observed)
+     core = Path('/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core')
+     overlay = ROOT/'build/rocm-sdk-overlay'
+@@ -40,15 +41,11 @@ def main():
+         record('I1', '共享HIP Canny阶段构建失败，实际编译日志已保留。', [build['evidence']])
+         return rc
+     rows=[]
+-    # Threshold variants share the same stage input. Run each unique byte image once.
+-    seen=set()
+-    for case in json.loads((ROOT/'migration/rewrite/image-canny-probe-cases.json').read_text()):
+-        fixture=ROOT/'tests/fixtures/image-canny'/case['case']
+-        identity=digest(fixture/'input.bin')
+-        if identity in seen: continue
+-        seen.add(identity)
++    for case in json.loads(case_plan.read_text())['cases']:
++        fixture=ROOT/case['fixture']
++        if digest(fixture/'manifest.json')!=case['manifest_sha256']:raise RuntimeError('frozen fixture changed')
+         r=Experiment('I1', 'Canny-GPU-stages', 'rocm-run', case=case['case'],
+-                     sources=[__file__,source,header,caller,contract], parent=e.id,
++                     sources=[__file__,source,header,caller,contract,case_plan], parent=e.id,
+                      comparison_id=case['case']+'/'+digest(fixture/'manifest.json'))
+         write(r.path/'backend.observed.json', observed)
+         shutil.copytree(fixture, r.path/'inputs')
+diff --git a/tools/moat/image_canny_stages_reference.py b/tools/moat/image_canny_stages_reference.py
+index 7ef5071ae..3f9fb8216 100644
+--- a/tools/moat/image_canny_stages_reference.py
++++ b/tools/moat/image_canny_stages_reference.py
+@@ -4,6 +4,7 @@ import json
+ import numpy as np
+ from experiment import ROOT,Experiment,write,digest
+ from image_progress import record
++from image_validation import coverage,file_set,fixture_identity,array_check
+ 
+ def reference(fixture):
+     config=json.loads((fixture/'config.json').read_text())
+@@ -33,22 +34,33 @@ def reference(fixture):
+     return dict(dx=dx.astype(np.int16),dy=dy.astype(np.int16),magnitude=mag,
+                 suppressed=np.where((mag>=a)&(mag>=b),mag,0).astype(np.uint16))
+ 
++def validate_run(row,case):
++    checks=[dict(check='GPU-process-exit',passed=row.get('return_code')==0)]
++    fixture=ROOT/row['inputs'];output=ROOT/row['outputs']
++    names={name+'.bin' for name in ['dx','dy','magnitude','suppressed']}
++    checks += [fixture_identity(fixture,case['manifest_sha256']),file_set(output,names),
++               dict(check='complete-output-hash-map',passed=set(row.get('output_sha256',{}))==names)]
++    if all(c['passed'] for c in checks):
++        try:
++            for name,expected in reference(fixture).items():
++                checks.append(array_check(output/(name+'.bin'),expected,row['output_sha256'][name+'.bin']))
++        except (OSError,ValueError,KeyError) as error:checks.append(dict(check='read-complete-arrays',passed=False,error=repr(error)))
++    return dict(status='PASSED' if all(c['passed'] for c in checks) else 'FAILED',checks=checks,
++                scope='Stage correctness only. Native hysteresis, full sample CLI and Python workloads remain pending.')
++
+ def main():
+-    results=[]
+-    for row in json.loads((ROOT/'migration/reports/image-I1-Canny-stages-runs.json').read_text()):
+-        if row['return_code']!=0:continue
+-        fixture=ROOT/row['inputs'];output=ROOT/row['outputs']
++    results=[];plan=ROOT/'migration/rewrite/image-canny-stage-cases.json'
++    cases=json.loads(plan.read_text())['cases'];rows=json.loads((ROOT/'migration/reports/image-I1-Canny-stages-runs.json').read_text())
++    required={c['case']:c for c in cases};complete=coverage(rows,cases)
++    if not complete['passed']:
++        e=Experiment('I1','Canny-stages-case-coverage','CPU-reference',sources=[__file__,plan,ROOT/'tools/moat/image_validation.py'])
++        validation=dict(status='FAILED',checks=[complete]);ref=e.finish('CONTRACT_AUDIT_FAILED',validation)
++        write(ROOT/'migration/reports/image-I1-Canny-stages-validation.json',[dict(case='case-coverage',**validation,evidence=ref)])
++        record('I1','阶段验收拒绝不完整或重复case集合。',[ref]);return 1
++    for row in rows:
+         e=Experiment('I1','Canny-stages-independent-CPU','CPU-reference',case=row['case'],
+-                     sources=[__file__,ROOT/'migration/rewrite/image-canny-stages-contract.json'],parent=row['experiment_id'])
+-        checks=[]
+-        for name,expected in reference(fixture).items():
+-            p=output/(name+'.bin');actual=np.fromfile(p,expected.dtype)
+-            identity=digest(p)==row['output_sha256'][p.name]
+-            mismatch=int(np.count_nonzero(actual.reshape(expected.shape)!=expected)) if actual.size==expected.size else None
+-            checks.append(dict(check=name,passed=identity and mismatch==0,mismatches=mismatch,
+-                               elements=int(expected.size),output_sha256=digest(p)))
+-        validation=dict(status='PASSED' if all(c['passed'] for c in checks) else 'FAILED',checks=checks,
+-                        scope='Stage correctness only. Native hysteresis, full sample CLI and Python workloads remain pending.')
++                     sources=[__file__,ROOT/'migration/rewrite/image-canny-stages-contract.json',plan,ROOT/'tools/moat/image_validation.py'],parent=row['experiment_id'])
++        validation=validate_run(row,required[row['case']])
+         ref=e.finish('PASSED' if validation['status']=='PASSED' else 'NUMERIC_MISMATCH',validation)
+         result=dict(case=row['case'],**validation,evidence=ref,parent=row['evidence']);results.append(result)
+         write(ROOT/'migration/reports/image-I1-Canny-stages-validation.json',results)
+diff --git a/tools/moat/image_checkpoint.py b/tools/moat/image_checkpoint.py
+index ebbc9af0e..ac58355cb 100644
+--- a/tools/moat/image_checkpoint.py
++++ b/tools/moat/image_checkpoint.py
+@@ -5,12 +5,13 @@ from experiment import ROOT, Experiment, write
+ from image_progress import record
+ 
+ def main():
+-    e=Experiment('I1','image-foundation-checkpoint','host-validation',sources=[__file__,ROOT/'tools/moat/audit.py',ROOT/'tools/migration/support_log_index.py'])
++    e=Experiment('I1','image-foundation-checkpoint','host-validation',sources=[__file__,ROOT/'tools/moat/audit.py',ROOT/'tools/migration/support_log_index.py',ROOT/'tools/moat/test_image_validation.py',ROOT/'tools/moat/image_validation.py',ROOT/'tools/moat/image_canny_stages_reference.py',ROOT/'tools/moat/image_native_gradient_compare.py',ROOT/'tools/moat/image_sdk_setup.py'])
+     # Earlier direct unittest invocation lacked PYTHONPATH and failed during import;
+     # it ran no tests. Preserve that observation and the corrected command below.
+     e.event('prior-host-invocation-observation',command='python3 -m unittest tools/moat/test_selected_proofs.py tools/moat/test_experiment.py',
+             outcome='IMPORT_ERROR_BEFORE_TESTS',diagnostic="ModuleNotFoundError: No module named 'experiment'",return_code=1)
+     commands=[(['env','PYTHONPATH='+str(ROOT/'tools/moat'),sys.executable,'-m','unittest','test_selected_proofs','test_experiment'],'existing-proof-and-recorder-regression'),
++              (['env','PYTHONPATH='+str(ROOT/'tools/moat'),str(ROOT/'build/image-cpu-venv/bin/python'),'-m','unittest','-v','test_image_validation'],'image-validator-positive-and-negative-regression'),
+               ([sys.executable,str(ROOT/'tools/moat/audit.py')],'immutable-evidence-audit'),
+               (['git','diff','--exit-code','d4046c61d598cc4aaffac0992a2768d16b60d6b8','--','NPP','NPP+','nvJPEG','nvJPEG2000','migration/samples.yaml','README.md','migration/reports/operator-support.json'],'originals-and-support-counts-unchanged'),
+               (['cmp',str(ROOT/'migration/image-libraries-plan.md'),str(ROOT.parent/'doc/cuda_samples_on_rocm_image_libraries_plan.md')],'plan-mirror-identical')]
+diff --git a/tools/moat/image_native_gradient_compare.py b/tools/moat/image_native_gradient_compare.py
+index 949907d69..5126587d6 100644
+--- a/tools/moat/image_native_gradient_compare.py
++++ b/tools/moat/image_native_gradient_compare.py
+@@ -5,24 +5,37 @@ import numpy as np
+ from image_canny_stages_reference import reference
+ from experiment import ROOT,Experiment,write,digest
+ from image_progress import record
++from image_validation import coverage,file_set,fixture_identity,array_check
+ 
+ def main():
+-    e=Experiment('I0','Canny-native-gradient-comparison','CPU-reference',sources=[__file__,ROOT/'tools/moat/image_canny_stages_reference.py'])
++    plan=ROOT/'migration/rewrite/image-native-gradient-cases.json';cases=json.loads(plan.read_text())['vendors']
++    e=Experiment('I0','Canny-native-gradient-comparison','CPU-reference',sources=[__file__,ROOT/'tools/moat/image_canny_stages_reference.py',ROOT/'tools/moat/image_validation.py',plan])
+     checks=[]
+     for suffix in ['', '-plus']:
+         report=ROOT/('migration/reports/image-I0-Canny-native-probes'+suffix+'-gradients.json')
+-        for row in json.loads(report.read_text()):
+-            fixture=ROOT/row['input_snapshot'];out=ROOT/row['output'];expected=reference(fixture)
+-            for name,oracle in [('x',-expected['dx']),('y',expected['dy']),('magnitude',expected['magnitude'])]:
+-                path=out/('native-'+name+'.bin');actual=np.fromfile(path,np.int16)
+-                mismatch=int(np.count_nonzero(actual.reshape(oracle.shape)!=oracle)) if actual.size==oracle.size else None
+-                checks.append(dict(check=('NPP+' if suffix else 'NPP')+'/'+row['case']+'/'+name,
+-                                   passed=mismatch==0,mismatches=mismatch,elements=int(oracle.size),native_sha256=digest(path)))
++        vendor='NPP+' if suffix else 'NPP';rows=json.loads(report.read_text());required={r['case']:r for r in cases[vendor]}
++        complete=coverage(rows,cases[vendor]);checks.append(dict(complete,check=vendor+'/complete-case-coverage'))
++        if not complete['passed']:continue
++        for row in rows:
++            prefix=vendor+'/'+row['case']+'/'
++            checks.append(dict(check=prefix+'process-exit',passed=row.get('return_code')==0))
++            fixture=ROOT/row['input_snapshot'];out=ROOT/row['output']
++            identity=fixture_identity(fixture,required[row['case']]['manifest_sha256'])
++            files=file_set(out,['output.bin','native.json','native-x.bin','native-y.bin','native-magnitude.bin','native-angle.bin'])
++            checks += [dict(identity,check=prefix+identity['check']),dict(files,check=prefix+files['check'])]
++            if row.get('return_code')!=0 or not identity['passed'] or not files['passed']:continue
++            try:
++                expected=reference(fixture);seal=json.loads((out.parent/'sealed.json').read_text())['files']
++                for name,oracle in [('x',-expected['dx']),('y',expected['dy']),('magnitude',expected['magnitude'])]:
++                    path=out/('native-'+name+'.bin');check=array_check(path,oracle,seal['outputs/'+path.name]['sha256'])
++                    checks.append(dict(check,check=prefix+name))
++            except (OSError,KeyError,ValueError) as error:checks.append(dict(check=prefix+'read-arrays',passed=False,error=repr(error)))
+     result=dict(status='PASSED' if checks and all(c['passed'] for c in checks) else 'FAILED',checks=checks,
+                 scope='Gradient stages only. Native X is -CPU dx, native Y is CPU dy; no claim about native NMS or final Canny mask.')
+     ref=e.finish('PASSED' if result['status']=='PASSED' else 'NUMERIC_MISMATCH',result)
+     write(ROOT/'migration/reports/image-I0-native-gradients-validation.json',dict(**result,evidence=ref))
+     record('I0','真实NPP/NPP+外部Sobel API与独立CPU梯度/整数幅度全数组对照：'+result['status']+'；明确X符号映射。此项不证明Canny内部NMS/连接阶段。',[ref])
+     print(json.dumps(result))
++    return int(result['status']!='PASSED')
+ 
+-if __name__=='__main__':main()
++if __name__=='__main__':raise SystemExit(main())
+diff --git a/tools/moat/image_native_sdk_setup.py b/tools/moat/image_native_sdk_setup.py
+index 1bda5cb6a..6220fd87a 100644
+--- a/tools/moat/image_native_sdk_setup.py
++++ b/tools/moat/image_native_sdk_setup.py
+@@ -8,11 +8,12 @@ from image_progress import record
+ def main():
+  results=[]
+  for r in json.loads((ROOT/'migration/reports/image-I0-private-SDKs.json').read_text()):
+-  e=Experiment('I0','image-native-private-'+r['SDK'],'cuda-setup',sources=[__file__]);raw=ROOT/json.loads((ROOT/r['evidence']/'manifest.json').read_text())['raw_artifact_dir'];remote='/tmp/image-library-private-SDKs/'+r['SDK']+'-'+r['version'];archive=remote+'/sdk.tar.xz';rc=e.command(['ssh','nvidia-5090x2',shlex.join(['mkdir','-p',remote])],'private-native-prefix');rc=rc or e.command(['scp',str(raw/'sdk.tar.xz'),'nvidia-5090x2:'+archive],'verified-archive-upload',timeout=300)
++  e=Experiment('I0','image-native-private-'+r['SDK'],'cuda-setup',sources=[__file__]);raw=ROOT/json.loads((ROOT/r.get('archive_evidence',r['evidence'])/'manifest.json').read_text())['raw_artifact_dir'];remote='/tmp/image-library-private-SDKs/'+r['SDK']+'-'+r['version'];archive=remote+'/sdk.tar.xz';rc=e.command(['ssh','nvidia-5090x2',shlex.join(['mkdir','-p',remote])],'private-native-prefix');rc=rc or e.command(['scp',str(raw/r.get('archive_file','sdk.tar.xz')),'nvidia-5090x2:'+archive],'verified-archive-upload',timeout=300)
+   code='''import pathlib,hashlib,tarfile,json,subprocess
+ root=pathlib.Path(REMOTE);p=root/'sdk.tar.xz';assert hashlib.file_digest(p.open('rb'),'sha256').hexdigest()==EXPECTED
+ with tarfile.open(p,'r:xz') as f:f.extractall(root,filter='data')
+ libs=[p for p in root.rglob('*.so*') if p.is_file()];result={str(p):dict(sha256=hashlib.file_digest(p.open('rb'),'sha256').hexdigest(),ldd=subprocess.run(['ldd',str(p)],capture_output=True,text=True).stdout) for p in libs};print(json.dumps(result))
+ '''.replace('REMOTE',repr(remote)).replace('EXPECTED',repr(r['vendor_sha256']))
+   rc=rc or e.command(['ssh','nvidia-5090x2',shlex.join(['python3','-c',code])],'native-archive-hash-unpack-and-loader',timeout=240);row=dict(SDK=r['SDK'],remote=remote,status='SDK_INSTALLED' if rc==0 else 'SDK_UNAVAILABLE',return_code=rc,identity=r);write(e.path/'native-SDK.json',row);ref=e.finish('OBSERVED' if rc==0 else 'SDK_UNAVAILABLE');row['evidence']=ref;results.append(row);write(ROOT/'migration/reports/image-I0-native-private-SDKs.json',results);record('I0',r['SDK']+' SDK私有部署到5090并核对实际loader依赖，结果 '+row['status']+'。',[ref]);print(r['SDK'],rc,flush=True)
+-if __name__=='__main__':main()
++ return int(any(r['return_code'] for r in results))
++if __name__=='__main__':raise SystemExit(main())
+diff --git a/tools/moat/image_sdk_setup.py b/tools/moat/image_sdk_setup.py
+index aaa6e0c0c..cd4d559a8 100644
+--- a/tools/moat/image_sdk_setup.py
++++ b/tools/moat/image_sdk_setup.py
+@@ -1,20 +1,60 @@
+ #!/usr/bin/env python3
+-"""Download private NVIDIA image SDKs strictly from recorded vendor manifests."""
++"""Download or verify private NVIDIA SDKs; seal failed installation attempts."""
+ import json,shutil,tarfile
+-from pathlib import Path
+ from experiment import ROOT,Experiment,write,digest
+ from image_progress import record
+ 
++def prefix_checks(prefix,previous,version,variant,sha):
++    errors=[]
++    if not previous or previous.get('version')!=version or previous.get('variant')!=variant or previous.get('vendor_sha256')!=sha:
++        return ['no matching previously verified package identity']
++    files=previous.get('files',{})
++    if not files:return ['no previous file inventory']
++    for name,row in files.items():
++        p=prefix/name
++        if not p.is_file() or p.stat().st_size!=row['bytes'] or digest(p)!=row['sha256']:errors.append(name)
++    actual={str(p.relative_to(prefix)) for p in prefix.rglob('*') if p.is_file() and (p.suffix in ['.h','.txt'] or '.so' in p.name)}
++    if actual!=set(files):errors.append('SDK file inventory differs')
++    return errors
++
+ def main():
+- manifests=json.loads((ROOT/'migration/reports/image-I0-SDK-manifests.json').read_text())['results'];rows=[]
+- for name,key,variant in [('nvjpeg2000','libnvjpeg_2k','cuda13'),('nppplus','libnpp_plus','cuda12')]:
+-  package=manifests[name]['manifest'][key];item=package['linux-x86_64'][variant];url='https://developer.download.nvidia.com/compute/'+name+'/redist/'+item['relative_path'];e=Experiment('I0','image-private-'+name+'-SDK','host-download',sources=[__file__,ROOT/'migration/reports/image-I0-SDK-manifests.json']);archive=e.path/'sdk.tar.xz';rc=e.command(['curl','--fail','--location','--connect-timeout','15','--max-time','600','--retry','1','--output',str(archive),url],'official-archive-download',timeout=650);valid=rc==0 and archive.stat().st_size==int(item['size']) and digest(archive)==item['sha256'];prefix=ROOT/'build/image-cuda-sdk'/name
+-  if valid:
+-   unpack=e.path/'unpack';unpack.mkdir()
+-   with tarfile.open(archive,'r:xz') as tar:tar.extractall(unpack,filter='data')
+-   children=list(unpack.iterdir());sdk=children[0] if len(children)==1 else unpack
+-   if prefix.exists():raise RuntimeError('Existing SDK prefix must be checked explicitly before replacement '+str(prefix))
+-   prefix.parent.mkdir(parents=True,exist_ok=True);shutil.copytree(sdk,prefix)
+-  row=dict(status='VERIFIED_DOWNLOAD' if valid else 'DOWNLOAD_FAILED',SDK=name,version=package['version'],variant=variant,url=url,vendor_sha256=item['sha256'],actual_sha256=digest(archive) if archive.exists() else None,prefix=str(prefix.relative_to(ROOT)),files={str(p.relative_to(prefix)):dict(bytes=p.stat().st_size,sha256=digest(p)) for p in prefix.rglob('*') if p.is_file() and (p.suffix in ['.h','.txt'] or '.so' in p.name)} if valid else {})
+-  write(e.path/'sdk-identity.json',row);ref=e.finish('OBSERVED' if valid else 'SDK_UNAVAILABLE');row['evidence']=ref;rows.append(row);write(ROOT/'migration/reports/image-I0-private-SDKs.json',rows);record('I0',name+' SDK '+package['version']+' / '+variant+' 官方下载与SHA核验：'+row['status']+'；仅项目私有前缀，编译/运行资格另验。',[ref]);print(name,row['status'],flush=True)
+-if __name__=='__main__':main()
++    manifests=json.loads((ROOT/'migration/reports/image-I0-SDK-manifests.json').read_text())['results']
++    report=ROOT/'migration/reports/image-I0-private-SDKs.json'
++    old=json.loads(report.read_text()) if report.exists() else []
++    rows={r['SDK']:r for r in old};failed=False
++    for name,key,variant in [('nvjpeg2000','libnvjpeg_2k','cuda13'),('nppplus','libnpp_plus','cuda12')]:
++        package=manifests[name]['manifest'][key];item=package['linux-x86_64'][variant]
++        url='https://developer.download.nvidia.com/compute/'+name+'/redist/'+item['relative_path']
++        e=Experiment('I0','image-private-'+name+'-SDK','host-download',sources=[__file__,ROOT/'migration/reports/image-I0-SDK-manifests.json'])
++        prefix=ROOT/'build/image-cuda-sdk'/name;previous=rows.get(name);valid=False;reason=None
++        row=dict(SDK=name,version=package['version'],variant=variant,url=url,vendor_sha256=item['sha256'],prefix=str(prefix.relative_to(ROOT)))
++        try:
++            if prefix.exists():
++                errors=prefix_checks(prefix,previous,package['version'],variant,item['sha256'])
++                if errors:raise RuntimeError('existing SDK prefix refused: '+repr(errors))
++                row=dict(previous,status='VERIFIED_REUSE',archive_evidence=previous.get('archive_evidence',previous['evidence']))
++                valid=True
++            else:
++                # Preserve vendor payload only in raw evidence, never in Git archives.
++                archive=e.path/'sdk.bin'
++                rc=e.command(['curl','--fail','--location','--connect-timeout','15','--max-time','600','--retry','1','--output',str(archive),url],'official-archive-download',timeout=650)
++                if rc or not archive.is_file() or archive.stat().st_size!=int(item['size']) or digest(archive)!=item['sha256']:
++                    raise RuntimeError('official download failed or size/SHA mismatch')
++                unpack=ROOT/'build/image-SDK-unpack'/e.id;unpack.mkdir(parents=True)
++                with tarfile.open(archive,'r:xz') as tar:tar.extractall(unpack,filter='data')
++                children=list(unpack.iterdir());sdk=children[0] if len(children)==1 else unpack
++                prefix.parent.mkdir(parents=True,exist_ok=True);shutil.copytree(sdk,prefix)
++                files={str(p.relative_to(prefix)):dict(bytes=p.stat().st_size,sha256=digest(p)) for p in prefix.rglob('*') if p.is_file() and (p.suffix in ['.h','.txt'] or '.so' in p.name)}
++                if not files:raise RuntimeError('empty SDK installation')
++                row.update(status='VERIFIED_DOWNLOAD',actual_sha256=digest(archive),archive_file='sdk.bin',files=files);valid=True
++        except Exception as error:
++            reason=repr(error);row.update(status='SDK_UNAVAILABLE',error=reason,previous_verified_identity=previous);failed=True
++        write(e.path/'sdk-identity.json',row)
++        ref=e.finish('OBSERVED' if valid else 'SDK_UNAVAILABLE',reason=reason)
++        if valid and row['status']=='VERIFIED_DOWNLOAD':row['archive_evidence']=ref
++        row['evidence']=ref;rows[name]=row;write(report,list(rows.values()))
++        record('I0',name+' 私有SDK安装/重用：'+row['status']+'；现有prefix必须逐文件匹配，所有失败封存。',[ref])
++        print(name,row['status'],flush=True)
++    return int(failed)
++
++if __name__=='__main__':raise SystemExit(main())

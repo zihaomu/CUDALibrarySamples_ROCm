@@ -5,12 +5,13 @@ from experiment import ROOT, Experiment, write
 from image_progress import record
 
 def main():
-    e=Experiment('I1','image-foundation-checkpoint','host-validation',sources=[__file__,ROOT/'tools/moat/audit.py',ROOT/'tools/migration/support_log_index.py'])
+    e=Experiment('I1','image-foundation-checkpoint','host-validation',sources=[__file__,ROOT/'tools/moat/audit.py',ROOT/'tools/migration/support_log_index.py',ROOT/'tools/moat/test_image_validation.py',ROOT/'tools/moat/image_validation.py',ROOT/'tools/moat/image_canny_stages_reference.py',ROOT/'tools/moat/image_native_gradient_compare.py',ROOT/'tools/moat/image_sdk_setup.py'])
     # Earlier direct unittest invocation lacked PYTHONPATH and failed during import;
     # it ran no tests. Preserve that observation and the corrected command below.
     e.event('prior-host-invocation-observation',command='python3 -m unittest tools/moat/test_selected_proofs.py tools/moat/test_experiment.py',
             outcome='IMPORT_ERROR_BEFORE_TESTS',diagnostic="ModuleNotFoundError: No module named 'experiment'",return_code=1)
     commands=[(['env','PYTHONPATH='+str(ROOT/'tools/moat'),sys.executable,'-m','unittest','test_selected_proofs','test_experiment'],'existing-proof-and-recorder-regression'),
+              (['env','PYTHONPATH='+str(ROOT/'tools/moat'),str(ROOT/'build/image-cpu-venv/bin/python'),'-m','unittest','-v','test_image_validation'],'image-validator-positive-and-negative-regression'),
               ([sys.executable,str(ROOT/'tools/moat/audit.py')],'immutable-evidence-audit'),
               (['git','diff','--exit-code','d4046c61d598cc4aaffac0992a2768d16b60d6b8','--','NPP','NPP+','nvJPEG','nvJPEG2000','migration/samples.yaml','README.md','migration/reports/operator-support.json'],'originals-and-support-counts-unchanged'),
               (['cmp',str(ROOT/'migration/image-libraries-plan.md'),str(ROOT.parent/'doc/cuda_samples_on_rocm_image_libraries_plan.md')],'plan-mirror-identical')]

@@ -4,6 +4,7 @@ import json
 import numpy as np
 from experiment import ROOT,Experiment,write,digest
 from image_progress import record
+from image_validation import coverage,file_set,fixture_identity,array_check
 
 def reference(fixture):
     config=json.loads((fixture/'config.json').read_text())
@@ -33,22 +34,33 @@ def reference(fixture):
     return dict(dx=dx.astype(np.int16),dy=dy.astype(np.int16),magnitude=mag,
                 suppressed=np.where((mag>=a)&(mag>=b),mag,0).astype(np.uint16))
 
+def validate_run(row,case):
+    checks=[dict(check='GPU-process-exit',passed=row.get('return_code')==0)]
+    fixture=ROOT/row['inputs'];output=ROOT/row['outputs']
+    names={name+'.bin' for name in ['dx','dy','magnitude','suppressed']}
+    checks += [fixture_identity(fixture,case['manifest_sha256']),file_set(output,names),
+               dict(check='complete-output-hash-map',passed=set(row.get('output_sha256',{}))==names)]
+    if all(c['passed'] for c in checks):
+        try:
+            for name,expected in reference(fixture).items():
+                checks.append(array_check(output/(name+'.bin'),expected,row['output_sha256'][name+'.bin']))
+        except (OSError,ValueError,KeyError) as error:checks.append(dict(check='read-complete-arrays',passed=False,error=repr(error)))
+    return dict(status='PASSED' if all(c['passed'] for c in checks) else 'FAILED',checks=checks,
+                scope='Stage correctness only. Native hysteresis, full sample CLI and Python workloads remain pending.')
+
 def main():
-    results=[]
-    for row in json.loads((ROOT/'migration/reports/image-I1-Canny-stages-runs.json').read_text()):
-        if row['return_code']!=0:continue
-        fixture=ROOT/row['inputs'];output=ROOT/row['outputs']
+    results=[];plan=ROOT/'migration/rewrite/image-canny-stage-cases.json'
+    cases=json.loads(plan.read_text())['cases'];rows=json.loads((ROOT/'migration/reports/image-I1-Canny-stages-runs.json').read_text())
+    required={c['case']:c for c in cases};complete=coverage(rows,cases)
+    if not complete['passed']:
+        e=Experiment('I1','Canny-stages-case-coverage','CPU-reference',sources=[__file__,plan,ROOT/'tools/moat/image_validation.py'])
+        validation=dict(status='FAILED',checks=[complete]);ref=e.finish('CONTRACT_AUDIT_FAILED',validation)
+        write(ROOT/'migration/reports/image-I1-Canny-stages-validation.json',[dict(case='case-coverage',**validation,evidence=ref)])
+        record('I1','阶段验收拒绝不完整或重复case集合。',[ref]);return 1
+    for row in rows:
         e=Experiment('I1','Canny-stages-independent-CPU','CPU-reference',case=row['case'],
-                     sources=[__file__,ROOT/'migration/rewrite/image-canny-stages-contract.json'],parent=row['experiment_id'])
-        checks=[]
-        for name,expected in reference(fixture).items():
-            p=output/(name+'.bin');actual=np.fromfile(p,expected.dtype)
-            identity=digest(p)==row['output_sha256'][p.name]
-            mismatch=int(np.count_nonzero(actual.reshape(expected.shape)!=expected)) if actual.size==expected.size else None
-            checks.append(dict(check=name,passed=identity and mismatch==0,mismatches=mismatch,
-                               elements=int(expected.size),output_sha256=digest(p)))
-        validation=dict(status='PASSED' if all(c['passed'] for c in checks) else 'FAILED',checks=checks,
-                        scope='Stage correctness only. Native hysteresis, full sample CLI and Python workloads remain pending.')
+                     sources=[__file__,ROOT/'migration/rewrite/image-canny-stages-contract.json',plan,ROOT/'tools/moat/image_validation.py'],parent=row['experiment_id'])
+        validation=validate_run(row,required[row['case']])
         ref=e.finish('PASSED' if validation['status']=='PASSED' else 'NUMERIC_MISMATCH',validation)
         result=dict(case=row['case'],**validation,evidence=ref,parent=row['evidence']);results.append(result)
         write(ROOT/'migration/reports/image-I1-Canny-stages-validation.json',results)

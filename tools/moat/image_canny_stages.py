@@ -12,8 +12,9 @@ def main():
     header = folder/'canny_stages.h'
     caller = ROOT/'rocm/probes/image/canny_stages.cpp'
     contract = ROOT/'migration/rewrite/image-canny-stages-contract.json'
+    case_plan = ROOT/'migration/rewrite/image-canny-stage-cases.json'
     observed = capture()
-    e = Experiment('I1', 'Canny-GPU-stages-build', 'rocm-build', sources=[__file__, source, header, caller, contract])
+    e = Experiment('I1', 'Canny-GPU-stages-build', 'rocm-build', sources=[__file__, source, header, caller, contract, case_plan])
     write(e.path/'backend.observed.json', observed)
     core = Path('/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core')
     overlay = ROOT/'build/rocm-sdk-overlay'
@@ -40,15 +41,11 @@ def main():
         record('I1', '共享HIP Canny阶段构建失败，实际编译日志已保留。', [build['evidence']])
         return rc
     rows=[]
-    # Threshold variants share the same stage input. Run each unique byte image once.
-    seen=set()
-    for case in json.loads((ROOT/'migration/rewrite/image-canny-probe-cases.json').read_text()):
-        fixture=ROOT/'tests/fixtures/image-canny'/case['case']
-        identity=digest(fixture/'input.bin')
-        if identity in seen: continue
-        seen.add(identity)
+    for case in json.loads(case_plan.read_text())['cases']:
+        fixture=ROOT/case['fixture']
+        if digest(fixture/'manifest.json')!=case['manifest_sha256']:raise RuntimeError('frozen fixture changed')
         r=Experiment('I1', 'Canny-GPU-stages', 'rocm-run', case=case['case'],
-                     sources=[__file__,source,header,caller,contract], parent=e.id,
+                     sources=[__file__,source,header,caller,contract,case_plan], parent=e.id,
                      comparison_id=case['case']+'/'+digest(fixture/'manifest.json'))
         write(r.path/'backend.observed.json', observed)
         shutil.copytree(fixture, r.path/'inputs')

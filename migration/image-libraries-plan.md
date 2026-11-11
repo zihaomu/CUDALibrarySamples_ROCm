@@ -269,7 +269,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-11T09:02:50.184581+00:00。26入口当前2通过/8部分/16失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-11T09:18:24.226917+00:00。26入口当前2通过/8部分/16失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -392,5 +392,41 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-11T09:01:35.078661+00:00 | I0 | 12张原始JPEG均已用独立CPU解码并解析SOF/SOS；rocJPEG成功的10张记录全像素maxAbs/MSE/PSNR，失败2张保留原格式与实际返回值。未按观察结果放宽或签发阈值。 | `migration/reports/evidence/rewrite/I0/JPEG-original-CPU-and-rocJPEG-observation/20261111T090134.230859Z-I0-CPU-reference-4be9098b0c` |
 | 2026-11-11T09:02:49.847464+00:00 | I0 | JPEG完整像素观察揭示8张自然图maxAbs16–52、PSNR42.47–51.49dB，未满足初始候选统一门槛。需要先分离IDCT/色彩/chroma upsampling，未调整阈值。两张失败图实际均为CPU可解码的SOF2/10-scan progressive。 | `migration/reports/image-I0-JPEG-CPU-observations.json` |
 | 2026-11-11T09:02:50.184581+00:00 | I1 | 当前共享阶段代码已在15输入/4,001,684元素上独立CPU逐值一致；原生NPP/NPP+梯度15数组另验通过。阶段检查点文档明确I0/I1未完成、其它阶段未启动与当前缺口；整例支持数不变。 | `migration/reports/image-I0-I1-checkpoint.md`；`migration/reports/image-I1-Canny-stages-validation.json`；`migration/reports/image-I0-native-gradients-validation.json` |
+| 2026-11-11T09:09:11.111435+00:00 | I1 | 固定4705868ef独立复核发现validator两项must-fix：跳过非零rc会漏记失败；np.fromfile会忽略int16文件末尾1字节。当前15实际case的只读数值重放仍一致。另发现SDK已存在prefix分支异常未封存；计划补固定case覆盖、精确字节集合/反向检查及SDK验证复用后复审。 | `migration/reports/image-I0-I1-checkpoint.md` |
+| 2026-11-11T09:15:55.256725+00:00 | I0 | nvjpeg2000 私有SDK安装/重用：VERIFIED_REUSE；现有prefix必须逐文件匹配，所有失败封存。 | `migration/reports/evidence/rewrite/I0/image-private-nvjpeg2000-SDK/20261111T091554.321290Z-I0-host-download-d912ac8dc9` |
+| 2026-11-11T09:15:55.560054+00:00 | I0 | 真实NPP/NPP+外部Sobel API与独立CPU梯度/整数幅度全数组对照：PASSED；明确X符号映射。此项不证明Canny内部NMS/连接阶段。 | `migration/reports/evidence/rewrite/I0/Canny-native-gradient-comparison/20261111T091554.369562Z-I0-CPU-reference-1b2e1da238` |
+| 2026-11-11T09:15:57.366020+00:00 | I0 | nppplus 私有SDK安装/重用：VERIFIED_REUSE；现有prefix必须逐文件匹配，所有失败封存。 | `migration/reports/evidence/rewrite/I0/image-private-nppplus-SDK/20261111T091555.559469Z-I0-host-download-1540be21a1` |
+| 2026-11-11T09:16:02.472027+00:00 | I1 | teapot-c3：真实HIP阶段C ABI执行成功，等待独立CPU逐元素检查。 | `migration/reports/evidence/rewrite/I1/Canny-GPU-stages/20261111T091600.956454Z-I1-rocm-run-cf573c2128` |
+| 2026-11-11T09:16:04.102422+00:00 | I1 | teapot-c1：真实HIP阶段C ABI执行成功，等待独立CPU逐元素检查。 | `migration/reports/evidence/rewrite/I1/Canny-GPU-stages/20261111T091602.781660Z-I1-rocm-run-0f123db918` |
+| 2026-11-11T09:16:05.740630+00:00 | I1 | noise-c3：真实HIP阶段C ABI执行成功，等待独立CPU逐元素检查。 | `migration/reports/evidence/rewrite/I1/Canny-GPU-stages/20261111T091604.437447Z-I1-rocm-run-61c82eecdf` |
+| 2026-11-11T09:16:07.360119+00:00 | I1 | noise-c1：真实HIP阶段C ABI执行成功，等待独立CPU逐元素检查。 | `migration/reports/evidence/rewrite/I1/Canny-GPU-stages/20261111T091606.056534Z-I1-rocm-run-d0d7a87766` |
+| 2026-11-11T09:16:08.979001+00:00 | I1 | ties-c1：真实HIP阶段C ABI执行成功，等待独立CPU逐元素检查。 | `migration/reports/evidence/rewrite/I1/Canny-GPU-stages/20261111T091607.667091Z-I1-rocm-run-d24fd1b6ef` |
+| 2026-11-11T09:16:10.571438+00:00 | I1 | step-c1：真实HIP阶段C ABI执行成功，等待独立CPU逐元素检查。 | `migration/reports/evidence/rewrite/I1/Canny-GPU-stages/20261111T091609.284009Z-I1-rocm-run-61be4a4ffc` |
+| 2026-11-11T09:16:12.170673+00:00 | I1 | tiny-c1：真实HIP阶段C ABI执行成功，等待独立CPU逐元素检查。 | `migration/reports/evidence/rewrite/I1/Canny-GPU-stages/20261111T091610.878302Z-I1-rocm-run-1aab260097` |
+| 2026-11-11T09:16:13.757038+00:00 | I1 | holdout-weak-step-c1：真实HIP阶段C ABI执行成功，等待独立CPU逐元素检查。 | `migration/reports/evidence/rewrite/I1/Canny-GPU-stages/20261111T091612.465877Z-I1-rocm-run-ac3ad32263` |
+| 2026-11-11T09:16:15.363733+00:00 | I1 | holdout-weak-cross-c1：真实HIP阶段C ABI执行成功，等待独立CPU逐元素检查。 | `migration/reports/evidence/rewrite/I1/Canny-GPU-stages/20261111T091614.064107Z-I1-rocm-run-80940bf50f` |
+| 2026-11-11T09:16:16.932798+00:00 | I1 | holdout-weak-diagonal-c1：真实HIP阶段C ABI执行成功，等待独立CPU逐元素检查。 | `migration/reports/evidence/rewrite/I1/Canny-GPU-stages/20261111T091615.656002Z-I1-rocm-run-7f516e7335` |
+| 2026-11-11T09:16:18.501871+00:00 | I1 | holdout-low-noise-c1：真实HIP阶段C ABI执行成功，等待独立CPU逐元素检查。 | `migration/reports/evidence/rewrite/I1/Canny-GPU-stages/20261111T091617.220664Z-I1-rocm-run-4a367fb534` |
+| 2026-11-11T09:16:20.115778+00:00 | I1 | holdout-mixed-noise-c1：真实HIP阶段C ABI执行成功，等待独立CPU逐元素检查。 | `migration/reports/evidence/rewrite/I1/Canny-GPU-stages/20261111T091618.789577Z-I1-rocm-run-36dd94f447` |
+| 2026-11-11T09:16:21.715961+00:00 | I1 | border-check91203-c1：真实HIP阶段C ABI执行成功，等待独立CPU逐元素检查。 | `migration/reports/evidence/rewrite/I1/Canny-GPU-stages/20261111T091620.426897Z-I1-rocm-run-beba604733` |
+| 2026-11-11T09:16:23.321408+00:00 | I1 | border-check40519-c1：真实HIP阶段C ABI执行成功，等待独立CPU逐元素检查。 | `migration/reports/evidence/rewrite/I1/Canny-GPU-stages/20261111T091622.025817Z-I1-rocm-run-9262c2c460` |
+| 2026-11-11T09:16:24.883512+00:00 | I1 | border-check83914-c1：真实HIP阶段C ABI执行成功，等待独立CPU逐元素检查。 | `migration/reports/evidence/rewrite/I1/Canny-GPU-stages/20261111T091623.608658Z-I1-rocm-run-e64a72a8bb` |
+| 2026-11-11T09:17:05.611155+00:00 | I1 | teapot-c3：Sobel dx/dy、整数L2、NMS四个完整数组与独立CPU逐元素完全一致；此结论仅覆盖阶段。 | `migration/reports/evidence/rewrite/I1/Canny-stages-independent-CPU/20261111T091704.722663Z-I1-CPU-reference-73f0be82f0` |
+| 2026-11-11T09:17:06.764817+00:00 | I1 | teapot-c1：Sobel dx/dy、整数L2、NMS四个完整数组与独立CPU逐元素完全一致；此结论仅覆盖阶段。 | `migration/reports/evidence/rewrite/I1/Canny-stages-independent-CPU/20261111T091705.902571Z-I1-CPU-reference-3490af453f` |
+| 2026-11-11T09:17:07.874759+00:00 | I1 | noise-c3：Sobel dx/dy、整数L2、NMS四个完整数组与独立CPU逐元素完全一致；此结论仅覆盖阶段。 | `migration/reports/evidence/rewrite/I1/Canny-stages-independent-CPU/20261111T091707.060963Z-I1-CPU-reference-8313e7a259` |
+| 2026-11-11T09:17:09.060698+00:00 | I1 | noise-c1：Sobel dx/dy、整数L2、NMS四个完整数组与独立CPU逐元素完全一致；此结论仅覆盖阶段。 | `migration/reports/evidence/rewrite/I1/Canny-stages-independent-CPU/20261111T091708.215774Z-I1-CPU-reference-f307eed640` |
+| 2026-11-11T09:17:10.213329+00:00 | I1 | ties-c1：Sobel dx/dy、整数L2、NMS四个完整数组与独立CPU逐元素完全一致；此结论仅覆盖阶段。 | `migration/reports/evidence/rewrite/I1/Canny-stages-independent-CPU/20261111T091709.392010Z-I1-CPU-reference-f1152bc3cf` |
+| 2026-11-11T09:17:11.322221+00:00 | I1 | step-c1：Sobel dx/dy、整数L2、NMS四个完整数组与独立CPU逐元素完全一致；此结论仅覆盖阶段。 | `migration/reports/evidence/rewrite/I1/Canny-stages-independent-CPU/20261111T091710.506554Z-I1-CPU-reference-076693129e` |
+| 2026-11-11T09:17:12.477119+00:00 | I1 | tiny-c1：Sobel dx/dy、整数L2、NMS四个完整数组与独立CPU逐元素完全一致；此结论仅覆盖阶段。 | `migration/reports/evidence/rewrite/I1/Canny-stages-independent-CPU/20261111T091711.641428Z-I1-CPU-reference-9a1235be18` |
+| 2026-11-11T09:17:13.631434+00:00 | I1 | holdout-weak-step-c1：Sobel dx/dy、整数L2、NMS四个完整数组与独立CPU逐元素完全一致；此结论仅覆盖阶段。 | `migration/reports/evidence/rewrite/I1/Canny-stages-independent-CPU/20261111T091712.798017Z-I1-CPU-reference-648f5441b1` |
+| 2026-11-11T09:17:14.747225+00:00 | I1 | holdout-weak-cross-c1：Sobel dx/dy、整数L2、NMS四个完整数组与独立CPU逐元素完全一致；此结论仅覆盖阶段。 | `migration/reports/evidence/rewrite/I1/Canny-stages-independent-CPU/20261111T091713.929977Z-I1-CPU-reference-c1fc1e9f9e` |
+| 2026-11-11T09:17:15.871917+00:00 | I1 | holdout-weak-diagonal-c1：Sobel dx/dy、整数L2、NMS四个完整数组与独立CPU逐元素完全一致；此结论仅覆盖阶段。 | `migration/reports/evidence/rewrite/I1/Canny-stages-independent-CPU/20261111T091715.063389Z-I1-CPU-reference-2c5c18095c` |
+| 2026-11-11T09:17:17.006959+00:00 | I1 | holdout-low-noise-c1：Sobel dx/dy、整数L2、NMS四个完整数组与独立CPU逐元素完全一致；此结论仅覆盖阶段。 | `migration/reports/evidence/rewrite/I1/Canny-stages-independent-CPU/20261111T091716.189354Z-I1-CPU-reference-a84b87afb8` |
+| 2026-11-11T09:17:18.133340+00:00 | I1 | holdout-mixed-noise-c1：Sobel dx/dy、整数L2、NMS四个完整数组与独立CPU逐元素完全一致；此结论仅覆盖阶段。 | `migration/reports/evidence/rewrite/I1/Canny-stages-independent-CPU/20261111T091717.322273Z-I1-CPU-reference-478225baf2` |
+| 2026-11-11T09:17:19.272846+00:00 | I1 | border-check91203-c1：Sobel dx/dy、整数L2、NMS四个完整数组与独立CPU逐元素完全一致；此结论仅覆盖阶段。 | `migration/reports/evidence/rewrite/I1/Canny-stages-independent-CPU/20261111T091718.441749Z-I1-CPU-reference-82e8ddd20e` |
+| 2026-11-11T09:17:20.395250+00:00 | I1 | border-check40519-c1：Sobel dx/dy、整数L2、NMS四个完整数组与独立CPU逐元素完全一致；此结论仅覆盖阶段。 | `migration/reports/evidence/rewrite/I1/Canny-stages-independent-CPU/20261111T091719.566996Z-I1-CPU-reference-53bde46972` |
+| 2026-11-11T09:17:21.526355+00:00 | I1 | border-check83914-c1：Sobel dx/dy、整数L2、NMS四个完整数组与独立CPU逐元素完全一致；此结论仅覆盖阶段。 | `migration/reports/evidence/rewrite/I1/Canny-stages-independent-CPU/20261111T091720.716158Z-I1-CPU-reference-b0133c204b` |
+| 2026-11-11T09:18:05.958984+00:00 | I1 | 图像基础实现检查点：PASSED；既有资格/记录器回归、证据封存审计、原始源码与支持计数不变、计划镜像一致分别检查。 | `migration/reports/evidence/rewrite/I1/image-foundation-checkpoint/20261111T091721.874780Z-I1-host-validation-df57386e26` |
+| 2026-11-11T09:18:24.226917+00:00 | I1 | 审查问题已修：固定15 stage和5 native case覆盖，失败rc不跳过/严格非零退出，逐文件精确字节/集合/hash/输入检查。16项正反测试全部通过；重新构建15 GPU/CPU阶段及15 native梯度数组严格复验通过。SDK两包已实际逐文件验证复用，所有失败分支可封存。 | `migration/reports/image-checkpoint-validation.json`；`migration/reports/image-review-4705868ef.json`；`migration/reports/image-I1-Canny-stages-validation.json` |
 
 <!-- IMAGE_EXECUTION:END -->

@@ -10,7 +10,7 @@
 | 原生 NPP+/nvJPEG2000 SDK | 官方包 SHA 核验、私有安装、实际链接与运行 | [本地 SDK](image-I0-private-SDKs.json)、[5090 SDK](image-I0-native-private-SDKs.json)；SDK 二进制未发布到 Git |
 | nvJPEG2000 四个原始入口 | 原始 CMake 构建与仓库 setup 自检通过；13 个实际输出文件 | [原生基线](image-I0-native-JPEG2000-originals.json)：整图/pipeline/512×512 ROI、classic/HT 无损编码回环；NLT/FP/YUV/quality 分支尚待补齐，AMD codec 尚未实现 |
 | rocJPEG 原图实际解码 | HARDWARE 10/12 文件取得输出，HYBRID 创建返回 -12 | [实际调用](image-I0-rocJPEG-files.json)、[CPU 与完整像素测量](image-I0-JPEG-CPU-observations.json)；两张失败文件均为 CPU 可解码的 SOF2/10-scan progressive JPEG |
-| 基础设施回归与审计 | 12 项既有资格/记录器测试通过，封存审计、原始源码/支持计数不变、计划镜像检查通过 | [检查点验证](image-checkpoint-validation.json)；没有签发新的样例资格 |
+| 基础设施回归与审计 | 12 项既有资格/记录器与 16 项图像正反测试通过，封存审计、原始源码/支持计数不变、计划镜像检查通过 | [检查点验证](image-checkpoint-validation.json)；没有签发新的样例资格 |
 
 ## 需要继续解决的问题
 
