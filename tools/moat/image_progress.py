@@ -17,12 +17,15 @@ def render(data):
   refs='；'.join('['+Path(p).name+']('+str(Path(p).relative_to('migration/reports'))+')' if p.startswith('migration/reports/') else '`'+p+'`' for p in e['evidence']) or '静态检查/任务接入'
   lines.append('| '+e['time']+' | '+e['phase']+' | '+e['message'].replace('|','/').replace('\n','<br>')+' | '+refs+' |')
  (ROOT/'migration/reports/image-libraries-progress.md').write_text('\n'.join(lines)+'\n')
- canonical=ROOT.parent/'doc/cuda_samples_on_rocm_image_libraries_plan.md';body=canonical.read_text().replace('状态：**PLANNED_NOT_EXECUTED**。本方案仅建立实施队列，不增加通过数。','状态：**IN_PROGRESS**。已开始按计划实施；原设计与基线保留，当前实验和阶段状态见下方执行记录。')
+ canonical=ROOT.parent/'doc/cuda_samples_on_rocm_image_libraries_plan.md'
+ if not canonical.exists():canonical=ROOT/'migration/image-libraries-plan.md'
+ body=canonical.read_text().replace('状态：**PLANNED_NOT_EXECUTED**。本方案仅建立实施队列，不增加通过数。','状态：**IN_PROGRESS**。已开始按计划实施；原设计与基线保留，当前实验和阶段状态见下方执行记录。')
  block='\n'.join([START,'','## 实时执行记录','',f'最近更新：{data["updated_at"]}。26入口当前{counts["PASSED"]}通过/{counts["PARTIAL"]}部分/{counts["FAILED"]}失败；实验运行成功不会直接升级支持数。','','| 时间 | 阶段 | 事件 / 结果 | 证据 |','| --- | --- | --- | --- |']+['| '+e['time']+' | '+e['phase']+' | '+e['message'].replace('|','/').replace('\n','<br>')+' | '+'；'.join('`'+p+'`' for p in e['evidence'])+' |' for e in data['events']]+['',END])
  if START in body:body=body.split(START,1)[0]+block+body.split(END,1)[1]
  else:body+='\n\n'+block+'\n'
  canonical.write_text(body);(ROOT/'migration/image-libraries-plan.md').write_text(body)
  execution=ROOT.parent/'doc/cuda_samples_on_rocm_image_equivalence_execution.md'
+ if not execution.exists():execution=ROOT/'migration/image-equivalence-execution.md'
  if execution.exists():
   text=execution.read_text().replace('状态：**方案已制定，未据此新增样例资格**。','状态：**IN_PROGRESS**。逐步实施中；仅封存资格会增加支持数。')
   latest=data['events'][-1]

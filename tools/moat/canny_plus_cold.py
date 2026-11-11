@@ -4,9 +4,10 @@ import json,os,shutil,sys,tempfile
 from pathlib import Path
 from experiment import ROOT,Experiment,write,digest,git
 from image_progress import record
+from canny_plus_build import dependencies
 
 def main():
- commit=git('rev-parse','HEAD').strip();sources=[__file__]+[ROOT/'tools/moat'/n for n in ['canny_plus_environment.py','canny_plus_replay_fixtures.py','canny_plus_build.py','canny_plus_run.py','canny_plus_validate.py','canny_plus_worker.py']]
+ commit=git('rev-parse','HEAD').strip();sources=[__file__,*dependencies()]+[ROOT/'tools/moat'/n for n in ['canny_plus_environment.py','canny_plus_replay_fixtures.py','canny_plus_build.py','canny_plus_run.py','canny_plus_validate.py','canny_plus_worker.py','image_progress.py','image_canny_stages_reference.py','image_canny_local_research.py','image_validation.py']]
  e=Experiment('I1','CannyPlus-clean-checkout','host-cold-replay',sources=sources);checks=[];child=[];root=Path(tempfile.mkdtemp(prefix='canny-cold-',dir=ROOT.parent));clone=root/'src'
  launcher='/home/zihaomu/zihaomu_workspace/rocm10-launch.sh'
  env=dict(os.environ,HIP_VISIBLE_DEVICES='2');rc=e.command(['git','clone','--shared','--quiet',str(ROOT),str(clone)],'fresh-clone',timeout=180,env=env)
@@ -32,13 +33,19 @@ assert all(v["status"]=="PASSED" for v in rows)
 '''
   rc=e.command([str(ROOT/'build/image-cpu-venv/bin/python'),'-c',code,str(clone),str(ROOT),str(e.path)],'independent-full-cold-output-validation',timeout=300)
   checks.append(dict(check='fresh-31-masks-and-eight-original-files-CPU',passed=rc==0))
-  for name in ['environment','fixture-replay','build','rocm','original']:
-   report=json.loads((clone/('migration/reports/canny-plus-'+name+'.json')).read_text());reference=clone/report['evidence'];meta=json.loads((reference/'manifest.json').read_text());raw=clone/meta['raw_artifact_dir'];dest=e.path/'child-evidence'/name;shutil.copytree(raw,dest)
+ for name in ['environment','fixture-replay','build','rocm','original']:
+   path=clone/('migration/reports/canny-plus-'+name+'.json')
+   if not path.is_file():continue
+   report=json.loads(path.read_text());reference=clone/report['evidence']
+   if not (reference/'manifest.json').is_file():continue
+   meta=json.loads((reference/'manifest.json').read_text());raw=clone/meta['raw_artifact_dir'];dest=e.path/'child-evidence'/name;shutil.copytree(raw,dest)
    # The original child seal is a parent payload, not an independent record
    # rooted at this checkout: its raw_artifact_dir belongs to the clean clone.
    # Give it a distinct name so the generic archive scan does not mis-root it.
    (dest/'sealed.json').rename(dest/'child-seal.json');child.append(dict(name=name,relative=str(dest.relative_to(e.path)),report=report))
+ if not rc:
   build=next(r['report'] for r in child if r['name']=='build');checks.append(dict(check='fresh-compiled-source-closure',passed=all(digest(ROOT/n)==sha for n,sha in build['dependencies'].items())))
+  checks.append(dict(check='all-five-fresh-child-records',passed=len(child)==5 and {r['name'] for r in child}=={'environment','fixture-replay','build','rocm','original'}))
  checks.append(dict(check='cold-final-process-success',passed=rc==0))
  status='PASSED' if checks and all(c['passed'] is True for c in checks) else 'FAILED';result=dict(status=status,checks=checks,source_commit=commit,clone=str(clone),children=child,return_code=rc)
  write(e.path/'cold.json',result);result['evidence']=e.finish('PASSED' if status=='PASSED' else 'SELF_TEST_FAILED',dict(status=status,checks=checks));write(ROOT/'migration/reports/canny-plus-cold.json',result)
