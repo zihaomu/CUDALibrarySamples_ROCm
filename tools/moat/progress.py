@@ -42,7 +42,10 @@ for phase in descriptions:
 lines+=['',f'累计新增资格{new_total}项，另撤销旧C++排序样例资格1项，支持211→{counts["PASSED"]}，净增{counts["PASSED"]-211}。当前{counts["PASSED"]}/639通过、{remaining}待支持；{operators.get("verified_operator_families")}功能族、{operators.get("modules_with_verified_operators")}模块。','',
  f'[R3](rewrite-R3.md) · [R4](rewrite-R4.md) · [R5](rewrite-R5.md) · [R6](rewrite-R6.md) · [R7](rewrite-R7.md) · [{remaining}项逐例原因与后续实验](rewrite-remaining-assessment.md)。',
  '', f'计划第1.2节区分阶段执行和整例支持；R5剩余{remaining_frontends}个前端及其它待实现项没有被登记为完成。wave64、Windows、多节点与全项目MOAT surface仍未验证。']
-if (ROOT/'migration/reports/rewrite-R9.md').exists():lines+=['','[R9：九个helper与CRC32 benchmark实时记录](rewrite-R9.md)。候选实现不预记整例资格。']
+if (ROOT/'migration/reports/rewrite-R9.md').exists():
+ r9_ids={p['sample_id'] for p in json.loads((ROOT/'migration/rewrite/helpers-benchmark.json').read_text())['helpers']}|{'nvCOMP/benchmarks::benchmark_crc32.cpp'}
+ r9_passed=sum(s['id'] in r9_ids and s['status']=='PASSED' and s.get('reason_code')=='VALIDATED_MOAT_REWRITE' for s in cat['samples'])
+ lines+=['',f'[R9：九个helper与CRC32 benchmark实时记录](rewrite-R9.md)：{r9_passed}/10资格。描述符覆盖按稠密/CSR功能去重，不计成9个GPU求解算法；原CUDA Fortran编译器基线另列。']
 (ROOT/'migration/reports/rewrite-progress.md').write_text('\n'.join(lines)+'\n')
 write(ROOT/'migration/reports/rewrite-progress.json',dict(updated_at=now(),rows=rows,baseline_counts=dict(counts),phases=phase_rows))
 doc=ROOT.parent/'doc/cuda_samples_on_rocm_moat_rewrite_plan.md';body=doc.read_text();start='<!-- MOAT_EXEC_PROGRESS:START -->';end='<!-- MOAT_EXEC_PROGRESS:END -->'

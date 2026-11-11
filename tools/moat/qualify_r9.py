@@ -9,6 +9,7 @@ from helper_reference import validate as helper_cpu
 from crc_benchmark_reference import validate as crc_cpu
 
 TRUSTED_COMMIT=None
+VALIDATION_DEPENDENCIES={'tools/moat/audit.py','tools/moat/qualification_common.py','tools/moat/experiment.py'}
 
 def load(name):return json.loads((ROOT/'migration/reports'/name).read_text())
 @functools.lru_cache(maxsize=None)
@@ -41,7 +42,7 @@ def helpers(profile,review):
   except (OSError,ValueError,KeyError,TypeError,StopIteration,AssertionError,subprocess.CalledProcessError):ok=False
   checks.append(dict(check=name,passed=ok));return ok
  expected={str(p.relative_to(ROOT)) for p in (ROOT/'rocm/adapters/helpers').glob('*')}|{p['implementation'] for p in json.loads((ROOT/'migration/rewrite/helpers-benchmark.json').read_text())['helpers']}
- sources=sorted(expected|{'tools/moat/build_helpers.py','tools/moat/run_helpers.py','tools/moat/cuda_helpers.py','tools/moat/cuda_helper_originals.py','tools/moat/helper_reference.py','tools/moat/helper_fixtures.py','tools/moat/helper_negative.py','tools/moat/helper_runtime.py','tools/moat/qualify_r9.py','migration/rewrite/helpers-benchmark.json'})
+ sources=sorted(VALIDATION_DEPENDENCIES|expected|{'tools/moat/build_helpers.py','tools/moat/run_helpers.py','tools/moat/cuda_helpers.py','tools/moat/cuda_helper_originals.py','tools/moat/helper_reference.py','tools/moat/helper_fixtures.py','tools/moat/helper_negative.py','tools/moat/helper_runtime.py','tools/moat/qualify_r9.py','migration/rewrite/helpers-benchmark.json'})
  gate('frozen-independent-source-review',lambda:review_ok(review,sources));gate('nonempty-five-case-contract',lambda:len(profile['cases'])==5 and len(set(profile['cases']))==5)
  def build_ok():
   directory,meta,_=sealed(build['evidence'],('build-result.json','compiled-dependencies.json'));record=json.loads((directory/'build-result.json').read_text())
@@ -82,7 +83,12 @@ def helpers(profile,review):
  refs.add(runtime['ABI']['evidence']);gate('actual-C-ABI-and-lifetime-tests',abi_ok)
  if profile['language']=='cpp':
   rs=[r for r in originals['originals'] if r['sample_id']==profile['sample_id']];gate('unmodified-native-original',lambda:len(rs)==1 and rs[0]['status']=='PASSED' and rs[0]['original_sha256']==profile['original_sha256'] and current(rs[0]['evidence'],[profile['source'],'tools/moat/cuda_helper_originals.py']));refs.update(r['evidence'] for r in rs)
- else:refs.add(originals['Fortran_toolchain_evidence']);gate('explicit-original-Fortran-toolchain-inventory',lambda:bool(sealed(originals['Fortran_toolchain_evidence'])))
+ else:
+  refs.add(originals['Fortran_toolchain_evidence'])
+  def fortran_inventory_ok():
+   d,m=current(originals['Fortran_toolchain_evidence'],['tools/moat/cuda_helper_originals.py']);cs=json.loads((d/'commands.json').read_text())
+   return m['sample_id']=='original-Fortran-toolchain-inventory' and m['backend']=='cuda-host' and m['case_id']=='all' and m['experiment_outcome']=='OBSERVED' and len(cs)==1 and cs[0]['phase']=='native-Fortran-compiler-inventory' and cs[0]['argv']==['ssh','nvidia-5090x2','for tool in nvfortran gfortran flang; do command -v "$tool" || true; done'] and cs[0]['return_code']==0 and not (d/cs[0]['stdout']).read_text().strip() and not (d/cs[0]['stderr']).read_text().strip()
+  gate('explicit-original-Fortran-toolchain-inventory',fortran_inventory_ok)
  return checks,refs,sources,build
 
 def crc_benchmark(review):
@@ -94,13 +100,13 @@ def crc_benchmark(review):
   except (OSError,ValueError,KeyError,TypeError,StopIteration,AssertionError,subprocess.CalledProcessError):ok=False
   checks.append(dict(check=name,passed=ok));return ok
  names=['build_crc_benchmark','run_crc_benchmark','cuda_crc_benchmark','crc_benchmark_fixtures','crc_benchmark_reference','crc_benchmark_checks','profile_crc_benchmark','prepare_crc_benchmark','qualify_r9']
- sources=sorted(set(build['dependencies'])|{'tools/moat/'+n+'.py' for n in names}|{'migration/rewrite/crc-benchmark-cases.json','migration/rewrite/helpers-benchmark.json','rocm/probes/crc_benchmark_lengths.cpp','nvCOMP/benchmarks/benchmark_crc32.cpp'})
+ sources=sorted(VALIDATION_DEPENDENCIES|set(build['dependencies'])|{'tools/moat/'+n+'.py' for n in names}|{'migration/rewrite/crc-benchmark-cases.json','migration/rewrite/helpers-benchmark.json','rocm/probes/crc_benchmark_lengths.cpp','nvCOMP/benchmarks/benchmark_crc32.cpp'})
  gate('frozen-independent-source-review',lambda:review_ok(review,sources));gate('exact-five-case-contract',lambda:{c['case'] for c in cases}=={'original-auto','storage-small','complete-small','changed-input','repeat'} and len(cases)==5 and set(runs)==set(natives)=={c['case'] for c in cases})
  def build_ok():
   d,m,_=sealed(build['evidence'],('build-result.json','compiled-dependencies.json'));return json.loads((d/'build-result.json').read_text())=={k:v for k,v in build.items() if k!='evidence'} and build['status']=='BUILT' and digest(ROOT/build['binary'])==build['binary_sha256'] and all(digest(ROOT/n)==h for n,h in build['dependencies'].items()) and set(build['dependencies'])=={'rocm/ported/nvCOMP/benchmarks/benchmark_crc32.cpp','rocm/backends/codec/crc_benchmark_compat.hpp','rocm/backends/codec/crc_benchmark_observe.hpp'} and build['build_recipe_sha256']==digest(ROOT/'tools/moat/build_crc_benchmark.py')
  gate('complete-current-compiled-build',build_ok);refs.add(build['evidence'])
  def native_build_ok():
-  d,m,_=current(native['evidence'],['tools/moat/cuda_crc_benchmark.py','tools/moat/prepare_crc_benchmark.py','tools/moat/crc_benchmark_reference.py','rocm/backends/codec/crc_benchmark_observe.hpp','nvCOMP/benchmarks/benchmark_crc32.cpp']);return json.loads((d/'build-result.json').read_text())=={k:v for k,v in native.items() if k!='evidence'} and json.loads((d/'binary-identities.json').read_text())=={k:native[k] for k in ['binary_sha256','linked_libraries']} and any('nvcomp' in n for n in native['linked_libraries']) and any('curand' in n for n in native['linked_libraries'])
+  d,m=current(native['evidence'],['tools/moat/cuda_crc_benchmark.py','tools/moat/prepare_crc_benchmark.py','tools/moat/crc_benchmark_reference.py','rocm/backends/codec/crc_benchmark_observe.hpp','nvCOMP/benchmarks/benchmark_crc32.cpp']);return json.loads((d/'build-result.json').read_text())=={k:v for k,v in native.items() if k!='evidence'} and json.loads((d/'binary-identities.json').read_text())=={k:native[k] for k in ['binary_sha256','linked_libraries']} and any('nvcomp' in n for n in native['linked_libraries']) and any('curand' in n for n in native['linked_libraries'])
  gate('native-original-harness-sdk-and-actual-loader-identities',native_build_ok);refs.add(native['evidence'])
  for case in cases:
   name=case['case'];mh=digest(ROOT/'tests/fixtures/rewrite-crc-benchmark'/name/'manifest.json')
@@ -108,7 +114,8 @@ def crc_benchmark(review):
    r=rows[name];refs.add(r['evidence'])
    def case_ok(r=r,backend=backend,b=b,case=case,mh=mh):
     runner='run_crc_benchmark.py' if backend=='rocm' else 'cuda_crc_benchmark.py';d,m=current(r['evidence'],['tools/moat/'+runner,'tools/moat/crc_benchmark_reference.py']);raw=ROOT/m['raw_artifact_dir'];v=json.loads((d/'validation.json').read_text());cs=json.loads((d/'commands.json').read_text());f=fixture(raw/'inputs',mh,kind='crc32-benchmark')
-    if json.loads((raw/'inputs/case.json').read_text())!=case or json.loads((d/'case-result.json').read_text())!={k:v for k,v in r.items() if k!='evidence'} or m['experiment_id']!=r['experiment_id'] or m['sample_id']!='nvCOMP/benchmarks::benchmark_crc32.cpp' or m['case_id']!=case['case'] or m['comparison_id']!='crc32-benchmark/'+case['case']+'/'+mh or m['parent_experiment_id']!=b['experiment_id'] or m['experiment_outcome']!='PASSED' or r['status']!='PASSED' or r['return_code'] or r['cpu_return_code'] or r['input_manifest_sha256']!=mh or r['build']!=b or r['validation']!=v or v['status']!='PASSED' or not v['checks'] or not all(c['passed'] for c in v['checks']):return False
+    expected_case=dict(case);expected_case['files']={n:v for n,v in case['files'].items() if n!='case.json'}
+    if json.loads((raw/'inputs/case.json').read_text())!=expected_case or f!=dict(kind='crc32-benchmark',case=case['case'],files=case['files']) or json.loads((d/'case-result.json').read_text())!={k:v for k,v in r.items() if k!='evidence'} or m['experiment_id']!=r['experiment_id'] or m['sample_id']!='nvCOMP/benchmarks::benchmark_crc32.cpp' or m['case_id']!=case['case'] or m['comparison_id']!='crc32-benchmark/'+case['case']+'/'+mh or m['parent_experiment_id']!=b['experiment_id'] or m['experiment_outcome']!='PASSED' or r['status']!='PASSED' or r['return_code'] or r['cpu_return_code'] or r['input_manifest_sha256']!=mh or r['build']!=b or r['validation']!=v or v['status']!='PASSED' or not v['checks'] or not all(c['passed'] for c in v['checks']):return False
     if (ROOT/r['output']).resolve()!=(raw/'outputs').resolve() or (ROOT/r['input_snapshot']).resolve()!=(raw/'inputs').resolve():return False
     out=raw/'outputs'
     if backend=='rocm':
@@ -142,7 +149,7 @@ def crc_benchmark(review):
  for r in aux['runtime']:
   refs.add(r['evidence'])
   def runtime_ok(r=r):
-   d,m=current(r['evidence'],['tools/moat/crc_benchmark_checks.py',*build['dependencies']]);cs=json.loads((d/'commands.json').read_text());return r['passed'] and m['case_id']==r['case'] and m['parent_experiment_id']==build['experiment_id'] and len(cs)==1 and cs[0]['argv']==[str(ROOT/build['binary'])]+r['argv'] and cs[0]['return_code']==r['return_code'] and (r['return_code']==0 if r['case']=='help' else r['return_code']!=0)
+   d,m=current(r['evidence'],['tools/moat/crc_benchmark_checks.py',*build['dependencies']]);cs=json.loads((d/'commands.json').read_text());return r['passed'] and m['case_id']==r['case'] and m['parent_experiment_id']==build['experiment_id'] and len(cs)==1 and cs[0]['argv']==[str(ROOT/build['binary'])]+r['argv'] and cs[0]['return_code']==r['return_code'] and r['return_code']==(0 if r['case']=='help' else 1)
   gate('actual-CLI/'+r['case'],runtime_ok)
  refs.add(aux['boundary']['evidence'])
  def boundary_ok():

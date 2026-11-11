@@ -20,6 +20,7 @@ def operator_name(sample):
  if family=='NPP':return {'distanceTransform':'Euclidean 距离变换/Voronoi','templateMatching':'零均值 NCC','nppCanny':'三通道 Canny'}[path.parent.name]
  if family=='cuBLASLt':return 'GEMM'
  if family=='cuSPARSELt':return '2:4 结构化稀疏 GEMM（含裁剪/压缩）'
+ if family=='cuDSS' and 'matrix_helpers' in kind:return '稠密矩阵描述符管理' if 'dense_matrix' in kind else 'CSR 矩阵描述符管理'
  if family=='cuDSS':return '稀疏重排序与求解' if kind in ['simple_reordering_phase','reordering_phase'] else '稀疏直接求解'
  if family=='cuFFT':
   if 'callback' in sample['source']:return 'FFT 窗口过滤 callback'
@@ -43,7 +44,7 @@ def operator_name(sample):
 SCOPES={
  'cuBLAS':'固定教学输入与所列扩展 cases；第二批含并列/空索引、旋转 flags、batch/grouped 和正负 alpha；rotmg 极端缩放使用明确登记的 HIP 修正。其它精度/API 仍逐例管理。',
  'cuBLASLt':'3 个 profile：FP32 SGEMM、HSH FP16 input/output + FP32 compute 的 pointer-array 与 strided batch。',
- 'cuDSS':'FP64 CSR：simple、异构/均匀batch、重排后完整求解及GENERAL多RHS残差；CPU符号/matching + rocSOLVER CSRRF或项目HIP CSR pivot LU。MOAT新增8个真实ISO_C_BINDING Fortran入口，uniform保留GPU factor并选择性重算，residual应用实际检查；原CUDA Fortran工具链仍缺。CPP重排严格METIS向量不同及get_set缺项保持PARTIAL，不把历史analysis-only计为完整求解。规模/动态pivot按逐例范围。',
+ 'cuDSS':'FP64 CSR：simple、异构/均匀batch、重排后完整求解及GENERAL多RHS残差；CPU符号/matching + rocSOLVER CSRRF或项目HIP CSR pivot LU。R9新增9个矩阵helper入口（按稠密/CSR两种描述符功能去重，batch与语言不另计）：项目host描述符＋真实HIP数据/指针表，非GPU求解算法；MOAT另有8个真实ISO_C_BINDING Fortran求解入口，uniform保留GPU factor并选择性重算，residual应用实际检查；原CUDA Fortran工具链仍缺。CPP重排严格METIS向量不同及get_set缺项保持PARTIAL，不把历史analysis-only计为完整求解。规模/动态pivot按逐例范围。',
  'cuFFT':'10 个 profile：原始单卡/双卡 C2C、实数正逆变换和 legacy/离线 SPIR-V/HIPRTC callback。1D 多卡使用 hipFFT + RCCL + HIP。',
  'cuPQC':'SHA-256 单线程与 SHA3-256 的 32-lane 协作 GPU kernel；各 14 输入与 hashlib 精确一致，PQC 其它算法未实现。',
  'cuRAND':'4 种分布 × 9 个 generator = 36 个 profile；原始参数、库内重复性和解析分布矩通过，跨库不要求逐位同序列。',
@@ -61,7 +62,7 @@ SCOPES.update({
  'MathDx/cuSolverDx':'HIP调用方kernel内complex Cholesky；MOAT新增complex FP32 48×32 pivot LU、complex FP64 32阶双batch POSV、FP64 right/lower 32×33 TRSM。原生MathDx26.06.1原例实际device输出、同字节HIP与独立CPU分别记录；只按已通过样例的登记范围统计。',
  'MathDx/cuRANDDx':'rocRAND设备Philox10 + 显式53bit Box-Muller；NVIDIA LEGACY逐位合同未等价，保持PARTIAL。',
  'NPP':'精确Euclidean距离/Voronoi/整数截断；NCC原始2048×1024 RAW、全部CLI、完整score/GPU argmax、PGM与HIP-event计时已收口，常量模板/图块按原生大图路径实测；Canny原生像素策略与其它未完成入口继续逐例记录。',
- 'nvCOMP':'hipCOMP LZ4/Snappy原生批处理；CPU↔GPU与hipCOMP↔nvCOMP双向互解、逐chunk status/实际长度、空/边界/损坏流；LZ4 native manager/factory +项目CRC32C及100 raw buffers。独立CRC32入口采用项目HIP IEEE/PKZIP算法，与zlib及真实nvCOMP逐chunk比较，空输入按原生语义拒绝；具体资格见逐例状态。完整NVBENCH框架仍单列PARTIAL。',
+ 'nvCOMP':'hipCOMP LZ4/Snappy原生批处理；CPU↔GPU与hipCOMP↔nvCOMP双向互解、逐chunk status/实际长度、空/边界/损坏流；LZ4 native manager/factory +项目CRC32C及100 raw buffers。独立CRC32入口采用项目HIP IEEE/PKZIP算法，与zlib及真实nvCOMP逐chunk比较，空输入按原生语义拒绝；具体资格见逐例状态。R9 CRC32 benchmark保留CLI/默认16GiB/CSV/完整GPU搜索和最终重算；四个小输入同字节三方，默认各后端RNG独立CPU验收，性能及完整32GiB complete扫描未验收。完整NVBENCH框架仍单列PARTIAL。',
  'cuBLAS':'固定教学profile与所列扩展cases；含复杂rank-k类型化适配、HIP GPU packed转换、FP32分组batched及FP64项目策略调优。rotmg极端缩放使用HIP修正；调优/批量变体按同一数学族去重。',
  'cuBLASLt':'既有6个profile为FP32 SGEMM、HSH pointer-array/strided、grouped分发及custom-find/autotune。MOAT新资格分别登记FP16 planar负偏移转换/FP32 3M/FP16输出，以及真实COL32/COL4 packing + native INT8/INT32 GemmEx；按样例链接与资格状态限定范围。',
  'cuSOLVER':'B13补611阶双GPU LU/pivot/solve，tile256列分布+RCCL+HIP，全部CPU重构/残差；MgPotrf及Mp原始descriptor缺口另列。原始FP64教学矩阵；status/info、全量分解/重构、残差、正交性、未排序配对及实际meig检查。B6增加64位LU/三角求逆；SVD/eigen typed接口显式INT_MAX限制。',

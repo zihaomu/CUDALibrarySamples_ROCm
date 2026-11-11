@@ -1,0 +1,21 @@
+Warning: HIP version file: "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/20261111T070506.367850Z-R9-cold-rebuild-72a9c5710e/build/rocm-sdk-overlay/share/hip/version" not found.  Cannot give HIP version information.
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/20261111T070506.367850Z-R9-cold-rebuild-72a9c5710e/rocm/adapters/helpers/matrix_helpers.cpp:48:229: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   48 | extern "C" int mh_alloc(void**p,size_t bytes){std::lock_guard<std::recursive_mutex>g(lock);if(!p||!bytes)return 1;*p=nullptr;auto rc=GPU(Malloc)(p,bytes);if(rc!=GPU(Success))return 2;if(GPU(Memset)(*p,0xa5,bytes)!=GPU(Success)){GPU(Free)(*p);*p=nullptr;return 2;}allocations[*p]=bytes;return 0;}
+      |                                                                                                                                                                                                                                     ^~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/20261111T070506.367850Z-R9-cold-rebuild-72a9c5710e/rocm/adapters/helpers/matrix_helpers.cpp:19:16: note: expanded from macro 'GPU'
+   19 | #define GPU(n) hip##n
+      |                ^
+<scratch space>:339:1: note: expanded from here
+  339 | hipFree
+      | ^
+1 warning generated when compiling for gfx1201.
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/20261111T070506.367850Z-R9-cold-rebuild-72a9c5710e/rocm/adapters/helpers/matrix_helpers.cpp:48:229: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   48 | extern "C" int mh_alloc(void**p,size_t bytes){std::lock_guard<std::recursive_mutex>g(lock);if(!p||!bytes)return 1;*p=nullptr;auto rc=GPU(Malloc)(p,bytes);if(rc!=GPU(Success))return 2;if(GPU(Memset)(*p,0xa5,bytes)!=GPU(Success)){GPU(Free)(*p);*p=nullptr;return 2;}allocations[*p]=bytes;return 0;}
+      |                                                                                                                                                                                                                                     ^~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/20261111T070506.367850Z-R9-cold-rebuild-72a9c5710e/rocm/adapters/helpers/matrix_helpers.cpp:19:16: note: expanded from macro 'GPU'
+   19 | #define GPU(n) hip##n
+      |                ^
+<scratch space>:340:1: note: expanded from here
+  340 | hipFree
+      | ^
+1 warning generated when compiling for host.

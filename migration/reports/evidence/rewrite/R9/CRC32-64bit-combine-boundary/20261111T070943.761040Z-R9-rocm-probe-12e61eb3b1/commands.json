@@ -1,0 +1,63 @@
+[
+  {
+    "command_id": 1,
+    "phase": "64bit-boundary-build",
+    "argv": [
+      "hipcc",
+      "--rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay",
+      "--hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay",
+      "--rocm-device-lib-path=/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode",
+      "--offload-arch=gfx1201",
+      "-std=c++17",
+      "-O2",
+      "-D__HIP_PLATFORM_AMD__",
+      "-I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/codec",
+      "-I/opt/rocm/core-10.1/include",
+      "-x",
+      "hip",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/probes/crc_benchmark_lengths.cpp",
+      "-o",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/R9/CRC32-64bit-combine-boundary/20261111T070943.761040Z-R9-rocm-probe-12e61eb3b1/probe"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T07:09:44.510732+00:00",
+    "timeout_seconds": 300,
+    "environment": {
+      "HIP_VISIBLE_DEVICES": "0",
+      "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+      "DEEPINFER_ROCM_RELEASE": "10.1.0",
+      "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+      "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+    },
+    "stdout": "logs/0001-64bit-boundary-build.stdout.log",
+    "stderr": "logs/0001-64bit-boundary-build.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T07:09:46.079535+00:00",
+    "seconds": 1.5678845890215598
+  },
+  {
+    "command_id": 2,
+    "phase": "actual-GPU-combine-for-large-lengths",
+    "argv": [
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/R9/CRC32-64bit-combine-boundary/20261111T070943.761040Z-R9-rocm-probe-12e61eb3b1/probe"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T07:09:46.081221+00:00",
+    "timeout_seconds": 300,
+    "environment": {
+      "HIP_VISIBLE_DEVICES": "0",
+      "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+      "DEEPINFER_ROCM_RELEASE": "10.1.0",
+      "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+      "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+    },
+    "stdout": "logs/0002-actual-GPU-combine-for-large-lengths.stdout.log",
+    "stderr": "logs/0002-actual-GPU-combine-for-large-lengths.stderr.log",
+    "environment_changes": {
+      "REWRITE_OUTPUT": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/R9/CRC32-64bit-combine-boundary/20261111T070943.761040Z-R9-rocm-probe-12e61eb3b1/outputs"
+    },
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T07:09:46.246290+00:00",
+    "seconds": 0.16447368898661807
+  }
+]

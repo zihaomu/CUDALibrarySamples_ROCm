@@ -1,0 +1,1 @@
+Test rocm-benchmark for nvCOMP/benchmarks::benchmark_crc32.cpp, case repeat. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T061849.276951Z-R9-rocm-build-0828d8560b.

@@ -1,0 +1,58 @@
+diff --git a/tools/moat/crc_benchmark_checks.py b/tools/moat/crc_benchmark_checks.py
+index e230bc1aa..8116dfc81 100644
+--- a/tools/moat/crc_benchmark_checks.py
++++ b/tools/moat/crc_benchmark_checks.py
+@@ -26,7 +26,7 @@ def main():
+   valid=dict(status='PASSED' if rejected else 'FAILED',checks=[dict(check='corrupted-benchmark-rejected',passed=rejected)],reason=reason);row=dict(fault=fault,passed=rejected);write(e.path/'rejection.json',valid);row['evidence']=e.finish('PASSED' if rejected else 'SELF_TEST_FAILED',valid);results.append(row)
+  runtime=[]
+  for name,args,expected in [('help',['-h'],0),('unknown',['--unknown'],1),('missing-output',['-o'],1),('missing-storage',['-s'],1),('not-power-two',['-s','3'],1),('empty-table',['-s','1'],1),('over-capacity',['-s',str(1<<62)],1),('unwritable-CSV',['-s','32768','-o','/no-such-directory/out.csv'],1)]:
+-  e=Experiment('R9','CRC32-benchmark-runtime','rocm-runtime',case=name,sources=[__file__]+[ROOT/n for n in build['dependencies']],parent=build['experiment_id']);out=e.path/'outputs';out.mkdir();write(e.path/'backend.observed.json',observed);rc=e.command([str(ROOT/build['binary'])]+args,'actual-original-CLI',cwd=out,env=dict(REWRITE_OUTPUT=str(out)),timeout=180);passed=rc==0 if expected==0 else rc!=0;valid=dict(status='PASSED' if passed else 'FAILED',checks=[dict(check='actual-CLI-contract',passed=passed)]);row=dict(case=name,argv=args,return_code=rc,passed=passed);row['evidence']=e.finish('PASSED' if passed and expected==0 else 'EXPECTED_REJECTION' if passed else 'SELF_TEST_FAILED',valid);runtime.append(row)
++  e=Experiment('R9','CRC32-benchmark-runtime','rocm-runtime',case=name,sources=[__file__]+[ROOT/n for n in build['dependencies']],parent=build['experiment_id']);out=e.path/'outputs';out.mkdir();write(e.path/'backend.observed.json',observed);rc=e.command([str(ROOT/build['binary'])]+args,'actual-original-CLI',cwd=out,env=dict(REWRITE_OUTPUT=str(out)),timeout=180);diagnostics={'help':'','unknown':'unknown argument','missing-output':'missing value for -o','missing-storage':'missing value for -s','not-power-two':'must be a power of two','empty-table':'cannot contain a minimum-sized buffer','over-capacity':'exceeds available GPU memory','unwritable-CSV':'Failed to open output file'};stderr=(e.path/e.commands[-1]['stderr']).read_text();passed=rc==expected and diagnostics[name] in stderr;valid=dict(status='PASSED' if passed else 'FAILED',checks=[dict(check='actual-CLI-contract',passed=passed)]);row=dict(case=name,argv=args,return_code=rc,passed=passed);row['evidence']=e.finish('PASSED' if passed and expected==0 else 'EXPECTED_REJECTION' if passed else 'SELF_TEST_FAILED',valid);runtime.append(row)
+  source=ROOT/'rocm/probes/crc_benchmark_lengths.cpp';e=Experiment('R9','CRC32-64bit-combine-boundary','rocm-probe',sources=[__file__,source]+[ROOT/n for n in build['dependencies']],parent=build['experiment_id']);write(e.path/'backend.observed.json',observed);core=Path('/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core');binary=e.path/'probe';out=e.path/'outputs';out.mkdir();cmd=['hipcc','--rocm-path='+str(ROOT/'build/rocm-sdk-overlay'),'--hip-path='+str(ROOT/'build/rocm-sdk-overlay'),'--rocm-device-lib-path='+str(core/'lib/llvm/amdgcn/bitcode'),'--offload-arch=gfx1201','-std=c++17','-O2','-D__HIP_PLATFORM_AMD__','-I'+str(ROOT/'rocm/backends/codec'),'-I/opt/rocm/core-10.1/include','-x','hip',str(source),'-o',str(binary)]
+  rc=e.command(cmd,'64bit-boundary-build');rc=rc or e.command([str(binary)],'actual-GPU-combine-for-large-lengths',env=dict(REWRITE_OUTPUT=str(out)));checks=[]
+  if rc==0:
+diff --git a/tools/moat/qualify_r9.py b/tools/moat/qualify_r9.py
+index 90e55dca1..142e4109e 100644
+--- a/tools/moat/qualify_r9.py
++++ b/tools/moat/qualify_r9.py
+@@ -100,7 +100,7 @@ def crc_benchmark(review):
+   d,m,_=sealed(build['evidence'],('build-result.json','compiled-dependencies.json'));return json.loads((d/'build-result.json').read_text())=={k:v for k,v in build.items() if k!='evidence'} and build['status']=='BUILT' and digest(ROOT/build['binary'])==build['binary_sha256'] and all(digest(ROOT/n)==h for n,h in build['dependencies'].items()) and set(build['dependencies'])=={'rocm/ported/nvCOMP/benchmarks/benchmark_crc32.cpp','rocm/backends/codec/crc_benchmark_compat.hpp','rocm/backends/codec/crc_benchmark_observe.hpp'} and build['build_recipe_sha256']==digest(ROOT/'tools/moat/build_crc_benchmark.py')
+  gate('complete-current-compiled-build',build_ok);refs.add(build['evidence'])
+  def native_build_ok():
+-  d,m,_=current(native['evidence'],['tools/moat/cuda_crc_benchmark.py','tools/moat/prepare_crc_benchmark.py','tools/moat/crc_benchmark_reference.py','rocm/backends/codec/crc_benchmark_observe.hpp','nvCOMP/benchmarks/benchmark_crc32.cpp']);return json.loads((d/'build-result.json').read_text())=={k:v for k,v in native.items() if k!='evidence'} and json.loads((d/'binary-identities.json').read_text())=={k:native[k] for k in ['binary_sha256','linked_libraries']} and any('nvcomp' in n for n in native['linked_libraries']) and any('curand' in n for n in native['linked_libraries'])
++  d,m=current(native['evidence'],['tools/moat/cuda_crc_benchmark.py','tools/moat/prepare_crc_benchmark.py','tools/moat/crc_benchmark_reference.py','rocm/backends/codec/crc_benchmark_observe.hpp','nvCOMP/benchmarks/benchmark_crc32.cpp']);return json.loads((d/'build-result.json').read_text())=={k:v for k,v in native.items() if k!='evidence'} and json.loads((d/'binary-identities.json').read_text())=={k:native[k] for k in ['binary_sha256','linked_libraries']} and any('nvcomp' in n for n in native['linked_libraries']) and any('curand' in n for n in native['linked_libraries'])
+  gate('native-original-harness-sdk-and-actual-loader-identities',native_build_ok);refs.add(native['evidence'])
+  for case in cases:
+   name=case['case'];mh=digest(ROOT/'tests/fixtures/rewrite-crc-benchmark'/name/'manifest.json')
+@@ -108,7 +108,8 @@ def crc_benchmark(review):
+    r=rows[name];refs.add(r['evidence'])
+    def case_ok(r=r,backend=backend,b=b,case=case,mh=mh):
+     runner='run_crc_benchmark.py' if backend=='rocm' else 'cuda_crc_benchmark.py';d,m=current(r['evidence'],['tools/moat/'+runner,'tools/moat/crc_benchmark_reference.py']);raw=ROOT/m['raw_artifact_dir'];v=json.loads((d/'validation.json').read_text());cs=json.loads((d/'commands.json').read_text());f=fixture(raw/'inputs',mh,kind='crc32-benchmark')
+-    if json.loads((raw/'inputs/case.json').read_text())!=case or json.loads((d/'case-result.json').read_text())!={k:v for k,v in r.items() if k!='evidence'} or m['experiment_id']!=r['experiment_id'] or m['sample_id']!='nvCOMP/benchmarks::benchmark_crc32.cpp' or m['case_id']!=case['case'] or m['comparison_id']!='crc32-benchmark/'+case['case']+'/'+mh or m['parent_experiment_id']!=b['experiment_id'] or m['experiment_outcome']!='PASSED' or r['status']!='PASSED' or r['return_code'] or r['cpu_return_code'] or r['input_manifest_sha256']!=mh or r['build']!=b or r['validation']!=v or v['status']!='PASSED' or not v['checks'] or not all(c['passed'] for c in v['checks']):return False
++    expected_case=dict(case);expected_case['files']={n:v for n,v in case['files'].items() if n!='case.json'}
++    if json.loads((raw/'inputs/case.json').read_text())!=expected_case or f!=dict(kind='crc32-benchmark',case=case['case'],files=case['files']) or json.loads((d/'case-result.json').read_text())!={k:v for k,v in r.items() if k!='evidence'} or m['experiment_id']!=r['experiment_id'] or m['sample_id']!='nvCOMP/benchmarks::benchmark_crc32.cpp' or m['case_id']!=case['case'] or m['comparison_id']!='crc32-benchmark/'+case['case']+'/'+mh or m['parent_experiment_id']!=b['experiment_id'] or m['experiment_outcome']!='PASSED' or r['status']!='PASSED' or r['return_code'] or r['cpu_return_code'] or r['input_manifest_sha256']!=mh or r['build']!=b or r['validation']!=v or v['status']!='PASSED' or not v['checks'] or not all(c['passed'] for c in v['checks']):return False
+     if (ROOT/r['output']).resolve()!=(raw/'outputs').resolve() or (ROOT/r['input_snapshot']).resolve()!=(raw/'inputs').resolve():return False
+     out=raw/'outputs'
+     if backend=='rocm':
+@@ -142,7 +143,7 @@ def crc_benchmark(review):
+  for r in aux['runtime']:
+   refs.add(r['evidence'])
+   def runtime_ok(r=r):
+-   d,m=current(r['evidence'],['tools/moat/crc_benchmark_checks.py',*build['dependencies']]);cs=json.loads((d/'commands.json').read_text());return r['passed'] and m['case_id']==r['case'] and m['parent_experiment_id']==build['experiment_id'] and len(cs)==1 and cs[0]['argv']==[str(ROOT/build['binary'])]+r['argv'] and cs[0]['return_code']==r['return_code'] and (r['return_code']==0 if r['case']=='help' else r['return_code']!=0)
++   d,m=current(r['evidence'],['tools/moat/crc_benchmark_checks.py',*build['dependencies']]);cs=json.loads((d/'commands.json').read_text());return r['passed'] and m['case_id']==r['case'] and m['parent_experiment_id']==build['experiment_id'] and len(cs)==1 and cs[0]['argv']==[str(ROOT/build['binary'])]+r['argv'] and cs[0]['return_code']==r['return_code'] and r['return_code']==(0 if r['case']=='help' else 1)
+   gate('actual-CLI/'+r['case'],runtime_ok)
+  refs.add(aux['boundary']['evidence'])
+  def boundary_ok():
+diff --git a/tools/moat/run_crc_benchmark.py b/tools/moat/run_crc_benchmark.py
+index 346082f56..0f5d853ce 100644
+--- a/tools/moat/run_crc_benchmark.py
++++ b/tools/moat/run_crc_benchmark.py
+@@ -14,6 +14,7 @@ def main():
+   rc=e.command([str(ROOT/build['binary'])]+case['argv'],'original-benchmark-CLI',cwd=out,env=env,timeout=900);cpu=1
+   if rc==0:cpu=e.command(['python3',str(ROOT/'tools/moat/crc_benchmark_reference.py'),'--output',str(out),'--case',str(e.path/'inputs/case.json'),'--report',str(e.path/'cpu-validation.json')],'independent-zlib-grid-CSV-validation',timeout=600)
+   valid=json.loads((e.path/'cpu-validation.json').read_text()) if (e.path/'cpu-validation.json').exists() else dict(status='FAILED',checks=[dict(check='CPU-validator-completed',passed=False)])
+-  row=dict(case=case['case'],return_code=rc,cpu_return_code=cpu,status=valid['status'],validation=valid,input_manifest_sha256=mh,output=str(out.relative_to(ROOT)),input_snapshot=str((e.path/'inputs').relative_to(ROOT)),experiment_id=e.id,comparison_id=e.meta['comparison_id'],build=build);write(e.path/'case-result.json',row);row['evidence']=e.finish('PASSED' if rc==0 and cpu==0 and valid['status']=='PASSED' else 'NUMERIC_OR_HARNESS_MISMATCH',valid);records[case['case']]=row;write(report,records);print(case['case'],row['status'],valid.get('valid_cells'),flush=True)
++  ok=rc==0 and cpu==0 and valid['status']=='PASSED'
++  row=dict(case=case['case'],return_code=rc,cpu_return_code=cpu,status='PASSED' if ok else 'FAILED',validation=valid,input_manifest_sha256=mh,output=str(out.relative_to(ROOT)),input_snapshot=str((e.path/'inputs').relative_to(ROOT)),experiment_id=e.id,comparison_id=e.meta['comparison_id'],build=build);write(e.path/'case-result.json',row);row['evidence']=e.finish('PASSED' if ok else 'NUMERIC_OR_HARNESS_MISMATCH',valid);records[case['case']]=row;write(report,records);print(case['case'],row['status'],valid.get('valid_cells'),flush=True)
+  return int(any(r['status']!='PASSED' for r in records.values()))
+ if __name__=='__main__':raise SystemExit(main())

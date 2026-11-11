@@ -49,7 +49,7 @@ def main():
     samples=cat['samples']; tasks=[]; routes=[]
     names=['hipBLASLt','hipSPARSELt','hipBLAS','rocBLAS','hipSOLVER','rocSOLVER',
            'hipSPARSE','rocSPARSE','hipFFT','rocFFT','hipTensor','rocRAND',
-           'hipRAND','RCCL','rocJPEG','hipCOMP','RPP','MPI','HIP','libjpeg','liblz4','Snappy']
+           'hipRAND','RCCL','rocJPEG','hipCOMP','RPP','MPI','HIP','libjpeg','liblz4','Snappy','ProjectMatrixHelpers']
     libraries={name:dict(id=name,version=None,status='CANDIDATE',qualified_samples=[],
                          observation_scope='Existing catalog only; per-run dependencies recorded separately')
                for name in names}
@@ -70,7 +70,7 @@ def main():
         if s['id'] in previous:
             task.update(previous[s['id']])
         task.update(current_status=s['status'],current_reason=s['reason'],implementation=s.get('implementation'),
-                    selected_validation=s.get('selected_validation'))
+                    selected_validation=s.get('selected_validation'),active_batch=s.get('active_batch'),required_cases=s['required_cases'])
         if s['status']=='PASSED' and task['state'] in ['OWED','HISTORICAL_QUALIFIED','QUALIFIED']:
             task['state']='QUALIFIED' if s['reason_code']=='VALIDATED_MOAT_REWRITE' else 'HISTORICAL_QUALIFIED'
         elif task['state'] in ['QUALIFIED','HISTORICAL_QUALIFIED']:
@@ -85,7 +85,7 @@ def main():
             candidate_libraries=s['candidate_libraries'],components=components,
             implementation=s.get('implementation'),method=s.get('equivalence'),
             status=s['status'],scope=s['reason'],evidence=s['evidence'],
-            cpu_stage_review='REQUIRES_EXPLICIT_PER_ROUTE_REVIEW' if 'CPU' in actual else 'NOT_IN_DECLARED_LIBRARY_STRING'))
+            cpu_stage_review='EXPLICIT_HOST_DESCRIPTOR_WITH_HIP_USER_STORAGE' if 'ProjectMatrixHelpers' in actual else 'REQUIRES_EXPLICIT_PER_ROUTE_REVIEW' if 'CPU' in actual else 'NOT_IN_DECLARED_LIBRARY_STRING'))
     for lib in libraries.values():
         if lib['qualified_samples']:lib['status']='HISTORICALLY_QUALIFIED_SCOPED'
         elif lib.get('status')=='HISTORICALLY_QUALIFIED_SCOPED':lib['status']='OBSERVED_NOT_CURRENTLY_QUALIFIED'

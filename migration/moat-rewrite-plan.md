@@ -585,3 +585,6 @@ PLAN-01 至 PLAN-03 是规划阶段记录，不代表实验结果。实施中的
 
 
 | 2026-11-11 | R9-04 | 最终上下文/stream生命周期版45 helper AMD/CPU和45 native cuDSS/CPU全部通过；30故障、9非法语言入口、22 ABI检查保持。CRC原始默认16 GiB分别在AMD物理GPU1及5090执行，6×6网格26有效/10跳过；四个冻结小场景同字节对照通过。7故障、8 CLI、6实际GPU 64位长度对libz检查通过。rocprof trace为1 MiB场景记录12次分段、74次合并，符合三配置搜索及最终完整重算，另一次实际重复结果一致。最初物理GPU0因其它任务占用显存导致默认分配失败，保留证据后在符合GPU禁用政策的物理GPU1运行完整原规模；未缩小输入冒充通过。 | 源码冻结、独立审查、复合资格与干净构建；计数仍231通过 |
+
+
+| 2026-11-11 | R9-05 | 固定7ea83b593的干净clone，从零构建10入口及16 M1，9 helper原始场景＋4 bounded CRC独立CPU均通过；helper实现独立复审APPROVED。资格dryrun发现case.json/manifest身份及二元返回值笔误，已修。独立审查发现CRC状态汇总应合并子进程rc、非法CLI不能把timeout/loader故障当预期拒绝，以及Fortran inventory不能指向任意seal；已分别补严格退出码/对应诊断与真实SSH inventory身份。修复后AMD原始16GiB及全部5场景重验通过。 | 7fault/8CLI/6长度重验、资格篡改自测及固定内容最小复审；仍不增加资格数 |
