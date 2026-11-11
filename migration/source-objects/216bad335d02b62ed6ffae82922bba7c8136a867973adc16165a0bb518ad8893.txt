@@ -1,0 +1,29 @@
+import json,sys
+from pathlib import Path
+import numpy as np
+sys.path.insert(0,'tools/moat')
+from experiment import ROOT,Experiment,write
+from image_distance_model import model
+from image_progress import record
+sources=[Path(__file__),ROOT/'tools/moat/image_distance_model.py',ROOT/'migration/rewrite/image-distance-profile.json'];e=Experiment('I2','Distance-independent-CPU-analytic-checks','CPU-model',sources=sources);checks=[]
+def check(n,v):checks.append(dict(check=n,passed=bool(v)))
+y,x=np.indices((5,7));r=model(x.astype(float)-.25,1);check('vertical-plane-fractional-distance',np.array_equal(r['distance'],x-.25));check('vertical-plane-anchor',np.array_equal(r['indices'][...,0],np.zeros((5,7))) and np.array_equal(r['indices'][...,1],y));check('vertical-plane-relative',np.array_equal(r['relative'][...,0],x) and np.all(r['relative'][...,1]==0));r=model(y.astype(float)-.75,1);check('horizontal-plane-fractional-distance',np.array_equal(r['distance'],y-.75));check('horizontal-plane-sites',np.array_equal(r['site_ids'],35+x));r=model(np.array([[-1.,1.,-1.]]),1);check('symmetric-two-crossing-global-ID-tie',np.array_equal(r['distance'],[[-.5,.5,-.5]]) and np.array_equal(r['site_ids'],[[0,0,1]]));r=model(np.array([[-1e308,1e308]]),1);check('finite-opposite-endpoints-overflow-safe-interpolation',np.array_equal(r['distance'],[[-.5,.5]]));r=model(np.zeros((2,3)),1);check('all-exact-zero-centers',np.all(r['distance']==0) and np.array_equal(r['site_ids'],12+np.arange(6).reshape(2,3)));r=model(np.ones((2,3)),1);check('signed-no-site-positive-infinity',np.all(np.isposinf(r['distance'])) and np.all(r['indices']==-32768) and np.all(r['visualization']==65535));r=model(-np.ones((2,3)),1);check('signed-no-site-negative-infinity',np.all(np.isneginf(r['distance'])) and np.all(r['visualization']==0));a=np.ones((3,5),np.uint8);a[1,0]=a[1,4]=0;r=model(a,0);check('unsigned-symmetric-tie-lowest-pixel',r['site_ids'][1,2]==5 and r['distance'][1,2]==2);r=model(np.ones((2,3),np.uint8),0);check('unsigned-no-zero-site',np.all(np.isposinf(r['distance'])) and np.all(r['site_ids']==np.iinfo(np.uint64).max));r=model(np.array([[.625]],np.float64),1,0.,1);check('circle-remap-before-threshold-positive-infinity',np.isposinf(r['distance'][0,0]));
+for value in [np.nan,np.inf,-np.inf]:
+ try:model(np.array([[value]]),1);okay=False
+ except ValueError:okay=True
+ check('reject-nonfinite-'+str(value),okay)
+from image_distance_model import field,sites
+rng=np.random.default_rng(76123)
+for mode in [0,1]:
+ for i in range(40):
+  a=rng.choice(np.array([-1e308,-1.,-1e-300,-5e-324,0.,5e-324,1e-300,1.,1e308]),(5,7)) if mode else rng.integers(0,3,(5,7),dtype=np.uint8)
+  with np.errstate(all='ignore'):
+   r=model(a,mode);z=field(a,mode,0.,0);points,ids=sites(z,mode);yy,xx=np.indices(a.shape);query=np.column_stack((xx.ravel(),yy.ravel()));okay=True
+   if len(points):
+    cost=(query[:,None,0]-points[None,:,0])**2+(query[:,None,1]-points[None,:,1])**2;minimum=cost.min(axis=1);picked=np.array([ids[row==value].min() for row,value in zip(cost,minimum)],np.uint64);okay=np.array_equal(r['site_ids'].ravel(),picked)
+    if mode:
+     zero=np.flatnonzero(z.ravel()==0);okay=okay and np.array_equal(picked[zero],2*a.size+zero)
+   check('exhaustive-squared-cost-global-site-ties-mode-'+str(mode)+'-seed76123-'+str(i),okay)
+for w,h in [(1,1),(32768,1),(1,32768),(32768,2048)]:
+ n=w*h;check('declared-workspace-and-index-bound-'+str(w)+'x'+str(h),n<=2**26 and n+255<2**31 and 3*n<2**32 and 80*n+8<2**64)
+v=dict(status='PASSED' if all(c['passed'] for c in checks) else 'FAILED',case_count=len(checks),checks=checks);write(e.path/'checks.json',v);v['evidence']=e.finish('PASSED' if v['status']=='PASSED' else 'SELF_TEST_FAILED',dict(status=v['status'],checks=checks));write(ROOT/'migration/reports/image-distance-model-checks.json',v);record('I2','Signed/unsigned独立CPU数学参考的解析直线/子像素/同距编号/符号/无site/溢出安全插值/nonfinite：'+v['status'],[v['evidence']]);print(v['status'],[c for c in checks if not c['passed']])

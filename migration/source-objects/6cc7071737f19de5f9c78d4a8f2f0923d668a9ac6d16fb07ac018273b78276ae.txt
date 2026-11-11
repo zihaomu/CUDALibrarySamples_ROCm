@@ -1,0 +1,102 @@
+// SPDX-License-Identifier: Apache-2.0
+#include "distance.h"
+#include "image_memory.hpp"
+#include <hip/hip_runtime.h>
+#include <cmath>
+#include <climits>
+#include <cstdint>
+#include <limits>
+
+static_assert(sizeof(rocm_image_distance_descriptor)==160,"distance C ABI layout");
+namespace image_distance {
+constexpr uint64_t absent=UINT64_MAX;
+struct Candidate {double cost;uint64_t id;};
+__device__ inline void choose(Candidate& b,double cost,uint64_t id){
+ if(id!=absent&&(cost<b.cost||(cost==b.cost&&id<b.id)))b={cost,id};
+}
+__device__ inline bool crosses(double a,double b){return(a<0&&b>0)||(a>0&&b<0);}
+__device__ inline double fraction(double a,double b){
+ // The usual expression preserves the declared arithmetic for ordinary
+ // fields; scaling also handles finite endpoints whose difference overflows.
+ double denominator=b-a;
+ if(__builtin_isfinite(denominator))return -a/denominator;
+ double aa=__builtin_fabs(a),bb=__builtin_fabs(b),scale=(aa>bb?aa:bb);aa/=scale;bb/=scale;return aa/(aa+bb);
+}
+__device__ inline void site(uint64_t id,const double*field,int w,int n,bool signed_mode,double&x,double&y){
+ uint64_t at=signed_mode?id%uint64_t(n):id;x=at%w;y=at/w;
+ if(signed_mode&&id<uint64_t(n))x+=fraction(field[at],field[at+1]);
+ else if(signed_mode&&id<2*uint64_t(n))y+=fraction(field[at],field[at+w]);
+}
+__global__ void prepare(rocm_image_distance_descriptor d,double*field,int*bad){
+ int t=blockIdx.x*blockDim.x+threadIdx.x,n=d.width*d.height;
+ if(t>=n)return;int x=t%d.width,y=t/d.width;auto row=static_cast<const unsigned char*>(d.input)+uint64_t(y)*d.input_pitch;
+ double value=d.input_type==0?double(row[x]):d.input_type==1?double(reinterpret_cast<const float*>(row)[x]):reinterpret_cast<const double*>(row)[x];
+ if(d.remap_circle)value=(value-.5)*2.;if(d.mode)value-=d.cutoff;field[t]=value;
+ if(!__builtin_isfinite(value))atomicExch(bad,1);
+}
+// Integer zero sites permit exact separable costs without floating ties.
+__global__ void unsigned_rows(const double*field,double*cost,uint64_t*ids,int w,int h){
+ int t=blockIdx.x*blockDim.x+threadIdx.x,n=w*h;if(t>=n)return;int x=t%w,y=t/w;Candidate best{INFINITY,absent};
+ if(field[t]==0.){cost[t]=0.;ids[t]=t;return;}
+ for(int j=0;j<w;++j)if(field[y*w+j]==0.){double dx=double(x)-j;choose(best,dx*dx,uint64_t(y)*w+j);}
+ cost[t]=best.cost;ids[t]=best.id;
+}
+__device__ inline void output(rocm_image_distance_descriptor d,int t,Candidate best,const double*field){
+ int x=t%d.width,y=t/d.width,n=d.width*d.height;double value=__builtin_sqrt(best.cost);if(d.mode&&field[t]<0)value=-value;
+ *reinterpret_cast<double*>(reinterpret_cast<unsigned char*>(d.distance)+uint64_t(y)*d.distance_pitch+uint64_t(x)*8)=value;
+ if(d.visualization){double v=value+(d.mode?32700.:0.);uint16_t pixel=v>=65535.?65535:v<=0.?0:uint16_t(v);auto row=reinterpret_cast<uint16_t*>(reinterpret_cast<unsigned char*>(d.visualization)+uint64_t(y)*d.visualization_pitch);row[x]=pixel;}
+ double sx=-32768.,sy=-32768.;int16_t ix=INT16_MIN,iy=INT16_MIN,rx=INT16_MIN,ry=INT16_MIN;
+ if(best.id!=absent){site(best.id,field,d.width,n,d.mode!=0,sx,sy);ix=int16_t(__builtin_floor(sx));iy=int16_t(__builtin_floor(sy));rx=int16_t(x-int(ix));ry=int16_t(y-int(iy));}
+ if(d.indices){auto row=reinterpret_cast<int16_t*>(reinterpret_cast<unsigned char*>(d.indices)+uint64_t(y)*d.indices_pitch);row[2*x]=ix;row[2*x+1]=iy;}
+ if(d.relative){auto row=reinterpret_cast<int16_t*>(reinterpret_cast<unsigned char*>(d.relative)+uint64_t(y)*d.relative_pitch);row[2*x]=rx;row[2*x+1]=ry;}
+ if(d.site_ids){auto row=reinterpret_cast<uint64_t*>(reinterpret_cast<unsigned char*>(d.site_ids)+uint64_t(y)*d.site_ids_pitch);row[x]=best.id;}
+ if(d.sites_xy){auto row=reinterpret_cast<double*>(reinterpret_cast<unsigned char*>(d.sites_xy)+uint64_t(y)*d.sites_xy_pitch);row[2*x]=sx;row[2*x+1]=sy;}
+}
+__global__ void unsigned_columns(rocm_image_distance_descriptor d,const double*field,const double*cost,const uint64_t*ids){
+ int t=blockIdx.x*blockDim.x+threadIdx.x,n=d.width*d.height;if(t>=n)return;int x=t%d.width,y=t/d.width;Candidate best{INFINITY,absent};
+ if(field[t]==0.){output(d,t,Candidate{0.,uint64_t(t)},field);return;}
+ for(int j=0;j<d.height;++j){int at=j*d.width+x;double dy=double(y)-j;choose(best,cost[at]+dy*dy,ids[at]);}output(d,t,best,field);
+}
+__global__ void compact_sites(const double*field,double*xs,double*ys,uint64_t*ids,unsigned*count,int w,int h){
+ int t=blockIdx.x*blockDim.x+threadIdx.x,n=w*h;if(t>=n)return;int x=t%w,y=t/w;double a=field[t];
+ if(a==0.){unsigned slot=atomicAdd(count,1u);xs[slot]=x;ys[slot]=y;ids[slot]=2*uint64_t(n)+t;}
+ if(x+1<w&&crosses(a,field[t+1])){unsigned slot=atomicAdd(count,1u);xs[slot]=double(x)+fraction(a,field[t+1]);ys[slot]=y;ids[slot]=t;}
+ if(y+1<h&&crosses(a,field[t+w])){unsigned slot=atomicAdd(count,1u);xs[slot]=x;ys[slot]=double(y)+fraction(a,field[t+w]);ids[slot]=uint64_t(n)+t;}
+}
+__global__ void nearest_sites(rocm_image_distance_descriptor d,const double*field,const double*xs,const double*ys,const uint64_t*ids,const unsigned*count){
+ int t=blockIdx.x*blockDim.x+threadIdx.x,n=d.width*d.height;if(t>=n)return;int x=t%d.width,y=t/d.width;Candidate best{INFINITY,absent};unsigned m=*count;
+ // Strict crossings cannot have a zero-valued endpoint. This pixel's zero
+ // site is therefore the unique site at distance zero, even after rounding.
+ if(field[t]==0.){output(d,t,Candidate{0.,2*uint64_t(n)+t},field);return;}
+ // Compare the complete squared cost before applying the global site-ID tie
+ // rule. Row-local rounding cannot discard a globally tied candidate.
+ for(unsigned i=0;i<m;++i){double dx=double(x)-xs[i],dy=double(y)-ys[i];choose(best,dx*dx+dy*dy,ids[i]);}output(d,t,best,field);
+}
+inline bool dims(int w,int h){return w>0&&h>0&&w<=32768&&h<=32768&&uint64_t(w)*h<=(uint64_t(1)<<26);}
+struct Span {const void*p;uint64_t bytes;};
+}
+extern "C" uint32_t rocm_image_distance_abi_version(){return 1;}
+extern "C" int rocm_image_distance_workspace_size(int w,int h,uint64_t*bytes){
+ if(!bytes)return hipErrorInvalidValue;*bytes=0;if(!image_distance::dims(w,h))return hipErrorInvalidValue;*bytes=80*uint64_t(w)*h+8;return hipSuccess;
+}
+extern "C" int rocm_image_distance_run(const rocm_image_distance_descriptor*ptr,void*stream_pointer){
+ using namespace image_distance;
+ if(!ptr)return hipErrorInvalidValue;const auto d=*ptr;uint64_t required=0;
+ if(rocm_image_distance_workspace_size(d.width,d.height,&required)!=hipSuccess||d.mode>1||d.input_type>2||d.reserved||d.remap_circle>1||(!d.mode&&(d.input_type!=0||d.remap_circle))||(d.mode&&d.input_type==0)||(d.remap_circle&&d.input_type!=2)||!std::isfinite(d.cutoff)||!d.input||!d.distance||!d.workspace||d.workspace_bytes<required)return hipErrorInvalidValue;
+ int current=0,owner=0;hipError_t status=hipGetDevice(&current);if(status!=hipSuccess)return status;hipStream_t stream=reinterpret_cast<hipStream_t>(stream_pointer);status=hipStreamGetDevice(stream,&owner);if(status!=hipSuccess)return status;if(owner!=current)return hipErrorInvalidDevice;
+ Span spans[8];int count=0;
+ auto add=[&](const void*p,uint64_t pitch,uint64_t row,uint64_t align,bool optional)->bool{
+  if(!p)return optional&&pitch==0;
+  if(reinterpret_cast<uintptr_t>(p)%align||pitch%align||pitch<row||pitch>UINT64_MAX/uint64_t(d.height))return false;
+  spans[count++]={p,pitch*uint64_t(d.height)};return true;
+ };
+ uint64_t item=d.input_type==0?1:d.input_type==1?4:8,w=d.width;
+ if(!add(d.input,d.input_pitch,w*item,item,false)||!add(d.distance,d.distance_pitch,w*8,8,false)||!add(d.visualization,d.visualization_pitch,w*2,2,true)||!add(d.indices,d.indices_pitch,w*4,2,true)||!add(d.relative,d.relative_pitch,w*4,2,true)||!add(d.site_ids,d.site_ids_pitch,w*8,8,true)||!add(d.sites_xy,d.sites_xy_pitch,w*16,8,true)||reinterpret_cast<uintptr_t>(d.workspace)%8)return hipErrorInvalidValue;
+ spans[count++]={d.workspace,d.workspace_bytes};
+ for(int i=0;i<count;++i){status=rocm_image::device_span(spans[i].p,spans[i].bytes,current);if(status!=hipSuccess)return status;for(int j=0;j<i;++j)if(rocm_image::spans_overlap(spans[i].p,spans[i].bytes,spans[j].p,spans[j].bytes))return hipErrorInvalidValue;}
+ int n=d.width*d.height;auto field=static_cast<double*>(d.workspace);double*cost=field+n;auto ids=reinterpret_cast<uint64_t*>(cost+n);double*points_x=field+n;double*points_y=points_x+3*n;auto point_ids=reinterpret_cast<uint64_t*>(points_y+3*n);int*bad=reinterpret_cast<int*>(point_ids+3*n);auto site_count=reinterpret_cast<unsigned*>(bad+1);dim3 grid((n+255)/256);
+ status=hipMemsetAsync(bad,0,8,stream);if(status!=hipSuccess)return status;
+ prepare<<<grid,256,0,stream>>>(d,field,bad);status=hipGetLastError();if(status!=hipSuccess)return status;int invalid=0;status=hipMemcpyAsync(&invalid,bad,sizeof(int),hipMemcpyDeviceToHost,stream);if(status!=hipSuccess)return status;status=hipStreamSynchronize(stream);if(status!=hipSuccess)return status;if(invalid)return hipErrorInvalidValue;
+ if(d.mode){compact_sites<<<grid,256,0,stream>>>(field,points_x,points_y,point_ids,site_count,d.width,d.height);status=hipGetLastError();if(status!=hipSuccess)return status;nearest_sites<<<grid,256,0,stream>>>(d,field,points_x,points_y,point_ids,site_count);return hipGetLastError();}
+ unsigned_rows<<<grid,256,0,stream>>>(field,cost,ids,d.width,d.height);status=hipGetLastError();if(status!=hipSuccess)return status;unsigned_columns<<<grid,256,0,stream>>>(d,field,cost,ids);return hipGetLastError();
+}

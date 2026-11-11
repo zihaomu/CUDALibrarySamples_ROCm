@@ -1,0 +1,20 @@
+W1111 17:09:44.551128     227 agent.cpp:157] Attempt to enable hip visibility for agent-8 which is not visible to HSA (ROCR)
+W1111 17:09:44.554733     227 agent.cpp:157] Attempt to enable hip visibility for agent-9 which is not visible to HSA (ROCR)
+Traceback (most recent call last):
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/tools/moat/image_distance_states.py", line 69, in <module>
+    if __name__=='__main__':raise SystemExit(main())
+                                             ~~~~^^
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/tools/moat/image_distance_states.py", line 66, in main
+    if a.worker:return worker(a)
+                       ~~~~~~^^^
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/tools/moat/image_distance_states.py", line 55, in worker
+    state=states.get(rule['state']) or create(rule['state'],case);state.reset_outputs();state.stream.synchronize();before=state.snapshot();d=Descriptor.from_buffer_copy(state.d)
+                                       ~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/tools/moat/image_distance_states.py", line 17, in create
+    state=State(lib,case,load_case(case),torch.cuda.Stream());state.stream.synchronize();states[key]=state;return state
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/tools/moat/image_distance_runtime_common.py", line 18, in __init__
+    self.src=torch.from_numpy(np.frombuffer(payload,np.uint8).copy()).to('cuda');self.work=torch.full((wb.value,),211,dtype=torch.uint8,device='cuda');self.outputs={k:torch.full((h*p,),self.pads[k],dtype=torch.uint8,device='cuda') for k,p in self.pitches.items()}
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+torch.AcceleratorError: CUDA error: context is destroyed
+Search for `hipErrorContextIsDestroyed' in https://rocm.docs.amd.com/projects/HIP/en/latest/index.html for more information.
+Device-side assertion tracking was not enabled by user.

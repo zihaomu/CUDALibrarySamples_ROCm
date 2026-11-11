@@ -1,0 +1,89 @@
+diff --git a/tools/moat/image_distance_original_reference.py b/tools/moat/image_distance_original_reference.py
+index b3eb1872c..ca9a91de7 100644
+--- a/tools/moat/image_distance_original_reference.py
++++ b/tools/moat/image_distance_original_reference.py
+@@ -12,7 +12,7 @@ def values(path,expected,floating=False):
+  a=np.frombuffer(exact_file(path,expected.nbytes),expected.dtype).reshape(expected.shape)
+  if not floating:return bool(np.array_equal(a,expected))
+  mask=np.isfinite(expected)
+- if not np.array_equal(mask,np.isfinite(a)) or not np.array_equal(np.signbit(a),np.signbit(expected)) or not np.array_equal(a==0,expected==0):return False
++ if np.any(np.isnan(a)) or not np.array_equal(mask,np.isfinite(a)) or not np.array_equal(np.isposinf(a),np.isposinf(expected)) or not np.array_equal(np.isneginf(a),np.isneginf(expected)) or not np.array_equal(np.signbit(a),np.signbit(expected)) or not np.array_equal(a==0,expected==0):return False
+  return bool(np.all(np.abs(a[mask]-expected[mask])<=2e-11+1e-12*np.abs(expected[mask])))
+ 
+ def validate_one(r,rule,raw_override=None):
+@@ -48,7 +48,7 @@ def validate(rows):
+  return result
+ 
+ def main():
+- e=Experiment('I2','Distance-original-four-workflows-independent-CPU','CPU-reference',sources=[__file__,ROOT/'tools/moat/image_distance_model.py',ROOT/'tools/moat/image_distance_reference.py',ROOT/'migration/rewrite/image-distance-original-contract.json']);rows=json.loads((ROOT/'migration/reports/image-distance-originals.json').read_text())
++ e=Experiment('I2','Distance-original-four-workflows-independent-CPU','CPU-reference',sources=[__file__,ROOT/'tools/moat/image_distance_model.py',ROOT/'tools/moat/image_distance_reference.py',ROOT/'tools/moat/image_distance_inputs.py',ROOT/'migration/rewrite/image-distance-original-contract.json']);rows=json.loads((ROOT/'migration/reports/image-distance-originals.json').read_text())
+  try:results=validate(rows);v=dict(status='PASSED' if all(r['status']=='PASSED' for r in results) else 'FAILED',case_count=len(results),file_count=sum(r['file_count'] for r in results),results=results)
+  except Exception as error:v=dict(status='FAILED',results=[],error=repr(error))
+  write(e.path/'results.json',v);v['evidence']=e.finish('PASSED' if v['status']=='PASSED' else 'NUMERIC_MISMATCH',dict(status=v['status'],checks=[dict(check='complete-original-files-inputs-sites-modes-default-paths-and-command-binding',passed=v['status']=='PASSED')]));write(ROOT/'migration/reports/image-distance-originals-validation.json',v);record('I2','Signed/unsigned EDT四真实C++完整流程/48产品文件与全量实际GPU site/Voronoi审计独立CPU：'+v['status'],[v['evidence']]);print(v['status'],v.get('error'),[(r['case'],[x for x in r['checks'] if not x['passed']]) for r in v['results'] if r['status']=='FAILED'][:3]);return int(v['status']!='PASSED')
+diff --git a/tools/moat/image_distance_reference.py b/tools/moat/image_distance_reference.py
+index 47ee15190..e6aa2ece6 100644
+--- a/tools/moat/image_distance_reference.py
++++ b/tools/moat/image_distance_reference.py
+@@ -5,6 +5,7 @@ import numpy as np
+ from experiment import ROOT,Experiment,write,digest
+ from image_distance_model import model
+ from image_progress import record
++from image_distance_inputs import load_case
+ 
+ FORMATS={'distance':('<f8',1,167,40),'visualization':('<u2',1,185,18),'indices':('<i2',2,171,20),'relative':('<i2',2,173,28),'site_ids':('<u8',1,205,24),'sites_xy':('<f8',2,221,32)}
+ def exact_file(path,n,sha=None):
+@@ -18,11 +19,11 @@ def validate(run):
+  for r in rows:
+   c=cases[r['case']];w,h=c['width'],c['height'];item=np.dtype(c['dtype']).itemsize;folder=out/c['case'];expected_names={k+'.bin' for k in FORMATS}|{'input-after.bin'}
+   if r['return_code'] or set(r['files'])!=expected_names or {p.name for p in folder.iterdir()}!=expected_names:raise ValueError('complete actual GPU output storage')
+-  payload=(ROOT/c['fixture']/'input.bin').read_bytes();image=np.frombuffer(payload,np.uint8).reshape(h,c['pitch'])[:,:w*item].copy().view(c['dtype']).reshape(h,w);expected=model(image,c['mode'],c['cutoff'],c['remap_circle']);checks=[dict(check='frozen-geometry-and-workspace',passed=[r['width'],r['height'],r['input_pitch'],r['workspace_bytes'],r['descriptor_bytes']]==[w,h,c['pitch'],80*w*h+8,160]),dict(check='full-input-and-padding-unchanged',passed=exact_file(folder/'input-after.bin',len(payload),r['files']['input-after.bin']['sha256'])==payload and r['input_before_sha256']==__import__('hashlib').sha256(payload).hexdigest())];actual_distance=None
++  payload=load_case(c);image=np.frombuffer(payload,np.uint8).reshape(h,c['pitch'])[:,:w*item].copy().view(c['dtype']).reshape(h,w);expected=model(image,c['mode'],c['cutoff'],c['remap_circle']);checks=[dict(check='frozen-geometry-and-workspace',passed=[r['width'],r['height'],r['input_pitch'],r['workspace_bytes'],r['descriptor_bytes']]==[w,h,c['pitch'],80*w*h+8,160]),dict(check='full-input-and-padding-unchanged',passed=exact_file(folder/'input-after.bin',len(payload),r['files']['input-after.bin']['sha256'])==payload and r['input_before_sha256']==__import__('hashlib').sha256(payload).hexdigest())];actual_distance=None
+   for key,(dtype,components,pad,extra) in FORMATS.items():
+    dt=np.dtype(dtype);pitch=w*dt.itemsize*components+extra;v=r['files'][key+'.bin'];raw=np.frombuffer(exact_file(folder/(key+'.bin'),h*pitch,v['sha256']),np.uint8).reshape(h,pitch);logical=raw[:,:w*dt.itemsize*components].copy().view(dt).reshape((h,w) if components==1 else(h,w,components));target=expected[key];ok=np.array_equal(logical,target);metrics={}
+    if key=='distance':
+-    actual_distance=logical;finite=np.isfinite(target);both=np.isfinite(logical);delta=np.abs(logical[finite]-target[finite]) if np.all(both==finite) else np.array([np.inf]);budget=2e-11+1e-12*np.abs(target[finite]);ok=np.array_equal(finite,both) and np.array_equal(np.signbit(logical),np.signbit(target)) and np.array_equal(logical==0,target==0) and np.all(delta<=budget);metrics=dict(max_abs_error=float(delta.max(initial=0)),finite_values=int(finite.sum()),infinite_values=int((~finite).sum()))
++    actual_distance=logical;finite=np.isfinite(target);both=np.isfinite(logical);delta=np.abs(logical[finite]-target[finite]) if np.all(both==finite) else np.array([np.inf]);budget=2e-11+1e-12*np.abs(target[finite]);ok=np.array_equal(finite,both) and np.array_equal(np.isposinf(logical),np.isposinf(target)) and np.array_equal(np.isneginf(logical),np.isneginf(target)) and not np.any(np.isnan(logical)) and np.array_equal(np.signbit(logical),np.signbit(target)) and np.array_equal(logical==0,target==0) and np.all(delta<=budget);metrics=dict(max_abs_error=float(delta.max(initial=0)),finite_values=int(finite.sum()),infinite_values=int((~finite).sum()))
+    checks.extend([dict(check=key+'/complete-values',passed=bool(ok),**metrics),dict(check=key+'/byte-pitch-and-padding',passed=r['pitches'][key]==pitch and r['pads'][key]==pad and bool(np.all(raw[:,w*dt.itemsize*components:]==pad))),dict(check=key+'/exact-byte-manifest',passed=v['bytes']==h*pitch)])
+   for axis in [0,1]:
+    near=np.isfinite(actual_distance[:-1,:])&np.isfinite(actual_distance[1:,:]) if axis==0 else np.isfinite(actual_distance[:,:-1])&np.isfinite(actual_distance[:,1:]);a=actual_distance[1:,:] if axis==0 else actual_distance[:,1:];b=actual_distance[:-1,:] if axis==0 else actual_distance[:,:-1];difference=np.abs(a[near]-b[near]);checks.append(dict(check='grid-distance-Lipschitz-axis-'+str(axis),passed=bool(np.all(difference<=1+1e-9)),max_neighbor_difference=float(difference.max(initial=0))))
+@@ -30,7 +31,7 @@ def validate(run):
+  return results
+ 
+ def main():
+- e=Experiment('I2','Distance-full-independent-spatial-CPU','CPU-reference',sources=[__file__,ROOT/'tools/moat/image_distance_model.py',ROOT/'migration/rewrite/image-distance-profile.json',ROOT/'migration/reports/image-distance-CPU-dependency.json']);run=json.loads((ROOT/'migration/reports/image-distance-all.json').read_text())
++ e=Experiment('I2','Distance-full-independent-spatial-CPU','CPU-reference',sources=[__file__,ROOT/'tools/moat/image_distance_model.py',ROOT/'tools/moat/image_distance_inputs.py',ROOT/'migration/rewrite/image-distance-profile.json',ROOT/'migration/reports/image-distance-CPU-dependency.json']);run=json.loads((ROOT/'migration/reports/image-distance-all.json').read_text())
+  try:results=validate(run);v=dict(status='PASSED' if all(r['status']=='PASSED' for r in results) else 'FAILED',case_count=len(results),results=results)
+  except Exception as error:v=dict(status='FAILED',results=[],error=repr(error))
+  write(e.path/'results.json',v);v['evidence']=e.finish('PASSED' if v['status']=='PASSED' else 'NUMERIC_MISMATCH',dict(status=v['status'],checks=[dict(check='all-thirty-independent-complete-distance-site-and-storage-contracts',passed=v['status']=='PASSED')]));write(ROOT/'migration/reports/image-distance-all-validation.json',v);record('I2','Signed/unsigned EDT30全量输入/子像素sites/确定性Voronoi/可视化/符号/距离结构/padding独立CPU：'+v['status']+'；完整原入口/运行/负测/trace/冷检出/复审另列。',[v['evidence']]);print(v['status'],v.get('error'),[(r['case'],[x for x in r['checks'] if not x['passed']]) for r in v['results'] if r['status']=='FAILED'][:4]);return int(v['status']!='PASSED')
+diff --git a/tools/moat/image_distance_run.py b/tools/moat/image_distance_run.py
+index cee3d4eb8..9ed05aa23 100644
+--- a/tools/moat/image_distance_run.py
++++ b/tools/moat/image_distance_run.py
+@@ -5,5 +5,5 @@ from image_distance_build import dependencies
+ from snapshot import capture
+ from image_progress import record
+ def main():
+- b=json.loads((ROOT/'migration/reports/image-distance-build.json').read_text());assert b['status']=='BUILT' and digest(ROOT/b['library'])==b['library_sha256'] and all(digest(ROOT/n)==sha for n,sha in b['dependencies'].items());e=Experiment('I2','Distance-thirty-complete-inputs','rocm-prototype',sources=[__file__,ROOT/'tools/moat/image_distance_worker.py',*dependencies()],parent=b['experiment_id']);write(e.path/'backend.observed.json',capture());out=e.path/'outputs';rc=e.command([sys.executable,str(ROOT/'tools/moat/image_distance_worker.py'),'--library',str(ROOT/b['library']),'--sha',b['library_sha256'],'--output',str(out)],'all-pitched-distance-and-real-subpixel-voronoi-outputs',timeout=900);r=dict(return_code=rc,build=b,experiment_id=e.id,outputs=str(out.relative_to(ROOT)));write(e.path/'run.json',r);r['evidence']=e.finish('EXECUTED' if not rc else 'RUNTIME_ERROR');write(ROOT/'migration/reports/image-distance-all.json',r);record('I2','30组signed/unsigned原始完整输入实际HIP执行rc='+str(rc)+'；独立CPU全数组和原入口验收待完成，不计支持。',[r['evidence']]);print(rc,r['evidence']);return rc
++ b=json.loads((ROOT/'migration/reports/image-distance-build.json').read_text());assert b['status']=='BUILT' and digest(ROOT/b['library'])==b['library_sha256'] and all(digest(ROOT/n)==sha for n,sha in b['dependencies'].items());e=Experiment('I2','Distance-thirty-complete-inputs','rocm-prototype',sources=[__file__,ROOT/'tools/moat/image_distance_worker.py',ROOT/'tools/moat/image_distance_inputs.py',*dependencies()],parent=b['experiment_id']);write(e.path/'backend.observed.json',capture());out=e.path/'outputs';rc=e.command([sys.executable,str(ROOT/'tools/moat/image_distance_worker.py'),'--library',str(ROOT/b['library']),'--sha',b['library_sha256'],'--output',str(out)],'all-pitched-distance-and-real-subpixel-voronoi-outputs',timeout=900);r=dict(return_code=rc,build=b,experiment_id=e.id,outputs=str(out.relative_to(ROOT)));write(e.path/'run.json',r);r['evidence']=e.finish('EXECUTED' if not rc else 'RUNTIME_ERROR');write(ROOT/'migration/reports/image-distance-all.json',r);record('I2','30组signed/unsigned原始完整输入实际HIP执行rc='+str(rc)+'；独立CPU全数组和原入口验收待完成，不计支持。',[r['evidence']]);print(rc,r['evidence']);return rc
+ if __name__=='__main__':raise SystemExit(main())
+diff --git a/tools/moat/image_distance_worker.py b/tools/moat/image_distance_worker.py
+index 9d3ab97dc..e7750632f 100644
+--- a/tools/moat/image_distance_worker.py
++++ b/tools/moat/image_distance_worker.py
+@@ -5,6 +5,7 @@ from pathlib import Path
+ import numpy as np
+ import torch
+ from experiment import ROOT,write,digest
++from image_distance_inputs import load_case
+ 
+ class Descriptor(C.Structure):
+  _fields_=[('input',C.c_void_p),('input_pitch',C.c_uint64),('distance',C.c_void_p),('distance_pitch',C.c_uint64),('visualization',C.c_void_p),('visualization_pitch',C.c_uint64),('indices',C.c_void_p),('indices_pitch',C.c_uint64),('relative',C.c_void_p),('relative_pitch',C.c_uint64),('site_ids',C.c_void_p),('site_ids_pitch',C.c_uint64),('sites_xy',C.c_void_p),('sites_xy_pitch',C.c_uint64),('workspace',C.c_void_p),('workspace_bytes',C.c_uint64),('cutoff',C.c_double),('width',C.c_int32),('height',C.c_int32),('mode',C.c_uint32),('input_type',C.c_uint32),('remap_circle',C.c_uint32),('reserved',C.c_uint32)]
+@@ -15,7 +16,7 @@ def load(path,sha):
+ def main():
+  p=argparse.ArgumentParser();p.add_argument('--library',required=True);p.add_argument('--sha',required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args();l=load(a.library,a.sha);spec=json.loads((ROOT/'migration/rewrite/image-distance-profile.json').read_text());a.output.mkdir(parents=True);rows=[];stream=torch.cuda.Stream()
+  for case in spec['cases']:
+-  name=case['case'];w,h=case['width'],case['height'];n=w*h;d=a.output/name;d.mkdir();payload=(ROOT/case['fixture']/'input.bin').read_bytes();wb=C.c_uint64();assert l.rocm_image_distance_workspace_size(w,h,C.byref(wb))==0;pitches=dict(distance=w*8+40,visualization=w*2+18,indices=w*4+20,relative=w*4+28,site_ids=w*8+24,sites_xy=w*16+32);pads=dict(distance=167,visualization=185,indices=171,relative=173,site_ids=205,sites_xy=221)
++  name=case['case'];w,h=case['width'],case['height'];n=w*h;d=a.output/name;d.mkdir();payload=load_case(case);wb=C.c_uint64();assert l.rocm_image_distance_workspace_size(w,h,C.byref(wb))==0;pitches=dict(distance=w*8+40,visualization=w*2+18,indices=w*4+20,relative=w*4+28,site_ids=w*8+24,sites_xy=w*16+32);pads=dict(distance=167,visualization=185,indices=171,relative=173,site_ids=205,sites_xy=221)
+   with torch.cuda.stream(stream):
+    src=torch.from_numpy(np.frombuffer(payload,np.uint8).copy()).to('cuda');work=torch.full((wb.value,),211,dtype=torch.uint8,device='cuda');outputs={k:torch.full((h*pitch,),pads[k],dtype=torch.uint8,device='cuda') for k,pitch in pitches.items()}
+   descriptor=Descriptor(input=src.data_ptr(),input_pitch=case['pitch'],workspace=work.data_ptr(),workspace_bytes=wb.value,cutoff=case['cutoff'],width=w,height=h,mode=case['mode'],input_type=case['input_type'],remap_circle=case['remap_circle'],reserved=0)

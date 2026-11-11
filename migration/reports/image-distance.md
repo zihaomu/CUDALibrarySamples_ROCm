@@ -29,7 +29,13 @@ Unsigned 为零像素中心的精确欧氏最近距离；signed 为水平/垂直
 
 最初device math普通符号无法链接的构建失败保留，改用HIP编译器内建数学操作后构建成功。CPU解析测试曾误将恰零site ID写成n+pixel而非合同的2n+pixel，修正测试期望后通过，生产模型未修改；全部失败和后续运行见[逐步记录](image-libraries-progress.md)及[实验索引](rewrite-experiments.jsonl)。
 
-四完整C++流程/48文件及全部site审计已独立CPU通过。尚需CLI/ABI/默认与外设备及销毁stream、变化后复用和并发实例、实际kernel trace、验收器正反例、原生完整输出绑定与差异重算、旧NPP EDT/NCC回归、冷检出、最终复审和先Git后发布。组件结果不提前增加整例支持。
+四完整C++流程/48文件及全部site审计已独立CPU通过。已完成19CLI、69参数/query、27默认/复用/并发/可选输出/外设备与销毁流/极值/次正规/32768行列、31项全trace检查及34反例；原生当前五图12输出及实际SDK/GPU receipt绑定和全量差异重算通过。尚需旧NPP EDT/NCC回归、冷检出、最终复审和先Git后发布。
+
+[CLI](image-distance-cli-validation.json) · [参数](image-distance-arguments-validation.json) · [状态](image-distance-states-validation.json) · [trace](image-distance-trace-validation.json) · [34反例](image-distance-checks.json) · [当前原生绑定与全量比较](image-distance-native-validation.json)
+
+预审发现NaN可冒充无穷、fixture未核冻结manifest两项缺口，现均修复并由原reviewer复核闭合；34项反例含语义不变的1→2输入及配套回读/receipt伪造，预算内扰动仍接受。销毁流的观察器查询会把709留在HIP线程错误缓存，已记录并用hipGetLastError清除后继续Torch操作；未改变API原始709返回值，后续全部正向状态通过。旧NCC常量图/模板预期返回1表示歧义拒绝，原输出/数值/PGM仍须完整通过，不能把该历史合同误报成算法失败。
+
+I9特别跟踪：旧NPP unsigned EDT的既有PASSED资格覆盖原尺寸数值/Voronoi/截断；其legacy入口输出观察器bin，而原CUDA入口写六RAW（并有原例Voronoi文件长度错误）。新26入口完整文件目标结束前须补原始文件适配并独立验收，不能仅凭数学回归宣布I9完成。组件结果不提前增加整例支持。
 
 ## 复现
 
@@ -45,3 +51,7 @@ python3 tools/moat/image_distance_originals.py
 ```
 
 独立CPU环境含NumPy2.2.6、SciPy1.18.1，运行 `image_distance_reference.py`、`image_distance_original_reference.py` 和 `image_distance_model_checks.py`。所有GPU像素计算在物理GPU1；未验证性能、wave64和Windows。
+
+原计划2/4ULP是I0前的候选；当前signed定义带子像素插值，首次GPU执行前另行固定绝对/相对数值预算，并严格保留零/符号/无穷及离散字段。该预算不由native差异拟合。当前30组实际GPU/CPU最大绝对误差见 `image-distance-all-validation.json`，与跨算法native差异分开报告。
+
+当前补充验收：100项CPU解析/穷举参考检查、69参数、27状态、19CLI、34核心与23运行/文件验收器正反例全部通过；旧EDT6组及完整NCC8组也通过。30组实际GPU/项目CPU距离最大绝对误差为0；与native不同signed定义的差异仍单列。

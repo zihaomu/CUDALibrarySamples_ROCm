@@ -1,0 +1,1 @@
+Test CPU-reference for Distance-complete-native-CPU-HIP-comparison, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T171925.812763Z-I2-cuda-original-855e0c016a.

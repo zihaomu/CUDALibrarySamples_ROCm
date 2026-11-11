@@ -1,0 +1,36 @@
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I2/Distance-legacy-EDT-and-full-NCC-fresh-build/20261111T173031.280143Z-I2-rocm-build-331ec62bbe/ncc-regression: \
+  /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/NPP/templateMatching/templateMatching.cpp \
+  /opt/rocm/core-10.1/include/hip/hip_runtime.h \
+  /opt/rocm/core-10.1/include/hip/hip_version.h \
+  /opt/rocm/core-10.1/include/hip/hip_common.h \
+  /opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_runtime.h \
+  /opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_common.h \
+  /opt/rocm/core-10.1/include/hip/hip_runtime_api.h \
+  /opt/rocm/core-10.1/include/hip/linker_types.h \
+  /opt/rocm/core-10.1/include/hip/amd_detail/host_defines.h \
+  /opt/rocm/core-10.1/include/hip/driver_types.h \
+  /opt/rocm/core-10.1/include/hip/texture_types.h \
+  /opt/rocm/core-10.1/include/hip/channel_descriptor.h \
+  /opt/rocm/core-10.1/include/hip/amd_detail/amd_channel_descriptor.h \
+  /opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_vector_types.h \
+  /opt/rocm/core-10.1/include/hip/surface_types.h \
+  /opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_runtime_pt_api.h \
+  /opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_atomic.h \
+  /opt/rocm/core-10.1/include/hip/amd_detail/amd_device_functions.h \
+  /opt/rocm/core-10.1/include/hip/amd_detail/device_library_decls.h \
+  /opt/rocm/core-10.1/include/hip/amd_detail/hip_assert.h \
+  /opt/rocm/core-10.1/include/hip/amd_detail/math_fwd.h \
+  /opt/rocm/core-10.1/include/hip/hip_vector_types.h \
+  /opt/rocm/core-10.1/include/hip/amd_detail/amd_warp_functions.h \
+  /opt/rocm/core-10.1/include/hip/amd_detail/amd_warp_sync_functions.h \
+  /opt/rocm/core-10.1/include/hip/amd_detail/amd_hip_unsafe_atomics.h \
+  /opt/rocm/core-10.1/include/hip/amd_detail/amd_surface_functions.h \
+  /opt/rocm/core-10.1/include/hip/amd_detail/texture_fetch_functions.h \
+  /opt/rocm/core-10.1/include/hip/hip_texture_types.h \
+  /opt/rocm/core-10.1/include/hip/amd_detail/ockl_image.h \
+  /opt/rocm/core-10.1/include/hip/amd_detail/texture_indirect_functions.h \
+  /opt/rocm/core-10.1/include/hip/amd_detail/hip_ldg.h \
+  /opt/rocm/core-10.1/include/hip/amd_detail/amd_math_functions.h \
+  /opt/rocm/core-10.1/include/hip/amd_detail/hip_fp16_math_fwd.h \
+  /opt/rocm/core-10.1/include/hip/library_types.h \
+  /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/backends/image/ncc_contract.hpp

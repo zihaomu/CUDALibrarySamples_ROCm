@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+"""Device-owned state and full byte snapshots for actual distance ABI calls."""
+import ctypes as C,hashlib,math
+import numpy as np
+import torch
+from image_distance_worker import Descriptor,load
+
+OUTPUTS=['distance','visualization','indices','relative','site_ids','sites_xy']
+def plain(d):
+ result={name:getattr(d,name) for name,kind in Descriptor._fields_}
+ if not math.isfinite(result['cutoff']):result['cutoff']='NaN' if math.isnan(result['cutoff']) else 'Infinity' if result['cutoff']>0 else '-Infinity'
+ return result
+
+class State:
+ def __init__(self,lib,case,payload,stream):
+  self.lib,self.case,self.stream=lib,case,stream;w,h=case['width'],case['height'];self.w,self.h=w,h;self.pitches=dict(distance=w*8+40,visualization=w*2+18,indices=w*4+20,relative=w*4+28,site_ids=w*8+24,sites_xy=w*16+32);self.pads=dict(distance=167,visualization=185,indices=171,relative=173,site_ids=205,sites_xy=221);wb=C.c_uint64();assert lib.rocm_image_distance_workspace_size(w,h,C.byref(wb))==0;self.workspace_bytes=wb.value
+  with torch.cuda.stream(stream):
+   self.src=torch.from_numpy(np.frombuffer(payload,np.uint8).copy()).to('cuda');self.work=torch.full((wb.value,),211,dtype=torch.uint8,device='cuda');self.outputs={k:torch.full((h*p,),self.pads[k],dtype=torch.uint8,device='cuda') for k,p in self.pitches.items()}
+  self.d=Descriptor(input=self.src.data_ptr(),input_pitch=case['pitch'],workspace=self.work.data_ptr(),workspace_bytes=wb.value,cutoff=case['cutoff'],width=w,height=h,mode=case['mode'],input_type=case['input_type'],remap_circle=case['remap_circle'],reserved=0)
+  for key,t in self.outputs.items():setattr(self.d,key,t.data_ptr());setattr(self.d,key+'_pitch',self.pitches[key])
+ def run(self,descriptor=None,stream=None):return self.lib.rocm_image_distance_run(C.byref(self.d if descriptor is None else descriptor),self.stream.cuda_stream if stream is None else stream)
+ def buffers(self):return dict(src=self.src,work=self.work,**self.outputs)
+ def snapshot(self):
+  self.stream.synchronize();return {k:hashlib.sha256(v.cpu().numpy().tobytes()).hexdigest() for k,v in self.buffers().items()}
+ def save(self,out):
+  out.mkdir(parents=True,exist_ok=True);self.stream.synchronize()
+  for k,v in self.buffers().items():v.cpu().numpy().tofile(out/(k+'.bin'))
+ def reset_outputs(self):
+  with torch.cuda.stream(self.stream):
+   for k,v in self.outputs.items():v.fill_(self.pads[k])
+ def changed_zero_input(self):
+  with torch.cuda.stream(self.stream):self.src.view(self.h,self.case['pitch'])[:,:self.w*np.dtype(self.case['dtype']).itemsize].zero_()
+
+def hip_library():
+ import _rocm_sdk_core
+ from pathlib import Path
+ l=C.CDLL(str(Path(_rocm_sdk_core.__file__).parent/'lib/libamdhip64.so.7'));l.hipMalloc.argtypes=[C.POINTER(C.c_void_p),C.c_size_t];l.hipFree.argtypes=[C.c_void_p];l.hipMemGetAddressRange.argtypes=[C.POINTER(C.c_void_p),C.POINTER(C.c_size_t),C.c_void_p];l.hipStreamCreate.argtypes=[C.POINTER(C.c_void_p)];l.hipStreamDestroy.argtypes=[C.c_void_p];l.hipStreamGetDevice.argtypes=[C.c_void_p,C.POINTER(C.c_int)];return l

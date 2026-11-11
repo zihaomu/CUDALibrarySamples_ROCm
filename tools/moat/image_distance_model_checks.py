@@ -12,4 +12,18 @@ for value in [np.nan,np.inf,-np.inf]:
  try:model(np.array([[value]]),1);okay=False
  except ValueError:okay=True
  check('reject-nonfinite-'+str(value),okay)
+from image_distance_model import field,sites
+rng=np.random.default_rng(76123)
+for mode in [0,1]:
+ for i in range(40):
+  a=rng.choice(np.array([-1e308,-1.,-1e-300,-5e-324,0.,5e-324,1e-300,1.,1e308]),(5,7)) if mode else rng.integers(0,3,(5,7),dtype=np.uint8)
+  with np.errstate(all='ignore'):
+   r=model(a,mode);z=field(a,mode,0.,0);points,ids=sites(z,mode);yy,xx=np.indices(a.shape);query=np.column_stack((xx.ravel(),yy.ravel()));okay=True
+   if len(points):
+    cost=(query[:,None,0]-points[None,:,0])**2+(query[:,None,1]-points[None,:,1])**2;minimum=cost.min(axis=1);picked=np.array([ids[row==value].min() for row,value in zip(cost,minimum)],np.uint64);okay=np.array_equal(r['site_ids'].ravel(),picked)
+    if mode:
+     zero=np.flatnonzero(z.ravel()==0);okay=okay and np.array_equal(picked[zero],2*a.size+zero)
+   check('exhaustive-squared-cost-global-site-ties-mode-'+str(mode)+'-seed76123-'+str(i),okay)
+for w,h in [(1,1),(32768,1),(1,32768),(32768,2048)]:
+ n=w*h;check('declared-workspace-and-index-bound-'+str(w)+'x'+str(h),n<=2**26 and n+255<2**31 and 3*n<2**32 and 80*n+8<2**64)
 v=dict(status='PASSED' if all(c['passed'] for c in checks) else 'FAILED',case_count=len(checks),checks=checks);write(e.path/'checks.json',v);v['evidence']=e.finish('PASSED' if v['status']=='PASSED' else 'SELF_TEST_FAILED',dict(status=v['status'],checks=checks));write(ROOT/'migration/reports/image-distance-model-checks.json',v);record('I2','Signed/unsigned独立CPU数学参考的解析直线/子像素/同距编号/符号/无site/溢出安全插值/nonfinite：'+v['status'],[v['evidence']]);print(v['status'],[c for c in checks if not c['passed']])

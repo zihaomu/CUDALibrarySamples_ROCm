@@ -1,0 +1,19 @@
+W1111 17:00:35.530121     227 agent.cpp:157] Attempt to enable hip visibility for agent-8 which is not visible to HSA (ROCR)
+Traceback (most recent call last):
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/tools/moat/image_distance_arguments.py", line 43, in <module>
+    if __name__=='__main__':raise SystemExit(main())
+                                             ~~~~^^
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/tools/moat/image_distance_arguments.py", line 40, in main
+    if a.worker:return worker(a)
+                       ~~~~~~^^^
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/tools/moat/image_distance_arguments.py", line 22, in worker
+    contract=json.loads((ROOT/'migration/rewrite/image-distance-argument-contract.json').read_text());spec=json.loads((ROOT/'migration/rewrite/image-distance-profile.json').read_text());case=next(c for c in spec['cases'] if c['case']==contract['source_case']);lib=load(a.library,a.sha);stream=torch.cuda.Stream();state=State(lib,case,load_case(case),stream);assert state.run()==0;stream.synchronize();out=Path(a.output);out.mkdir(parents=True);state.save(out/'baseline');base=plain(state.d);hip=hip_library();tiny=C.c_void_p();assert hip.hipMalloc(C.byref(tiny),16)==0;origin=C.c_void_p();observed=C.c_size_t();assert hip.hipMemGetAddressRange(C.byref(origin),C.byref(observed),tiny)==0;host=C.create_string_buffer(case['height']*case['pitch']);setup=dict(descriptor=base,tiny=tiny.value,tiny_requested_bytes=16,tiny_observed_bytes=observed.value,host=C.addressof(host),source_case=case['case']);w=case['width'];setup.update(minimum_input_pitch=4*w,minimum_distance_pitch=8*w,minimum_visualization_pitch=2*w,minimum_indices_pitch=4*w,minimum_relative_pitch=4*w,minimum_site_ids_pitch=8*w,minimum_sites_xy_pitch=16*w);write(out/'setup.json',setup);rows=[]
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ~~~~~~~~~~~^^
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/tools/moat/image_distance_runtime_common.py", line 35, in hip_library
+    l=C.CDLL('/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamdhip64.so');l.hipMalloc.argtypes=[C.POINTER(C.c_void_p),C.c_size_t];l.hipFree.argtypes=[C.c_void_p];l.hipMemGetAddressRange.argtypes=[C.POINTER(C.c_void_p),C.POINTER(C.c_size_t),C.c_void_p];l.hipStreamCreate.argtypes=[C.POINTER(C.c_void_p)];l.hipStreamDestroy.argtypes=[C.c_void_p];l.hipStreamGetDevice.argtypes=[C.c_void_p,C.POINTER(C.c_int)];return l
+  File "/opt/python/cpython-3.13.13-linux-x86_64-gnu/lib/python3.13/ctypes/__init__.py", line 361, in __init__
+    self._handle = self._load_library(name, mode, handle, winmode)
+                   ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/python/cpython-3.13.13-linux-x86_64-gnu/lib/python3.13/ctypes/__init__.py", line 403, in _load_library
+    return _dlopen(name, mode)
+OSError: /opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/libamdhip64.so: cannot open shared object file: No such file or directory

@@ -1,0 +1,1 @@
+Test rocm-regression for Distance-regression-distance, case boundary. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T173250.484874Z-I2-rocm-build-8fbeeb0035.

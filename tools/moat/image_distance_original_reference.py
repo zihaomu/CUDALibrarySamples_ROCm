@@ -12,7 +12,7 @@ def values(path,expected,floating=False):
  a=np.frombuffer(exact_file(path,expected.nbytes),expected.dtype).reshape(expected.shape)
  if not floating:return bool(np.array_equal(a,expected))
  mask=np.isfinite(expected)
- if not np.array_equal(mask,np.isfinite(a)) or not np.array_equal(np.signbit(a),np.signbit(expected)) or not np.array_equal(a==0,expected==0):return False
+ if np.any(np.isnan(a)) or not np.array_equal(mask,np.isfinite(a)) or not np.array_equal(np.isposinf(a),np.isposinf(expected)) or not np.array_equal(np.isneginf(a),np.isneginf(expected)) or not np.array_equal(np.signbit(a),np.signbit(expected)) or not np.array_equal(a==0,expected==0):return False
  return bool(np.all(np.abs(a[mask]-expected[mask])<=2e-11+1e-12*np.abs(expected[mask])))
 
 def validate_one(r,rule,raw_override=None):
@@ -48,7 +48,7 @@ def validate(rows):
  return result
 
 def main():
- e=Experiment('I2','Distance-original-four-workflows-independent-CPU','CPU-reference',sources=[__file__,ROOT/'tools/moat/image_distance_model.py',ROOT/'tools/moat/image_distance_reference.py',ROOT/'migration/rewrite/image-distance-original-contract.json']);rows=json.loads((ROOT/'migration/reports/image-distance-originals.json').read_text())
+ e=Experiment('I2','Distance-original-four-workflows-independent-CPU','CPU-reference',sources=[__file__,ROOT/'tools/moat/image_distance_model.py',ROOT/'tools/moat/image_distance_reference.py',ROOT/'tools/moat/image_distance_inputs.py',ROOT/'migration/rewrite/image-distance-original-contract.json']);rows=json.loads((ROOT/'migration/reports/image-distance-originals.json').read_text())
  try:results=validate(rows);v=dict(status='PASSED' if all(r['status']=='PASSED' for r in results) else 'FAILED',case_count=len(results),file_count=sum(r['file_count'] for r in results),results=results)
  except Exception as error:v=dict(status='FAILED',results=[],error=repr(error))
  write(e.path/'results.json',v);v['evidence']=e.finish('PASSED' if v['status']=='PASSED' else 'NUMERIC_MISMATCH',dict(status=v['status'],checks=[dict(check='complete-original-files-inputs-sites-modes-default-paths-and-command-binding',passed=v['status']=='PASSED')]));write(ROOT/'migration/reports/image-distance-originals-validation.json',v);record('I2','Signed/unsigned EDT四真实C++完整流程/48产品文件与全量实际GPU site/Voronoi审计独立CPU：'+v['status'],[v['evidence']]);print(v['status'],v.get('error'),[(r['case'],[x for x in r['checks'] if not x['passed']]) for r in v['results'] if r['status']=='FAILED'][:3]);return int(v['status']!='PASSED')

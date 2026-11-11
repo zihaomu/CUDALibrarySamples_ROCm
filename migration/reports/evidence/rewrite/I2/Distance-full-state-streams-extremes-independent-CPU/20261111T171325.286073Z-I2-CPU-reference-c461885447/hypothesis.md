@@ -1,0 +1,1 @@
+Test CPU-reference for Distance-full-state-streams-extremes-independent-CPU, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T171124.613936Z-I2-rocm-runtime-a5f6b39145.

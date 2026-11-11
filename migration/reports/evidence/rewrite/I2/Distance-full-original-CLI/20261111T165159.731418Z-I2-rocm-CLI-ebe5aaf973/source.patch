@@ -1,0 +1,26 @@
+diff --git a/tools/moat/image_distance_original_reference.py b/tools/moat/image_distance_original_reference.py
+index b3eb1872c..dde984088 100644
+--- a/tools/moat/image_distance_original_reference.py
++++ b/tools/moat/image_distance_original_reference.py
+@@ -12,7 +12,7 @@ def values(path,expected,floating=False):
+  a=np.frombuffer(exact_file(path,expected.nbytes),expected.dtype).reshape(expected.shape)
+  if not floating:return bool(np.array_equal(a,expected))
+  mask=np.isfinite(expected)
+- if not np.array_equal(mask,np.isfinite(a)) or not np.array_equal(np.signbit(a),np.signbit(expected)) or not np.array_equal(a==0,expected==0):return False
++ if np.any(np.isnan(a)) or not np.array_equal(mask,np.isfinite(a)) or not np.array_equal(np.isposinf(a),np.isposinf(expected)) or not np.array_equal(np.isneginf(a),np.isneginf(expected)) or not np.array_equal(np.signbit(a),np.signbit(expected)) or not np.array_equal(a==0,expected==0):return False
+  return bool(np.all(np.abs(a[mask]-expected[mask])<=2e-11+1e-12*np.abs(expected[mask])))
+ 
+ def validate_one(r,rule,raw_override=None):
+diff --git a/tools/moat/image_distance_reference.py b/tools/moat/image_distance_reference.py
+index 47ee15190..0354bd3b2 100644
+--- a/tools/moat/image_distance_reference.py
++++ b/tools/moat/image_distance_reference.py
+@@ -22,7 +22,7 @@ def validate(run):
+   for key,(dtype,components,pad,extra) in FORMATS.items():
+    dt=np.dtype(dtype);pitch=w*dt.itemsize*components+extra;v=r['files'][key+'.bin'];raw=np.frombuffer(exact_file(folder/(key+'.bin'),h*pitch,v['sha256']),np.uint8).reshape(h,pitch);logical=raw[:,:w*dt.itemsize*components].copy().view(dt).reshape((h,w) if components==1 else(h,w,components));target=expected[key];ok=np.array_equal(logical,target);metrics={}
+    if key=='distance':
+-    actual_distance=logical;finite=np.isfinite(target);both=np.isfinite(logical);delta=np.abs(logical[finite]-target[finite]) if np.all(both==finite) else np.array([np.inf]);budget=2e-11+1e-12*np.abs(target[finite]);ok=np.array_equal(finite,both) and np.array_equal(np.signbit(logical),np.signbit(target)) and np.array_equal(logical==0,target==0) and np.all(delta<=budget);metrics=dict(max_abs_error=float(delta.max(initial=0)),finite_values=int(finite.sum()),infinite_values=int((~finite).sum()))
++    actual_distance=logical;finite=np.isfinite(target);both=np.isfinite(logical);delta=np.abs(logical[finite]-target[finite]) if np.all(both==finite) else np.array([np.inf]);budget=2e-11+1e-12*np.abs(target[finite]);ok=np.array_equal(finite,both) and np.array_equal(np.isposinf(logical),np.isposinf(target)) and np.array_equal(np.isneginf(logical),np.isneginf(target)) and not np.any(np.isnan(logical)) and np.array_equal(np.signbit(logical),np.signbit(target)) and np.array_equal(logical==0,target==0) and np.all(delta<=budget);metrics=dict(max_abs_error=float(delta.max(initial=0)),finite_values=int(finite.sum()),infinite_values=int((~finite).sum()))
+    checks.extend([dict(check=key+'/complete-values',passed=bool(ok),**metrics),dict(check=key+'/byte-pitch-and-padding',passed=r['pitches'][key]==pitch and r['pads'][key]==pad and bool(np.all(raw[:,w*dt.itemsize*components:]==pad))),dict(check=key+'/exact-byte-manifest',passed=v['bytes']==h*pitch)])
+   for axis in [0,1]:
+    near=np.isfinite(actual_distance[:-1,:])&np.isfinite(actual_distance[1:,:]) if axis==0 else np.isfinite(actual_distance[:,:-1])&np.isfinite(actual_distance[:,1:]);a=actual_distance[1:,:] if axis==0 else actual_distance[:,1:];b=actual_distance[:-1,:] if axis==0 else actual_distance[:,:-1];difference=np.abs(a[near]-b[near]);checks.append(dict(check='grid-distance-Lipschitz-axis-'+str(axis),passed=bool(np.all(difference<=1+1e-9)),max_neighbor_difference=float(difference.max(initial=0))))
