@@ -1,0 +1,70 @@
+[
+  {
+    "command_id": 1,
+    "phase": "download-CPU-only-oracle-wheel",
+    "argv": [
+      "/usr/bin/python3",
+      "-m",
+      "pip",
+      "download",
+      "--only-binary=:all:",
+      "--no-deps",
+      "--dest",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-cpu-wheels",
+      "scipy"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T16:13:03.638308+00:00",
+    "timeout_seconds": 180,
+    "environment": {},
+    "stdout": "logs/0001-download-CPU-only-oracle-wheel.stdout.log",
+    "stderr": "logs/0001-download-CPU-only-oracle-wheel.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T16:13:04.807180+00:00",
+    "seconds": 1.1676200830261223
+  },
+  {
+    "command_id": 2,
+    "phase": "install-independent-CPU-only-oracle",
+    "argv": [
+      "/usr/bin/python3",
+      "-m",
+      "pip",
+      "--python",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-cpu-venv/bin/python",
+      "install",
+      "--no-index",
+      "--no-deps",
+      "--find-links",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-cpu-wheels",
+      "scipy"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T16:13:04.809119+00:00",
+    "timeout_seconds": 120,
+    "environment": {},
+    "stdout": "logs/0002-install-independent-CPU-only-oracle.stdout.log",
+    "stderr": "logs/0002-install-independent-CPU-only-oracle.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T16:13:08.232891+00:00",
+    "seconds": 3.422872931987513
+  },
+  {
+    "command_id": 3,
+    "phase": "actual-reference-library-versions",
+    "argv": [
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-cpu-venv/bin/python",
+      "-c",
+      "import scipy,numpy;print(scipy.__version__,numpy.__version__)"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T16:13:08.234845+00:00",
+    "timeout_seconds": 30,
+    "environment": {},
+    "stdout": "logs/0003-actual-reference-library-versions.stdout.log",
+    "stderr": "logs/0003-actual-reference-library-versions.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T16:13:08.350937+00:00",
+    "seconds": 0.11520832002861425
+  }
+]

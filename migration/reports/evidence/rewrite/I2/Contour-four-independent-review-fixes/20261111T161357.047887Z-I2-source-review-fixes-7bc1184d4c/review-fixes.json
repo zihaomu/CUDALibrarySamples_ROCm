@@ -1,0 +1,98 @@
+{
+  "status": "CORRECTED_PRELIMINARY",
+  "reviewer_id": "/root/r2_contract_review",
+  "source_checkpoint": "164538d92",
+  "findings": [
+    {
+      "id": "R2-CLI",
+      "finding": "Full CLI command, malformed input and log paths were not bound",
+      "state": "RESOLVED",
+      "proofs": [
+        "CLI-actual-argv-cannot-change-case",
+        "CLI-input-path-cannot-redirect",
+        "CLI-malformed-input-bytes-required",
+        "CLI-log-paths-bound"
+      ]
+    },
+    {
+      "id": "R2-COLD",
+      "finding": "Cold original workflows could be duplicated",
+      "state": "RESOLVED",
+      "proofs": [
+        "cold-real-complete-matrix-passes",
+        "cold-duplicate-workflow-rejected",
+        "cold-duplicate-child-path-rejected",
+        "cold-duplicate-child-index-rejected"
+      ]
+    },
+    {
+      "id": "R2-NATIVE",
+      "finding": "Native complete output inventory and mathematical comparison needed rebinding",
+      "state": "RESOLVED",
+      "proofs": [
+        "native-complete-outputs-and-receipts-pass",
+        "native-empty-output-inventory-rejected",
+        "native-input-identity-rejected"
+      ]
+    },
+    {
+      "id": "R2-DEPS",
+      "finding": "Qualification compilation closure lacked frontend implementation",
+      "state": "RESOLVED",
+      "proofs": [
+        "complete-frontend-and-backend-dependencies"
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "check": "CLI-actual-argv-cannot-change-case",
+      "passed": true
+    },
+    {
+      "check": "CLI-input-path-cannot-redirect",
+      "passed": true
+    },
+    {
+      "check": "CLI-malformed-input-bytes-required",
+      "passed": true
+    },
+    {
+      "check": "CLI-log-paths-bound",
+      "passed": true
+    },
+    {
+      "check": "cold-real-complete-matrix-passes",
+      "passed": true
+    },
+    {
+      "check": "cold-duplicate-workflow-rejected",
+      "passed": true
+    },
+    {
+      "check": "cold-duplicate-child-path-rejected",
+      "passed": true
+    },
+    {
+      "check": "cold-duplicate-child-index-rejected",
+      "passed": true
+    },
+    {
+      "check": "native-complete-outputs-and-receipts-pass",
+      "passed": true
+    },
+    {
+      "check": "native-empty-output-inventory-rejected",
+      "passed": true
+    },
+    {
+      "check": "native-input-identity-rejected",
+      "passed": true
+    },
+    {
+      "check": "complete-frontend-and-backend-dependencies",
+      "passed": true
+    }
+  ],
+  "scope": "Preliminary findings and independently confirmed fixes; final exact-commit approval remains pending."
+}

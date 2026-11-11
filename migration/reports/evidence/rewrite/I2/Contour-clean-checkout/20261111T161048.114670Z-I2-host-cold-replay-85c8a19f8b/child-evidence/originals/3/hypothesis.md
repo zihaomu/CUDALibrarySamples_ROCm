@@ -1,0 +1,1 @@
+Test rocm-original for NPP/findContour::findContour.cpp, case diagonal-touch-two-loops/default. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T161135.285157Z-I2-rocm-build-df572c71aa.

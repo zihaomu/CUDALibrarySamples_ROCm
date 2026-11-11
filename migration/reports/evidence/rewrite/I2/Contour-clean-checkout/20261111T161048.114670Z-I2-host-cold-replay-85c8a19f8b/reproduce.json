@@ -1,0 +1,276 @@
+{
+  "commands": [
+    {
+      "command_id": 1,
+      "phase": "fresh-clone",
+      "argv": [
+        "git",
+        "clone",
+        "--shared",
+        "--quiet",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-contour-cold-640mhhnq/src"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T16:10:48.757352+00:00",
+      "timeout_seconds": 180,
+      "environment": {},
+      "stdout": "logs/0001-fresh-clone.stdout.log",
+      "stderr": "logs/0001-fresh-clone.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T16:10:56.646507+00:00",
+      "seconds": 7.886047798034269
+    },
+    {
+      "command_id": 2,
+      "phase": "fixed-source-commit",
+      "argv": [
+        "git",
+        "checkout",
+        "--quiet",
+        "83ea6539f407ee93050d5f582b88e165d6e200a7"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-contour-cold-640mhhnq/src",
+      "started_at_utc": "2026-11-11T16:10:56.657936+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0002-fixed-source-commit.stdout.log",
+      "stderr": "logs/0002-fixed-source-commit.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T16:10:57.174734+00:00",
+      "seconds": 0.515959793003276
+    },
+    {
+      "command_id": 3,
+      "phase": "reconstruct-all-22-frozen-inputs",
+      "argv": [
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-cpu-venv/bin/python",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-contour-cold-640mhhnq/src/tools/moat/image_contour_contracts.py"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-contour-cold-640mhhnq/src",
+      "started_at_utc": "2026-11-11T16:10:57.177808+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0003-reconstruct-all-22-frozen-inputs.stdout.log",
+      "stderr": "logs/0003-reconstruct-all-22-frozen-inputs.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T16:10:58.596853+00:00",
+      "seconds": 1.4180647830362432
+    },
+    {
+      "command_id": 4,
+      "phase": "cold-bootstrap_sdk",
+      "argv": [
+        "/home/zihaomu/zihaomu_workspace/rocm10-launch.sh",
+        "env",
+        "ROCR_VISIBLE_DEVICES=3",
+        "HIP_VISIBLE_DEVICES=0",
+        "python3",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-contour-cold-640mhhnq/src/tools/migration/bootstrap_sdk.py"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-contour-cold-640mhhnq/src",
+      "started_at_utc": "2026-11-11T16:10:58.598265+00:00",
+      "timeout_seconds": 900,
+      "environment": {},
+      "stdout": "logs/0004-cold-bootstrap_sdk.stdout.log",
+      "stderr": "logs/0004-cold-bootstrap_sdk.stderr.log",
+      "environment_changes": {
+        "HIP_VISIBLE_DEVICES": "2"
+      },
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T16:11:16.659412+00:00",
+      "seconds": 18.060749016993213
+    },
+    {
+      "command_id": 5,
+      "phase": "cold-image_contour_build",
+      "argv": [
+        "/home/zihaomu/zihaomu_workspace/rocm10-launch.sh",
+        "env",
+        "ROCR_VISIBLE_DEVICES=3",
+        "HIP_VISIBLE_DEVICES=0",
+        "python3",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-contour-cold-640mhhnq/src/tools/moat/image_contour_build.py"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-contour-cold-640mhhnq/src",
+      "started_at_utc": "2026-11-11T16:11:16.661505+00:00",
+      "timeout_seconds": 900,
+      "environment": {},
+      "stdout": "logs/0005-cold-image_contour_build.stdout.log",
+      "stderr": "logs/0005-cold-image_contour_build.stderr.log",
+      "environment_changes": {
+        "HIP_VISIBLE_DEVICES": "2"
+      },
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T16:11:25.298332+00:00",
+      "seconds": 8.63588284899015
+    },
+    {
+      "command_id": 6,
+      "phase": "cold-image_contour_run",
+      "argv": [
+        "/home/zihaomu/zihaomu_workspace/rocm10-launch.sh",
+        "env",
+        "ROCR_VISIBLE_DEVICES=3",
+        "HIP_VISIBLE_DEVICES=0",
+        "python3",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-contour-cold-640mhhnq/src/tools/moat/image_contour_run.py"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-contour-cold-640mhhnq/src",
+      "started_at_utc": "2026-11-11T16:11:25.300616+00:00",
+      "timeout_seconds": 900,
+      "environment": {},
+      "stdout": "logs/0006-cold-image_contour_run.stdout.log",
+      "stderr": "logs/0006-cold-image_contour_run.stderr.log",
+      "environment_changes": {
+        "HIP_VISIBLE_DEVICES": "2"
+      },
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T16:11:33.034470+00:00",
+      "seconds": 7.732928871992044
+    },
+    {
+      "command_id": 7,
+      "phase": "cold-image_contour_frontends_build",
+      "argv": [
+        "/home/zihaomu/zihaomu_workspace/rocm10-launch.sh",
+        "env",
+        "ROCR_VISIBLE_DEVICES=3",
+        "HIP_VISIBLE_DEVICES=0",
+        "python3",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-contour-cold-640mhhnq/src/tools/moat/image_contour_frontends_build.py"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-contour-cold-640mhhnq/src",
+      "started_at_utc": "2026-11-11T16:11:33.036802+00:00",
+      "timeout_seconds": 900,
+      "environment": {},
+      "stdout": "logs/0007-cold-image_contour_frontends_build.stdout.log",
+      "stderr": "logs/0007-cold-image_contour_frontends_build.stderr.log",
+      "environment_changes": {
+        "HIP_VISIBLE_DEVICES": "2"
+      },
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T16:11:39.918572+00:00",
+      "seconds": 6.880930694984272
+    },
+    {
+      "command_id": 8,
+      "phase": "cold-image_contour_originals",
+      "argv": [
+        "/home/zihaomu/zihaomu_workspace/rocm10-launch.sh",
+        "env",
+        "ROCR_VISIBLE_DEVICES=3",
+        "HIP_VISIBLE_DEVICES=0",
+        "python3",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-contour-cold-640mhhnq/src/tools/moat/image_contour_originals.py"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-contour-cold-640mhhnq/src",
+      "started_at_utc": "2026-11-11T16:11:39.921320+00:00",
+      "timeout_seconds": 900,
+      "environment": {},
+      "stdout": "logs/0008-cold-image_contour_originals.stdout.log",
+      "stderr": "logs/0008-cold-image_contour_originals.stderr.log",
+      "environment_changes": {
+        "HIP_VISIBLE_DEVICES": "2"
+      },
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T16:12:14.271026+00:00",
+      "seconds": 34.34868241701042
+    },
+    {
+      "command_id": 9,
+      "phase": "cold-image_contour_data_errors",
+      "argv": [
+        "/home/zihaomu/zihaomu_workspace/rocm10-launch.sh",
+        "env",
+        "ROCR_VISIBLE_DEVICES=3",
+        "HIP_VISIBLE_DEVICES=0",
+        "python3",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-contour-cold-640mhhnq/src/tools/moat/image_contour_data_errors.py"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-contour-cold-640mhhnq/src",
+      "started_at_utc": "2026-11-11T16:12:14.273050+00:00",
+      "timeout_seconds": 900,
+      "environment": {},
+      "stdout": "logs/0009-cold-image_contour_data_errors.stdout.log",
+      "stderr": "logs/0009-cold-image_contour_data_errors.stderr.log",
+      "environment_changes": {
+        "HIP_VISIBLE_DEVICES": "2"
+      },
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T16:12:23.809890+00:00",
+      "seconds": 9.535961031971965
+    },
+    {
+      "command_id": 10,
+      "phase": "cold-image_contour_arguments",
+      "argv": [
+        "/home/zihaomu/zihaomu_workspace/rocm10-launch.sh",
+        "env",
+        "ROCR_VISIBLE_DEVICES=3",
+        "HIP_VISIBLE_DEVICES=0",
+        "python3",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-contour-cold-640mhhnq/src/tools/moat/image_contour_arguments.py"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-contour-cold-640mhhnq/src",
+      "started_at_utc": "2026-11-11T16:12:23.812416+00:00",
+      "timeout_seconds": 900,
+      "environment": {},
+      "stdout": "logs/0010-cold-image_contour_arguments.stdout.log",
+      "stderr": "logs/0010-cold-image_contour_arguments.stderr.log",
+      "environment_changes": {
+        "HIP_VISIBLE_DEVICES": "2"
+      },
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T16:12:33.702077+00:00",
+      "seconds": 9.888728259014897
+    },
+    {
+      "command_id": 11,
+      "phase": "cold-image_contour_states",
+      "argv": [
+        "/home/zihaomu/zihaomu_workspace/rocm10-launch.sh",
+        "env",
+        "ROCR_VISIBLE_DEVICES=2,3",
+        "HIP_VISIBLE_DEVICES=0,1",
+        "python3",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-contour-cold-640mhhnq/src/tools/moat/image_contour_states.py"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-contour-cold-640mhhnq/src",
+      "started_at_utc": "2026-11-11T16:12:33.704451+00:00",
+      "timeout_seconds": 900,
+      "environment": {},
+      "stdout": "logs/0011-cold-image_contour_states.stdout.log",
+      "stderr": "logs/0011-cold-image_contour_states.stderr.log",
+      "environment_changes": {
+        "HIP_VISIBLE_DEVICES": "0,2"
+      },
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T16:12:45.447224+00:00",
+      "seconds": 11.741878842993174
+    },
+    {
+      "command_id": 12,
+      "phase": "independent-all-cold-pixels-geometry-files-and-runtime",
+      "argv": [
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-cpu-venv/bin/python",
+        "-c",
+        "import json,pathlib,sys\nclone=pathlib.Path(sys.argv[1]);out=pathlib.Path(sys.argv[2]);sys.path.insert(0,str(clone/'tools/moat'))\nimport image_contour_reference as masks\nimport image_contour_original_reference as originals\nimport image_contour_data_reference as data\nimport image_contour_arguments_reference as arguments\nimport image_contour_states_reference as states\nfor name,fn in [('all',masks.validate),('originals',originals.validate),('data-errors',data.validate),('arguments',arguments.validate),('states',states.validate)]:\n r=json.loads((clone/f'migration/reports/image-contour-{name}.json').read_text());v=fn(r);(out/(name+'-CPU.json')).write_text(json.dumps(v,indent=2)+'\\n');assert all(x['status']=='PASSED' for x in v) if isinstance(v,list) else v['status']=='PASSED';print(name,len(v) if isinstance(v,list) else v['case_count'],'PASSED',flush=True)\n",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-contour-cold-640mhhnq/src",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I2/Contour-clean-checkout/20261111T161048.114670Z-I2-host-cold-replay-85c8a19f8b"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-contour-cold-640mhhnq/src",
+      "started_at_utc": "2026-11-11T16:12:45.449293+00:00",
+      "timeout_seconds": 600,
+      "environment": {},
+      "stdout": "logs/0012-independent-all-cold-pixels-geometry-files-and-runtime.stdout.log",
+      "stderr": "logs/0012-independent-all-cold-pixels-geometry-files-and-runtime.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T16:13:04.865524+00:00",
+      "seconds": 19.415119857992977
+    }
+  ],
+  "source": "source.json",
+  "inputs": "inputs/manifest.json",
+  "expected_environment": "environment.expected.json"
+}

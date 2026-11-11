@@ -280,7 +280,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-11T16:10:20.485199+00:00。26入口当前7通过/7部分/12失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-11T16:13:57.956929+00:00。26入口当前7通过/7部分/12失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -1116,5 +1116,8 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-11T16:09:33.148789+00:00 | I2 | Contour两个真实C++入口15流程/55原始文件、完整geometry与实际排序诊断/范围/bypass独立CPU验收：PASSED；尚待运行/CLI/trace/反例/冷检出/复审。 | `migration/reports/evidence/rewrite/I2/Contour-real-C__-originals-CPU/20261111T160919.174378Z-I2-CPU-reference-633735062b` |
 | 2026-11-11T16:09:37.034761+00:00 | I2 | Contour验收器固定58项真实输出/metadata/模式/默认路径/geometry/状态/原例stdout正反向检查：PASSED | `migration/reports/evidence/rewrite/I2/Contour-actual-validator-mutations/20261111T160931.855865Z-I2-CPU-validator-test-153f7dcf0d` |
 | 2026-11-11T16:10:20.485199+00:00 | I0 | NPP+ signed EDT原生小数覆盖率/真实符号/绝对与相对Voronoi逐文件分析：OBSERVED；用于固定项目算法前的语义研究，不计支持。 | `migration/reports/evidence/rewrite/I0/Signed-EDT-native-fractional-output-research/20261111T161019.497065Z-I0-CPU-research-5e08a74d22` |
+| 2026-11-11T16:13:05.956837+00:00 | I2 | Contour干净检出/22输入重建/ABI2新HIP编译/15实际原流程及26设备数据、61参数、11状态合同冷重放：PASSED；22子记录原始bytes和source objects封存。 | `migration/reports/evidence/rewrite/I2/Contour-clean-checkout/20261111T161048.114670Z-I2-host-cold-replay-85c8a19f8b` |
+| 2026-11-11T16:13:08.608010+00:00 | I0 | Signed EDT独立CPU私有SciPy：READY；首次venv无pip和记录器终态拼写错误已保留/恢复封存，改用系统pip指定私有venv，NumPy不变。 | `migration/reports/evidence/rewrite/I0/Signed-EDT-independent-CPU-spatial-reference-retry/20261111T161303.010431Z-I0-host-dependency-5060327eea`；`migration/reports/evidence/rewrite/I0/Signed-EDT-independent-CPU-spatial-reference/20261111T161225.094936Z-I0-host-dependency-a3f091408b` |
+| 2026-11-11T16:13:57.956929+00:00 | I2 | 四项独立预审发现已修复并由原reviewer复核闭合；CLI完整绑定/冷重放唯一矩阵/native完整输出与当前数学重算/包含原入口的编译闭包。58项反例与新冷重放通过，最终固定commit复审待执行。 | `migration/reports/evidence/rewrite/I2/Contour-four-independent-review-fixes/20261111T161357.047887Z-I2-source-review-fixes-7bc1184d4c`；`migration/reports/evidence/rewrite/I2/Contour-actual-validator-mutations/20261111T160931.855865Z-I2-CPU-validator-test-153f7dcf0d`；`migration/reports/evidence/rewrite/I2/Contour-clean-checkout/20261111T161048.114670Z-I2-host-cold-replay-85c8a19f8b` |
 
 <!-- IMAGE_EXECUTION:END -->
