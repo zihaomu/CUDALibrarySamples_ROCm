@@ -1,5 +1,7 @@
 # 图像库 I0/I1 当前实现检查点
 
+本检查点保留当时的严格比对判断；用户后续允许合理差异，当前验收方向以[合理差异复评](image-difference-acceptance.md)为准。原始测量、失败和阶段支持数不改写。
+
 状态：**IN_PROGRESS，未完成 I0/I1，未新增整例资格**。完整设计与每步实验见 [实施计划](../image-libraries-plan.md) 和 [实时记录](image-libraries-progress.md)。I2–I9 尚未开始。
 
 | 已落地内容 | 实际结果 | 范围与证据 |

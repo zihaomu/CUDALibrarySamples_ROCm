@@ -94,7 +94,7 @@ Python 使用 ROCm PyTorch 与共享 HIP C ABI。`torch.cuda` 在 ROCm 中仍是
 | 阶段 | 内容 | 依赖 | 可新增整例资格 | 四模块累计目标 | 初估人周 |
 | --- | --- | --- | ---: | ---: | --- |
 | I0 | 26 入口合同、SDK/驱动能力、原图清单、CPU/5090 基线、fixture 与阈值冻结 | 无 | 0 | 2/26 | 1–2 |
-| I1 | 精确 C1/C3 Canny、两个 Python 调用、共享基础图像操作 | I0 | 3 | 5/26 | 2–4 |
+| I1 | 满足声明语义的 C1/C3 Canny、两个 Python 调用、共享基础图像操作 | I0 | 3 | 5/26 | 2–4 |
 | I2 | CCL/label compact、NPP/NPP+ contour、NPP+ unsigned/signed EDT；既有 EDT/NCC 回归 | I1 基础设施 | 5 | 10/26 | 3–5 |
 | I3 | NPP/NPP+ watershed、完整 flood fill、Hough、OpenCV benchmark | I1–I2 | 5 | 15/26 | 3–6 |
 | I4 | GPU baseline/progressive JPEG decode、批处理/多实例/ROI、decoder Python 测试 | I0、I1 图像核心 | 4 | 19/26 | 4–8 |
@@ -119,9 +119,9 @@ Python 使用 ROCm PyTorch 与共享 HIP C ABI。`torch.cuda` 在 ROCm 中仍是
 
 ### 5.1 NPP / NPP+
 
-**Canny 与图像操作**：分离原始 NPP C3→C1、NPP+ Python C1 与 benchmark C1 合同。逐阶段核对 Sobel/梯度范数、三通道归并、方向量化、NMS 的相等值规则、双阈值、连接和边界。先复现当前原图差异，再补单像素斜线/交叉/平台值，禁止通过放宽整图误差把旧差异隐藏。Gaussian 5×5、linear/Lanczos resize、RGB/BGR、灰度、alpha 的像素中心/系数/舍入分别冻结。
+**Canny 与图像操作**：分离原始 NPP C3→C1、NPP+ Python C1 与 benchmark C1 合同。逐阶段明确 Sobel/梯度范数、三通道归并、方向量化、NMS 相等值规则、双阈值、连接和边界，并对选定项目算法作独立CPU验收。跨vendor可接受明示的合法算法/边界差异，保留原图与单像素斜线/交叉/平台值的结构检查；不能用全图差异占比掩盖内部断边、错误连接或失败case。Gaussian 5×5、linear/Lanczos resize、RGB/BGR、灰度、alpha 的像素中心/系数/舍入分别冻结。
 
-**CCL 与 label compact**：GPU union-find/边界合并 + prefix-scan，支持原图异构 batch 与独立 pitch。这里的 compression 是标签编号压紧，不是 LZ4/JPEG 压缩。检查连通划分、背景、分量数、label 范围、batch 不串扰。只有原 API 明确允许 label ID 任意重命名时才能预先定义 canonicalization；原例文件/metadata 要求编号顺序时逐值匹配。厂商反复运行的允许变化在 I0 留证，不能事后选择有利匹配规则。
+**CCL 与 label compact**：GPU union-find/边界合并 + prefix-scan，支持原图异构 batch 与独立 pitch。这里的 compression 是标签编号压紧，不是 LZ4/JPEG 压缩。检查连通划分、背景、分量数、label 范围、batch 不串扰。对不承载语义的label编号，可在功能等价profile中预先定义固定重命名/映射，以同一分区、背景和分量数验收；seed/引用等有语义的ID、文件格式与关联metadata按其含义严格核对。保留原始vendor标签和映射，跨厂商不默认要求同一压紧顺序；不事后选择有利匹配规则。
 
 **Contour**：NPP 的 contour mask/direction/totals/counts/offset 与 NPP+ 的 geometry lists 是不同合同。核对外边界/孔洞、开放/闭合轮廓、像素链/方向、区域归属、长度、bbox、前缀偏移及实际文件输出。只有非零轮廓像素总数不构成通过。
 
@@ -151,13 +151,18 @@ baseline/progressive、grayscale/RGB/YCbCr、所有实际接受的 subsampling�
 
 ## 6. 测试矩阵与误差策略
 
+**2026-11-11 用户要求更新：允许合理差异，目标采用完整样例的功能等价支持。** `EXACT`、`NUMERICAL_TOLERANCE` 和明示的 `ALGORITHM_VARIANT` 可分别验收；后两种在完整入口与必需用例通过后同样可以计入支持，并记录具体差异。当前生效政策为 `migration/rewrite/image-acceptance-policy.json`；原机器设计清单保留为历史基线，不再把其中的 Exact Canny/统一跨库像素精确要求作为所有功能支持的前提。详见[差异复评与新增实验](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/reports/image-difference-acceptance.md)。
+
+已观察到的 NPP+ CPU 模型/native 3 个外圈像素可以接受为边界行为差异；优先完成项目明确算法下的 HIP mask 与真实调用，而不继续追求这 3 点的厂商复刻。rocJPEG 10 张成功图与关闭平滑上采样的独立 CPU 参考 maxAbs 为 1–3、PSNR 均>55.7dB、RGB SSIM 均>0.9997，当前差异可接受；不要用 Pillow 默认平滑输出直接判其错误。两项判断都不直接签发整例资格。逐 profile 仍需先固定参考配置、误差预算/结构指标和完整新用例，再实施验收；元数据、无损数据、GPU 执行、错误处理和完整结果覆盖保持硬约束。
+
 每个入口至少登记原始完整 profile、非规则尺寸、修改输入、pitch/ROI、边界/空输入、重复/并发、损坏输入七类，并展开其实际 CLI、类型和算法分支。七类是最低分类，不是把所有入口都限定为七个 case。完整输入文件、seed、SHA256、阈值和 case ID 在编码前冻结。
 
 | 输出类型 | 默认验收原则 | 额外检查 |
 | --- | --- | --- |
-| mask、labels、整数像素、metadata、文件尺寸 | 确定性合同逐元素/字段精确 | ROI外和padding保留；label/geometry完整，不只比总量 |
+| metadata、文件尺寸、位深/通道/ROI/padding、无损数据 | 与声明语义精确一致 | 不能用视觉质量指标容忍错布局/丢结果/错误无损重建 |
+| mask、labels、整数图像操作 | 主参考验证明确的项目算法；跨 vendor 可记录合法算法/边界差异 | Canny保留内部与边界/边缘统计；CCL编号可映射但分区/背景/分量数须一致；不只比全图占比 |
 | EDT FP32/FP64 | 预设目标分别≤2/4 ULP，I0按标准及原生行为冻结 | 符号、Voronoi坐标、截断与非有限值分别判断 |
-| JPEG decode | 同一冻结输出规则逐像素；IDCT合法差异另列门槛 | 初始候选8-bit maxAbs≤2且PSNR≥48dB，仅在原合同允许且I0确认后采用；逐分量/全像素，不仅平均值 |
+| JPEG decode | 匹配输出/上采样策略后，按逐profile容差与质量指标验收 | 原maxAbs≤2/PSNR≥48dB仅保留为初始严格候选，不作跨不同策略的统一门槛；报告全像素/分量误差、分位数、PSNR/SSIM与局部效果 |
 | JPEG encode | 标准有效码流、表/metadata/模式一致、独立跨解码 | quality/采样生效，量化表和受影响像素检查；不默认要求两个合法encoder产生相同字节流 |
 | JPEG2000 reversible | 原始有效整数逐值精确；可逆浮点按规定转换后bits精确 | 双向跨解码与尺寸/分量/位深/符号/marker |
 | JPEG2000 irreversible | 对原指定quality语义、量化及重建误差逐项验收 | 同时看全图max误差、MSE/PSNR和局部残差；PSNR目标容差在I0冻结，不事后为了通过调整 |
@@ -220,8 +225,8 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 | 模块 / 原始入口 | 当前结论 | 收口阶段 | 主要实现 |
 | --- | --- | --- | --- |
-| [NPP/nppCanny/npp_canny_simple.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP/nppCanny/npp_canny_simple.cpp) | PARTIAL | I1 | Shared exact HIP C1/C3 Canny + C ABI; real C++/ROCm Python caller |
-| [NPP/nppCanny/npp_canny_simple.py](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP/nppCanny/npp_canny_simple.py) | FAILED | I1 | Shared exact HIP C1/C3 Canny + C ABI; real C++/ROCm Python caller |
+| [NPP/nppCanny/npp_canny_simple.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP/nppCanny/npp_canny_simple.cpp) | PARTIAL | I1 | Shared HIP C1/C3 Canny under declared equivalence profile + C ABI; real C++/ROCm Python caller |
+| [NPP/nppCanny/npp_canny_simple.py](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP/nppCanny/npp_canny_simple.py) | FAILED | I1 | Shared HIP C1/C3 Canny under declared equivalence profile + C ABI; real C++/ROCm Python caller |
 | [NPP/batchedLabelMarkersAndCompression/batchedLabelMarkersAndCompression.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP/batchedLabelMarkersAndCompression/batchedLabelMarkersAndCompression.cpp) | FAILED | I2 | HIP CCL/union-find + scan/label compact; independent batch descriptors |
 | [NPP/findContour/findContour.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP/findContour/findContour.cpp) | FAILED | I2 | Shared HIP labels + contour mask/direction/offset; NPP+ geometry adapters |
 | [NPP/houghLines/houghLines.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP/houghLines/houghLines.cpp) | FAILED | I3 | HIP Canny + Hough accumulator/peak extraction |
@@ -229,7 +234,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | [NPP/watershedSegmentation/watershedSegmentation.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP/watershedSegmentation/watershedSegmentation.cpp) | FAILED | I3 | HIP bucket/sort flooding + plateau assignment + segmentation outputs |
 | [NPP/distanceTransform/distanceTransform.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP/distanceTransform/distanceTransform.cpp) | PASSED | I9（回归守护） | HIP exact separable Euclidean distance/Voronoi/integer truncation kernels |
 | [NPP/templateMatching/templateMatching.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP/templateMatching/templateMatching.cpp) | PASSED | I9（回归守护） | HIP NCC/full original CLI/RAW input/PGM annotation/HIP-event timing |
-| [NPP+/cannyEdgeDetectorPython/cannyEdgeDetector.py](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP%2B/cannyEdgeDetectorPython/cannyEdgeDetector.py) | FAILED | I1 | Shared exact HIP C1/C3 Canny + C ABI; real C++/ROCm Python caller |
+| [NPP+/cannyEdgeDetectorPython/cannyEdgeDetector.py](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP%2B/cannyEdgeDetectorPython/cannyEdgeDetector.py) | FAILED | I1 | Shared HIP C1/C3 Canny under declared equivalence profile + C ABI; real C++/ROCm Python caller |
 | [NPP+/batchedLabelMarkersAndCompression/batchedLabelMarkersAndCompressionNPPPlus.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP%2B/batchedLabelMarkersAndCompression/batchedLabelMarkersAndCompressionNPPPlus.cpp) | FAILED | I2 | HIP CCL/union-find + scan/label compact; independent batch descriptors |
 | [NPP+/distanceTransform/unsignedAndSignedDistanceTransformNPPPlus.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP%2B/distanceTransform/unsignedAndSignedDistanceTransformNPPPlus.cpp) | FAILED | I2 | HIP exact unsigned/signed EDT and Voronoi; 32f/64f semantics |
 | [NPP+/findContour/findContourNPPPlus.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP%2B/findContour/findContourNPPPlus.cpp) | FAILED | I2 | Shared HIP labels + contour mask/direction/offset; NPP+ geometry adapters |
@@ -269,7 +274,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-11T09:22:58.923043+00:00。26入口当前2通过/8部分/16失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-11T10:02:02.333196+00:00。26入口当前2通过/8部分/16失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -429,5 +434,6 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-11T09:18:05.958984+00:00 | I1 | 图像基础实现检查点：PASSED；既有资格/记录器回归、证据封存审计、原始源码与支持计数不变、计划镜像一致分别检查。 | `migration/reports/evidence/rewrite/I1/image-foundation-checkpoint/20261111T091721.874780Z-I1-host-validation-df57386e26` |
 | 2026-11-11T09:18:24.226917+00:00 | I1 | 审查问题已修：固定15 stage和5 native case覆盖，失败rc不跳过/严格非零退出，逐文件精确字节/集合/hash/输入检查。16项正反测试全部通过；重新构建15 GPU/CPU阶段及15 native梯度数组严格复验通过。SDK两包已实际逐文件验证复用，所有失败分支可封存。 | `migration/reports/image-checkpoint-validation.json`；`migration/reports/image-review-4705868ef.json`；`migration/reports/image-I1-Canny-stages-validation.json` |
 | 2026-11-11T09:22:58.923043+00:00 | I1 | 固定66abeeeb三项独立复审批准，先前must-fix均闭合；代码与审查版本逐字节一致门槛通过。I0/I1仍未完成，无原始样例资格新增，下一工作保留Canny边界/连接和codec GPU纵向原型。 | `migration/reports/evidence/rewrite/I1/image-foundation-independent-review/20261111T092258.027132Z-I1-host-review-9e527480d1`；`migration/reports/image-I0-I1-checkpoint.md` |
+| 2026-11-11T10:02:02.333196+00:00 | I0 | 按用户允许合理差异重新评估：新增CPU控制变量实验，关闭fancy upsampling后，10张既有GPU图maxAbs1–3、PSNR>55.7、RGB SSIM>0.9997；Canny CPU模型/native的3点全部位于外圈。当前差异可接受，后续按明确语义的功能等价推进，原始失败和未实现功能保留，不直接升级样例。 | `migration/reports/image-difference-assessment.json`；`migration/reports/image-difference-acceptance.md`；`migration/rewrite/image-acceptance-policy.json` |
 
 <!-- IMAGE_EXECUTION:END -->

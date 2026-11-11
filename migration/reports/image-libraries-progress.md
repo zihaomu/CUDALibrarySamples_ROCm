@@ -1,6 +1,6 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-11T09:22:58.923043+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-11T10:02:02.333196+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
 26入口当前：2 PASSED / 8 PARTIAL / 16 FAILED。
 
@@ -177,3 +177,4 @@
 | 2026-11-11T09:18:05.958984+00:00 | I1 | 图像基础实现检查点：PASSED；既有资格/记录器回归、证据封存审计、原始源码与支持计数不变、计划镜像一致分别检查。 | [20261111T091721.874780Z-I1-host-validation-df57386e26](evidence/rewrite/I1/image-foundation-checkpoint/20261111T091721.874780Z-I1-host-validation-df57386e26) |
 | 2026-11-11T09:18:24.226917+00:00 | I1 | 审查问题已修：固定15 stage和5 native case覆盖，失败rc不跳过/严格非零退出，逐文件精确字节/集合/hash/输入检查。16项正反测试全部通过；重新构建15 GPU/CPU阶段及15 native梯度数组严格复验通过。SDK两包已实际逐文件验证复用，所有失败分支可封存。 | [image-checkpoint-validation.json](image-checkpoint-validation.json)；[image-review-4705868ef.json](image-review-4705868ef.json)；[image-I1-Canny-stages-validation.json](image-I1-Canny-stages-validation.json) |
 | 2026-11-11T09:22:58.923043+00:00 | I1 | 固定66abeeeb三项独立复审批准，先前must-fix均闭合；代码与审查版本逐字节一致门槛通过。I0/I1仍未完成，无原始样例资格新增，下一工作保留Canny边界/连接和codec GPU纵向原型。 | [20261111T092258.027132Z-I1-host-review-9e527480d1](evidence/rewrite/I1/image-foundation-independent-review/20261111T092258.027132Z-I1-host-review-9e527480d1)；[image-I0-I1-checkpoint.md](image-I0-I1-checkpoint.md) |
+| 2026-11-11T10:02:02.333196+00:00 | I0 | 按用户允许合理差异重新评估：新增CPU控制变量实验，关闭fancy upsampling后，10张既有GPU图maxAbs1–3、PSNR>55.7、RGB SSIM>0.9997；Canny CPU模型/native的3点全部位于外圈。当前差异可接受，后续按明确语义的功能等价推进，原始失败和未实现功能保留，不直接升级样例。 | [image-difference-assessment.json](image-difference-assessment.json)；[image-difference-acceptance.md](image-difference-acceptance.md)；`migration/rewrite/image-acceptance-policy.json` |

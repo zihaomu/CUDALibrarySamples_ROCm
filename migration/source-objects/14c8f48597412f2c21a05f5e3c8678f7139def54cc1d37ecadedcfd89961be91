@@ -1,0 +1,68 @@
+#!/usr/bin/env python3
+"""Re-assess frozen outputs; do not promote a sample or change an old verdict."""
+import json,math,sys,importlib.metadata
+from pathlib import Path
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools/moat'))
+import numpy as np,cv2
+from PIL import Image
+from experiment import ROOT,Experiment,digest,write
+from image_canny_local_research import local_mask
+from image_canny_stages_reference import reference
+from audit import check
+
+def ssim(a,b):
+ x=a.astype(np.float64);y=b.astype(np.float64)
+ filt=lambda v:cv2.GaussianBlur(v,(11,11),1.5)[5:-5,5:-5]
+ ux=filt(x);uy=filt(y);vx=filt(x*x)-ux*ux;vy=filt(y*y)-uy*uy;cov=filt(x*y)-ux*uy
+ return float(np.mean(((2*ux*uy+6.5025)*(2*cov+58.5225))/((ux*ux+uy*uy+6.5025)*(vx+vy+58.5225))))
+
+def metrics(a,b):
+ if a.shape!=b.shape:raise ValueError('different image shapes')
+ d=np.abs(a.astype(np.float64)-b.astype(np.float64));mse=float(np.mean(d*d))
+ weights=np.array([.299,.587,.114]);ya=np.sum(a*weights,axis=2);yb=np.sum(b*weights,axis=2)
+ return dict(max_abs=int(d.max()),MAE=float(d.mean()),RMSE=math.sqrt(mse),PSNR_dB=10*math.log10(255**2/mse) if mse else None,
+             p95_abs=float(np.percentile(d,95)),p99_abs=float(np.percentile(d,99)),percent_samples_gt8=float(np.mean(d>8)*100),
+             SSIM_RGB_full_resolution=ssim(a,b),SSIM_Y_full_resolution=ssim(ya,yb))
+
+def main():
+ inputs=[ROOT/'migration/reports/image-I0-rocJPEG-files.json',ROOT/'migration/reports/image-I0-Canny-local-model.json']
+ e=Experiment('I0','image-difference-acceptability-assessment','CPU-analysis',sources=[__file__,ROOT/'agent_space/jpeg_options.c',*inputs,ROOT/'tools/moat/image_canny_local_research.py',ROOT/'tools/moat/image_canny_stages_reference.py'])
+ try:
+  rc=e.command(['cc','-std=c11','-O2',str(ROOT/'agent_space/jpeg_options.c'),'-ljpeg','-o',str(e.path/'jpeg_options')],'build-independent-CPU-reference-options')
+  if rc:raise RuntimeError('CPU helper build failed')
+  for command,phase in [(['pkg-config','--modversion','libjpeg'],'CPU-jpeg-package'),(['ldd',str(e.path/'jpeg_options')],'CPU-loaded-libraries')]:
+   if e.command(command,phase):raise RuntimeError(phase)
+  write(e.path/'dependencies.json',dict(binary_sha256=digest(e.path/'jpeg_options'),jpeg_header_sha256=digest('/usr/include/jpeglib.h'),jpeg_library_sha256=digest('/usr/lib/x86_64-linux-gnu/libjpeg.so'),packages={n:importlib.metadata.version(n) for n in ['numpy','opencv-python-headless','Pillow']}))
+  gpu=json.loads(inputs[0].read_text());assert not check(ROOT/gpu['evidence']);raw=ROOT/json.loads((ROOT/gpu['evidence']/'manifest.json').read_text())['raw_artifact_dir'];jpeg=[]
+  for item in gpu['results']:
+   if item.get('decode')!=0:continue
+   name=item['file'];source=ROOT/'nvJPEG/nvJPEG-Decoder/input_images'/name
+   assert digest(source)==gpu['input_files'][str(source.relative_to(ROOT))]
+   shape=(item['height'],item['width'],3);path=raw/'outputs'/(name+'.rgb');assert path.stat().st_size==int(np.prod(shape))
+   assert digest(path)==gpu['outputs']['outputs/'+name+'.rgb']['sha256']
+   actual=np.fromfile(path,np.uint8).reshape(shape)
+   with Image.open(source) as im:cpu=np.array(im.convert('RGB'))
+   row=dict(file=name,GPU_output_sha256=digest(path),Pillow_default=metrics(actual,cpu),CPU_options={})
+   for fancy in [0,1]:
+    out=e.path/(name+'-fancy'+str(fancy)+'.bin')
+    if e.command([str(e.path/'jpeg_options'),str(source),str(out),str(fancy)],'CPU-'+name+'-fancy'+str(fancy)):raise RuntimeError('CPU decode')
+    assert out.stat().st_size==int(np.prod(shape));result=np.fromfile(out,np.uint8).reshape(shape)
+    row['CPU_options'][str(fancy)]=dict(GPU_comparison=metrics(actual,result),Pillow_comparison=metrics(result,cpu),output_sha256=digest(out))
+   jpeg.append(row)
+  canny=[]
+  for item in json.loads(inputs[1].read_text())['cases']:
+   evidence=ROOT/item['native_evidence'];assert not check(evidence);base=ROOT/json.loads((evidence/'manifest.json').read_text())['raw_artifact_dir']
+   fixture=base/'inputs';config=json.loads((fixture/'config.json').read_text());h,w=config['height'],config['width'];p=base/'outputs/output.bin'
+   assert digest(p)==item['native_sha256'];assert digest(fixture/'manifest.json')==item['input_manifest_sha256']
+   actual=local_mask(reference(fixture),config['low'],config['high'])>0;gold=np.fromfile(p,np.uint8).reshape(h,config['output_pitch'])[:,:w]>0
+   different=actual!=gold;interior=different.copy();interior[[0,-1],:]=False;interior[:,[0,-1]]=False
+   tp=int(np.count_nonzero(actual&gold));fp=int(np.count_nonzero(actual&~gold));fn=int(np.count_nonzero(~actual&gold));union=tp+fp+fn
+   canny.append(dict(case=item['case'],shape=[h,w],different_pixels=int(different.sum()),interior_differences=int(interior.sum()),CPU_edges=int(actual.sum()),native_edges=int(gold.sum()),TP=tp,FP=fp,FN=fn,IoU=tp/union if union else 1.,edge_recall=tp/(tp+fn) if tp+fn else 1.,mismatch_coordinates=np.argwhere(different).tolist()))
+  result=dict(status='OBSERVED',scope='User-authorized functional-equivalence assessment of existing evidence. Canny is CPU model vs native, not a final HIP mask; no sample qualification or numeric threshold inferred from this assessment.',JPEG=jpeg,Canny=canny,SSIM_definition='Single-scale 11x11 Gaussian sigma1.5 population moments, K1=.01 K2=.03 L255, valid pixels, no downsampling; RGB channel mean and .299/.587/.114 luma reported separately.')
+  write(e.path/'assessment.json',result);ref=e.finish('OBSERVED');write(ROOT/'migration/reports/image-difference-assessment.json',dict(**result,evidence=ref))
+  print(json.dumps(dict(evidence=ref,JPEG=[dict(file=r['file'],original_max=r['Pillow_default']['max_abs'],fast_max=r['CPU_options']['0']['GPU_comparison']['max_abs'],fast_PSNR=r['CPU_options']['0']['GPU_comparison']['PSNR_dB'],default_SSIM=r['Pillow_default']['SSIM_RGB_full_resolution']) for r in jpeg],Canny=[r for r in canny if r['different_pixels']]),ensure_ascii=False))
+ except Exception as error:
+  if not e.sealed:e.finish('CONTRACT_AUDIT_FAILED',reason=repr(error))
+  raise
+
+if __name__=='__main__':main()
