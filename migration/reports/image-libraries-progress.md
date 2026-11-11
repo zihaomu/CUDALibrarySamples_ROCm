@@ -1,6 +1,6 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-11T18:03:36.783315+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-11T18:08:29.240788+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
 26入口当前：9 PASSED / 7 PARTIAL / 10 FAILED。
 
@@ -991,3 +991,6 @@
 | 2026-11-11T17:58:22.447718+00:00 | I2 | EDT12子记录冷检出全部通过；完成复合资格器/发布器，覆盖全部冻结输入/完整C++编译闭包/CPU重算/原生receipt/14旧EDT-NCC回归及先Git门禁；准备固定源码三独立复审，暂不增加支持数。 | [image-distance-cold.json](image-distance-cold.json) |
 | 2026-11-11T18:01:04.233436+00:00 | I3 | 开始5原入口源码面核对：NPP watershed实际5图10输出且不解析README的-b；NPP+3图12输出；flood5分支/5RGB输出+元数据；Hough完整五直线/外部图/CLI；benchmark原4096x2048/四算子/预热/五轮20次。仅调查，不增加支持数。 | [20261111T180103.350853Z-I3-CPU-source-audit-7b5e20754b](evidence/rewrite/I3/Five-original-image-entrypoint-surface-audit/20261111T180103.350853Z-I3-CPU-source-audit-7b5e20754b) |
 | 2026-11-11T18:03:36.783315+00:00 | I2 | 最终复审发现15个生成图像数据不能直接git-show的问题；Distance专用映射仅对冻结15文件使用已提交CAS，4项真实数据/CAS身份与反例检查通过，未知build路径仍要求原Git blob。共享复审门禁与已合格图像源码未改。 | [20261111T180335.755974Z-I2-CPU-review-gate-test-66aa77fe31](evidence/rewrite/I2/Distance-frozen-data-review-CAS-identity-guards/20261111T180335.755974Z-I2-CPU-review-gate-test-66aa77fe31) |
+| 2026-11-11T18:04:03.926729+00:00 | I3 | 对两张完整RGB原图/5个捆绑输出做独立8连通seed谓词和4/8邻域内外边界研究；只作既有vendor文件观察，新的实际native基线与GPU实现尚未完成。 | [20261111T180402.676532Z-I3-CPU-research-904a751674](evidence/rewrite/I3/FloodFill-bundled-native-full-output-CPU-research/20261111T180402.676532Z-I3-CPU-research-904a751674) |
+| 2026-11-11T18:06:08.195681+00:00 | I2 | EDT最终固定提交76afb83f6三独立scope复审全部APPROVED；15生成数据/CAS闭包问题与此前NaN/fixture问题均闭合。开始完整资格器重算；尚不改主表。 | [image-distance-review.json](image-distance-review.json) |
+| 2026-11-11T18:08:29.240788+00:00 | I2 | 真实EDT publisher拒绝尚未Git封存的资格、错sample ID、缺qualification ID、伪造物理GPU及缺必需case；6检查通过，所有拒绝前后主表SHA不变。接下来先提交资格后发布。 | [20261111T180802.705402Z-I2-CPU-publication-guard-946776192a](evidence/rewrite/I2/Distance-real-publisher-prepublication-and-forgery-guards/20261111T180802.705402Z-I2-CPU-publication-guard-946776192a) |

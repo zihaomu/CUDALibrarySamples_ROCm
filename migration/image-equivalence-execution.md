@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-11T18:03:36.783315+00:00。26入口当前9通过/7部分/10失败。
+更新时间：2026-11-11T18:08:29.240788+00:00。26入口当前9通过/7部分/10失败。
 
-I2：最终复审发现15个生成图像数据不能直接git-show的问题；Distance专用映射仅对冻结15文件使用已提交CAS，4项真实数据/CAS身份与反例检查通过，未知build路径仍要求原Git blob。共享复审门禁与已合格图像源码未改。
+I2：真实EDT publisher拒绝尚未Git封存的资格、错sample ID、缺qualification ID、伪造物理GPU及缺必需case；6检查通过，所有拒绝前后主表SHA不变。接下来先提交资格后发布。
 
-证据：`migration/reports/evidence/rewrite/I2/Distance-frozen-data-review-CAS-identity-guards/20261111T180335.755974Z-I2-CPU-review-gate-test-66aa77fe31`
+证据：`migration/reports/evidence/rewrite/I2/Distance-real-publisher-prepublication-and-forgery-guards/20261111T180802.705402Z-I2-CPU-publication-guard-946776192a`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 
