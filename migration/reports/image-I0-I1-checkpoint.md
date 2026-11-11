@@ -19,3 +19,5 @@
 3. **尚未完成的 I0 范围**：其余入口完整 CLI/default/输入分支合同、全部 CPU/原生基线、JPEG/JPEG2000 GPU 熵编解码纵向原型、最终输入与阈值矩阵仍待实现。下载 SDK 或通过原生自检不替代这些步骤。
 
 项目总量仍为 **241 PASSED / 23 PARTIAL / 375 FAILED**；本计划 26 个图像入口仍为 **2 PASSED / 8 PARTIAL / 16 FAILED**。性能、wave64、Windows 以及尚未验证的码流分支均未新增支持声明。
+
+三项独立审查已批准固定代码 `66abeeebf9080ed99fa65bae98423cdc3679acec`，此前验收器/SDK 复现问题已修复并完成 16 项正反测试及真实数据复验。见[审查记录](image-independent-review.json)与[原始问题](image-review-4705868ef.json)。批准不代表 I0/I1 或任何原始 Canny 样例已完成。

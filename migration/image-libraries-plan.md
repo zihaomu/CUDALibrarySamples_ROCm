@@ -269,7 +269,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-11T09:18:24.226917+00:00。26入口当前2通过/8部分/16失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-11T09:22:58.923043+00:00。26入口当前2通过/8部分/16失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -428,5 +428,6 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-11T09:17:21.526355+00:00 | I1 | border-check83914-c1：Sobel dx/dy、整数L2、NMS四个完整数组与独立CPU逐元素完全一致；此结论仅覆盖阶段。 | `migration/reports/evidence/rewrite/I1/Canny-stages-independent-CPU/20261111T091720.716158Z-I1-CPU-reference-b0133c204b` |
 | 2026-11-11T09:18:05.958984+00:00 | I1 | 图像基础实现检查点：PASSED；既有资格/记录器回归、证据封存审计、原始源码与支持计数不变、计划镜像一致分别检查。 | `migration/reports/evidence/rewrite/I1/image-foundation-checkpoint/20261111T091721.874780Z-I1-host-validation-df57386e26` |
 | 2026-11-11T09:18:24.226917+00:00 | I1 | 审查问题已修：固定15 stage和5 native case覆盖，失败rc不跳过/严格非零退出，逐文件精确字节/集合/hash/输入检查。16项正反测试全部通过；重新构建15 GPU/CPU阶段及15 native梯度数组严格复验通过。SDK两包已实际逐文件验证复用，所有失败分支可封存。 | `migration/reports/image-checkpoint-validation.json`；`migration/reports/image-review-4705868ef.json`；`migration/reports/image-I1-Canny-stages-validation.json` |
+| 2026-11-11T09:22:58.923043+00:00 | I1 | 固定66abeeeb三项独立复审批准，先前must-fix均闭合；代码与审查版本逐字节一致门槛通过。I0/I1仍未完成，无原始样例资格新增，下一工作保留Canny边界/连接和codec GPU纵向原型。 | `migration/reports/evidence/rewrite/I1/image-foundation-independent-review/20261111T092258.027132Z-I1-host-review-9e527480d1`；`migration/reports/image-I0-I1-checkpoint.md` |
 
 <!-- IMAGE_EXECUTION:END -->
