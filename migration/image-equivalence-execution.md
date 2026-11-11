@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-11T15:53:56.008509+00:00。26入口当前7通过/7部分/12失败。
+更新时间：2026-11-11T16:10:20.485199+00:00。26入口当前7通过/7部分/12失败。
 
-I2：Contour验收器固定47项真实输出/metadata/模式/默认路径/geometry/状态/原例stdout正反向检查：PASSED
+I0：NPP+ signed EDT原生小数覆盖率/真实符号/绝对与相对Voronoi逐文件分析：OBSERVED；用于固定项目算法前的语义研究，不计支持。
 
-证据：`migration/reports/evidence/rewrite/I2/Contour-actual-validator-mutations/20261111T155352.592443Z-I2-CPU-validator-test-a2cb4cbdcd`
+证据：`migration/reports/evidence/rewrite/I0/Signed-EDT-native-fractional-output-research/20261111T161019.497065Z-I0-CPU-research-5e08a74d22`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

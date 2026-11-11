@@ -1,6 +1,6 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-11T15:53:56.008509+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-11T16:10:20.485199+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
 26入口当前：7 PASSED / 7 PARTIAL / 12 FAILED。
 
@@ -846,3 +846,10 @@
 | 2026-11-11T15:47:53.076092+00:00 | I2 | Contour默认流/复用/改变输入/两并发实例/外设备与销毁流11实际case执行rc=0；像素仅物理GPU1，GPU0仅建外设备流。 | [20261111T154745.577448Z-I2-rocm-runtime-6f8e5d6d3a](evidence/rewrite/I2/Contour-real-state-streams-and-concurrent-instances/20261111T154745.577448Z-I2-rocm-runtime-6f8e5d6d3a) |
 | 2026-11-11T15:47:55.260267+00:00 | I2 | Contour默认流/复用变化/并发实例与外设备/销毁流的11项完整像素/geometry/未写尾部/存储/真实stream独立CPU检查：PASSED | [20261111T154754.396969Z-I2-CPU-reference-7bb12136a9](evidence/rewrite/I2/Contour-state-streams-independent-CPU/20261111T154754.396969Z-I2-CPU-reference-7bb12136a9) |
 | 2026-11-11T15:53:56.008509+00:00 | I2 | Contour验收器固定47项真实输出/metadata/模式/默认路径/geometry/状态/原例stdout正反向检查：PASSED | [20261111T155352.592443Z-I2-CPU-validator-test-a2cb4cbdcd](evidence/rewrite/I2/Contour-actual-validator-mutations/20261111T155352.592443Z-I2-CPU-validator-test-a2cb4cbdcd) |
+| 2026-11-11T16:04:10.367437+00:00 | I2 | Contour干净检出/22输入重建/ABI2新HIP编译/15实际原流程及26设备数据、61参数、11状态合同冷重放：PASSED；22子记录原始bytes和source objects封存。 | [20261111T160153.636573Z-I2-host-cold-replay-a64ff41804](evidence/rewrite/I2/Contour-clean-checkout/20261111T160153.636573Z-I2-host-cold-replay-a64ff41804) |
+| 2026-11-11T16:05:03.323917+00:00 | I0 | NPP+完整unsigned/signed EDT原始CUDA入口与五张原图实际build/run rc=1；原始distance/Voronoi/16u文件封存，CPU数学比较另列。 | [20261111T160500.687139Z-I0-cuda-original-51d37205d3](evidence/rewrite/I0/NPP_-signed-unsigned-EDT-original/20261111T160500.687139Z-I0-cuda-original-51d37205d3) |
+| 2026-11-11T16:06:06.924837+00:00 | I0 | NPP+ unsigned/signed EDT原生重试：修正nvcc链接rpath传参，原始源码不变。实际build/run rc=0；初次构建错误保留，CPU比较另列。 | [20261111T160500.687139Z-I0-cuda-original-51d37205d3](evidence/rewrite/I0/NPP_-signed-unsigned-EDT-original/20261111T160500.687139Z-I0-cuda-original-51d37205d3)；[20261111T160602.357460Z-I0-cuda-original-53c8e4ee90](evidence/rewrite/I0/NPP_-signed-unsigned-EDT-original-retry/20261111T160602.357460Z-I0-cuda-original-53c8e4ee90) |
+| 2026-11-11T16:09:18.728295+00:00 | I2 | Contour32项CLI实际返回码/具体诊断/空输出/无设备mask独立验收：PASSED | [20261111T160917.840338Z-I2-CPU-reference-7f584e82b2](evidence/rewrite/I2/Contour-CLI-independent-CPU/20261111T160917.840338Z-I2-CPU-reference-7f584e82b2) |
+| 2026-11-11T16:09:33.148789+00:00 | I2 | Contour两个真实C++入口15流程/55原始文件、完整geometry与实际排序诊断/范围/bypass独立CPU验收：PASSED；尚待运行/CLI/trace/反例/冷检出/复审。 | [20261111T160919.174378Z-I2-CPU-reference-633735062b](evidence/rewrite/I2/Contour-real-C__-originals-CPU/20261111T160919.174378Z-I2-CPU-reference-633735062b) |
+| 2026-11-11T16:09:37.034761+00:00 | I2 | Contour验收器固定58项真实输出/metadata/模式/默认路径/geometry/状态/原例stdout正反向检查：PASSED | [20261111T160931.855865Z-I2-CPU-validator-test-153f7dcf0d](evidence/rewrite/I2/Contour-actual-validator-mutations/20261111T160931.855865Z-I2-CPU-validator-test-153f7dcf0d) |
+| 2026-11-11T16:10:20.485199+00:00 | I0 | NPP+ signed EDT原生小数覆盖率/真实符号/绝对与相对Voronoi逐文件分析：OBSERVED；用于固定项目算法前的语义研究，不计支持。 | [20261111T161019.497065Z-I0-CPU-research-5e08a74d22](evidence/rewrite/I0/Signed-EDT-native-fractional-output-research/20261111T161019.497065Z-I0-CPU-research-5e08a74d22) |

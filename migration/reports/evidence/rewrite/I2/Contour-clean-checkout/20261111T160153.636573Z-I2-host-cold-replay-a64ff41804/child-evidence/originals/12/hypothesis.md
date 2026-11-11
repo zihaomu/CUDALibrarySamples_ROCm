@@ -1,0 +1,1 @@
+Test rocm-original for NPP+/findContour::findContourNPPPlus.cpp, case large-multiple-ID-bypass/single-ID-override. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T160240.585801Z-I2-rocm-build-ef3ee81c3d.

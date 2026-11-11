@@ -1,0 +1,1 @@
+Test rocm-data-errors for Contour-malformed-device-geometry-errors, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T160224.168512Z-I2-rocm-build-2730f4284a.

@@ -22,11 +22,16 @@ def execute():
  return 0
 
 def validate(rows):
- rules=json.loads((ROOT/'migration/rewrite/image-contour-cli-contract.json').read_text())['cases'];expected={(r['family'],r['case']):r for r in rules}
+ rules=json.loads((ROOT/'migration/rewrite/image-contour-cli-contract.json').read_text())['cases'];expected={(r['family'],r['case']):r for r in rules};profile=json.loads((ROOT/'migration/rewrite/image-contour-profile.json').read_text());cases={c['case']:c for c in profile['cases']}
  if len(rows)!=32 or {(r['family'],r['case']) for r in rows}!=set(expected):raise ValueError('all unique fixed CLI obligations')
  results=[]
  for r in rows:
-  rule=expected[(r['family'],r['case'])];meta=json.loads((ROOT/r['evidence']/'manifest.json').read_text());raw=ROOT/meta['raw_artifact_dir'];cs=json.loads((raw/'commands.json').read_text());stdout=(raw/r['stdout']).read_text();stderr=(raw/r['stderr']).read_text();output=ROOT/r['output'];checks=[dict(check='actual-return-code',passed=r['return_code']==rule['return_code']==cs[0]['return_code']),dict(check='actual-current-binary',passed=len(cs)==1 and cs[0]['argv'][0]==str(ROOT/r['binary']['binary']))]
+  rule=expected[(r['family'],r['case'])];meta=json.loads((ROOT/r['evidence']/'manifest.json').read_text());raw=ROOT/meta['raw_artifact_dir'];cs=json.loads((raw/'commands.json').read_text());stdout=(raw/r['stdout']).read_text();stderr=(raw/r['stderr']).read_text();output=ROOT/r['output'];case=cases[rule['source_case']];w,h=case['width'],case['height'];actual_input=raw/'input.raw';actual_output=raw/'outputs';argv=[str(ROOT/r['binary']['binary']),'--input',str(actual_input),'--output-dir',str(actual_output),'--width',str(w),'--height',str(h),*rule['args']]
+  if r['case']=='help':argv=[str(ROOT/r['binary']['binary']),'--help']
+  source=np.frombuffer((ROOT/case['fixture']/'input.bin').read_bytes(),np.uint8).reshape(h,case['pitch'])[:,:w].copy().tobytes();wanted_input=source[:-1] if r['case']=='truncated-input' else source+b'\x00' if r['case']=='trailing-input' else source
+  binding=len(cs)==1 and cs[0]['argv']==argv and cs[0]['stdout']==r['stdout'] and cs[0]['stderr']==r['stderr'] and (ROOT/r['input']).resolve()==actual_input.resolve() and output.resolve()==actual_output.resolve()
+  input_ok=not actual_input.exists() if r['case']=='missing-input' else actual_input.is_file() and actual_input.read_bytes()==wanted_input
+  checks=[dict(check='actual-return-code',passed=r['return_code']==rule['return_code']==cs[0]['return_code']),dict(check='actual-complete-command-and-artifact-binding',passed=binding),dict(check='actual-frozen-original-or-malformed-input-bytes',passed=input_ok)]
   if r['case']=='help':checks.extend([dict(check='actual-help',passed='Usage:' in stdout and '--input RAW' in stdout and '--width W --height H' in stdout and (('--start-id ID' in stdout)==(r['family']=='NPP+'))),dict(check='no-error-diagnostic',passed=not stderr.strip())])
   else:checks.append(dict(check='actual-specific-error-diagnostic',passed='Contour error:' in stderr and rule['diagnostic'] in stderr))
   if r['case']=='unwritable-output':checks.append(dict(check='actual-output-directory-conflict',passed=output.is_file() and output.read_text()=='file blocks output directory'))

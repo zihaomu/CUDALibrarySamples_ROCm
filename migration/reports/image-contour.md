@@ -28,9 +28,11 @@
 | C ABI | 共享 HIP 库已构建；规模为各维1..32768且像素≤2^26，info容量≥像素数，geometry容量≥4×像素数；仅写实际前缀。ABI2 renderer先独立验证边集合完整、唯一、闭环次序和全部marker统计，再写目标；61项参数/query和26项真实畸形设备数据验收通过。[构建](image-contour-build.json) |
 | 两真实 C++ 入口 | 15个默认文件/范围/大轮廓/诊断完整流程、55个实际RAW文件和逐点stdout独立CPU验收通过。[构建](image-contour-frontends-build.json)、[逐次执行](image-contour-originals.json) |
 
-初版小图及各构建证据继续保留；最终资格只使用当前固定 source/profile 及完整输入的最新证明。已完成32项真实CLI、11项默认流/输入变化复用/并发实例/外设备及销毁stream、61项参数/query、26项设备数据合同与17图真实trace（10类关键kernel），47项验收器正反例全部通过。早期ABI1接受缺边几何的真实失败保留，不计支持。接下来进行冷检出、最终独立复审及先Git后发布。
+初版小图及各构建证据继续保留；最终资格只使用当前固定 source/profile 及完整输入的最新证明。已完成32项真实CLI、11项默认流/输入变化复用/并发实例/外设备及销毁stream、61项参数/query、26项设备数据合同与17图真实trace（10类关键kernel），58项验收器正反例全部通过。早期ABI1接受缺边几何的真实失败保留，不计支持。干净检出164538d92重新生成全部22输入、新编译ABI2和两个入口，并完成15流程/26设备数据/61参数/11状态合同的独立CPU重验，22子记录全部封存通过。复合验收预检曾只剩最终复审；预审发现CLI绑定、冷流程去重、native完整文件和frontend依赖闭包缺口后均补齐，58项反例已通过。当前正重新封存CPU证明和新冷检出，旧冷重放保留。
 
-[CLI](image-contour-cli-validation.json) · [状态/stream](image-contour-states-validation.json) · [参数](image-contour-arguments-validation.json) · [设备数据](image-contour-data-errors-validation.json) · [trace](image-contour-trace-validation.json) · [47项反例](image-contour-checks.json) · [ABI1失败](image-contour-legacy-data-error-validation.json)
+[干净检出复现](image-contour-cold.json)
+
+[CLI](image-contour-cli-validation.json) · [状态/stream](image-contour-states-validation.json) · [参数](image-contour-arguments-validation.json) · [设备数据](image-contour-data-errors-validation.json) · [trace](image-contour-trace-validation.json) · [58项反例](image-contour-checks.json) · [ABI1失败](image-contour-legacy-data-error-validation.json)
 
 ## 复现
 

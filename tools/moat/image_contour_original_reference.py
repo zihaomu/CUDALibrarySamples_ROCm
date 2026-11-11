@@ -18,7 +18,7 @@ def command_binding(r,rule,raw,meta,w,h,audit,out):
  if not rule['default_paths']:expected+=['--input',str(original_input),'--output-dir',str(original_output),'--width',str(w),'--height',str(h)]
  modes={'single-ID-override':['--start-id','1','--stop-id','2'],'all-markers':['--start-id','0','--stop-id','3'],'empty':['--start-id','2','--stop-id','2']};expected+=modes.get(rule['mode'],[])
  relocated_input=raw/original_input.relative_to(stored_raw);relocated_output=raw/original_output.relative_to(stored_raw)
- return dict(check='actual-C++-command-input-output-and-audit-binding',passed=command['return_code']==0 and command['argv']==expected and command['cwd']==str(stored_raw/'work') and (ROOT/r['input']).resolve()==relocated_input.resolve() and out.resolve()==relocated_output.resolve() and command['environment_changes']['MIGRATION_IMAGE_CONTOUR_AUDIT_DIR']==str(stored_raw/'audit') and audit.resolve()==(raw/'audit').resolve())
+ return dict(check='actual-C++-command-input-output-and-audit-binding',passed=command['return_code']==0 and command['argv']==expected and command['stdout']==r['stdout'] and command['stderr']==r['stderr'] and command['cwd']==str(stored_raw/'work') and (ROOT/r['input']).resolve()==relocated_input.resolve() and out.resolve()==relocated_output.resolve() and command['environment_changes']['MIGRATION_IMAGE_CONTOUR_AUDIT_DIR']==str(stored_raw/'audit') and audit.resolve()==(raw/'audit').resolve())
 
 def validate_one(r,rule,raw_override=None):
  if (r['family'],r['case'],r['mode'],r['fixture_case'])!=(rule['family'],rule['case'],rule['mode'],rule['source_case']) or r['return_code']!=0:raise ValueError('fixed actual original case/status')
