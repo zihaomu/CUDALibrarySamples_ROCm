@@ -2,6 +2,8 @@
 
 [返回总表](../support-log-index.md)；完整记录包括当前范围/失败原因、AMD/CUDA 日志和 CPU 验收报告。编译/import 成功不代表 GPU 数值通过；CUDA 栏标明日志属于哪次记录。
 
+新增重写实验、当前未解决语义与 SDK 能力复查见 [图像库执行记录](../image-libraries-progress.md)。下表支持结论保持已封存范围，不将候选阶段或原生 baseline 运行计作新的 AMD 整例资格。
+
 | 样例 / 详情 | 状态 / 用例 | 实际库、方式与源码 | 支持范围 / 失败原因 | AMD 详细 log | CPU 验收 / CUDA log |
 | --- | --- | --- | --- | --- | --- |
 | <a id="sample-dba24802126c"></a>[nvJPEG2000-Decoder-Pipelined/nvjpeg2k_dec_pipelined.cpp](../../sample-reports/nvJPEG2000/nvJPEG2000-Decoder-Pipelined/nvjpeg2k_dec_pipelined.cpp.md) | FAILED / L1<br>0/2 | 尚无已验证使用库<br>库 API 迁移；[实现/草稿](../../../rocm/ported/nvJPEG2000/nvJPEG2000-Decoder-Pipelined/nvjpeg2k_dec_pipelined.cpp) | build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG2000/nvJPEG2000-Decoder-Pipelined/nvjpeg2k_dec_pipelined.h:53:10: fatal error: 'nvjpeg2k.h' file not found<br>重试/扩展：提供可在锁定 AMD 环境工作的 GPU JPEG2000 codec/实现，保留原例 bit depth、batch、输出与质量要求。<br>性能：NOT_RUN<br>CUDA 对照范围：CUDA 原始 SDK、绑定或输入前置条件未满足，见该例 CUDA 基线证据。 | [build.log](../evidence/20261109T084256.329631Z/original-rocm/nvJPEG2000_nvJPEG2000-Decoder-Pipelined_nvjpeg2k_dec_pipelined.cpp/build.log)<br>[证据目录](../evidence/20261109T084256.329631Z/original-rocm/nvJPEG2000_nvJPEG2000-Decoder-Pipelined_nvjpeg2k_dec_pipelined.cpp) | [验收/缺项记录](../../sample-reports/nvJPEG2000/nvJPEG2000-Decoder-Pipelined/nvjpeg2k_dec_pipelined.cpp.md)<br>CUDA baseline = BLOCKED；comparison = BLOCKED；原始 CUDA 尝试<br>[build.log](../evidence/20261109T084857.451692Z/original-cuda/nvJPEG2000_nvJPEG2000-Decoder-Pipelined_nvjpeg2k_dec_pipelined.cpp/build.log) |

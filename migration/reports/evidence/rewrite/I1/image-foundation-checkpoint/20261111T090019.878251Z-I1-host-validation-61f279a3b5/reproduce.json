@@ -1,0 +1,91 @@
+{
+  "commands": [
+    {
+      "command_id": 1,
+      "phase": "existing-proof-and-recorder-regression",
+      "argv": [
+        "env",
+        "PYTHONPATH=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/tools/moat",
+        "/usr/bin/python3",
+        "-m",
+        "unittest",
+        "test_selected_proofs",
+        "test_experiment"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T09:00:20.498216+00:00",
+      "timeout_seconds": 600,
+      "environment": {},
+      "stdout": "logs/0001-existing-proof-and-recorder-regression.stdout.log",
+      "stderr": "logs/0001-existing-proof-and-recorder-regression.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T09:00:28.329370+00:00",
+      "seconds": 7.830697804980446
+    },
+    {
+      "command_id": 2,
+      "phase": "immutable-evidence-audit",
+      "argv": [
+        "/usr/bin/python3",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/tools/moat/audit.py"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T09:00:28.330939+00:00",
+      "timeout_seconds": 600,
+      "environment": {},
+      "stdout": "logs/0002-immutable-evidence-audit.stdout.log",
+      "stderr": "logs/0002-immutable-evidence-audit.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T09:01:03.820979+00:00",
+      "seconds": 35.489046541042626
+    },
+    {
+      "command_id": 3,
+      "phase": "originals-and-support-counts-unchanged",
+      "argv": [
+        "git",
+        "diff",
+        "--exit-code",
+        "d4046c61d598cc4aaffac0992a2768d16b60d6b8",
+        "--",
+        "NPP",
+        "NPP+",
+        "nvJPEG",
+        "nvJPEG2000",
+        "migration/samples.yaml",
+        "README.md",
+        "migration/reports/operator-support.json"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T09:01:03.823277+00:00",
+      "timeout_seconds": 600,
+      "environment": {},
+      "stdout": "logs/0003-originals-and-support-counts-unchanged.stdout.log",
+      "stderr": "logs/0003-originals-and-support-counts-unchanged.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T09:01:03.857280+00:00",
+      "seconds": 0.033051795035135
+    },
+    {
+      "command_id": 4,
+      "phase": "plan-mirror-identical",
+      "argv": [
+        "cmp",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/migration/image-libraries-plan.md",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/doc/cuda_samples_on_rocm_image_libraries_plan.md"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T09:01:03.858456+00:00",
+      "timeout_seconds": 600,
+      "environment": {},
+      "stdout": "logs/0004-plan-mirror-identical.stdout.log",
+      "stderr": "logs/0004-plan-mirror-identical.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T09:01:03.861222+00:00",
+      "seconds": 0.0022387069766409695
+    }
+  ],
+  "source": "source.json",
+  "inputs": "inputs/manifest.json",
+  "expected_environment": "environment.expected.json"
+}

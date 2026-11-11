@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "status": "REJECTED_NATIVE_MISMATCH",
+  "scope": "NPP+0.10 C1 Sobel3 L2 local threshold candidate; original whole benchmark and GPU comparison remain required",
+  "stage_contract": "image-canny-stages-contract.json",
+  "strong": "suppressed > high",
+  "weak": "suppressed >= low and at least one neighbour on the gradient has equal suppressed magnitude and the same direction bin",
+  "boundary": "For threshold neighbours, if either coordinate would leave the image, substitute the current pixel and direction; convolution and NMS retain the separately frozen stage boundary",
+  "output": "uint8 0/255, independent output pitch, padding unchanged",
+  "thresholds": "signed16 representable 0 <= low <= high <= 32767; original72/256",
+  "acceptance": "Exact all bytes CPU/native/HIP; no tolerance; no catalog promotion from this candidate alone",
+  "native_research": "migration/reports/evidence/rewrite/I0/Canny-NPPPlus-local-threshold-hypothesis/20261111T085324.544203Z-I0-CPU-research-8836b2b407",
+  "rejection": "Boundary-self hypothesis contradicted held-out native images; no production mask implementation retained.",
+  "evidence": "migration/reports/image-I0-Canny-local-model-boundary-self.json"
+}

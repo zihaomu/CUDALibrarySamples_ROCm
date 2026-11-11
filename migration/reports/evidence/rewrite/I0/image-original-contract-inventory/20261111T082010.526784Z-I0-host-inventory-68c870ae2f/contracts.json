@@ -1,0 +1,3070 @@
+{
+  "schema_version": 1,
+  "baseline_commit": "605a561e7fafc81be52a44354867c84f3078161b",
+  "current_commit": "d4046c61d598cc4aaffac0992a2768d16b60d6b8",
+  "samples": [
+    {
+      "sample_id": "NPP+/batchedLabelMarkersAndCompression::batchedLabelMarkersAndCompressionNPPPlus.cpp",
+      "source": "NPP+/batchedLabelMarkersAndCompression/batchedLabelMarkersAndCompressionNPPPlus.cpp",
+      "baseline_status": "FAILED",
+      "completion_phase": "I2",
+      "source_files": {
+        "NPP+/batchedLabelMarkersAndCompression/batchedLabelMarkersAndCompressionNPPPlus.cpp": {
+          "sha256": "27072de0ee98a324dc66c0a3be357e68dc49a0125800abfe7bc5c6e7a086e0fe",
+          "bytes": 34859
+        },
+        "NPP+/batchedLabelMarkersAndCompression/batchedLabelMarkersAndCompression.h": {
+          "sha256": "09a08d0e03ac949b1bc2e337172db7bd04e3d3607fa2f6d2b103636fe3538fe8",
+          "bytes": 2018
+        },
+        "NPP+/batchedLabelMarkersAndCompression/dirent.h": {
+          "sha256": "70676c386529e7d6e8551d045eaff46cc2a97c8d98fea05128cf36f0a856f133",
+          "bytes": 26801
+        }
+      },
+      "CLI_token_hints": [
+        "-Wunused-function",
+        "-b",
+        "-h",
+        "-help"
+      ],
+      "api_token_hints": [
+        "nppGetLibVersion",
+        "nppiCompressMarkerLabelsGetBufferSize_32u_C1R",
+        "nppiCompressMarkerLabelsUFBatch_32u_C1IR_Advanced_Ctx",
+        "nppiCompressMarkerLabelsUF_32u_C1IR_Ctx",
+        "nppiLabelMarkersUFBatch_8u32u_C1R_Advanced_Ctx",
+        "nppiLabelMarkersUFGetBufferSize_32u_C1R",
+        "nppiLabelMarkersUF_8u32u_C1R_Ctx",
+        "nppiNormInf",
+        "nppi_filtering_functions"
+      ],
+      "literal_image_paths": [
+        "CT_skull_512x512_8u.raw",
+        "CT_skull_CompressedMarkerLabelsUFBatch_8Way_512x512_32u.raw",
+        "CT_skull_CompressedMarkerLabelsUF_8Way_512x512_32u.raw",
+        "CT_skull_LabelMarkersUFBatch_8Way_512x512_32u.raw",
+        "CT_skull_LabelMarkersUF_8Way_512x512_32u.raw",
+        "Lena_CompressedMarkerLabelsUFBatch_8Way_512x512_32u.raw",
+        "Lena_CompressedMarkerLabelsUF_8Way_512x512_32u.raw",
+        "Lena_LabelMarkersUFBatch_8Way_512x512_32u.raw",
+        "Lena_LabelMarkersUF_8Way_512x512_32u.raw",
+        "PCB2_1024x683_8u.raw",
+        "PCB2_CompressedMarkerLabelsUFBatch_8Way_1024x683_32u.raw",
+        "PCB2_CompressedMarkerLabelsUF_8Way_1024x683_32u.raw",
+        "PCB2_LabelMarkersUFBatch_8Way_1024x683_32u.raw",
+        "PCB2_LabelMarkersUF_8Way_1024x683_32u.raw",
+        "PCB_1280x720_8u.raw",
+        "PCB_CompressedMarkerLabelsUFBatch_8Way_1280x720_32u.raw",
+        "PCB_CompressedMarkerLabelsUF_8Way_1280x720_32u.raw",
+        "PCB_LabelMarkersUFBatch_8Way_1280x720_32u.raw",
+        "PCB_LabelMarkersUF_8Way_1280x720_32u.raw",
+        "PCB_METAL_509x335_8u.raw",
+        "PCB_METAL_CompressedMarkerLabelsUFBatch_8Way_509x335_32u.raw",
+        "PCB_METAL_CompressedMarkerLabelsUF_8Way_509x335_32u.raw",
+        "PCB_METAL_LabelMarkersUFBatch_8Way_509x335_32u.raw",
+        "PCB_METAL_LabelMarkersUF_8Way_509x335_32u.raw",
+        "lena_512x512_8u.raw"
+      ],
+      "conditional_compilation": [
+        "#define NUMBER_OF_IMAGES 5",
+        "#ifdef CUDA11U1",
+        "#ifdef CUDA11U1",
+        "#ifndef _WIN64",
+        "#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)",
+        "#  define WINDOWS_LEAN_AND_MEAN",
+        "#  define NOMINMAX",
+        "#ifdef __unix",
+        "#define fopen_s(pFile,filename,mode) ((*(pFile))=fopen((filename),  (mode)))==NULL",
+        "#ifndef DIRENT_H",
+        "#define DIRENT_H",
+        "#if defined(__clang__)",
+        "#elif defined(_MSC_VER)",
+        "#elif defined(__GNUC__)",
+        "#ifndef WIN32_LEAN_AND_MEAN",
+        "#   define WIN32_LEAN_AND_MEAN",
+        "#define _DIRENT_HAVE_D_TYPE",
+        "#define _DIRENT_HAVE_D_NAMLEN",
+        "#if !defined(FILE_ATTRIBUTE_DEVICE)",
+        "#   define FILE_ATTRIBUTE_DEVICE 0x40",
+        "#if !defined(S_IFMT)",
+        "#   define S_IFMT _S_IFMT",
+        "#if !defined(S_IFDIR)",
+        "#   define S_IFDIR _S_IFDIR",
+        "#if !defined(S_IFCHR)",
+        "#   define S_IFCHR _S_IFCHR",
+        "#if !defined(S_IFFIFO)",
+        "#   define S_IFFIFO _S_IFFIFO",
+        "#if !defined(S_IFREG)",
+        "#   define S_IFREG _S_IFREG",
+        "#if !defined(S_IREAD)",
+        "#   define S_IREAD _S_IREAD",
+        "#if !defined(S_IWRITE)",
+        "#   define S_IWRITE _S_IWRITE",
+        "#if !defined(S_IEXEC)",
+        "#   define S_IEXEC _S_IEXEC",
+        "#if !defined(S_IFIFO)",
+        "#   define S_IFIFO _S_IFIFO",
+        "#if !defined(S_IFBLK)",
+        "#   define S_IFBLK 0",
+        "#if !defined(S_IFLNK)",
+        "#   define S_IFLNK 0",
+        "#if !defined(S_IFSOCK)",
+        "#   define S_IFSOCK 0",
+        "#if !defined(S_IRUSR)",
+        "#   define S_IRUSR S_IREAD",
+        "#if !defined(S_IWUSR)",
+        "#   define S_IWUSR S_IWRITE",
+        "#if !defined(S_IXUSR)",
+        "#   define S_IXUSR 0",
+        "#if !defined(S_IRGRP)",
+        "#   define S_IRGRP 0",
+        "#if !defined(S_IWGRP)",
+        "#   define S_IWGRP 0",
+        "#if !defined(S_IXGRP)",
+        "#   define S_IXGRP 0",
+        "#if !defined(S_IROTH)",
+        "#   define S_IROTH 0",
+        "#if !defined(S_IWOTH)",
+        "#   define S_IWOTH 0",
+        "#if !defined(S_IXOTH)",
+        "#   define S_IXOTH 0",
+        "#if !defined(PATH_MAX)",
+        "#   define PATH_MAX MAX_PATH",
+        "#if !defined(FILENAME_MAX)",
+        "#   define FILENAME_MAX MAX_PATH",
+        "#if !defined(NAME_MAX)",
+        "#   define NAME_MAX FILENAME_MAX",
+        "#define DT_UNKNOWN 0",
+        "#define DT_REG S_IFREG",
+        "#define DT_DIR S_IFDIR",
+        "#define DT_FIFO S_IFIFO",
+        "#define DT_SOCK S_IFSOCK",
+        "#define DT_CHR S_IFCHR",
+        "#define DT_BLK S_IFBLK",
+        "#define DT_LNK S_IFLNK",
+        "#define IFTODT(mode) ((mode) & S_IFMT)",
+        "#define DTTOIF(type) (type)",
+        "#if !defined(S_ISFIFO)",
+        "#   define S_ISFIFO(mode) (((mode) & S_IFMT) == S_IFIFO)",
+        "#if !defined(S_ISDIR)",
+        "#   define S_ISDIR(mode) (((mode) & S_IFMT) == S_IFDIR)",
+        "#if !defined(S_ISREG)",
+        "#   define S_ISREG(mode) (((mode) & S_IFMT) == S_IFREG)",
+        "#if !defined(S_ISLNK)",
+        "#   define S_ISLNK(mode) (((mode) & S_IFMT) == S_IFLNK)",
+        "#if !defined(S_ISSOCK)",
+        "#   define S_ISSOCK(mode) (((mode) & S_IFMT) == S_IFSOCK)",
+        "#if !defined(S_ISCHR)",
+        "#   define S_ISCHR(mode) (((mode) & S_IFMT) == S_IFCHR)",
+        "#if !defined(S_ISBLK)",
+        "#   define S_ISBLK(mode) (((mode) & S_IFMT) == S_IFBLK)",
+        "#define _D_EXACT_NAMLEN(p) ((p)->d_namlen)",
+        "#define _D_ALLOC_NAMLEN(p) ((PATH_MAX)+1)",
+        "#ifdef __cplusplus",
+        "#define wdirent _wdirent",
+        "#define WDIR _WDIR",
+        "#define wopendir _wopendir",
+        "#define wreaddir _wreaddir",
+        "#define wclosedir _wclosedir",
+        "#define wrewinddir _wrewinddir",
+        "#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)",
+        "#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)",
+        "#if defined(_MSC_VER)  &&  _MSC_VER >= 1400",
+        "#if defined(_MSC_VER)  &&  _MSC_VER >= 1400",
+        "#if defined(_MSC_VER)  &&  _MSC_VER >= 1400",
+        "#ifdef __cplusplus"
+      ],
+      "required_case_categories": [
+        "original-full-profile",
+        "irregular-dimensions",
+        "changed-input",
+        "roi-stride-padding",
+        "boundary-and-empty",
+        "repeat-concurrency",
+        "malformed-input-and-CLI",
+        "component-partition-and-label-order",
+        "mixed-size-batch",
+        "padding-and-batch-isolation"
+      ],
+      "inventory_scope": "Static hints. CLI semantic/default/error and resolved-input matrix frozen separately before qualification."
+    },
+    {
+      "sample_id": "NPP+/cannyEdgeDetectorPython::cannyEdgeDetector.py",
+      "source": "NPP+/cannyEdgeDetectorPython/cannyEdgeDetector.py",
+      "baseline_status": "FAILED",
+      "completion_phase": "I1",
+      "source_files": {
+        "NPP+/cannyEdgeDetectorPython/cannyEdgeDetector.py": {
+          "sha256": "74c58b322283e9979d26a793b915291db457f2a4c33515947e82608c4ee1fe16",
+          "bytes": 5866
+        }
+      },
+      "CLI_token_hints": [],
+      "api_token_hints": [
+        "nppiFilterCannyBorderGetBufferSize",
+        "nppiFilterCannyBorder_8u_C1R_Ctx"
+      ],
+      "literal_image_paths": [
+        "Teapot.jpg",
+        "{OUTPUT_DIR}/out_npp_{label}.png"
+      ],
+      "conditional_compilation": [],
+      "required_case_categories": [
+        "original-full-profile",
+        "irregular-dimensions",
+        "changed-input",
+        "roi-stride-padding",
+        "boundary-and-empty",
+        "repeat-concurrency",
+        "malformed-input-and-CLI",
+        "native-pixel-stage-comparison",
+        "stream-and-tensor-stride",
+        "original-CLI-and-files"
+      ],
+      "inventory_scope": "Static hints. CLI semantic/default/error and resolved-input matrix frozen separately before qualification."
+    },
+    {
+      "sample_id": "NPP+/distanceTransform::unsignedAndSignedDistanceTransformNPPPlus.cpp",
+      "source": "NPP+/distanceTransform/unsignedAndSignedDistanceTransformNPPPlus.cpp",
+      "baseline_status": "FAILED",
+      "completion_phase": "I2",
+      "source_files": {
+        "NPP+/distanceTransform/unsignedAndSignedDistanceTransformNPPPlus.cpp": {
+          "sha256": "637c42cdf9426fa8c3967d738e011c1b7689e9fecc87e9b327c5643bcc1ac7e8",
+          "bytes": 33767
+        }
+      },
+      "CLI_token_hints": [],
+      "api_token_hints": [
+        "nppGetLibVersion",
+        "nppiDistanceTransformPBAGetBufferSize",
+        "nppiDistanceTransformPBA_8u64f_C1R_Ctx",
+        "nppiSignedDistanceTransformPBAGet64fBufferSize",
+        "nppiSignedDistanceTransformPBA_32f64f_C1R_Ctx",
+        "nppiSignedDistanceTransformPBA_64f_C1R_Ctx"
+      ],
+      "literal_image_paths": [
+        "DistanceSamplerTransform_512x512_16u.raw",
+        "DistanceSamplerTransform_512x512_64f.raw",
+        "DistanceSamplerTransform_512x512_Inverted_16u.raw",
+        "DistanceSamplerTransform_512x512_Inverted_64f.raw",
+        "DistanceSampler_512x512_8u.raw",
+        "DistanceSampler_512x512_Inverted_8u.raw",
+        "SignedCircle_256x206_64f.raw",
+        "SignedCircle_256x206_Inverted_64f.raw",
+        "SignedDistanceCircleTransform_256x206_16u.raw",
+        "SignedDistanceCircleTransform_256x206_64f.raw",
+        "SignedDistanceCircleTransform_256x206_Inverted_16u.raw",
+        "SignedDistanceCircleTransform_256x206_Inverted_64f.raw",
+        "SignedDistanceLithTransformVoronoiIndices_554x554_16s.raw",
+        "SignedDistanceLithTransformVoronoiRelativeManhattan_554x554_16s.raw",
+        "SignedDistanceLithTransform_554x554_16u.raw",
+        "SignedDistanceLithTransform_554x554_64f.raw",
+        "SignedLith_554x554_32f.raw"
+      ],
+      "conditional_compilation": [
+        "#ifndef _WIN64",
+        "#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)",
+        "#  define WINDOWS_LEAN_AND_MEAN",
+        "#  define NOMINMAX",
+        "#ifdef __unix",
+        "#define fopen_s(pFile,filename,mode) ((*(pFile))=fopen((filename),  (mode)))==NULL",
+        "#define NUMBER_OF_IMAGES 2"
+      ],
+      "required_case_categories": [
+        "original-full-profile",
+        "irregular-dimensions",
+        "changed-input",
+        "roi-stride-padding",
+        "boundary-and-empty",
+        "repeat-concurrency",
+        "malformed-input-and-CLI",
+        "signed-level-set-and-Voronoi-ties",
+        "float-and-integer-type-contract",
+        "original-NPPPlus-files"
+      ],
+      "inventory_scope": "Static hints. CLI semantic/default/error and resolved-input matrix frozen separately before qualification."
+    },
+    {
+      "sample_id": "NPP+/findContour::findContourNPPPlus.cpp",
+      "source": "NPP+/findContour/findContourNPPPlus.cpp",
+      "baseline_status": "FAILED",
+      "completion_phase": "I2",
+      "source_files": {
+        "NPP+/findContour/findContourNPPPlus.cpp": {
+          "sha256": "b7bb88e00678b72b5c2ffbf9dd48e0e292b635dce4c206fd2d054b71a0daed28",
+          "bytes": 34905
+        }
+      },
+      "CLI_token_hints": [],
+      "api_token_hints": [
+        "nppGetLibVersion",
+        "nppiCompressMarkerLabelsGetBufferSize_32u_C1R",
+        "nppiCompressMarkerLabelsUF_32u_C1IR_Ctx",
+        "nppiCompressedMarkerLabelsUFContoursGenerateGeometryLists_C1R_Ctx",
+        "nppiCompressedMarkerLabelsUFContoursOutputGeometryLists_C1R",
+        "nppiCompressedMarkerLabelsUFGetContoursBlockSegmentListSize_C1R",
+        "nppiCompressedMarkerLabelsUFGetGeometryListsSize_C1R",
+        "nppiCompressedMarkerLabelsUFGetInfoListSize_32u_C1R",
+        "nppiCompressedMarkerLabelsUFInfo_32u_C1R_Ctx",
+        "nppiLabelMarkersUFGetBufferSize_32u_C1R",
+        "nppiLabelMarkersUF_8u32u_C1R_Ctx",
+        "nppiNormInf"
+      ],
+      "literal_image_paths": [
+        "CircuitBoard_2048x1024_8u.raw",
+        "CircuitBoard_CompressedMarkerLabelsUF_8Way_2048x1024_32u.raw",
+        "CircuitBoard_ContoursDirection_8Way_2048x1024_8u.raw",
+        "CircuitBoard_ContoursReconstructed_8Way_2048x1024_8u.raw",
+        "CircuitBoard_Contours_8Way_2048x1024_8u.raw",
+        "CircuitBoard_LabelMarkersUF_8Way_2048x1024_32u.raw"
+      ],
+      "conditional_compilation": [
+        "#ifndef _WIN64",
+        "#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)",
+        "#  define WINDOWS_LEAN_AND_MEAN",
+        "#  define NOMINMAX",
+        "#ifdef __unix",
+        "#define fopen_s(pFile,filename,mode) ((*(pFile))=fopen((filename),  (mode)))==NULL",
+        "#if 0",
+        "#if 0"
+      ],
+      "required_case_categories": [
+        "original-full-profile",
+        "irregular-dimensions",
+        "changed-input",
+        "roi-stride-padding",
+        "boundary-and-empty",
+        "repeat-concurrency",
+        "malformed-input-and-CLI",
+        "holes-and-open-closed-contours",
+        "direction-count-offset-and-geometry",
+        "native-output-files"
+      ],
+      "inventory_scope": "Static hints. CLI semantic/default/error and resolved-input matrix frozen separately before qualification."
+    },
+    {
+      "sample_id": "NPP+/floodFill::floodFillVariousRegionTypesNPPPlus.cpp",
+      "source": "NPP+/floodFill/floodFillVariousRegionTypesNPPPlus.cpp",
+      "baseline_status": "PARTIAL",
+      "completion_phase": "I3",
+      "source_files": {
+        "NPP+/floodFill/floodFillVariousRegionTypesNPPPlus.cpp": {
+          "sha256": "b607b3cc985c64e4504fa62a9e08f0fd296821737726f87d90d74653c683eb5c",
+          "bytes": 17911
+        }
+      },
+      "CLI_token_hints": [],
+      "api_token_hints": [
+        "nppGetLibVersion",
+        "nppiFloodFillGetBufferSize",
+        "nppiFloodFillGradientBoundary_Ctx",
+        "nppiFloodFillGradient_Ctx",
+        "nppiFloodFillRangeBoundary_Ctx",
+        "nppiFloodFillRange_Ctx",
+        "nppiFloodFill_Ctx",
+        "nppiNormInf"
+      ],
+      "literal_image_paths": [
+        "RainbowChart_RGB_C3_1024x445_8u.raw",
+        "RainbowChart_RGB_C3_Fill_8Way_1024x445_Dev_8u.raw",
+        "RainbowChart_RGB_C3_Fill_8Way_Gradient_1024x445_Dev_8u.raw",
+        "RainbowChart_RGB_C3_Fill_8Way_Gradient_Boundary_1024x445_Dev_8u.raw",
+        "SeabedSampler_RGB_C3_675x1024_8u.raw",
+        "SeabedSampler_RGB_C3_Fill_8Way_Range_675x1024_Dev_8u.raw",
+        "SeabedSampler_RGB_C3_Fill_8Way_Range_Boundary_675x1024_Dev_8u.raw"
+      ],
+      "conditional_compilation": [
+        "#ifndef _WIN64",
+        "#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)",
+        "#  define WINDOWS_LEAN_AND_MEAN",
+        "#  define NOMINMAX",
+        "#ifdef __unix",
+        "#define fopen_s(pFile,filename,mode) ((*(pFile))=fopen((filename),  (mode)))==NULL",
+        "#define NUMBER_OF_IMAGES 5"
+      ],
+      "required_case_categories": [
+        "original-full-profile",
+        "irregular-dimensions",
+        "changed-input",
+        "roi-stride-padding",
+        "boundary-and-empty",
+        "repeat-concurrency",
+        "malformed-input-and-CLI",
+        "five-comparison-and-boundary-modes",
+        "seed-paint-area-bbox-full-metadata",
+        "native-NPPPlus-comparison"
+      ],
+      "inventory_scope": "Static hints. CLI semantic/default/error and resolved-input matrix frozen separately before qualification."
+    },
+    {
+      "sample_id": "NPP+/watershedSegmentation::watershedSegmentationNPPPlus.cpp",
+      "source": "NPP+/watershedSegmentation/watershedSegmentationNPPPlus.cpp",
+      "baseline_status": "FAILED",
+      "completion_phase": "I3",
+      "source_files": {
+        "NPP+/watershedSegmentation/watershedSegmentationNPPPlus.cpp": {
+          "sha256": "da1f96daa9b45c9bc4e4bbf81545586f47adf1c9f1a2b389d163490837b8a8f5",
+          "bytes": 24801
+        },
+        "NPP+/watershedSegmentation/watershedSegmentationNPPPlus.h": {
+          "sha256": "f7d7d691663880749440a3133b020a5b94a2b722fe6e1856fb71b2c4b8533775",
+          "bytes": 2029
+        }
+      },
+      "CLI_token_hints": [],
+      "api_token_hints": [
+        "nppGetLibVersion",
+        "nppiCompressMarkerLabelsGetBufferSize_32u_C1R",
+        "nppiCompressMarkerLabelsUF_32u_C1IR_Ctx",
+        "nppiNormInf",
+        "nppiSegmentWatershedGetBufferSize_8u_C1R",
+        "nppiSegmentWatershed_8u_C1IR_Ctx"
+      ],
+      "literal_image_paths": [
+        "CT_skull_512x512_8u_Gray.raw",
+        "CT_skull_CompressedSegmentLabels_8Way_512x512_32u.raw",
+        "CT_skull_SegmentBoundaries_8Way_512x512_8u.raw",
+        "CT_skull_SegmentsWithContrastingBoundaries_8Way_512x512_8u.raw",
+        "CT_skull_Segments_8Way_512x512_8u.raw",
+        "Corn_614x461_8u_Gray.raw",
+        "Corn_CompressedSegmentLabels_8Way_614x461_32u.raw",
+        "Corn_SegmentBoundaries_8Way_614x461_8u.raw",
+        "Corn_SegmentsWithContrastingBoundaries_8Way_614x461_8u.raw",
+        "Corn_Segments_8Way_614x461_8u.raw",
+        "Rocks_512x512_8u_Gray.raw",
+        "Rocks_CompressedSegmentLabels_8Way_512x512_32u.raw",
+        "Rocks_SegmentBoundaries_8Way_512x512_8u.raw",
+        "Rocks_SegmentsWithContrastingBoundaries_8Way_512x512_8u.raw",
+        "Rocks_Segments_8Way_512x512_8u.raw"
+      ],
+      "conditional_compilation": [
+        "#define NUMBER_OF_IMAGES 3",
+        "#ifndef _WIN64",
+        "#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)",
+        "#  define WINDOWS_LEAN_AND_MEAN",
+        "#  define NOMINMAX",
+        "#ifdef __unix",
+        "#define fopen_s(pFile,filename,mode) ((*(pFile))=fopen((filename),  (mode)))==NULL"
+      ],
+      "required_case_categories": [
+        "original-full-profile",
+        "irregular-dimensions",
+        "changed-input",
+        "roi-stride-padding",
+        "boundary-and-empty",
+        "repeat-concurrency",
+        "malformed-input-and-CLI",
+        "plateau-and-boundary-strategy",
+        "all-boundary-output-modes",
+        "native-label-and-file-contract"
+      ],
+      "inventory_scope": "Static hints. CLI semantic/default/error and resolved-input matrix frozen separately before qualification."
+    },
+    {
+      "sample_id": "NPP/batchedLabelMarkersAndCompression::batchedLabelMarkersAndCompression.cpp",
+      "source": "NPP/batchedLabelMarkersAndCompression/batchedLabelMarkersAndCompression.cpp",
+      "baseline_status": "FAILED",
+      "completion_phase": "I2",
+      "source_files": {
+        "NPP/batchedLabelMarkersAndCompression/batchedLabelMarkersAndCompression.cpp": {
+          "sha256": "1785e97788c9406410dab85d2297a718761a07a678397d25341596a383d4dfa9",
+          "bytes": 36276
+        },
+        "NPP/batchedLabelMarkersAndCompression/batchedLabelMarkersAndCompression.h": {
+          "sha256": "80c7be77713d7054f74b21b03f309b26776b30928a47a80bf76ac67ff7f6e976",
+          "bytes": 2219
+        },
+        "NPP/batchedLabelMarkersAndCompression/dirent.h": {
+          "sha256": "70676c386529e7d6e8551d045eaff46cc2a97c8d98fea05128cf36f0a856f133",
+          "bytes": 26801
+        }
+      },
+      "CLI_token_hints": [
+        "-Wunused-function",
+        "-b",
+        "-h",
+        "-help"
+      ],
+      "api_token_hints": [
+        "nppGetLibVersion",
+        "nppiCompressMarkerLabelsGetBufferSize_32u_C1R",
+        "nppiCompressMarkerLabelsUFBatch_32u_C1IR_Advanced_Ctx",
+        "nppiCompressMarkerLabelsUF_32u_C1IR_Ctx",
+        "nppiLabelMarkersUFBatch_8u32u_C1R_Advanced_Ctx",
+        "nppiLabelMarkersUFGetBufferSize_32u_C1R",
+        "nppiLabelMarkersUF_8u32u_C1R_Ctx",
+        "nppiNormInf",
+        "nppiWorkspaceCreate",
+        "nppiWorkspaceDestroy",
+        "nppi_filtering_functions"
+      ],
+      "literal_image_paths": [
+        "CT_skull_512x512_8u.raw",
+        "CT_skull_CompressedMarkerLabelsUFBatch_8Way_512x512_32u.raw",
+        "CT_skull_CompressedMarkerLabelsUF_8Way_512x512_32u.raw",
+        "CT_skull_LabelMarkersUFBatch_8Way_512x512_32u.raw",
+        "CT_skull_LabelMarkersUF_8Way_512x512_32u.raw",
+        "Lena_CompressedMarkerLabelsUFBatch_8Way_512x512_32u.raw",
+        "Lena_CompressedMarkerLabelsUF_8Way_512x512_32u.raw",
+        "Lena_LabelMarkersUFBatch_8Way_512x512_32u.raw",
+        "Lena_LabelMarkersUF_8Way_512x512_32u.raw",
+        "PCB2_1024x683_8u.raw",
+        "PCB2_CompressedMarkerLabelsUFBatch_8Way_1024x683_32u.raw",
+        "PCB2_CompressedMarkerLabelsUF_8Way_1024x683_32u.raw",
+        "PCB2_LabelMarkersUFBatch_8Way_1024x683_32u.raw",
+        "PCB2_LabelMarkersUF_8Way_1024x683_32u.raw",
+        "PCB_1280x720_8u.raw",
+        "PCB_CompressedMarkerLabelsUFBatch_8Way_1280x720_32u.raw",
+        "PCB_CompressedMarkerLabelsUF_8Way_1280x720_32u.raw",
+        "PCB_LabelMarkersUFBatch_8Way_1280x720_32u.raw",
+        "PCB_LabelMarkersUF_8Way_1280x720_32u.raw",
+        "PCB_METAL_509x335_8u.raw",
+        "PCB_METAL_CompressedMarkerLabelsUFBatch_8Way_509x335_32u.raw",
+        "PCB_METAL_CompressedMarkerLabelsUF_8Way_509x335_32u.raw",
+        "PCB_METAL_LabelMarkersUFBatch_8Way_509x335_32u.raw",
+        "PCB_METAL_LabelMarkersUF_8Way_509x335_32u.raw",
+        "lena_512x512_8u.raw"
+      ],
+      "conditional_compilation": [
+        "#define NUMBER_OF_IMAGES 5",
+        "#if NPP_HAS_WORKSPACE",
+        "#if NPP_HAS_WORKSPACE",
+        "#if !NPP_HAS_WORKSPACE",
+        "#ifndef _WIN64",
+        "#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)",
+        "#  define WINDOWS_LEAN_AND_MEAN",
+        "#  define NOMINMAX",
+        "#if __has_include(<nppworkspace.h>)",
+        "#define NPP_HAS_WORKSPACE 1 // NPP 13.2.0.58 (CTK 13.4 and later)",
+        "#define NPP_HAS_WORKSPACE 0 // older NPP: the application allocates the scratch buffers",
+        "#ifdef __unix",
+        "#define fopen_s(pFile,filename,mode) ((*(pFile))=fopen((filename),  (mode)))==NULL",
+        "#ifndef DIRENT_H",
+        "#define DIRENT_H",
+        "#if defined(__clang__)",
+        "#elif defined(_MSC_VER)",
+        "#elif defined(__GNUC__)",
+        "#ifndef WIN32_LEAN_AND_MEAN",
+        "#   define WIN32_LEAN_AND_MEAN",
+        "#define _DIRENT_HAVE_D_TYPE",
+        "#define _DIRENT_HAVE_D_NAMLEN",
+        "#if !defined(FILE_ATTRIBUTE_DEVICE)",
+        "#   define FILE_ATTRIBUTE_DEVICE 0x40",
+        "#if !defined(S_IFMT)",
+        "#   define S_IFMT _S_IFMT",
+        "#if !defined(S_IFDIR)",
+        "#   define S_IFDIR _S_IFDIR",
+        "#if !defined(S_IFCHR)",
+        "#   define S_IFCHR _S_IFCHR",
+        "#if !defined(S_IFFIFO)",
+        "#   define S_IFFIFO _S_IFFIFO",
+        "#if !defined(S_IFREG)",
+        "#   define S_IFREG _S_IFREG",
+        "#if !defined(S_IREAD)",
+        "#   define S_IREAD _S_IREAD",
+        "#if !defined(S_IWRITE)",
+        "#   define S_IWRITE _S_IWRITE",
+        "#if !defined(S_IEXEC)",
+        "#   define S_IEXEC _S_IEXEC",
+        "#if !defined(S_IFIFO)",
+        "#   define S_IFIFO _S_IFIFO",
+        "#if !defined(S_IFBLK)",
+        "#   define S_IFBLK 0",
+        "#if !defined(S_IFLNK)",
+        "#   define S_IFLNK 0",
+        "#if !defined(S_IFSOCK)",
+        "#   define S_IFSOCK 0",
+        "#if !defined(S_IRUSR)",
+        "#   define S_IRUSR S_IREAD",
+        "#if !defined(S_IWUSR)",
+        "#   define S_IWUSR S_IWRITE",
+        "#if !defined(S_IXUSR)",
+        "#   define S_IXUSR 0",
+        "#if !defined(S_IRGRP)",
+        "#   define S_IRGRP 0",
+        "#if !defined(S_IWGRP)",
+        "#   define S_IWGRP 0",
+        "#if !defined(S_IXGRP)",
+        "#   define S_IXGRP 0",
+        "#if !defined(S_IROTH)",
+        "#   define S_IROTH 0",
+        "#if !defined(S_IWOTH)",
+        "#   define S_IWOTH 0",
+        "#if !defined(S_IXOTH)",
+        "#   define S_IXOTH 0",
+        "#if !defined(PATH_MAX)",
+        "#   define PATH_MAX MAX_PATH",
+        "#if !defined(FILENAME_MAX)",
+        "#   define FILENAME_MAX MAX_PATH",
+        "#if !defined(NAME_MAX)",
+        "#   define NAME_MAX FILENAME_MAX",
+        "#define DT_UNKNOWN 0",
+        "#define DT_REG S_IFREG",
+        "#define DT_DIR S_IFDIR",
+        "#define DT_FIFO S_IFIFO",
+        "#define DT_SOCK S_IFSOCK",
+        "#define DT_CHR S_IFCHR",
+        "#define DT_BLK S_IFBLK",
+        "#define DT_LNK S_IFLNK",
+        "#define IFTODT(mode) ((mode) & S_IFMT)",
+        "#define DTTOIF(type) (type)",
+        "#if !defined(S_ISFIFO)",
+        "#   define S_ISFIFO(mode) (((mode) & S_IFMT) == S_IFIFO)",
+        "#if !defined(S_ISDIR)",
+        "#   define S_ISDIR(mode) (((mode) & S_IFMT) == S_IFDIR)",
+        "#if !defined(S_ISREG)",
+        "#   define S_ISREG(mode) (((mode) & S_IFMT) == S_IFREG)",
+        "#if !defined(S_ISLNK)",
+        "#   define S_ISLNK(mode) (((mode) & S_IFMT) == S_IFLNK)",
+        "#if !defined(S_ISSOCK)",
+        "#   define S_ISSOCK(mode) (((mode) & S_IFMT) == S_IFSOCK)",
+        "#if !defined(S_ISCHR)",
+        "#   define S_ISCHR(mode) (((mode) & S_IFMT) == S_IFCHR)",
+        "#if !defined(S_ISBLK)",
+        "#   define S_ISBLK(mode) (((mode) & S_IFMT) == S_IFBLK)",
+        "#define _D_EXACT_NAMLEN(p) ((p)->d_namlen)",
+        "#define _D_ALLOC_NAMLEN(p) ((PATH_MAX)+1)",
+        "#ifdef __cplusplus",
+        "#define wdirent _wdirent",
+        "#define WDIR _WDIR",
+        "#define wopendir _wopendir",
+        "#define wreaddir _wreaddir",
+        "#define wclosedir _wclosedir",
+        "#define wrewinddir _wrewinddir",
+        "#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)",
+        "#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)",
+        "#if defined(_MSC_VER)  &&  _MSC_VER >= 1400",
+        "#if defined(_MSC_VER)  &&  _MSC_VER >= 1400",
+        "#if defined(_MSC_VER)  &&  _MSC_VER >= 1400",
+        "#ifdef __cplusplus"
+      ],
+      "required_case_categories": [
+        "original-full-profile",
+        "irregular-dimensions",
+        "changed-input",
+        "roi-stride-padding",
+        "boundary-and-empty",
+        "repeat-concurrency",
+        "malformed-input-and-CLI",
+        "component-partition-and-label-order",
+        "mixed-size-batch",
+        "padding-and-batch-isolation"
+      ],
+      "inventory_scope": "Static hints. CLI semantic/default/error and resolved-input matrix frozen separately before qualification."
+    },
+    {
+      "sample_id": "NPP/distanceTransform::distanceTransform.cpp",
+      "source": "NPP/distanceTransform/distanceTransform.cpp",
+      "baseline_status": "PASSED",
+      "completion_phase": "I9",
+      "source_files": {
+        "NPP/distanceTransform/distanceTransform.cpp": {
+          "sha256": "7e5d292f6ee99ef7afc02d9af3659d5d5538ab28915dbde015e4042acdef36d1",
+          "bytes": 25949
+        }
+      },
+      "CLI_token_hints": [],
+      "api_token_hints": [
+        "nppGetLibVersion",
+        "nppiDistanceTransformPBAGetBufferSize",
+        "nppiDistanceTransformPBA_8u16u_C1R_Ctx",
+        "nppiDistanceTransformPBA_8u32f_C1R_Ctx",
+        "nppiWorkspaceCreate",
+        "nppiWorkspaceDestroy",
+        "nppi_filtering_functions"
+      ],
+      "literal_image_paths": [
+        "DistanceTransformTrue_Dolphin1_313x317_32f.raw",
+        "DistanceTransformTrue_TestImage3_diamond_64x64_32f.raw",
+        "DistanceTransformTruncated_Dolphin1_313x317_16u.raw",
+        "DistanceTransformTruncated_TestImage3_diamond_64x64_16u.raw",
+        "DistanceTransformVoronoi_Dolphin1_626x317_16s.raw",
+        "DistanceTransformVoronoi_TestImage3_128x64_16s.raw",
+        "Dolphin1_313x317_8u.raw",
+        "TestImage3_diamond_64x64_8u.raw"
+      ],
+      "conditional_compilation": [
+        "#if __has_include(<nppworkspace.h>)",
+        "#define NPP_HAS_WORKSPACE 1 // NPP 13.2.0.58 (CTK 13.4 and later)",
+        "#define NPP_HAS_WORKSPACE 0 // older NPP: the application allocates the scratch buffers",
+        "#if NPP_HAS_WORKSPACE",
+        "#if NPP_HAS_WORKSPACE"
+      ],
+      "required_case_categories": [
+        "original-full-profile",
+        "irregular-dimensions",
+        "changed-input",
+        "roi-stride-padding",
+        "boundary-and-empty",
+        "repeat-concurrency",
+        "malformed-input-and-CLI",
+        "shared-backend-regression",
+        "same-original-files-and-output-contract"
+      ],
+      "inventory_scope": "Static hints. CLI semantic/default/error and resolved-input matrix frozen separately before qualification."
+    },
+    {
+      "sample_id": "NPP/findContour::findContour.cpp",
+      "source": "NPP/findContour/findContour.cpp",
+      "baseline_status": "FAILED",
+      "completion_phase": "I2",
+      "source_files": {
+        "NPP/findContour/findContour.cpp": {
+          "sha256": "2c8e6ed514f58258b3482cf58adf91a48cbccd17fbebc7680f0e90ba286d1680",
+          "bytes": 7895
+        }
+      },
+      "CLI_token_hints": [],
+      "api_token_hints": [
+        "nppiCompressMarkerLabelsGetBufferSize_32u_C1R",
+        "nppiCompressMarkerLabelsUF_32u_C1IR_Ctx",
+        "nppiCompressedMarkerLabelsUFGetInfoListSize_32u_C1R",
+        "nppiCompressedMarkerLabelsUFInfo_32u_C1R_Ctx",
+        "nppiLabelMarkersUFGetBufferSize_32u_C1R",
+        "nppiLabelMarkersUF_8u32u_C1R_Ctx",
+        "nppiNormInf",
+        "nppiWorkspaceCreate",
+        "nppiWorkspaceDestroy"
+      ],
+      "literal_image_paths": [
+        "images/CircuitBoard_2048x1024_8u.raw",
+        "images/CircuitBoard_CompressedMarkerLabelsUF_8Way_2048x1024_32u.raw",
+        "images/CircuitBoard_ContoursReconstructed_8Way_2048x1024_8u.raw",
+        "images/CircuitBoard_Contours_8Way_2048x1024_8u.raw",
+        "images/CircuitBoard_LabelMarkersUF_8Way_2048x1024_32u.raw"
+      ],
+      "conditional_compilation": [
+        "#if __has_include(<nppworkspace.h>)",
+        "#define NPP_HAS_WORKSPACE 1 // NPP 13.2.0.58 (CTK 13.4 and later)",
+        "#define NPP_HAS_WORKSPACE 0 // older NPP: the application allocates the scratch buffers",
+        "#ifdef _WIN32",
+        "#define WINDOWS_LEAN_AND_MEAN",
+        "#define NOMINMAX",
+        "#if NPP_HAS_WORKSPACE",
+        "#if !NPP_HAS_WORKSPACE",
+        "#if NPP_HAS_WORKSPACE"
+      ],
+      "required_case_categories": [
+        "original-full-profile",
+        "irregular-dimensions",
+        "changed-input",
+        "roi-stride-padding",
+        "boundary-and-empty",
+        "repeat-concurrency",
+        "malformed-input-and-CLI",
+        "holes-and-open-closed-contours",
+        "direction-count-offset-and-geometry",
+        "native-output-files"
+      ],
+      "inventory_scope": "Static hints. CLI semantic/default/error and resolved-input matrix frozen separately before qualification."
+    },
+    {
+      "sample_id": "NPP/houghLines::houghLines.cpp",
+      "source": "NPP/houghLines/houghLines.cpp",
+      "baseline_status": "FAILED",
+      "completion_phase": "I3",
+      "source_files": {
+        "NPP/houghLines/houghLines.cpp": {
+          "sha256": "2433c9caa3838ee4f32d31f3e1d1930c1b1b9add72883335c64928ba3e7d7b50",
+          "bytes": 13672
+        }
+      },
+      "CLI_token_hints": [
+        "-ch",
+        "-cl",
+        "-h",
+        "-i",
+        "-m",
+        "-n",
+        "-nppiFilterCannyBorder_8u_C1R_Ctx--",
+        "-nppiFilterHoughLine_8u32f_C1R_Ctx--",
+        "-t",
+        "-w"
+      ],
+      "api_token_hints": [
+        "nppiFilterCannyBorderGetBufferSize",
+        "nppiFilterCannyBorder_8u_C1R_Ctx",
+        "nppiFilterHoughLineGetBufferSize",
+        "nppiFilterHoughLine_8u32f_C1R_Ctx",
+        "nppiNormL2"
+      ],
+      "literal_image_paths": [
+        "hough_result.ppm"
+      ],
+      "conditional_compilation": [
+        "#define CHECK_CUDA(call)                                                                      \\",
+        "#define CHECK_NPP(call)                                                                       \\"
+      ],
+      "required_case_categories": [
+        "original-full-profile",
+        "irregular-dimensions",
+        "changed-input",
+        "roi-stride-padding",
+        "boundary-and-empty",
+        "repeat-concurrency",
+        "malformed-input-and-CLI",
+        "rho-theta-votes-and-ties",
+        "empty-maxlines-and-order",
+        "original-image-and-line-overlay"
+      ],
+      "inventory_scope": "Static hints. CLI semantic/default/error and resolved-input matrix frozen separately before qualification."
+    },
+    {
+      "sample_id": "NPP/nppCanny::npp_canny_simple.cpp",
+      "source": "NPP/nppCanny/npp_canny_simple.cpp",
+      "baseline_status": "PARTIAL",
+      "completion_phase": "I1",
+      "source_files": {
+        "NPP/nppCanny/npp_canny_simple.cpp": {
+          "sha256": "baf56fa10d093239368ac3feb40874b3d76f9a9d97824697ea8851d196a68eb4",
+          "bytes": 9692
+        }
+      },
+      "CLI_token_hints": [
+        "-build",
+        "-config"
+      ],
+      "api_token_hints": [
+        "nppiFilterCannyBorderGetBufferSize",
+        "nppiFilterCannyBorder_8u_C3C1R_Ctx",
+        "nppiNormL2",
+        "nppiWorkspaceCreate",
+        "nppiWorkspaceDestroy"
+      ],
+      "literal_image_paths": [
+        "\\nSaved: edges_npp.png, edges_opencv_gray.png, edges_opencv_3ch.png",
+        "edges_npp.png",
+        "edges_opencv_3ch.png",
+        "edges_opencv_gray.png",
+        "image.jpg"
+      ],
+      "conditional_compilation": [
+        "#if __has_include(<nppworkspace.h>)",
+        "#define NPP_HAS_WORKSPACE 1 // NPP 13.2.0.58 (CTK 13.4 and later)",
+        "#define NPP_HAS_WORKSPACE 0 // older NPP: the application allocates the scratch buffers",
+        "#define CHECK_CUDA(call) \\",
+        "#define CHECK_NPP(call) \\",
+        "#if NPP_HAS_WORKSPACE",
+        "#if NPP_HAS_WORKSPACE"
+      ],
+      "required_case_categories": [
+        "original-full-profile",
+        "irregular-dimensions",
+        "changed-input",
+        "roi-stride-padding",
+        "boundary-and-empty",
+        "repeat-concurrency",
+        "malformed-input-and-CLI",
+        "native-pixel-stage-comparison",
+        "stream-and-tensor-stride",
+        "original-CLI-and-files"
+      ],
+      "inventory_scope": "Static hints. CLI semantic/default/error and resolved-input matrix frozen separately before qualification."
+    },
+    {
+      "sample_id": "NPP/nppCanny::npp_canny_simple.py",
+      "source": "NPP/nppCanny/npp_canny_simple.py",
+      "baseline_status": "FAILED",
+      "completion_phase": "I1",
+      "source_files": {
+        "NPP/nppCanny/npp_canny_simple.py": {
+          "sha256": "2234be4a8099a7fcc45b5174bd10e2eb9716c5692d47ae3a065b92728881be87",
+          "bytes": 8395
+        }
+      },
+      "CLI_token_hints": [],
+      "api_token_hints": [
+        "nppiFilterCannyBorderGetBufferSize",
+        "nppiFilterCannyBorder_8u_C3C1R_Ctx",
+        "nppif64_13"
+      ],
+      "literal_image_paths": [
+        "\\nSaved: edges_npp.png, edges_opencv_gray.png, edges_opencv_3ch.png",
+        "edges_npp.png",
+        "edges_opencv_3ch.png",
+        "edges_opencv_gray.png",
+        "image.jpg"
+      ],
+      "conditional_compilation": [],
+      "required_case_categories": [
+        "original-full-profile",
+        "irregular-dimensions",
+        "changed-input",
+        "roi-stride-padding",
+        "boundary-and-empty",
+        "repeat-concurrency",
+        "malformed-input-and-CLI",
+        "native-pixel-stage-comparison",
+        "stream-and-tensor-stride",
+        "original-CLI-and-files"
+      ],
+      "inventory_scope": "Static hints. CLI semantic/default/error and resolved-input matrix frozen separately before qualification."
+    },
+    {
+      "sample_id": "NPP/opencvBenchmark::opencvBenchmark.cpp",
+      "source": "NPP/opencvBenchmark/opencvBenchmark.cpp",
+      "baseline_status": "FAILED",
+      "completion_phase": "I3",
+      "source_files": {
+        "NPP/opencvBenchmark/opencvBenchmark.cpp": {
+          "sha256": "0332d73b327bbf76726b6eb13e38bbf68110baff7f923f328dbaabbca54fb30e",
+          "bytes": 14409
+        }
+      },
+      "CLI_token_hints": [
+        "-h",
+        "-i",
+        "-n",
+        "-w"
+      ],
+      "api_token_hints": [
+        "nppiFilterCannyBorderGetBufferSize",
+        "nppiFilterCannyBorder_8u_C1R_Ctx",
+        "nppiFilterGaussBorder_8u_C1R_Ctx",
+        "nppiNormL2",
+        "nppiRGBToGray_8u_C3C1R_Ctx",
+        "nppiResize_8u_C1R_Ctx",
+        "nppiWorkspaceCreate",
+        "nppiWorkspaceDestroy"
+      ],
+      "literal_image_paths": [
+        "../images/CircuitBoard_2048x1024_8u.raw"
+      ],
+      "conditional_compilation": [
+        "#if __has_include(<nppworkspace.h>)",
+        "#define NPP_HAS_WORKSPACE 1 // NPP 13.2.0.58 (CTK 13.4 and later)",
+        "#define NPP_HAS_WORKSPACE 0 // older NPP: the application allocates the scratch buffers",
+        "#define CHECK_CUDA(call)                                                                      \\",
+        "#define CHECK_NPP(call)                                                                       \\",
+        "#if NPP_HAS_WORKSPACE",
+        "#if !NPP_HAS_WORKSPACE",
+        "#if NPP_HAS_WORKSPACE"
+      ],
+      "required_case_categories": [
+        "original-full-profile",
+        "irregular-dimensions",
+        "changed-input",
+        "roi-stride-padding",
+        "boundary-and-empty",
+        "repeat-concurrency",
+        "malformed-input-and-CLI",
+        "all-four-operation-outputs",
+        "CPU-single-and-multi-thread-branches",
+        "warmup-iterations-and-finite-positive-timing"
+      ],
+      "inventory_scope": "Static hints. CLI semantic/default/error and resolved-input matrix frozen separately before qualification."
+    },
+    {
+      "sample_id": "NPP/templateMatching::templateMatching.cpp",
+      "source": "NPP/templateMatching/templateMatching.cpp",
+      "baseline_status": "PASSED",
+      "completion_phase": "I9",
+      "source_files": {
+        "NPP/templateMatching/templateMatching.cpp": {
+          "sha256": "812ed394222f764ce9fb4ec0cac1c5d0cad6f1620cc15a367dc1be9ce92c2cfb",
+          "bytes": 13298
+        }
+      },
+      "CLI_token_hints": [
+        "-g",
+        "-i",
+        "-n",
+        "-noise",
+        "-o",
+        "-th",
+        "-tw",
+        "-x",
+        "-y"
+      ],
+      "api_token_hints": [
+        "nppiCrossCorrValid_NormLevel_8u32f_C1R_Ctx",
+        "nppiMaxIndxGetBufferHostSize_32f_C1R_Ctx",
+        "nppiMaxIndx_32f_C1R_Ctx",
+        "nppiValidNormLevelGetBufferHostSize_8u32f_C1R_Ctx"
+      ],
+      "literal_image_paths": [
+        "../images/CircuitBoard_2048x1024_8u.raw",
+        "match_result.pgm"
+      ],
+      "conditional_compilation": [
+        "#define CHECK_CUDA(call)                                                                      \\",
+        "#define CHECK_NPP(call)                                                                       \\"
+      ],
+      "required_case_categories": [
+        "original-full-profile",
+        "irregular-dimensions",
+        "changed-input",
+        "roi-stride-padding",
+        "boundary-and-empty",
+        "repeat-concurrency",
+        "malformed-input-and-CLI",
+        "shared-backend-regression",
+        "same-original-files-and-output-contract"
+      ],
+      "inventory_scope": "Static hints. CLI semantic/default/error and resolved-input matrix frozen separately before qualification."
+    },
+    {
+      "sample_id": "NPP/watershedSegmentation::watershedSegmentation.cpp",
+      "source": "NPP/watershedSegmentation/watershedSegmentation.cpp",
+      "baseline_status": "FAILED",
+      "completion_phase": "I3",
+      "source_files": {
+        "NPP/watershedSegmentation/watershedSegmentation.cpp": {
+          "sha256": "7beb7bf2489f0126934b08c13618dd3908a0bb627a02bd510d4112a6f9c9791d",
+          "bytes": 5512
+        },
+        "NPP/watershedSegmentation/watershedSegmentation.h": {
+          "sha256": "cd89ff891fd176aff8a2371eed7ba478f7ae46ff9349db056b63ff8a28f90721",
+          "bytes": 1995
+        }
+      },
+      "CLI_token_hints": [],
+      "api_token_hints": [
+        "nppiNormInf",
+        "nppiSegmentWatershedGetBufferSize_8u_C1R",
+        "nppiSegmentWatershed_8u_C1IR_Ctx",
+        "nppiWorkspaceCreate",
+        "nppiWorkspaceDestroy"
+      ],
+      "literal_image_paths": [
+        "CT_skull_512x512_8u_Gray.raw",
+        "Lena_512x512_8u_Gray.raw",
+        "Rocks_512x512_8u_Gray.raw",
+        "coins_500x383_8u_Gray.raw",
+        "coins_overlay_500x569_8u_Gray.raw"
+      ],
+      "conditional_compilation": [
+        "#if __has_include(<nppworkspace.h>)",
+        "#define NPP_HAS_WORKSPACE 1 // NPP 13.2.0.58 (CTK 13.4 and later)",
+        "#define NPP_HAS_WORKSPACE 0 // older NPP: the application allocates the scratch buffers",
+        "#define NUM_IMAGES 5",
+        "#if NPP_HAS_WORKSPACE",
+        "#if !NPP_HAS_WORKSPACE",
+        "#if NPP_HAS_WORKSPACE",
+        "#ifndef _WIN64",
+        "#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)",
+        "#  define WINDOWS_LEAN_AND_MEAN",
+        "#  define NOMINMAX",
+        "#ifdef __unix",
+        "#define fopen_s(pFile,filename,mode) ((*(pFile))=fopen((filename),  (mode)))==NULL"
+      ],
+      "required_case_categories": [
+        "original-full-profile",
+        "irregular-dimensions",
+        "changed-input",
+        "roi-stride-padding",
+        "boundary-and-empty",
+        "repeat-concurrency",
+        "malformed-input-and-CLI",
+        "plateau-and-boundary-strategy",
+        "all-boundary-output-modes",
+        "native-label-and-file-contract"
+      ],
+      "inventory_scope": "Static hints. CLI semantic/default/error and resolved-input matrix frozen separately before qualification."
+    },
+    {
+      "sample_id": "nvJPEG/Image-Resize-WaterMark::imageResizeWatermark.cpp",
+      "source": "nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp",
+      "baseline_status": "PARTIAL",
+      "completion_phase": "I5",
+      "source_files": {
+        "nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp": {
+          "sha256": "e4f336ff2598fdcc5d0899d168eaf7785ed4b277fb494cd6f23960d181fe405b",
+          "bytes": 21806
+        },
+        "nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.h": {
+          "sha256": "72a1f51cb8b8ad21c7f90be3c56ff2072968345b9cb0c0a62287a73b43662210",
+          "bytes": 7820
+        }
+      },
+      "CLI_token_hints": [
+        "-h",
+        "-help",
+        "-i",
+        "-o",
+        "-p",
+        "-q",
+        "-rh",
+        "-rw"
+      ],
+      "api_token_hints": [
+        "nppiAlphaCompC_8u_C1R_Ctx",
+        "nppiAlphaCompC_8u_C3R_Ctx",
+        "nppiResize_8u_C1R_Ctx",
+        "nppiResize_8u_C3R_Ctx",
+        "nppi_arithmetic_and_logical_operations",
+        "nppi_geometry_transforms",
+        "nvjpegBackend_t",
+        "nvjpegChromaSubsampling_t",
+        "nvjpegCreate",
+        "nvjpegDecode",
+        "nvjpegDecodeParamsCreate",
+        "nvjpegDecodeParamsDestroy",
+        "nvjpegDecodeParams_t",
+        "nvjpegDestroy",
+        "nvjpegDevAllocator_t",
+        "nvjpegEncodeImage",
+        "nvjpegEncodeRetrieveBitstream",
+        "nvjpegEncoderParamsCopyMetadata",
+        "nvjpegEncoderParamsCopyQuantizationTables",
+        "nvjpegEncoderParamsCreate",
+        "nvjpegEncoderParamsDestroy",
+        "nvjpegEncoderParamsSetEncoding",
+        "nvjpegEncoderParamsSetOptimizedHuffman",
+        "nvjpegEncoderParamsSetQuality",
+        "nvjpegEncoderParamsSetSamplingFactors",
+        "nvjpegEncoderParams_t",
+        "nvjpegEncoderStateCreate",
+        "nvjpegEncoderStateDestroy",
+        "nvjpegEncoderState_t",
+        "nvjpegGetImageInfo",
+        "nvjpegHandle_t",
+        "nvjpegImage_t",
+        "nvjpegInputFormat_t",
+        "nvjpegJpegEncoding_t",
+        "nvjpegJpegStateCreate",
+        "nvjpegJpegStateDestroy",
+        "nvjpegJpegState_t",
+        "nvjpegJpegStreamCreate",
+        "nvjpegJpegStreamGetJpegEncoding",
+        "nvjpegJpegStreamParse",
+        "nvjpegJpegStream_t",
+        "nvjpegOutputFormat_t",
+        "nvjpegStatus_t",
+        "nvjpeg_decode_params",
+        "nvjpeg_decoder_state",
+        "nvjpeg_encode_params",
+        "nvjpeg_encoder_state",
+        "nvjpeg_encoding",
+        "nvjpeg_handle",
+        "nvjpeg_jpeg_stream"
+      ],
+      "literal_image_paths": [
+        "NVLogo.jpg"
+      ],
+      "conditional_compilation": [
+        "#define ALPHA_BLEND 50",
+        "#ifndef _WIN64",
+        "#ifdef OPTIMIZED_HUFFMAN  // Optimized Huffman",
+        "#if !defined(_WIN32)",
+        "#ifndef _WIN64",
+        "#define CHECK_CUDA(call)                                                        \\",
+        "#define CHECK_NVJPEG(call)                                                      \\",
+        "#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)"
+      ],
+      "required_case_categories": [
+        "original-full-profile",
+        "irregular-dimensions",
+        "changed-input",
+        "roi-stride-padding",
+        "boundary-and-empty",
+        "repeat-concurrency",
+        "malformed-input-and-CLI",
+        "quality-subsampling-and-Huffman",
+        "bitstream-cross-decode-and-markers",
+        "no-CPU-encoder-fallback",
+        "metadata-and-quantization-copy",
+        "preserve-source-encoding-including-progressive-encode"
+      ],
+      "inventory_scope": "Static hints. CLI semantic/default/error and resolved-input matrix frozen separately before qualification."
+    },
+    {
+      "sample_id": "nvJPEG/Image-Resize::imageResize.cpp",
+      "source": "nvJPEG/Image-Resize/imageResize.cpp",
+      "baseline_status": "PARTIAL",
+      "completion_phase": "I5",
+      "source_files": {
+        "nvJPEG/Image-Resize/imageResize.cpp": {
+          "sha256": "2fe18e4c075972ba4612b3fcf71d37baffb47c14ebe952f79b527846603b6ca1",
+          "bytes": 16465
+        },
+        "nvJPEG/Image-Resize/imageResize.h": {
+          "sha256": "814bf442159c191415b09646c3e50a564744b8e586a635812220d18e6a70fe64",
+          "bytes": 7768
+        }
+      },
+      "CLI_token_hints": [
+        "-h",
+        "-help",
+        "-i",
+        "-o",
+        "-p",
+        "-q",
+        "-rh",
+        "-rw"
+      ],
+      "api_token_hints": [
+        "nppiResize_8u_C1R_Ctx",
+        "nppiResize_8u_C3R_Ctx",
+        "nppi_geometry_transforms",
+        "nvjpegBackend_t",
+        "nvjpegChromaSubsampling_t",
+        "nvjpegCreate",
+        "nvjpegDecode",
+        "nvjpegDecodeParamsCreate",
+        "nvjpegDecodeParamsDestroy",
+        "nvjpegDecodeParams_t",
+        "nvjpegDestroy",
+        "nvjpegDevAllocator_t",
+        "nvjpegEncodeImage",
+        "nvjpegEncodeRetrieveBitstream",
+        "nvjpegEncoderParamsCopyMetadata",
+        "nvjpegEncoderParamsCopyQuantizationTables",
+        "nvjpegEncoderParamsCreate",
+        "nvjpegEncoderParamsDestroy",
+        "nvjpegEncoderParamsSetEncoding",
+        "nvjpegEncoderParamsSetOptimizedHuffman",
+        "nvjpegEncoderParamsSetQuality",
+        "nvjpegEncoderParamsSetSamplingFactors",
+        "nvjpegEncoderParams_t",
+        "nvjpegEncoderStateCreate",
+        "nvjpegEncoderStateDestroy",
+        "nvjpegEncoderState_t",
+        "nvjpegGetImageInfo",
+        "nvjpegHandle_t",
+        "nvjpegImage_t",
+        "nvjpegInputFormat_t",
+        "nvjpegJpegEncoding_t",
+        "nvjpegJpegStateCreate",
+        "nvjpegJpegStateDestroy",
+        "nvjpegJpegState_t",
+        "nvjpegJpegStreamCreate",
+        "nvjpegJpegStreamGetJpegEncoding",
+        "nvjpegJpegStreamParse",
+        "nvjpegJpegStream_t",
+        "nvjpegOutputFormat_t",
+        "nvjpegStatus_t",
+        "nvjpeg_decode_params",
+        "nvjpeg_decoder_state",
+        "nvjpeg_encode_params",
+        "nvjpeg_encoder_state",
+        "nvjpeg_encoding",
+        "nvjpeg_handle",
+        "nvjpeg_jpeg_stream"
+      ],
+      "literal_image_paths": [],
+      "conditional_compilation": [
+        "#ifdef CUDA10U2 // This part needs CUDA 10.1 Update 2 for copy the metadata other information from base image.",
+        "#ifndef _WIN64",
+        "#ifdef OPTIMIZED_HUFFMAN  // Optimized Huffman",
+        "#ifdef CUDA10U2 // This part needs CUDA 10.1 Update 2",
+        "#ifdef CUDA10U2 // This part needs CUDA 10.1 Update 2 for copy the metadata other information from base image.",
+        "#if !defined(_WIN32)",
+        "#ifndef _WIN64",
+        "#define CHECK_CUDA(call)                                                        \\",
+        "#define CHECK_NVJPEG(call)                                                      \\",
+        "#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)"
+      ],
+      "required_case_categories": [
+        "original-full-profile",
+        "irregular-dimensions",
+        "changed-input",
+        "roi-stride-padding",
+        "boundary-and-empty",
+        "repeat-concurrency",
+        "malformed-input-and-CLI",
+        "quality-subsampling-and-Huffman",
+        "bitstream-cross-decode-and-markers",
+        "no-CPU-encoder-fallback",
+        "metadata-and-quantization-copy",
+        "preserve-source-encoding-including-progressive-encode"
+      ],
+      "inventory_scope": "Static hints. CLI semantic/default/error and resolved-input matrix frozen separately before qualification."
+    },
+    {
+      "sample_id": "nvJPEG/nvJPEG-Decoder-Backend-ROI::nvJPEGROIDecode.cpp",
+      "source": "nvJPEG/nvJPEG-Decoder-Backend-ROI/nvJPEGROIDecode.cpp",
+      "baseline_status": "PARTIAL",
+      "completion_phase": "I4",
+      "source_files": {
+        "nvJPEG/nvJPEG-Decoder-Backend-ROI/nvJPEGROIDecode.cpp": {
+          "sha256": "47fa1a5507565755fbc431714c54f1db61727eba775c064ef2b6f69df4516166",
+          "bytes": 21193
+        },
+        "nvJPEG/nvJPEG-Decoder-Backend-ROI/nvJPEGROIDecode.h": {
+          "sha256": "cfea23df049861dfd9f5d7d8fe98919b889361b8b329ac15cc0c385ced73adcb",
+          "bytes": 23415
+        },
+        "nvJPEG/nvJPEG-Decoder-Backend-ROI/threadpool.h": {
+          "sha256": "30dc27872f3214aa7d7efaff5b38e63887bd024dd9c2d9e3ffd5cab5a57bd13f",
+          "bytes": 3770
+        }
+      },
+      "CLI_token_hints": [
+        "-b",
+        "-backend",
+        "-batched",
+        "-fmt",
+        "-h",
+        "-help",
+        "-i",
+        "-j",
+        "-o",
+        "-pipelined",
+        "-roi",
+        "-t",
+        "-w"
+      ],
+      "api_token_hints": [
+        "nvjpegBufferDeviceCreate",
+        "nvjpegBufferDeviceDestroy",
+        "nvjpegBufferDevice_t",
+        "nvjpegBufferPinnedCreate",
+        "nvjpegBufferPinnedDestroy",
+        "nvjpegBufferPinned_t",
+        "nvjpegChromaSubsampling_t",
+        "nvjpegCreateEx",
+        "nvjpegDecodeJpegDevice",
+        "nvjpegDecodeJpegHost",
+        "nvjpegDecodeJpegTransferToDevice",
+        "nvjpegDecodeParamsCreate",
+        "nvjpegDecodeParamsDestroy",
+        "nvjpegDecodeParamsSetOutputFormat",
+        "nvjpegDecodeParamsSetROI",
+        "nvjpegDecodeParams_t",
+        "nvjpegDecoderCreate",
+        "nvjpegDecoderDestroy",
+        "nvjpegDecoderStateCreate",
+        "nvjpegDestroy",
+        "nvjpegDevAllocator_t",
+        "nvjpegGetImageInfo",
+        "nvjpegHandle_t",
+        "nvjpegImage_t",
+        "nvjpegJpegDecoder_t",
+        "nvjpegJpegStateDestroy",
+        "nvjpegJpegState_t",
+        "nvjpegJpegStreamCreate",
+        "nvjpegJpegStreamDestroy",
+        "nvjpegJpegStreamGetChromaSubsampling",
+        "nvjpegJpegStreamGetFrameDimensions",
+        "nvjpegJpegStreamParse",
+        "nvjpegJpegStream_t",
+        "nvjpegOutputFormat_t",
+        "nvjpegPinnedAllocator_t",
+        "nvjpegStateAttachDeviceBuffer",
+        "nvjpegStateAttachPinnedBuffer",
+        "nvjpegStatus_t",
+        "nvjpeg_data",
+        "nvjpeg_dec_cpu",
+        "nvjpeg_dec_gpu",
+        "nvjpeg_decode_params",
+        "nvjpeg_handle",
+        "nvjpeg_per_thread_data"
+      ],
+      "literal_image_paths": [],
+      "conditional_compilation": [
+        "#ifndef _WIN64",
+        "#define CHECK_CUDA(call)                                                        \\",
+        "#define CHECK_NVJPEG(call)                                                      \\",
+        "#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)"
+      ],
+      "required_case_categories": [
+        "original-full-profile",
+        "irregular-dimensions",
+        "changed-input",
+        "roi-stride-padding",
+        "boundary-and-empty",
+        "repeat-concurrency",
+        "malformed-input-and-CLI",
+        "baseline-and-progressive-all-scans",
+        "format-ROI-scale-and-batch-tail",
+        "no-CPU-full-codec-fallback",
+        "multi-instance-state-and-original-CLI"
+      ],
+      "inventory_scope": "Static hints. CLI semantic/default/error and resolved-input matrix frozen separately before qualification."
+    },
+    {
+      "sample_id": "nvJPEG/nvJPEG-Decoder-MultipleInstances::nvJPEGDecMultipleInstances.cpp",
+      "source": "nvJPEG/nvJPEG-Decoder-MultipleInstances/nvJPEGDecMultipleInstances.cpp",
+      "baseline_status": "PARTIAL",
+      "completion_phase": "I4",
+      "source_files": {
+        "nvJPEG/nvJPEG-Decoder-MultipleInstances/nvJPEGDecMultipleInstances.cpp": {
+          "sha256": "a86d7317b33a3a667f3b9b502f7bf289e86d0204625d091bed623df56377fa30",
+          "bytes": 40045
+        }
+      },
+      "CLI_token_hints": [
+        "-b",
+        "-h",
+        "-i",
+        "-j",
+        "-n",
+        "-o",
+        "-r",
+        "-s"
+      ],
+      "api_token_hints": [
+        "nvjpegBackend_t",
+        "nvjpegBufferDeviceCreate",
+        "nvjpegBufferDeviceDestroy",
+        "nvjpegBufferDevice_t",
+        "nvjpegBufferPinnedCreate",
+        "nvjpegBufferPinnedDestroy",
+        "nvjpegBufferPinned_t",
+        "nvjpegChromaSubsampling_t",
+        "nvjpegCreateSimple",
+        "nvjpegDecodeJpegDevice",
+        "nvjpegDecodeJpegHost",
+        "nvjpegDecodeJpegTransferToDevice",
+        "nvjpegDecodeParamsCreate",
+        "nvjpegDecodeParamsDestroy",
+        "nvjpegDecodeParamsSetOutputFormat",
+        "nvjpegDecodeParams_t",
+        "nvjpegDecoderCreate",
+        "nvjpegDecoderDestroy",
+        "nvjpegDecoderStateCreate",
+        "nvjpegDestroy",
+        "nvjpegGetHardwareDecoderInfo",
+        "nvjpegGetImageInfo",
+        "nvjpegHandle_t",
+        "nvjpegImage_t",
+        "nvjpegJpegDecoder_t",
+        "nvjpegJpegEncoding_t",
+        "nvjpegJpegStateDestroy",
+        "nvjpegJpegState_t",
+        "nvjpegJpegStreamCreate",
+        "nvjpegJpegStreamDestroy",
+        "nvjpegJpegStreamGetChromaSubsampling",
+        "nvjpegJpegStreamGetJpegEncoding",
+        "nvjpegJpegStreamParse",
+        "nvjpegJpegStream_t",
+        "nvjpegOutputFormat_t",
+        "nvjpegSetDeviceMemoryPadding",
+        "nvjpegSetPinnedMemoryPadding",
+        "nvjpegStateAttachDeviceBuffer",
+        "nvjpegStateAttachPinnedBuffer",
+        "nvjpegStatus_t"
+      ],
+      "literal_image_paths": [],
+      "conditional_compilation": [
+        "#define CHECK_CUDA(call) \\",
+        "#define CHECK_NVJPEG(call) \\",
+        "#define CHECK(condition, message) \\"
+      ],
+      "required_case_categories": [
+        "original-full-profile",
+        "irregular-dimensions",
+        "changed-input",
+        "roi-stride-padding",
+        "boundary-and-empty",
+        "repeat-concurrency",
+        "malformed-input-and-CLI",
+        "baseline-and-progressive-all-scans",
+        "format-ROI-scale-and-batch-tail",
+        "no-CPU-full-codec-fallback",
+        "multi-instance-state-and-original-CLI"
+      ],
+      "inventory_scope": "Static hints. CLI semantic/default/error and resolved-input matrix frozen separately before qualification."
+    },
+    {
+      "sample_id": "nvJPEG/nvJPEG-Decoder/tests::test_decoder.py",
+      "source": "nvJPEG/nvJPEG-Decoder/tests/test_decoder.py",
+      "baseline_status": "PARTIAL",
+      "completion_phase": "I4",
+      "source_files": {
+        "nvJPEG/nvJPEG-Decoder/tests/test_decoder.py": {
+          "sha256": "b430c3b46f5698b0e54aa4b23ed80c165371f4fdc02d132c6d75a7701264ca33",
+          "bytes": 8629
+        }
+      },
+      "CLI_token_hints": [
+        "-b",
+        "-backend",
+        "-bad",
+        "-device",
+        "-fmt",
+        "-h",
+        "-i",
+        "-o",
+        "-raw",
+        "-reference",
+        "-scale",
+        "-t",
+        "-w"
+      ],
+      "api_token_hints": [
+        "nvjpegDecoder"
+      ],
+      "literal_image_paths": [
+        "*.raw",
+        "420.jpg",
+        "420.jpg.nv12.s2.raw",
+        "420.jpg.yuv.s1.raw",
+        "422.jpg",
+        "444.jpg",
+        "a_baseline.bmp",
+        "a_baseline.jpg",
+        "bad.jpg",
+        "gray.jpg",
+        "missing.jpg",
+        "progressive.jpg",
+        "z_progressive.bmp",
+        "z_progressive.jpg",
+        "{name}.{fmt}.s{scale}.raw"
+      ],
+      "conditional_compilation": [],
+      "required_case_categories": [
+        "original-full-profile",
+        "irregular-dimensions",
+        "changed-input",
+        "roi-stride-padding",
+        "boundary-and-empty",
+        "repeat-concurrency",
+        "malformed-input-and-CLI",
+        "baseline-and-progressive-all-scans",
+        "format-ROI-scale-and-batch-tail",
+        "no-CPU-full-codec-fallback",
+        "real-Python-decoder-tests"
+      ],
+      "inventory_scope": "Static hints. CLI semantic/default/error and resolved-input matrix frozen separately before qualification."
+    },
+    {
+      "sample_id": "nvJPEG/nvJPEG-Decoder::nvjpegDecoder.cpp",
+      "source": "nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp",
+      "baseline_status": "PARTIAL",
+      "completion_phase": "I4",
+      "source_files": {
+        "nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp": {
+          "sha256": "6f39206e88ab6d10d43a06bd766166ccca415e42bafe911b03192da47b63b36d",
+          "bytes": 20822
+        },
+        "nvJPEG/nvJPEG-Decoder/nvjpegDecoder.h": {
+          "sha256": "986ba11d551ea92b65cf2fb9ccb1511353b2dd4194f738b95b08b8e0aba001f3",
+          "bytes": 23902
+        }
+      },
+      "CLI_token_hints": [
+        "-b",
+        "-backend",
+        "-batched",
+        "-device",
+        "-fmt",
+        "-h",
+        "-help",
+        "-i",
+        "-o",
+        "-pipelined",
+        "-raw",
+        "-reference",
+        "-scale",
+        "-t",
+        "-w"
+      ],
+      "api_token_hints": [
+        "nvjpegBufferDeviceCreate",
+        "nvjpegBufferDeviceDestroy",
+        "nvjpegBufferDevice_t",
+        "nvjpegBufferPinnedCreate",
+        "nvjpegBufferPinnedDestroy",
+        "nvjpegBufferPinned_t",
+        "nvjpegChromaSubsampling_t",
+        "nvjpegCreateEx",
+        "nvjpegDecodeBatched",
+        "nvjpegDecodeBatchedInitialize",
+        "nvjpegDecodeBatchedSupported",
+        "nvjpegDecodeJpeg",
+        "nvjpegDecodeJpegDevice",
+        "nvjpegDecodeJpegHost",
+        "nvjpegDecodeJpegTransferToDevice",
+        "nvjpegDecodeParamsCreate",
+        "nvjpegDecodeParamsDestroy",
+        "nvjpegDecodeParamsSetOutputFormat",
+        "nvjpegDecodeParamsSetScaleFactor",
+        "nvjpegDecodeParams_t",
+        "nvjpegDecoder",
+        "nvjpegDecoderCreate",
+        "nvjpegDecoderDestroy",
+        "nvjpegDecoderJpegSupported",
+        "nvjpegDecoderStateCreate",
+        "nvjpegDestroy",
+        "nvjpegDevAllocator_t",
+        "nvjpegGetImageInfo",
+        "nvjpegHandle_t",
+        "nvjpegImage_t",
+        "nvjpegJpegDecoder_t",
+        "nvjpegJpegStateCreate",
+        "nvjpegJpegStateDestroy",
+        "nvjpegJpegState_t",
+        "nvjpegJpegStreamCreate",
+        "nvjpegJpegStreamDestroy",
+        "nvjpegJpegStreamParse",
+        "nvjpegJpegStreamParseHeader",
+        "nvjpegJpegStream_t",
+        "nvjpegOutputFormat_t",
+        "nvjpegPinnedAllocator_t",
+        "nvjpegScaleFactor_t",
+        "nvjpegStateAttachDeviceBuffer",
+        "nvjpegStateAttachPinnedBuffer",
+        "nvjpegStatus_t",
+        "nvjpeg_decode_params",
+        "nvjpeg_decoder",
+        "nvjpeg_decoupled_state",
+        "nvjpeg_handle",
+        "nvjpeg_state"
+      ],
+      "literal_image_paths": [],
+      "conditional_compilation": [
+        "#ifndef _WIN64",
+        "#define CHECK_CUDA(call)                                                        \\",
+        "#define CHECK_NVJPEG(call)                                                      \\",
+        "#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)"
+      ],
+      "required_case_categories": [
+        "original-full-profile",
+        "irregular-dimensions",
+        "changed-input",
+        "roi-stride-padding",
+        "boundary-and-empty",
+        "repeat-concurrency",
+        "malformed-input-and-CLI",
+        "baseline-and-progressive-all-scans",
+        "format-ROI-scale-and-batch-tail",
+        "no-CPU-full-codec-fallback",
+        "multi-instance-state-and-original-CLI"
+      ],
+      "inventory_scope": "Static hints. CLI semantic/default/error and resolved-input matrix frozen separately before qualification."
+    },
+    {
+      "sample_id": "nvJPEG/nvJPEG-Encoder-MultipleInstances::nvJPEGEncMultipleInstances.cpp",
+      "source": "nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp",
+      "baseline_status": "FAILED",
+      "completion_phase": "I5",
+      "source_files": {
+        "nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp": {
+          "sha256": "f417be2a36bed75baea893712db616416ea748157406dc489ffdf323b9fe8d7e",
+          "bytes": 37221
+        }
+      },
+      "CLI_token_hints": [
+        "-b",
+        "-bit",
+        "-d",
+        "-f",
+        "-h",
+        "-i",
+        "-j",
+        "-n",
+        "-o",
+        "-p",
+        "-q",
+        "-r",
+        "-s"
+      ],
+      "api_token_hints": [
+        "nvjpegChromaSubsampling_t",
+        "nvjpegCreateSimple",
+        "nvjpegDestroy",
+        "nvjpegEncBackend_t",
+        "nvjpegEncode",
+        "nvjpegEncodeRetrieveBitstream",
+        "nvjpegEncoderParamsCreate",
+        "nvjpegEncoderParamsDestroy",
+        "nvjpegEncoderParamsSetEncoding",
+        "nvjpegEncoderParamsSetOptimizedHuffman",
+        "nvjpegEncoderParamsSetQuality",
+        "nvjpegEncoderParamsSetSamplingFactors",
+        "nvjpegEncoderParams_t",
+        "nvjpegEncoderStateCreateWithBackend",
+        "nvjpegEncoderStateDestroy",
+        "nvjpegEncoderState_t",
+        "nvjpegGetHardwareEncoderInfo",
+        "nvjpegHandle_t",
+        "nvjpegImage_t",
+        "nvjpegSetDeviceMemoryPadding",
+        "nvjpegStatus_t"
+      ],
+      "literal_image_paths": [],
+      "conditional_compilation": [
+        "#define CHECK_CUDA(call) \\",
+        "#define CHECK_NVJPEG(call) \\",
+        "#define CHECK(condition, message) \\"
+      ],
+      "required_case_categories": [
+        "original-full-profile",
+        "irregular-dimensions",
+        "changed-input",
+        "roi-stride-padding",
+        "boundary-and-empty",
+        "repeat-concurrency",
+        "malformed-input-and-CLI",
+        "quality-subsampling-and-Huffman",
+        "bitstream-cross-decode-and-markers",
+        "no-CPU-encoder-fallback",
+        "slots-state-lifetime-and-backend-capabilities"
+      ],
+      "inventory_scope": "Static hints. CLI semantic/default/error and resolved-input matrix frozen separately before qualification."
+    },
+    {
+      "sample_id": "nvJPEG2000/nvJPEG2000-Decoder-Pipelined::nvjpeg2k_dec_pipelined.cpp",
+      "source": "nvJPEG2000/nvJPEG2000-Decoder-Pipelined/nvjpeg2k_dec_pipelined.cpp",
+      "baseline_status": "FAILED",
+      "completion_phase": "I8",
+      "source_files": {
+        "nvJPEG2000/nvJPEG2000-Decoder-Pipelined/nvjpeg2k_dec_pipelined.cpp": {
+          "sha256": "30d7d62a812a7a90db2743a087202e3e623f8da03614492d371d73e8a70dff7c",
+          "bytes": 22694
+        },
+        "nvJPEG2000/nvJPEG2000-Decoder-Pipelined/nvjpeg2k_dec_pipelined.h": {
+          "sha256": "4130fdddbfc1324a10fa37e9822bbf5e49d1099c74aa5b2f0257f021e272d28c",
+          "bytes": 25824
+        }
+      },
+      "CLI_token_hints": [
+        "-b",
+        "-h",
+        "-help",
+        "-i",
+        "-o",
+        "-t",
+        "-v",
+        "-w"
+      ],
+      "api_token_hints": [
+        "nvjpeg2k",
+        "nvjpeg2kCreate",
+        "nvjpeg2kDecodeImage",
+        "nvjpeg2kDecodeParamsCreate",
+        "nvjpeg2kDecodeParamsDestroy",
+        "nvjpeg2kDecodeParamsSetRGBOutput",
+        "nvjpeg2kDecodeParams_t",
+        "nvjpeg2kDecodeStateCreate",
+        "nvjpeg2kDecodeStateDestroy",
+        "nvjpeg2kDecodeState_t",
+        "nvjpeg2kDestroy",
+        "nvjpeg2kDeviceAllocator_t",
+        "nvjpeg2kHandle_t",
+        "nvjpeg2kImageComponentInfo_t",
+        "nvjpeg2kImageInfo_t",
+        "nvjpeg2kImageSample",
+        "nvjpeg2kImageSample_t",
+        "nvjpeg2kImageType_t",
+        "nvjpeg2kImage_t",
+        "nvjpeg2kNLTInfo_t",
+        "nvjpeg2kPinnedAllocator_t",
+        "nvjpeg2kStatus_t",
+        "nvjpeg2kStreamCreate",
+        "nvjpeg2kStreamDestroy",
+        "nvjpeg2kStreamGetComponentNLTInfo",
+        "nvjpeg2kStreamGetImageComponentInfo",
+        "nvjpeg2kStreamGetImageInfo",
+        "nvjpeg2kStreamParse",
+        "nvjpeg2kStream_t",
+        "nvjpeg2k_dec_pipelined",
+        "nvjpeg2k_decode_states",
+        "nvjpeg2k_handle",
+        "nvjpeg2k_output"
+      ],
+      "literal_image_paths": [
+        "and NLT type 3 images as .pfm",
+        "uncompressed size > 4GB. Writing it as .ppm"
+      ],
+      "conditional_compilation": [
+        "#if NVJPEG2K_HAS_NLT3_DECODE",
+        "#if NVJPEG2K_HAS_NLT3_DECODE",
+        "#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)",
+        "#ifndef NOMINMAX",
+        "#define NOMINMAX // keep windows.h from defining min and max macros",
+        "#if (NVJPEG2K_VER_MAJOR > 0) || (NVJPEG2K_VER_MAJOR == 0 && NVJPEG2K_VER_MINOR >= 11)",
+        "#define NVJPEG2K_HAS_NLT3_DECODE 1",
+        "#define NVJPEG2K_HAS_NLT3_DECODE 0",
+        "#define CHECK_CUDA(call)                                                                                          \\",
+        "#define CHECK_NVJPEG2K(call)                                                                                \\",
+        "#define EXIT_INVALID_ARGUMENTS 2 // the command line is invalid",
+        "#define EXIT_MISSING_INPUT 3     // the input path does not exist, or none of its files can be read",
+        "#define EXIT_NO_IMAGES 4         // the input directory holds no files",
+        "#define EXIT_UNSUPPORTED 5       // a valid input image that this sample or library version cannot handle",
+        "#define EXIT_DECODE_FAILURE 6    // an input file could not be decoded, or its output written",
+        "#if NVJPEG2K_HAS_NLT3_DECODE",
+        "#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)",
+        "#if NVJPEG2K_HAS_NLT3_DECODE",
+        "#define CLAMP_PIXEL(x,a,b) ((x) < (a) ? (a) : ((x) > (b) ? (b) : (x)))"
+      ],
+      "required_case_categories": [
+        "original-full-profile",
+        "irregular-dimensions",
+        "changed-input",
+        "roi-stride-padding",
+        "boundary-and-empty",
+        "repeat-concurrency",
+        "malformed-input-and-CLI",
+        "classic-and-HTJ2K",
+        "bit-depth-sign-and-components",
+        "NLT3-FP16-FP32-conditional-surface",
+        "lossless-exact-or-lossy-quality",
+        "cross-decode-native-CPU-and-AMD",
+        "real-overlap-and-event-dependencies",
+        "slot-tail-and-error-propagation"
+      ],
+      "inventory_scope": "Static hints. CLI semantic/default/error and resolved-input matrix frozen separately before qualification."
+    },
+    {
+      "sample_id": "nvJPEG2000/nvJPEG2000-Decoder-Tile-Partial::nvjpeg2k_decode_tile_partial.cpp",
+      "source": "nvJPEG2000/nvJPEG2000-Decoder-Tile-Partial/nvjpeg2k_decode_tile_partial.cpp",
+      "baseline_status": "FAILED",
+      "completion_phase": "I8",
+      "source_files": {
+        "nvJPEG2000/nvJPEG2000-Decoder-Tile-Partial/nvjpeg2k_decode_tile_partial.cpp": {
+          "sha256": "713e948bd6439e72c857d32b3f582970bce746df175845157f5b9e55731eb646",
+          "bytes": 33382
+        },
+        "nvJPEG2000/nvJPEG2000-Decoder-Tile-Partial/nvjpeg2k_decode_tile_partial.h": {
+          "sha256": "d82b09234b997fd868bb7e3a0105397ec78bc6e4bdadf607bf51e01bcf9f3cf6",
+          "bytes": 25919
+        }
+      },
+      "CLI_token_hints": [
+        "-b",
+        "-da",
+        "-h",
+        "-help",
+        "-i",
+        "-o",
+        "-t",
+        "-v",
+        "-w"
+      ],
+      "api_token_hints": [
+        "nvjpeg2k",
+        "nvjpeg2kCreate",
+        "nvjpeg2kDecodeParamsCreate",
+        "nvjpeg2kDecodeParamsDestroy",
+        "nvjpeg2kDecodeParamsSetDecodeArea",
+        "nvjpeg2kDecodeParamsSetRGBOutput",
+        "nvjpeg2kDecodeParams_t",
+        "nvjpeg2kDecodeStateCreate",
+        "nvjpeg2kDecodeStateDestroy",
+        "nvjpeg2kDecodeState_t",
+        "nvjpeg2kDecodeTile",
+        "nvjpeg2kDestroy",
+        "nvjpeg2kDeviceAllocator_t",
+        "nvjpeg2kHandle_t",
+        "nvjpeg2kImageComponentInfo_t",
+        "nvjpeg2kImageInfo_t",
+        "nvjpeg2kImageSample",
+        "nvjpeg2kImageSample_t",
+        "nvjpeg2kImageType_t",
+        "nvjpeg2kImage_t",
+        "nvjpeg2kNLTInfo_t",
+        "nvjpeg2kPinnedAllocator_t",
+        "nvjpeg2kStatus_t",
+        "nvjpeg2kStreamCreate",
+        "nvjpeg2kStreamDestroy",
+        "nvjpeg2kStreamGetComponentNLTInfo",
+        "nvjpeg2kStreamGetImageComponentInfo",
+        "nvjpeg2kStreamGetImageInfo",
+        "nvjpeg2kStreamParse",
+        "nvjpeg2kStream_t",
+        "nvjpeg2k_decode_states",
+        "nvjpeg2k_decode_tile_partial",
+        "nvjpeg2k_handle",
+        "nvjpeg2k_out"
+      ],
+      "literal_image_paths": [
+        "and NLT type 3 images as .pfm",
+        "uncompressed size > 4GB. Writing it as .ppm"
+      ],
+      "conditional_compilation": [
+        "#if NVJPEG2K_HAS_NLT3_DECODE",
+        "#if NVJPEG2K_HAS_NLT3_DECODE",
+        "#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)",
+        "#ifndef NOMINMAX",
+        "#define NOMINMAX // keep windows.h from defining min and max macros",
+        "#if (NVJPEG2K_VER_MAJOR > 0) || (NVJPEG2K_VER_MAJOR == 0 && NVJPEG2K_VER_MINOR >= 11)",
+        "#define NVJPEG2K_HAS_NLT3_DECODE 1",
+        "#define NVJPEG2K_HAS_NLT3_DECODE 0",
+        "#define CHECK_CUDA(call)                                                                                          \\",
+        "#define CHECK_NVJPEG2K(call)                                                                                \\",
+        "#define EXIT_INVALID_ARGUMENTS 2 // the command line is invalid",
+        "#define EXIT_MISSING_INPUT 3     // the input path does not exist, or none of its files can be read",
+        "#define EXIT_NO_IMAGES 4         // the input directory holds no files",
+        "#define EXIT_UNSUPPORTED 5       // a valid input image that this sample or library version cannot handle",
+        "#define EXIT_DECODE_FAILURE 6    // an input file could not be decoded, or its output written",
+        "#if NVJPEG2K_HAS_NLT3_DECODE",
+        "#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)",
+        "#if NVJPEG2K_HAS_NLT3_DECODE",
+        "#define CLAMP_PIXEL(x,a,b) ((x) < (a) ? (a) : ((x) > (b) ? (b) : (x)))"
+      ],
+      "required_case_categories": [
+        "original-full-profile",
+        "irregular-dimensions",
+        "changed-input",
+        "roi-stride-padding",
+        "boundary-and-empty",
+        "repeat-concurrency",
+        "malformed-input-and-CLI",
+        "classic-and-HTJ2K",
+        "bit-depth-sign-and-components",
+        "NLT3-FP16-FP32-conditional-surface",
+        "lossless-exact-or-lossy-quality",
+        "cross-decode-native-CPU-and-AMD",
+        "actual-selective-tile-codeblock-work",
+        "decode-area-and-component-origin"
+      ],
+      "inventory_scope": "Static hints. CLI semantic/default/error and resolved-input matrix frozen separately before qualification."
+    },
+    {
+      "sample_id": "nvJPEG2000/nvJPEG2000-Decoder::nvjpeg2k_decode.cpp",
+      "source": "nvJPEG2000/nvJPEG2000-Decoder/nvjpeg2k_decode.cpp",
+      "baseline_status": "FAILED",
+      "completion_phase": "I8",
+      "source_files": {
+        "nvJPEG2000/nvJPEG2000-Decoder/nvjpeg2k_decode.cpp": {
+          "sha256": "06beb1ffb836585b92d1cbdef8ab8b5724d063dadc9902424cefd5ec5753b754",
+          "bytes": 22198
+        },
+        "nvJPEG2000/nvJPEG2000-Decoder/nvjpeg2k_decode.h": {
+          "sha256": "9fd70e11ed60b4c541443963a7ab6aaced8312b8e2a445f16a6a29949b72a860",
+          "bytes": 25105
+        }
+      },
+      "CLI_token_hints": [
+        "-b",
+        "-h",
+        "-help",
+        "-i",
+        "-o",
+        "-rgb_output",
+        "-t",
+        "-v",
+        "-w"
+      ],
+      "api_token_hints": [
+        "nvjpeg2k",
+        "nvjpeg2kCreate",
+        "nvjpeg2kDecodeImage",
+        "nvjpeg2kDecodeParamsCreate",
+        "nvjpeg2kDecodeParamsDestroy",
+        "nvjpeg2kDecodeParamsSetRGBOutput",
+        "nvjpeg2kDecodeParams_t",
+        "nvjpeg2kDecodeStateCreate",
+        "nvjpeg2kDecodeStateDestroy",
+        "nvjpeg2kDecodeState_t",
+        "nvjpeg2kDestroy",
+        "nvjpeg2kDeviceAllocator_t",
+        "nvjpeg2kHandle_t",
+        "nvjpeg2kImageComponentInfo_t",
+        "nvjpeg2kImageInfo_t",
+        "nvjpeg2kImageType_t",
+        "nvjpeg2kImage_t",
+        "nvjpeg2kNLTInfo_t",
+        "nvjpeg2kPinnedAllocator_t",
+        "nvjpeg2kStatus_t",
+        "nvjpeg2kStreamCreate",
+        "nvjpeg2kStreamDestroy",
+        "nvjpeg2kStreamGetComponentNLTInfo",
+        "nvjpeg2kStreamGetImageComponentInfo",
+        "nvjpeg2kStreamGetImageInfo",
+        "nvjpeg2kStreamParse",
+        "nvjpeg2kStream_t",
+        "nvjpeg2k_decode",
+        "nvjpeg2k_decode_state",
+        "nvjpeg2k_handle"
+      ],
+      "literal_image_paths": [
+        "\\t\\t\\t\\tand NLT type 3 images as .pfm",
+        "and NLT type 3 images as .pfm",
+        "uncompressed size > 4GB. Writing it as .ppm"
+      ],
+      "conditional_compilation": [
+        "#if (NVJPEG2K_VER_MAJOR == 0 && NVJPEG2K_VER_MINOR >= 3)",
+        "#if NVJPEG2K_HAS_NLT3_DECODE",
+        "#if NVJPEG2K_HAS_NLT3_DECODE",
+        "#if NVJPEG2K_HAS_NLT3_DECODE",
+        "#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)",
+        "#ifndef NOMINMAX",
+        "#define NOMINMAX // keep windows.h from defining min and max macros",
+        "#if (NVJPEG2K_VER_MAJOR > 0) || (NVJPEG2K_VER_MAJOR == 0 && NVJPEG2K_VER_MINOR >= 11)",
+        "#define NVJPEG2K_HAS_NLT3_DECODE 1",
+        "#define NVJPEG2K_HAS_NLT3_DECODE 0",
+        "#define CHECK_CUDA(call)                                                                                          \\",
+        "#define CHECK_NVJPEG2K(call)                                                                                \\",
+        "#define EXIT_INVALID_ARGUMENTS 2 // the command line is invalid",
+        "#define EXIT_MISSING_INPUT 3     // the input path does not exist, or none of its files can be read",
+        "#define EXIT_NO_IMAGES 4         // the input directory holds no files",
+        "#define EXIT_UNSUPPORTED 5       // a valid input image that this sample or library version cannot handle",
+        "#define EXIT_DECODE_FAILURE 6    // an input file could not be decoded, or its output written",
+        "#if NVJPEG2K_HAS_NLT3_DECODE",
+        "#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)",
+        "#if NVJPEG2K_HAS_NLT3_DECODE",
+        "#define CLAMP_PIXEL(x,a,b) ((x) < (a) ? (a) : ((x) > (b) ? (b) : (x)))"
+      ],
+      "required_case_categories": [
+        "original-full-profile",
+        "irregular-dimensions",
+        "changed-input",
+        "roi-stride-padding",
+        "boundary-and-empty",
+        "repeat-concurrency",
+        "malformed-input-and-CLI",
+        "classic-and-HTJ2K",
+        "bit-depth-sign-and-components",
+        "NLT3-FP16-FP32-conditional-surface",
+        "lossless-exact-or-lossy-quality",
+        "cross-decode-native-CPU-and-AMD"
+      ],
+      "inventory_scope": "Static hints. CLI semantic/default/error and resolved-input matrix frozen separately before qualification."
+    },
+    {
+      "sample_id": "nvJPEG2000/nvJPEG2000-Encoder::nvjpeg2k_encode.cpp",
+      "source": "nvJPEG2000/nvJPEG2000-Encoder/nvjpeg2k_encode.cpp",
+      "baseline_status": "FAILED",
+      "completion_phase": "I8",
+      "source_files": {
+        "nvJPEG2000/nvJPEG2000-Encoder/nvjpeg2k_encode.cpp": {
+          "sha256": "ec7e0563b4496f9908abe1c42a33fa655a9ee1ded88b818970c6e703d17170f6",
+          "bytes": 45115
+        },
+        "nvJPEG2000/nvJPEG2000-Encoder/nvjpeg2k_encode.h": {
+          "sha256": "7d90d58df95c7e323191e8b208c791d26c213babc784bcc297c0c8fa5b8f1fd3",
+          "bytes": 15584
+        }
+      },
+      "CLI_token_hints": [
+        "-I",
+        "-b",
+        "-cblk",
+        "-h",
+        "-help",
+        "-ht",
+        "-i",
+        "-img_fmt",
+        "-o",
+        "-pfm_precision",
+        "-psnr",
+        "-q_factor",
+        "-quantization",
+        "-t",
+        "-w"
+      ],
+      "api_token_hints": [
+        "nvjpeg2k",
+        "nvjpeg2kColorSpace_t",
+        "nvjpeg2kEncode",
+        "nvjpeg2kEncodeConfig_t",
+        "nvjpeg2kEncodeParamsCreate",
+        "nvjpeg2kEncodeParamsDestroy",
+        "nvjpeg2kEncodeParamsSetEncodeConfig",
+        "nvjpeg2kEncodeParamsSetNLTInfo",
+        "nvjpeg2kEncodeParamsSpecifyQuality",
+        "nvjpeg2kEncodeParams_t",
+        "nvjpeg2kEncodeRetrieveBitstream",
+        "nvjpeg2kEncodeStateCreate",
+        "nvjpeg2kEncodeStateDestroy",
+        "nvjpeg2kEncodeState_t",
+        "nvjpeg2kEncoderCreateSimple",
+        "nvjpeg2kEncoderDestroy",
+        "nvjpeg2kEncoder_t",
+        "nvjpeg2kImageComponentInfo_t",
+        "nvjpeg2kImageInfo_t",
+        "nvjpeg2kImageType_t",
+        "nvjpeg2kImage_t",
+        "nvjpeg2kNLTInfo_t",
+        "nvjpeg2kQualityType_t",
+        "nvjpeg2kStatus_t",
+        "nvjpeg2k_comp_info",
+        "nvjpeg2k_encode",
+        "nvjpeg2k_img",
+        "nvjpeg2k_info"
+      ],
+      "literal_image_paths": [],
+      "conditional_compilation": [
+        "#if NVJPEG2K_HAS_NLT3_ENCODE",
+        "#if NVJPEG2K_HAS_NLT3_ENCODE",
+        "#if NVJPEG2K_HAS_NLT3_ENCODE",
+        "#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)",
+        "#if (NVJPEG2K_VER_MAJOR > 0) || (NVJPEG2K_VER_MAJOR == 0 && NVJPEG2K_VER_MINOR >= 11)",
+        "#define NVJPEG2K_HAS_NLT3_ENCODE 1",
+        "#define NVJPEG2K_HAS_NLT3_ENCODE 0",
+        "#define CHECK_CUDA(call)                                                                                          \\",
+        "#define CHECK_NVJPEG2K(call)                                                                                \\",
+        "#define EXIT_INVALID_ARGUMENTS 2 // the command line is invalid, or does not suit the input image",
+        "#define EXIT_MISSING_INPUT 3     // the input path does not exist, or none of its files can be read",
+        "#define EXIT_NO_IMAGES 4         // the input directory holds no files",
+        "#define EXIT_UNSUPPORTED 5       // a valid input image that this sample or library version cannot handle",
+        "#define EXIT_ENCODE_FAILURE 6    // an input image could not be read or encoded, or its output written",
+        "#if NVJPEG2K_HAS_NLT3_ENCODE",
+        "#if defined(_WIN32)"
+      ],
+      "required_case_categories": [
+        "original-full-profile",
+        "irregular-dimensions",
+        "changed-input",
+        "roi-stride-padding",
+        "boundary-and-empty",
+        "repeat-concurrency",
+        "malformed-input-and-CLI",
+        "classic-and-HTJ2K",
+        "bit-depth-sign-and-components",
+        "NLT3-FP16-FP32-conditional-surface",
+        "lossless-exact-or-lossy-quality",
+        "cross-decode-native-CPU-and-AMD",
+        "all-source-quality-enums",
+        "all-source-codeblock-sizes-including-128x32",
+        "PFM-YUV-BMP-PNM-inputs-and-invalid-combinations"
+      ],
+      "inventory_scope": "Static hints. CLI semantic/default/error and resolved-input matrix frozen separately before qualification."
+    }
+  ],
+  "repository_assets": {
+    "NPP/batchedLabelMarkersAndCompression/images/CT_skull_512x512_8u.raw": {
+      "sha256": "13a71ba09bc16fe42e20353c08ca094605dc8091d0fa29de8afcd35ade080940",
+      "bytes": 262144,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/batchedLabelMarkersAndCompression/images/CT_skull_CompressedMarkerLabelsUF_8Way_512x512_32u.raw": {
+      "sha256": "01fa4577a6e7ec8edfa24b9b2b0e1e9d7126ac095d6f6d4f0059ae898dbd43fb",
+      "bytes": 1048576,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/batchedLabelMarkersAndCompression/images/CT_skull_LabelMarkersUFBatch_8Way_512x512_32u.raw": {
+      "sha256": "ba2d2368156b7a6344fe484178a457f2402e3868fbd9ecd9696fcc66b1b67f2e",
+      "bytes": 1048576,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/batchedLabelMarkersAndCompression/images/CT_skull_LabelMarkersUF_8Way_512x512_32u.raw": {
+      "sha256": "38e3bc40baac305479143c671b507827aa1e56043c411d22fbe784aa70d48f60",
+      "bytes": 1048576,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/batchedLabelMarkersAndCompression/images/Lena_CompressedMarkerLabelsUF_8Way_512x512_32u.raw": {
+      "sha256": "048c2669997792d0ba400cb770060124b3b581299e5d30fccaf3ce748bbbd64b",
+      "bytes": 1048576,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/batchedLabelMarkersAndCompression/images/Lena_LabelMarkersUFBatch_8Way_512x512_32u.raw": {
+      "sha256": "14ca013cd679d1e559aef2e82286a2d15c557a221b31684c2ceac9577f501007",
+      "bytes": 1048576,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/batchedLabelMarkersAndCompression/images/Lena_LabelMarkersUF_8Way_512x512_32u.raw": {
+      "sha256": "fef421babc529db73b6efa6e4481cde9136e00e80804c3b2a0336cbe4fcd7013",
+      "bytes": 1048576,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/batchedLabelMarkersAndCompression/images/PCB2_1024x683_8u.raw": {
+      "sha256": "17fe6f2101336af677b0ac28a79bf1e6e85183038e2f2b181d2e433dab5e406c",
+      "bytes": 699392,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/batchedLabelMarkersAndCompression/images/PCB2_CompressedMarkerLabelsUF_8Way_1024x683_32u.raw": {
+      "sha256": "7226b6a2dbd904f08bb34208cdc08ad191b34226651916954605561e394f5402",
+      "bytes": 2797568,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/batchedLabelMarkersAndCompression/images/PCB2_LabelMarkersUFBatch_8Way_1024x683_32u.raw": {
+      "sha256": "6cee715f3cc0a10386705dff6aadd05fff68f2b35ba321359805309e62c19a68",
+      "bytes": 2797568,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/batchedLabelMarkersAndCompression/images/PCB2_LabelMarkersUF_8Way_1024x683_32u.raw": {
+      "sha256": "adc804afba6033fdc6a0eeca93a86650c547acb277e88cd86268146ef4a4d592",
+      "bytes": 2797568,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/batchedLabelMarkersAndCompression/images/PCB_1280x720_8u.raw": {
+      "sha256": "b3b869c6a101643e5d68c215201e94757e2573838772d723f6f17a77ebf6c29d",
+      "bytes": 921600,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/batchedLabelMarkersAndCompression/images/PCB_CompressedMarkerLabelsUF_8Way_1280x720_32u.raw": {
+      "sha256": "817d8b9cff83be4af6a670f6224b388f131ba1fec4e42e6cb72adb9e62aa3305",
+      "bytes": 3686400,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/batchedLabelMarkersAndCompression/images/PCB_LabelMarkersUFBatch_8Way_1280x720_32u.raw": {
+      "sha256": "def931f035e504f2d5116fdd6ff083a8959ed5e0f8f2ec9328881307c0a13821",
+      "bytes": 3686400,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/batchedLabelMarkersAndCompression/images/PCB_LabelMarkersUF_8Way_1280x720_32u.raw": {
+      "sha256": "5e9ecc7c943f6c81635ecfdf0819758352b4168af93519df8b79b2d4945d4194",
+      "bytes": 3686400,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/batchedLabelMarkersAndCompression/images/PCB_METAL_509x335_8u.raw": {
+      "sha256": "64dc6686b5ae544ea0db25c83cc080d5b662c200d745cca004974e296b13c85f",
+      "bytes": 170515,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/batchedLabelMarkersAndCompression/images/PCB_METAL_CompressedMarkerLabelsUF_8Way_509x335_32u.raw": {
+      "sha256": "bce2c05a7cca50ed583e81faa81477dc49b1d6d40939078004b0da1c31b9b2e6",
+      "bytes": 682060,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/batchedLabelMarkersAndCompression/images/PCB_METAL_LabelMarkersUFBatch_8Way_509x335_32u.raw": {
+      "sha256": "4c8cd7f901e0bc980c7e16d681ae8aadde32ff229a75e1592b3d2a8986caeac1",
+      "bytes": 682060,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/batchedLabelMarkersAndCompression/images/PCB_METAL_LabelMarkersUF_8Way_509x335_32u.raw": {
+      "sha256": "27eb8a2d0e2c5e38d338412fd3b052f20a541760443c147ca4a2da4996903f97",
+      "bytes": 682060,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/batchedLabelMarkersAndCompression/images/lena_512x512_8u.raw": {
+      "sha256": "91aa283822bf4a1c3f9d53007fad6dc34a6f218798ea199eedd00d15a1708c71",
+      "bytes": 262144,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/distanceTransform/DistanceTransformTrue_Dolphin1_319x319_16u.jpg": {
+      "sha256": "008a342b1b1b19f2b1dc7fb89c4e59dbe67cf01a650287b0eeede8abdd58972e",
+      "bytes": 4818,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/distanceTransform/dolphin1_Input_319x319_8u.jpg": {
+      "sha256": "e6557cf839d8b7dddf44542064862ed8323c3c05a87bc190590c96b233630961",
+      "bytes": 6276,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/distanceTransform/images/Dolphin1_313x317_8u.raw": {
+      "sha256": "818e5cfcd696ff344f10afde6dbe3fe31d61457a7b585a46f3e9d614563da2e0",
+      "bytes": 99221,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/distanceTransform/images/TestImage3_diamond_64x64_8u.raw": {
+      "sha256": "c8dc47fc3653bdb212d9e3f055aec03bc45ba2126acc053ab601dd1e6044be57",
+      "bytes": 4096,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/findContour/CircuitBoard_2048x1024_8u.jpg": {
+      "sha256": "98513b4e4b438278143f8b3239706656254b64978d72171becf78b3a880890cf",
+      "bytes": 320201,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/findContour/CircuitBoard_CompressedMarkerLabelsUF_8Way_2048x1024_32u.jpg": {
+      "sha256": "0babd3d2e44f65be994d560c2cb71765383e4d6e90b31e426518395be181e249",
+      "bytes": 162034,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/findContour/CircuitBoard_ContoursReconstructed_8Way_2048x1024_8u.jpg": {
+      "sha256": "3b411de1b4d12a3f7e440d0d081a6a05830645e53e98a449cb85b09accbc57f0",
+      "bytes": 406839,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/findContour/CircuitBoard_Contours_8Way_2048x1024_8u.jpg": {
+      "sha256": "dc1ccf4b0a42104b39fc34dfcee79d54baf5debcdebc29bbe8ece7fc350b234b",
+      "bytes": 476622,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/findContour/CircuitBoard_LabelMarkersUF_8Way_2048x1024_32u.jpg": {
+      "sha256": "437cbacc975ce7800ce89163f3ffa2efb3a45dd4ce14d0edf98fb941fbeed6f3",
+      "bytes": 179540,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/findContour/images/CircuitBoard_2048x1024_8u.raw": {
+      "sha256": "4fdc3295d8f6dde8bc9ec0850bc8d29c8a80e991ce8461dab08056e172ab89ec",
+      "bytes": 2097152,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/nppCanny/example_input.png": {
+      "sha256": "5cec78b0345c75ea173f7bccda737b59a71c4dd75f3a1bb2a771a762b838859e",
+      "bytes": 260476,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/nppCanny/example_npp.png": {
+      "sha256": "01938409dc31b8d6a8408827ae9ce37d3a6cb6d460dfbdc80034f9c36f99eda8",
+      "bytes": 16099,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/nppCanny/example_opencv_3ch.png": {
+      "sha256": "fe4a4ba1db0a11967bd7d534094a37b97ce5146be762f036bc71a7438898a1f5",
+      "bytes": 15637,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/nppCanny/example_opencv_gray.png": {
+      "sha256": "4ef1a36b7d9a0245c68d847d45cd92a7e53ee0fd90d980ecca7e255c00a3d210",
+      "bytes": 11415,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/opencvBenchmark/images/CircuitBoard_2048x1024_8u.raw": {
+      "sha256": "4fdc3295d8f6dde8bc9ec0850bc8d29c8a80e991ce8461dab08056e172ab89ec",
+      "bytes": 2097152,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/templateMatching/images/CircuitBoard_2048x1024_8u.raw": {
+      "sha256": "4fdc3295d8f6dde8bc9ec0850bc8d29c8a80e991ce8461dab08056e172ab89ec",
+      "bytes": 2097152,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/watershedSegmentation/images/CT_skull_512x512_8u_Gray.raw": {
+      "sha256": "144fdfe2f97aff0f05cc3473e14ac4a5c376eb8e2313a9cef244c49c69568daf",
+      "bytes": 262144,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/watershedSegmentation/images/CT_skull_CompressedSegmentLabels_8Way_512x512_32u.raw": {
+      "sha256": "5879850203e47026ccf2e6bfdc3ac3c093d8d56e1834fa2ad06127dd34a33906",
+      "bytes": 1048576,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/watershedSegmentation/images/CT_skull_SegmentBoundaries_8Way_512x512_8u.raw": {
+      "sha256": "3dab3cd660b1364c54f05e6ff5afa9ad60f9126c5865d6950c0020a30ac14d86",
+      "bytes": 262144,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/watershedSegmentation/images/CT_skull_SegmentsWithContrastingBoundaries_8Way_512x512_8u.raw": {
+      "sha256": "c543d9df0850aed01ec5b9b272684a31043f6870b3349cd7e05dff5295c24e8d",
+      "bytes": 262144,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/watershedSegmentation/images/CT_skull_Segments_8Way_512x512_8u.raw": {
+      "sha256": "6c9cf88e897cd00ab9455308d624a0a456cc2819f685f24bb5816bf89e977c6a",
+      "bytes": 262144,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/watershedSegmentation/images/Lena_512x512_8u_Gray.raw": {
+      "sha256": "1413a84e01e2738166b18a72c4a147c8e0b4dbf1efc0ececbb9e99dc27593a39",
+      "bytes": 262144,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/watershedSegmentation/images/Lena_CompressedSegmentLabels_8Way_512x512_32u.raw": {
+      "sha256": "dccebb287774d825a1b5780964eaeb46a3689ac0d6df3b7bae76316aa041863a",
+      "bytes": 1048576,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/watershedSegmentation/images/Lena_SegmentBoundaries_8Way_512x512_8u.raw": {
+      "sha256": "9abf131e71516c4650d0f8161b0135d4c40a93280dc9daf36f2b9c7f65a1e6f0",
+      "bytes": 262144,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/watershedSegmentation/images/Lena_SegmentsWithContrastingBoundaries_8Way_512x512_8u.raw": {
+      "sha256": "69d207b48a58f236636df09cb7a689d9dc58c0999ff7f4f581eda8d1ade1b80d",
+      "bytes": 262144,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/watershedSegmentation/images/Lena_Segments_8Way_512x512_8u.raw": {
+      "sha256": "80bb53689989e64de25c473839fc6923eeb9b74e2df76d184d54e6971e518c73",
+      "bytes": 262144,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/watershedSegmentation/images/Rocks_512x512_8u_Gray.raw": {
+      "sha256": "23dce5a33ff855aa217b6a19ee66dee53eda7cc5b79a056fd905be38d2ea8e6d",
+      "bytes": 262144,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/watershedSegmentation/images/Rocks_CompressedSegmentLabels_8Way_512x512_32u.raw": {
+      "sha256": "801ccabe2ac3071965d124d517fc990cd86b9257f49228ed3428025dfa12a55e",
+      "bytes": 1048576,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/watershedSegmentation/images/Rocks_SegmentBoundaries_8Way_512x512_8u.raw": {
+      "sha256": "5f33630b09c6c1e995ebc18c52ecacd9a2baaf03c7d0006c85e9b238364a050c",
+      "bytes": 262144,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/watershedSegmentation/images/Rocks_SegmentsWithContrastingBoundaries_8Way_512x512_8u.raw": {
+      "sha256": "2b3b75a94701161c7d8f7d93ae2631796d100496d3ee7d7384d6a337283f5e2d",
+      "bytes": 262144,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/watershedSegmentation/images/Rocks_Segments_8Way_512x512_8u.raw": {
+      "sha256": "7fde5634629a32b45f7007aa363fd09f1b5d614a555c206b3858c72cfd0172f8",
+      "bytes": 262144,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/watershedSegmentation/images/coins_500x383_8u_Gray.raw": {
+      "sha256": "3c70e2c8e0cfbdd2004c04f918e33fa0870ce2fa170c18c2d8e9105eaa8eacee",
+      "bytes": 191500,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP/watershedSegmentation/images/coins_overlay_500x569_8u_Gray.raw": {
+      "sha256": "c9029f2747c00585915e00640d138f0eadf6af396198c64f87e63f9dca7d8d99",
+      "bytes": 284500,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/batchedLabelMarkersAndCompression/images/CT_skull_512x512_8u.raw": {
+      "sha256": "13a71ba09bc16fe42e20353c08ca094605dc8091d0fa29de8afcd35ade080940",
+      "bytes": 262144,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/batchedLabelMarkersAndCompression/images/CT_skull_CompressedMarkerLabelsUF_8Way_512x512_32u.raw": {
+      "sha256": "fb1982bed702eb4a270e08e492e9aa6a3492f4a47949930365f62705aa528aee",
+      "bytes": 1048576,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/batchedLabelMarkersAndCompression/images/CT_skull_LabelMarkersUFBatch_8Way_512x512_32u.raw": {
+      "sha256": "d6b4a612c19f21bbd0c37ba0799f5834c9c19c55139dfc72c8693938f9550c76",
+      "bytes": 1048576,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/batchedLabelMarkersAndCompression/images/CT_skull_LabelMarkersUF_8Way_512x512_32u.raw": {
+      "sha256": "501e6dedf3f0b82c27e2c1901d261f93f6c202b415b9ba7807b6bae06887e53c",
+      "bytes": 1048576,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/batchedLabelMarkersAndCompression/images/Lena_CompressedMarkerLabelsUF_8Way_512x512_32u.raw": {
+      "sha256": "cf42edd9d4d7fff637719255f8ab15675f0e68cf93f29b009ff0e2f8b63bc612",
+      "bytes": 1048576,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/batchedLabelMarkersAndCompression/images/Lena_LabelMarkersUFBatch_8Way_512x512_32u.raw": {
+      "sha256": "8e1cb346243ad4ba271e11ca25ab912055f3546ed37b54bf499d6640a3bc9fec",
+      "bytes": 1048576,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/batchedLabelMarkersAndCompression/images/Lena_LabelMarkersUF_8Way_512x512_32u.raw": {
+      "sha256": "8b683c11756d0f492f024c150bca2451b8ac7980f9a23186165d25ee96619d13",
+      "bytes": 1048576,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/batchedLabelMarkersAndCompression/images/PCB2_1024x683_8u.raw": {
+      "sha256": "17fe6f2101336af677b0ac28a79bf1e6e85183038e2f2b181d2e433dab5e406c",
+      "bytes": 699392,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/batchedLabelMarkersAndCompression/images/PCB2_CompressedMarkerLabelsUF_8Way_1024x683_32u.raw": {
+      "sha256": "df0929b97a72ad5edcb8526b2f8113466fce19dde01a189ecac7f8b1b983a869",
+      "bytes": 2797568,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/batchedLabelMarkersAndCompression/images/PCB2_LabelMarkersUFBatch_8Way_1024x683_32u.raw": {
+      "sha256": "be78635ab76ac40d25ad96d03cc02364edcd033e43d8af75bbf375b03a213d5b",
+      "bytes": 2797568,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/batchedLabelMarkersAndCompression/images/PCB2_LabelMarkersUF_8Way_1024x683_32u.raw": {
+      "sha256": "923b3028c710fdb3f8c67bcdb0bc4eab98504dfd1afafaefca22d3c3b9a26251",
+      "bytes": 2797568,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/batchedLabelMarkersAndCompression/images/PCB_1280x720_8u.raw": {
+      "sha256": "b3b869c6a101643e5d68c215201e94757e2573838772d723f6f17a77ebf6c29d",
+      "bytes": 921600,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/batchedLabelMarkersAndCompression/images/PCB_CompressedMarkerLabelsUF_8Way_1280x720_32u.raw": {
+      "sha256": "0cb081b6b1981eb0893dc81eefd4ce99e61a384062f6c25d13d14c17419770e8",
+      "bytes": 3686400,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/batchedLabelMarkersAndCompression/images/PCB_LabelMarkersUFBatch_8Way_1280x720_32u.raw": {
+      "sha256": "e5d8da9d43228fb8b947c27e195ec621e77b51a77f8095ba828c02a819e7b336",
+      "bytes": 3686400,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/batchedLabelMarkersAndCompression/images/PCB_LabelMarkersUF_8Way_1280x720_32u.raw": {
+      "sha256": "6c6250ee063fc81e1f944c930205cb07958cbfe3a10ccf363f7ebf147f931499",
+      "bytes": 3686400,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/batchedLabelMarkersAndCompression/images/PCB_METAL_509x335_8u.raw": {
+      "sha256": "64dc6686b5ae544ea0db25c83cc080d5b662c200d745cca004974e296b13c85f",
+      "bytes": 170515,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/batchedLabelMarkersAndCompression/images/PCB_METAL_CompressedMarkerLabelsUF_8Way_509x335_32u.raw": {
+      "sha256": "a882cea293ed5840013773334c83f8b15c7cd72e4902bc59bcd23d7b7262fef0",
+      "bytes": 682060,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/batchedLabelMarkersAndCompression/images/PCB_METAL_LabelMarkersUFBatch_8Way_509x335_32u.raw": {
+      "sha256": "934a219cfb3ce870c919cdc129754941df4d498fe88f31656d0df6304a498d91",
+      "bytes": 682060,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/batchedLabelMarkersAndCompression/images/PCB_METAL_LabelMarkersUF_8Way_509x335_32u.raw": {
+      "sha256": "aef83cd910051b0ba887a25c2ff86eaf74856124aac92a57d9cbecdedce5ee18",
+      "bytes": 682060,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/batchedLabelMarkersAndCompression/images/lena_512x512_8u.raw": {
+      "sha256": "91aa283822bf4a1c3f9d53007fad6dc34a6f218798ea199eedd00d15a1708c71",
+      "bytes": 262144,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/cannyEdgeDetectorPython/Teapot.jpg": {
+      "sha256": "3fc3d9938ac87c4fe21c42126644a6696637a444bcf1e60c90309aeaab39a625",
+      "bytes": 63428,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/cannyEdgeDetectorPython/Teapot_resolutions/out_npp_1280x720.png": {
+      "sha256": "34fb3fc2c1164d0948be08a187385999842f2fd02d9bea6f9aed3e775aae795a",
+      "bytes": 10028,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/cannyEdgeDetectorPython/Teapot_resolutions/out_npp_1920x1080.png": {
+      "sha256": "de72be168178371ebabddb3613144a73e36731eeeff45a3f674841c7ce7103c8",
+      "bytes": 14268,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/cannyEdgeDetectorPython/Teapot_resolutions/out_npp_2560x1440.png": {
+      "sha256": "a7aa108d7a27ab9d88ac781ceb040c6de53d9d6a6dcba0ea4fa5860822da00ed",
+      "bytes": 16799,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/cannyEdgeDetectorPython/Teapot_resolutions/out_npp_320x180.png": {
+      "sha256": "68ae43455342b866a3db854cff5846f24baa1b7fe6cd9040fcf2b81536a6261a",
+      "bytes": 2350,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/cannyEdgeDetectorPython/Teapot_resolutions/out_npp_3840x2160.png": {
+      "sha256": "26af2d131223a0237897fba9141598da7a27d0ff6c1d47c4f843f6ec2427df81",
+      "bytes": 24891,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/cannyEdgeDetectorPython/Teapot_resolutions/out_npp_5120x2880.png": {
+      "sha256": "5546f0687e3d372f2430f3f77cdbe9051e5303f6afafbc0cdac629066e3bf081",
+      "bytes": 33739,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/cannyEdgeDetectorPython/Teapot_resolutions/out_npp_640x360.png": {
+      "sha256": "8aa4d7fe9a4386d2b6a383ead625c7befc7bb068d599702c1ef82f9d5a31a704",
+      "bytes": 4717,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/cannyEdgeDetectorPython/Teapot_resolutions/out_npp_800x600.png": {
+      "sha256": "a79f3c48557b59d422769107008dfdd26ba6052fdf5ee89f8adb5797122aec68",
+      "bytes": 8617,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/distanceTransform/DistanceTransformTrue_Dolphin1_319x319_16u.jpg": {
+      "sha256": "008a342b1b1b19f2b1dc7fb89c4e59dbe67cf01a650287b0eeede8abdd58972e",
+      "bytes": 4818,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/distanceTransform/dolphin1_Input_319x319_8u.jpg": {
+      "sha256": "e6557cf839d8b7dddf44542064862ed8323c3c05a87bc190590c96b233630961",
+      "bytes": 6276,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/distanceTransform/images/DistanceSampler_512x512_8u.raw": {
+      "sha256": "742c675c148d9ff4c174264e080e2f7e03eb17abc804cc9588e9ec608e035078",
+      "bytes": 262144,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/distanceTransform/images/DistanceSampler_512x512_Inverted_8u.raw": {
+      "sha256": "9e2caf92f140944035ec159160cccdad446faae9dd5eb1251c216c58b745d71b",
+      "bytes": 262144,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/distanceTransform/images/Dolphin1_313x317_8u.raw": {
+      "sha256": "818e5cfcd696ff344f10afde6dbe3fe31d61457a7b585a46f3e9d614563da2e0",
+      "bytes": 99221,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/distanceTransform/images/SignedCircle_256x206_64f.raw": {
+      "sha256": "0e1d4330e94a96ac365a950b42721ebb4028af32884b34aa8bf26e96e1fdbc05",
+      "bytes": 421888,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/distanceTransform/images/SignedCircle_256x206_Inverted_64f.raw": {
+      "sha256": "e19f56a977225eff05cf2b5982a490670768c395c3c3ea768882d358639fff2f",
+      "bytes": 421888,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/distanceTransform/images/SignedLith_554x554_32f.raw": {
+      "sha256": "91d2296c56a6a1b191b0b9fed48e385c6c37776c5969adcaf998495c14e6298d",
+      "bytes": 1227664,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/distanceTransform/images/TestImage3_diamond_64x64_8u.raw": {
+      "sha256": "c8dc47fc3653bdb212d9e3f055aec03bc45ba2126acc053ab601dd1e6044be57",
+      "bytes": 4096,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/findContour/CircuitBoard_2048x1024_8u.jpg": {
+      "sha256": "98513b4e4b438278143f8b3239706656254b64978d72171becf78b3a880890cf",
+      "bytes": 320201,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/findContour/CircuitBoard_CompressedMarkerLabelsUF_8Way_2048x1024_32u.jpg": {
+      "sha256": "0babd3d2e44f65be994d560c2cb71765383e4d6e90b31e426518395be181e249",
+      "bytes": 162034,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/findContour/CircuitBoard_ContoursReconstructed_8Way_2048x1024_8u.jpg": {
+      "sha256": "3b411de1b4d12a3f7e440d0d081a6a05830645e53e98a449cb85b09accbc57f0",
+      "bytes": 406839,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/findContour/CircuitBoard_Contours_8Way_2048x1024_8u.jpg": {
+      "sha256": "dc1ccf4b0a42104b39fc34dfcee79d54baf5debcdebc29bbe8ece7fc350b234b",
+      "bytes": 476622,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/findContour/CircuitBoard_LabelMarkersUF_8Way_2048x1024_32u.jpg": {
+      "sha256": "437cbacc975ce7800ce89163f3ffa2efb3a45dd4ce14d0edf98fb941fbeed6f3",
+      "bytes": 179540,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/findContour/images/CircuitBoard_2048x1024_8u.raw": {
+      "sha256": "4fdc3295d8f6dde8bc9ec0850bc8d29c8a80e991ce8461dab08056e172ab89ec",
+      "bytes": 2097152,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/floodFill/images/CT_skull_512x512_8u_Gray.raw": {
+      "sha256": "144fdfe2f97aff0f05cc3473e14ac4a5c376eb8e2313a9cef244c49c69568daf",
+      "bytes": 262144,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/floodFill/images/Corn_614x461_8u_Gray.raw": {
+      "sha256": "5c5ea4f2a251409135f4d220d5edecf89257a0f716913b65e104573b371bf789",
+      "bytes": 283054,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/floodFill/images/RainbowChart_RGB_C3_1024x445_8u.raw": {
+      "sha256": "33395433b2e2af1d7e1ec31f8c41d50cc55d38735d3946b833e6db4321ac1182",
+      "bytes": 1367040,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/floodFill/images/RainbowChart_RGB_C3_Fill_8Way_1024x445_Dev_8u.raw": {
+      "sha256": "ba76b0eede40465110bb210f7d1ea8bddbe5e33b4c9b7b9a9db524249a36bab2",
+      "bytes": 1367040,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/floodFill/images/RainbowChart_RGB_C3_Fill_8Way_Gradient_1024x445_Dev_8u.raw": {
+      "sha256": "dacfa07b3771df95e574604d39163c017cdbbe929be4221ba11678b69077cd11",
+      "bytes": 1367040,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/floodFill/images/RainbowChart_RGB_C3_Fill_8Way_Gradient_Boundary_1024x445_Dev_8u.raw": {
+      "sha256": "b2df4b049eebcc1ef86b631fa6172ad46e0ffd4238806dc495e500a7339bc711",
+      "bytes": 1367040,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/floodFill/images/Rocks_512x512_8u_Gray.raw": {
+      "sha256": "23dce5a33ff855aa217b6a19ee66dee53eda7cc5b79a056fd905be38d2ea8e6d",
+      "bytes": 262144,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/floodFill/images/SeabedSampler_RGB_C3_675x1024_8u.raw": {
+      "sha256": "3661db4d1b97f5a480381065b97f854282b226b0c9766f0cafa5da94e1d7105a",
+      "bytes": 2073600,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/floodFill/images/SeabedSampler_RGB_C3_Fill_8Way_Range_675x1024_Dev_8u.raw": {
+      "sha256": "e10127c19efcddddfdd9951609bb2237c12b15e875148d236ade6e2a7c28bf6c",
+      "bytes": 2073600,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/floodFill/images/SeabedSampler_RGB_C3_Fill_8Way_Range_Boundary_675x1024_Dev_8u.raw": {
+      "sha256": "66bb2d42c205af32b713b0fd6797d7d16f6ad65107fd10ed9b708e12e7dff136",
+      "bytes": 2073600,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/watershedSegmentation/images/CT_skull_512x512_8u_Gray.raw": {
+      "sha256": "144fdfe2f97aff0f05cc3473e14ac4a5c376eb8e2313a9cef244c49c69568daf",
+      "bytes": 262144,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/watershedSegmentation/images/CT_skull_CompressedSegmentLabels_8Way_512x512_32u.raw": {
+      "sha256": "5879850203e47026ccf2e6bfdc3ac3c093d8d56e1834fa2ad06127dd34a33906",
+      "bytes": 1048576,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/watershedSegmentation/images/CT_skull_SegmentBoundaries_8Way_512x512_8u.raw": {
+      "sha256": "3dab3cd660b1364c54f05e6ff5afa9ad60f9126c5865d6950c0020a30ac14d86",
+      "bytes": 262144,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/watershedSegmentation/images/CT_skull_SegmentsWithContrastingBoundaries_8Way_512x512_8u.raw": {
+      "sha256": "c543d9df0850aed01ec5b9b272684a31043f6870b3349cd7e05dff5295c24e8d",
+      "bytes": 262144,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/watershedSegmentation/images/CT_skull_Segments_8Way_512x512_8u.raw": {
+      "sha256": "6c9cf88e897cd00ab9455308d624a0a456cc2819f685f24bb5816bf89e977c6a",
+      "bytes": 262144,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/watershedSegmentation/images/Corn_614x461_8u_Gray.raw": {
+      "sha256": "5c5ea4f2a251409135f4d220d5edecf89257a0f716913b65e104573b371bf789",
+      "bytes": 283054,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/watershedSegmentation/images/Corn_CompressedSegmentLabels_8Way_614x461_32u.raw": {
+      "sha256": "eb8c5adab8859b8051bb7daaa1e008a57f407f3071e56872c0098eb4bf0ca53e",
+      "bytes": 1132216,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/watershedSegmentation/images/Corn_SegmentBoundaries_8Way_614x461_8u.raw": {
+      "sha256": "ea39cac877c2eb1538105bd346ee20ac5ab01808a902b3e827f35392cfbf5523",
+      "bytes": 283054,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/watershedSegmentation/images/Corn_SegmentsWithContrastingBoundaries_8Way_614x461_8u.raw": {
+      "sha256": "284153ad379a0b585e61da3f303d9cebd30974d7a305a00243cb82140c0cb4d4",
+      "bytes": 283054,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/watershedSegmentation/images/Corn_Segments_8Way_614x461_8u.raw": {
+      "sha256": "9272cbbff081cebe79b83a116dff00a153c896ae82efa6386629da572da670e7",
+      "bytes": 283054,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/watershedSegmentation/images/DistanceSampler_512x512_8u.raw": {
+      "sha256": "742c675c148d9ff4c174264e080e2f7e03eb17abc804cc9588e9ec608e035078",
+      "bytes": 262144,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/watershedSegmentation/images/DistanceSampler_512x512_Inverted_8u.raw": {
+      "sha256": "9e2caf92f140944035ec159160cccdad446faae9dd5eb1251c216c58b745d71b",
+      "bytes": 262144,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/watershedSegmentation/images/RainbowChart_RGB_C3_1024x445_8u.raw": {
+      "sha256": "33395433b2e2af1d7e1ec31f8c41d50cc55d38735d3946b833e6db4321ac1182",
+      "bytes": 1367040,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/watershedSegmentation/images/Rocks_512x512_8u_Gray.raw": {
+      "sha256": "23dce5a33ff855aa217b6a19ee66dee53eda7cc5b79a056fd905be38d2ea8e6d",
+      "bytes": 262144,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/watershedSegmentation/images/Rocks_CompressedSegmentLabels_8Way_512x512_32u.raw": {
+      "sha256": "801ccabe2ac3071965d124d517fc990cd86b9257f49228ed3428025dfa12a55e",
+      "bytes": 1048576,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/watershedSegmentation/images/Rocks_SegmentBoundaries_8Way_512x512_8u.raw": {
+      "sha256": "5f33630b09c6c1e995ebc18c52ecacd9a2baaf03c7d0006c85e9b238364a050c",
+      "bytes": 262144,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/watershedSegmentation/images/Rocks_SegmentsWithContrastingBoundaries_8Way_512x512_8u.raw": {
+      "sha256": "2b3b75a94701161c7d8f7d93ae2631796d100496d3ee7d7384d6a337283f5e2d",
+      "bytes": 262144,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/watershedSegmentation/images/Rocks_Segments_8Way_512x512_8u.raw": {
+      "sha256": "7fde5634629a32b45f7007aa363fd09f1b5d614a555c206b3858c72cfd0172f8",
+      "bytes": 262144,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/watershedSegmentation/images/SeabedSampler_RGB_C3_675x1024_8u.raw": {
+      "sha256": "3661db4d1b97f5a480381065b97f854282b226b0c9766f0cafa5da94e1d7105a",
+      "bytes": 2073600,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/watershedSegmentation/images/SignedCircle_256x206_64f.raw": {
+      "sha256": "0e1d4330e94a96ac365a950b42721ebb4028af32884b34aa8bf26e96e1fdbc05",
+      "bytes": 421888,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/watershedSegmentation/images/SignedCircle_256x206_Inverted_64f.raw": {
+      "sha256": "e19f56a977225eff05cf2b5982a490670768c395c3c3ea768882d358639fff2f",
+      "bytes": 421888,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "NPP+/watershedSegmentation/images/SignedLith_554x554_32f.raw": {
+      "sha256": "91d2296c56a6a1b191b0b9fed48e385c6c37776c5969adcaf998495c14e6298d",
+      "bytes": 1227664,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/Image-Resize/input_images/cat.jpg": {
+      "sha256": "0f539cae5115901c4b1be31433c15a731c1b2497bb76628f5371efbdfa997afd",
+      "bytes": 3026,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/Image-Resize/input_images/cat_baseline.jpg": {
+      "sha256": "f7f74291733969413516c356ad1240ec8fee0f65571cb50f5e8d46785c17d81a",
+      "bytes": 2885,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/Image-Resize/input_images/cat_grayscale.jpg": {
+      "sha256": "73ec280e6144febbaccad524e2f2f0357ec160cd544c464ad0fe4c00a0da04ed",
+      "bytes": 2033,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/Image-Resize/input_images/img1.jpg": {
+      "sha256": "3c95d11da67ebda145cf878bb4781e135192a8a7261ae5d15cd5dfbad99955ef",
+      "bytes": 67716,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/Image-Resize/input_images/img2.jpg": {
+      "sha256": "a460a41c0f0aa0d03402ce963993f705d33fbc3057b1df3768474f759302969c",
+      "bytes": 51012,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/Image-Resize/input_images/img3.jpg": {
+      "sha256": "85658d025705398f10173caeacb355a5513e96990c99b3e4e5c43a4b95887118",
+      "bytes": 34914,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/Image-Resize/input_images/img4.jpg": {
+      "sha256": "e8c99d0f00221ecb4f7375bd4bfc1097814fcb8018d2b079dc9af183aee72f65",
+      "bytes": 30198,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/Image-Resize/input_images/img5.jpg": {
+      "sha256": "bc74dd7529563d7d3f6d1c63017db0b515c2f001856316a8e7e80308cdbdd89e",
+      "bytes": 81385,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/Image-Resize/input_images/img6.jpg": {
+      "sha256": "1e8a2fc42b8eb2edfd785e6668803407421325c81f0ee14af02045cdbdff3bd3",
+      "bytes": 64806,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/Image-Resize/input_images/img7.jpg": {
+      "sha256": "367cabdf8c4977a124a56468e0031af7e5cac9dcb8337c688a612c5ad92a2887",
+      "bytes": 94376,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/Image-Resize/input_images/img8.jpg": {
+      "sha256": "1bafbf9b63be9830f95571dc5b00255135b2c3f98f25d3ce34eea3dd0ff16044",
+      "bytes": 53180,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/Image-Resize/input_images/img9.jpg": {
+      "sha256": "233deede4bb1319debb983ed3e290b30f1f6a6065b8ded81833886794222cf27",
+      "bytes": 69067,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/Image-Resize-WaterMark/NVLogo.jpg": {
+      "sha256": "049aba61dbd42843a7c233977a6b1676565074b8e895dfdf5fca018d32059d84",
+      "bytes": 12023,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/Image-Resize-WaterMark/NVLogo.png": {
+      "sha256": "38413ce18243e66a98ffea991939d48ea3ad7887c8bbaa37bd1c0f895016b96d",
+      "bytes": 56937,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/Image-Resize-WaterMark/img9.png": {
+      "sha256": "6b9dd2b6784cc40171560ea34a92f486a5ecde1be65de32921df582f6fd5b041",
+      "bytes": 848032,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/Image-Resize-WaterMark/img9wm.png": {
+      "sha256": "a26ad92fb62f2d5fe15270c69902683ee640485954fd6352f8770aa23cfa589c",
+      "bytes": 739299,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/Image-Resize-WaterMark/input_images/cat.jpg": {
+      "sha256": "0f539cae5115901c4b1be31433c15a731c1b2497bb76628f5371efbdfa997afd",
+      "bytes": 3026,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/Image-Resize-WaterMark/input_images/cat_baseline.jpg": {
+      "sha256": "f7f74291733969413516c356ad1240ec8fee0f65571cb50f5e8d46785c17d81a",
+      "bytes": 2885,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/Image-Resize-WaterMark/input_images/cat_grayscale.jpg": {
+      "sha256": "73ec280e6144febbaccad524e2f2f0357ec160cd544c464ad0fe4c00a0da04ed",
+      "bytes": 2033,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/Image-Resize-WaterMark/input_images/img1.jpg": {
+      "sha256": "3c95d11da67ebda145cf878bb4781e135192a8a7261ae5d15cd5dfbad99955ef",
+      "bytes": 67716,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/Image-Resize-WaterMark/input_images/img2.jpg": {
+      "sha256": "a460a41c0f0aa0d03402ce963993f705d33fbc3057b1df3768474f759302969c",
+      "bytes": 51012,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/Image-Resize-WaterMark/input_images/img3.jpg": {
+      "sha256": "85658d025705398f10173caeacb355a5513e96990c99b3e4e5c43a4b95887118",
+      "bytes": 34914,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/Image-Resize-WaterMark/input_images/img4.jpg": {
+      "sha256": "e8c99d0f00221ecb4f7375bd4bfc1097814fcb8018d2b079dc9af183aee72f65",
+      "bytes": 30198,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/Image-Resize-WaterMark/input_images/img5.jpg": {
+      "sha256": "bc74dd7529563d7d3f6d1c63017db0b515c2f001856316a8e7e80308cdbdd89e",
+      "bytes": 81385,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/Image-Resize-WaterMark/input_images/img6.jpg": {
+      "sha256": "1e8a2fc42b8eb2edfd785e6668803407421325c81f0ee14af02045cdbdff3bd3",
+      "bytes": 64806,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/Image-Resize-WaterMark/input_images/img7.jpg": {
+      "sha256": "367cabdf8c4977a124a56468e0031af7e5cac9dcb8337c688a612c5ad92a2887",
+      "bytes": 94376,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/Image-Resize-WaterMark/input_images/img8.jpg": {
+      "sha256": "1bafbf9b63be9830f95571dc5b00255135b2c3f98f25d3ce34eea3dd0ff16044",
+      "bytes": 53180,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/Image-Resize-WaterMark/input_images/img9.jpg": {
+      "sha256": "74b4deed43ecaad91c7a88cf57131a8a3aa8b5994bbc594a4be642814d9afa7d",
+      "bytes": 69084,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/nvJPEG-Decoder/input_images/cat.jpg": {
+      "sha256": "0f539cae5115901c4b1be31433c15a731c1b2497bb76628f5371efbdfa997afd",
+      "bytes": 3026,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/nvJPEG-Decoder/input_images/cat_baseline.jpg": {
+      "sha256": "f7f74291733969413516c356ad1240ec8fee0f65571cb50f5e8d46785c17d81a",
+      "bytes": 2885,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/nvJPEG-Decoder/input_images/cat_grayscale.jpg": {
+      "sha256": "73ec280e6144febbaccad524e2f2f0357ec160cd544c464ad0fe4c00a0da04ed",
+      "bytes": 2033,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/nvJPEG-Decoder/input_images/img1.jpg": {
+      "sha256": "3c95d11da67ebda145cf878bb4781e135192a8a7261ae5d15cd5dfbad99955ef",
+      "bytes": 67716,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/nvJPEG-Decoder/input_images/img2.jpg": {
+      "sha256": "a460a41c0f0aa0d03402ce963993f705d33fbc3057b1df3768474f759302969c",
+      "bytes": 51012,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/nvJPEG-Decoder/input_images/img3.jpg": {
+      "sha256": "85658d025705398f10173caeacb355a5513e96990c99b3e4e5c43a4b95887118",
+      "bytes": 34914,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/nvJPEG-Decoder/input_images/img4.jpg": {
+      "sha256": "e8c99d0f00221ecb4f7375bd4bfc1097814fcb8018d2b079dc9af183aee72f65",
+      "bytes": 30198,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/nvJPEG-Decoder/input_images/img5.jpg": {
+      "sha256": "bc74dd7529563d7d3f6d1c63017db0b515c2f001856316a8e7e80308cdbdd89e",
+      "bytes": 81385,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/nvJPEG-Decoder/input_images/img6.jpg": {
+      "sha256": "1e8a2fc42b8eb2edfd785e6668803407421325c81f0ee14af02045cdbdff3bd3",
+      "bytes": 64806,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/nvJPEG-Decoder/input_images/img7.jpg": {
+      "sha256": "367cabdf8c4977a124a56468e0031af7e5cac9dcb8337c688a612c5ad92a2887",
+      "bytes": 94376,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/nvJPEG-Decoder/input_images/img8.jpg": {
+      "sha256": "1bafbf9b63be9830f95571dc5b00255135b2c3f98f25d3ce34eea3dd0ff16044",
+      "bytes": 53180,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/nvJPEG-Decoder/input_images/img9.jpg": {
+      "sha256": "233deede4bb1319debb983ed3e290b30f1f6a6065b8ded81833886794222cf27",
+      "bytes": 69067,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/nvJPEG-Decoder-Backend-ROI/img9_roi.png": {
+      "sha256": "69014306f1e8c8c1c9393477609e5960b86dedbc60726f0ec701f8998af0b087",
+      "bytes": 49307,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/nvJPEG-Decoder-Backend-ROI/input_images/cat.jpg": {
+      "sha256": "0f539cae5115901c4b1be31433c15a731c1b2497bb76628f5371efbdfa997afd",
+      "bytes": 3026,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/nvJPEG-Decoder-Backend-ROI/input_images/cat_baseline.jpg": {
+      "sha256": "f7f74291733969413516c356ad1240ec8fee0f65571cb50f5e8d46785c17d81a",
+      "bytes": 2885,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/nvJPEG-Decoder-Backend-ROI/input_images/cat_grayscale.jpg": {
+      "sha256": "73ec280e6144febbaccad524e2f2f0357ec160cd544c464ad0fe4c00a0da04ed",
+      "bytes": 2033,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/nvJPEG-Decoder-Backend-ROI/input_images/img1.jpg": {
+      "sha256": "3c95d11da67ebda145cf878bb4781e135192a8a7261ae5d15cd5dfbad99955ef",
+      "bytes": 67716,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/nvJPEG-Decoder-Backend-ROI/input_images/img2.jpg": {
+      "sha256": "a460a41c0f0aa0d03402ce963993f705d33fbc3057b1df3768474f759302969c",
+      "bytes": 51012,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/nvJPEG-Decoder-Backend-ROI/input_images/img3.jpg": {
+      "sha256": "85658d025705398f10173caeacb355a5513e96990c99b3e4e5c43a4b95887118",
+      "bytes": 34914,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/nvJPEG-Decoder-Backend-ROI/input_images/img4.jpg": {
+      "sha256": "e8c99d0f00221ecb4f7375bd4bfc1097814fcb8018d2b079dc9af183aee72f65",
+      "bytes": 30198,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/nvJPEG-Decoder-Backend-ROI/input_images/img5.jpg": {
+      "sha256": "bc74dd7529563d7d3f6d1c63017db0b515c2f001856316a8e7e80308cdbdd89e",
+      "bytes": 81385,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/nvJPEG-Decoder-Backend-ROI/input_images/img6.jpg": {
+      "sha256": "1e8a2fc42b8eb2edfd785e6668803407421325c81f0ee14af02045cdbdff3bd3",
+      "bytes": 64806,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/nvJPEG-Decoder-Backend-ROI/input_images/img7.jpg": {
+      "sha256": "367cabdf8c4977a124a56468e0031af7e5cac9dcb8337c688a612c5ad92a2887",
+      "bytes": 94376,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/nvJPEG-Decoder-Backend-ROI/input_images/img8.jpg": {
+      "sha256": "1bafbf9b63be9830f95571dc5b00255135b2c3f98f25d3ce34eea3dd0ff16044",
+      "bytes": 53180,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG/nvJPEG-Decoder-Backend-ROI/input_images/img9.jpg": {
+      "sha256": "233deede4bb1319debb983ed3e290b30f1f6a6065b8ded81833886794222cf27",
+      "bytes": 69067,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG2000/nvJPEG2000-Decoder/images/2k_image_lossless/2k_lossless.jp2": {
+      "sha256": "91eda20f170dbfe22cc224a5716576cbda59ffb037ee9753787021546c63c3e0",
+      "bytes": 2922117,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG2000/nvJPEG2000-Decoder/images/2k_image_lossy/2k_lossy.jp2": {
+      "sha256": "d348492b2308e67a412d4ebd60954357866d633b59321abadf0a1561fe27ffbe",
+      "bytes": 1903614,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG2000/nvJPEG2000-Decoder/images/4k_image_lossy/4k_lossy.jp2": {
+      "sha256": "56773cf8a98f599dc5df9451fd86f5c37fcd3cf96975727b4a23c389a735d44e",
+      "bytes": 4705628,
+      "role": "repository asset; input/reference-output classification by original caller"
+    },
+    "nvJPEG2000/nvJPEG2000-Encoder/images/TestImage640x480.bmp": {
+      "sha256": "4d445c04fd17171979816f6a9ab69901dce6649a84bb645433df8a847d53a311",
+      "bytes": 921654,
+      "role": "repository asset; input/reference-output classification by original caller"
+    }
+  },
+  "original_build_definition_sha256": {
+    "NPP+/batchedLabelMarkersAndCompression/CMakeLists.txt": "773f4bc4a7dd2bc076ec02fa0a6b72f134774d314c12cf8b17919fc8dc38299b",
+    "NPP+/distanceTransform/CMakeLists.txt": "c5ff6adc19cbbd2f309a8885c17ad239e1f227ba6d78cffbfb93870f5e439b33",
+    "NPP+/findContour/CMakeLists.txt": "1725845baf379d28ca7f55d0e6c507a7318b3582b1acf63e6292290cf53fc03c",
+    "NPP+/floodFill/CMakeLists.txt": "7f737d75cfcd07fcf56e2fff23fbfd87bb8e5e524ad68ba4a2327916c990619b",
+    "NPP+/watershedSegmentation/CMakeLists.txt": "17ae4b31319ae4940613d3666316bc8f57ab74ea0af7db732e42b211a7a6a92c",
+    "NPP/batchedLabelMarkersAndCompression/CMakeLists.txt": "62a25f3befa564a1a5946fb03aeb81525e4e63c0cfb6d887b909ff1ba917fb01",
+    "NPP/distanceTransform/CMakeLists.txt": "e9c46f51a86403b5d4a477ffff9bf0d7fa9f0c3a0f9b48b9e28e46f5a2381cd7",
+    "NPP/findContour/CMakeLists.txt": "db375f73ffa710ed0177ca2bf21a6a8a486e69a0d854bddfec9cc1ff713ae611",
+    "NPP/houghLines/CMakeLists.txt": "3d09bbf6e8e134e9cb6360171077e91515e34d9625e40d61a7ebfd1dcf6a1062",
+    "NPP/nppCanny/CMakeLists.txt": "371119d76d3b6fabc20a6bf0e2d49413909d5775c87d8a676aa6c05ee18996b2",
+    "NPP/opencvBenchmark/CMakeLists.txt": "3323d418a7a6ec6b2185c434798d487eee061655d452d816e6bfc1a7541570eb",
+    "NPP/templateMatching/CMakeLists.txt": "8d76b32fdacc89fe555d1e9df90326bd664aa47051e1130f68dfcdeabc51026e",
+    "NPP/watershedSegmentation/CMakeLists.txt": "74ac57390d60ba7afda1d2ece047a3a93dd5d83afb112fa1abc3efaebdd74b3c",
+    "nvJPEG/Image-Resize-WaterMark/CMakeLists.txt": "58e55fa8733d6680a9afd6a74ffba34bacd8e4bb2c71013a95323a07dea26cec",
+    "nvJPEG/Image-Resize/CMakeLists.txt": "7da1bf0f64be41810de46fff92ebd67cad1fd4c3fd0fa69dbc3cbb267b4cf47d",
+    "nvJPEG/nvJPEG-Decoder-Backend-ROI/CMakeLists.txt": "7b253ab8ac6b1f13e3df78a48a1985a175b26fb2ca9cd58488997b9746dec122",
+    "nvJPEG/nvJPEG-Decoder-MultipleInstances/CMakeLists.txt": "13e914ce9a9a8cb54634d619c6a8833a81beece5e3138425d1975116b0e67e46",
+    "nvJPEG/nvJPEG-Decoder/CMakeLists.txt": "4216fd96d93623acec467782f1a315540201fd9d160e6b3282b62fb73e69ad8c",
+    "nvJPEG/nvJPEG-Encoder-MultipleInstances/CMakeLists.txt": "11cbd7ac2a9218242738ad09f12c56cb36096a00815756bfb2e6a25a4e102240",
+    "nvJPEG2000/CMakeLists.txt": "555a6f02b2751530a3b18ab5e9482902ef935539a19bc1468e458ceb50567a1a",
+    "nvJPEG2000/nvJPEG2000-Decoder-Pipelined/CMakeLists.txt": "5b581adeb6fb5e9ac31f669f2a1725b9b2c96ffc8fe532413066ee390cdd7458",
+    "nvJPEG2000/nvJPEG2000-Decoder-Tile-Partial/CMakeLists.txt": "d1e92de9c57fe0356acd4e762fc13d19f16a8432e419a8a51988035c05692d9a",
+    "nvJPEG2000/nvJPEG2000-Decoder/CMakeLists.txt": "abecf701e171d9344a4f4bbd18b90302b6055cef567749be2cf7b0a340a54ccd",
+    "nvJPEG2000/nvJPEG2000-Encoder/CMakeLists.txt": "584db729ffa5ee7aebe3a16b32340cccdb3d5b698e07af25d61446eeeeb20a45"
+  },
+  "case_policy": "Original complete files plus all registered semantic/CLI/type/conditional branches; no promotion from inventory or process exit alone."
+}

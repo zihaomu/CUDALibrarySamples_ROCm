@@ -1,0 +1,22 @@
+// SPDX-License-Identifier: Apache-2.0
+#include <cuda_runtime.h>
+#ifdef IMAGE_NPP_PLUS
+#include <nppPlus/nppPlus.h>
+#else
+#include <npp.h>
+#endif
+#include <fstream>
+#include <iostream>
+#include <vector>
+#include <stdexcept>
+#include <cstdlib>
+static void check(int status,const char* operation){if(status)throw std::runtime_error(std::string(operation)+" status="+std::to_string(status));}
+static void emit(const std::string& p,const void* data,size_t n){std::ofstream f(p,std::ios::binary);f.write(static_cast<const char*>(data),n);if(!f)throw std::runtime_error("output "+p);}
+int main(int argc,char** argv){try{
+ if(argc!=3)throw std::runtime_error("expected input/output directories");std::string in=argv[1],out=argv[2];int W,H,C,pitch,x,y,w,h,low,high,opitch;std::ifstream config(in+"/params.txt");if(!(config>>W>>H>>C>>pitch>>x>>y>>w>>h>>low>>high>>opitch))throw std::runtime_error("params");
+ std::ifstream raw(in+"/input.bin",std::ios::binary);std::vector<unsigned char> input((std::istreambuf_iterator<char>(raw)),{}),output(size_t(opitch)*h,173);if(input.size()!=size_t(pitch)*H)throw std::runtime_error("input size");unsigned char *a=nullptr,*b=nullptr,*scratch=nullptr;cudaStream_t stream{};check(cudaStreamCreate(&stream),"stream-create");check(cudaMalloc(&a,input.size()),"allocate-input");check(cudaMalloc(&b,output.size()),"allocate-output");check(cudaMemcpyAsync(a,input.data(),input.size(),cudaMemcpyHostToDevice,stream),"input-copy");check(cudaMemcpyAsync(b,output.data(),output.size(),cudaMemcpyHostToDevice,stream),"output-sentinel");
+ NppStreamContext ctx{};cudaDeviceProp prop{};check(cudaGetDevice(&ctx.nCudaDeviceId),"device");check(cudaGetDeviceProperties(&prop,ctx.nCudaDeviceId),"properties");ctx.hStream=stream;ctx.nMultiProcessorCount=prop.multiProcessorCount;ctx.nMaxThreadsPerMultiProcessor=prop.maxThreadsPerMultiProcessor;ctx.nMaxThreadsPerBlock=prop.maxThreadsPerBlock;ctx.nSharedMemPerBlock=prop.sharedMemPerBlock;ctx.nCudaDevAttrComputeCapabilityMajor=prop.major;ctx.nCudaDevAttrComputeCapabilityMinor=prop.minor;check(cudaStreamGetFlags(stream,&ctx.nStreamFlags),"stream-flags");
+ int bytes=0;check(nppiFilterCannyBorderGetBufferSize(NppiSize{w,h},&bytes),"scratch-query");check(cudaMalloc(&scratch,bytes),"scratch-allocate");int status=C==1?nppiFilterCannyBorder_8u_C1R_Ctx(a,pitch,{W,H},{x,y},b,opitch,{w,h},NPP_FILTER_SOBEL,NPP_MASK_SIZE_3_X_3,(Npp16s)low,(Npp16s)high,nppiNormL2,NPP_BORDER_REPLICATE,scratch,ctx):nppiFilterCannyBorder_8u_C3C1R_Ctx(a,pitch,{W,H},{x,y},b,opitch,{w,h},NPP_FILTER_SOBEL,NPP_MASK_SIZE_3_X_3,(Npp16s)low,(Npp16s)high,nppiNormL2,NPP_BORDER_REPLICATE,scratch,ctx);
+ check(status,"native-canny");check(cudaStreamSynchronize(stream),"decode-sync");check(cudaMemcpy(output.data(),b,output.size(),cudaMemcpyDeviceToHost),"output-copy");emit(out+"/output.bin",output.data(),output.size());char pci[64]{};check(cudaDeviceGetPCIBusId(pci,64,ctx.nCudaDeviceId),"PCI");std::ofstream meta(out+"/native.json");meta<<"{\"status\":"<<status<<",\"context_bytes\":"<<sizeof(ctx)<<",\"scratch_bytes\":"<<bytes<<",\"pci\":\""<<pci<<"\",\"device\":\""<<prop.name<<"\"}\n";
+ check(cudaFree(scratch),"free-scratch");check(cudaFree(a),"free-input");check(cudaFree(b),"free-output");check(cudaStreamDestroy(stream),"destroy-stream");return 0;
+ }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}}

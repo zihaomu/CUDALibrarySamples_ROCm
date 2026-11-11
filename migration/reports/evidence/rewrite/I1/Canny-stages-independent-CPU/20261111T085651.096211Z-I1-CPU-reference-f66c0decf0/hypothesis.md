@@ -1,0 +1,1 @@
+Test CPU-reference for Canny-stages-independent-CPU, case border-check40519-c1. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T085522.516986Z-I1-rocm-run-a0f3cf3db0.

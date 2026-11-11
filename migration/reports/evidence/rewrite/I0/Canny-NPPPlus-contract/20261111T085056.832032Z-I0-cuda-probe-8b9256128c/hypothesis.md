@@ -1,0 +1,1 @@
+Test cuda-probe for Canny-NPPPlus-contract, case holdout-low-noise-c1. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T085047.689910Z-I0-cuda-build-dcd9925281.

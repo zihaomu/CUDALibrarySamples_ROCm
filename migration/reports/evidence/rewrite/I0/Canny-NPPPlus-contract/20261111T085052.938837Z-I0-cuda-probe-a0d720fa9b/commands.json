@@ -1,0 +1,57 @@
+[
+  {
+    "command_id": 1,
+    "phase": "prepare-output",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "mkdir -p /tmp/20261111T085047.689910Z-I0-cuda-build-dcd9925281/outputs/holdout-weak-cross-c1"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T08:50:53.499708+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0001-prepare-output.stdout.log",
+    "stderr": "logs/0001-prepare-output.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T08:50:53.816661+00:00",
+    "seconds": 0.31555871601449326
+  },
+  {
+    "command_id": 2,
+    "phase": "actual-native-NPPPlus-Canny",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "env CUDA_VISIBLE_DEVICES=1 /tmp/20261111T085047.689910Z-I0-cuda-build-dcd9925281/canny /tmp/20261111T085047.689910Z-I0-cuda-build-dcd9925281/inputs/holdout-weak-cross-c1 /tmp/20261111T085047.689910Z-I0-cuda-build-dcd9925281/outputs/holdout-weak-cross-c1"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T08:50:53.818013+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0002-actual-native-NPPPlus-Canny.stdout.log",
+    "stderr": "logs/0002-actual-native-NPPPlus-Canny.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T08:50:54.334667+00:00",
+    "seconds": 0.5159002920263447
+  },
+  {
+    "command_id": 3,
+    "phase": "collect-native-full-output",
+    "argv": [
+      "scp",
+      "-r",
+      "nvidia-5090x2:/tmp/20261111T085047.689910Z-I0-cuda-build-dcd9925281/outputs/holdout-weak-cross-c1/.",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I0/Canny-NPPPlus-contract/20261111T085052.938837Z-I0-cuda-probe-a0d720fa9b/outputs"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T08:50:54.336269+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0003-collect-native-full-output.stdout.log",
+    "stderr": "logs/0003-collect-native-full-output.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T08:50:54.652335+00:00",
+    "seconds": 0.3154456770280376
+  }
+]

@@ -1,0 +1,61 @@
+[
+  {
+    "command_id": 1,
+    "phase": "compile-actual-rocJPEG-probe",
+    "argv": [
+      "hipcc",
+      "--rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay",
+      "--hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay",
+      "--rocm-device-lib-path=/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode",
+      "--offload-arch=gfx1201",
+      "-std=c++17",
+      "-O2",
+      "-I/opt/rocm/core-10.1/include",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/probes/image/rocjpeg_decode.cpp",
+      "-L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib",
+      "-Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib",
+      "-lrocjpeg",
+      "-o",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I0/rocJPEG-original-file-decode/20261111T084128.016454Z-I0-rocm-probe-2ee4bb24d3/decode"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T08:41:29.323922+00:00",
+    "timeout_seconds": 300,
+    "environment": {
+      "HIP_VISIBLE_DEVICES": "0",
+      "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+      "DEEPINFER_ROCM_RELEASE": "10.1.0",
+      "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+      "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+    },
+    "stdout": "logs/0001-compile-actual-rocJPEG-probe.stdout.log",
+    "stderr": "logs/0001-compile-actual-rocJPEG-probe.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T08:41:30.992555+00:00",
+    "seconds": 1.6676980489864945
+  },
+  {
+    "command_id": 2,
+    "phase": "decode-original-JPEG-files",
+    "argv": [
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I0/rocJPEG-original-file-decode/20261111T084128.016454Z-I0-rocm-probe-2ee4bb24d3/decode",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/nvJPEG/nvJPEG-Decoder/input_images",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I0/rocJPEG-original-file-decode/20261111T084128.016454Z-I0-rocm-probe-2ee4bb24d3/outputs"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-11T08:41:30.994020+00:00",
+    "timeout_seconds": 300,
+    "environment": {
+      "HIP_VISIBLE_DEVICES": "0",
+      "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+      "DEEPINFER_ROCM_RELEASE": "10.1.0",
+      "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+      "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+    },
+    "stdout": "logs/0002-decode-original-JPEG-files.stdout.log",
+    "stderr": "logs/0002-decode-original-JPEG-files.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-11T08:41:31.460395+00:00",
+    "seconds": 0.46556951000820845
+  }
+]

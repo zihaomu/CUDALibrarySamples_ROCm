@@ -1,0 +1,1 @@
+Test CPU-reference for Canny-stages-independent-CPU, case teapot-c1. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T085504.015170Z-I1-rocm-run-e37a1a6af9.

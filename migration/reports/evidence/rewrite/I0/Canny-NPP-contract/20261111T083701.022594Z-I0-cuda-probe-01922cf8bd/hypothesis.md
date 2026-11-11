@@ -1,0 +1,1 @@
+Test cuda-probe for Canny-NPP-contract, case noise-equal1-c1. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T083657.499037Z-I0-cuda-build-f3ad168beb.

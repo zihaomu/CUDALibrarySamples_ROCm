@@ -1,0 +1,1 @@
+Test CPU-reference for Canny-stages-independent-CPU, case holdout-weak-step-c1. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T085513.377342Z-I1-rocm-run-b86dbdbb51.

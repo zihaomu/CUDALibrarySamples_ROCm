@@ -1,0 +1,1 @@
+Test cuda-probe for Canny-native-contract, case teapot-c1. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T082735.041637Z-I0-cuda-build-8ea93c85fd.

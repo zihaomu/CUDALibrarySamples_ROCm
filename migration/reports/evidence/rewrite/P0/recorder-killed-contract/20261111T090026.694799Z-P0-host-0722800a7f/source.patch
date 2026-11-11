@@ -1,0 +1,21 @@
+diff --git a/tools/migration/support_log_index.py b/tools/migration/support_log_index.py
+index 5d7050131..aab45fc9d 100644
+--- a/tools/migration/support_log_index.py
++++ b/tools/migration/support_log_index.py
+@@ -108,6 +108,7 @@ def write_index(cat):
+     text+='CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历史尝试”；只有该行 `CUDA comparison = PASSED` 才表示已完成登记范围的对照。CPU 验收报告保存误差、阈值、残差等结构化检查，不要求每个样例另有一个 CPU 文本 log。所有历史失败与重试记录保留在“详情”。大二进制输出按 hash/生成方法保存，未全部提交 Git。\n\n'
+     text+='实现方式是逐例登记值：库 API 迁移、生态库 + 项目 HIP、算法流程重写、执行语义适配或未实现语言绑定；**实际库名称和逐例范围决定具体支持边界**。例如 cuDSS 的 CPU 符号分析 + GPU CSRRF、rotmg 的项目 HIP 修正，不因同样标为 PASSED 而隐去区别。\n\n'
+     text+='原始 CUDA baseline 与 CUDA 数学对照分列：原语言工具链缺失时，即使兼容 C++ API 对照通过，原语言 baseline 仍保留 BLOCKED。每个入口的实际误差、残差、阈值和逐项检查结果在 CPU/复合验收 JSON 中；日志包含对应命令、环境和源码/输入 hash。GPU 计时不等于性能资格，'+link('性能验证','migration/reports/performance-comparison.md')+'单独登记。\n\n'
++    text+='图像库后续重写的逐步实验见 '+link('图像库执行记录','migration/reports/image-libraries-progress.md')+'；候选阶段检查与原生能力调查不增加本表的整例通过数。\n\n'
+     text+=render_overview(summarize(cat),'../../')
+     reasons=collections.Counter((r['status'],r['reason_code']) for r in report['samples'] if r['status']!='PASSED')
+     labels={'BUILD_ERROR':'当前移植稿的 API、类型、链接或算法实现未完成，实际构建失败。',
+@@ -128,6 +129,8 @@ def write_index(cat):
+         text+='| 样例 / 详情 | 状态 / 用例 | 实际库与实现方式 | 详细日志与范围 |\n| --- | --- | --- | --- |\n'
+         link_parent=page.parent
+         module_text='# '+family+'：支持方式与详细日志\n\n'+link('返回总表','migration/reports/support-log-index.md')+'；完整记录包括当前范围/失败原因、AMD/CUDA 日志和 CPU 验收报告。编译/import 成功不代表 GPU 数值通过；CUDA 栏标明日志属于哪次记录。\n\n'
++        if family in {'NPP','NPP+','nvJPEG','nvJPEG2000'}:
++            module_text+='新增重写实验、当前未解决语义与 SDK 能力复查见 '+link('图像库执行记录','migration/reports/image-libraries-progress.md')+'。下表支持结论保持已封存范围，不将候选阶段或原生 baseline 运行计作新的 AMD 整例资格。\n\n'
+         module_text+='| 样例 / 详情 | 状态 / 用例 | 实际库、方式与源码 | 支持范围 / 失败原因 | AMD 详细 log | CPU 验收 / CUDA log |\n| --- | --- | --- | --- | --- | --- |\n'
+         for r in group:
+             method=METHODS.get(r['implementation_method'],r['implementation_method'])

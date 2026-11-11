@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "status": "FROZEN_STAGE_CONTRACT",
+  "scope": "Reusable Sobel3x3/L2/NMS stages only; no final Canny hysteresis qualification",
+  "source": "C1 or C3 unsigned8 with independent byte pitch; whole source replicate boundary",
+  "gradient": "Sobel integer dx=sum(pixel*i*(j==0?2:1)), dy=sum(pixel*j*(i==0?2:1)); C3 selects first channel with maximal dx*dx+dy*dy",
+  "magnitude": "exact floor integer square root of dx*dx+dy*dy",
+  "direction": "horizontal abs(dy)*32768 < abs(dx)*13573; vertical abs(dy)*32768 > abs(dx)*(13573+65536); otherwise diagonal sign(dx*dy)",
+  "nms": "retain integer magnitude iff >= both directional neighbours; same full-image replicated boundary",
+  "outputs": {
+    "dx": "int16",
+    "dy": "int16",
+    "magnitude": "uint16",
+    "suppressed": "uint16"
+  },
+  "threshold": "Exact every element of all four outputs, independent NumPy reference; no numeric relaxation",
+  "pending": "Native NPP and NPP+ hysteresis differ and remain under investigation; this contract cannot promote an original sample"
+}

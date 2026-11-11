@@ -1,0 +1,69 @@
+{
+  "commands": [
+    {
+      "command_id": 1,
+      "phase": "private-CPU-venv-no-ensurepip",
+      "argv": [
+        "python3",
+        "-m",
+        "venv",
+        "--without-pip",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-cpu-venv"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T08:23:45.536961+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0001-private-CPU-venv-no-ensurepip.stdout.log",
+      "stderr": "logs/0001-private-CPU-venv-no-ensurepip.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T08:23:45.606301+00:00",
+      "seconds": 0.06775518000358716
+    },
+    {
+      "command_id": 2,
+      "phase": "locked-private-CPU-packages",
+      "argv": [
+        "python3",
+        "-m",
+        "pip",
+        "--python",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-cpu-venv/bin/python",
+        "install",
+        "numpy==2.2.6",
+        "opencv-python-headless==4.12.0.88",
+        "Pillow==12.0.0"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T08:23:45.607547+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0002-locked-private-CPU-packages.stdout.log",
+      "stderr": "logs/0002-locked-private-CPU-packages.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T08:24:46.491451+00:00",
+      "seconds": 60.883117142017
+    },
+    {
+      "command_id": 3,
+      "phase": "actual-CPU-load-and-Canny",
+      "argv": [
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-cpu-venv/bin/python",
+        "-c",
+        "import cv2,numpy,PIL,json;print(json.dumps(dict(cv2=cv2.__version__,numpy=numpy.__version__,Pillow=PIL.__version__)));assert cv2.Canny(numpy.zeros((8,8),numpy.uint8),50,100).shape==(8,8)"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T08:24:46.494006+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0003-actual-CPU-load-and-Canny.stdout.log",
+      "stderr": "logs/0003-actual-CPU-load-and-Canny.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T08:24:46.732902+00:00",
+      "seconds": 0.23772649600869045
+    }
+  ],
+  "source": "source.json",
+  "inputs": "inputs/manifest.json",
+  "expected_environment": "environment.expected.json"
+}

@@ -1,0 +1,55 @@
+// SPDX-License-Identifier: Apache-2.0
+#include "../../common/image/canny_stages.h"
+#include <hip/hip_runtime.h>
+#include <fstream>
+#include <iostream>
+#include <vector>
+#include <iterator>
+#include <stdexcept>
+static void check(hipError_t status) { if (status != hipSuccess) throw std::runtime_error(hipGetErrorString(status)); }
+template<class T> struct DeviceBuffer {
+    T* data = nullptr;
+    size_t size;
+    explicit DeviceBuffer(size_t count): size(count) { check(hipMalloc(&data, count*sizeof(T))); }
+    ~DeviceBuffer() { if (data) hipFree(data); }
+    DeviceBuffer(const DeviceBuffer&) = delete;
+    DeviceBuffer& operator=(const DeviceBuffer&) = delete;
+    void save(const std::string& path) {
+        std::vector<T> host(size);
+        check(hipMemcpy(host.data(), data, size*sizeof(T), hipMemcpyDeviceToHost));
+        std::ofstream f(path, std::ios::binary);
+        f.write(reinterpret_cast<char*>(host.data()), size*sizeof(T));
+        if (!f) throw std::runtime_error("output write");
+    }
+};
+int main(int argc, char** argv) {
+    try {
+        if (argc != 3) throw std::runtime_error("expected fixture and output directories");
+        std::string input = argv[1], output = argv[2];
+        int width, height, channels, pitch, x, y, rw, rh, low, high, output_pitch;
+        std::ifstream params(input+"/params.txt");
+        if (!(params >> width >> height >> channels >> pitch) || width < 1 || height < 1 ||
+            width > 32768 || height > 32768 || pitch < width*channels)
+            throw std::runtime_error("invalid input geometry");
+        if (!(params >> x >> y >> rw >> rh >> low >> high >> output_pitch) || x || y || rw != width || rh != height ||
+            output_pitch < width || (channels != 1 && channels != 3)) throw std::runtime_error("unsupported fixture descriptor");
+        std::ifstream f(input+"/input.bin", std::ios::binary);
+        std::vector<uint8_t> bytes((std::istreambuf_iterator<char>(f)), {});
+        if (bytes.size() != size_t(height)*pitch) throw std::runtime_error("invalid input length");
+        DeviceBuffer<uint8_t> source(bytes.size());
+        DeviceBuffer<int16_t> dx(size_t(width)*height), dy(size_t(width)*height);
+        DeviceBuffer<uint16_t> mag(size_t(width)*height), nms(size_t(width)*height);
+        hipStream_t stream = nullptr;
+        check(hipStreamCreateWithFlags(&stream, hipStreamNonBlocking));
+        check(hipMemcpyAsync(source.data, bytes.data(), bytes.size(), hipMemcpyHostToDevice, stream));
+        check(rocm_image_canny_stages(source.data, pitch, width, height, channels, dx.data, dy.data, mag.data, nms.data, stream));
+        check(hipStreamSynchronize(stream));
+        dx.save(output+"/dx.bin"); dy.save(output+"/dy.bin");
+        mag.save(output+"/magnitude.bin"); nms.save(output+"/suppressed.bin");
+        auto rejected = rocm_image_canny_stages(source.data, 0, width, height, channels, dx.data, dy.data, mag.data, nms.data, stream);
+        if (rejected != hipErrorInvalidValue) throw std::runtime_error("invalid pitch was accepted");
+        check(hipStreamDestroy(stream));
+        std::cout << "{\"stage_only\":true,\"explicit_nondefault_stream\":true,\"invalid_pitch_rejected\":true}\n";
+        return 0;
+    } catch (const std::exception& e) { std::cerr << e.what() << '\n'; return 1; }
+}

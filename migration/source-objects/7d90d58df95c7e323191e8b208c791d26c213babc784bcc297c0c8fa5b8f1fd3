@@ -1,0 +1,487 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2021-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <cstdlib>
+#include <vector>
+#include <algorithm>
+#include <cstring>
+#include <cctype>
+#include <cerrno>
+#include <climits>
+#include <limits>
+
+#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
+#include <windows.h>
+#include <filesystem>
+const std::string separator = "\\";
+namespace fs = std::filesystem;
+#else
+#include <sys/time.h> // timings
+#include <experimental/filesystem>
+const std::string separator = "/";
+namespace fs = std::experimental::filesystem::v1;
+#endif
+
+
+#include <sys/stat.h>
+#include <sys/types.h>
+
+#include <cuda_runtime_api.h>
+#include <nvjpeg2k.h>
+
+#if (NVJPEG2K_VER_MAJOR > 0) || (NVJPEG2K_VER_MAJOR == 0 && NVJPEG2K_VER_MINOR >= 11)
+#define NVJPEG2K_HAS_NLT3_ENCODE 1
+#include <cuda_fp16.h>
+#else
+#define NVJPEG2K_HAS_NLT3_ENCODE 0
+#endif
+
+#define CHECK_CUDA(call)                                                                                          \
+    {                                                                                                             \
+        cudaError_t _e = (call);                                                                                  \
+        if (_e != cudaSuccess)                                                                                    \
+        {                                                                                                         \
+            std::cout << "CUDA Runtime failure: '#" << _e << "' at " << __FILE__ << ":" << __LINE__ << std::endl; \
+            return EXIT_FAILURE;                                                                                  \
+        }                                                                                                         \
+    }
+
+#define CHECK_NVJPEG2K(call)                                                                                \
+    {                                                                                                       \
+        nvjpeg2kStatus_t _e = (call);                                                                       \
+        if (_e != NVJPEG2K_STATUS_SUCCESS)                                                                  \
+        {                                                                                                   \
+            std::cout << "NVJPEG failure: '#" << _e << "' at " << __FILE__ << ":" << __LINE__ << std::endl; \
+            return EXIT_ENCODE_FAILURE;                                                                     \
+        }                                                                                                   \
+    }
+
+// Exit codes, in the order a run checks for them; EXIT_FAILURE (1) reports any other error, such as a
+// CUDA failure.
+#define EXIT_INVALID_ARGUMENTS 2 // the command line is invalid, or does not suit the input image
+#define EXIT_MISSING_INPUT 3     // the input path does not exist, or none of its files can be read
+#define EXIT_NO_IMAGES 4         // the input directory holds no files
+#define EXIT_UNSUPPORTED 5       // a valid input image that this sample or library version cannot handle
+#define EXIT_ENCODE_FAILURE 6    // an input image could not be read or encoded, or its output written
+
+typedef std::vector<std::vector<unsigned char>> BitStreamData;
+typedef std::vector<std::string> FileNames;
+
+constexpr int MAX_COMPONENTS = 4;
+
+class Image
+{
+    std::vector<void *>  pixel_data_d_;
+    std::vector<void *>  pixel_data_h_;
+    std::vector<size_t> pitch_in_bytes_d_;
+    std::vector<size_t> pitch_in_bytes_h_;
+    
+    std::vector<size_t> pixel_data_size_;
+    uint32_t capacity_;
+    
+    nvjpeg2kImage_t image_d_;
+    nvjpeg2kImage_t image_h_;
+    
+    nvjpeg2kImageInfo_t info_;
+    std::vector<nvjpeg2kImageComponentInfo_t> comp_info_;
+    nvjpeg2kColorSpace_t color_space_;
+    bool nlt_type3_;
+    uint8_t nlt_bit_depth_;
+
+    static bool checkedMultiply(size_t a, size_t b, size_t& result)
+    {
+        if(a != 0 && b > (std::numeric_limits<size_t>::max)() / a)
+        {
+            return false;
+        }
+        result = a * b;
+        return true;
+    }
+
+    void  clear()
+    {
+        image_d_.num_components = 0;
+        image_d_.pixel_data = nullptr;
+        image_d_.pitch_in_bytes = nullptr;
+        image_d_.pixel_type = NVJPEG2K_UINT8;
+        image_h_.num_components = 0;
+        image_h_.pixel_data = nullptr;
+        image_h_.pitch_in_bytes = nullptr;
+        image_h_.pixel_type = NVJPEG2K_UINT8;
+        capacity_ = 0;
+        nlt_type3_ = false;
+        nlt_bit_depth_ = 0;
+    }
+
+    int bytes_per_element(nvjpeg2kImageType_t pixel_type)
+    {
+        if(pixel_type == NVJPEG2K_UINT16 || pixel_type == NVJPEG2K_INT16)
+        {
+            return 2;
+        }
+#if NVJPEG2K_HAS_NLT3_ENCODE
+        if(pixel_type == NVJPEG2K_FP16)
+        {
+            return 2;
+        }
+        if(pixel_type == NVJPEG2K_FP32)
+        {
+            return 4;
+        }
+#endif
+        return 1;
+    }
+
+    public:
+    
+    nvjpeg2kColorSpace_t getColorSpace()
+    {
+        return color_space_;
+    }
+
+    nvjpeg2kImage_t& getImageHost()
+    {
+        return image_h_;
+    }
+
+    nvjpeg2kImage_t& getImageDevice()
+    {
+        return image_d_;
+    }
+
+    nvjpeg2kImageInfo_t& getnvjpeg2kImageInfo()
+    {
+        return info_;
+    }
+
+    nvjpeg2kImageComponentInfo_t* getnvjpeg2kCompInfo()
+    {
+        return comp_info_.data();
+    }
+
+    bool isNltType3()
+    {
+        return nlt_type3_;
+    }
+
+    uint8_t getNltBitDepth()
+    {
+        return nlt_bit_depth_;
+    }
+
+    void setNltType3(uint8_t bit_depth)
+    {
+        nlt_type3_ = true;
+        nlt_bit_depth_ = bit_depth;
+    }
+
+    Image ()
+    {
+        clear();
+    }
+
+    int initialize(nvjpeg2kImageInfo_t& img_info, nvjpeg2kImageComponentInfo_t *img_comp_info, nvjpeg2kColorSpace_t color_space)
+    {
+        nvjpeg2kImageType_t pixel_type = NVJPEG2K_UINT8;
+        if(img_comp_info[0].precision <= 8)
+        {
+            pixel_type = NVJPEG2K_UINT8;
+        }
+        else if(img_comp_info[0].precision > 8 && img_comp_info[0].precision <= 16)
+        {
+            pixel_type = NVJPEG2K_UINT16;
+        }
+        else
+        {
+            return EXIT_ENCODE_FAILURE;
+        }
+        return initialize(img_info, img_comp_info, color_space, pixel_type);
+    }
+
+    int initialize(nvjpeg2kImageInfo_t& img_info, nvjpeg2kImageComponentInfo_t *img_comp_info,
+        nvjpeg2kColorSpace_t color_space, nvjpeg2kImageType_t pixel_type)
+    {
+        memcpy(&info_, &img_info, sizeof(img_info));
+        comp_info_.resize(info_.num_components);
+        color_space_ = color_space;
+        nlt_type3_ = false;
+        nlt_bit_depth_ = 0;
+        for(uint32_t c = 0; c < info_.num_components; c++)
+        {
+            memcpy(&comp_info_[c], &img_comp_info[c], sizeof(comp_info_[c]));
+        }
+        if(info_.num_components >  capacity_ )
+        {
+            pixel_data_d_.resize(info_.num_components, nullptr);
+            pitch_in_bytes_d_.resize(info_.num_components, 0);
+            pixel_data_h_.resize(info_.num_components, nullptr);
+            pitch_in_bytes_h_.resize(info_.num_components, 0);
+            pixel_data_size_.resize(info_.num_components, 0);
+            capacity_ = info_.num_components;
+        }
+
+        image_d_.pixel_data     = pixel_data_d_.data();
+        image_d_.pitch_in_bytes = pitch_in_bytes_d_.data();
+        image_h_.pixel_data     = pixel_data_h_.data();
+        image_h_.pitch_in_bytes = pitch_in_bytes_h_.data();
+
+        image_d_.pixel_type = pixel_type;
+        image_h_.pixel_type = pixel_type;
+   
+        image_d_.num_components = info_.num_components;
+        image_h_.num_components = image_d_.num_components;
+        int bytes_per_element = this->bytes_per_element(image_d_.pixel_type);
+
+        for(uint32_t c = 0; c < info_.num_components;c++)
+        {
+            if(comp_info_[c].component_width == 0 || comp_info_[c].component_height == 0)
+            {
+                std::cout << "Invalid image dimensions" << std::endl;
+                return EXIT_ENCODE_FAILURE;
+            }
+
+            size_t pitch_in_bytes = 0;
+            if(!checkedMultiply(static_cast<size_t>(comp_info_[c].component_width),
+                static_cast<size_t>(bytes_per_element), pitch_in_bytes))
+            {
+                std::cout << "Invalid image dimensions" << std::endl;
+                return EXIT_ENCODE_FAILURE;
+            }
+
+            size_t comp_size = 0;
+            if(!checkedMultiply(static_cast<size_t>(comp_info_[c].component_height), pitch_in_bytes, comp_size))
+            {
+                std::cout << "Invalid image dimensions" << std::endl;
+                return EXIT_ENCODE_FAILURE;
+            }
+
+            image_d_.pitch_in_bytes[c] = 
+            image_h_.pitch_in_bytes[c] = pitch_in_bytes;
+            if( comp_size > pixel_data_size_[c])
+            {
+                if(image_d_.pixel_data[c])
+                {
+                    CHECK_CUDA(cudaFree(image_d_.pixel_data[c])); 
+                }
+                if( image_h_.pixel_data[c])
+                {
+                    free(image_h_.pixel_data[c]);
+                }
+                pixel_data_size_[c] = comp_size;
+                CHECK_CUDA(cudaMalloc(&image_d_.pixel_data[c], comp_size));
+                image_h_.pixel_data[c] = malloc(comp_size);
+            }
+        }
+        return EXIT_SUCCESS;
+    }
+
+
+    int tearDown()
+    {
+        for(uint32_t c = 0; c < capacity_;c++)
+        {
+            if(image_d_.pixel_data[c])
+            {
+                CHECK_CUDA(cudaFree(pixel_data_d_[c]));
+                pixel_data_d_[c] = nullptr;
+            }
+            if(image_h_.pixel_data[c])
+            {
+                free(pixel_data_h_[c]);
+                pixel_data_h_[c] = nullptr;
+            }
+            pixel_data_size_[c] = 0;
+        }
+        return EXIT_SUCCESS;
+    }
+    
+    int copyToDevice()
+    {
+        for (uint32_t c = 0; c < image_d_.num_components; c++)
+        {
+            CHECK_CUDA(cudaMemcpy2D(image_d_.pixel_data[c], image_d_.pitch_in_bytes[c], image_h_.pixel_data[c], image_h_.pitch_in_bytes[c], 
+                image_d_.pitch_in_bytes[c],
+                comp_info_[c].component_height, cudaMemcpyHostToDevice));
+            CHECK_CUDA(cudaDeviceSynchronize());
+        }
+        return EXIT_SUCCESS;
+    }
+};
+
+struct encode_params_t
+{
+    std::string input_dir;
+    int batch_size;
+    int total_images;
+    int dev;
+    int warmup;
+    int is_irreversible;
+    int cblk_w;
+    int cblk_h;
+    bool use_ht;
+    nvjpeg2kQualityType_t quality_type;
+    double quality_value;
+    nvjpeg2kEncoder_t enc_handle;
+    nvjpeg2kEncodeState_t enc_state;
+    nvjpeg2kEncodeParams_t enc_params;
+    nvjpeg2kImageComponentInfo_t comp_info[MAX_COMPONENTS]; // required when input is yuv
+    nvjpeg2kImageInfo_t img_info; // required when input is yuv
+    cudaStream_t stream;
+    std::string output_dir;
+    bool write_bitstream;
+    bool img_fmt_init;
+    uint8_t pfm_precision;
+};
+
+double Wtime(void)
+{
+#if defined(_WIN32)
+    LARGE_INTEGER t;
+    static double oofreq;
+    static int checkedForHighResTimer;
+    static BOOL hasHighResTimer;
+
+    if (!checkedForHighResTimer)
+    {
+        hasHighResTimer = QueryPerformanceFrequency(&t);
+        oofreq = 1.0 / (double)t.QuadPart;
+        checkedForHighResTimer = 1;
+    }
+    if (hasHighResTimer)
+    {
+        QueryPerformanceCounter(&t);
+        return (double)t.QuadPart * oofreq;
+    }
+    else
+    {
+        return (double)GetTickCount() / 1000.0;
+    }
+#else
+    struct timespec tp;
+    int rv = clock_gettime(CLOCK_MONOTONIC, &tp);
+
+    if (rv)
+        return 0;
+
+    return tp.tv_nsec / 1.0E+9 + (double)tp.tv_sec;
+
+#endif
+}
+// *****************************************************************************
+// reading input directory to file list
+// -----------------------------------------------------------------------------
+int readInput(const std::string &sInputPath, std::vector<std::string> &filelist)
+{
+    if( fs::is_regular_file(sInputPath))
+    {
+        filelist.push_back(sInputPath);
+    }
+    else if (fs::is_directory(sInputPath))
+    { 
+        fs::recursive_directory_iterator iter(sInputPath);
+        for(auto& p: iter)
+        {
+           if( fs::is_regular_file(p))
+           {
+                filelist.push_back(p.path().string());
+           }
+        }
+    }
+    else
+    {
+        std::cout<<"unable to open input"<<std::endl;
+        return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
+}
+
+// *****************************************************************************
+// parse parameters
+// -----------------------------------------------------------------------------
+int findParamIndex(const char **argv, int argc, const char *parm)
+{
+    int count = 0;
+    int index = -1;
+
+    for (int i = 0; i < argc; i++)
+    {
+        if (strncmp(argv[i], parm, 100) == 0)
+        {
+            index = i;
+            count++;
+        }
+    }
+
+    if (count == 0 || count == 1)
+    {
+        return index;
+    }
+    else
+    {
+        std::cout << "Error, parameter " << parm
+                  << " has been specified more than once, exiting\n"
+                  << std::endl;
+        std::exit(EXIT_INVALID_ARGUMENTS);
+    }
+
+    return -1;
+}
+
+// Returns the value that follows the option at argv[pidx], and exits when there is none: the command line
+// ends there, or the next token is another option.
+inline const char *paramValue(const char **argv, int argc, int pidx)
+{
+    if (pidx + 1 >= argc || (argv[pidx + 1][0] == '-' && std::isalpha(static_cast<unsigned char>(argv[pidx + 1][1]))))
+    {
+        std::cout << "Error, parameter " << argv[pidx] << " needs a value, exiting" << std::endl;
+        std::exit(EXIT_INVALID_ARGUMENTS);
+    }
+    return argv[pidx + 1];
+}
+
+// Like paramValue, for an integer value; anything else exits.
+inline int paramInt(const char **argv, int argc, int pidx)
+{
+    const char *value = paramValue(argv, argc, pidx);
+    char *end = nullptr;
+    errno = 0;
+    const long number = std::strtol(value, &end, 10);
+    if (end == value || *end != '\0' || errno == ERANGE || number < INT_MIN || number > INT_MAX)
+    {
+        std::cout << "Error, parameter " << argv[pidx] << " needs an integer, not '" << value << "', exiting" << std::endl;
+        std::exit(EXIT_INVALID_ARGUMENTS);
+    }
+    return static_cast<int>(number);
+}
+
+// Like paramValue, for a number; anything else exits.
+inline double paramDouble(const char **argv, int argc, int pidx)
+{
+    const char *value = paramValue(argv, argc, pidx);
+    char *end = nullptr;
+    const double number = std::strtod(value, &end);
+    if (end == value || *end != '\0')
+    {
+        std::cout << "Error, parameter " << argv[pidx] << " needs a number, not '" << value << "', exiting" << std::endl;
+        std::exit(EXIT_INVALID_ARGUMENTS);
+    }
+    return number;
+}

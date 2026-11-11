@@ -1,0 +1,79 @@
+{
+  "commands": [
+    {
+      "command_id": 1,
+      "phase": "prepare",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "mkdir -p /tmp/20261111T085236.411450Z-I0-cuda-build-b5a1b36c0e"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T08:52:37.477543+00:00",
+      "timeout_seconds": 240,
+      "environment": {},
+      "stdout": "logs/0001-prepare.stdout.log",
+      "stderr": "logs/0001-prepare.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T08:52:37.793974+00:00",
+      "seconds": 0.31544745597057045
+    },
+    {
+      "command_id": 2,
+      "phase": "upload",
+      "argv": [
+        "scp",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I0/Canny-NPPPlus-contract-build/20261111T085236.411450Z-I0-cuda-build-b5a1b36c0e/source.tar.gz",
+        "nvidia-5090x2:/tmp/20261111T085236.411450Z-I0-cuda-build-b5a1b36c0e/source.tar.gz"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T08:52:37.795355+00:00",
+      "timeout_seconds": 240,
+      "environment": {},
+      "stdout": "logs/0002-upload.stdout.log",
+      "stderr": "logs/0002-upload.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T08:52:38.212374+00:00",
+      "seconds": 0.41612765204627067
+    },
+    {
+      "command_id": 3,
+      "phase": "unpack",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "tar -xzf /tmp/20261111T085236.411450Z-I0-cuda-build-b5a1b36c0e/source.tar.gz -C /tmp/20261111T085236.411450Z-I0-cuda-build-b5a1b36c0e"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T08:52:38.213792+00:00",
+      "timeout_seconds": 240,
+      "environment": {},
+      "stdout": "logs/0003-unpack.stdout.log",
+      "stderr": "logs/0003-unpack.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T08:52:38.630581+00:00",
+      "seconds": 0.41586033400380984
+    },
+    {
+      "command_id": 4,
+      "phase": "actual-NPPPlus-build",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "/usr/local/cuda-13.4/bin/nvcc -std=c++17 -O2 -arch=sm_120 /tmp/20261111T085236.411450Z-I0-cuda-build-b5a1b36c0e/canny.cpp -DIMAGE_NPP_PLUS -I/tmp/image-library-private-SDKs/nppplus-0.10.0.0/libnpp_plus-linux-x86_64-0.10.0.0_cuda12-archive/include -L/tmp/image-library-private-SDKs/nppplus-0.10.0.0/libnpp_plus-linux-x86_64-0.10.0.0_cuda12-archive/lib -Xlinker -rpath -Xlinker /tmp/image-library-private-SDKs/nppplus-0.10.0.0/libnpp_plus-linux-x86_64-0.10.0.0_cuda12-archive/lib -lnpp_plus_if -lnpp_plus_c -o /tmp/20261111T085236.411450Z-I0-cuda-build-b5a1b36c0e/canny"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T08:52:38.632459+00:00",
+      "timeout_seconds": 240,
+      "environment": {},
+      "stdout": "logs/0004-actual-NPPPlus-build.stdout.log",
+      "stderr": "logs/0004-actual-NPPPlus-build.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T08:52:39.701177+00:00",
+      "seconds": 1.067823002988007
+    }
+  ],
+  "source": "source.json",
+  "inputs": "inputs/manifest.json",
+  "expected_environment": "environment.expected.json"
+}

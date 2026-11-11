@@ -1,0 +1,1 @@
+Test rocm-run for Canny-GPU-stages, case border-check91203-c1. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T085714.446443Z-I1-rocm-build-604cdfb05a.

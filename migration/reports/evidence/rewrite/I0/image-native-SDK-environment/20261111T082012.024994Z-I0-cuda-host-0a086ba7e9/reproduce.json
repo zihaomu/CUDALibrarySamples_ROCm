@@ -1,0 +1,25 @@
+{
+  "commands": [
+    {
+      "command_id": 1,
+      "phase": "actual-native-SDK-device-and-OpenCV-inventory",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "python3 -c 'import pathlib,subprocess,json,shutil\nroot=pathlib.Path('\"'\"'/usr/local/cuda-13.4'\"'\"');libs=root/'\"'\"'targets/x86_64-linux/lib'\"'\"';inc=root/'\"'\"'targets/x86_64-linux/include'\"'\"'\nr=dict(nvcc=str(root/'\"'\"'bin/nvcc'\"'\"'),headers={n:(inc/n).exists() for n in ['\"'\"'npp.h'\"'\"','\"'\"'nppworkspace.h'\"'\"','\"'\"'nvjpeg.h'\"'\"','\"'\"'nvjpeg2k.h'\"'\"']},libraries=[str(p) for pattern in ['\"'\"'libnpp*.so*'\"'\"','\"'\"'libnvjpeg*.so*'\"'\"'] for p in libs.glob(pattern)],tools={n:shutil.which(n) for n in ['\"'\"'python3'\"'\"','\"'\"'cmake'\"'\"','\"'\"'pkg-config'\"'\"']})\nfor cmd,name in [(['\"'\"'nvidia-smi'\"'\"','\"'\"'--query-gpu=index,name,uuid,memory.free'\"'\"','\"'\"'--format=csv,noheader'\"'\"'],'\"'\"'GPUs'\"'\"'),(['\"'\"'pkg-config'\"'\"','\"'\"'--modversion'\"'\"','\"'\"'opencv4'\"'\"'],'\"'\"'OpenCV'\"'\"')]:\n p=subprocess.run(cmd,text=True,capture_output=True);r[name]=dict(return_code=p.returncode,stdout=p.stdout,stderr=p.stderr)\nprint(json.dumps(r))\n'"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T08:20:12.584711+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0001-actual-native-SDK-device-and-OpenCV-inventory.stdout.log",
+      "stderr": "logs/0001-actual-native-SDK-device-and-OpenCV-inventory.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T08:20:13.000620+00:00",
+      "seconds": 0.41527950699673966
+    }
+  ],
+  "source": "source.json",
+  "inputs": "inputs/manifest.json",
+  "expected_environment": "environment.expected.json"
+}

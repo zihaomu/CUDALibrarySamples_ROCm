@@ -1,0 +1,1 @@
+Test cuda-probe for Canny-NPPPlus-contract, case ties-c1. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T083910.467652Z-I0-cuda-build-6a33cbf9de.
