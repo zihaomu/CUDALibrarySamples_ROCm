@@ -280,7 +280,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-11T14:35:51.728086+00:00。26入口当前5通过/7部分/14失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-11T14:41:45.108898+00:00。26入口当前5通过/7部分/14失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -1000,5 +1000,8 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-11T14:33:16.933221+00:00 | I2 | 三项复审缺口已修复并重验：native原始编译rc汇总/封存预检、GetDevice默认/外设备/销毁流预检、独立runtime角色/源身份/几何/query约束。新HIP库27mask/44runtime/trace/15全流程165文件/39CLI均重跑；3额外stream默认0/外设备101/销毁709与完整存储通过，GPU0只建外设备流、仅GPU1计算；31数值/结构/绕过反例及3原生预检反例通过。下一步新固定源码的20子记录冷检出和最终复审。 | `migration/reports/image-ccl-streams-validation.json`；`migration/reports/image-ccl-checks.json`；`migration/reports/image-ccl-native-guard-tests.json`；`migration/rewrite/image-ccl-runtime-contract.json` |
 | 2026-11-11T14:34:55.116008+00:00 | I2 | CCL干净检出/27输入重建/新HIP编译/两C++全15流程及44运行合同冷重放：PASSED；全部子raw和source objects封存。 | `migration/reports/evidence/rewrite/I2/CCL-clean-checkout/20261111T143320.085723Z-I2-host-cold-replay-17225690ca` |
 | 2026-11-11T14:35:51.728086+00:00 | I2 | 复审修复后冷clone再次PASSED：473f2e363空build重建27输入/共享HIP/三个C++配置，27mask、独立固定角色的44runtime、3实际default/foreign/destroyed streams与15完整流程共89项CPU通过，20子raw和source objects封存。复合预检除独立三范围最终review外全部通过，准备签发两个CCL入口，I2其它3入口仍待实现。 | `migration/reports/image-ccl-cold.json`；`migration/reports/image-ccl.md` |
+| 2026-11-11T14:39:25.329090+00:00 | I0 | NPP findContour未改原例默认完整输入：build=0 run=0，逐文件完整字节已保留；不从rc推断geometry正确或ROCm支持。 | `migration/reports/evidence/rewrite/I0/NPP_findContour__findContour.cpp/20261111T143920.643375Z-I0-cuda-original-44dd678001` |
+| 2026-11-11T14:39:30.596903+00:00 | I0 | NPP+ findContour未改原例默认完整输入：build=0 run=0，逐文件完整字节已保留；不从rc推断geometry正确或ROCm支持。 | `migration/reports/evidence/rewrite/I0/NPP__findContour__findContourNPPPlus.cpp/20261111T143925.653981Z-I0-cuda-original-8d2d32ef8b` |
+| 2026-11-11T14:41:45.108898+00:00 | I2 | CCL两个已签发资格发布前实测拒绝：未首次Git封存及不完整两入口组均在主表修改前阻断；catalog SHA完全不变。PASSED | `migration/reports/evidence/rewrite/I2/CCL-first-publication-and-complete-group-guards/20261111T144131.655597Z-I2-CPU-publication-test-d4b32abc5d` |
 
 <!-- IMAGE_EXECUTION:END -->

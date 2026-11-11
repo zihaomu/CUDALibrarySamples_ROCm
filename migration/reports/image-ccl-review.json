@@ -1,0 +1,46 @@
+{
+  "verdict": "APPROVED",
+  "source_commit": "e2c01dabdb8309a8cc6ae958996fc9288afebb6d",
+  "reviewed_at": "2026-11-11T14:40:55.501066+00:00",
+  "reviewers": [
+    {
+      "reviewer_id": "/root/r1_contract_review",
+      "scope": "kernel-stream",
+      "verdict": "APPROVED",
+      "summary": "CCL/scan/span/integer/batch/stream/resource and real C++ callers; all20 cold children and89 cases independently checked."
+    },
+    {
+      "reviewer_id": "/root/r2_contract_review",
+      "scope": "acceptance-publication",
+      "verdict": "APPROVED",
+      "summary": "All25 gates,133 proof references,41 source closure entries; fixed runtime roles/inputs, native propagation/preflight, cold20/89 and mandatory first-Git publication checked."
+    },
+    {
+      "reviewer_id": "/root/remaining_scope_review",
+      "scope": "workflow-reproduction",
+      "verdict": "APPROVED",
+      "summary": "Original five inputs, three compile modes, batch1..5/165files/39CLI, native success vs partition failure, fresh build and20 child seals checked."
+    }
+  ],
+  "findings": [
+    {
+      "issue": "Native original compile return codes did not propagate; missing identity could orphan a runner record.",
+      "state": "RESOLVED",
+      "commit": "473f2e3633f687865a26655ca35f9fe38c1c9b75",
+      "validation": "All54 API/3 original modes replayed;3 actual runner rejection paths sealed."
+    },
+    {
+      "issue": "Runtime producer could redefine case kind/query validity/source identity.",
+      "state": "RESOLVED",
+      "commit": "473f2e3633f687865a26655ca35f9fe38c1c9b75",
+      "validation": "Independent44-case contract and known initial storage hashes;4 bypass mutations rejected within31 checks."
+    },
+    {
+      "issue": "Stream flags query rejected default stream and did not verify stream device.",
+      "state": "RESOLVED",
+      "commit": "473f2e3633f687865a26655ca35f9fe38c1c9b75",
+      "validation": "GetDevice check;default0/foreign101/destroyed709;all affected GPU/CPU and cold proof replayed."
+    }
+  ],
+  "scope": "Linux/gfx1201/ROCm10.1 full two C++ CCL entries. Native mathematical defects remain separate; no performance, wave64 or Windows approval."
+}
