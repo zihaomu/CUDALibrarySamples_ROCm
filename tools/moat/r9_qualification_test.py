@@ -58,6 +58,14 @@ class Promotion(unittest.TestCase):
    return original(path,*args,**kwargs)
   with patch.object(type(ROOT),'read_text',read):
    with self.assertRaisesRegex(ValueError,'unsealed composite qualification'):publish_r9.validate_qualification(forged,dict(id=self.profile['sample_id']),self.profile,self.review)
+ def test_publisher_binds_actual_source_language(self):
+  import publish_r9
+  p=json.loads((ROOT/'migration/rewrite/helpers-benchmark.json').read_text())['helpers'][3]
+  qrow=dict(kind='matrix-helper/'+p['language']+'/'+p['kind'],implementation=p['implementation'],implementation_sha256=q.digest(ROOT/p['implementation']))
+  publish_r9.profile_identity(qrow,p)
+  for field,value in [('kind','matrix-helper/cpp/'+p['kind']),('implementation',self.profile['implementation']),('implementation_sha256','0'*64)]:
+   wrong=dict(qrow);wrong[field]=value
+   with self.assertRaisesRegex(ValueError,'source-language/profile identity'):publish_r9.profile_identity(wrong,p)
  def test_complete_crc_proof(self):self.assertTrue(all(c['passed'] for c in self.crc()))
  def test_crc_output_redirect(self):self.rejected(self.crc('rewrite-R9-crc-benchmark-rocm.json',lambda r:r['original-auto'].update(output='nonexistent-output')))
  def test_crc_native_binary_identity(self):self.rejected(self.crc('rewrite-R9-crc-benchmark-native-build.json',lambda b:b.update(binary_sha256='0'*64)))
