@@ -33,7 +33,11 @@ assert all(v["status"]=="PASSED" for v in rows)
   rc=e.command([str(ROOT/'build/image-cpu-venv/bin/python'),'-c',code,str(clone),str(ROOT),str(e.path)],'independent-full-cold-output-validation',timeout=300)
   checks.append(dict(check='fresh-31-masks-and-eight-original-files-CPU',passed=rc==0))
   for name in ['environment','fixture-replay','build','rocm','original']:
-   report=json.loads((clone/('migration/reports/canny-plus-'+name+'.json')).read_text());reference=clone/report['evidence'];meta=json.loads((reference/'manifest.json').read_text());raw=clone/meta['raw_artifact_dir'];dest=e.path/'child-evidence'/name;shutil.copytree(raw,dest);child.append(dict(name=name,relative=str(dest.relative_to(e.path)),report=report))
+   report=json.loads((clone/('migration/reports/canny-plus-'+name+'.json')).read_text());reference=clone/report['evidence'];meta=json.loads((reference/'manifest.json').read_text());raw=clone/meta['raw_artifact_dir'];dest=e.path/'child-evidence'/name;shutil.copytree(raw,dest)
+   # The original child seal is a parent payload, not an independent record
+   # rooted at this checkout: its raw_artifact_dir belongs to the clean clone.
+   # Give it a distinct name so the generic archive scan does not mis-root it.
+   (dest/'sealed.json').rename(dest/'child-seal.json');child.append(dict(name=name,relative=str(dest.relative_to(e.path)),report=report))
   build=next(r['report'] for r in child if r['name']=='build');checks.append(dict(check='fresh-compiled-source-closure',passed=all(digest(ROOT/n)==sha for n,sha in build['dependencies'].items())))
  checks.append(dict(check='cold-final-process-success',passed=rc==0))
  status='PASSED' if checks and all(c['passed'] is True for c in checks) else 'FAILED';result=dict(status=status,checks=checks,source_commit=commit,clone=str(clone),children=child,return_code=rc)
