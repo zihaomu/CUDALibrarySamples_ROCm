@@ -1,0 +1,1 @@
+Test CPU-reference for NPP+/cannyEdgeDetectorPython::cannyEdgeDetector.py, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T115739.481820Z-I1-rocm-run-575b7c18ef.

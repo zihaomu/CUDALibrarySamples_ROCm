@@ -1,0 +1,1 @@
+Test CPU-reference for CannyPlus-runtime-independent-CPU, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T120547.372744Z-I1-rocm-runtime-ebd02aa12f.

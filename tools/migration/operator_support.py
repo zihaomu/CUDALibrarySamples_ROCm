@@ -18,6 +18,7 @@ def operator_name(sample):
  if family=='cuTENSORMg':return '多 GPU 张量 contraction'
  if family.startswith('MathDx/'):return {'introduction_example':'设备内 GEMM','simple_fft_block':'设备内 C2C FFT','potrf_block':'设备内 complex Cholesky','getrf_partial_pivot_block':'设备内 partial-pivot LU','posv_batched_block':'设备内 Cholesky 分解/求解','trsm_batched_block':'设备内三角求解'}[path.stem]
  if family=='NPP':return {'distanceTransform':'Euclidean 距离变换/Voronoi','templateMatching':'零均值 NCC','nppCanny':'三通道 Canny'}[path.parent.name]
+ if family=='NPP+':return {'cannyEdgeDetectorPython':'单通道 Canny'}[path.parent.name]
  if family=='cuBLASLt':return 'GEMM'
  if family=='cuSPARSELt':return '2:4 结构化稀疏 GEMM（含裁剪/压缩）'
  if family=='cuDSS' and 'matrix_helpers' in kind:return '稠密矩阵描述符管理' if 'dense_matrix' in kind else 'CSR 矩阵描述符管理'
@@ -53,6 +54,7 @@ SCOPES={
  'cuTENSOR':'FP32：contraction 用 rocBLAS + HIP；其它已通过的逐元素/permutation/reduction 使用 hipTensor。逐例记录原始 extents 与扩展小尺寸、全部输出 CPU 检查；contraction 的原始规模另为抽样验收。'}
 
 SCOPES.update({
+ 'NPP+':'项目HIP C1 Sobel3/整数L2/NMS/局部阈值，ROCm Torch/C ABI；原例8分辨率、5次预热/1000测量和PNG/CSV，31组CPU精确mask及native API比较，stream/并发/非法span/trace与独立审查。native内部精确一致，3外圈差异按项目边界定义接受；无跨设备性能结论。其它入口单列。',
  'cuSPARSELt':'默认FP16 A/B/C/bias、FP32累积；项目HIP 4×4 TILE最大L1裁剪、实际packed values/metadata及只读压缩数据的稀疏乘法，basic GPU搜索，advanced双batch/stride/bias/ReLU。14输入CPU/原生稀疏数学对照及两个原CUDA程序另验；原生hipSPARSELt/gfx1201失败另存，不声明原生加速/opaque格式兼容。',
  'cuBLASMp':'已登记FP64 GEADD与1024阶block-cyclic重分布/往返；双MPI进程和不同GPU实际通信。GEMM子矩阵与低精度collective/quantized scale模式等缺口保持PARTIAL，未覆盖多节点。',
  'cuFFTMp':'双MPI rank，原始16³及不均匀17×13×9；hipFFT本地YZ/X FFT + RCCL Send/Recv + HIP pack/unpack/归一化，完整频域与逆变换输出。',

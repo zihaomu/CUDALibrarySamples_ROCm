@@ -1,0 +1,1 @@
+Test rocm-trace for CannyPlus-runtime, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T115553.659333Z-I1-rocm-build-7d346fc325.

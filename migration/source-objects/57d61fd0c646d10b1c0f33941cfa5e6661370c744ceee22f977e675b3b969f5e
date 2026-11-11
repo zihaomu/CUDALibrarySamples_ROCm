@@ -1,0 +1,58 @@
+#!/usr/bin/env python3
+"""Independent CPU verification of complete masks and the original file workflow."""
+import argparse,csv,json,math
+import cv2,numpy as np
+from experiment import ROOT,Experiment,write,digest
+from image_validation import coverage,file_set,fixture_identity,array_check
+from image_canny_stages_reference import reference
+from image_canny_local_research import local_mask
+from image_progress import record
+
+def check_pixels(path,expected,sha=None):
+ return array_check(path,expected,sha or (digest(path) if path.is_file() else ''))
+
+def main():
+ p=argparse.ArgumentParser();p.add_argument('--original',action='store_true');args=p.parse_args()
+ profile=ROOT/'migration/rewrite/canny-plus-profile.json';spec=json.loads(profile.read_text());runfile=ROOT/('migration/reports/canny-plus-original.json' if args.original else 'migration/reports/canny-plus-rocm.json');run=json.loads(runfile.read_text())
+ sources=[__file__,profile,ROOT/'tools/moat/image_validation.py',ROOT/'tools/moat/image_canny_stages_reference.py',ROOT/'tools/moat/image_canny_local_research.py']
+ e=Experiment('I1',spec['sample_id'],'CPU-original' if args.original else 'CPU-reference',sources=sources,parent=run['experiment_id']);checks=[dict(check='actual-GPU-process-exit',passed=run['return_code']==0)];results=[]
+ try:
+  out=ROOT/run['outputs'];cases=[c for c in spec['cases'] if c['kind']=='original'] if args.original else spec['cases'];native={r['case']:r for r in json.loads((ROOT/'migration/reports/canny-plus-native.json').read_text())}
+  if args.original:
+   audit=ROOT/run['audit'];bench=json.loads((audit/'benchmark.json').read_text());rows=bench['resolutions'];checks.append(coverage(rows,cases))
+   pngnames=['out_npp_'+r['case'].replace('original-','')+'.png' for r in cases];checks.append(file_set(out,pngnames+['performance_results.csv']))
+   csvrows=list(csv.DictReader((out/'performance_results.csv').open()));checks.append(dict(check='complete-CSV-rows-and-backend',passed=len(csvrows)==8 and {r['Resolution'] for r in csvrows}=={c['case'].replace('original-','') for c in cases} and all(r['Backend']=='Project HIP local Canny' and math.isfinite(float(r['HIP Time (ms)'])) and float(r['HIP Time (ms)'])>0 for r in csvrows)))
+   assert bench['library']==str((ROOT/run['build']['library']).resolve())
+   rows_by_name={r['case']:r for r in rows}
+  else:
+   rows=json.loads((out/'results.json').read_text());checks.append(coverage(rows,cases));rows_by_name={r['case']:r for r in rows}
+   checks.append(dict(check='complete-native-case-set',passed=set(native)=={c['case'] for c in cases}))
+  for case in cases:
+   name=case['case'];fixture=ROOT/case['fixture'];c=json.loads((fixture/'config.json').read_text());h,w=c['height'],c['width'];row=rows_by_name[name]
+   own=[fixture_identity(fixture,case['manifest_sha256'])];expected=local_mask(reference(fixture),c['low'],c['high']);expected.tofile(e.path/(name+'-CPU.bin'))
+   if args.original:
+    label=name.replace('original-','');pixels=cv2.imread(str(out/('out_npp_'+label+'.png')),cv2.IMREAD_UNCHANGED)
+    own.append(dict(check='PNG-full-CPU-pixels',passed=pixels is not None and pixels.dtype==np.uint8 and pixels.shape==expected.shape and np.array_equal(pixels,expected)))
+    own.append(check_pixels(audit/(label+'-mask.bin'),expected))
+    gray=np.fromfile(fixture/'input.bin',np.uint8).reshape(h,c['pitch'])[:,:w];own.append(check_pixels(audit/(label+'-input.bin'),np.ascontiguousarray(gray)))
+    timings=row['timings_ms'];own.append(dict(check='original-eight-sizes-5-warmup-1000-measurements',passed=row['width']==w and row['height']==h and row['warmup']==5 and row['iterations']==1000 and len(timings)==1000 and all(math.isfinite(t) and t>0 for t in timings)))
+   else:
+    directory=out/name;own.append(file_set(directory,['pitched.bin','python.bin']));own.append(dict(check='library-and-input-identity',passed=row['library_sha256']==run['build']['library_sha256'] and row['input_manifest_sha256']==case['manifest_sha256']))
+    padded=np.full((h,c['output_pitch']),173,np.uint8);padded[:,:w]=expected
+    own.append(check_pixels(directory/'pitched.bin',padded,row['outputs']['pitched.bin']['sha256']));own.append(check_pixels(directory/'python.bin',expected,row['outputs']['python.bin']['sha256']))
+   r=native[name];npath=ROOT/r['outputs']/'output.bin';own.append(dict(check='native-command-and-identical-input',passed=r['return_code']==0 and r['collection_return_code']==0 and r['input_manifest_sha256']==case['manifest_sha256']))
+   if npath.is_file() and npath.stat().st_size==h*c['output_pitch']:
+    gold=np.fromfile(npath,np.uint8).reshape(h,c['output_pitch'])[:,:w];a=expected>0;b=gold>0;interior=(slice(1,-1),slice(1,-1));ai=a[interior];bi=b[interior];union=int(np.count_nonzero(ai|bi));iou=float(np.count_nonzero(ai&bi)/union) if union else 1.
+    different=expected!=gold;inside=different.copy();inside[[0,-1],:]=False;inside[:,[0,-1]]=False
+    cross=dict(interior_IoU=iou,different_pixels=int(different.sum()),interior_differences=int(inside.sum()),project_edges=int(a.sum()),native_edges=int(b.sum()))
+    own.append(dict(check='declared-functional-native-comparison',passed=bool(iou>=spec['native_policy']['interior_IoU_min'] and (case['kind']!='original' or (a.any() and b.any()))),**cross))
+   else:own.append(dict(check='complete-native-output-bytes',passed=False))
+   checks += [dict(item,check=name+'/'+item['check']) for item in own];results.append(dict(case=name,status='PASSED' if all(v['passed'] for v in own) else 'FAILED',checks=own));write(e.path/'cases.json',results);print(name,results[-1]['status'],flush=True)
+ except Exception as error:checks.append(dict(check='complete-validation-no-missing-data',passed=False,error=repr(error)))
+ validation=dict(status='PASSED' if checks and all(c['passed'] is True or c['passed']==True for c in checks) else 'FAILED',checks=checks,case_count=len(results),scope='Declared functional-equivalence profile; original file workflow checked separately from case masks.')
+ # Convert NumPy scalar comparisons to canonical booleans for immutable records.
+ for c in checks:c['passed']=bool(c['passed'])
+ ref=e.finish('PASSED' if validation['status']=='PASSED' else 'NUMERIC_MISMATCH',validation)
+ write(ROOT/('migration/reports/canny-plus-original-validation.json' if args.original else 'migration/reports/canny-plus-validation.json'),dict(**validation,cases=results,evidence=ref,parent=run['evidence']))
+ record('I1',('完整原始Python流程' if args.original else '31组完整mask')+' 独立CPU/原生对照：'+validation['status']+'；按固定功能等价profile，保留所有边界与内部差异。',[ref]);print(validation['status'],ref);return int(validation['status']!='PASSED')
+if __name__=='__main__':raise SystemExit(main())

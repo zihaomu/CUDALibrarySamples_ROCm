@@ -1,0 +1,299 @@
+{
+  "schema_version": 1,
+  "status": "FROZEN_IMPLEMENTATION_PROFILE",
+  "sample_id": "NPP+/cannyEdgeDetectorPython::cannyEdgeDetector.py",
+  "source": "NPP+/cannyEdgeDetectorPython/cannyEdgeDetector.py",
+  "original_source_sha256": "74c58b322283e9979d26a793b915291db457f2a4c33515947e82608c4ee1fe16",
+  "original_image_sha256": "3fc3d9938ac87c4fe21c42126644a6696637a444bcf1e60c90309aeaab39a625",
+  "implementation": "rocm/ported/NPP+/cannyEdgeDetectorPython/cannyEdgeDetector.py",
+  "comparison_mode": "ALGORITHM_VARIANT",
+  "algorithm": {
+    "stages": "migration/rewrite/image-canny-stages-contract.json",
+    "strong": "suppressed > high",
+    "weak": "suppressed >= low AND a gradient-axis neighbour has equal suppressed magnitude and the same quantized direction",
+    "border": "independently clamp neighbour x/y to image bounds; no boundary-self substitution",
+    "threshold_range": [
+      0,
+      32767
+    ],
+    "layout": "C1 uint8 source with byte pitch; independently pitched output 0/255; padding untouched"
+  },
+  "original": {
+    "resolutions": [
+      [
+        320,
+        180
+      ],
+      [
+        640,
+        360
+      ],
+      [
+        800,
+        600
+      ],
+      [
+        1280,
+        720
+      ],
+      [
+        1920,
+        1080
+      ],
+      [
+        2560,
+        1440
+      ],
+      [
+        3840,
+        2160
+      ],
+      [
+        5120,
+        2880
+      ]
+    ],
+    "warmup": 5,
+    "iterations": 1000,
+    "low": 72,
+    "high": 256,
+    "preprocess": "cv2 BGR resize -> Torch CHW -> torchvision RGB-to-gray applied to original BGR ordering"
+  },
+  "required_runtime": [
+    "repeat-and-changed-input",
+    "two-streams",
+    "concurrent-instances",
+    "CPU-float32-and-float16-conversion",
+    "pitched-and-noncontiguous",
+    "invalid-shape-dtype-threshold-ABI-span-alias",
+    "full-original-file-profile",
+    "actual-GPU-trace",
+    "validator-positive-negative"
+  ],
+  "native_policy": {
+    "interior_IoU_min": 0.98,
+    "original_nonempty": true,
+    "outer_border": "Full project CPU comparison remains exact; native outer differences reported under declared boundary semantics, never discarded from logs.",
+    "small_dimensions": "Project extension; native may reject only with recorded NPP size diagnostic. Original8-resolution baseline must run successfully."
+  },
+  "cases": [
+    {
+      "case": "original-320x180",
+      "fixture": "build/canny-plus-fixtures/original-320x180",
+      "manifest_sha256": "bea124903ae91dd57db42e36245a1f2d12d8b85899b273509f59d7832bd1918b",
+      "kind": "original",
+      "native_size_extension": false
+    },
+    {
+      "case": "original-640x360",
+      "fixture": "build/canny-plus-fixtures/original-640x360",
+      "manifest_sha256": "0bcf3bd9ee468059846ae49fd82713b3e75c21d33cd60f5d45adce3021529006",
+      "kind": "original",
+      "native_size_extension": false
+    },
+    {
+      "case": "original-800x600",
+      "fixture": "build/canny-plus-fixtures/original-800x600",
+      "manifest_sha256": "e9dc76f143ed1ae9f2026de4addf04b932ec24cdfdf9db6d039a1d6e25e69c2f",
+      "kind": "original",
+      "native_size_extension": false
+    },
+    {
+      "case": "original-1280x720",
+      "fixture": "build/canny-plus-fixtures/original-1280x720",
+      "manifest_sha256": "04593b3aab7e333dbd9b683f6981543e16860028cbe04db25317e2b8c573d1fe",
+      "kind": "original",
+      "native_size_extension": false
+    },
+    {
+      "case": "original-1920x1080",
+      "fixture": "build/canny-plus-fixtures/original-1920x1080",
+      "manifest_sha256": "0966a6f1859ce818ba8ba75f53ea4958ee54dde45580fdd33dbcef39f1ec1957",
+      "kind": "original",
+      "native_size_extension": false
+    },
+    {
+      "case": "original-2560x1440",
+      "fixture": "build/canny-plus-fixtures/original-2560x1440",
+      "manifest_sha256": "0820cac25672f69600110ae7aacf1a56b3c4939ac9efc2458f7fd1319d2f5de8",
+      "kind": "original",
+      "native_size_extension": false
+    },
+    {
+      "case": "original-3840x2160",
+      "fixture": "build/canny-plus-fixtures/original-3840x2160",
+      "manifest_sha256": "3435988a7f5b40fb2610b1c993f0e61e0c75b7600b9339c16eb417d2fc644a66",
+      "kind": "original",
+      "native_size_extension": false
+    },
+    {
+      "case": "original-5120x2880",
+      "fixture": "build/canny-plus-fixtures/original-5120x2880",
+      "manifest_sha256": "1f2fa146cf4dc8041bc8856be7ac85a2a923ffa08fd001eaf1b6ae52bde299e4",
+      "kind": "original",
+      "native_size_extension": false
+    },
+    {
+      "case": "registered-teapot-c1",
+      "fixture": "build/canny-plus-fixtures/registered-teapot-c1",
+      "manifest_sha256": "3c71bf8c2ce2a148218d22b637ada324b4c08025623b4908337b24164640bf6c",
+      "kind": "registered-research",
+      "native_size_extension": false
+    },
+    {
+      "case": "registered-noise-c1",
+      "fixture": "build/canny-plus-fixtures/registered-noise-c1",
+      "manifest_sha256": "3c546f797623d6958ca117a82f1b08360764ad1260682b8253201c34bd6fb86b",
+      "kind": "registered-research",
+      "native_size_extension": false
+    },
+    {
+      "case": "registered-ties-c1",
+      "fixture": "build/canny-plus-fixtures/registered-ties-c1",
+      "manifest_sha256": "67769736b51dbfd4927ffe975d1f4a5ef049112d21e783146a19f87df11dae47",
+      "kind": "registered-research",
+      "native_size_extension": false
+    },
+    {
+      "case": "registered-step-c1",
+      "fixture": "build/canny-plus-fixtures/registered-step-c1",
+      "manifest_sha256": "ab6733084d364c0c435204bff4159a004c6da058e2b249d427effc580ca5f652",
+      "kind": "registered-research",
+      "native_size_extension": false
+    },
+    {
+      "case": "registered-tiny-c1",
+      "fixture": "build/canny-plus-fixtures/registered-tiny-c1",
+      "manifest_sha256": "fea0088a7802da4db68274824284e5f4771c860e7a324e7e83cf08f5a71d809f",
+      "kind": "registered-research",
+      "native_size_extension": false
+    },
+    {
+      "case": "registered-holdout-weak-step-c1",
+      "fixture": "build/canny-plus-fixtures/registered-holdout-weak-step-c1",
+      "manifest_sha256": "d41d8499f5fe682a9b1ff8872c2d6b7f2ec727124524a9cf17895c9d5caa6e92",
+      "kind": "registered-research",
+      "native_size_extension": false
+    },
+    {
+      "case": "registered-holdout-weak-cross-c1",
+      "fixture": "build/canny-plus-fixtures/registered-holdout-weak-cross-c1",
+      "manifest_sha256": "a9969cd99848693d2429bf996899ee6b994907fcc5f718f5806adcd9a4171846",
+      "kind": "registered-research",
+      "native_size_extension": false
+    },
+    {
+      "case": "registered-holdout-weak-diagonal-c1",
+      "fixture": "build/canny-plus-fixtures/registered-holdout-weak-diagonal-c1",
+      "manifest_sha256": "e68ae9bbadfece2c0407fc801ba1f486f72ec4cda55b1f40753b86079a9fc1a0",
+      "kind": "registered-research",
+      "native_size_extension": false
+    },
+    {
+      "case": "registered-holdout-low-noise-c1",
+      "fixture": "build/canny-plus-fixtures/registered-holdout-low-noise-c1",
+      "manifest_sha256": "8d62842e74cdf5bcd420baa79983dcbe916e2132f8b88744b34bfb675965d0cc",
+      "kind": "registered-research",
+      "native_size_extension": false
+    },
+    {
+      "case": "registered-holdout-mixed-noise-c1",
+      "fixture": "build/canny-plus-fixtures/registered-holdout-mixed-noise-c1",
+      "manifest_sha256": "34b0c26e59659aac0258e5332bdce745bc02d1858505e332633fbad673501c8d",
+      "kind": "registered-research",
+      "native_size_extension": false
+    },
+    {
+      "case": "registered-border-check91203-c1",
+      "fixture": "build/canny-plus-fixtures/registered-border-check91203-c1",
+      "manifest_sha256": "5f0e77cb253e0d90dd4629caa017e0af42812f631a8c6744cdfedce28c76b20e",
+      "kind": "registered-research",
+      "native_size_extension": false
+    },
+    {
+      "case": "registered-border-check40519-c1",
+      "fixture": "build/canny-plus-fixtures/registered-border-check40519-c1",
+      "manifest_sha256": "c6cf1e986bbf685fccc32886025ba2cf9072dbc66684384b02e9109db73e3de9",
+      "kind": "registered-research",
+      "native_size_extension": false
+    },
+    {
+      "case": "registered-border-check83914-c1",
+      "fixture": "build/canny-plus-fixtures/registered-border-check83914-c1",
+      "manifest_sha256": "d8b8fafc50bcda42be0adcc1cf6f96f370caebba1f72f762368f6e067cf330da",
+      "kind": "registered-research",
+      "native_size_extension": false
+    },
+    {
+      "case": "new-one-pixel",
+      "fixture": "build/canny-plus-fixtures/new-one-pixel",
+      "manifest_sha256": "140293e122cdb1b5d731434b3ed2adebee8b9537f0f9d70fede2c72e42ed2bc2",
+      "kind": "holdout",
+      "native_size_extension": true
+    },
+    {
+      "case": "new-single-row",
+      "fixture": "build/canny-plus-fixtures/new-single-row",
+      "manifest_sha256": "359f7b763fc917d3bfe50d92e63e9079bc12316ef2eda310c969eafcc9f04375",
+      "kind": "holdout",
+      "native_size_extension": true
+    },
+    {
+      "case": "new-single-column",
+      "fixture": "build/canny-plus-fixtures/new-single-column",
+      "manifest_sha256": "b56e1e7e56d71b0772750ce5f07c823497c6a37a0325fe277c5c5d926f133fb8",
+      "kind": "holdout",
+      "native_size_extension": true
+    },
+    {
+      "case": "new-flat",
+      "fixture": "build/canny-plus-fixtures/new-flat",
+      "manifest_sha256": "85e04a0c783b4c5bde3b13e93e4edf86f18185b95b0474ccbb8b9270c98a0b50",
+      "kind": "holdout",
+      "native_size_extension": false
+    },
+    {
+      "case": "new-odd-noise",
+      "fixture": "build/canny-plus-fixtures/new-odd-noise",
+      "manifest_sha256": "57bf9d6756331d7e33d2a3ab699b4f5a3874d93d48c317de3b1f4539b36d0431",
+      "kind": "holdout",
+      "native_size_extension": false
+    },
+    {
+      "case": "new-boundary-step",
+      "fixture": "build/canny-plus-fixtures/new-boundary-step",
+      "manifest_sha256": "a3237adc5215b43d95185d99beee4df55e7807d9fb4b91eb5afa7688a3c0c4e0",
+      "kind": "holdout",
+      "native_size_extension": false
+    },
+    {
+      "case": "new-weak-cross",
+      "fixture": "build/canny-plus-fixtures/new-weak-cross",
+      "manifest_sha256": "1997147e9906f1ffd220007b0649f8cd683eb3d02b0eabc9510f5b5dffd56cc1",
+      "kind": "holdout",
+      "native_size_extension": false
+    },
+    {
+      "case": "new-impulse",
+      "fixture": "build/canny-plus-fixtures/new-impulse",
+      "manifest_sha256": "ef8d29c97e24efcac7919468e8a371dab2c12bd62b457b38b5f7890d151406da",
+      "kind": "holdout",
+      "native_size_extension": false
+    },
+    {
+      "case": "new-equal-threshold",
+      "fixture": "build/canny-plus-fixtures/new-equal-threshold",
+      "manifest_sha256": "7399d78f6ca70ade7df8f4abdf9879043ca85cab0b106a056ba1d2fd0b7858f2",
+      "kind": "holdout",
+      "native_size_extension": false
+    },
+    {
+      "case": "new-high-threshold",
+      "fixture": "build/canny-plus-fixtures/new-high-threshold",
+      "manifest_sha256": "6526e37ea3179840ba48e6cde117fafec20a38fc94e4838e59ab8e72b3a8cc17",
+      "kind": "holdout",
+      "native_size_extension": false
+    }
+  ],
+  "fixture_evidence": "migration/reports/evidence/rewrite/I1/CannyPlus-contract-and-fixtures/20261111T115003.674180Z-I1-CPU-fixtures-41b974229d"
+}

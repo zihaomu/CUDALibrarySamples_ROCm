@@ -1,0 +1,1 @@
+Test CPU-reference for CannyPlus-trace-independent-CPU, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T120611.386862Z-I1-rocm-trace-197635086c.

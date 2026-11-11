@@ -1,6 +1,6 @@
 # 图像库功能等价实施方案
 
-日期：2026-11-11。状态：**方案已制定，未据此新增样例资格**。
+日期：2026-11-11。状态：**IN_PROGRESS**。逐步实施中；仅封存资格会增加支持数。
 
 本方案落实用户“合理差异可以接受”的要求，是[完整图像库计划](image-libraries-plan.md)的执行细化。[生效验收政策](rewrite/image-acceptance-policy.json)和[差异复评](reports/image-difference-acceptance.md)作为依据。目标仍为原定 26 个入口：当前 2 通过、8 部分、16 失败，新增目标为 24 个；完整模式和输入分支不删减。
 
@@ -93,3 +93,18 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 容差内的扰动是正向检查，超预算数值偏差和错通道/ROI/模式/丢 batch 是反向检查；不要求所有 1 LSB 扰动都被判错。无损数据、位深/通道/尺寸、ROI/padding、错误行为和 GPU 实际执行仍有硬约束。水印、tile/ROI、连通结构等另作局部/语义检查，不能只用全图 SSIM 判断。
 
 首页仍只展示当前支持情况；批次过程与完整日志保留在[逐步记录](reports/image-libraries-progress.md)和[支持日志总表](reports/support-log-index.md)。当前计数维持项目 241/23/375、图像 2/8/16，直到实际入口资格签发。
+
+
+<!-- IMAGE_EXECUTION:START -->
+
+## 当前实施检查点
+
+更新时间：2026-11-11T12:13:30.109667+00:00。26入口当前2通过/8部分/16失败。
+
+I1：31组原始/随机/几何输入从源码重新生成：PASSED；未替换冻结profile或历史来源。
+
+证据：`migration/reports/evidence/rewrite/I1/CannyPlus-deterministic-fixture-replay/20261111T121328.945896Z-I1-CPU-fixtures-5afa78314d`
+
+完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
+
+<!-- IMAGE_EXECUTION:END -->

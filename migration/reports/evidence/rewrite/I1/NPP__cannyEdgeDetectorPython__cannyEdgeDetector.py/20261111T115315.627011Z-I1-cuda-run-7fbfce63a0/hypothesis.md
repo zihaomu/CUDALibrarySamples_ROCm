@@ -1,0 +1,1 @@
+Test cuda-run for NPP+/cannyEdgeDetectorPython::cannyEdgeDetector.py, case original-1920x1080. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T115300.937762Z-I1-cuda-build-f2915ac7e8.

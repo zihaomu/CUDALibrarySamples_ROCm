@@ -1,0 +1,97 @@
+{
+  "commands": [
+    {
+      "command_id": 1,
+      "phase": "prepare",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "mkdir -p /tmp/20261111T115148.236244Z-I1-cuda-build-78e755b6be"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T11:51:51.301855+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0001-prepare.stdout.log",
+      "stderr": "logs/0001-prepare.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T11:51:51.620404+00:00",
+      "seconds": 0.3163556919898838
+    },
+    {
+      "command_id": 2,
+      "phase": "upload-frozen-inputs",
+      "argv": [
+        "scp",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I1/NPP__cannyEdgeDetectorPython__cannyEdgeDetector.py/20261111T115148.236244Z-I1-cuda-build-78e755b6be/inputs.tar.gz",
+        "nvidia-5090x2:/tmp/20261111T115148.236244Z-I1-cuda-build-78e755b6be/inputs.tar.gz"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T11:51:51.622308+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0002-upload-frozen-inputs.stdout.log",
+      "stderr": "logs/0002-upload-frozen-inputs.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T11:51:52.039449+00:00",
+      "seconds": 0.4162124209688045
+    },
+    {
+      "command_id": 3,
+      "phase": "extract",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "tar -xzf /tmp/20261111T115148.236244Z-I1-cuda-build-78e755b6be/inputs.tar.gz -C /tmp/20261111T115148.236244Z-I1-cuda-build-78e755b6be"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T11:51:52.041382+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0003-extract.stdout.log",
+      "stderr": "logs/0003-extract.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T11:51:52.508254+00:00",
+      "seconds": 0.46587815799284726
+    },
+    {
+      "command_id": 4,
+      "phase": "build-real-NPPPlus-counterpart",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "/usr/local/cuda-13.4/bin/nvcc -std=c++17 -O2 -arch=sm_120 -DIMAGE_NPP_PLUS -I/tmp/image-library-private-SDKs/nppplus-0.10.0.0/libnpp_plus-linux-x86_64-0.10.0.0_cuda12-archive/include /tmp/20261111T115148.236244Z-I1-cuda-build-78e755b6be/canny.cpp -L/tmp/image-library-private-SDKs/nppplus-0.10.0.0/libnpp_plus-linux-x86_64-0.10.0.0_cuda12-archive/lib -Xlinker -rpath -Xlinker /tmp/image-library-private-SDKs/nppplus-0.10.0.0/libnpp_plus-linux-x86_64-0.10.0.0_cuda12-archive/lib -lnpp_plus_if -lnpp_plus_c -o /tmp/20261111T115148.236244Z-I1-cuda-build-78e755b6be/canny"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T11:51:52.510499+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0004-build-real-NPPPlus-counterpart.stdout.log",
+      "stderr": "logs/0004-build-real-NPPPlus-counterpart.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T11:51:53.681176+00:00",
+      "seconds": 1.169754959992133
+    },
+    {
+      "command_id": 5,
+      "phase": "binary-and-SDK-identities",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "sha256sum /tmp/20261111T115148.236244Z-I1-cuda-build-78e755b6be/canny /tmp/image-library-private-SDKs/nppplus-0.10.0.0/libnpp_plus-linux-x86_64-0.10.0.0_cuda12-archive/lib/libnpp_plus_if.so /tmp/image-library-private-SDKs/nppplus-0.10.0.0/libnpp_plus-linux-x86_64-0.10.0.0_cuda12-archive/lib/libnpp_plus_c.so"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-11T11:51:53.682647+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0005-binary-and-SDK-identities.stdout.log",
+      "stderr": "logs/0005-binary-and-SDK-identities.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-11T11:51:54.148646+00:00",
+      "seconds": 0.4654961899504997
+    }
+  ],
+  "source": "source.json",
+  "inputs": "inputs/manifest.json",
+  "expected_environment": "environment.expected.json"
+}

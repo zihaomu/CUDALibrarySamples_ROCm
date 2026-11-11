@@ -1,0 +1,100 @@
+#!/usr/bin/env python3
+"""Recompute the complete C1 sample qualification from sealed original-size runs."""
+import argparse,functools,hashlib,json,shlex,subprocess
+from pathlib import Path
+from experiment import ROOT,Experiment,write,digest
+from audit import check as audit
+from canny_plus_validate import validate
+from canny_plus_runtime_validate import validate as runtime_validate
+from canny_plus_build import dependencies
+
+def load(name):return json.loads((ROOT/('migration/reports/canny-plus-'+name+'.json')).read_text())
+
+@functools.lru_cache(maxsize=None)
+def sealed(ref):
+ d=ROOT/ref;members=json.loads((d/'sealed.json').read_text())['files']
+ if not {'manifest.json','source.json','validation.json'}<=set(members) or audit(d):raise ValueError('invalid evidence seal '+ref)
+ src=json.loads((d/'source.json').read_text())
+ if any(not (ROOT/n).is_file() or digest(ROOT/n)!=sha for n,sha in src['dependencies'].items()):raise ValueError('stale proof source '+ref)
+ return d,json.loads((d/'manifest.json').read_text()),src
+
+def reviewed(review,names,refs):
+ if not review or review.get('verdict')!='APPROVED' or len(review.get('reviewers',[]))<3 or any(r.get('verdict')!='APPROVED' for r in review['reviewers']):return False
+ commit=review['source_commit']
+ for name in names:
+  data=subprocess.check_output(['git','show',commit+':'+name],cwd=ROOT,stderr=subprocess.DEVNULL)
+  if hashlib.sha256(data).hexdigest()!=digest(ROOT/name):return False
+ for ref in refs:
+  name=ref+'/sealed.json'
+  if subprocess.check_output(['git','show',commit+':'+name],cwd=ROOT)!=(ROOT/name).read_bytes():return False
+ return True
+
+def collect(review=None):
+ spec=json.loads((ROOT/'migration/rewrite/canny-plus-profile.json').read_text());build=load('build');native_build=load('native-build');natives=load('native');gpu=load('rocm');original=load('original');cpu=load('validation');original_cpu=load('original-validation');runtime=load('runtime');runtime_cpu=load('runtime-validation');trace=load('trace');trace_cpu=load('trace-validation');negative=load('checks');cuda_original=load('original-cuda');checks=[];refs=set()
+ def gate(name,fn):
+  try:ok=bool(fn())
+  except (OSError,ValueError,KeyError,TypeError,IndexError,StopIteration,AssertionError,subprocess.CalledProcessError):ok=False
+  checks.append(dict(check=name,passed=ok));return ok
+ def report(record,member,backend=None):
+  ref=record['evidence'];refs.add(ref);d,m,_=sealed(ref)
+  if backend and m['backend']!=backend:return False
+  if m['experiment_id']!=record.get('experiment_id',m['experiment_id']):return False
+  return json.loads((d/member).read_text())=={k:v for k,v in record.items() if k not in {'evidence','parent'}}
+ gate('fixed-31-cases-8-original-sizes',lambda:len(spec['cases'])==31 and len({c['case'] for c in spec['cases']})==31 and len([c for c in spec['cases'] if c['kind']=='original'])==8 and spec['original']['warmup']==5 and spec['original']['iterations']==1000)
+ gate('unmodified-original-source-and-image',lambda:digest(ROOT/spec['source'])==spec['original_source_sha256'] and digest(ROOT/'NPP+/cannyEdgeDetectorPython/Teapot.jpg')==spec['original_image_sha256'])
+ def fixture_ok():
+  refs.add(spec['fixture_evidence']);d,m,_=sealed(spec['fixture_evidence']);expected=dict(spec);expected.pop('fixture_evidence')
+  return m['backend']=='CPU-fixtures' and json.loads((d/'profile.json').read_text())==expected
+ gate('frozen-original-preprocessing-and-fixtures',fixture_ok)
+ def replay_ok():
+  replay=load('fixture-replay');refs.add(replay['evidence']);d,m,_=sealed(replay['evidence']);v=json.loads((d/'replay.json').read_text())
+  return m['experiment_outcome']=='PASSED' and v=={k:x for k,x in replay.items() if k!='evidence'} and v['status']=='PASSED' and len(v['checks'])==31 and all(c['passed'] is True for c in v['checks']) and {c['check'] for c in v['checks']}=={c['case'] for c in spec['cases']}
+ gate('deterministic-frozen-input-reconstruction',replay_ok)
+ def build_ok():
+  return report(build,'build.json','rocm-build') and build['status']=='BUILT' and set(build['dependencies'])=={str(p.relative_to(ROOT)) for p in dependencies()} and all(digest(ROOT/n)==h for n,h in build['dependencies'].items()) and build['build_recipe_sha256']==digest(ROOT/'tools/moat/canny_plus_build.py') and digest(ROOT/build['library'])==build['library_sha256'] and all(c['return_code']==0 for c in json.loads((ROOT/build['evidence']/'commands.json').read_text()))
+ gate('current-shared-library-source-and-build-command',build_ok)
+ def native_build_ok():
+  if not report(native_build,'build.json','cuda-build') or native_build['status']!='BUILT':return False
+  d,_,_=sealed(native_build['evidence']);lines=(d/'logs/0005-binary-and-SDK-identities.stdout.log').read_text().splitlines();sdk=native_build['SDK']
+  return lines[0].split()[0]==native_build['binary_sha256'] and lines[1].split()[0]==sdk['files']['lib/libnpp_plus_if.so']['sha256'] and lines[2].split()[0]==sdk['files']['lib/libnpp_plus_c.so']['sha256'] and all(c['return_code']==0 for c in json.loads((d/'commands.json').read_text()))
+ gate('actual-native-SDK-and-binary-build',native_build_ok)
+ gate('unique-complete-native-31-case-set',lambda:len(natives)==31 and {r['case'] for r in natives}=={c['case'] for c in spec['cases']})
+ for row in natives:
+  def native_ok(row=row):
+   if not report(row,'run.json','cuda-run') or row['build']!=native_build or row['return_code'] or row['collection_return_code']:return False
+   d,m,_=sealed(row['evidence']);commands=json.loads((d/'commands.json').read_text());cmd=commands[0];config=next(c for c in spec['cases'] if c['case']==row['case'])
+   receipt=json.loads((d/cmd['stdout']).read_text().splitlines()[0]);f=ROOT/row['inputs']
+   return m['case_id']==row['case'] and m['parent_experiment_id']==native_build['experiment_id'] and m['comparison_id']==config['manifest_sha256'] and digest(f/'manifest.json')==config['manifest_sha256'] and receipt==dict(binary_sha256=native_build['binary_sha256'],input_manifest_sha256=config['manifest_sha256']) and all(c['return_code']==0 for c in commands) and 'CUDA_VISIBLE_DEVICES' in cmd['argv'][-1] and native_build['remote']+'/canny' in cmd['argv'][-1]
+  gate('native/'+row['case']+'/sealed-command-input-receipt',native_ok)
+ for name,run,backend,worker in [('cases',gpu,'rocm-run','tools/moat/canny_plus_worker.py'),('original',original,'rocm-original',spec['implementation']),('runtime',runtime,'rocm-runtime','tools/moat/canny_plus_runtime.py'),('trace',trace,'rocm-trace','tools/moat/canny_plus_runtime.py')]:
+  def run_ok(run=run,backend=backend,worker=worker):
+   if not report(run,'run.json',backend) or run['build']!=build or run['return_code']:return False
+   d,m,_=sealed(run['evidence']);observed=json.loads((d/'backend.observed.json').read_text());commands=json.loads((d/'commands.json').read_text())
+   return m['parent_experiment_id']==build['experiment_id'] and len(commands)==1 and commands[0]['return_code']==0 and str(ROOT/worker) in commands[0]['argv'] and str(ROOT/build['library']) in (commands[0]['argv']+list(commands[0].get('environment_changes',{}).values())) and observed['image_id']=='sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03' and observed['rocm_release']=='10.1.0' and bool(observed['devices']) and all(d['physical_id']!=3 for d in observed['devices'])
+  gate(name+'/actual-guarded-GPU-current-library-command',run_ok)
+ for name,v,run,recompute in [('31-masks',cpu,gpu,lambda:validate(gpu,spec,natives)),('full-original',original_cpu,original,lambda:validate(original,spec,natives,True)),('runtime',runtime_cpu,runtime,lambda:runtime_validate(runtime)),('raw-trace',trace_cpu,trace,lambda:runtime_validate(trace,True))]:
+  def validation_ok(v=v,run=run,recompute=recompute):
+   refs.add(v['evidence']);d,m,_=sealed(v['evidence']);stored=json.loads((d/'validation.json').read_text());actual=recompute()
+   return stored==actual=={k:x for k,x in v.items() if k not in {'evidence','parent'}} and actual['status']=='PASSED' and bool(actual['checks']) and all(c['passed'] is True for c in actual['checks']) and m['experiment_outcome']=='PASSED' and m['parent_experiment_id']==run['experiment_id'] and v['parent']==run['evidence']
+  gate(name+'/recomputed-independent-full-validation',validation_ok)
+ def checks_ok():
+  refs.add(negative['evidence']);d,m,_=sealed(negative['evidence']);v=json.loads((d/'checks.json').read_text())
+  return m['experiment_outcome']=='PASSED' and v=={k:x for k,x in negative.items() if k!='evidence'} and v==json.loads((d/'validation.json').read_text()) and v['case_count']==24 and v['status']=='PASSED' and len(v['checks'])==24 and all(c['passed'] is True for c in v['checks'])
+ gate('complete-24-positive-negative-validator-checks',checks_ok)
+ gate('original-CUDA-script-status-distinct-from-native-API',lambda:report(cuda_original,'result.json','cuda-original') and cuda_original['original_source_sha256']==spec['original_source_sha256'] and cuda_original['status'] in {'BLOCKED','FAILED','EXECUTED'})
+ sources=set(build['dependencies'])|{'tools/moat/qualify_canny_plus.py','tools/moat/publish_canny_plus.py','migration/rewrite/image-acceptance-policy.json','tools/moat/audit.py'}
+ for ref in refs:
+  try:sources.update(sealed(ref)[2]['dependencies'])
+  except (OSError,ValueError):pass
+ gate('independent-three-part-source-and-proof-review',lambda:reviewed(review,sorted(sources),refs))
+ return checks,refs,sorted(sources),build,spec
+
+def main():
+ p=argparse.ArgumentParser();p.add_argument('--dry-run',action='store_true');a=p.parse_args();review_path=ROOT/'migration/reports/canny-plus-review.json';review=json.loads(review_path.read_text()) if review_path.exists() else None
+ checks,refs,sources,build,spec=collect(review);status='PASSED' if checks and all(c['passed'] for c in checks) else 'FAILED';print(status,[c['check'] for c in checks if not c['passed']],flush=True)
+ if not a.dry_run and status=='PASSED':
+  row=dict(sample_id=spec['sample_id'],kind='image-canny-c1-full-python',status=status,checks=checks,implementation=spec['implementation'],implementation_sha256=digest(ROOT/spec['implementation']),dependencies=build['dependencies'],case_count=len(spec['cases']),case_ids=[c['case'] for c in spec['cases']],evidence_references=sorted(refs),source_commit=review['source_commit'],comparison_mode=spec['comparison_mode'],scope='Full original eight resolutions, 5 warmups/1000 measurements, real Torch/C ABI HIP masks, independent CPU exact masks, native NPP+ API counterpart, streams/concurrency/invalid spans and raw dispatch trace. No cross-device performance claim. Original CUDA Python dependency status remains separate.')
+  e=Experiment('I1',row['sample_id'],'composite-qualification',sources=[ROOT/n for n in sources]);write(e.path/'qualification.json',row);row.update(qualification_id=e.id,evidence=e.finish('PASSED',dict(status=status,checks=checks)))
+  run=load('rocm');d=ROOT/run['evidence'];row.update(rocm_evidence=run['evidence'],cuda_evidence=load('native')[0]['evidence'],environment=str((d/'backend.observed.json').relative_to(ROOT)),devices=json.loads((d/'backend.observed.json').read_text())['devices']);write(ROOT/'migration/reports/canny-plus-qualification.json',row)
+ return int(status!='PASSED')
+if __name__=='__main__':raise SystemExit(main())

@@ -22,6 +22,14 @@ def render(data):
  if START in body:body=body.split(START,1)[0]+block+body.split(END,1)[1]
  else:body+='\n\n'+block+'\n'
  canonical.write_text(body);(ROOT/'migration/image-libraries-plan.md').write_text(body)
+ execution=ROOT.parent/'doc/cuda_samples_on_rocm_image_equivalence_execution.md'
+ if execution.exists():
+  text=execution.read_text().replace('状态：**方案已制定，未据此新增样例资格**。','状态：**IN_PROGRESS**。逐步实施中；仅封存资格会增加支持数。')
+  latest=data['events'][-1]
+  stage='\n'.join([START,'','## 当前实施检查点','',f'更新时间：{data["updated_at"]}。26入口当前{counts["PASSED"]}通过/{counts["PARTIAL"]}部分/{counts["FAILED"]}失败。','',latest['phase']+'：'+latest['message'],'','证据：'+'；'.join('`'+p+'`' for p in latest['evidence']),'','完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。','',END])
+  if START in text:text=text.split(START,1)[0]+stage+text.split(END,1)[1]
+  else:text+='\n\n'+stage+'\n'
+  execution.write_text(text);(ROOT/'migration/image-equivalence-execution.md').write_text(text)
 
 def record(phase,message,evidence=(),state=None):
  lock=ROOT/'build/image-progress.lock';lock.parent.mkdir(exist_ok=True)

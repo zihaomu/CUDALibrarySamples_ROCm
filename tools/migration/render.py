@@ -63,6 +63,7 @@ def render():
   'MathDx/cuFFTDx':'调用方 HIP kernel 内的 FFT',
   'MathDx/cuSolverDx':'调用方 HIP kernel 内的分解和求解',
   'NPP':'项目 HIP 图像处理实现',
+  'NPP+':'项目 HIP 图像处理 + ROCm Torch',
   'nvCOMP':'hipCOMP + 项目 HIP CRC 实现',
  }
  intro='''[![License](https://img.shields.io/badge/License-Apache_2.0-yellowgreen.svg)](LICENSE.md)
