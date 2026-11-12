@@ -22,7 +22,8 @@ NAMES=['real-45-child-cold-archive','actual-14-CPU-reference-gate',
        'coupled-cold-foreign-wrong-backend-and-seal',
        'coupled-cold-trace-wrong-parent-and-seal',
        'cold-outer-checkout-command-forgery',
-       'current-CPU-validation-wrong-parent-identity']
+       'current-CPU-validation-wrong-parent-identity',
+       'current-original-CLI-wrong-output-cwd']
 
 def run_checks():
     checks=[];original=q.load
@@ -125,19 +126,28 @@ def run_checks():
     with patch.object(q,'sealed',wrong_parent):
         check(NAMES[21],lambda:next(c for c in q.collect(None)[0]
               if c['check']=='fourteen-complete-line-list-CSV-PPM-independent-CPU-recomputations')['passed'],False)
+    original_run=original('runs')[0]
+    command_path=ROOT/original_run['evidence']/'commands.json'
+    forged=json.loads(command_path.read_text());forged[0]['cwd']='/tmp/forged-unrelated-cwd'
+    real_read=Path.read_text
+    def wrong_cwd(self,*args,**kwargs):
+        return json.dumps(forged) if self==command_path else real_read(self,*args,**kwargs)
+    with patch.object(Path,'read_text',wrong_cwd):
+        check(NAMES[22],lambda:next(c for c in q.collect(None)[0]
+              if c['check']=='fourteen-actual-complete-original-CLI-and-products')['passed'],False)
     if [c['check'] for c in checks]!=NAMES:raise ValueError('fixed Hough mutation suite')
     return dict(status='PASSED' if all(c['passed'] for c in checks) else 'FAILED',
                 case_count=len(checks),checks=checks)
 
 def main():
-    path=ROOT/'migration/rewrite/image-hough-qualification-checks-v5.json'
+    path=ROOT/'migration/rewrite/image-hough-qualification-checks-v6.json'
     if not path.exists():
         contract=Experiment('I3','Hough-qualification-mutation-contract','CPU-contract',sources=[__file__,ROOT/'migration/rewrite/image-hough-profile.json'])
         write(path,NAMES);write(contract.path/'cases.json',NAMES)
         result=dict(status='FROZEN',case_count=len(NAMES));write(contract.path/'contracts.json',result)
         result['evidence']=contract.finish('OBSERVED')
-        write(ROOT/'migration/reports/image-hough-qualification-check-contract-v5.json',result)
-        record('I3','Hough组合资格与45子封印的22项正反向检查合同冻结。',[result['evidence']])
+        write(ROOT/'migration/reports/image-hough-qualification-check-contract-v6.json',result)
+        record('I3','Hough组合资格与45子封印的23项正反向检查合同冻结。',[result['evidence']])
     if json.loads(path.read_text())!=NAMES:raise ValueError('fixed Hough mutation names')
     e=Experiment('I3','Hough-actual-qualification-mutations','CPU-validator-test',
                  sources=[__file__,ROOT/'tools/moat/qualify_image_hough.py',path,ROOT/'migration/rewrite/image-hough-profile.json'])
@@ -145,7 +155,7 @@ def main():
     result['evidence']=e.finish('PASSED' if result['status']=='PASSED' else 'VALIDATOR_GAP',
                                 dict(status=result['status'],checks=result['checks']))
     write(ROOT/'migration/reports/image-hough-qualification-checks.json',result)
-    record('I3','Hough22项实际组合资格与子封印正反向变异：'+result['status']+'。',[result['evidence']])
+    record('I3','Hough23项实际组合资格与子封印正反向变异：'+result['status']+'。',[result['evidence']])
     print(result['status'],[c['check'] for c in result['checks'] if not c['passed']])
     return int(result['status']!='PASSED')
 

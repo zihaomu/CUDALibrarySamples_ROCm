@@ -1,6 +1,6 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-12T05:15:37.422695+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-12T05:22:11.519776+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
 26入口当前：11 PASSED / 7 PARTIAL / 8 FAILED。
 
@@ -1365,3 +1365,6 @@
 | 2026-11-12T05:14:09.923106+00:00 | I3 | Hough组合资格与45子封印的22项正反向检查合同冻结。 | [20261112T051408.961818Z-I3-CPU-contract-4077aff021](evidence/rewrite/I3/Hough-qualification-mutation-contract/20261112T051408.961818Z-I3-CPU-contract-4077aff021) |
 | 2026-11-12T05:15:03.533805+00:00 | I3 | Hough22项实际组合资格与子封印正反向变异：PASSED。 | [20261112T051448.570746Z-I3-CPU-validator-test-aeab7e0e7e](evidence/rewrite/I3/Hough-actual-qualification-mutations/20261112T051448.570746Z-I3-CPU-validator-test-aeab7e0e7e) |
 | 2026-11-12T05:15:37.422695+00:00 | I3 | Hough第四轮复审发现外层冷检出命令及当前CPU证据父运行未绑定；已验13条clone/checkout/job命令及父子身份，22/22变异通过。主表仍PARTIAL，待复审签发。 | [image-hough-cold.json](image-hough-cold.json)；[image-hough-qualification-checks.json](image-hough-qualification-checks.json)；[image-hough.md](image-hough.md) |
+| 2026-11-12T05:19:56.840066+00:00 | I3 | Hough组合资格与45子封印的23项正反向检查合同冻结。 | [20261112T051955.886101Z-I3-CPU-contract-2336666844](evidence/rewrite/I3/Hough-qualification-mutation-contract/20261112T051955.886101Z-I3-CPU-contract-2336666844) |
+| 2026-11-12T05:20:13.700428+00:00 | I3 | Hough23项实际组合资格与子封印正反向变异：PASSED。 | [20261112T051957.215518Z-I3-CPU-validator-test-ff39b0bdd2](evidence/rewrite/I3/Hough-actual-qualification-mutations/20261112T051957.215518Z-I3-CPU-validator-test-ff39b0bdd2) |
+| 2026-11-12T05:22:11.519776+00:00 | I3 | Hough第五轮验收复审证实当前14条CLI cwd可伪造；现逐条绑定命令输出目录，23/23变异通过；仍PARTIAL待独立复审与资格Git发布。 | [image-hough-qualification-checks.json](image-hough-qualification-checks.json)；[image-hough.md](image-hough.md) |

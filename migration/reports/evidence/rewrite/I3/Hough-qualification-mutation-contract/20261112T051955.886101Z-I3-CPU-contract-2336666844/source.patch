@@ -1,0 +1,105 @@
+diff --git a/tools/moat/image_hough_qualification_checks.py b/tools/moat/image_hough_qualification_checks.py
+index fbfe86c3e..8699ed8cd 100644
+--- a/tools/moat/image_hough_qualification_checks.py
++++ b/tools/moat/image_hough_qualification_checks.py
+@@ -22,7 +22,8 @@ NAMES=['real-45-child-cold-archive','actual-14-CPU-reference-gate',
+        'coupled-cold-foreign-wrong-backend-and-seal',
+        'coupled-cold-trace-wrong-parent-and-seal',
+        'cold-outer-checkout-command-forgery',
+-       'current-CPU-validation-wrong-parent-identity']
++       'current-CPU-validation-wrong-parent-identity',
++       'current-original-CLI-wrong-output-cwd']
+ 
+ def run_checks():
+     checks=[];original=q.load
+@@ -125,19 +126,28 @@ def run_checks():
+     with patch.object(q,'sealed',wrong_parent):
+         check(NAMES[21],lambda:next(c for c in q.collect(None)[0]
+               if c['check']=='fourteen-complete-line-list-CSV-PPM-independent-CPU-recomputations')['passed'],False)
++    original_run=original('runs')[0]
++    command_path=ROOT/original_run['evidence']/'commands.json'
++    forged=json.loads(command_path.read_text());forged[0]['cwd']='/tmp/forged-unrelated-cwd'
++    real_read=Path.read_text
++    def wrong_cwd(self,*args,**kwargs):
++        return json.dumps(forged) if self==command_path else real_read(self,*args,**kwargs)
++    with patch.object(Path,'read_text',wrong_cwd):
++        check(NAMES[22],lambda:next(c for c in q.collect(None)[0]
++              if c['check']=='fourteen-actual-complete-original-CLI-and-products')['passed'],False)
+     if [c['check'] for c in checks]!=NAMES:raise ValueError('fixed Hough mutation suite')
+     return dict(status='PASSED' if all(c['passed'] for c in checks) else 'FAILED',
+                 case_count=len(checks),checks=checks)
+ 
+ def main():
+-    path=ROOT/'migration/rewrite/image-hough-qualification-checks-v5.json'
++    path=ROOT/'migration/rewrite/image-hough-qualification-checks-v6.json'
+     if not path.exists():
+         contract=Experiment('I3','Hough-qualification-mutation-contract','CPU-contract',sources=[__file__,ROOT/'migration/rewrite/image-hough-profile.json'])
+         write(path,NAMES);write(contract.path/'cases.json',NAMES)
+         result=dict(status='FROZEN',case_count=len(NAMES));write(contract.path/'contracts.json',result)
+         result['evidence']=contract.finish('OBSERVED')
+-        write(ROOT/'migration/reports/image-hough-qualification-check-contract-v5.json',result)
+-        record('I3','Hough组合资格与45子封印的22项正反向检查合同冻结。',[result['evidence']])
++        write(ROOT/'migration/reports/image-hough-qualification-check-contract-v6.json',result)
++        record('I3','Hough组合资格与45子封印的23项正反向检查合同冻结。',[result['evidence']])
+     if json.loads(path.read_text())!=NAMES:raise ValueError('fixed Hough mutation names')
+     e=Experiment('I3','Hough-actual-qualification-mutations','CPU-validator-test',
+                  sources=[__file__,ROOT/'tools/moat/qualify_image_hough.py',path,ROOT/'migration/rewrite/image-hough-profile.json'])
+@@ -145,7 +155,7 @@ def main():
+     result['evidence']=e.finish('PASSED' if result['status']=='PASSED' else 'VALIDATOR_GAP',
+                                 dict(status=result['status'],checks=result['checks']))
+     write(ROOT/'migration/reports/image-hough-qualification-checks.json',result)
+-    record('I3','Hough22项实际组合资格与子封印正反向变异：'+result['status']+'。',[result['evidence']])
++    record('I3','Hough23项实际组合资格与子封印正反向变异：'+result['status']+'。',[result['evidence']])
+     print(result['status'],[c['check'] for c in result['checks'] if not c['passed']])
+     return int(result['status']!='PASSED')
+ 
+diff --git a/tools/moat/publish_image_hough.py b/tools/moat/publish_image_hough.py
+index 70c72a77f..c84b11d18 100644
+--- a/tools/moat/publish_image_hough.py
++++ b/tools/moat/publish_image_hough.py
+@@ -35,7 +35,7 @@ def main():
+         'image-hough/complete-native-PPM-and-declared-differences',
+         'image-hough/five-real-GPU-kernel-dispatches',
+         'image-hough/forty-five-child-cold-replay',
+-        'image-hough/twenty-two-qualification-and-archive-mutation-checks',
++        'image-hough/twenty-three-qualification-and-archive-mutation-checks',
+         'image-hough/three-independent-fixed-source-reviews']
+     sample.update(status='PASSED',level='L4',reason_code='VALIDATED_MOAT_REWRITE',
+                   implementation=IMPLEMENTATION,selected_validation=q,
+diff --git a/tools/moat/qualify_image_hough.py b/tools/moat/qualify_image_hough.py
+index 21186d62f..492bef9d5 100644
+--- a/tools/moat/qualify_image_hough.py
++++ b/tools/moat/qualify_image_hough.py
+@@ -252,14 +252,15 @@ def collect(review=None):
+             c=cases[r['case']];args=c['arguments'].copy()
+             if '-i' in args:args[args.index('-i')+1]=str(ROOT/args[args.index('-i')+1])
+             commands=json.loads((ROOT/r['evidence']/'commands.json').read_text())
++            raw=ROOT/json.loads((ROOT/r['evidence']/'manifest.json').read_text())['raw_artifact_dir']
+             if (not record(r,'run.json','rocm-original','Hough-complete-C++-original-CLI',
+                            outcome='EXPECTED_REJECTION' if c['expected_return_code'] else 'EXECUTED')
+                 or not physical(r) or r['status']!='EXECUTED'
+                 or r['build']!=build['evidence'] or r['return_code']!=c['expected_return_code']
+                 or len(commands)!=1 or commands[0]['argv']!=[str(ROOT/build['binary']),*args]
++                or commands[0]['cwd']!=str(raw/'outputs')
+                 or commands[0]['return_code']!=r['return_code']):return False
+             if c['kind']=='valid':
+-                raw=ROOT/json.loads((ROOT/r['evidence']/'manifest.json').read_text())['raw_artifact_dir']
+                 for file,key in [('hough_result.ppm','ppm'),('hough_lines.csv','lines')]:
+                     f=raw/'outputs'/file
+                     if not f.is_file() or digest(f)!=r[key+'_sha256'] or f.stat().st_size!=r[key+'_bytes']:return False
+@@ -402,12 +403,12 @@ def collect(review=None):
+     gate('forty-five-sealed-child-clean-checkout-replay',cold_gate)
+     def mutations():
+         r=load('qualification-checks')
+-        names=json.loads((ROOT/'migration/rewrite/image-hough-qualification-checks-v5.json').read_text())
++        names=json.loads((ROOT/'migration/rewrite/image-hough-qualification-checks-v6.json').read_text())
+         return (record(r,'checks.json','CPU-validator-test','Hough-actual-qualification-mutations') and r['status']=='PASSED'
+-                and r['case_count']==len(r['checks'])==len(names)==22
++                and r['case_count']==len(r['checks'])==len(names)==23
+                 and [c['check'] for c in r['checks']]==names
+                 and all(c['passed'] for c in r['checks']))
+-    gate('twenty-two-real-qualification-and-archive-mutation-checks',mutations)
++    gate('twenty-three-real-qualification-and-archive-mutation-checks',mutations)
+     sources.update({'tools/moat/qualify_image_hough.py','tools/moat/publish_image_hough.py',
+                     'tools/moat/image_hough_qualification_checks.py',
+                     'tools/moat/image_hough_native_reference.py','tools/moat/image_regions_native.py',

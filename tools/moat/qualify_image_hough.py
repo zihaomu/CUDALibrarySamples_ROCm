@@ -252,14 +252,15 @@ def collect(review=None):
             c=cases[r['case']];args=c['arguments'].copy()
             if '-i' in args:args[args.index('-i')+1]=str(ROOT/args[args.index('-i')+1])
             commands=json.loads((ROOT/r['evidence']/'commands.json').read_text())
+            raw=ROOT/json.loads((ROOT/r['evidence']/'manifest.json').read_text())['raw_artifact_dir']
             if (not record(r,'run.json','rocm-original','Hough-complete-C++-original-CLI',
                            outcome='EXPECTED_REJECTION' if c['expected_return_code'] else 'EXECUTED')
                 or not physical(r) or r['status']!='EXECUTED'
                 or r['build']!=build['evidence'] or r['return_code']!=c['expected_return_code']
                 or len(commands)!=1 or commands[0]['argv']!=[str(ROOT/build['binary']),*args]
+                or commands[0]['cwd']!=str(raw/'outputs')
                 or commands[0]['return_code']!=r['return_code']):return False
             if c['kind']=='valid':
-                raw=ROOT/json.loads((ROOT/r['evidence']/'manifest.json').read_text())['raw_artifact_dir']
                 for file,key in [('hough_result.ppm','ppm'),('hough_lines.csv','lines')]:
                     f=raw/'outputs'/file
                     if not f.is_file() or digest(f)!=r[key+'_sha256'] or f.stat().st_size!=r[key+'_bytes']:return False
@@ -402,12 +403,12 @@ def collect(review=None):
     gate('forty-five-sealed-child-clean-checkout-replay',cold_gate)
     def mutations():
         r=load('qualification-checks')
-        names=json.loads((ROOT/'migration/rewrite/image-hough-qualification-checks-v5.json').read_text())
+        names=json.loads((ROOT/'migration/rewrite/image-hough-qualification-checks-v6.json').read_text())
         return (record(r,'checks.json','CPU-validator-test','Hough-actual-qualification-mutations') and r['status']=='PASSED'
-                and r['case_count']==len(r['checks'])==len(names)==22
+                and r['case_count']==len(r['checks'])==len(names)==23
                 and [c['check'] for c in r['checks']]==names
                 and all(c['passed'] for c in r['checks']))
-    gate('twenty-two-real-qualification-and-archive-mutation-checks',mutations)
+    gate('twenty-three-real-qualification-and-archive-mutation-checks',mutations)
     sources.update({'tools/moat/qualify_image_hough.py','tools/moat/publish_image_hough.py',
                     'tools/moat/image_hough_qualification_checks.py',
                     'tools/moat/image_hough_native_reference.py','tools/moat/image_regions_native.py',

@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-12T05:15:37.422695+00:00。26入口当前11通过/7部分/8失败。
+更新时间：2026-11-12T05:22:11.519776+00:00。26入口当前11通过/7部分/8失败。
 
-I3：Hough第四轮复审发现外层冷检出命令及当前CPU证据父运行未绑定；已验13条clone/checkout/job命令及父子身份，22/22变异通过。主表仍PARTIAL，待复审签发。
+I3：Hough第五轮验收复审证实当前14条CLI cwd可伪造；现逐条绑定命令输出目录，23/23变异通过；仍PARTIAL待独立复审与资格Git发布。
 
-证据：`migration/reports/image-hough-cold.json`；`migration/reports/image-hough-qualification-checks.json`；`migration/reports/image-hough.md`
+证据：`migration/reports/image-hough-qualification-checks.json`；`migration/reports/image-hough.md`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 
