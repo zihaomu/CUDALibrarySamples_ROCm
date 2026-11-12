@@ -1,0 +1,1 @@
+Test rocm-original for OpenCV-benchmark-complete-original-CLI, case odd-half. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T072219.953703Z-I3-rocm-build-7016258f32.

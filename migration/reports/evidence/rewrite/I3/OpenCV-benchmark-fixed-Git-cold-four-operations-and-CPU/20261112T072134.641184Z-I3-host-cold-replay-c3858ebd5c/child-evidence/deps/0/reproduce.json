@@ -1,0 +1,53 @@
+{
+  "commands": [
+    {
+      "command_id": 1,
+      "phase": "copy-exact-native-OpenCV-prefix",
+      "argv": [
+        "scp",
+        "-r",
+        "nvidia-5090x2:/tmp/image-library-private-OpenCV/opencv-4.12.0-49486f61fb25/include",
+        "nvidia-5090x2:/tmp/image-library-private-OpenCV/opencv-4.12.0-49486f61fb25/lib",
+        "nvidia-5090x2:/tmp/image-library-private-OpenCV/opencv-4.12.0-49486f61fb25/share",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-benchmark-cold-kfwqo2hm/src/build/image-opencv-4.12"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-benchmark-cold-kfwqo2hm/src",
+      "started_at_utc": "2026-11-12T07:21:48.441371+00:00",
+      "timeout_seconds": 240,
+      "environment": {},
+      "stdout": "logs/0001-copy-exact-native-OpenCV-prefix.stdout.log",
+      "stderr": "logs/0001-copy-exact-native-OpenCV-prefix.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-12T07:21:50.310725+00:00",
+      "seconds": 1.868488942971453
+    },
+    {
+      "command_id": 2,
+      "phase": "real-ROCm10-container-C++-loader",
+      "argv": [
+        "/home/zihaomu/zihaomu_workspace/rocm10-launch.sh",
+        "env",
+        "ROCR_VISIBLE_DEVICES=3",
+        "HIP_VISIBLE_DEVICES=0",
+        "LD_LIBRARY_PATH=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-benchmark-cold-kfwqo2hm/src/build/image-opencv-4.12/lib",
+        "ldd",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-benchmark-cold-kfwqo2hm/src/build/image-opencv-4.12/lib/libopencv_imgproc.so.4.12.0"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-benchmark-cold-kfwqo2hm/src",
+      "started_at_utc": "2026-11-12T07:21:50.386979+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0002-real-ROCm10-container-C++-loader.stdout.log",
+      "stderr": "logs/0002-real-ROCm10-container-C++-loader.stderr.log",
+      "environment_changes": {
+        "HIP_VISIBLE_DEVICES": "2"
+      },
+      "return_code": 0,
+      "finished_at_utc": "2026-11-12T07:22:06.636433+00:00",
+      "seconds": 16.24866944103269
+    }
+  ],
+  "source": "source.json",
+  "inputs": "inputs/manifest.json",
+  "expected_environment": "environment.expected.json"
+}
