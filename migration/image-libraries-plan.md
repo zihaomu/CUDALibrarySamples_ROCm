@@ -280,7 +280,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-12T07:17:50.930982+00:00。26入口当前12通过/7部分/7失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-12T07:21:17.922468+00:00。26入口当前12通过/7部分/7失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -1727,5 +1727,8 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-12T07:06:08.610261+00:00 | I3 | benchmark最终固定源码冷证据已锚定；组合资格预检发现主负例回执仍封存于上一个资格源码版本，已在不改源码的情况下重新执行25项负例PASSED并封存，准备补充证据锚点。 | `migration/reports/image-benchmark-cold.json` |
 | 2026-11-12T07:16:48.390425+00:00 | I3 | benchmark原生/错误CLI/依赖及CPU/runtime/trace/cold配对篡改共31项正反证据：PASSED。 | `migration/reports/evidence/rewrite/I3/OpenCV-benchmark-sealed-reader-counterexamples/20261112T071645.188848Z-I3-CPU-negative-2b286735c1` |
 | 2026-11-12T07:17:50.930982+00:00 | I3 | 独立复审对源码67f7dd83给出两份REQUEST_CHANGES：5090 nvcc编译命令未绑定；冷子build/runtime等依赖名与CAS未对应固定Git，合同profile、CLI argv和精确状态可配对伪造。现资格门绑定六条原生命令、全kind必需源码集合/固定提交SHA与生成报告、冷合同/运行命令/状态，31项本地反例PASSED。主表冷检出门退回待验证。 | `migration/samples.yaml` |
+| 2026-11-12T07:20:10.300645+00:00 | I3 | benchmark固定Git冷检出同版OpenCV/四算子/六CLI/独立CPU/原生统计/运行/trace及18子封存：PASSED | `migration/reports/evidence/rewrite/I3/OpenCV-benchmark-fixed-Git-cold-four-operations-and-CPU/20261112T071829.632907Z-I3-host-cold-replay-e658fed8d1` |
+| 2026-11-12T07:21:12.059653+00:00 | I3 | benchmark原生/错误CLI/依赖及CPU/runtime/trace/cold配对篡改共31项正反证据：PASSED。 | `migration/reports/evidence/rewrite/I3/OpenCV-benchmark-sealed-reader-counterexamples/20261112T072109.415645Z-I3-CPU-negative-a7fb06b68a` |
+| 2026-11-12T07:21:17.922468+00:00 | I3 | benchmark源码df52dee4冷检出10/10作业、19/19子封存PASSED；组合复算先因新负例读取的2份报告未列入negative子必需依赖集合而拒绝。现补齐集合，原始冷证据完整复算True，31项负例重跑PASSED；资格代码变更，须再次固定提交冷检出。 | `migration/reports/image-benchmark-negative.json` |
 
 <!-- IMAGE_EXECUTION:END -->
