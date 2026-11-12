@@ -1,0 +1,155 @@
+{
+  "sample_id": "NPP/houghLines::houghLines.cpp",
+  "kind": "image-hough-full",
+  "status": "PASSED",
+  "implementation": "rocm/ported/NPP/houghLines/houghLines.cpp",
+  "implementation_sha256": "d11d7a46e7a5e4a0cdbb233e97f80789e7187ca140eb89023c0f7fa96a8c7907",
+  "dependencies": {
+    "rocm/ported/NPP/houghLines/houghLines.cpp": "d11d7a46e7a5e4a0cdbb233e97f80789e7187ca140eb89023c0f7fa96a8c7907",
+    "migration/rewrite/image-hough-profile.json": "526beaa892a539189a35ce16909fad1ba66e1949c7489d15327fd6ca3d216849",
+    "rocm/common/image/canny.h": "b0fd6536f299550aa30357067fa56d5d599318aeee274e1146a6645720c29424",
+    "rocm/common/image/canny.hip": "250f0704d2d66038a04e7990a5c49a17628c64674a834c8124304fb48cc7592b",
+    "rocm/common/image/canny_stages.h": "afd4be4bedbfc218a36169437f086f86ce82d6486e174db2bc534de208dce4b9",
+    "rocm/common/image/canny_stages.hip": "dd0a7b1c89003532626ad73e9f6355f866f015fad0d7cf6629aee92a2c6e06b6",
+    "rocm/common/image/hough.h": "b16be352ecfcdc53fd443bfc91b9818633133ef2653bd5e7641e298a2e8dba91",
+    "rocm/common/image/hough.hip": "75a55757c260120227b15948e040ff599245caf4f6123a565227c4e6674edd27",
+    "rocm/common/image/hough_trig.h": "62d7ca0325148ca855e099e8aecb4974ee4fa0000530e98026d0f94ea125d90c"
+  },
+  "case_ids": [
+    "raw-blank",
+    "raw-cross",
+    "raw-diagonal",
+    "raw-noise-cross",
+    "raw-odd-line",
+    "synthetic-default",
+    "synthetic-no-timing",
+    "invalid-width",
+    "invalid-height",
+    "invalid-threshold",
+    "invalid-lines",
+    "invalid-canny",
+    "truncated-raw",
+    "help",
+    "raw-option-low-vote-threshold",
+    "raw-option-maximum-one-line",
+    "raw-option-changed-canny-thresholds",
+    "raw-option-combined-nondefault-timed",
+    "raw-option-blank-low-threshold"
+  ],
+  "case_count": 19,
+  "comparison_mode": "DOCUMENTED_HOUGH_ACCUMULATOR_VARIANT",
+  "checks": [
+    {
+      "check": "frozen-fourteen-complete-CLI-and-RAW-contract",
+      "passed": true
+    },
+    {
+      "check": "current-compiled-shared-Canny-and-Hough-GPU-binary",
+      "passed": true
+    },
+    {
+      "check": "fourteen-actual-complete-original-CLI-and-products",
+      "passed": true
+    },
+    {
+      "check": "fourteen-complete-line-list-CSV-PPM-independent-CPU-recomputations",
+      "passed": true
+    },
+    {
+      "check": "five-valid-nondefault-parameter-and-1196-peak-complete-products",
+      "passed": true
+    },
+    {
+      "check": "nineteen-real-device-runtime-and-all-peaks-independent-CPU",
+      "passed": true
+    },
+    {
+      "check": "foreign-device-empty-stream-rejected-with-storage-unchanged",
+      "passed": true
+    },
+    {
+      "check": "five-actual-Canny-and-Hough-GPU-dispatches-on-physical-one",
+      "passed": true
+    },
+    {
+      "check": "unmodified-native-5090-complete-PPM-and-declared-variant",
+      "passed": true
+    },
+    {
+      "check": "forty-five-sealed-child-clean-checkout-replay",
+      "passed": true
+    },
+    {
+      "check": "twenty-eight-real-qualification-and-archive-mutation-checks",
+      "passed": true
+    },
+    {
+      "check": "three-independent-fixed-source-and-proof-reviews",
+      "passed": true
+    }
+  ],
+  "evidence_references": [
+    "migration/reports/evidence/rewrite/I3/Hough-Canny-GPU-and-complete-C__-build/20261112T043041.079819Z-I3-rocm-build-3164e51cae",
+    "migration/reports/evidence/rewrite/I3/Hough-actual-device-allocation-and-stream-runtime/20261112T045917.456621Z-I3-rocm-runtime-f7e02f44f9",
+    "migration/reports/evidence/rewrite/I3/Hough-actual-qualification-mutations/20261112T052522.441353Z-I3-CPU-validator-test-f935316728",
+    "migration/reports/evidence/rewrite/I3/Hough-clean-fixed-checkout-all-CLI-CPU-runtime-trace/20261112T050047.079015Z-I3-host-cold-replay-6d00b5133f",
+    "migration/reports/evidence/rewrite/I3/Hough-complete-C__-original-CLI/20261112T043345.473641Z-I3-rocm-original-35a534891d",
+    "migration/reports/evidence/rewrite/I3/Hough-complete-C__-original-CLI/20261112T043347.931133Z-I3-rocm-original-1e41c3fe88",
+    "migration/reports/evidence/rewrite/I3/Hough-complete-C__-original-CLI/20261112T043350.176580Z-I3-rocm-original-e8379bf4e0",
+    "migration/reports/evidence/rewrite/I3/Hough-complete-C__-original-CLI/20261112T043352.305562Z-I3-rocm-original-5b4fd2eca2",
+    "migration/reports/evidence/rewrite/I3/Hough-complete-C__-original-CLI/20261112T043354.414880Z-I3-rocm-original-551a399ad9",
+    "migration/reports/evidence/rewrite/I3/Hough-complete-C__-original-CLI/20261112T043356.519374Z-I3-rocm-original-47557abfc6",
+    "migration/reports/evidence/rewrite/I3/Hough-complete-C__-original-CLI/20261112T043358.691863Z-I3-rocm-original-e2b39c23cd",
+    "migration/reports/evidence/rewrite/I3/Hough-complete-C__-original-CLI/20261112T043400.825703Z-I3-rocm-original-64dc383bdb",
+    "migration/reports/evidence/rewrite/I3/Hough-complete-C__-original-CLI/20261112T043402.754024Z-I3-rocm-original-823f07da57",
+    "migration/reports/evidence/rewrite/I3/Hough-complete-C__-original-CLI/20261112T043404.682017Z-I3-rocm-original-acb82d76f1",
+    "migration/reports/evidence/rewrite/I3/Hough-complete-C__-original-CLI/20261112T043406.613844Z-I3-rocm-original-7f77efb47f",
+    "migration/reports/evidence/rewrite/I3/Hough-complete-C__-original-CLI/20261112T043408.537883Z-I3-rocm-original-dd5ed17bfd",
+    "migration/reports/evidence/rewrite/I3/Hough-complete-C__-original-CLI/20261112T043410.461625Z-I3-rocm-original-127015a156",
+    "migration/reports/evidence/rewrite/I3/Hough-complete-C__-original-CLI/20261112T043412.347524Z-I3-rocm-original-6a185d6f92",
+    "migration/reports/evidence/rewrite/I3/Hough-complete-image-and-line-independent-CPU/20261112T044437.739554Z-I3-CPU-reference-6416bbd511",
+    "migration/reports/evidence/rewrite/I3/Hough-complete-image-and-line-independent-CPU/20261112T044439.106208Z-I3-CPU-reference-755254c51e",
+    "migration/reports/evidence/rewrite/I3/Hough-complete-image-and-line-independent-CPU/20261112T044440.451040Z-I3-CPU-reference-03ced5580b",
+    "migration/reports/evidence/rewrite/I3/Hough-complete-image-and-line-independent-CPU/20261112T044441.800418Z-I3-CPU-reference-8d4c76adf3",
+    "migration/reports/evidence/rewrite/I3/Hough-complete-image-and-line-independent-CPU/20261112T044443.146330Z-I3-CPU-reference-68900293c4",
+    "migration/reports/evidence/rewrite/I3/Hough-complete-image-and-line-independent-CPU/20261112T044444.467117Z-I3-CPU-reference-63d94fc0c0",
+    "migration/reports/evidence/rewrite/I3/Hough-complete-image-and-line-independent-CPU/20261112T044446.036423Z-I3-CPU-reference-e9f1e08d78",
+    "migration/reports/evidence/rewrite/I3/Hough-complete-image-and-line-independent-CPU/20261112T044447.604987Z-I3-CPU-reference-b589d40862",
+    "migration/reports/evidence/rewrite/I3/Hough-complete-image-and-line-independent-CPU/20261112T044448.870117Z-I3-CPU-reference-85e1684d80",
+    "migration/reports/evidence/rewrite/I3/Hough-complete-image-and-line-independent-CPU/20261112T044450.147643Z-I3-CPU-reference-2ee9fdf569",
+    "migration/reports/evidence/rewrite/I3/Hough-complete-image-and-line-independent-CPU/20261112T044451.401384Z-I3-CPU-reference-c230731223",
+    "migration/reports/evidence/rewrite/I3/Hough-complete-image-and-line-independent-CPU/20261112T044452.685390Z-I3-CPU-reference-d031bb4c03",
+    "migration/reports/evidence/rewrite/I3/Hough-complete-image-and-line-independent-CPU/20261112T044453.957915Z-I3-CPU-reference-e32647904e",
+    "migration/reports/evidence/rewrite/I3/Hough-complete-image-and-line-independent-CPU/20261112T044455.241098Z-I3-CPU-reference-87396c24ee",
+    "migration/reports/evidence/rewrite/I3/Hough-complete-native-CUDA-project-HIP-CPU-comparison/20261112T044516.922448Z-I3-CPU-reference-99bff1e3cc",
+    "migration/reports/evidence/rewrite/I3/Hough-foreign-device-empty-stream-rejection/20261112T044214.998119Z-I3-rocm-runtime-75d3d45122",
+    "migration/reports/evidence/rewrite/I3/Hough-full-entry-contract/20261112T035751.350843Z-I3-CPU-contract-6d4bb737da",
+    "migration/reports/evidence/rewrite/I3/Hough-full-synthetic-real-GPU-Canny-votes-peaks-trace/20261112T043457.432843Z-I3-rocm-trace-6e89f2b97a",
+    "migration/reports/evidence/rewrite/I3/Hough-runtime-independent-CPU-all-peaks/20261112T045925.314369Z-I3-CPU-reference-88840adc63",
+    "migration/reports/evidence/rewrite/I3/Hough-valid-nondefault-options-contract/20261112T043037.329027Z-I3-CPU-contract-465a96d913",
+    "migration/reports/evidence/rewrite/I3/Hough-valid-nondefault-original-options/20261112T044458.951397Z-I3-rocm-original-50779738e1",
+    "migration/reports/evidence/rewrite/I3/Hough-valid-nondefault-original-options/20261112T044502.732842Z-I3-rocm-original-83c5e9568e",
+    "migration/reports/evidence/rewrite/I3/Hough-valid-nondefault-original-options/20261112T044506.200558Z-I3-rocm-original-55f20154be",
+    "migration/reports/evidence/rewrite/I3/Hough-valid-nondefault-original-options/20261112T044509.645953Z-I3-rocm-original-394e6582c6",
+    "migration/reports/evidence/rewrite/I3/Hough-valid-nondefault-original-options/20261112T044513.080972Z-I3-rocm-original-9385bab3d1",
+    "migration/reports/evidence/rewrite/I3/Hough-valid-options-independent-CPU/20261112T044501.153653Z-I3-CPU-reference-6192248c9a",
+    "migration/reports/evidence/rewrite/I3/Hough-valid-options-independent-CPU/20261112T044504.603704Z-I3-CPU-reference-ff2c308ca8",
+    "migration/reports/evidence/rewrite/I3/Hough-valid-options-independent-CPU/20261112T044508.067048Z-I3-CPU-reference-267a6ccfd5",
+    "migration/reports/evidence/rewrite/I3/Hough-valid-options-independent-CPU/20261112T044511.495586Z-I3-CPU-reference-7c7cd1717d",
+    "migration/reports/evidence/rewrite/I3/Hough-valid-options-independent-CPU/20261112T044514.912362Z-I3-CPU-reference-4e20cef9a7",
+    "migration/reports/evidence/rewrite/I3/NPP__houghLines_houghLines.cpp/20261111T181159.322261Z-I3-cuda-original-6e3b3023be"
+  ],
+  "source_commit": "ddf6a824e6266558b53f9d8a912cbbf82c54941c",
+  "rocm_evidence": "migration/reports/evidence/rewrite/I3/Hough-complete-C__-original-CLI/20261112T043356.519374Z-I3-rocm-original-47557abfc6",
+  "cuda_evidence": "migration/reports/evidence/rewrite/I3/NPP__houghLines_houghLines.cpp/20261111T181159.322261Z-I3-cuda-original-6e3b3023be",
+  "environment": "migration/reports/evidence/rewrite/I3/Hough-Canny-GPU-and-complete-C__-build/20261112T043041.079819Z-I3-rocm-build-3164e51cae/backend.observed.json",
+  "devices": [
+    {
+      "logical_id": 0,
+      "pci_bdf": "0000:23:00.0",
+      "physical_id": 1,
+      "uuid": "39383130336566346332326133636363"
+    }
+  ],
+  "scope": "Complete synthetic/RAW C++ Hough entry, nineteen valid/error/parameter CLI cases, nineteen memory/stream contracts plus foreign-device empty stream, GPU Canny/vote/peak dispatch, exact independent CPU project outputs and documented native differences. Linux/gfx1201/ROCm10.1 only; no vendor-exact or performance claim."
+}

@@ -1,6 +1,6 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-12T05:26:15.434798+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-12T05:29:41.758189+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
 26入口当前：11 PASSED / 7 PARTIAL / 8 FAILED。
 
@@ -1371,3 +1371,4 @@
 | 2026-11-12T05:25:22.055113+00:00 | I3 | Hough组合资格与45子封印的28项正反向检查合同冻结。 | [20261112T052521.106105Z-I3-CPU-contract-c653ef3038](evidence/rewrite/I3/Hough-qualification-mutation-contract/20261112T052521.106105Z-I3-CPU-contract-c653ef3038) |
 | 2026-11-12T05:25:39.010933+00:00 | I3 | Hough28项实际组合资格与子封印正反向变异：PASSED。 | [20261112T052522.441353Z-I3-CPU-validator-test-f935316728](evidence/rewrite/I3/Hough-actual-qualification-mutations/20261112T052522.441353Z-I3-CPU-validator-test-f935316728) |
 | 2026-11-12T05:26:15.434798+00:00 | I3 | Hough第六轮验收复审发现资格ROCm/CUDA/环境/设备四对外指针可配对伪造；发布门现逐一核回已验证运行、原生和构建证据，28/28反例通过。主表保持PARTIAL待独立复审。 | [image-hough-qualification-checks.json](image-hough-qualification-checks.json)；[image-hough.md](image-hough.md) |
+| 2026-11-12T05:29:41.758189+00:00 | I3 | Hough固定源码ddf6a824e三范围全部APPROVED，组合资格19 case/12门通过；未Git锚定先发布被selected_proofs按预期拒绝，主表保持PARTIAL。 | [image-hough-review.json](image-hough-review.json)；[image-hough-qualification.json](image-hough-qualification.json) |

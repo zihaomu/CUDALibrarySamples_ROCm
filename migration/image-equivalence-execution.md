@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-12T05:26:15.434798+00:00。26入口当前11通过/7部分/8失败。
+更新时间：2026-11-12T05:29:41.758189+00:00。26入口当前11通过/7部分/8失败。
 
-I3：Hough第六轮验收复审发现资格ROCm/CUDA/环境/设备四对外指针可配对伪造；发布门现逐一核回已验证运行、原生和构建证据，28/28反例通过。主表保持PARTIAL待独立复审。
+I3：Hough固定源码ddf6a824e三范围全部APPROVED，组合资格19 case/12门通过；未Git锚定先发布被selected_proofs按预期拒绝，主表保持PARTIAL。
 
-证据：`migration/reports/image-hough-qualification-checks.json`；`migration/reports/image-hough.md`
+证据：`migration/reports/image-hough-review.json`；`migration/reports/image-hough-qualification.json`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

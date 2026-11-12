@@ -1,0 +1,38 @@
+{
+  "verdict": "APPROVED",
+  "source_commit": "ddf6a824e6266558b53f9d8a912cbbf82c54941c",
+  "reviewed_at": "2026-11-12T05:28:27.157690+00:00",
+  "reviewers": [
+    {
+      "reviewer_id": "/root/r1_contract_review",
+      "scope": "kernel-stream",
+      "verdict": "APPROVED",
+      "summary": "FMA half-grid, bounded vote grid, alignment with actual full device spans, foreign stream rejection and sealed GPU runtime checked; publication pointers and 28 mutations checked at fixed source."
+    },
+    {
+      "reviewer_id": "/root/flood_acceptance_review",
+      "scope": "acceptance-publication",
+      "verdict": "APPROVED",
+      "summary": "Current 19 CLI and CPU outputs, outer 13 cold commands, 45 child identities/products, native CUDA source and proof closure, four publication pointers and Git anchor gate checked."
+    },
+    {
+      "reviewer_id": "/root/remaining_scope_review",
+      "scope": "workflow-reproduction",
+      "verdict": "APPROVED",
+      "summary": "Fixed cold checkout, complete child replay, 28 mutation checks and native 5090 comparison audited; no remaining must-fix at reviewed commit."
+    }
+  ],
+  "findings": [
+    {
+      "issue": "Previous reviews found GPU launch, alignment, FMA and qualification provenance gaps.",
+      "state": "RESOLVED",
+      "validation": "Full device runtime, cold replay, actual command and source binding, and 28 mutations pass; historical failures retained."
+    },
+    {
+      "issue": "Original NPP image differs from project algorithm.",
+      "state": "DOCUMENTED_VARIANT",
+      "validation": "10627 differing RGB pixels, red IoU 0.23946; five truth lines covered by both. No vendor-exact claim."
+    }
+  ],
+  "scope": "One original NPP Hough Lines entry on Linux/gfx1201/ROCm10.1; project HIP Canny and Hough algorithm variant with complete CPU and native evidence. No vendor bitwise or performance approval."
+}

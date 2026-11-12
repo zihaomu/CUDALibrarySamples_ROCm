@@ -280,7 +280,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-12T05:26:15.434798+00:00。26入口当前11通过/7部分/8失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-12T05:29:41.758189+00:00。26入口当前11通过/7部分/8失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -1634,5 +1634,6 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-12T05:25:22.055113+00:00 | I3 | Hough组合资格与45子封印的28项正反向检查合同冻结。 | `migration/reports/evidence/rewrite/I3/Hough-qualification-mutation-contract/20261112T052521.106105Z-I3-CPU-contract-c653ef3038` |
 | 2026-11-12T05:25:39.010933+00:00 | I3 | Hough28项实际组合资格与子封印正反向变异：PASSED。 | `migration/reports/evidence/rewrite/I3/Hough-actual-qualification-mutations/20261112T052522.441353Z-I3-CPU-validator-test-f935316728` |
 | 2026-11-12T05:26:15.434798+00:00 | I3 | Hough第六轮验收复审发现资格ROCm/CUDA/环境/设备四对外指针可配对伪造；发布门现逐一核回已验证运行、原生和构建证据，28/28反例通过。主表保持PARTIAL待独立复审。 | `migration/reports/image-hough-qualification-checks.json`；`migration/reports/image-hough.md` |
+| 2026-11-12T05:29:41.758189+00:00 | I3 | Hough固定源码ddf6a824e三范围全部APPROVED，组合资格19 case/12门通过；未Git锚定先发布被selected_proofs按预期拒绝，主表保持PARTIAL。 | `migration/reports/image-hough-review.json`；`migration/reports/image-hough-qualification.json` |
 
 <!-- IMAGE_EXECUTION:END -->
