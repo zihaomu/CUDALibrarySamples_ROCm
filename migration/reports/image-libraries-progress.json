@@ -10816,9 +10816,34 @@
         "migration/reports/image-hough-cold.json",
         "migration/reports/image-hough-qualification-checks.json"
       ]
+    },
+    {
+      "time": "2026-11-12T04:59:21.099250+00:00",
+      "phase": "I3",
+      "message": "Hough 19组真实设备存储/非默认流/输入变化/非法形参运行检查（含足量实测错位分配）：PASSED；CPU逐峰数值与全图另验。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/Hough-actual-device-allocation-and-stream-runtime/20261112T045917.456621Z-I3-rocm-runtime-f7e02f44f9"
+      ]
+    },
+    {
+      "time": "2026-11-12T04:59:26.278035+00:00",
+      "phase": "I3",
+      "message": "Hough17组运行合同正常/变化/恢复全部GPU峰由独立CPU重算，含>2^32工作量和FP32半格：PASSED。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/Hough-runtime-independent-CPU-all-peaks/20261112T045925.314369Z-I3-CPU-reference-88840adc63"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:00:36.843000+00:00",
+      "phase": "I3",
+      "message": "Hough第二轮三范围复审发现冷runtime/trace配对篡改可通过及错位测试混杂span不足；现补足量分配地址范围证明、运行/trace冷子重算与四种新变异，重跑固定提交45子前维持PARTIAL。",
+      "evidence": [
+        "migration/reports/image-hough.md",
+        "migration/reports/image-hough-runtime.json"
+      ]
     }
   ],
-  "updated_at": "2026-11-12T04:54:30.833257+00:00",
+  "updated_at": "2026-11-12T05:00:36.843000+00:00",
   "acceptance_policy": "migration/rewrite/image-acceptance-policy.json",
   "execution_plan": "migration/image-equivalence-execution.md"
 }

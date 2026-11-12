@@ -12,7 +12,11 @@ NAMES=['real-45-child-cold-archive','actual-14-CPU-reference-gate',
        'forged-CPU-result','forged-nondefault-parameter-result',
        'forged-runtime-result','missing-GPU-vote-dispatch',
        'forged-native-pixel-difference','altered-cold-child-file',
-       'coupled-cold-PPM-report-and-seal-forgery']
+       'coupled-cold-PPM-report-and-seal-forgery',
+       'coupled-cold-runtime-failed-report-and-seal',
+       'coupled-cold-runtime-validation-failed-report-and-seal',
+       'coupled-cold-foreign-stream-failed-report-and-seal',
+       'coupled-cold-trace-failed-report-and-seal']
 
 def run_checks():
     checks=[];original=q.load
@@ -67,19 +71,34 @@ def run_checks():
             file=target/filename;members['files'][filename]=dict(bytes=file.stat().st_size,sha256=digest(file))
         write(seal,members)
         check(NAMES[11],lambda:q.cold_verify(changed,parent_override=root),False)
+    for position,group,member in [(12,'runtime','runtime.json'),(13,'runtime-validation','results.json'),
+                                  (14,'foreign-stream','results.json'),(15,'trace','trace-result.json')]:
+        with tempfile.TemporaryDirectory(prefix='hough-cold-coupled-status-') as temporary:
+            root=Path(temporary);changed=copy.deepcopy(cold)
+            for child in changed['children']:
+                source=parent/child['relative'];dest=root/child['relative'];dest.parent.mkdir(parents=True,exist_ok=True)
+                if child['name']==group:shutil.copytree(source,dest)
+                else:dest.symlink_to(source,target_is_directory=True)
+            child=next(c for c in changed['children'] if c['name']==group)
+            target=root/child['relative'];product=target/member
+            data=json.loads(product.read_text());data['status']='FAILED';write(product,data)
+            child['report']['status']='FAILED'
+            seal=target/'child-seal.json';members=json.loads(seal.read_text())
+            members['files'][member]=dict(bytes=product.stat().st_size,sha256=digest(product));write(seal,members)
+            check(NAMES[position],lambda:q.cold_verify(changed,parent_override=root),False)
     if [c['check'] for c in checks]!=NAMES:raise ValueError('fixed Hough mutation suite')
     return dict(status='PASSED' if all(c['passed'] for c in checks) else 'FAILED',
                 case_count=len(checks),checks=checks)
 
 def main():
-    path=ROOT/'migration/rewrite/image-hough-qualification-checks-v2.json'
+    path=ROOT/'migration/rewrite/image-hough-qualification-checks-v3.json'
     if not path.exists():
         contract=Experiment('I3','Hough-qualification-mutation-contract','CPU-contract',sources=[__file__,ROOT/'migration/rewrite/image-hough-profile.json'])
         write(path,NAMES);write(contract.path/'cases.json',NAMES)
         result=dict(status='FROZEN',case_count=len(NAMES));write(contract.path/'contracts.json',result)
         result['evidence']=contract.finish('OBSERVED')
-        write(ROOT/'migration/reports/image-hough-qualification-check-contract-v2.json',result)
-        record('I3','Hough组合资格与45子封印的12项正反向检查合同冻结。',[result['evidence']])
+        write(ROOT/'migration/reports/image-hough-qualification-check-contract-v3.json',result)
+        record('I3','Hough组合资格与45子封印的16项正反向检查合同冻结。',[result['evidence']])
     if json.loads(path.read_text())!=NAMES:raise ValueError('fixed Hough mutation names')
     e=Experiment('I3','Hough-actual-qualification-mutations','CPU-validator-test',
                  sources=[__file__,ROOT/'tools/moat/qualify_image_hough.py',path,ROOT/'migration/rewrite/image-hough-profile.json'])
@@ -87,7 +106,7 @@ def main():
     result['evidence']=e.finish('PASSED' if result['status']=='PASSED' else 'VALIDATOR_GAP',
                                 dict(status=result['status'],checks=result['checks']))
     write(ROOT/'migration/reports/image-hough-qualification-checks.json',result)
-    record('I3','Hough12项实际组合资格与子封印正反向变异：'+result['status']+'。',[result['evidence']])
+    record('I3','Hough16项实际组合资格与子封印正反向变异：'+result['status']+'。',[result['evidence']])
     print(result['status'],[c['check'] for c in result['checks'] if not c['passed']])
     return int(result['status']!='PASSED')
 

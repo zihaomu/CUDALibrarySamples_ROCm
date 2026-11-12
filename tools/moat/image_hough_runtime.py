@@ -35,6 +35,8 @@ def main():
         rows=[line.split('|') for line in output.splitlines()]
         checks=[dict(check='exact-case-list',passed=[r[0] for r in rows]==NAMES),
                 dict(check='actual-process-exit',passed=rc==0),
+                dict(check='misaligned-pointers-have-complete-real-device-spans',
+                     passed=(e.path/'logs/0002-actual-device-runtime-cases.stderr.log').read_text().strip()=='alignment-spans-proven|1|1'),
                 dict(check='current-library-build',passed=all(digest(ROOT/n)==h for n,h in build['dependencies'].items()))]
         if len(rows)==len(NAMES):
             normal,zero,restore,default=rows[:4]
@@ -53,7 +55,7 @@ def main():
     result['evidence']=e.finish('PASSED' if result['status']=='PASSED' else 'RUNTIME_ERROR',
                                dict(status=result['status'],checks=result.get('checks',[])))
     write(ROOT/'migration/reports/image-hough-runtime.json',result)
-    record('I3','Hough 11组真实设备存储/非默认流/输入变化/非法形参运行检查：'+result['status']+'；CPU逐峰数值与全图另验。',[result['evidence']])
+    record('I3','Hough 19组真实设备存储/非默认流/输入变化/非法形参运行检查（含足量实测错位分配）：'+result['status']+'；CPU逐峰数值与全图另验。',[result['evidence']])
     print(result['status'],result['evidence'])
     return int(result['status']!='PASSED')
 

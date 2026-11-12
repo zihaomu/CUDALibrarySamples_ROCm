@@ -1,0 +1,145 @@
+diff --git a/tools/moat/image_hough_runtime.cpp b/tools/moat/image_hough_runtime.cpp
+index ff965204e..dabf68185 100644
+--- a/tools/moat/image_hough_runtime.cpp
++++ b/tools/moat/image_hough_runtime.cpp
+@@ -53,15 +53,34 @@ int main(){
+     show("overlap-count-and-peaks",rocm_image_hough_peaks(edge,w,h,8,peaks,capacity,reinterpret_cast<int*>(peaks),stream));
+     show("overlap-input-and-output",rocm_image_hough_peaks(edge,w,h,8,reinterpret_cast<RocmHoughPeak*>(edge),capacity,count,stream));
+     int host_count=0;show("host-count",rocm_image_hough_peaks(edge,w,h,8,peaks,capacity,&host_count,stream));
+-    show("misaligned-peaks",rocm_image_hough_peaks(edge,w,h,8,reinterpret_cast<RocmHoughPeak*>(reinterpret_cast<uint8_t*>(peaks)+1),capacity,count,stream));
+-    show("misaligned-count",rocm_image_hough_peaks(edge,w,h,8,peaks,capacity,reinterpret_cast<int*>(reinterpret_cast<uint8_t*>(count)+1),stream));
++    const size_t mis_peak_bytes=size_t(capacity)*sizeof(*peaks)+alignof(RocmHoughPeak);
++    const size_t mis_count_bytes=sizeof(*count)+alignof(int);
++    uint8_t *mis_peaks=nullptr,*mis_count=nullptr;
++    check(hipMalloc(&mis_peaks,mis_peak_bytes),"misaligned-peaks-allocation");
++    check(hipMalloc(&mis_count,mis_count_bytes),"misaligned-count-allocation");
++    check(hipMemset(mis_peaks,0xa5,mis_peak_bytes),"misaligned-peaks-sentinel");
++    check(hipMemset(mis_count,0x5a,mis_count_bytes),"misaligned-count-sentinel");
++    void *peak_base=nullptr,*count_base=nullptr;size_t peak_span=0,count_span=0;
++    check(hipMemGetAddressRange(&peak_base,&peak_span,mis_peaks+1),"misaligned-peaks-range");
++    check(hipMemGetAddressRange(&count_base,&count_span,mis_count+1),"misaligned-count-range");
++    const bool peak_full=peak_base==mis_peaks&&peak_span>=size_t(capacity)*sizeof(*peaks)+1;
++    const bool count_full=count_base==mis_count&&count_span>=sizeof(*count)+1;
++    std::fprintf(stderr,"alignment-spans-proven|%d|%d\n",int(peak_full),int(count_full));
++    if(!peak_full||!count_full)return 4;
++    show("misaligned-peaks",rocm_image_hough_peaks(edge,w,h,8,reinterpret_cast<RocmHoughPeak*>(mis_peaks+1),capacity,count,stream));
++    show("misaligned-count",rocm_image_hough_peaks(edge,w,h,8,peaks,capacity,reinterpret_cast<int*>(mis_count+1),stream));
+     hipStream_t dead{};check(hipStreamCreate(&dead),"create-dead");check(hipStreamDestroy(dead),"destroy-dead");
+     show("destroyed-stream",rocm_image_hough_peaks(edge,w,h,8,peaks,capacity,count,dead));
+     std::vector<uint8_t> after_edge(w*h),after_peaks(size_t(capacity)*sizeof(*peaks)),after_count(sizeof(*count));
+     check(hipMemcpy(after_edge.data(),edge,after_edge.size(),hipMemcpyDeviceToHost),"after-edge");
+     check(hipMemcpy(after_peaks.data(),peaks,after_peaks.size(),hipMemcpyDeviceToHost),"after-peaks");
+     check(hipMemcpy(after_count.data(),count,after_count.size(),hipMemcpyDeviceToHost),"after-count");
+-    std::printf("invalid-storage-preserved|0|%d\n",before_edge==after_edge&&before_peaks==after_peaks&&before_count==after_count?1:0);
++    std::vector<uint8_t> after_mis_peaks(mis_peak_bytes),after_mis_count(mis_count_bytes);
++    check(hipMemcpy(after_mis_peaks.data(),mis_peaks,mis_peak_bytes,hipMemcpyDeviceToHost),"after-misaligned-peaks");
++    check(hipMemcpy(after_mis_count.data(),mis_count,mis_count_bytes,hipMemcpyDeviceToHost),"after-misaligned-count");
++    const bool mis_preserved=std::all_of(after_mis_peaks.begin(),after_mis_peaks.end(),[](uint8_t b){return b==0xa5;})&&
++                             std::all_of(after_mis_count.begin(),after_mis_count.end(),[](uint8_t b){return b==0x5a;});
++    std::printf("invalid-storage-preserved|0|%d\n",before_edge==after_edge&&before_peaks==after_peaks&&before_count==after_count&&mis_preserved?1:0);
+     // Clear the expected invalid-handle status before the next valid launch.
+     hipGetLastError();
+     std::printf("large-grid-plan|0|%d\n",rocm_image_hough_vote_grid_x(16384,16384));
+@@ -81,6 +100,7 @@ int main(){
+     show("fp32-half-grid",rocm_image_hough_peaks(fp_edges,fpw,fpw,2,fp_peaks,fpcap,count,stream),count,fp_peaks,fpcap,stream);
+     check(hipFree(fp_edges),"free-fp32-edges");check(hipFree(fp_peaks),"free-fp32-peaks");
+     check(hipFree(short_edge),"free-short");
++    check(hipFree(mis_peaks),"free-misaligned-peaks");check(hipFree(mis_count),"free-misaligned-count");
+     check(hipFree(edge),"free-edge");check(hipFree(peaks),"free-peaks");check(hipFree(count),"free-count");
+     check(hipStreamDestroy(stream),"destroy-stream");
+ }
+diff --git a/tools/moat/image_hough_runtime.py b/tools/moat/image_hough_runtime.py
+index e24370812..b680dc4c0 100644
+--- a/tools/moat/image_hough_runtime.py
++++ b/tools/moat/image_hough_runtime.py
+@@ -35,6 +35,8 @@ def main():
+         rows=[line.split('|') for line in output.splitlines()]
+         checks=[dict(check='exact-case-list',passed=[r[0] for r in rows]==NAMES),
+                 dict(check='actual-process-exit',passed=rc==0),
++                dict(check='misaligned-pointers-have-complete-real-device-spans',
++                     passed=(e.path/'logs/0002-actual-device-runtime-cases.stderr.log').read_text().strip()=='alignment-spans-proven|1|1'),
+                 dict(check='current-library-build',passed=all(digest(ROOT/n)==h for n,h in build['dependencies'].items()))]
+         if len(rows)==len(NAMES):
+             normal,zero,restore,default=rows[:4]
+@@ -53,7 +55,7 @@ def main():
+     result['evidence']=e.finish('PASSED' if result['status']=='PASSED' else 'RUNTIME_ERROR',
+                                dict(status=result['status'],checks=result.get('checks',[])))
+     write(ROOT/'migration/reports/image-hough-runtime.json',result)
+-    record('I3','Hough 11组真实设备存储/非默认流/输入变化/非法形参运行检查：'+result['status']+'；CPU逐峰数值与全图另验。',[result['evidence']])
++    record('I3','Hough 19组真实设备存储/非默认流/输入变化/非法形参运行检查（含足量实测错位分配）：'+result['status']+'；CPU逐峰数值与全图另验。',[result['evidence']])
+     print(result['status'],result['evidence'])
+     return int(result['status']!='PASSED')
+ 
+diff --git a/tools/moat/qualify_image_hough.py b/tools/moat/qualify_image_hough.py
+index ad8901588..db6b84775 100644
+--- a/tools/moat/qualify_image_hough.py
++++ b/tools/moat/qualify_image_hough.py
+@@ -80,6 +80,60 @@ def cold_verify(cold,parent_override=None):
+     if (foreign['status']!='PASSED' or foreign['build_evidence']!=build['evidence']
+         or foreign['output']!='foreign-device-stream|101|1'
+         or {d['physical_id'] for d in json.loads((foreignpath/'backend.observed.json').read_text())['devices']}!={0,1}):return False
++    core=Path('/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core')
++    flags=['hipcc','--rocm-path='+str(clone/'build/rocm-sdk-overlay'),
++           '--hip-path='+str(clone/'build/rocm-sdk-overlay'),
++           '--rocm-device-lib-path='+str(core/'lib/llvm/amdgcn/bitcode'),
++           '--offload-arch=gfx1201','-std=c++17','-O2','-D__HIP_PLATFORM_AMD__']
++    def harness_commands(path,source,executable):
++        raw=clone/json.loads((path/'manifest.json').read_text())['raw_artifact_dir']
++        binary=raw/executable;lib=clone/build['library']
++        compile=[*flags,'-x','hip',str(clone/'tools/moat'/source),
++                 '-L'+str(lib.parent),'-limage_hough','-Wl,-rpath,'+str(lib.parent),
++                 '-L'+str(core/'lib'),'-Wl,-rpath,'+str(core/'lib'),'-lamdhip64',
++                 '-o',str(binary)]
++        commands=json.loads((path/'commands.json').read_text())
++        return (len(commands)==2 and commands[0]['argv']==compile
++                and commands[1]['argv']==[str(binary)]
++                and all(c['return_code']==0 and c['cwd']==str(clone) for c in commands),commands,raw)
++    runtime,runtimepath=by['runtime'][0];runtime=runtime['report']
++    rc,rcommands,rraw=harness_commands(runtimepath,'image_hough_runtime.cpp','runtime')
++    rv,rvpath=by['runtime-validation'][0];rv=rv['report']
++    if (not rc or runtime['status']!='PASSED' or runtime['case_count']!=19
++        or runtime['build_evidence']!=build['evidence'] or runtime['return_code']!=0
++        or not all(c['passed'] for c in runtime['checks'])
++        or (runtimepath/rcommands[1]['stdout']).read_text().splitlines()!=['|'.join(r) for r in runtime['rows']]
++        or (runtimepath/rcommands[1]['stderr']).read_text().strip()!='alignment-spans-proven|1|1'
++        or rv['status']!='PASSED' or not all(c['passed'] for c in rv['checks'])
++        or json.loads((rvpath/'manifest.json').read_text())['parent_experiment_id']!=Path(runtime['evidence']).name
++        or json.loads(json.dumps(runtime_validate(runtime,proof_override=runtimepath)))!={k:v for k,v in rv.items() if k!='evidence'}):return False
++    fc,fcommands,fraw=harness_commands(foreignpath,'image_hough_foreign_stream.cpp','foreign-stream')
++    if (not fc or foreign['return_code']!=0 or not all(c['passed'] for c in foreign['checks'])
++        or (foreignpath/fcommands[1]['stdout']).read_text().strip()!=foreign['output']):return False
++    trace,tracepath=by['trace'][0];trace=trace['report']
++    traw=clone/json.loads((tracepath/'manifest.json').read_text())['raw_artifact_dir']
++    tcommands=json.loads((tracepath/'commands.json').read_text())
++    traces=list((tracepath/'trace').rglob('*kernel_trace.csv'))
++    agents=list((tracepath/'trace').rglob('*agent_info.csv'))
++    original=next(c[0]['report'] for c in by['runs'].values() if c[0]['report']['case']=='synthetic-no-timing')
++    if (trace['status']!='PASSED' or trace['return_code']!=0 or trace['build_evidence']!=build['evidence']
++        or trace['original_evidence']!=original['evidence'] or not all(c['passed'] for c in trace['checks'])
++        or len(tcommands)!=1 or len(agents)!=1 or len(traces)!=1
++        or tcommands[0]['argv']!=['rocprofv3','--kernel-trace','--output-format','csv','--output-directory',
++                                  str(traw/'trace'),'--',str(clone/build['binary']),'-n','0']
++        or tcommands[0]['cwd']!=str(traw/'outputs') or tcommands[0]['return_code']!=0
++        or digest(tracepath/'outputs/hough_result.ppm')!=original['ppm_sha256']):return False
++    lookup={r['Node_Id']:r for r in csv.DictReader(agents[0].open())}
++    allowed={d['pci_bdf'] for d in json.loads((tracepath/'backend.observed.json').read_text())['devices'] if d['physical_id']==1}
++    counts=collections.Counter();names=['sobel','suppress','local_threshold','cast_votes','extract_peaks']
++    for row in csv.DictReader(traces[0].open()):
++        matches=[key for key in names if key in row['Kernel_Name']]
++        if not matches:continue
++        for key in matches:counts[key]+=1
++        agent=lookup[row['Agent_Id'].split()[-1]];loc=int(agent['Location_Id'])
++        pci=f"{int(agent['Domain']):04x}:{loc>>8:02x}:{(loc>>3)&31:02x}.{loc&7}"
++        if pci not in allowed or int(row['End_Timestamp'])<=int(row['Start_Timestamp']) or int(row['Grid_Size_X'])<=0:return False
++    if dict(counts)!=trace['counts'] or any(counts[n]!=1 for n in names):return False
+     binary=str(clone/build['binary'])
+     for group,cases,validation_group in [('runs',main_cases,'validation'),('options-run',option_cases,'options-validation')]:
+         for index,case in enumerate(cases):
+@@ -210,6 +264,7 @@ def collect(review=None):
+                 and commands[1]['argv']==[str(binary)]
+                 and all(c['return_code']==0 and c['cwd']==str(ROOT) for c in commands)
+                 and (d/commands[1]['stdout']).read_text().splitlines()==['|'.join(row) for row in runtime['rows']]
++                and (d/commands[1]['stderr']).read_text().strip()=='alignment-spans-proven|1|1'
+                 and len(runtime['checks'])>=9 and all(c['passed'] for c in runtime['checks'])
+                 and record(runtime_cpu,'results.json','CPU-reference')
+                 and runtime_cpu['status']=='PASSED' and all(c['passed'] for c in runtime_cpu['checks'])

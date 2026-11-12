@@ -80,6 +80,60 @@ def cold_verify(cold,parent_override=None):
     if (foreign['status']!='PASSED' or foreign['build_evidence']!=build['evidence']
         or foreign['output']!='foreign-device-stream|101|1'
         or {d['physical_id'] for d in json.loads((foreignpath/'backend.observed.json').read_text())['devices']}!={0,1}):return False
+    core=Path('/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core')
+    flags=['hipcc','--rocm-path='+str(clone/'build/rocm-sdk-overlay'),
+           '--hip-path='+str(clone/'build/rocm-sdk-overlay'),
+           '--rocm-device-lib-path='+str(core/'lib/llvm/amdgcn/bitcode'),
+           '--offload-arch=gfx1201','-std=c++17','-O2','-D__HIP_PLATFORM_AMD__']
+    def harness_commands(path,source,executable):
+        raw=clone/json.loads((path/'manifest.json').read_text())['raw_artifact_dir']
+        binary=raw/executable;lib=clone/build['library']
+        compile=[*flags,'-x','hip',str(clone/'tools/moat'/source),
+                 '-L'+str(lib.parent),'-limage_hough','-Wl,-rpath,'+str(lib.parent),
+                 '-L'+str(core/'lib'),'-Wl,-rpath,'+str(core/'lib'),'-lamdhip64',
+                 '-o',str(binary)]
+        commands=json.loads((path/'commands.json').read_text())
+        return (len(commands)==2 and commands[0]['argv']==compile
+                and commands[1]['argv']==[str(binary)]
+                and all(c['return_code']==0 and c['cwd']==str(clone) for c in commands),commands,raw)
+    runtime,runtimepath=by['runtime'][0];runtime=runtime['report']
+    rc,rcommands,rraw=harness_commands(runtimepath,'image_hough_runtime.cpp','runtime')
+    rv,rvpath=by['runtime-validation'][0];rv=rv['report']
+    if (not rc or runtime['status']!='PASSED' or runtime['case_count']!=19
+        or runtime['build_evidence']!=build['evidence'] or runtime['return_code']!=0
+        or not all(c['passed'] for c in runtime['checks'])
+        or (runtimepath/rcommands[1]['stdout']).read_text().splitlines()!=['|'.join(r) for r in runtime['rows']]
+        or (runtimepath/rcommands[1]['stderr']).read_text().strip()!='alignment-spans-proven|1|1'
+        or rv['status']!='PASSED' or not all(c['passed'] for c in rv['checks'])
+        or json.loads((rvpath/'manifest.json').read_text())['parent_experiment_id']!=Path(runtime['evidence']).name
+        or json.loads(json.dumps(runtime_validate(runtime,proof_override=runtimepath)))!={k:v for k,v in rv.items() if k!='evidence'}):return False
+    fc,fcommands,fraw=harness_commands(foreignpath,'image_hough_foreign_stream.cpp','foreign-stream')
+    if (not fc or foreign['return_code']!=0 or not all(c['passed'] for c in foreign['checks'])
+        or (foreignpath/fcommands[1]['stdout']).read_text().strip()!=foreign['output']):return False
+    trace,tracepath=by['trace'][0];trace=trace['report']
+    traw=clone/json.loads((tracepath/'manifest.json').read_text())['raw_artifact_dir']
+    tcommands=json.loads((tracepath/'commands.json').read_text())
+    traces=list((tracepath/'trace').rglob('*kernel_trace.csv'))
+    agents=list((tracepath/'trace').rglob('*agent_info.csv'))
+    original=next(c[0]['report'] for c in by['runs'].values() if c[0]['report']['case']=='synthetic-no-timing')
+    if (trace['status']!='PASSED' or trace['return_code']!=0 or trace['build_evidence']!=build['evidence']
+        or trace['original_evidence']!=original['evidence'] or not all(c['passed'] for c in trace['checks'])
+        or len(tcommands)!=1 or len(agents)!=1 or len(traces)!=1
+        or tcommands[0]['argv']!=['rocprofv3','--kernel-trace','--output-format','csv','--output-directory',
+                                  str(traw/'trace'),'--',str(clone/build['binary']),'-n','0']
+        or tcommands[0]['cwd']!=str(traw/'outputs') or tcommands[0]['return_code']!=0
+        or digest(tracepath/'outputs/hough_result.ppm')!=original['ppm_sha256']):return False
+    lookup={r['Node_Id']:r for r in csv.DictReader(agents[0].open())}
+    allowed={d['pci_bdf'] for d in json.loads((tracepath/'backend.observed.json').read_text())['devices'] if d['physical_id']==1}
+    counts=collections.Counter();names=['sobel','suppress','local_threshold','cast_votes','extract_peaks']
+    for row in csv.DictReader(traces[0].open()):
+        matches=[key for key in names if key in row['Kernel_Name']]
+        if not matches:continue
+        for key in matches:counts[key]+=1
+        agent=lookup[row['Agent_Id'].split()[-1]];loc=int(agent['Location_Id'])
+        pci=f"{int(agent['Domain']):04x}:{loc>>8:02x}:{(loc>>3)&31:02x}.{loc&7}"
+        if pci not in allowed or int(row['End_Timestamp'])<=int(row['Start_Timestamp']) or int(row['Grid_Size_X'])<=0:return False
+    if dict(counts)!=trace['counts'] or any(counts[n]!=1 for n in names):return False
     binary=str(clone/build['binary'])
     for group,cases,validation_group in [('runs',main_cases,'validation'),('options-run',option_cases,'options-validation')]:
         for index,case in enumerate(cases):
@@ -210,6 +264,7 @@ def collect(review=None):
                 and commands[1]['argv']==[str(binary)]
                 and all(c['return_code']==0 and c['cwd']==str(ROOT) for c in commands)
                 and (d/commands[1]['stdout']).read_text().splitlines()==['|'.join(row) for row in runtime['rows']]
+                and (d/commands[1]['stderr']).read_text().strip()=='alignment-spans-proven|1|1'
                 and len(runtime['checks'])>=9 and all(c['passed'] for c in runtime['checks'])
                 and record(runtime_cpu,'results.json','CPU-reference')
                 and runtime_cpu['status']=='PASSED' and all(c['passed'] for c in runtime_cpu['checks'])
@@ -284,12 +339,12 @@ def collect(review=None):
     gate('forty-five-sealed-child-clean-checkout-replay',cold_gate)
     def mutations():
         r=load('qualification-checks')
-        names=json.loads((ROOT/'migration/rewrite/image-hough-qualification-checks-v2.json').read_text())
+        names=json.loads((ROOT/'migration/rewrite/image-hough-qualification-checks-v3.json').read_text())
         return (record(r,'checks.json','CPU-validator-test') and r['status']=='PASSED'
-                and r['case_count']==len(r['checks'])==len(names)==12
+                and r['case_count']==len(r['checks'])==len(names)==16
                 and [c['check'] for c in r['checks']]==names
                 and all(c['passed'] for c in r['checks']))
-    gate('twelve-real-qualification-and-archive-mutation-checks',mutations)
+    gate('sixteen-real-qualification-and-archive-mutation-checks',mutations)
     sources.update({'tools/moat/qualify_image_hough.py','tools/moat/publish_image_hough.py',
                     'tools/moat/image_hough_qualification_checks.py',
                     'tools/moat/image_hough_native_reference.py','tools/moat/image_regions_native.py',

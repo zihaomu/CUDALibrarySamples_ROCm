@@ -35,7 +35,7 @@ def main():
         'image-hough/complete-native-PPM-and-declared-differences',
         'image-hough/five-real-GPU-kernel-dispatches',
         'image-hough/forty-five-child-cold-replay',
-        'image-hough/twelve-qualification-and-archive-mutation-checks',
+        'image-hough/sixteen-qualification-and-archive-mutation-checks',
         'image-hough/three-independent-fixed-source-reviews']
     sample.update(status='PASSED',level='L4',reason_code='VALIDATED_MOAT_REWRITE',
                   implementation=IMPLEMENTATION,selected_validation=q,

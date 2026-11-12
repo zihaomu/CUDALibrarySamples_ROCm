@@ -1,6 +1,6 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-12T04:54:30.833257+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-12T05:00:36.843000+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
 26入口当前：11 PASSED / 7 PARTIAL / 8 FAILED。
 
@@ -1352,3 +1352,6 @@
 | 2026-11-12T04:53:29.745622+00:00 | I3 | Hough组合资格与45子封印的12项正反向检查合同冻结。 | [20261112T045328.785105Z-I3-CPU-contract-e4a1f3594e](evidence/rewrite/I3/Hough-qualification-mutation-contract/20261112T045328.785105Z-I3-CPU-contract-e4a1f3594e) |
 | 2026-11-12T04:53:43.855053+00:00 | I3 | Hough12项实际组合资格与子封印正反向变异：PASSED。 | [20261112T045330.105200Z-I3-CPU-validator-test-405c471a25](evidence/rewrite/I3/Hough-actual-qualification-mutations/20261112T045330.105200Z-I3-CPU-validator-test-405c471a25) |
 | 2026-11-12T04:54:30.833257+00:00 | I3 | Hough固定提交f243503e冷检出45/45子记录重算通过；12/12资格及配对归档篡改反例通过；资格门仅余三范围独立复审，主表仍PARTIAL。 | [image-hough-cold.json](image-hough-cold.json)；[image-hough-qualification-checks.json](image-hough-qualification-checks.json) |
+| 2026-11-12T04:59:21.099250+00:00 | I3 | Hough 19组真实设备存储/非默认流/输入变化/非法形参运行检查（含足量实测错位分配）：PASSED；CPU逐峰数值与全图另验。 | [20261112T045917.456621Z-I3-rocm-runtime-f7e02f44f9](evidence/rewrite/I3/Hough-actual-device-allocation-and-stream-runtime/20261112T045917.456621Z-I3-rocm-runtime-f7e02f44f9) |
+| 2026-11-12T04:59:26.278035+00:00 | I3 | Hough17组运行合同正常/变化/恢复全部GPU峰由独立CPU重算，含>2^32工作量和FP32半格：PASSED。 | [20261112T045925.314369Z-I3-CPU-reference-88840adc63](evidence/rewrite/I3/Hough-runtime-independent-CPU-all-peaks/20261112T045925.314369Z-I3-CPU-reference-88840adc63) |
+| 2026-11-12T05:00:36.843000+00:00 | I3 | Hough第二轮三范围复审发现冷runtime/trace配对篡改可通过及错位测试混杂span不足；现补足量分配地址范围证明、运行/trace冷子重算与四种新变异，重跑固定提交45子前维持PARTIAL。 | [image-hough.md](image-hough.md)；[image-hough-runtime.json](image-hough-runtime.json) |
