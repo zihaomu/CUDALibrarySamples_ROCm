@@ -1,0 +1,19 @@
+diff --git a/tools/moat/qualify_image_benchmark.py b/tools/moat/qualify_image_benchmark.py
+index aa3c19523..d2cc4c8e0 100644
+--- a/tools/moat/qualify_image_benchmark.py
++++ b/tools/moat/qualify_image_benchmark.py
+@@ -53,10 +53,13 @@ def reviews_ok(review,cold,refs):
+        or len({r['reviewer_id'] for r in reviewers})!=3):return False
+     commit=review['source_commit']
+     if subprocess.run(['git','merge-base','--is-ancestor',commit,'HEAD'],cwd=ROOT,capture_output=True).returncode:return False
++    evidence_commit=review.get('evidence_commit','')
++    if (not evidence_commit or subprocess.run(['git','merge-base','--is-ancestor',commit,evidence_commit],cwd=ROOT,capture_output=True).returncode
++      or subprocess.run(['git','merge-base','--is-ancestor',evidence_commit,'HEAD'],cwd=ROOT,capture_output=True).returncode):return False
+     if not review_identity(review):return False
+     if review.get('proof_seals')!={ref:digest(ROOT/ref/'sealed.json') for ref in refs}:return False
+     try:
+-      if any(digest_bytes(subprocess.check_output(['git','show',commit+':'+ref+'/sealed.json'],cwd=ROOT,stderr=subprocess.DEVNULL))!=sha
++      if any(digest_bytes(subprocess.check_output(['git','show',evidence_commit+':'+ref+'/sealed.json'],cwd=ROOT,stderr=subprocess.DEVNULL))!=sha
+              for ref,sha in review['proof_seals'].items()):return False
+     except (OSError,subprocess.CalledProcessError):return False
+     source_names=[str(p.relative_to(ROOT)) for p in dependencies() if 'image-I3-rocm-OpenCV.json' not in str(p)]

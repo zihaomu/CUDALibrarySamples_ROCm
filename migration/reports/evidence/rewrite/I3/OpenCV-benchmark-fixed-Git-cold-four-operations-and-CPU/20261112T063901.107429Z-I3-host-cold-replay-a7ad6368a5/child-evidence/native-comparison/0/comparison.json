@@ -1,0 +1,140 @@
+{
+  "status": "PASSED",
+  "checks": [
+    {
+      "check": "one-sealed-stdout-per-backend",
+      "passed": true
+    },
+    {
+      "check": "original-source-unchanged",
+      "passed": true
+    },
+    {
+      "check": "actual-native-build-run-collection-and-seal",
+      "passed": true
+    },
+    {
+      "check": "same-input-and-4096x2048-20x5-contract",
+      "passed": true
+    },
+    {
+      "check": "same-pinned-OpenCV-build",
+      "passed": true
+    },
+    {
+      "check": "all-four-operations-in-original-order",
+      "passed": true
+    },
+    {
+      "check": "real-distinct-GPU-identities",
+      "passed": true
+    },
+    {
+      "check": "Canny-edge-counts-recorded",
+      "passed": true
+    },
+    {
+      "check": "all-four-HIP-printed-OpenCV-differences-independently-recomputed",
+      "passed": true
+    },
+    {
+      "check": "documented-Gaussian-and-Canny-native-variant",
+      "passed": true
+    },
+    {
+      "check": "all-numeric-results-finite-and-nonnegative",
+      "passed": true
+    }
+  ],
+  "cuda": {
+    "size": [
+      4096,
+      2048,
+      20,
+      5
+    ],
+    "device": "GPU: NVIDIA GeForce RTX 5090 | OpenCV 4.12.0, 256 CPU threads",
+    "edges": {
+      "label": "NPP",
+      "gpu": 546308,
+      "opencv": 324128
+    },
+    "rows": {
+      "Gaussian 5x5": {
+        "kernel_ms": 0.031,
+        "e2e_ms": 0.34,
+        "cpu_one_ms": 3.241,
+        "cpu_many_ms": 6.3,
+        "opencv_mean_abs": 1.7
+      },
+      "Canny 3x3 L2": {
+        "kernel_ms": 0.07,
+        "e2e_ms": 0.384,
+        "cpu_one_ms": 17.908,
+        "cpu_many_ms": 10.13,
+        "opencv_mean_abs": 6.75
+      },
+      "Resize 1/2 bilinear": {
+        "kernel_ms": 0.006,
+        "e2e_ms": 0.208,
+        "cpu_one_ms": 0.236,
+        "cpu_many_ms": 0.131,
+        "opencv_mean_abs": 0.0
+      },
+      "RGB to gray": {
+        "kernel_ms": 0.01,
+        "e2e_ms": 0.604,
+        "cpu_one_ms": 1.905,
+        "cpu_many_ms": 0.19,
+        "opencv_mean_abs": 0.0
+      }
+    }
+  },
+  "rocm": {
+    "size": [
+      4096,
+      2048,
+      20,
+      5
+    ],
+    "device": "GPU: AMD Radeon AI PRO R9700 | OpenCV 4.12.0, 128 CPU threads",
+    "edges": {
+      "label": "ROCm",
+      "gpu": 546308,
+      "opencv": 324128
+    },
+    "rows": {
+      "Gaussian 5x5": {
+        "kernel_ms": 0.169,
+        "e2e_ms": 0.687,
+        "cpu_one_ms": 3.117,
+        "cpu_many_ms": 7.05,
+        "opencv_mean_abs": 0.0
+      },
+      "Canny 3x3 L2": {
+        "kernel_ms": 0.425,
+        "e2e_ms": 0.925,
+        "cpu_one_ms": 17.519,
+        "cpu_many_ms": 10.036,
+        "opencv_mean_abs": 6.75
+      },
+      "Resize 1/2 bilinear": {
+        "kernel_ms": 0.029,
+        "e2e_ms": 0.349,
+        "cpu_one_ms": 0.224,
+        "cpu_many_ms": 5.4,
+        "opencv_mean_abs": 0.0
+      },
+      "RGB to gray": {
+        "kernel_ms": 0.062,
+        "e2e_ms": 1.018,
+        "cpu_one_ms": 1.823,
+        "cpu_many_ms": 0.241,
+        "opencv_mean_abs": 0.0
+      }
+    }
+  },
+  "limitation": "Timing values are observations only; different GPU and CPU occupancy, no cross-device speedup claim. Original NPP did not emit pixels, so equal Canny counts do not prove equal masks.",
+  "native_evidence": "migration/reports/evidence/rewrite/I3/NPP-opencvBenchmark-full-native-default/20261111T182242.064805Z-I3-cuda-original-a496dad9bb",
+  "rocm_evidence": "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T064001.100599Z-I3-rocm-original-d4d1a4f702"
+}

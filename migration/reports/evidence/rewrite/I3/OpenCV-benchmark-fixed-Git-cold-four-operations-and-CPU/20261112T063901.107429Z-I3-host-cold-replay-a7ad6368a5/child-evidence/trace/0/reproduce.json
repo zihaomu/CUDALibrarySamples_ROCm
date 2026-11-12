@@ -1,0 +1,67 @@
+{
+  "commands": [
+    {
+      "command_id": 1,
+      "phase": "resolve-real-image-libraries",
+      "argv": [
+        "ldd",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-benchmark-cold-ddlxq7aq/src/artifacts/rewrite/I3/OpenCV-benchmark-four-HIP-operations-and-original-C__-CLI-build/20261112T063945.422329Z-I3-rocm-build-fd9b064da2/opencvBenchmark"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-benchmark-cold-ddlxq7aq/src",
+      "started_at_utc": "2026-11-12T06:40:34.887462+00:00",
+      "timeout_seconds": 30,
+      "environment": {
+        "HIP_VISIBLE_DEVICES": "0",
+        "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "DEEPINFER_ROCM_RELEASE": "10.1.0",
+        "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+        "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+      },
+      "stdout": "logs/0001-resolve-real-image-libraries.stdout.log",
+      "stderr": "logs/0001-resolve-real-image-libraries.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-12T06:40:34.904694+00:00",
+      "seconds": 0.016385392984375358
+    },
+    {
+      "command_id": 2,
+      "phase": "profile-complete-four-operation-C++-entry",
+      "argv": [
+        "rocprofv3",
+        "--kernel-trace",
+        "--output-format",
+        "csv",
+        "--output-directory",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-benchmark-cold-ddlxq7aq/src/artifacts/rewrite/I3/OpenCV-benchmark-all-four-actual-GPU-kernel-traces/20261112T064033.489302Z-I3-rocm-trace-1a43734315/trace",
+        "--",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-benchmark-cold-ddlxq7aq/src/artifacts/rewrite/I3/OpenCV-benchmark-four-HIP-operations-and-original-C__-CLI-build/20261112T063945.422329Z-I3-rocm-build-fd9b064da2/opencvBenchmark",
+        "-i",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-benchmark-cold-ddlxq7aq/src/NPP/opencvBenchmark/images/CircuitBoard_2048x1024_8u.raw",
+        "-w",
+        "128",
+        "-h",
+        "96",
+        "-n",
+        "1"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-benchmark-cold-ddlxq7aq/src/artifacts/rewrite/I3/OpenCV-benchmark-all-four-actual-GPU-kernel-traces/20261112T064033.489302Z-I3-rocm-trace-1a43734315/outputs",
+      "started_at_utc": "2026-11-12T06:40:34.914013+00:00",
+      "timeout_seconds": 300,
+      "environment": {
+        "HIP_VISIBLE_DEVICES": "0",
+        "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "DEEPINFER_ROCM_RELEASE": "10.1.0",
+        "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+        "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+      },
+      "stdout": "logs/0002-profile-complete-four-operation-C++-entry.stdout.log",
+      "stderr": "logs/0002-profile-complete-four-operation-C++-entry.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-12T06:40:35.631316+00:00",
+      "seconds": 0.7167191670159809
+    }
+  ],
+  "source": "source.json",
+  "inputs": "inputs/manifest.json",
+  "expected_environment": "environment.expected.json"
+}

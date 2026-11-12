@@ -1,6 +1,6 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-12T06:38:20.870452+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-12T06:40:51.986069+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
 26入口当前：12 PASSED / 7 PARTIAL / 7 FAILED。
 
@@ -1447,3 +1447,5 @@
 | 2026-11-12T06:37:16.862844+00:00 | I3 | benchmark固定Git冷检出同版OpenCV/四算子/六CLI/独立CPU/原生统计/运行/trace及18子封存：FAILED | [20261112T063539.400801Z-I3-host-cold-replay-3bff3d2d09](evidence/rewrite/I3/OpenCV-benchmark-fixed-Git-cold-four-operations-and-CPU/20261112T063539.400801Z-I3-host-cold-replay-3bff3d2d09) |
 | 2026-11-12T06:38:12.648532+00:00 | I3 | benchmark原生/错误CLI/依赖及CPU/runtime/trace/cold配对篡改共19项正反证据：PASSED。 | [20261112T063808.645269Z-I3-CPU-negative-b36043678b](evidence/rewrite/I3/OpenCV-benchmark-sealed-reader-counterexamples/20261112T063808.645269Z-I3-CPU-negative-b36043678b) |
 | 2026-11-12T06:38:20.870452+00:00 | I3 | 最终冷检出九项主作业成功，第十项反例因尝试在隔离clone读取上一轮未归档的完整冷raw而失败；失败封存，反例已缩为纯19子身份结构检查，完整raw复算仍由主资格单独执行；现19项反例本地通过，等待新Git冷检出。 | [20261112T063539.400801Z-I3-host-cold-replay-3bff3d2d09](evidence/rewrite/I3/OpenCV-benchmark-fixed-Git-cold-four-operations-and-CPU/20261112T063539.400801Z-I3-host-cold-replay-3bff3d2d09)；[image-benchmark-negative.json](image-benchmark-negative.json) |
+| 2026-11-12T06:40:41.126923+00:00 | I3 | benchmark固定Git冷检出同版OpenCV/四算子/六CLI/独立CPU/原生统计/运行/trace及18子封存：PASSED | [20261112T063901.107429Z-I3-host-cold-replay-a7ad6368a5](evidence/rewrite/I3/OpenCV-benchmark-fixed-Git-cold-four-operations-and-CPU/20261112T063901.107429Z-I3-host-cold-replay-a7ad6368a5) |
+| 2026-11-12T06:40:51.986069+00:00 | I3 | benchmark原生/错误CLI/依赖及CPU/runtime/trace/cold配对篡改共19项正反证据：PASSED。 | [20261112T064048.101076Z-I3-CPU-negative-4fb8ec13db](evidence/rewrite/I3/OpenCV-benchmark-sealed-reader-counterexamples/20261112T064048.101076Z-I3-CPU-negative-4fb8ec13db) |
