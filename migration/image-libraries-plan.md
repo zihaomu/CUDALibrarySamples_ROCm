@@ -280,7 +280,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-12T03:47:53.478951+00:00。26入口当前10通过/7部分/9失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-12T03:52:19.132551+00:00。26入口当前10通过/7部分/9失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -1412,5 +1412,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-12T03:43:45.453015+00:00 | I3 | Flood未首次提交的组合资格被真实publisher拒绝，样例主表hash保持；先提交资格封印后才能升级支持：PASSED | `migration/reports/evidence/rewrite/I3/FloodFill-unpublished-qualification-must-not-update-catalog/20261112T034338.085846Z-I3-CPU-publication-gate-30fd8a5f0c` |
 | 2026-11-12T03:45:45.148854+00:00 | I3 | Flood组合资格首次发布被当前源码传递闭包门正确拒绝：旧失败实验的历史HIP源不能作为当前通过证明；catalog保持不变。正在改为历史引用与当前CAS绑定，拒绝证据独立保留。 | `migration/reports/evidence/rewrite/I3/FloodFill-selected-proof-rejects-stale-historical-kernel-as-current/20261112T034537.140996Z-I3-CPU-publication-gate-20e29ff3be` |
 | 2026-11-12T03:47:53.478951+00:00 | I3 | Flood资格门16项真实历史padding/源命令/重复子记录/摘要/像素和配对hash反例：PASSED | `migration/reports/evidence/rewrite/I3/FloodFill-qualification-and-cold-archive-validator-checks/20261112T034743.636243Z-I3-CPU-validator-test-3b569ed53c` |
+| 2026-11-12T03:51:55.850323+00:00 | I3 | Flood历史证据与当前引用分离后，三项固定源码复审通过；新组合资格21/21门通过，未首次Git锚定的真实publisher仍拒绝且catalog SHA不变。 | `migration/reports/evidence/rewrite/I3/FloodFill-new-unanchored-qualification/20261112T035148.860738Z-I3-CPU-publication-gate-5781827759` |
+| 2026-11-12T03:52:19.132551+00:00 | I3 | Flood新资格首次发布门真实拒绝且catalog不变：PASSED。首次校验脚本只匹配了错误诊断字符串而误报FAILED，保留原始尝试并以真实异常消息重验。 | `migration/reports/evidence/rewrite/I3/FloodFill-new-unanchored-qualification-corrected-gate/20261112T035211.964332Z-I3-CPU-publication-gate-cc704324ce` |
 
 <!-- IMAGE_EXECUTION:END -->

@@ -1,25 +1,25 @@
 {
   "verdict": "APPROVED",
-  "source_commit": "eeed6ee1a406c3d6c19698244cea3bd9fe28b8cf",
-  "reviewed_at": "2026-11-12T03:42:46Z",
+  "source_commit": "c0e6c3ff732ad75791824b165138537f73ec6dcb",
+  "reviewed_at": "2026-11-12T03:51:17Z",
   "reviewers": [
     {
       "reviewer_id": "/root/r1_contract_review",
       "scope": "kernel-stream",
       "verdict": "APPROVED",
-      "summary": "Fixed GPU source, full pitched allocation checks, 72 runtime cases, build argv, 36 cold child archives and 16 publication gate mutations reviewed."
+      "summary": "Fixed kernel and stream contracts remain valid; 43 current selected references and two historical failed proofs are separated, with 73-path current qualification closure and historical source CAS checked."
     },
     {
       "reviewer_id": "/root/flood_acceptance_review",
       "scope": "acceptance-publication",
       "verdict": "APPROVED",
-      "summary": "Old and fixed padding receipts, native execution recipe, frozen cold profiles, qualification closure and publication checks reviewed; 16 of 16 gate mutations pass."
+      "summary": "Publication code approved at exact commit; old padding seals and outputs remain bound as historical, current selected proof closure is strict, and requalification plus first Git anchor are required before catalog publication."
     },
     {
       "reviewer_id": "/root/remaining_scope_review",
       "scope": "workflow-reproduction",
       "verdict": "APPROVED",
-      "summary": "Four complete workflows and twenty RGB products, eighteen CLI paths, native comparison and all thirty-six cold child records with five CPU recomputations reviewed."
+      "summary": "Four complete original workflows, 29 full inputs, 18 CLI cases, 36 cold children and five CPU recalculations remain gated; old failure proof remains traceable."
     }
   ],
   "findings": [
@@ -37,6 +37,11 @@
       "issue": "Historical padding and native/ROCm command provenance were incompletely bound to qualification.",
       "state": "RESOLVED",
       "validation": "Historical and current raw bytes, source CAS, compiler argv and native receipt execution recipe are checked from sealed records."
+    },
+    {
+      "issue": "Old failed HIP source was selected as a current passing evidence reference and publication correctly rejected it.",
+      "state": "RESOLVED",
+      "validation": "New qualification separates two historical references, binds old seals/bytes/commands/CAS as source dependencies, and leaves current selected proof closure strict. Fixed c0e6c3ff7 independently reviewed by three scopes."
     }
   ],
   "scope": "One complete NPP+ Flood Fill entry on Linux/gfx1201/ROCm10.1. Fixed-seed eight-connected project algorithm variant with measured native differences. No whole-project, vendor ABI, platform breadth or performance approval."

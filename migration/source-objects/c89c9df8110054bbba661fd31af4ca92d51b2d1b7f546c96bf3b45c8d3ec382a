@@ -1,0 +1,88 @@
+{
+  "status": "FAILED_CONTRACT",
+  "build": {
+    "status": "BUILT",
+    "abi_version": 1,
+    "experiment_id": "20261111T181533.727560Z-I3-rocm-build-895672330e",
+    "library": "artifacts/rewrite/I3/FloodFill-full-RGB-GPU-backend-build/20261111T181533.727560Z-I3-rocm-build-895672330e/libimage_flood.so",
+    "library_sha256": "278dfdb196b1fc73e1e96f2a6a9e16ca2378adad1b6aea6648984b5b86ccadff",
+    "dependencies": {
+      "rocm/common/image/flood.h": "c0fc95af2575ff65cdb72bce4bde075cc92b83d9a1fb62d20bc3a7547bb82dfe",
+      "rocm/common/image/flood.hip": "4719a965471a330c9f874c79f33372ac12a29e7131552319a4710ac5a08ebf94",
+      "rocm/common/image/connectivity.h": "f6a25d07f6f3f499b72f2877dfe4674f76e60410141f2f9462476843d4b871da",
+      "rocm/common/image/connectivity.hip": "fffe2c0096705d0fb8f8b6bc0770f15944bf526135c12c8f746b4ead4af3d412",
+      "rocm/common/image/image_memory.hpp": "4a24dd7cd8efc50e2b65d50fc1dfe872a9b8ba09654b6f220524cd64c1131f35",
+      "migration/rewrite/image-flood-profile.json": "8220c184842d76398e5d92eacca062fe0c438f446726b4595de0dfadb2e45b3b"
+    },
+    "build_recipe_sha256": "3fb85894a096a310b71e8ff377c9b58a5fcd0b26cba83f198f111bd77dfec863",
+    "evidence": "migration/reports/evidence/rewrite/I3/FloodFill-full-RGB-GPU-backend-build/20261111T181533.727560Z-I3-rocm-build-895672330e"
+  },
+  "observed": {
+    "return_code": 0,
+    "expected_return_code": 1,
+    "input_before": [
+      31,
+      41,
+      51,
+      197
+    ],
+    "input_after": [
+      31,
+      41,
+      51,
+      255
+    ],
+    "padding_before": 197,
+    "padding_after": 255,
+    "descriptor": {
+      "version": 1,
+      "descriptor_bytes": 160,
+      "width": 1,
+      "height": 1,
+      "mode": 0,
+      "seed_x": 0,
+      "seed_y": 0,
+      "reserved": 0,
+      "input": 124385891450880,
+      "input_pitch": 4,
+      "output": 124385891451392,
+      "output_pitch": 3,
+      "mask": 124385891450883,
+      "mask_pitch": 1,
+      "lower": [
+        0,
+        0,
+        0
+      ],
+      "upper": [
+        0,
+        0,
+        0
+      ],
+      "fill": [
+        255,
+        0,
+        0
+      ],
+      "boundary": [
+        255,
+        255,
+        0
+      ],
+      "region": 124385891451904,
+      "workspace": 124385891452416,
+      "workspace_bytes": 12,
+      "reserved_tail": 0
+    }
+  },
+  "checks": [
+    {
+      "check": "reject-partial-storage-alias-before-any-writes",
+      "passed": false
+    },
+    {
+      "check": "full-last-row-input-padding-preserved",
+      "passed": false
+    }
+  ]
+}
