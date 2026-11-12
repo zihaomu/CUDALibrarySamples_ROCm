@@ -66,7 +66,7 @@ JPEG2000 的已验 HIP MQ 算术解码与可逆变换组件、原图 CPU/CUDA �
 | PARTIAL | `VALIDATED_B9_B11_SUBSET` | 3 | 已有验收子集，原例框架、调度或配置/查询语义仍有缺口。 |
 | PARTIAL | `VALIDATED_I4_PROGRESSIVE_SUBSET` | 4 | 按该入口的失败日志和恢复条件处理。 |
 | PARTIAL | `VALIDATED_I5_FULL_GPU_JPEG_BASELINE_SUBSET` | 2 | 按该入口的失败日志和恢复条件处理。 |
-| PARTIAL | `VALIDATED_I5_FULL_GPU_JPEG_INSTANCES_SUBSET` | 1 | 按该入口的失败日志和恢复条件处理。 |
+| PARTIAL | `VALIDATED_I5_OPTIMIZED_GPU_JPEG_INSTANCES_SUBSET` | 1 | 按该入口的失败日志和恢复条件处理。 |
 | PARTIAL | `VENDOR_PERMUTATION_POLICY_DIFFERS` | 1 | 置换/排序策略未满足原始 vendor 合同。 |
 
 ## 逐入口实现、结果与日志
@@ -843,7 +843,7 @@ JPEG2000 的已验 HIP MQ 算术解码与可逆变换组件、原图 CPU/CUDA �
 | [nvJPEG-Decoder-MultipleInstances/nvJPEGDecMultipleInstances.cpp](../sample-reports/nvJPEG/nvJPEG-Decoder-MultipleInstances/nvJPEGDecMultipleInstances.cpp.md) | PARTIAL / 8/10 | rocJPEG hardware baseline + project HIP progressive IDCT/chroma/RGB; libjpeg-turbo CPU entropy assembly / rocJPEG + project HIP image decoder + libjpeg-turbo entropy；GPU 实现 + 明确标注的 CPU 阶段 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-f846e59c86c3) |
 | [nvJPEG-Decoder/nvjpegDecoder.cpp](../sample-reports/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp.md) | PARTIAL / 8/9 | rocJPEG hardware baseline + project HIP progressive IDCT/chroma/RGB; libjpeg-turbo CPU entropy assembly / rocJPEG + project HIP image decoder + libjpeg-turbo entropy；GPU 实现 + 明确标注的 CPU 阶段 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-340e3057571d) |
 | [nvJPEG-Decoder/tests/test_decoder.py](../sample-reports/nvJPEG/nvJPEG-Decoder/tests/test_decoder.py.md) | PARTIAL / 8/9 | rocJPEG hardware baseline + project HIP progressive IDCT/chroma/RGB; libjpeg-turbo CPU entropy assembly / rocJPEG + project HIP image decoder + libjpeg-turbo entropy；GPU 实现 + 明确标注的 CPU 阶段 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-682072b0c8fa) |
-| [nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp](../sample-reports/nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp.md) | PARTIAL / 9/14 | Project HIP multi-stream baseline JPEG color/downsample/FDCT/quant/Huffman/pack/stuff; libjpeg-turbo standard markers and optimized -f fallback / project HIP full baseline JPEG encoder + libjpeg-turbo optimized Huffman fallback；GPU_BASELINE_WITH_EXPLICIT_OPTIMIZED_CPU_FALLBACK | [日志、范围、源码](support-log-index/nvJPEG.md#sample-1745f35191ec) |
+| [nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp](../sample-reports/nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp.md) | PARTIAL / 10/14 | Project HIP multi-stream baseline and optimized JPEG color/downsample/FDCT/quant/Huffman/pack/stuff; CPU libjpeg-turbo standard markers and optimized DHT design / project HIP full baseline/optimized JPEG encoder + CPU libjpeg-turbo DHT/header design；GPU_BASELINE_AND_OPTIMIZED_HUFFMAN_WITH_CPU_DHT_DESIGN | [日志、范围、源码](support-log-index/nvJPEG.md#sample-1745f35191ec) |
 
 <a id="module-26"></a>
 

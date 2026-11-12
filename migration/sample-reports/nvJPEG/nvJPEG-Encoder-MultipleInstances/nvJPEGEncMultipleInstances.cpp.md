@@ -2,26 +2,26 @@
 
 **PARTIAL / L4**
 
-原始 C++ 七组 CLI 通过：3张 BMP 自然排序、7次重复、2线程/4状态、Q75/90、420/444、优化 Huffman、硬件不可用/错误输入拒绝；16件JPEG产品独立跨解码与旧路径逐 RGB 字节、采样和量化表一致。非优化 baseline 用 GPU 完成色彩/FDCT/MCU/Huffman/pack/stuff，真实 GPU trace 有7图/84内核、2个独立HIP stream，改输入重放通过。-f 优化 Huffman 仍调用 CPU libjpeg；pinned buffer/事件重叠/自动标定与 GPU prefix 性能尚未完整验收，因此 PARTIAL。
+原始 C++ 七组 CLI 和16件JPEG独立跨解码通过；13件baseline与旧RGB精确，3件优化产品与同源GPU FDCT plain RGB精确，旧CPU优化结果差异单独留档。baseline 7图/84 GPU kernel，-f优化3图/39 GPU kernel，两条HIP stream及改输入重放通过。CPU仅设计优化DHT/标准header。pinned buffer/事件重叠/自动标定与GPU prefix性能尚未完整验收，因此PARTIAL。
 
 | 字段 | 当前记录 |
 | --- | --- |
 | 原始入口 | [nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp](../../../../nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp) |
-| 实际库 / 后端 | Project HIP multi-stream baseline JPEG color/downsample/FDCT/quant/Huffman/pack/stuff; libjpeg-turbo standard markers and optimized -f fallback / project HIP full baseline JPEG encoder + libjpeg-turbo optimized Huffman fallback |
+| 实际库 / 后端 | Project HIP multi-stream baseline and optimized JPEG color/downsample/FDCT/quant/Huffman/pack/stuff; CPU libjpeg-turbo standard markers and optimized DHT design / project HIP full baseline/optimized JPEG encoder + CPU libjpeg-turbo DHT/header design |
 | 候选路线 | rocJPEG (decode only), RPP |
 | 代码 | [rocm/ported/nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp](../../../../rocm/ported/nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp) |
-| required cases | 9/14 |
+| required cases | 10/14 |
 | CUDA baseline / comparison | FAILED / BLOCKED |
 | 性能 | NOT_RUN |
 | 原始源码 SHA256 | `f417be2a36bed75baea893712db616416ea748157406dc489ffdf323b9fe8d7e` |
 
 编译/运行返回 0 仅对应 L3；通过独立参考检查后才记 L4。失败的候选库不列为已使用库。
 
-必需用例：`I5/natural-three`, `I5/repeat-seven`, `I5/optimized-444`, `I5/default-backend`, `I5/hardware-unavailable`, `I5/missing-input`, `I5/invalid-quality`, `I5/multi-stream-changed-input-replay`, `I5/sixteen-prior-JPEG-exact-decoded-RGB`, `I5/GPU-optimized-Huffman-table-generation`, `I5/pinned-host-device-workspace-and-event-overlap`, `I5/parallel-GPU-prefix-and-throughput`, `I5/original-auto-calibration-and-backend-selection-semantics`, `I9/fixed-commit-cold-replay-and-independent-review`。
+必需用例：`I5/natural-three`, `I5/repeat-seven`, `I5/optimized-444`, `I5/default-backend`, `I5/hardware-unavailable`, `I5/missing-input`, `I5/invalid-quality`, `I5/multi-stream-changed-input-replay`, `I5/sixteen-JPEG-independent-decoded-RGB`, `I5/optimized-GPU-Huffman-39-kernel-trace`, `I5/pinned-host-device-workspace-and-event-overlap`, `I5/parallel-GPU-prefix-and-throughput`, `I5/original-auto-calibration-and-backend-selection-semantics`, `I9/fixed-commit-cold-replay-and-independent-review`。
 
-实现方式：`GPU_BASELINE_WITH_EXPLICIT_OPTIMIZED_CPU_FALLBACK`。
+实现方式：`GPU_BASELINE_AND_OPTIMIZED_HUFFMAN_WITH_CPU_DHT_DESIGN`。
 
-恢复/扩展条件：完成 GPU 优化 Huffman 表、pinned host/device workspace/事件重叠、并行 prefix 吞吐和原自动标定/后端选择后，补原生CUDA对照与固定提交冷检出。
+恢复/扩展条件：完成 pinned host/device workspace/事件重叠、并行 prefix 吞吐和原自动标定/后端选择，补原生CUDA对照与固定提交冷检出。
 
 CUDA 对照限制：历史原生 nvJPEG 编码器 CUDA baseline 未成功构建；本阶段使用独立 libjpeg/Pillow 跨解码与量化表参考，不把它冒充同输入原始 CUDA 入口对照。
 
@@ -64,3 +64,5 @@ build/image-cpu-venv/bin/python tools/moat/image_encoder_instances_full_compare.
 - [migration/reports/evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261112T101031.858636Z-I5-composite-subset-qualification-48ce947c56](../../../reports/evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261112T101031.858636Z-I5-composite-subset-qualification-48ce947c56)
 - [migration/reports/evidence/rewrite/I5/original-JPEG-encoder-concurrent-HIP-streams-and-changed-input/20261112T100631.107895Z-I5-rocm-trace-c6f9a5a6c2](../../../reports/evidence/rewrite/I5/original-JPEG-encoder-concurrent-HIP-streams-and-changed-input/20261112T100631.107895Z-I5-rocm-trace-c6f9a5a6c2)
 - [migration/reports/image-jpeg-encoder-instances-full-comparison.json](../../../reports/image-jpeg-encoder-instances-full-comparison.json)
+- [migration/reports/evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261112T111813.647313Z-I5-composite-subset-qualification-f5bc6c8843](../../../reports/evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261112T111813.647313Z-I5-composite-subset-qualification-f5bc6c8843)
+- [migration/reports/evidence/rewrite/I5/original-JPEG-encoder-concurrent-HIP-streams-and-changed-input/20261112T111658.917395Z-I5-rocm-trace-b3bbf722d3](../../../reports/evidence/rewrite/I5/original-JPEG-encoder-concurrent-HIP-streams-and-changed-input/20261112T111658.917395Z-I5-rocm-trace-b3bbf722d3)

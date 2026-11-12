@@ -1,6 +1,6 @@
 # I5：HIP JPEG 前向编码与入口接入
 
-状态：**baseline JPEG 全 GPU 编码子集已接入两个 resize 入口和独立多实例编码入口，三个关联入口均 PARTIAL**。四组预冻结 RGB 输入的 420/444、奇数尺寸、MCU 边界和 1×1 在物理 GPU1 上完成色彩转换、色度降采样、8×8 FDCT、量化、MCU 排列、Huffman、位流打包与 byte stuffing。多实例入口的 `-f` 优化 Huffman 路径仍使用 CPU libjpeg 熵编码，并明确标记。
+状态：**baseline JPEG 全 GPU 编码子集已接入两个 resize 入口和独立多实例编码入口；多实例 `-f` 优化 Huffman 的 GPU 熵编码也已接入；三个关联入口均 PARTIAL**。四组预冻结 RGB 输入的 420/444、奇数尺寸、MCU 边界和 1×1 在物理 GPU1 上完成色彩转换、色度降采样、8×8 FDCT、量化、MCU 排列、Huffman、位流打包与 byte stuffing。`-f` 由 GPU 统计符号与编码熵码流，CPU 设计小型 DHT 码表及标准头部。
 
 | 固定用例 | 采样/质量 | 独立解码尺寸 | 对源 RGB PSNR | 与 CPU encoder 解码像素最大差 | 结果 |
 | --- | --- | --- | ---: | ---: | --- |
@@ -13,12 +13,12 @@
 
 两个原始 resize 入口已切换到隔离的 `jpeg_decoder_v4.hpp`，在完整七组 B10 CLI 流程下各 7/7 命令及独立 CPU 数值验收通过。`Image-Resize` 的 33 个、`Image-Resize-WaterMark` 的 35 个重编码产品标记 `gpu_full_encode=1`、`cpu_entropy_encode=0`。68 件产品经独立 Pillow 解码后，合计 **8,191,374 个 RGB 字节**与旧 GPU FDCT+CPU 熵编码路径逐值相同，尺寸、采样和量化表也一致。两个原始 C++ 入口各有 12 个实际 JPEG GPU 内核调用；profile 与非 profile 的输出 SHA 相同。新 baseline marker/头部在 CPU 按标准组装，不执行 CPU entropy。原始输入的 progressive 输出模式、APP/COM metadata 与量化表继承尚未按全合同验证；GPU 前缀扫描目前为串行正确性实现，性能未签发，因此两个入口保持 PARTIAL。
 
-原始 `nvJPEG-Encoder-MultipleInstances` C++ 入口已由项目 HIP 适配：3 张 BMP 自然排序，`-n 7 -j 2 -s 4` 重复与多状态，Q75/90、420/444、`-f` 优化 Huffman、显式硬件不可用及无效目录/quality 拒绝，七组预登记 CLI 全部通过。16 件实际 JPEG 产品由独立 Pillow/libjpeg 解码，尺寸、采样与量化表匹配，且与冻结的旧编码路径逐 RGB 字节一致；`-f` 确实改变 DHT 表。非优化 baseline 从色彩变换到 Huffman/pack/stuff 在 GPU 上执行；实际 rocprof trace 有 7 图共 84 个内核，落在物理 GPU1 上两个 HIP stream；修改一张 BMP 后，只有对应编码文件变化。`-f` 的优化 Huffman 表生成与熵编码仍使用 CPU libjpeg；原始 pinned host/device workspace、事件重叠、自动线程标定、并行 GPU prefix 性能尚未完成；历史原生 CUDA baseline 仍未成功构建，不能声称三方原始入口验收。因此该入口维持 **PARTIAL**，不计入整例支持数。
+原始 `nvJPEG-Encoder-MultipleInstances` C++ 入口已由项目 HIP 适配：3 张 BMP 自然排序，`-n 7 -j 2 -s 4` 重复与多状态，Q75/90、420/444、`-f` 优化 Huffman、显式硬件不可用及无效目录/quality 拒绝，七组预登记 CLI 全部通过。16 件实际 JPEG 产品由独立 Pillow/libjpeg 解码，尺寸、采样与量化表匹配；13 件 baseline 按预冻结门槛与旧路径逐 RGB 字节一致，3 件 `-f` 产品与同源 GPU FDCT plain 精确一致；实测旧 CPU 优化路径的 3 件结果也逐 RGB 字节一致，差值逐件留档。`-f` 确实改变 DHT 表。baseline 真实 GPU trace 有 7 图共 84 个内核，优化 `-f` 3 图共 39 个内核，均落在物理 GPU1 上两个 HIP stream；修改一张 BMP 后，只有对应编码文件变化。优化码表设计和标准头部在 CPU，色彩/FDCT/MCU/符号直方图/Huffman/pack/stuff 在 GPU。原始 pinned host/device workspace、事件重叠、自动线程标定、并行 GPU prefix 性能尚未完成；历史原生 CUDA baseline 仍未成功构建，不能声称三方原始入口验收。因此该入口维持 **PARTIAL**，不计入整例支持数。
 
 证据：[预冻结前向合同](../rewrite/image-jpeg-encoder-gpu-profile.json)、[GPU 前向原型](image-jpeg-encoder-runs.json)、[熵编码 GPU 原型](image-jpeg-entropy-prototype.md)、[全 GPU 编码合同](../rewrite/image-jpeg-encoder-full-gpu-profile.json)、[四组全 GPU 数值与独立解码](image-jpeg-encoder-full-gpu-runs.json)、[全 GPU trace](image-jpeg-encoder-full-gpu-trace.json)、[非法输入](image-jpeg-encoder-full-gpu-negative.json)、[两个 resize 原始入口七组流程](image-jpeg-encoder-full-gpu-integration.json)、[两个原始 C++ 入口 GPU trace](image-jpeg-encoder-full-gpu-frontend-trace.json)、[68 产品冻结比较合同](../rewrite/image-jpeg-encoder-full-gpu-products-profile.json)、[68 产品逐像素比较](image-jpeg-encoder-full-gpu-products-comparison.json)、[多实例冻结合同](../rewrite/image-jpeg-encoder-instances-profile.json)、[多实例七组 CLI 与独立跨解码](image-jpeg-encoder-instances-runs.json)、[多实例 GPU trace 与改输入重放](image-jpeg-encoder-instances-trace.json)、[逐步实验记录](image-libraries-progress.md)。每个子项的命令、stdout/stderr、设备快照和源码哈希位于对应 `migration/reports/evidence/rewrite/I5/` 目录；首次宿主环境拒绝、HIP 编译失败和 CPU 验证器选错解释器的记录也保留。两个 resize 入口沿用已封存 B10 同输入 CUDA 数学对照；独立编码器目前只有 CPU/GPU 交叉验收。
 
 本次 stream 版源文件变更后已重跑四组全 GPU 输入、四组负例、两个 resize 入口共 14 组 CLI 与 68 产品独立解码，结果均通过；两个原始入口各 12 个 GPU JPEG kernel 的重新追踪也通过。新产品使用[stream 版冻结合同](../rewrite/image-jpeg-encoder-full-gpu-stream-products-profile.json)封存，避免沿用旧二进制的结论。多实例入口的 [full GPU 冻结合同](../rewrite/image-jpeg-encoder-instances-full-gpu-profile.json)、[16 产品逐像素对照](image-jpeg-encoder-instances-full-comparison.json)与[多 stream 追踪](image-jpeg-encoder-instances-trace.json)分别记录输入、输出、数值和运行语义。
 
-下一步：将优化 Huffman 组件接入原始多实例 `-f` 路径、补 pinned host/device workspace 与事件重叠；让 resize/watermark 保留源 JPEG 的编码模式、量化表和 APP/COM 元数据，覆盖 progressive 重新编码；优化 GPU prefix scan 性能。全部阶段与固定提交冷检出通过后再申请整例资格。
+下一步：补多实例 pinned host/device workspace 与事件重叠；让 resize/watermark 保留源 JPEG 的编码模式、量化表和 APP/COM 元数据，覆盖 progressive 重新编码；优化 GPU prefix scan 性能。全部阶段与固定提交冷检出通过后再申请整例资格。
 
-优化 Huffman 已有[独立 HIP 组件实验](image-jpeg-opt-huffman.md)：四组 GPU FDCT 基线的优化 DHT/熵编码跨解码逐 RGB 字节一致，物理 GPU1 上的符号直方图和熵编码 trace 通过。该实验尚未接入原始多实例 `-f` 路径，原入口仍使用上述 CPU 优化分支，资格与通过数不变。
+优化 Huffman 的[独立 HIP 组件实验](image-jpeg-opt-huffman.md)和[原始入口接入合同](../rewrite/image-jpeg-encoder-instances-opt-profile.json)分别预先固定四组及七组验收。原入口新[复合资格](image-jpeg-encoder-instances-subset-qualification.json)仍是 PARTIAL，支持计数不变。

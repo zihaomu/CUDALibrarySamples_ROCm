@@ -282,7 +282,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-12T11:18:14.668366+00:00。26入口当前13通过/9部分/4失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-12T11:18:34.925327+00:00。26入口当前13通过/9部分/4失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -2033,5 +2033,6 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-12T11:17:02.074513+00:00 | I5 | 原始多实例 JPEG 编码器 baseline 7 图/84 kernel、优化 -f 3 图/39 kernel，多 HIP stream、物理 GPU1、改输入重放：PASSED。 | `migration/reports/evidence/rewrite/I5/original-JPEG-encoder-concurrent-HIP-streams-and-changed-input/20261112T111658.917395Z-I5-rocm-trace-b3bbf722d3` |
 | 2026-11-12T11:17:08.835520+00:00 | I5 | 原始多实例编码16件 JPEG 独立解码：13 baseline 旧 RGB 精确，3 优化输出按同源GPU FDCT plain精确；旧CPU优化结果差值逐件记录，尺寸/采样/量化均核对：PASSED。 | `migration/reports/evidence/rewrite/I5/multi-instance-sixteen-JPEG-prior-vs-full-GPU-decode/20261112T111707.847444Z-I5-CPU-reference-a0998d3121` |
 | 2026-11-12T11:18:14.668366+00:00 | I5 | 原始 nvJPEG 多实例编码器7 CLI、16产品与 baseline 84/优化39 GPU kernel、双stream封存；CPU仅设计优化DHT表，其余调度缺口保留PARTIAL。 | `migration/reports/evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261112T111813.647313Z-I5-composite-subset-qualification-f5bc6c8843` |
+| 2026-11-12T11:18:34.925327+00:00 | I5 | 原始 nvJPEG 多实例编码器16产品/7 CLI、baseline84+优化39 GPU kernel及真实多stream通过；CPU DHT 表设计与调度缺口逐例登记。 | `migration/reports/evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261112T111813.647313Z-I5-composite-subset-qualification-f5bc6c8843`；`migration/reports/image-jpeg-encoder-instances-publication.json` |
 
 <!-- IMAGE_EXECUTION:END -->

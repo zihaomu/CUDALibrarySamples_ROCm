@@ -8,4 +8,4 @@ rocprofv3 对 33×29/420 用例记录到 3 个色彩内核、3 个 FDCT 内核�
 
 DHT 表生成另以单符号、256 均匀符号、25 个 2 的幂长尾、120 稀疏符号和最大偏斜五类分布检查符号库存、16 bit 限长、无全 1 码和前缀不冲突，5/5 通过；长尾分布实际触发 16 bit 限长。[边界日志](image-jpeg-opt-huffman-edges.json)。首次把 Fibonacci 序列当作超长树的自检失败已保留：加入 JPEG 伪符号后该序列的未受限最长码仅 13 bit，未覆盖目标边界；改用 2 的幂序列后通过。
 
-本阶段不修改原始 `nvJPEG-Encoder-MultipleInstances` 的 `-f` 路径和已发布资格。下一步把该组件接入原始七组 CLI，更新 16 件产品的独立参考与多 stream trace；接入时旧优化 CPU 结果与新 GPU FDCT 结果应分别留档，不强求两个合法 JPEG 编码器输出相同像素。pinned buffer、事件重叠、自动线程标定、并行前缀性能及原生 CUDA 入口基线仍未完成。
+该独立原型随后已[接入原始 `nvJPEG-Encoder-MultipleInstances` 的 `-f` 路径](image-jpeg-encoder.md)：七组 CLI、16 产品跨解码及 baseline 84/优化 39 个 GPU kernel 多 stream trace 通过；复合资格仍为 PARTIAL。pinned buffer、事件重叠、自动线程标定、并行前缀性能及原生 CUDA 入口基线仍未完成。
