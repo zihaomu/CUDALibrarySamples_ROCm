@@ -18,5 +18,5 @@
   
 
 // MIGRATION_BATCH10: rocJPEG hardware / explicit CPU fallback, GPU layout and postprocess.
-#include "image/jpeg_decoder_v3.hpp"
+#include "image/jpeg_decoder_v4.hpp"
 int main(int argc,const char**argv){return migration_batch::image10_main("Image-Resize",argc,argv);}

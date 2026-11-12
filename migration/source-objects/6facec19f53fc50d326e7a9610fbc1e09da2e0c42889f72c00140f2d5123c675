@@ -1,0 +1,71 @@
+// SPDX-License-Identifier: Apache-2.0
+// Baseline JPEG Huffman/packing GPU kernels, validated by I5 prototype.
+#pragma once
+#include "jpeg_encoder_gpu.hpp"
+static constexpr int MAX_BITS=4096;
+struct Code {unsigned short bits;unsigned char length;};
+static void check(hipError_t r,const char*what){if(r!=hipSuccess)throw std::runtime_error(std::string(what)+": "+hipGetErrorString(r));}
+static std::vector<unsigned char> read_file(const char*p){std::ifstream f(p,std::ios::binary);if(!f)throw std::runtime_error("cannot open input");return {std::istreambuf_iterator<char>(f),{}};}
+static void write_file(const char*p,const std::vector<unsigned char>&v){std::ofstream f(p,std::ios::binary);f.write((const char*)v.data(),v.size());if(!f)throw std::runtime_error("cannot write output");}
+static std::array<Code,256> make_codes(JHUFF_TBL*table){if(!table)throw std::runtime_error("missing Huffman table");
+ std::array<Code,256> result{};unsigned code=0,k=0;
+ for(unsigned length=1;length<=16;++length){for(int n=0;n<table->bits[length];++n){
+  unsigned symbol=table->huffval[k++];result[symbol]={static_cast<unsigned short>(code++),static_cast<unsigned char>(length)};}
+  code<<=1;}return result;}
+
+__device__ static void put_bits(unsigned char*out,int&n,unsigned value,int count){
+ for(int bit=count-1;bit>=0;--bit){if(n<MAX_BITS && ((value>>bit)&1))out[n>>3]|=0x80u>>(n&7);++n;}}
+__device__ static int category(int v){unsigned magnitude=v<0?-v:v;int n=0;while(magnitude){magnitude>>=1;++n;}return n;}
+__device__ static unsigned amplitude(int v,int n){return v<0?unsigned((1<<n)-1+v):unsigned(v);}
+__global__ static void encode_blocks(const short*coeff,const int*previous,const unsigned char*component,
+ const Code*dc,const Code*ac,unsigned char*output,unsigned short*lengths,int blocks){
+ int id=blockIdx.x*blockDim.x+threadIdx.x;if(id>=blocks)return;
+ const short*c=coeff+size_t(id)*64;unsigned char*out=output+size_t(id)*(MAX_BITS/8);
+ int comp=component[id],prev=previous[id];int value=int(c[0])-(prev<0?0:int(coeff[size_t(prev)*64]));
+ int n=0,bits=category(value);Code h=dc[comp*256+bits];
+ if(!h.length){lengths[id]=0;return;}put_bits(out,n,h.bits,h.length);put_bits(out,n,amplitude(value,bits),bits);
+ const int zigzag[64]={0,1,8,16,9,2,3,10,17,24,32,25,18,11,4,5,12,19,26,33,40,48,41,34,27,20,13,6,7,14,21,28,35,42,49,56,57,50,43,36,29,22,15,23,30,37,44,51,58,59,52,45,38,31,39,46,53,60,61,54,47,55,62,63};
+ int zeros=0;
+ for(int k=1;k<64;++k){value=c[zigzag[k]];if(!value){++zeros;continue;}
+  while(zeros>=16){h=ac[comp*256+0xf0];if(!h.length){lengths[id]=0;return;}
+   put_bits(out,n,h.bits,h.length);zeros-=16;}
+  bits=category(value);h=ac[comp*256+(zeros<<4)+bits];if(!h.length){lengths[id]=0;return;}
+  put_bits(out,n,h.bits,h.length);put_bits(out,n,amplitude(value,bits),bits);zeros=0;}
+ if(zeros){h=ac[comp*256];if(!h.length){lengths[id]=0;return;}put_bits(out,n,h.bits,h.length);}
+ lengths[id]=n>MAX_BITS?0:static_cast<unsigned short>(n);
+}
+
+__global__ static void prefix_bits(const unsigned short*lengths,unsigned*offsets,
+                                   unsigned*total,int blocks){
+ if(blockIdx.x||threadIdx.x)return;
+ unsigned sum=0;for(int i=0;i<blocks;++i){offsets[i]=sum;sum+=lengths[i];}
+ total[0]=sum;
+}
+__global__ static void pack_bytes(const unsigned char*bits,const unsigned*offsets,
+                                  unsigned char*packed,int blocks,unsigned total_bits,
+                                  unsigned output_bytes){
+ unsigned index=blockIdx.x*blockDim.x+threadIdx.x;if(index>=output_bytes)return;
+ unsigned value=0;
+ for(int slot=0;slot<8;++slot){unsigned bit_index=index*8+slot,bit=1;
+  if(bit_index<total_bits){int low=0,high=blocks;
+   while(low+1<high){int middle=(low+high)/2;if(offsets[middle]<=bit_index)low=middle;
+    else high=middle;}
+   unsigned local=bit_index-offsets[low];
+   bit=(bits[size_t(low)*(MAX_BITS/8)+(local>>3)]>>(7-(local&7)))&1u;}
+  value=(value<<1)|bit;}
+ packed[index]=static_cast<unsigned char>(value);
+}
+__global__ static void prefix_stuff(const unsigned char*packed,unsigned*positions,
+                                    unsigned*total,unsigned count){
+ if(blockIdx.x||threadIdx.x)return;
+ unsigned extra=0;for(unsigned i=0;i<count;++i){positions[i]=i+extra;
+  if(packed[i]==0xff)++extra;}
+ total[0]=count+extra;
+}
+__global__ static void scatter_stuff(const unsigned char*packed,const unsigned*positions,
+                                     unsigned char*output,unsigned count){
+ unsigned index=blockIdx.x*blockDim.x+threadIdx.x;if(index>=count)return;
+ unsigned target=positions[index];output[target]=packed[index];
+ if(packed[index]==0xff)output[target+1]=0;
+}
+

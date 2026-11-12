@@ -1,0 +1,1 @@
+Test rocm-original-entry-trace for nvJPEG/Image-Resize/imageResize.cpp/full-GPU-encode-trace, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T094951.274614Z-I5-rocm-full-GPU-JPEG-original-entry-integration-d011989ac0.

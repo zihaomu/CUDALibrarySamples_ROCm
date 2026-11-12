@@ -1,0 +1,64 @@
+#!/usr/bin/env python3
+"""Seal full GPU baseline JPEG encode in both original resize entrypoints."""
+import json
+from audit import check as audit_check
+from experiment import ROOT,Experiment,digest,git,write
+from image_progress import record
+REPORT=ROOT/'migration/reports/image-jpeg-encoder-full-gpu-resize-qualifications.json'
+def load(name):return json.loads((ROOT/'migration/reports'/name).read_text())
+def main():
+ build=load('image-jpeg-encoder-full-gpu-build.json');runs=load('image-jpeg-encoder-full-gpu-runs.json')
+ trace=load('image-jpeg-encoder-full-gpu-trace.json');negative=load('image-jpeg-encoder-full-gpu-negative.json')
+ integration=load('image-jpeg-encoder-full-gpu-integration.json');frontends=load('image-jpeg-encoder-full-gpu-frontend-trace.json')
+ progress=load('image-progressive-trace.json');corpus=load('image-progressive-original-corpus.json')
+ cuda={x['source']:x for x in load('batches9_11-validation.json') if x['batch']=='b10'}
+ refs=[build['evidence'],trace['evidence'],progress['evidence'],corpus['evidence']]
+ refs += [x['evidence'] for x in runs+negative]
+ if (build['status']!='BUILT' or len(runs)!=4 or len(negative)!=4 or len(integration)!=2 or len(frontends)!=2 or
+     any(x['status']!='PASSED' for x in runs+frontends) or
+     any(x['status']!='EXPECTED_REJECTION' for x in negative) or trace['status']!='PASSED'):
+  raise ValueError('complete I5 full GPU prototype and production trace required')
+ if any(audit_check(ROOT/ref) for ref in refs+[x['evidence'] for x in integration+frontends]):
+  raise ValueError('unsealed full GPU JPEG evidence')
+ result=[]
+ for row in integration:
+  source=row['source'];frontend=next(x for x in frontends if x['source']==source)
+  original=ROOT/'rocm/ported'/source;old=cuda[source]
+  dependencies={str(original.relative_to(ROOT)):digest(original),**row['dependencies']}
+  checks=[dict(check='four-frozen-RGB-full-GPU-JPEG-independent-cross-decodes',passed=
+    all(x['status']=='PASSED' and any(c['check']=='exact-decoded-RGB-vs-frozen-GPU-FDCT-CPU-entropy' and c['passed'] for c in x['checks']) for x in runs)),
+   dict(check='full-GPU-FDCT-Huffman-pack-stuff-prototype-physical-trace',passed=trace['status']=='PASSED' and
+    trace['counts']=={'rgb_to_plane':3,'forward_dct_quantize':3,'gather_mcu_coefficients':1,
+     'encode_blocks':1,'prefix_bits':1,'pack_bytes':1,'prefix_stuff':1,'scatter_stuff':1}),
+   dict(check='four-invalid-input-rejections',passed=all(x['status']=='EXPECTED_REJECTION' for x in negative)),
+   dict(check='all-seven-original-CLI-CPU-pixel-and-file-oracles',passed=row['status']=='PASSED_SUBSET' and
+    len(row['cases'])==7 and all(x['return_code']==0 and x['status']=='PASSED' for x in row['cases'])),
+   dict(check='all-produced-JPEG-files-use-GPU-full-encode',passed=
+    sum(x['encoded_products'] for x in row['cases'])>=33 and all(x['encoder_claims'] for x in row['cases'])),
+   dict(check='actual-C++-frontend-twelve-GPU-JPEG-kernels-and-no-CPU-entropy',passed=frontend['status']=='PASSED' and
+    all(c['passed'] for c in frontend['checks'])),
+   dict(check='same-input-CUDA-math-comparisons',passed=old['cuda_comparison']=='PASSED' and
+    all(x['status']=='PASSED' for x in old['cuda_cases'])),
+   dict(check='current-compiled-source-closure',passed=all(digest(ROOT/n)==h for n,h in dependencies.items()))]
+  if not all(x['passed'] for x in checks):raise ValueError('full GPU resize subset failed '+source)
+  sample=source.rsplit('/',1)[0]+'::'+source.rsplit('/',1)[1]
+  evidence=refs+[row['evidence'],frontend['evidence']]
+  e=Experiment('I5',sample,'full-GPU-JPEG-original-entry-subset-qualification',
+   sources=[__file__,original,ROOT/'migration/reports/image-jpeg-encoder-full-gpu-integration.json',
+            ROOT/'migration/reports/image-jpeg-encoder-full-gpu-frontend-trace.json',
+            ROOT/'migration/rewrite/image-jpeg-encoder-resize-full-gpu-profile.json'])
+  devices=json.loads((ROOT/frontend['evidence']/'backend.observed.json').read_text())['devices']
+  q=dict(kind='image-JPEG-full-GPU-baseline-reencode-subset',status='PASSED',contract_status='PARTIAL',
+   sample_id=sample,implementation=str(original.relative_to(ROOT)),implementation_sha256=digest(original),
+   source_commit=git('rev-parse','HEAD').strip(),case_count=10,
+   case_ids=['batches9_11/'+x['case'] for x in row['cases']]+['I4/progressive-GPU-pixel-synthesis',
+    'I5/full-GPU-JPEG-encode-four-fixtures','I5/actual-original-entry-GPU-encode-trace'],
+   checks=checks,devices=devices,dependencies=dependencies,evidence_references=evidence,
+   rocm_evidence=row['evidence'],cuda_evidence=old['cuda_evidence'],
+   comparison_mode='GPU_BASELINE_PROJECT_JPEG_ENCODE_WITH_INDEPENDENT_CPU_ORACLE',
+   remaining='source progressive output mode, quantization tables and APP/COM metadata preservation; parallel GPU prefix throughput; fixed-commit cold review')
+  q['qualification_id']=e.id;write(e.path/'qualification.json',{k:v for k,v in q.items() if k not in {'qualification_id','evidence'}})
+  q['evidence']=e.finish('PASSED',dict(status='PASSED',checks=checks));result.append(q);write(REPORT,result)
+  record('I5',source+' 完整 GPU baseline JPEG 重编码原入口子集封存；七组 CPU/CUDA、四原型、真实 C++ GPU trace 通过，metadata/progressive 仍 PARTIAL。',[q['evidence']])
+  print(source,'FULL_GPU_BASELINE_SUBSET_PASSED',flush=True)
+if __name__=='__main__':main()

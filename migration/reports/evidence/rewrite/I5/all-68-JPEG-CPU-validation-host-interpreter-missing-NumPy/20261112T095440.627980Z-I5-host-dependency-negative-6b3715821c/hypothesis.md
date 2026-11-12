@@ -1,0 +1,1 @@
+Test host-dependency-negative for all-68-JPEG-CPU-validation-host-interpreter-missing-NumPy, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: none.

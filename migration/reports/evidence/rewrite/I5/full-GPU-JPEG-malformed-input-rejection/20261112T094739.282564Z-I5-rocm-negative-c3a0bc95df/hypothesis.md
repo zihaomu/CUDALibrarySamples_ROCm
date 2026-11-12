@@ -1,0 +1,1 @@
+Test rocm-negative for full-GPU-JPEG-malformed-input-rejection, case truncated-rgb. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T094518.935573Z-I5-rocm-build-87c5ef7b98.

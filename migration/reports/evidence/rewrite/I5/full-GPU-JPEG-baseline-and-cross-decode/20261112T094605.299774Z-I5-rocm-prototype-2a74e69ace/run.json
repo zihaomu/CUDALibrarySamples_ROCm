@@ -1,0 +1,45 @@
+{
+  "case": "mcu-boundary",
+  "status": "NUMERIC_MISMATCH",
+  "return_code": 0,
+  "checks": [
+    {
+      "check": "encode-command-exit-zero",
+      "passed": true
+    },
+    {
+      "check": "independent-cross-decode",
+      "passed": false,
+      "error": "KeyError('decoded_psnr_vs_source_min_db')"
+    },
+    {
+      "check": "GPU-entropy-without-CPU-entropy",
+      "passed": true
+    }
+  ],
+  "metrics": {
+    "width": 64,
+    "height": 40,
+    "psnr_vs_source_db": 17.202266323049326,
+    "max_abs_vs_cpu_encoder": 22,
+    "psnr_vs_cpu_encoder_db": 35.994139078189555,
+    "encoded_bytes": 1676,
+    "sampling": 2,
+    "quantization_matches_cpu": true,
+    "format": "JPEG",
+    "decode_error": "KeyError('decoded_psnr_vs_source_min_db')"
+  },
+  "metadata": {
+    "width": 64,
+    "height": 40,
+    "quality": 75,
+    "sampling": "420",
+    "gpu_fdct": true,
+    "gpu_huffman": true,
+    "gpu_pack_stuff": true,
+    "cpu_entropy": false,
+    "cpu_header_tables": true
+  },
+  "experiment_id": "20261112T094605.299774Z-I5-rocm-prototype-2a74e69ace",
+  "jpeg_sha256": "946b81be4223ae24dbcf58387a67e520d699918d4df9d66183e4b2a7f63b9630"
+}

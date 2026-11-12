@@ -1,0 +1,35 @@
+{
+  "status": "FROZEN",
+  "phase": "I5",
+  "inputs": [
+    {
+      "case": "odd-420",
+      "path": "migration/reports/evidence/rewrite/I5/GPU-JPEG-forward-transform-and-cross-decode/20261112T092426.785782Z-I5-rocm-prototype-4b794a4f8b/output.jpg",
+      "sha256": "68b08fab3089deef4bcc54edd4e3b0b795880e2a8f983f1af1c619eded4f7d6c",
+      "source_evidence": "migration/reports/evidence/rewrite/I5/GPU-JPEG-forward-transform-and-cross-decode/20261112T092426.785782Z-I5-rocm-prototype-4b794a4f8b",
+      "bytes": 819
+    },
+    {
+      "case": "odd-444",
+      "path": "migration/reports/evidence/rewrite/I5/GPU-JPEG-forward-transform-and-cross-decode/20261112T092429.351561Z-I5-rocm-prototype-3a4f1199a7/output.jpg",
+      "sha256": "d76b3d495783af6145619d667d128ab1f08fef71726a16babcd8618b586088e4",
+      "source_evidence": "migration/reports/evidence/rewrite/I5/GPU-JPEG-forward-transform-and-cross-decode/20261112T092429.351561Z-I5-rocm-prototype-3a4f1199a7",
+      "bytes": 685
+    }
+  ],
+  "algorithm": "GPU per-block Huffman bit generation, GPU per-block bit offset scan, GPU byte bit assembly and pad, GPU byte stuffing prefix/scatter; CPU only coefficient extraction and JPEG marker/table orchestration in prototype",
+  "gates": {
+    "exact_original_entropy_bytes": 2,
+    "required_GPU_kernels": [
+      "encode_blocks",
+      "prefix_bits",
+      "pack_bytes",
+      "prefix_stuff",
+      "scatter_stuff"
+    ],
+    "physical_GPU1": true,
+    "modified_input_changes_output": true
+  },
+  "limitations": "Prefix scan prototype may be serial; performance and original sample integration must be validated separately.",
+  "evidence": "migration/reports/evidence/rewrite/I5/GPU-JPEG-entropy-prefix-pack-stuff-contract/20261112T093654.216090Z-I5-CPU-contract-0c00461407"
+}

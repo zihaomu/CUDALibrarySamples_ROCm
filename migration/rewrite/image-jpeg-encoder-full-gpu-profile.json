@@ -1,0 +1,66 @@
+{
+  "status": "FROZEN",
+  "phase": "I5",
+  "inputs": [
+    {
+      "case": "odd-420",
+      "path": "migration/fixtures/image-jpeg-encoder/odd-420.rgb",
+      "sha256": "91430de5cc2c584c6296f233215a594b220eb90c7617cf978daa28e1f5fe89ef",
+      "width": 33,
+      "height": 29,
+      "variant": "smooth",
+      "quality": 75,
+      "subsampling": "420",
+      "reference_jpeg": "migration/reports/evidence/rewrite/I5/GPU-JPEG-forward-transform-and-cross-decode/20261112T092426.785782Z-I5-rocm-prototype-4b794a4f8b/output.jpg",
+      "reference_jpeg_sha256": "68b08fab3089deef4bcc54edd4e3b0b795880e2a8f983f1af1c619eded4f7d6c"
+    },
+    {
+      "case": "odd-444",
+      "path": "migration/fixtures/image-jpeg-encoder/odd-444.rgb",
+      "sha256": "a1997f28549c8a4263729fb7a54a56b896e19ed7e879499a1fffdac5ae6e4388",
+      "width": 13,
+      "height": 11,
+      "variant": "smooth",
+      "quality": 90,
+      "subsampling": "444",
+      "reference_jpeg": "migration/reports/evidence/rewrite/I5/GPU-JPEG-forward-transform-and-cross-decode/20261112T092429.351561Z-I5-rocm-prototype-3a4f1199a7/output.jpg",
+      "reference_jpeg_sha256": "d76b3d495783af6145619d667d128ab1f08fef71726a16babcd8618b586088e4"
+    },
+    {
+      "case": "mcu-boundary",
+      "path": "migration/fixtures/image-jpeg-encoder/mcu-boundary.rgb",
+      "sha256": "856b9241dc106d3f4739b3828947a75ffda5c85425c572b6d89d71e265e9aa28",
+      "width": 64,
+      "height": 40,
+      "variant": "checker",
+      "quality": 75,
+      "subsampling": "420",
+      "reference_jpeg": "migration/reports/evidence/rewrite/I5/GPU-JPEG-forward-transform-and-cross-decode/20261112T092431.508207Z-I5-rocm-prototype-e46747e957/output.jpg",
+      "reference_jpeg_sha256": "9d4e6e5538fa358a376ad62e34b09e7d476988d9f713f2499ad5cbfae7b03c4d"
+    },
+    {
+      "case": "tiny-444",
+      "path": "migration/fixtures/image-jpeg-encoder/tiny-444.rgb",
+      "sha256": "709e80c88487a2411e1ee4dfb9f22a861492d20c4765150c0c794abd70f8147c",
+      "width": 1,
+      "height": 1,
+      "variant": "black",
+      "quality": 75,
+      "subsampling": "444",
+      "reference_jpeg": "migration/reports/evidence/rewrite/I5/GPU-JPEG-forward-transform-and-cross-decode/20261112T092433.624622Z-I5-rocm-prototype-3e523315b7/output.jpg",
+      "reference_jpeg_sha256": "0fd3a3b9ec8314b24580fa0ab42253c1a99530fbfd0897ebb4caeee1ca8af35c"
+    }
+  ],
+  "algorithm": "HIP RGB-to-YCbCr/chroma, FDCT/quant, MCU gather, DC/AC Huffman, GPU bit scan/pack/stuff; CPU only JPEG baseline marker/table orchestration",
+  "gates": {
+    "all_inputs": 4,
+    "independent_JPEG_decode": true,
+    "decoded_RGB_exactly_matches_previous_GPU_FDCT_CPU_entropy_baseline": true,
+    "quantization_and_sampling_exact": true,
+    "real_GPU_kernel_trace": true,
+    "no_CPU_entropy_encode_path": true,
+    "malformed_input_rejected": true
+  },
+  "limitations": "Baseline 3-component 420/444 with standard Huffman tables; optimized Huffman, progressive output, APP/COM metadata, restart and throughput validation remain separate.",
+  "evidence": "migration/reports/evidence/rewrite/I5/combined-GPU-JPEG-encode-contract/20261112T094240.342093Z-I5-CPU-contract-f751165635"
+}

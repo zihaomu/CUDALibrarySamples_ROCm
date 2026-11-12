@@ -1,0 +1,1 @@
+Test rocm-trace for GPU-Huffman-two-real-traces-and-input-change, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T093439.852518Z-I5-rocm-build-f88ad1a5aa.

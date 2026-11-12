@@ -1,0 +1,45 @@
+{
+  "case": "tiny-444",
+  "status": "NUMERIC_MISMATCH",
+  "return_code": 0,
+  "checks": [
+    {
+      "check": "encode-command-exit-zero",
+      "passed": true
+    },
+    {
+      "check": "independent-cross-decode",
+      "passed": false,
+      "error": "KeyError('decoded_psnr_vs_source_min_db')"
+    },
+    {
+      "check": "GPU-entropy-without-CPU-entropy",
+      "passed": true
+    }
+  ],
+  "metrics": {
+    "width": 1,
+    "height": 1,
+    "psnr_vs_source_db": Infinity,
+    "max_abs_vs_cpu_encoder": 0,
+    "psnr_vs_cpu_encoder_db": Infinity,
+    "encoded_bytes": 629,
+    "sampling": 0,
+    "quantization_matches_cpu": true,
+    "format": "JPEG",
+    "decode_error": "KeyError('decoded_psnr_vs_source_min_db')"
+  },
+  "metadata": {
+    "width": 1,
+    "height": 1,
+    "quality": 75,
+    "sampling": "444",
+    "gpu_fdct": true,
+    "gpu_huffman": true,
+    "gpu_pack_stuff": true,
+    "cpu_entropy": false,
+    "cpu_header_tables": true
+  },
+  "experiment_id": "20261112T094607.547910Z-I5-rocm-prototype-7f3f49dc5a",
+  "jpeg_sha256": "0fd3a3b9ec8314b24580fa0ab42253c1a99530fbfd0897ebb4caeee1ca8af35c"
+}

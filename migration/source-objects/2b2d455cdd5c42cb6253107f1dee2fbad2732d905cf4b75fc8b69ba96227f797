@@ -1,0 +1,30 @@
+{
+  "status": "FROZEN",
+  "phase": "I5",
+  "scope": "GPU Huffman symbol and bit generation from preexisting JPEG coefficient arrays; CPU coefficient extraction and final bit packing are prototype scaffolding",
+  "inputs": [
+    {
+      "case": "odd-420",
+      "path": "migration/reports/evidence/rewrite/I5/GPU-JPEG-forward-transform-and-cross-decode/20261112T092426.785782Z-I5-rocm-prototype-4b794a4f8b/output.jpg",
+      "sha256": "68b08fab3089deef4bcc54edd4e3b0b795880e2a8f983f1af1c619eded4f7d6c",
+      "source_evidence": "migration/reports/evidence/rewrite/I5/GPU-JPEG-forward-transform-and-cross-decode/20261112T092426.785782Z-I5-rocm-prototype-4b794a4f8b",
+      "bytes": 819
+    },
+    {
+      "case": "odd-444",
+      "path": "migration/reports/evidence/rewrite/I5/GPU-JPEG-forward-transform-and-cross-decode/20261112T092429.351561Z-I5-rocm-prototype-3a4f1199a7/output.jpg",
+      "sha256": "d76b3d495783af6145619d667d128ab1f08fef71726a16babcd8618b586088e4",
+      "source_evidence": "migration/reports/evidence/rewrite/I5/GPU-JPEG-forward-transform-and-cross-decode/20261112T092429.351561Z-I5-rocm-prototype-3a4f1199a7",
+      "bytes": 685
+    }
+  ],
+  "gates": {
+    "all_inputs": 2,
+    "exact_entropy_bytes_match_original": true,
+    "one_real_GPU_Huffman_kernel_per_input": true,
+    "physical_GPU1_required": true,
+    "altered_coefficient_must_change_entropy": true
+  },
+  "limitations": "Does not yet implement GPU prefix scan, byte stuffing, header/metadata preservation or integration into original sample.",
+  "evidence": "migration/reports/evidence/rewrite/I5/GPU-baseline-Huffman-two-original-project-JPEGs/20261112T093258.693807Z-I5-CPU-contract-6dd4968bdc"
+}

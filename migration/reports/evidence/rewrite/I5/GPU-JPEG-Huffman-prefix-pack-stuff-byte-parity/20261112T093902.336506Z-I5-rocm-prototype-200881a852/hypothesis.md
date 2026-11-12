@@ -1,0 +1,1 @@
+Test rocm-prototype for GPU-JPEG-Huffman-prefix-pack-stuff-byte-parity, case odd-420. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T093831.801126Z-I5-rocm-build-19a6241159.

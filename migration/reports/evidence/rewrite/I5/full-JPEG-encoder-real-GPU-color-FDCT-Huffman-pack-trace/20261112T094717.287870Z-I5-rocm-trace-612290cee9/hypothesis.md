@@ -1,0 +1,1 @@
+Test rocm-trace for full-JPEG-encoder-real-GPU-color-FDCT-Huffman-pack-trace, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T094630.312866Z-I5-rocm-prototype-d3b81ce68a.
