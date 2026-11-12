@@ -17,4 +17,4 @@
 
 首次全尺度 CPU 验证误读了实验归档的大文件策略：大于4 MiB 的 RAW 输出保留在原始 artifact，并在 seal 中登记完整 SHA256，精简 archive 不复制这些字节。该失败检查及修正后重新验收均保留；当前验收从 manifest 指向原始 artifact，并核对 seal 与产品 SHA。
 
-剩余：固定提交冷检出；独立复审、组合资格与先 Git 锚定后发布。任一缺口未闭合时维持 PARTIAL。命令、源码 hash、物理设备、stdout/stderr 和产品 SHA 见逐实验封存；实施时间线见[图像库进展](image-libraries-progress.md)。
+固定提交首次冷检出已完成九项重跑和18项子封存，但最终比较错误地把随实验 ID 改变的 OpenCV 依赖回执视为源码固定字节，故该轮最终状态 FAILED，证据保留。已把该检查改成固定源码 hash、OpenCV commit 和200个文件实际校验，等待重跑。剩余：固定提交冷检出；独立复审、组合资格与先 Git 锚定后发布。任一缺口未闭合时维持 PARTIAL。命令、源码 hash、物理设备、stdout/stderr 和产品 SHA 见逐实验封存；实施时间线见[图像库进展](image-libraries-progress.md)。

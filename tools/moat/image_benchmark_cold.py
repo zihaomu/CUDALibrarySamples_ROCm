@@ -63,9 +63,14 @@ def main():
             children.append(dict(kind=kind,index=index,evidence=row['evidence'],raw=str(dest.relative_to(e.path))))
       counts=collections.Counter(c['kind'] for c in children)
       checks.append(dict(check='complete-18-child-inventory',passed=dict(counts)==REPORTS and len(children)==18))
-      checks.append(dict(check='same-build-source-hashes',passed=rc==0 and
-        json.loads((clone/'migration/reports/image-benchmark-build.json').read_text())['dependencies']==
-        {name:digest(ROOT/name) for name in json.loads((ROOT/'migration/reports/image-benchmark-build.json').read_text())['dependencies']}))
+      cold_deps=json.loads((clone/'migration/reports/image-benchmark-build.json').read_text())['dependencies'] if rc==0 else {}
+      volatile='migration/reports/image-I3-rocm-OpenCV.json'
+      pinned={name:sha for name,sha in cold_deps.items() if name!=volatile}
+      checks.append(dict(check='same-build-source-hashes',passed=rc==0 and pinned and
+        pinned=={name:digest(ROOT/name) for name in pinned} and
+        json.loads((clone/volatile).read_text())['source']==
+        json.loads((ROOT/volatile).read_text())['source'] and
+        json.loads((clone/volatile).read_text())['files_checked']==200))
     except Exception as error:checks.append(dict(check='cold-replay-finished',passed=False,error=repr(error)));rc=rc or 1
     checks.append(dict(check='final-return-code',passed=rc==0))
     status='PASSED' if all(c['passed'] for c in checks) else 'FAILED'

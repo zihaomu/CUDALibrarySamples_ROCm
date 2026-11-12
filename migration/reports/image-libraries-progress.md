@@ -1,6 +1,6 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-12T05:57:19.619618+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-12T06:00:51.048912+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
 26入口当前：12 PASSED / 7 PARTIAL / 7 FAILED。
 
@@ -1412,3 +1412,5 @@
 | 2026-11-12T05:54:43.084067+00:00 | I3 | benchmark封存5090原例与AMD原规模四算子/同版OpenCV/输入/边缘计数重算：PASSED；计时仅观察。 | [20261112T055442.135418Z-I3-CPU-comparison-b7b12a27e8](evidence/rewrite/I3/OpenCV-benchmark-original-CUDA-and-HIP-sealed-semantics/20261112T055442.135418Z-I3-CPU-comparison-b7b12a27e8) |
 | 2026-11-12T05:55:25.153203+00:00 | I3 | benchmark四GPU算子含Canny各阶段实际rocprof内核/PCI/产品重放：PASSED。 | [20261112T055522.615463Z-I3-rocm-trace-4515e5232c](evidence/rewrite/I3/OpenCV-benchmark-all-four-actual-GPU-kernel-traces/20261112T055522.615463Z-I3-rocm-trace-4515e5232c) |
 | 2026-11-12T05:57:19.619618+00:00 | I3 | OpenCV benchmark当前7/10资格面通过，样例从旧构建失败更新为PARTIAL/L3；固定提交冷检出、复审、组合资格欠项不伪记PASSED。 | [image-benchmark.md](image-benchmark.md)；[image-benchmark-trace.json](image-benchmark-trace.json)；[image-benchmark-runtime.json](image-benchmark-runtime.json) |
+| 2026-11-12T06:00:28.272264+00:00 | I3 | benchmark固定Git冷检出同版OpenCV/四算子/六CLI/独立CPU/原生统计/运行/trace及18子封存：FAILED | [20261112T055856.083473Z-I3-host-cold-replay-e87fe41013](evidence/rewrite/I3/OpenCV-benchmark-fixed-Git-cold-four-operations-and-CPU/20261112T055856.083473Z-I3-host-cold-replay-e87fe41013) |
+| 2026-11-12T06:00:51.048912+00:00 | I3 | benchmark首轮固定Git冷检出九作业及18子证据均通过，最后同源hash比较错误地把每次不同的依赖实验回执ID当作固定源码；失败封存，改为比对固定源码hash和OpenCV固定commit/200文件后重跑。 | [image-benchmark-cold.json](image-benchmark-cold.json) |
