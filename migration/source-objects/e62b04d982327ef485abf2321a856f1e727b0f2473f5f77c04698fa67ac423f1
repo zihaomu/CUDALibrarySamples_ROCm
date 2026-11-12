@@ -1,0 +1,39 @@
+{
+  "status": "FROZEN",
+  "phase": "I6",
+  "inputs": [
+    {
+      "case": "2k_lossless",
+      "source": "nvJPEG2000/nvJPEG2000-Decoder/images/2k_image_lossless/2k_lossless.jp2",
+      "source_sha256": "91eda20f170dbfe22cc224a5716576cbda59ffb037ee9753787021546c63c3e0",
+      "native_output": "artifacts/rewrite/I0/nvJPEG2000-original-build-and-examples/20261111T084513.481474Z-I0-cuda-baseline-1454add055/outputs/decode/2k_lossless.bmp",
+      "native_output_sha256": "ffc06d70ab5c59eae739d33c9dc2aa5389ecdece1ce789ef268f6d26360d2fb1",
+      "reversible": true
+    },
+    {
+      "case": "2k_lossy",
+      "source": "nvJPEG2000/nvJPEG2000-Decoder/images/2k_image_lossy/2k_lossy.jp2",
+      "source_sha256": "d348492b2308e67a412d4ebd60954357866d633b59321abadf0a1561fe27ffbe",
+      "native_output": "artifacts/rewrite/I0/nvJPEG2000-original-build-and-examples/20261111T084513.481474Z-I0-cuda-baseline-1454add055/outputs/decode/2k_lossy.bmp",
+      "native_output_sha256": "e1d1b6675dff2643150268489c33bdc3057e93f99bafb1edf801b7b92f282abb",
+      "reversible": false
+    },
+    {
+      "case": "4k_lossy",
+      "source": "nvJPEG2000/nvJPEG2000-Decoder/images/4k_image_lossy/4k_lossy.jp2",
+      "source_sha256": "56773cf8a98f599dc5df9451fd86f5c37fcd3cf96975727b4a23c389a735d44e",
+      "native_output": "artifacts/rewrite/I0/nvJPEG2000-original-build-and-examples/20261111T084513.481474Z-I0-cuda-baseline-1454add055/outputs/decode/4k_lossy.bmp",
+      "native_output_sha256": "f18cde9fb2bb1ee8e44c14d02b3bcf76b60e6030bbf88114cb3e6c00ce2c22df",
+      "reversible": false
+    }
+  ],
+  "cpu_library": "Pillow linked to libopenjp2 (actual loaded version recorded in run)",
+  "scope": "Observe independent Part 1 decoder difference against original native CUDA outputs; no AMD GPU codec inferred.",
+  "gates": {
+    "all_three_files_decodable": true,
+    "exact_geometry": true,
+    "lossless_RGB_exact_or_report_mismatch": true,
+    "lossy_full_pixel_differences_reported": true
+  },
+  "evidence": "migration/reports/evidence/rewrite/I6/three-original-JP2-native-and-CPU-crossdecode-contract/20261112T102211.233637Z-I6-CPU-contract-0e2f273d73"
+}

@@ -1,0 +1,1 @@
+Test CPU-reference for original-JP2-independent-OpenJPEG-vs-CUDA, case 2k_lossless. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T102211.233637Z-I6-CPU-contract-0e2f273d73.

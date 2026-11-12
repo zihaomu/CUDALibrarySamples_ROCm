@@ -1,0 +1,1 @@
+Test CPU-parser for JP2-J2K-main-header-boundary, case 2k_lossless-raw-j2k. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T102745.058670Z-I6-host-build-d23eabecc9.

@@ -282,7 +282,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-12T10:13:36.176181+00:00。26入口当前13通过/9部分/4失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-12T10:28:20.092809+00:00。26入口当前13通过/9部分/4失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -1954,5 +1954,34 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-12T10:11:20.628255+00:00 | I5 | nvJPEG/Image-Resize/imageResize.cpp 33件全 GPU baseline JPEG 产品/七组原入口/独立CPU与CUDA/实际GPU trace 已绑定主表；源模式metadata缺口仍 PARTIAL。 | `migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize__imageResize.cpp/20261112T101033.399316Z-I5-full-GPU-JPEG-original-entry-subset-qualification-bc3df8784b`；`migration/reports/evidence/rewrite/I5/all-68-original-resize-JPEG-independent-pixel-comparison/20261112T100910.848426Z-I5-CPU-reference-76406ad8b9` |
 | 2026-11-12T10:11:21.106180+00:00 | I5 | nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp 35件全 GPU baseline JPEG 产品/七组原入口/独立CPU与CUDA/实际GPU trace 已绑定主表；源模式metadata缺口仍 PARTIAL。 | `migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261112T101034.778214Z-I5-full-GPU-JPEG-original-entry-subset-qualification-d1c172995a`；`migration/reports/evidence/rewrite/I5/all-68-original-resize-JPEG-independent-pixel-comparison/20261112T100910.848426Z-I5-CPU-reference-76406ad8b9` |
 | 2026-11-12T10:13:36.176181+00:00 | I5 | 审计发现的错误解释器初始化尝试已以 INTERRUPTED 封存：CPU-only Python 3.12 缺少 _rocm_sdk_core；保留失败身份与原始环境，/opt/venv Python 3.13 七组重跑全部通过。 | `migration/reports/evidence/rewrite/I5/nvJPEG-Encoder-MultipleInstances-original-CLI/20261112T100531.170885Z-I5-rocm-original-entry-f35ad8db1d` |
+| 2026-11-12T10:18:11.138299+00:00 | I6 | JPEG2000 可逆 5/3+RCT 纵向 GPU 阶段先冻结5组原图裁剪、系数和精确 RGB oracle；仅变换组件，不宣称完整码流/整例。 | `migration/reports/evidence/rewrite/I6/JPEG2000-reversible-5-3-RCT-first-GPU-stage-contract/20261112T101810.114684Z-I6-CPU-contract-674a79735f` |
+| 2026-11-12T10:19:32.926064+00:00 | I6 | JPEG2000 独立 GPU inverse 5/3+RCT 构建：BUILT；仍未包含 JP2/J2K packet/MQ/原入口。 | `migration/reports/evidence/rewrite/I6/JPEG2000-GPU-inverse-5-3-RCT-component-build/20261112T101929.733486Z-I6-rocm-build-cb01b14584` |
+| 2026-11-12T10:20:22.924285+00:00 | I6 | JPEG2000 inverse 5/3+RCT singleton 原图系数 GPU 逆变换与预冻 RGB 精确比对：PASSED；不计整例。 | `migration/reports/evidence/rewrite/I6/JPEG2000-GPU-inverse-5-3-RCT-component/20261112T102020.732484Z-I6-rocm-prototype-5f39743dd3` |
+| 2026-11-12T10:20:25.251360+00:00 | I6 | JPEG2000 inverse 5/3+RCT odd-small 原图系数 GPU 逆变换与预冻 RGB 精确比对：PASSED；不计整例。 | `migration/reports/evidence/rewrite/I6/JPEG2000-GPU-inverse-5-3-RCT-component/20261112T102023.264757Z-I6-rocm-prototype-ccfb8da0f4` |
+| 2026-11-12T10:20:27.513122+00:00 | I6 | JPEG2000 inverse 5/3+RCT even-grid 原图系数 GPU 逆变换与预冻 RGB 精确比对：PASSED；不计整例。 | `migration/reports/evidence/rewrite/I6/JPEG2000-GPU-inverse-5-3-RCT-component/20261112T102025.617909Z-I6-rocm-prototype-4b80a47335` |
+| 2026-11-12T10:20:29.926532+00:00 | I6 | JPEG2000 inverse 5/3+RCT tile-edge 原图系数 GPU 逆变换与预冻 RGB 精确比对：PASSED；不计整例。 | `migration/reports/evidence/rewrite/I6/JPEG2000-GPU-inverse-5-3-RCT-component/20261112T102027.863314Z-I6-rocm-prototype-429c5d6f5e` |
+| 2026-11-12T10:20:32.177412+00:00 | I6 | JPEG2000 inverse 5/3+RCT odd-wide 原图系数 GPU 逆变换与预冻 RGB 精确比对：PASSED；不计整例。 | `migration/reports/evidence/rewrite/I6/JPEG2000-GPU-inverse-5-3-RCT-component/20261112T102030.237232Z-I6-rocm-prototype-b194accadf` |
+| 2026-11-12T10:20:34.276253+00:00 | I6 | JPEG2000 inverse 5/3+RCT truncated 输入拒绝/变化重放：PASSED。 | `migration/reports/evidence/rewrite/I6/JPEG2000-GPU-inverse-5-3-RCT-boundary/20261112T102032.527972Z-I6-rocm-prototype-d2477cd158` |
+| 2026-11-12T10:20:36.332639+00:00 | I6 | JPEG2000 inverse 5/3+RCT zero-width 输入拒绝/变化重放：PASSED。 | `migration/reports/evidence/rewrite/I6/JPEG2000-GPU-inverse-5-3-RCT-boundary/20261112T102034.600569Z-I6-rocm-prototype-6b41e80067` |
+| 2026-11-12T10:20:38.637063+00:00 | I6 | JPEG2000 inverse 5/3+RCT changed-coefficient 输入拒绝/变化重放：PASSED。 | `migration/reports/evidence/rewrite/I6/JPEG2000-GPU-inverse-5-3-RCT-boundary/20261112T102036.656514Z-I6-rocm-prototype-291787ea2d` |
+| 2026-11-12T10:21:17.713063+00:00 | I6 | JPEG2000 可逆 5/3+RCT 孤立组件 3 个真实 HIP kernel/物理 GPU1/重放 RGB：PASSED；JP2 码流仍未实现。 | `migration/reports/evidence/rewrite/I6/JPEG2000-inverse-5-3-RCT-real-GPU-trace/20261112T102115.338516Z-I6-rocm-trace-4cdc04f122` |
+| 2026-11-12T10:22:12.247551+00:00 | I6 | 三张原始 JP2 和 CUDA 原入口 BMP 输出 SHA 已在 CPU OpenJPEG 跨解码前冻结；仅参考基线，AMD 完整解码尚未支持。 | `migration/reports/evidence/rewrite/I6/three-original-JP2-native-and-CPU-crossdecode-contract/20261112T102211.233637Z-I6-CPU-contract-0e2f273d73` |
+| 2026-11-12T10:22:50.441095+00:00 | I6 | 原始 JP2 2k_lossless OpenJPEG CPU 与原生 CUDA BMP 全像素观测：OBSERVED，maxAbs=0；不计 AMD 支持。 | `migration/reports/evidence/rewrite/I6/original-JP2-independent-OpenJPEG-vs-CUDA/20261112T102248.655458Z-I6-CPU-reference-3b93a4d180` |
+| 2026-11-12T10:22:52.482159+00:00 | I6 | 原始 JP2 2k_lossy OpenJPEG CPU 与原生 CUDA BMP 全像素观测：OBSERVED，maxAbs=1；不计 AMD 支持。 | `migration/reports/evidence/rewrite/I6/original-JP2-independent-OpenJPEG-vs-CUDA/20261112T102250.896566Z-I6-CPU-reference-f2175a6e79` |
+| 2026-11-12T10:22:55.544660+00:00 | I6 | 原始 JP2 4k_lossy OpenJPEG CPU 与原生 CUDA BMP 全像素观测：OBSERVED，maxAbs=1；不计 AMD 支持。 | `migration/reports/evidence/rewrite/I6/original-JP2-independent-OpenJPEG-vs-CUDA/20261112T102252.868899Z-I6-CPU-reference-610b02ba23` |
+| 2026-11-12T10:23:13.634794+00:00 | I6 | I6 开始：5组可逆5/3+RCT真实GPU组件、8项数值/负例/变化重放和三原始JP2独立OpenJPEG-CUDA参考完成；4个JPEG2000原入口仍FAILED，完整码流/HT/NLT3待实现。 | `migration/reports/image-j2k-i53-trace.json`；`migration/reports/image-j2k-part1-crossdecode.json` |
+| 2026-11-12T10:23:52.466889+00:00 | I6 | I6 阶段报告已归档：5组5/3+RCT GPU精确、3 kernel实际GPU trace、3原始JP2 CPU/CUDA全像素差异；明确四原始入口仍0/4支持及MQ/HT/NLT3缺口。 | `migration/reports/image-jpeg2000-I6.md`；`migration/reports/image-j2k-i53-trace.json`；`migration/reports/image-j2k-part1-crossdecode.json` |
+| 2026-11-12T10:26:49.720807+00:00 | I6 | 原始 JP2/J2K 容器与主头解析 9 组合同先冻结：3真实JP2、1原始codestream、4损坏、1变更重放；只算CPU描述阶段。 | `migration/reports/evidence/rewrite/I6/original-JP2-J2K-container-parser-contract/20261112T102648.652734Z-I6-CPU-contract-cede2cb677` |
+| 2026-11-12T10:27:46.480397+00:00 | I6 | JP2/J2K 容器主头边界解析器构建：BUILT；不是 GPU codec。 | `migration/reports/evidence/rewrite/I6/JP2-J2K-main-header-parser-build/20261112T102745.058670Z-I6-host-build-d23eabecc9` |
+| 2026-11-12T10:27:47.910182+00:00 | I6 | 2k_lossless 原始 JP2 主头与独立 CPU 尺寸/分量校对：PASSED。 | `migration/reports/evidence/rewrite/I6/original-JP2-main-header-parse/20261112T102746.861264Z-I6-CPU-parser-a9bdad32bd` |
+| 2026-11-12T10:27:49.368469+00:00 | I6 | 2k_lossy 原始 JP2 主头与独立 CPU 尺寸/分量校对：PASSED。 | `migration/reports/evidence/rewrite/I6/original-JP2-main-header-parse/20261112T102748.295061Z-I6-CPU-parser-50c13821b2` |
+| 2026-11-12T10:27:50.778764+00:00 | I6 | 4k_lossy 原始 JP2 主头与独立 CPU 尺寸/分量校对：PASSED。 | `migration/reports/evidence/rewrite/I6/original-JP2-main-header-parse/20261112T102749.752442Z-I6-CPU-parser-dacb8c9506` |
+| 2026-11-12T10:27:52.194161+00:00 | I6 | JP2/J2K 主头 2k_lossless-raw-j2k 边界/变化重放：PASSED。 | `migration/reports/evidence/rewrite/I6/JP2-J2K-main-header-boundary/20261112T102751.162871Z-I6-CPU-parser-33e761a01e` |
+| 2026-11-12T10:27:53.586326+00:00 | I6 | JP2/J2K 主头 invalid-signature 边界/变化重放：PASSED。 | `migration/reports/evidence/rewrite/I6/JP2-J2K-main-header-boundary/20261112T102752.564733Z-I6-CPU-parser-2907313c06` |
+| 2026-11-12T10:27:54.963351+00:00 | I6 | JP2/J2K 主头 invalid-box-length 边界/变化重放：PASSED。 | `migration/reports/evidence/rewrite/I6/JP2-J2K-main-header-boundary/20261112T102753.950778Z-I6-CPU-parser-f0f913e204` |
+| 2026-11-12T10:27:56.305543+00:00 | I6 | JP2/J2K 主头 truncated-main-header 边界/变化重放：PASSED。 | `migration/reports/evidence/rewrite/I6/JP2-J2K-main-header-boundary/20261112T102755.325914Z-I6-CPU-parser-b9a8a567f4` |
+| 2026-11-12T10:27:57.689910+00:00 | I6 | JP2/J2K 主头 zero-components 边界/变化重放：PASSED。 | `migration/reports/evidence/rewrite/I6/JP2-J2K-main-header-boundary/20261112T102756.658896Z-I6-CPU-parser-c018366bd2` |
+| 2026-11-12T10:27:59.082605+00:00 | I6 | JP2/J2K 主头 changed-SIZ-width 边界/变化重放：PASSED。 | `migration/reports/evidence/rewrite/I6/JP2-J2K-main-header-boundary/20261112T102758.056710Z-I6-CPU-parser-cea9e32676` |
+| 2026-11-12T10:28:20.092809+00:00 | I6 | 原始JP2/J2K容器和SOC/SIZ/COD主头解析9/9预冻用例通过；三真实JP2几何/分量与独立CPU一致，4损坏拒绝、变更SIZ生效；仅CPU描述层，未增加AMD整例。 | `migration/reports/image-j2k-container-runs.json`；`migration/reports/image-jpeg2000-I6.md` |
 
 <!-- IMAGE_EXECUTION:END -->

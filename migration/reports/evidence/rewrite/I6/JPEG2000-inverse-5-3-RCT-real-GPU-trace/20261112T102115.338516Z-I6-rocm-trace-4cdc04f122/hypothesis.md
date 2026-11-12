@@ -1,0 +1,1 @@
+Test rocm-trace for JPEG2000-inverse-5-3-RCT-real-GPU-trace, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T102027.863314Z-I6-rocm-prototype-429c5d6f5e.

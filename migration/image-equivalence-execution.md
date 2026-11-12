@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-12T10:13:36.176181+00:00。26入口当前13通过/9部分/4失败。
+更新时间：2026-11-12T10:28:20.092809+00:00。26入口当前13通过/9部分/4失败。
 
-I5：审计发现的错误解释器初始化尝试已以 INTERRUPTED 封存：CPU-only Python 3.12 缺少 _rocm_sdk_core；保留失败身份与原始环境，/opt/venv Python 3.13 七组重跑全部通过。
+I6：原始JP2/J2K容器和SOC/SIZ/COD主头解析9/9预冻用例通过；三真实JP2几何/分量与独立CPU一致，4损坏拒绝、变更SIZ生效；仅CPU描述层，未增加AMD整例。
 
-证据：`migration/reports/evidence/rewrite/I5/nvJPEG-Encoder-MultipleInstances-original-CLI/20261112T100531.170885Z-I5-rocm-original-entry-f35ad8db1d`
+证据：`migration/reports/image-j2k-container-runs.json`；`migration/reports/image-jpeg2000-I6.md`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

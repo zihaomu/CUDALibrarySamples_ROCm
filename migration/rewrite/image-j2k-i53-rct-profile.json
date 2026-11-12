@@ -1,0 +1,82 @@
+{
+  "status": "FROZEN",
+  "phase": "I6",
+  "source": "nvJPEG2000/nvJPEG2000-Encoder/images/TestImage640x480.bmp",
+  "source_sha256": "4d445c04fd17171979816f6a9ab69901dce6649a84bb645433df8a847d53a311",
+  "fixtures": [
+    {
+      "case": "singleton",
+      "width": 1,
+      "height": 1,
+      "components": 3,
+      "coefficients": "migration/fixtures/image-j2k-i53-rct/singleton/coefficients.i32",
+      "coefficients_sha256": "49e500e0e11dfe4825ae824aa92025c7aa3da50a5068138aa3253cd074a7172e",
+      "expected_rgb": "migration/fixtures/image-j2k-i53-rct/singleton/expected.rgb",
+      "expected_rgb_sha256": "19fa455892e8b535a75e7c19c63a72002a428406d550d9bc728e26ce1385004c",
+      "coefficient_min": -140,
+      "coefficient_max": 144
+    },
+    {
+      "case": "odd-small",
+      "width": 13,
+      "height": 11,
+      "components": 3,
+      "coefficients": "migration/fixtures/image-j2k-i53-rct/odd-small/coefficients.i32",
+      "coefficients_sha256": "ba3d2a995361128c89c2a23e7e0965df6c46d1d5e7699a1787a976508d3fbd9a",
+      "expected_rgb": "migration/fixtures/image-j2k-i53-rct/odd-small/expected.rgb",
+      "expected_rgb_sha256": "5040af1b8b4893a17e29d861bd28d3f4b2903dc3f068bdb7e194078f49c15cf1",
+      "coefficient_min": -175,
+      "coefficient_max": 207
+    },
+    {
+      "case": "even-grid",
+      "width": 16,
+      "height": 16,
+      "components": 3,
+      "coefficients": "migration/fixtures/image-j2k-i53-rct/even-grid/coefficients.i32",
+      "coefficients_sha256": "26f03ec81652f2907721e90fe619ff37468122ffba02e96cb072ba9cd64cc4a1",
+      "expected_rgb": "migration/fixtures/image-j2k-i53-rct/even-grid/expected.rgb",
+      "expected_rgb_sha256": "3ce9c9e897e9624ecc4a6e5ca4a04867e27bc31f04b0b6057405c05cd27f1ce9",
+      "coefficient_min": -175,
+      "coefficient_max": 229
+    },
+    {
+      "case": "tile-edge",
+      "width": 17,
+      "height": 19,
+      "components": 3,
+      "coefficients": "migration/fixtures/image-j2k-i53-rct/tile-edge/coefficients.i32",
+      "coefficients_sha256": "7e8cbeef89e8790300897ebeb8674b844f47bc444fcd3755d0e6c0a2e9dffe9a",
+      "expected_rgb": "migration/fixtures/image-j2k-i53-rct/tile-edge/expected.rgb",
+      "expected_rgb_sha256": "ba00a0fb1dc4df025aad8a072067b47865af4480a97c9c4084a272b276eb0b27",
+      "coefficient_min": -175,
+      "coefficient_max": 241
+    },
+    {
+      "case": "odd-wide",
+      "width": 33,
+      "height": 29,
+      "components": 3,
+      "coefficients": "migration/fixtures/image-j2k-i53-rct/odd-wide/coefficients.i32",
+      "coefficients_sha256": "315020be0cdc9659e4d5f74cbe563cf30aba217febdf4ef614baa64c79b24595",
+      "expected_rgb": "migration/fixtures/image-j2k-i53-rct/odd-wide/expected.rgb",
+      "expected_rgb_sha256": "7def03dcb16c261f988648c03e39307e4f9f78433780233c23f86e4036ef34e4",
+      "coefficient_min": -175,
+      "coefficient_max": 268
+    }
+  ],
+  "representation": "one-level planar LL/HL/LH/HH packed rows, signed int32; Y/Cb/Cr reversible color transform",
+  "gates": {
+    "exact_all_RGB_bytes": true,
+    "actual_HIP_GPU_kernels": true,
+    "physical_GPU1": true,
+    "changed_coefficient_replay": true,
+    "negative_dimensions_and_truncated_payload": true
+  },
+  "scope": "Isolated transform stage only. No JP2/J2K parser, MQ/EBCOT, packet or original entrypoint support is inferred.",
+  "references": [
+    "https://www.itu.int/rec/T-REC-T.800-202407-I/en",
+    "https://github.com/uclouvain/openjpeg/blob/master/src/lib/openjp2/dwt.c"
+  ],
+  "evidence": "migration/reports/evidence/rewrite/I6/JPEG2000-reversible-5-3-RCT-first-GPU-stage-contract/20261112T101810.114684Z-I6-CPU-contract-674a79735f"
+}

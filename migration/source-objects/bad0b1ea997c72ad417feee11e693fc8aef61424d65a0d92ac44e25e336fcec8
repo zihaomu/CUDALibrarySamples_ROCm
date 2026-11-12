@@ -1,0 +1,53 @@
+{
+  "status": "FROZEN",
+  "phase": "I6",
+  "inputs": [
+    {
+      "case": "2k_lossless",
+      "source": "nvJPEG2000/nvJPEG2000-Decoder/images/2k_image_lossless/2k_lossless.jp2",
+      "sha256": "91eda20f170dbfe22cc224a5716576cbda59ffb037ee9753787021546c63c3e0",
+      "width": 1920,
+      "height": 1080,
+      "components": 3,
+      "reversible": true
+    },
+    {
+      "case": "2k_lossy",
+      "source": "nvJPEG2000/nvJPEG2000-Decoder/images/2k_image_lossy/2k_lossy.jp2",
+      "sha256": "d348492b2308e67a412d4ebd60954357866d633b59321abadf0a1561fe27ffbe",
+      "width": 1920,
+      "height": 1080,
+      "components": 3,
+      "reversible": false
+    },
+    {
+      "case": "4k_lossy",
+      "source": "nvJPEG2000/nvJPEG2000-Decoder/images/4k_image_lossy/4k_lossy.jp2",
+      "sha256": "56773cf8a98f599dc5df9451fd86f5c37fcd3cf96975727b4a23c389a735d44e",
+      "width": 3840,
+      "height": 2160,
+      "components": 3,
+      "reversible": false
+    }
+  ],
+  "cases": [
+    "2k_lossless-jp2",
+    "2k_lossy-jp2",
+    "4k_lossy-jp2",
+    "2k_lossless-raw-j2k",
+    "invalid-signature",
+    "invalid-box-length",
+    "truncated-main-header",
+    "zero-components",
+    "changed-SIZ-width"
+  ],
+  "gates": {
+    "all_three_original_JP2_headers": true,
+    "independent_CPU_geometry": true,
+    "raw_J2K_SOC_SIZ_COD": true,
+    "four_malformed_inputs_rejected_without_result": true,
+    "changed_SIZ_changes_reported_width": true
+  },
+  "scope": "CPU container/marker metadata only. No packet/tier1 or GPU JPEG2000 decode is inferred.",
+  "evidence": "migration/reports/evidence/rewrite/I6/original-JP2-J2K-container-parser-contract/20261112T102648.652734Z-I6-CPU-contract-cede2cb677"
+}

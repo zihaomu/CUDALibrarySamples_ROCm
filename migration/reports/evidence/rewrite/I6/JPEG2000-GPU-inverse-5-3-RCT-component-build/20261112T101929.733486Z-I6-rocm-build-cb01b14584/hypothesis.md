@@ -1,0 +1,1 @@
+Test rocm-build for JPEG2000-GPU-inverse-5-3-RCT-component-build, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T101810.114684Z-I6-CPU-contract-674a79735f.
