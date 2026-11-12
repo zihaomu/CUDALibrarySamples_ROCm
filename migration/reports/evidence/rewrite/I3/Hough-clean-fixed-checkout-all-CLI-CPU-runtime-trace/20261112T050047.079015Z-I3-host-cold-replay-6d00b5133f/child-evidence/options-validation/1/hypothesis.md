@@ -1,0 +1,1 @@
+Test CPU-reference for Hough-valid-options-independent-CPU, case raw-option-maximum-one-line. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T050228.505696Z-I3-rocm-original-c57a32d29a.

@@ -1,0 +1,1 @@
+Test CPU-reference for Hough-runtime-independent-CPU-all-peaks, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T050244.485180Z-I3-rocm-runtime-d7ad721d33.

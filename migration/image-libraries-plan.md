@@ -280,7 +280,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-12T05:00:36.843000+00:00。26入口当前11通过/7部分/8失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-12T05:04:00.577240+00:00。26入口当前11通过/7部分/8失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -1618,5 +1618,9 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-12T04:59:21.099250+00:00 | I3 | Hough 19组真实设备存储/非默认流/输入变化/非法形参运行检查（含足量实测错位分配）：PASSED；CPU逐峰数值与全图另验。 | `migration/reports/evidence/rewrite/I3/Hough-actual-device-allocation-and-stream-runtime/20261112T045917.456621Z-I3-rocm-runtime-f7e02f44f9` |
 | 2026-11-12T04:59:26.278035+00:00 | I3 | Hough17组运行合同正常/变化/恢复全部GPU峰由独立CPU重算，含>2^32工作量和FP32半格：PASSED。 | `migration/reports/evidence/rewrite/I3/Hough-runtime-independent-CPU-all-peaks/20261112T045925.314369Z-I3-CPU-reference-88840adc63` |
 | 2026-11-12T05:00:36.843000+00:00 | I3 | Hough第二轮三范围复审发现冷runtime/trace配对篡改可通过及错位测试混杂span不足；现补足量分配地址范围证明、运行/trace冷子重算与四种新变异，重跑固定提交45子前维持PARTIAL。 | `migration/reports/image-hough.md`；`migration/reports/image-hough-runtime.json` |
+| 2026-11-12T05:03:02.338125+00:00 | I3 | Hough固定Git检出重建双合同/RAW、HIP/C++、14主CLI+5有效参数、全部独立CPU、运行/外流合同与GPU trace及45子记录：PASSED | `migration/reports/evidence/rewrite/I3/Hough-clean-fixed-checkout-all-CLI-CPU-runtime-trace/20261112T050047.079015Z-I3-host-cold-replay-6d00b5133f` |
+| 2026-11-12T05:03:11.021466+00:00 | I3 | Hough组合资格与45子封印的16项正反向检查合同冻结。 | `migration/reports/evidence/rewrite/I3/Hough-qualification-mutation-contract/20261112T050310.061978Z-I3-CPU-contract-5490ca4ad4` |
+| 2026-11-12T05:03:25.194951+00:00 | I3 | Hough16项实际组合资格与子封印正反向变异：PASSED。 | `migration/reports/evidence/rewrite/I3/Hough-actual-qualification-mutations/20261112T050311.399371Z-I3-CPU-validator-test-aaf90b7ebc` |
+| 2026-11-12T05:04:00.577240+00:00 | I3 | Hough修订固定提交a11892da45子记录冷重放通过；运行及trace子证据逐原始文件重算，16/16配对篡改变异通过；资格门仅余三范围复审，主表仍PARTIAL。 | `migration/reports/image-hough-cold.json`；`migration/reports/image-hough-qualification-checks.json` |
 
 <!-- IMAGE_EXECUTION:END -->

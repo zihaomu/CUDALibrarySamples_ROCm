@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-12T05:00:36.843000+00:00。26入口当前11通过/7部分/8失败。
+更新时间：2026-11-12T05:04:00.577240+00:00。26入口当前11通过/7部分/8失败。
 
-I3：Hough第二轮三范围复审发现冷runtime/trace配对篡改可通过及错位测试混杂span不足；现补足量分配地址范围证明、运行/trace冷子重算与四种新变异，重跑固定提交45子前维持PARTIAL。
+I3：Hough修订固定提交a11892da45子记录冷重放通过；运行及trace子证据逐原始文件重算，16/16配对篡改变异通过；资格门仅余三范围复审，主表仍PARTIAL。
 
-证据：`migration/reports/image-hough.md`；`migration/reports/image-hough-runtime.json`
+证据：`migration/reports/image-hough-cold.json`；`migration/reports/image-hough-qualification-checks.json`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 
