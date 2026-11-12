@@ -1,0 +1,1 @@
+Test CPU-reference for Hough-complete-image-and-line-independent-CPU, case synthetic-default. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T041846.477973Z-I3-rocm-original-3eb7e78cf0.

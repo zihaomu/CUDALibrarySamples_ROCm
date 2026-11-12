@@ -280,7 +280,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-12T04:16:19.750115+00:00。26入口当前11通过/7部分/8失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-12T04:24:32.639944+00:00。26入口当前11通过/7部分/8失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -1541,5 +1541,9 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-12T04:15:20.359987+00:00 | I3 | Hough运行合同正常/变化/恢复的全部GPU峰由独立CPU完整重算：PASSED；其余8类非法跨度/参数真实拒绝。 | `migration/reports/evidence/rewrite/I3/Hough-runtime-independent-CPU-all-peaks/20261112T041519.400987Z-I3-CPU-reference-9b6d37c53e` |
 | 2026-11-12T04:15:25.386608+00:00 | I3 | Hough完整默认合成原例真实GPU kernel trace：PASSED；逐PCI/网格/时长检查Canny、180角投票与GPU峰提取。 | `migration/reports/evidence/rewrite/I3/Hough-full-synthetic-real-GPU-Canny-votes-peaks-trace/20261112T041523.021432Z-I3-rocm-trace-9b45d63c18` |
 | 2026-11-12T04:16:19.750115+00:00 | I3 | Hough当前19/19真实完整CLI含5个非默认有效参数、逐峰诊断CSV/全PPM独立CPU、11运行合同/CPU、真实GPU trace与原生完整对照通过；主表先登记PARTIAL，冷检出/独立复审/组合资格未完成，不计入已通过算子。 | `migration/reports/image-hough.md`；`migration/reports/image-hough-options.json`；`migration/reports/image-hough-runtime-validation.json` |
+| 2026-11-12T04:19:55.277403+00:00 | I3 | Hough固定Git检出重建合同/RAW、HIP/C++、14主CLI+5有效参数、全部独立CPU、运行合同与GPU trace及43子记录：PASSED | `migration/reports/evidence/rewrite/I3/Hough-clean-fixed-checkout-all-CLI-CPU-runtime-trace/20261112T041751.032048Z-I3-host-cold-replay-e6b294ba1b` |
+| 2026-11-12T04:23:59.228953+00:00 | I3 | Hough组合资格与43子封印的11项正反向检查合同冻结。 | `migration/reports/evidence/rewrite/I3/Hough-qualification-mutation-contract/20261112T042358.287065Z-I3-CPU-contract-155dc6ddf1` |
+| 2026-11-12T04:24:05.388978+00:00 | I3 | Hough11项实际组合资格与子封印正反向变异：PASSED。 | `migration/reports/evidence/rewrite/I3/Hough-actual-qualification-mutations/20261112T042359.602888Z-I3-CPU-validator-test-92ea44ec9f` |
+| 2026-11-12T04:24:32.639944+00:00 | I3 | Hough固定Git冷重放43份完整子封印通过；11项实际资格篡改反例通过；当前组合资格全部数值/构建/运行/原生/trace/冷检出门通过，仅固定源码三范围复审待签发，主表保持PARTIAL。 | `migration/reports/image-hough-cold.json`；`migration/reports/image-hough-qualification-checks.json`；`migration/reports/image-hough.md` |
 
 <!-- IMAGE_EXECUTION:END -->

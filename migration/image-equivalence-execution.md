@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-12T04:16:19.750115+00:00。26入口当前11通过/7部分/8失败。
+更新时间：2026-11-12T04:24:32.639944+00:00。26入口当前11通过/7部分/8失败。
 
-I3：Hough当前19/19真实完整CLI含5个非默认有效参数、逐峰诊断CSV/全PPM独立CPU、11运行合同/CPU、真实GPU trace与原生完整对照通过；主表先登记PARTIAL，冷检出/独立复审/组合资格未完成，不计入已通过算子。
+I3：Hough固定Git冷重放43份完整子封印通过；11项实际资格篡改反例通过；当前组合资格全部数值/构建/运行/原生/trace/冷检出门通过，仅固定源码三范围复审待签发，主表保持PARTIAL。
 
-证据：`migration/reports/image-hough.md`；`migration/reports/image-hough-options.json`；`migration/reports/image-hough-runtime-validation.json`
+证据：`migration/reports/image-hough-cold.json`；`migration/reports/image-hough-qualification-checks.json`；`migration/reports/image-hough.md`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

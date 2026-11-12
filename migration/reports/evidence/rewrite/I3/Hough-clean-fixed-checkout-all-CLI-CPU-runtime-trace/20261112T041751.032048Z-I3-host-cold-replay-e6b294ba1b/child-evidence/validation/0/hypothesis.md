@@ -1,0 +1,1 @@
+Test CPU-reference for Hough-complete-image-and-line-independent-CPU, case raw-blank. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T041835.721967Z-I3-rocm-original-e285680b5a.

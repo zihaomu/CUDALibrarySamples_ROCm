@@ -1,0 +1,1 @@
+Test CPU-reference for Hough-complete-image-and-line-independent-CPU, case truncated-raw. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T041859.811060Z-I3-rocm-original-67ca59c57c.

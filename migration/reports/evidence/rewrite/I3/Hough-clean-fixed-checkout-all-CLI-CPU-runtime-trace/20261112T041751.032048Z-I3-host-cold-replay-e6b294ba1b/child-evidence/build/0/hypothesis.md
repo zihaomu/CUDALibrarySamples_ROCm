@@ -1,0 +1,1 @@
+Test rocm-build for Hough-Canny-GPU-and-complete-C++-build, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: none.
