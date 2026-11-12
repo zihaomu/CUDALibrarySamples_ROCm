@@ -12801,9 +12801,45 @@
       "evidence": [
         "migration/reports/evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261112T092622.568541Z-I5-composite-subset-qualification-e8ef77900b"
       ]
+    },
+    {
+      "time": "2026-11-12T09:27:42.313348+00:00",
+      "phase": "I5",
+      "message": "nvJPEG/Image-Resize/imageResize.cpp 新 GPU 前向 JPEG 编码子集已绑定逐例主表；33 件产品、七组原入口/CPU/CUDA 通过，整例仍 PARTIAL。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize__imageResize.cpp/20261112T092539.929042Z-I5-composite-subset-qualification-36a0288f8f",
+        "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize_imageResize.cpp/20261112T092511.776236Z-I5-rocm-original-entry-integration-75d632cd9a"
+      ]
+    },
+    {
+      "time": "2026-11-12T09:27:42.756101+00:00",
+      "phase": "I5",
+      "message": "nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp 新 GPU 前向 JPEG 编码子集已绑定逐例主表；35 件产品、七组原入口/CPU/CUDA 通过，整例仍 PARTIAL。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261112T092541.290750Z-I5-composite-subset-qualification-962fb0c234",
+        "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp/20261112T092522.572015Z-I5-rocm-original-entry-integration-e2c3697df4"
+      ]
+    },
+    {
+      "time": "2026-11-12T09:28:29.639139+00:00",
+      "phase": "I5",
+      "message": "原始 nvJPEG 多实例编码器从旧 build FAILED 更新为当前 PARTIAL：16产品/7 CLI+真实多stream通过；CPU熵编码与调度缺口逐例登记。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261112T092622.568541Z-I5-composite-subset-qualification-e8ef77900b",
+        "migration/reports/image-jpeg-encoder-instances-publication.json"
+      ]
+    },
+    {
+      "time": "2026-11-12T09:29:16.567331+00:00",
+      "phase": "I5",
+      "message": "I5 三个 JPEG 重编码入口均已有 GPU 前向变换子集：两个 resize 入口各七组流程和 33/35 产品，独立编码器七组 CLI/16 产品/42 内核多stream；CPU Huffman、原编码模式/metadata、自动调度及原生 CUDA baseline 尚未收口，全部仍 PARTIAL。",
+      "evidence": [
+        "migration/reports/image-jpeg-encoder.md",
+        "migration/reports/image-jpeg-encoder-instances-publication.json"
+      ]
     }
   ],
-  "updated_at": "2026-11-12T09:26:23.574237+00:00",
+  "updated_at": "2026-11-12T09:29:16.567331+00:00",
   "acceptance_policy": "migration/rewrite/image-acceptance-policy.json",
   "execution_plan": "migration/image-equivalence-execution.md"
 }

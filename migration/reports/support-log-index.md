@@ -2,7 +2,7 @@
 
 [返回项目首页](../../README.md) · [构建与复现](../usage.md) · [机器可读记录](support-log-index.json)
 
-覆盖 **639 个样例入口**：252 PASSED、23 PARTIAL、364 FAILED、0 UNSUPPORTED、0 BLOCKED。全部 30 个模块逐项列出实现方式、范围/原因、AMD 日志、CUDA 日志与验收报告。数据直接来自 [逐例清单](../samples.yaml)，[JSON 索引](support-log-index.json) 另含全部历史证据路径、源码 SHA256、已通过/必需用例及恢复条件。
+覆盖 **639 个样例入口**：252 PASSED、24 PARTIAL、363 FAILED、0 UNSUPPORTED、0 BLOCKED。全部 30 个模块逐项列出实现方式、范围/原因、AMD 日志、CUDA 日志与验收报告。数据直接来自 [逐例清单](../samples.yaml)，[JSON 索引](support-log-index.json) 另含全部历史证据路径、源码 SHA256、已通过/必需用例及恢复条件。
 
 **查阅方式：** 先看状态和“支持范围/失败原因”，再看实际库与实现源码。AMD 栏优先链接与当前源码 hash 匹配的选定验收日志；未通过项链接实际尝试。`build.log` 是编译/链接记录，`run.log` 是程序输出，`<case>/run.log` 是对应输入的输出。命令与环境位于同目录的 `commands.json` 和 `*.environment.json`，从“证据目录”进入。缺少运行日志时会明确标注，不将编译/import 成功视作 GPU 通过。
 
@@ -46,7 +46,7 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 
 | 模块 | 已验证子集 | 原始样例尚缺什么 |
 | --- | --- | --- |
-| nvJPEG | rocJPEG baseline 解码；CLI/布局/缩放/ROI/多实例/后处理逐例验收 | progressive缺少原生GPU后端；显式CPU fallback/encode另标注；6 PARTIAL、0 PASSED |
+| nvJPEG | rocJPEG baseline 解码；CLI/布局/缩放/ROI/多实例/后处理逐例验收 | progressive缺少原生GPU后端；显式CPU fallback/encode另标注；7 PARTIAL、0 PASSED |
 
 逐个算子族与样例的可追溯映射见 [operator-support.json](../../migration/reports/operator-support.json)；失败仍按具体入口和原因保留。
 
@@ -57,13 +57,14 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 | 当前结论 | 原因编码 | 入口数 | 说明 |
 | --- | --- | ---: | --- |
 | FAILED | `BINDING_OR_FRONTEND_MIGRATION_REQUIRED` | 57 | 原始语言前端或 vendor 绑定尚未完成迁移。 |
-| FAILED | `BUILD_ERROR` | 307 | 当前移植稿的 API、类型、链接或算法实现未完成，实际构建失败。 |
+| FAILED | `BUILD_ERROR` | 306 | 当前移植稿的 API、类型、链接或算法实现未完成，实际构建失败。 |
 | PARTIAL | `INDEPENDENT_VALIDATION_PENDING` | 3 | 尚未完成对应独立数值及实际执行路径验收。 |
 | PARTIAL | `SEMANTIC_GAP` | 2 | 按该入口的失败日志和恢复条件处理。 |
 | PARTIAL | `VALIDATED_B12_B15_SUBSET` | 8 | 已有验收子集，原始 descriptor、低精度通信、序列或像素语义仍有缺口。 |
 | PARTIAL | `VALIDATED_B9_B11_SUBSET` | 3 | 已有验收子集，原例框架、调度或配置/查询语义仍有缺口。 |
 | PARTIAL | `VALIDATED_I4_PROGRESSIVE_SUBSET` | 4 | 按该入口的失败日志和恢复条件处理。 |
 | PARTIAL | `VALIDATED_I5_GPU_JPEG_FORWARD_SUBSET` | 2 | 按该入口的失败日志和恢复条件处理。 |
+| PARTIAL | `VALIDATED_I5_GPU_JPEG_INSTANCES_SUBSET` | 1 | 按该入口的失败日志和恢复条件处理。 |
 | PARTIAL | `VENDOR_PERMUTATION_POLICY_DIFFERS` | 1 | 置换/排序策略未满足原始 vendor 合同。 |
 
 ## 逐入口实现、结果与日志
@@ -840,7 +841,7 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 | [nvJPEG-Decoder-MultipleInstances/nvJPEGDecMultipleInstances.cpp](../sample-reports/nvJPEG/nvJPEG-Decoder-MultipleInstances/nvJPEGDecMultipleInstances.cpp.md) | PARTIAL / 8/10 | rocJPEG hardware baseline + project HIP progressive IDCT/chroma/RGB; libjpeg-turbo CPU entropy assembly / rocJPEG + project HIP image decoder + libjpeg-turbo entropy；GPU 实现 + 明确标注的 CPU 阶段 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-f846e59c86c3) |
 | [nvJPEG-Decoder/nvjpegDecoder.cpp](../sample-reports/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp.md) | PARTIAL / 8/9 | rocJPEG hardware baseline + project HIP progressive IDCT/chroma/RGB; libjpeg-turbo CPU entropy assembly / rocJPEG + project HIP image decoder + libjpeg-turbo entropy；GPU 实现 + 明确标注的 CPU 阶段 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-340e3057571d) |
 | [nvJPEG-Decoder/tests/test_decoder.py](../sample-reports/nvJPEG/nvJPEG-Decoder/tests/test_decoder.py.md) | PARTIAL / 8/9 | rocJPEG hardware baseline + project HIP progressive IDCT/chroma/RGB; libjpeg-turbo CPU entropy assembly / rocJPEG + project HIP image decoder + libjpeg-turbo entropy；GPU 实现 + 明确标注的 CPU 阶段 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-682072b0c8fa) |
-| [nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp](../sample-reports/nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-1745f35191ec) |
+| [nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp](../sample-reports/nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp.md) | PARTIAL / 8/12 | Project HIP multi-stream JPEG color/downsample/FDCT/quant + libjpeg-turbo CPU Huffman/headers / project HIP JPEG encoder + libjpeg-turbo entropy；GPU 实现 + 明确标注的 CPU 阶段 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-1745f35191ec) |
 
 <a id="module-26"></a>
 

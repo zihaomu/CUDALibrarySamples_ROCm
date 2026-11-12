@@ -64,3 +64,5 @@ python3 tools/moat/qualify_image_encoder_subset.py
 - [migration/reports/image-jpeg-encoder-runs.json](../../../reports/image-jpeg-encoder-runs.json)
 - [migration/reports/image-jpeg-encoder-trace.json](../../../reports/image-jpeg-encoder-trace.json)
 - [migration/reports/image-jpeg-encoder-negative.json](../../../reports/image-jpeg-encoder-negative.json)
+- [migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize__imageResize.cpp/20261112T092539.929042Z-I5-composite-subset-qualification-36a0288f8f](../../../reports/evidence/rewrite/I5/nvJPEG_Image-Resize__imageResize.cpp/20261112T092539.929042Z-I5-composite-subset-qualification-36a0288f8f)
+- [migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize_imageResize.cpp/20261112T092511.776236Z-I5-rocm-original-entry-integration-75d632cd9a](../../../reports/evidence/rewrite/I5/nvJPEG_Image-Resize_imageResize.cpp/20261112T092511.776236Z-I5-rocm-original-entry-integration-75d632cd9a)

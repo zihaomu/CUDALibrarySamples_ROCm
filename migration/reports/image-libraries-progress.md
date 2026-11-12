@@ -1,8 +1,8 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-12T09:26:23.574237+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-12T09:29:16.567331+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
-26入口当前：13 PASSED / 8 PARTIAL / 5 FAILED。
+26入口当前：13 PASSED / 9 PARTIAL / 4 FAILED。
 
 | 阶段 | 执行状态 |
 | --- | --- |
@@ -1596,3 +1596,7 @@
 | 2026-11-12T09:25:40.911324+00:00 | I5 | nvJPEG/Image-Resize/imageResize.cpp 七组完整入口+GPU JPEG 前向变换与CPU熵编码子集资格封存；待GPU entropy、模式/metadata与冷检出，整例仍 PARTIAL。 | [20261112T092539.929042Z-I5-composite-subset-qualification-36a0288f8f](evidence/rewrite/I5/nvJPEG_Image-Resize__imageResize.cpp/20261112T092539.929042Z-I5-composite-subset-qualification-36a0288f8f) |
 | 2026-11-12T09:25:42.253702+00:00 | I5 | nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp 七组完整入口+GPU JPEG 前向变换与CPU熵编码子集资格封存；待GPU entropy、模式/metadata与冷检出，整例仍 PARTIAL。 | [20261112T092541.290750Z-I5-composite-subset-qualification-962fb0c234](evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261112T092541.290750Z-I5-composite-subset-qualification-962fb0c234) |
 | 2026-11-12T09:26:23.574237+00:00 | I5 | 原始 nvJPEG 多实例编码器 7 CLI+多stream/改输入重放已封存子集资格；CPU Huffman 与原自动标定等缺口保留 PARTIAL。 | [20261112T092622.568541Z-I5-composite-subset-qualification-e8ef77900b](evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261112T092622.568541Z-I5-composite-subset-qualification-e8ef77900b) |
+| 2026-11-12T09:27:42.313348+00:00 | I5 | nvJPEG/Image-Resize/imageResize.cpp 新 GPU 前向 JPEG 编码子集已绑定逐例主表；33 件产品、七组原入口/CPU/CUDA 通过，整例仍 PARTIAL。 | [20261112T092539.929042Z-I5-composite-subset-qualification-36a0288f8f](evidence/rewrite/I5/nvJPEG_Image-Resize__imageResize.cpp/20261112T092539.929042Z-I5-composite-subset-qualification-36a0288f8f)；[20261112T092511.776236Z-I5-rocm-original-entry-integration-75d632cd9a](evidence/rewrite/I5/nvJPEG_Image-Resize_imageResize.cpp/20261112T092511.776236Z-I5-rocm-original-entry-integration-75d632cd9a) |
+| 2026-11-12T09:27:42.756101+00:00 | I5 | nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp 新 GPU 前向 JPEG 编码子集已绑定逐例主表；35 件产品、七组原入口/CPU/CUDA 通过，整例仍 PARTIAL。 | [20261112T092541.290750Z-I5-composite-subset-qualification-962fb0c234](evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261112T092541.290750Z-I5-composite-subset-qualification-962fb0c234)；[20261112T092522.572015Z-I5-rocm-original-entry-integration-e2c3697df4](evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp/20261112T092522.572015Z-I5-rocm-original-entry-integration-e2c3697df4) |
+| 2026-11-12T09:28:29.639139+00:00 | I5 | 原始 nvJPEG 多实例编码器从旧 build FAILED 更新为当前 PARTIAL：16产品/7 CLI+真实多stream通过；CPU熵编码与调度缺口逐例登记。 | [20261112T092622.568541Z-I5-composite-subset-qualification-e8ef77900b](evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261112T092622.568541Z-I5-composite-subset-qualification-e8ef77900b)；[image-jpeg-encoder-instances-publication.json](image-jpeg-encoder-instances-publication.json) |
+| 2026-11-12T09:29:16.567331+00:00 | I5 | I5 三个 JPEG 重编码入口均已有 GPU 前向变换子集：两个 resize 入口各七组流程和 33/35 产品，独立编码器七组 CLI/16 产品/42 内核多stream；CPU Huffman、原编码模式/metadata、自动调度及原生 CUDA baseline 尚未收口，全部仍 PARTIAL。 | [image-jpeg-encoder.md](image-jpeg-encoder.md)；[image-jpeg-encoder-instances-publication.json](image-jpeg-encoder-instances-publication.json) |

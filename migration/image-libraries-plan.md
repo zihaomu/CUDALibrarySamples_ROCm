@@ -2,7 +2,7 @@
 
 日期：2026-11-11。状态：**IN_PROGRESS**。已开始按计划实施；原设计与基线保留，当前实验和阶段状态见下方执行记录。
 
-截至 2026-11-12，本计划四模块 **13/26 整例通过、8 PARTIAL、5 FAILED**：NPP 8/9、NPP+ 5/6、nvJPEG 0/7、nvJPEG2000 0/4。I3 两个 watershed 已有完整 HIP 文件入口及独立 CPU 逐字节结果，但原生分割/边界语义差异显著，保持 PARTIAL；I4–I8 JPEG/JPEG2000 整例目标仍未完成。全项目为 252 PASSED、23 PARTIAL、364 FAILED。详细资格及失败原因见项目的 `migration/reports/image-libraries-progress.md` 和 `migration/reports/support-log-index.md`。
+截至 2026-11-12，本计划四模块 **13/26 整例通过、9 PARTIAL、4 FAILED**：NPP 8/9、NPP+ 5/6、nvJPEG 0/7、nvJPEG2000 0/4。I3 两个 watershed 已有完整 HIP 文件入口及独立 CPU 逐字节结果，但原生分割/边界语义差异显著，保持 PARTIAL；I4–I8 JPEG/JPEG2000 整例目标仍未完成。全项目为 252 PASSED、24 PARTIAL、363 FAILED。详细资格及失败原因见项目的 `migration/reports/image-libraries-progress.md` 和 `migration/reports/support-log-index.md`。
 
 ## 1. 目标和“完整支持”的含义
 
@@ -254,7 +254,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | [nvJPEG/nvJPEG-Decoder/tests/test_decoder.py](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/nvJPEG/nvJPEG-Decoder/tests/test_decoder.py) | PARTIAL | I4 | Probed rocJPEG/VCN + HIP baseline/progressive decoder and real framework |
 | [nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp) | PARTIAL | I5 | HIP JPEG encoder + shared GPU resize/alpha; full multi-instance scheduling |
 | [nvJPEG/Image-Resize/imageResize.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/nvJPEG/Image-Resize/imageResize.cpp) | PARTIAL | I5 | HIP JPEG encoder + shared GPU resize/alpha; full multi-instance scheduling |
-| [nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp) | FAILED | I5 | HIP JPEG encoder + shared GPU resize/alpha; full multi-instance scheduling |
+| [nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp) | PARTIAL | I5 | HIP JPEG encoder + shared GPU resize/alpha; full multi-instance scheduling |
 | [nvJPEG2000/nvJPEG2000-Decoder-Pipelined/nvjpeg2k_dec_pipelined.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/nvJPEG2000/nvJPEG2000-Decoder-Pipelined/nvjpeg2k_dec_pipelined.cpp) | FAILED | I8 | Project HIP JPEG2000 MQ/HT codec + header/container orchestration |
 | [nvJPEG2000/nvJPEG2000-Decoder-Tile-Partial/nvjpeg2k_decode_tile_partial.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/nvJPEG2000/nvJPEG2000-Decoder-Tile-Partial/nvjpeg2k_decode_tile_partial.cpp) | FAILED | I8 | Project HIP JPEG2000 MQ/HT codec + header/container orchestration |
 | [nvJPEG2000/nvJPEG2000-Decoder/nvjpeg2k_decode.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/nvJPEG2000/nvJPEG2000-Decoder/nvjpeg2k_decode.cpp) | FAILED | I8 | Project HIP JPEG2000 MQ/HT codec + header/container orchestration |
@@ -282,7 +282,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-12T09:26:23.574237+00:00。26入口当前13通过/8部分/5失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-12T09:29:16.567331+00:00。26入口当前13通过/9部分/4失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -1861,5 +1861,9 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-12T09:25:40.911324+00:00 | I5 | nvJPEG/Image-Resize/imageResize.cpp 七组完整入口+GPU JPEG 前向变换与CPU熵编码子集资格封存；待GPU entropy、模式/metadata与冷检出，整例仍 PARTIAL。 | `migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize__imageResize.cpp/20261112T092539.929042Z-I5-composite-subset-qualification-36a0288f8f` |
 | 2026-11-12T09:25:42.253702+00:00 | I5 | nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp 七组完整入口+GPU JPEG 前向变换与CPU熵编码子集资格封存；待GPU entropy、模式/metadata与冷检出，整例仍 PARTIAL。 | `migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261112T092541.290750Z-I5-composite-subset-qualification-962fb0c234` |
 | 2026-11-12T09:26:23.574237+00:00 | I5 | 原始 nvJPEG 多实例编码器 7 CLI+多stream/改输入重放已封存子集资格；CPU Huffman 与原自动标定等缺口保留 PARTIAL。 | `migration/reports/evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261112T092622.568541Z-I5-composite-subset-qualification-e8ef77900b` |
+| 2026-11-12T09:27:42.313348+00:00 | I5 | nvJPEG/Image-Resize/imageResize.cpp 新 GPU 前向 JPEG 编码子集已绑定逐例主表；33 件产品、七组原入口/CPU/CUDA 通过，整例仍 PARTIAL。 | `migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize__imageResize.cpp/20261112T092539.929042Z-I5-composite-subset-qualification-36a0288f8f`；`migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize_imageResize.cpp/20261112T092511.776236Z-I5-rocm-original-entry-integration-75d632cd9a` |
+| 2026-11-12T09:27:42.756101+00:00 | I5 | nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp 新 GPU 前向 JPEG 编码子集已绑定逐例主表；35 件产品、七组原入口/CPU/CUDA 通过，整例仍 PARTIAL。 | `migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261112T092541.290750Z-I5-composite-subset-qualification-962fb0c234`；`migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp/20261112T092522.572015Z-I5-rocm-original-entry-integration-e2c3697df4` |
+| 2026-11-12T09:28:29.639139+00:00 | I5 | 原始 nvJPEG 多实例编码器从旧 build FAILED 更新为当前 PARTIAL：16产品/7 CLI+真实多stream通过；CPU熵编码与调度缺口逐例登记。 | `migration/reports/evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261112T092622.568541Z-I5-composite-subset-qualification-e8ef77900b`；`migration/reports/image-jpeg-encoder-instances-publication.json` |
+| 2026-11-12T09:29:16.567331+00:00 | I5 | I5 三个 JPEG 重编码入口均已有 GPU 前向变换子集：两个 resize 入口各七组流程和 33/35 产品，独立编码器七组 CLI/16 产品/42 内核多stream；CPU Huffman、原编码模式/metadata、自动调度及原生 CUDA baseline 尚未收口，全部仍 PARTIAL。 | `migration/reports/image-jpeg-encoder.md`；`migration/reports/image-jpeg-encoder-instances-publication.json` |
 
 <!-- IMAGE_EXECUTION:END -->
