@@ -403,12 +403,12 @@ def collect(review=None):
     gate('forty-five-sealed-child-clean-checkout-replay',cold_gate)
     def mutations():
         r=load('qualification-checks')
-        names=json.loads((ROOT/'migration/rewrite/image-hough-qualification-checks-v6.json').read_text())
+        names=json.loads((ROOT/'migration/rewrite/image-hough-qualification-checks-v7.json').read_text())
         return (record(r,'checks.json','CPU-validator-test','Hough-actual-qualification-mutations') and r['status']=='PASSED'
-                and r['case_count']==len(r['checks'])==len(names)==23
+                and r['case_count']==len(r['checks'])==len(names)==28
                 and [c['check'] for c in r['checks']]==names
                 and all(c['passed'] for c in r['checks']))
-    gate('twenty-three-real-qualification-and-archive-mutation-checks',mutations)
+    gate('twenty-eight-real-qualification-and-archive-mutation-checks',mutations)
     sources.update({'tools/moat/qualify_image_hough.py','tools/moat/publish_image_hough.py',
                     'tools/moat/image_hough_qualification_checks.py',
                     'tools/moat/image_hough_native_reference.py','tools/moat/image_regions_native.py',

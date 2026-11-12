@@ -6,6 +6,15 @@ from qualify_image_hough import collect,load,options_profile,SAMPLE,IMPLEMENTATI
 from qualify_canny_plus import sealed
 from selected_proofs import inspect
 
+def proof_pointers(q,build):
+    original=next(r for r in load('runs') if r['case']=='synthetic-default')
+    native=load('native-comparison')
+    expected_devices=json.loads((ROOT/build['evidence']/'backend.observed.json').read_text())['devices']
+    return (q.get('rocm_evidence')==original['evidence']
+            and q.get('cuda_evidence')==native['native_evidence']
+            and q.get('environment')==build['evidence']+'/backend.observed.json'
+            and q.get('devices')==expected_devices)
+
 def validate(q,sample,review,closure=None):
     checks,refs,sources,build,p=closure if closure is not None else collect(review)
     directory,manifest,_=sealed(q['evidence']);frozen=json.loads((directory/'qualification.json').read_text())
@@ -15,6 +24,8 @@ def validate(q,sample,review,closure=None):
         or q['implementation']!=IMPLEMENTATION or q['implementation_sha256']!=digest(ROOT/IMPLEMENTATION)
         or q['source_commit']!=review['source_commit']):raise ValueError('Hough qualification identity')
     ids=[c['case'] for c in p['cases']]+[x['case'] for x in options_profile()['cases']]
+    if not proof_pointers(q,build):
+        raise ValueError('Hough proof pointers do not match validated runs, native CUDA, and build')
     if (q['status']!='PASSED' or q['checks']!=checks or not all(c['passed'] for c in checks)
         or set(q['evidence_references'])!=refs or q['dependencies']!=build['dependencies']
         or q['case_ids']!=ids or q['case_count']!=len(ids)==19
@@ -35,7 +46,7 @@ def main():
         'image-hough/complete-native-PPM-and-declared-differences',
         'image-hough/five-real-GPU-kernel-dispatches',
         'image-hough/forty-five-child-cold-replay',
-        'image-hough/twenty-three-qualification-and-archive-mutation-checks',
+        'image-hough/twenty-eight-qualification-and-archive-mutation-checks',
         'image-hough/three-independent-fixed-source-reviews']
     sample.update(status='PASSED',level='L4',reason_code='VALIDATED_MOAT_REWRITE',
                   implementation=IMPLEMENTATION,selected_validation=q,

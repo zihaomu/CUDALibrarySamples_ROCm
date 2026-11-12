@@ -6,6 +6,7 @@ from unittest.mock import patch
 from experiment import ROOT,Experiment,write,digest
 from image_progress import record
 import qualify_image_hough as q
+import publish_image_hough as publisher
 
 NAMES=['real-45-child-cold-archive','actual-14-CPU-reference-gate',
        'duplicate-original-CLI','forged-PPM-SHA','forged-line-CSV-SHA',
@@ -23,7 +24,12 @@ NAMES=['real-45-child-cold-archive','actual-14-CPU-reference-gate',
        'coupled-cold-trace-wrong-parent-and-seal',
        'cold-outer-checkout-command-forgery',
        'current-CPU-validation-wrong-parent-identity',
-       'current-original-CLI-wrong-output-cwd']
+       'current-original-CLI-wrong-output-cwd',
+       'current-publication-pointer-baseline',
+       'forged-publication-ROCm-evidence-pointer',
+       'forged-publication-CUDA-evidence-pointer',
+       'forged-publication-environment-pointer',
+       'forged-publication-device-list']
 
 def run_checks():
     checks=[];original=q.load
@@ -135,27 +141,40 @@ def run_checks():
     with patch.object(Path,'read_text',wrong_cwd):
         check(NAMES[22],lambda:next(c for c in q.collect(None)[0]
               if c['check']=='fourteen-actual-complete-original-CLI-and-products')['passed'],False)
+    build=original('build')
+    pointers=dict(rocm_evidence=next(r['evidence'] for r in original('runs') if r['case']=='synthetic-default'),
+                  cuda_evidence=original('native-comparison')['native_evidence'],
+                  environment=build['evidence']+'/backend.observed.json',
+                  devices=json.loads((ROOT/build['evidence']/'backend.observed.json').read_text())['devices'])
+    check(NAMES[23],lambda:publisher.proof_pointers(pointers,build))
+    for position,field,value in [(24,'rocm_evidence','missing-ROCm-evidence'),
+                                 (25,'cuda_evidence','missing-CUDA-evidence'),
+                                 (26,'environment','missing-environment'),
+                                 (27,'devices',[dict(physical_id=0,pci_bdf='forged-device')])]:
+        forged=dict(pointers);forged[field]=value
+        check(NAMES[position],lambda forged=forged:publisher.proof_pointers(forged,build),False)
     if [c['check'] for c in checks]!=NAMES:raise ValueError('fixed Hough mutation suite')
     return dict(status='PASSED' if all(c['passed'] for c in checks) else 'FAILED',
                 case_count=len(checks),checks=checks)
 
 def main():
-    path=ROOT/'migration/rewrite/image-hough-qualification-checks-v6.json'
+    path=ROOT/'migration/rewrite/image-hough-qualification-checks-v7.json'
     if not path.exists():
         contract=Experiment('I3','Hough-qualification-mutation-contract','CPU-contract',sources=[__file__,ROOT/'migration/rewrite/image-hough-profile.json'])
         write(path,NAMES);write(contract.path/'cases.json',NAMES)
         result=dict(status='FROZEN',case_count=len(NAMES));write(contract.path/'contracts.json',result)
         result['evidence']=contract.finish('OBSERVED')
-        write(ROOT/'migration/reports/image-hough-qualification-check-contract-v6.json',result)
-        record('I3','Hough组合资格与45子封印的23项正反向检查合同冻结。',[result['evidence']])
+        write(ROOT/'migration/reports/image-hough-qualification-check-contract-v7.json',result)
+        record('I3','Hough组合资格与45子封印的28项正反向检查合同冻结。',[result['evidence']])
     if json.loads(path.read_text())!=NAMES:raise ValueError('fixed Hough mutation names')
     e=Experiment('I3','Hough-actual-qualification-mutations','CPU-validator-test',
-                 sources=[__file__,ROOT/'tools/moat/qualify_image_hough.py',path,ROOT/'migration/rewrite/image-hough-profile.json'])
+                 sources=[__file__,ROOT/'tools/moat/qualify_image_hough.py',ROOT/'tools/moat/publish_image_hough.py',
+                          path,ROOT/'migration/rewrite/image-hough-profile.json'])
     result=run_checks();write(e.path/'checks.json',result)
     result['evidence']=e.finish('PASSED' if result['status']=='PASSED' else 'VALIDATOR_GAP',
                                 dict(status=result['status'],checks=result['checks']))
     write(ROOT/'migration/reports/image-hough-qualification-checks.json',result)
-    record('I3','Hough23项实际组合资格与子封印正反向变异：'+result['status']+'。',[result['evidence']])
+    record('I3','Hough28项实际组合资格与子封印正反向变异：'+result['status']+'。',[result['evidence']])
     print(result['status'],[c['check'] for c in result['checks'] if not c['passed']])
     return int(result['status']!='PASSED')
 
