@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-12T08:51:53.796663+00:00。26入口当前13通过/8部分/5失败。
+更新时间：2026-11-12T08:53:35.402065+00:00。26入口当前13通过/8部分/5失败。
 
-I4：nvJPEG/nvJPEG-Decoder/tests/test_decoder.py 七组历史合同+两原始 progressive GPU像素/trace/current source 复合子集证据封存；整例仍 PARTIAL，待剩余语义/冷检出复审。
+I4：六个 nvJPEG 入口新 progressive GPU 子集证据已按 Git 封印绑定到逐例主表；仍全部 PARTIAL，旧 CPU 回退原因改为各入口真实剩余缺口。
 
-证据：`migration/reports/evidence/rewrite/I4/nvJPEG_nvJPEG-Decoder_tests_test_decoder.py/20261112T085152.831043Z-I4-composite-subset-qualification-fbbed580cf`
+证据：`migration/reports/image-progressive-publication.json`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

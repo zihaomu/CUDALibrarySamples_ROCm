@@ -282,7 +282,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-12T08:51:53.796663+00:00。26入口当前13通过/8部分/5失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-12T08:53:35.402065+00:00。26入口当前13通过/8部分/5失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -1808,5 +1808,6 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-12T08:51:51.143832+00:00 | I4 | nvJPEG/nvJPEG-Decoder-Backend-ROI/nvJPEGROIDecode.cpp 七组历史合同+两原始 progressive GPU像素/trace/current source 复合子集证据封存；整例仍 PARTIAL，待剩余语义/冷检出复审。 | `migration/reports/evidence/rewrite/I4/nvJPEG_nvJPEG-Decoder-Backend-ROI_nvJPEGROIDecode.cpp/20261112T085150.166831Z-I4-composite-subset-qualification-20660715e6` |
 | 2026-11-12T08:51:52.482357+00:00 | I4 | nvJPEG/nvJPEG-Decoder-MultipleInstances/nvJPEGDecMultipleInstances.cpp 七组历史合同+两原始 progressive GPU像素/trace/current source 复合子集证据封存；整例仍 PARTIAL，待剩余语义/冷检出复审。 | `migration/reports/evidence/rewrite/I4/nvJPEG_nvJPEG-Decoder-MultipleInstances_nvJPEGDecMultipleInstances.cpp/20261112T085151.508214Z-I4-composite-subset-qualification-1a4d02b7ec` |
 | 2026-11-12T08:51:53.796663+00:00 | I4 | nvJPEG/nvJPEG-Decoder/tests/test_decoder.py 七组历史合同+两原始 progressive GPU像素/trace/current source 复合子集证据封存；整例仍 PARTIAL，待剩余语义/冷检出复审。 | `migration/reports/evidence/rewrite/I4/nvJPEG_nvJPEG-Decoder_tests_test_decoder.py/20261112T085152.831043Z-I4-composite-subset-qualification-fbbed580cf` |
+| 2026-11-12T08:53:35.402065+00:00 | I4 | 六个 nvJPEG 入口新 progressive GPU 子集证据已按 Git 封印绑定到逐例主表；仍全部 PARTIAL，旧 CPU 回退原因改为各入口真实剩余缺口。 | `migration/reports/image-progressive-publication.json` |
 
 <!-- IMAGE_EXECUTION:END -->

@@ -2,28 +2,28 @@
 
 **PARTIAL / L4**
 
-使用 rocJPEG + HIP layout/ROI/Lanczos/watermark + explicit libjpeg CPU fallback/encode；7 个预登记case通过独立CPU与同输入CUDA。锁定rocJPEG的HYBRID创建返回-12；原始12图中2张progressive由明确标注的libjpeg CPU fallback解码。GPU格式/ROI/缩放/Lanczos/水印和真实CLI已验证，CPU编码不声称AMDGPU JPEG encoder支持。
+七组原登记流程与同输入 CUDA 数学对照重新通过；12 原始 JPEG 中 10 张 rocJPEG 硬件解码、2 张 progressive 使用 CPU 熵装配 + AMD GPU IDCT/色度/RGB，独立 CPU maxAbs≤3、PSNR≥60.76 dB，真实 GPU kernel trace 已验。当前仍缺：I4/fixed-commit-cold-replay-and-independent-review、I5/GPU-JPEG-reencoding-and-metadata。
 
 | 字段 | 当前记录 |
 | --- | --- |
 | 原始入口 | [nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp](../../../../nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp) |
-| 实际库 / 后端 | rocJPEG + HIP layout/ROI/Lanczos/watermark + explicit libjpeg CPU fallback/encode / rocJPEG/HIP runtime + libjpeg-turbo |
+| 实际库 / 后端 | rocJPEG hardware baseline + project HIP progressive IDCT/chroma/RGB; libjpeg-turbo CPU entropy assembly + current CPU JPEG encode / rocJPEG + project HIP image decoder + libjpeg-turbo entropy |
 | 候选路线 | rocJPEG (decode only), RPP |
 | 代码 | [rocm/ported/nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp](../../../../rocm/ported/nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp) |
-| required cases | 7/8 |
+| required cases | 8/10 |
 | CUDA baseline / comparison | PASSED / PASSED |
 | 性能 | NOT_RUN |
 | 原始源码 SHA256 | `e4f336ff2598fdcc5d0899d168eaf7785ed4b277fb494cd6f23960d181fe405b` |
 
 编译/运行返回 0 仅对应 L3；通过独立参考检查后才记 L4。失败的候选库不列为已使用库。
 
-必需用例：`batches9_11/original-corpus`, `batches9_11/formats-scale`, `batches9_11/roi-boundary`, `batches9_11/batch-multi-instance`, `batches9_11/invalid-cli`, `batches9_11/postprocess`, `batches9_11/python-integration`, `batches9_11/native-progressive-GPU-backend`。
+必需用例：`batches9_11/original-corpus`, `batches9_11/formats-scale`, `batches9_11/roi-boundary`, `batches9_11/batch-multi-instance`, `batches9_11/invalid-cli`, `batches9_11/postprocess`, `batches9_11/python-integration`, `I4/progressive-GPU-pixel-synthesis`, `I4/fixed-commit-cold-replay-and-independent-review`, `I5/GPU-JPEG-reencoding-and-metadata`。
 
 实现方式：`HYBRID_CPU_GPU`。
 
-恢复/扩展条件：缺失范围：native-progressive-GPU-backend；需要真实后端/完整harness并重做验收。
+恢复/扩展条件：完成 I4/fixed-commit-cold-replay-and-independent-review、I5/GPU-JPEG-reencoding-and-metadata 后重做固定提交资格；progressive灰度/采样变体及错误流仍需增补输入合同。
 
-CUDA 对照限制：当前 AMD 路线尚未通过正确性验收。
+CUDA 对照限制：既有七组同输入 CUDA 数学对照通过；progressive 采用项目 HIP 与 CPU 熵装配，不声称 nvJPEG 私有 backend/流水线 ABI 一致。
 
 ## 原始 API 自动移植稿最近一次尝试
 
@@ -37,11 +37,13 @@ build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_mi
 
 从仓库根目录，先核对物理 GPU 占用。HIP ordinal 与物理编号不同；项目 guard 根据 PCI 地址拒绝 GPU3 和被预约的卡。
 
-在仓库根目录运行：GPU 构建/执行由 launcher 进入锁定容器，CPU 验收在宿主 Python3.12；先按对应批次报告同步 CUDA 证据。
+在已锁定并通过 guard 的 ROCm 10.1.0 容器中（多 GPU 用例须暴露两个允许的设备）：
 
 ```bash
-HIP_VISIBLE_DEVICES=2 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh python tools/migration/batches9_11_run.py b10
-OPENBLAS_NUM_THREADS=1 python3 tools/migration/batches9_11_validate.py b10 --qualify
+HIP_VISIBLE_DEVICES=2 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh python3 tools/moat/image_progressive_build.py
+HIP_VISIBLE_DEVICES=2 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh python3 tools/migration/batches9_11_run.py b10
+build/image-cpu-venv/bin/python tools/migration/batches9_11_validate.py b10
+python3 tools/moat/qualify_image_progressive_subset.py
 ```
 
 - [migration/reports/evidence/20261109T083217.050455Z/original-rocm/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp](../../../reports/evidence/20261109T083217.050455Z/original-rocm/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp)
@@ -50,3 +52,10 @@ OPENBLAS_NUM_THREADS=1 python3 tools/migration/batches9_11_validate.py b10 --qua
 - [migration/reports/evidence/20261110T043132.627099Z/batches9_11-rocm/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp](../../../reports/evidence/20261110T043132.627099Z/batches9_11-rocm/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp)
 - [migration/reports/batches9_11-validation.json](../../../reports/batches9_11-validation.json)
 - [migration/reports/evidence/20261110T043816.470698Z/batches9_11-cuda/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp](../../../reports/evidence/20261110T043816.470698Z/batches9_11-cuda/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp)
+- [migration/reports/evidence/rewrite/I4/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp/20261112T085147.482242Z-I4-composite-subset-qualification-671d449fb5](../../../reports/evidence/rewrite/I4/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp/20261112T085147.482242Z-I4-composite-subset-qualification-671d449fb5)
+- [migration/reports/evidence/rewrite/I4/six-JPEG-entry-current-full-harness-logs-and-product-hashes/20261112T085059.002402Z-I4-host-evidence-archive-2ec54e2d04/harness/nvJPEG__Image-Resize-WaterMark__imageResizeWatermark.cpp](../../../reports/evidence/rewrite/I4/six-JPEG-entry-current-full-harness-logs-and-product-hashes/20261112T085059.002402Z-I4-host-evidence-archive-2ec54e2d04/harness/nvJPEG__Image-Resize-WaterMark__imageResizeWatermark.cpp)
+- [migration/reports/image-progressive.md](../../../reports/image-progressive.md)
+- [migration/reports/image-progressive-harness-archive.json](../../../reports/image-progressive-harness-archive.json)
+- [migration/reports/image-progressive-original-corpus.json](../../../reports/image-progressive-original-corpus.json)
+- [migration/reports/image-progressive-runs.json](../../../reports/image-progressive-runs.json)
+- [migration/reports/image-progressive-trace.json](../../../reports/image-progressive-trace.json)

@@ -1,6 +1,6 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-12T08:51:53.796663+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-12T08:53:35.402065+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
 26入口当前：13 PASSED / 8 PARTIAL / 5 FAILED。
 
@@ -1543,3 +1543,4 @@
 | 2026-11-12T08:51:51.143832+00:00 | I4 | nvJPEG/nvJPEG-Decoder-Backend-ROI/nvJPEGROIDecode.cpp 七组历史合同+两原始 progressive GPU像素/trace/current source 复合子集证据封存；整例仍 PARTIAL，待剩余语义/冷检出复审。 | [20261112T085150.166831Z-I4-composite-subset-qualification-20660715e6](evidence/rewrite/I4/nvJPEG_nvJPEG-Decoder-Backend-ROI_nvJPEGROIDecode.cpp/20261112T085150.166831Z-I4-composite-subset-qualification-20660715e6) |
 | 2026-11-12T08:51:52.482357+00:00 | I4 | nvJPEG/nvJPEG-Decoder-MultipleInstances/nvJPEGDecMultipleInstances.cpp 七组历史合同+两原始 progressive GPU像素/trace/current source 复合子集证据封存；整例仍 PARTIAL，待剩余语义/冷检出复审。 | [20261112T085151.508214Z-I4-composite-subset-qualification-1a4d02b7ec](evidence/rewrite/I4/nvJPEG_nvJPEG-Decoder-MultipleInstances_nvJPEGDecMultipleInstances.cpp/20261112T085151.508214Z-I4-composite-subset-qualification-1a4d02b7ec) |
 | 2026-11-12T08:51:53.796663+00:00 | I4 | nvJPEG/nvJPEG-Decoder/tests/test_decoder.py 七组历史合同+两原始 progressive GPU像素/trace/current source 复合子集证据封存；整例仍 PARTIAL，待剩余语义/冷检出复审。 | [20261112T085152.831043Z-I4-composite-subset-qualification-fbbed580cf](evidence/rewrite/I4/nvJPEG_nvJPEG-Decoder_tests_test_decoder.py/20261112T085152.831043Z-I4-composite-subset-qualification-fbbed580cf) |
+| 2026-11-12T08:53:35.402065+00:00 | I4 | 六个 nvJPEG 入口新 progressive GPU 子集证据已按 Git 封印绑定到逐例主表；仍全部 PARTIAL，旧 CPU 回退原因改为各入口真实剩余缺口。 | [image-progressive-publication.json](image-progressive-publication.json) |
