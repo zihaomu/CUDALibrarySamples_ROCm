@@ -11,4 +11,4 @@
 
 这些结果尚未签发整例资格。原生 nvJPEG backend 枚举、解耦流水线、多实例自动调度和图像重新编码等缺口因入口而异；当前旧 B10 验证器把 progressive CPU 回退写成固定原因，不能用于新路径的最终出版。新复合证明仅确认上述子集，冷检出与独立复审仍待执行。
 
-证据：[预冻结合同](../rewrite/image-progressive-gpu-profile.json)、[原型两图数值](image-progressive-runs.json)、[实际 GPU trace](image-progressive-trace.json)、[完整入口12图](image-progressive-original-corpus.json)、[六入口子集资格](image-progressive-subset-qualifications.json)、[逐步实验](image-libraries-progress.md)。每次构建、失败和重试的 stdout/stderr、源码 SHA、设备快照在对应 `migration/reports/evidence/rewrite/I4/` 目录；失败的首次编译与布尔元数据验收也保留。
+证据：[预冻结合同](../rewrite/image-progressive-gpu-profile.json)、[原型两图数值](image-progressive-runs.json)、[实际 GPU trace](image-progressive-trace.json)、[完整入口12图](image-progressive-original-corpus.json)、[六入口子集资格](image-progressive-subset-qualifications.json)、[完整日志归档](image-progressive-harness-archive.json)、[逐步实验](image-libraries-progress.md)。当前六入口共归档 880 个文本/JSON 日志，并对 511 个二进制产品记录 SHA、大小与本地重建命令；大产品仍留在本地 artifacts。每次构建、失败和重试的 stdout/stderr、源码 SHA、设备快照在对应 `migration/reports/evidence/rewrite/I4/` 目录；失败的首次编译与布尔元数据验收也保留。

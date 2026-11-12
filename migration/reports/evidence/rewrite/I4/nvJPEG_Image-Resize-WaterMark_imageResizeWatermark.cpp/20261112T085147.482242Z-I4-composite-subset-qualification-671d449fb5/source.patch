@@ -1,0 +1,41 @@
+diff --git a/tools/moat/qualify_image_progressive_subset.py b/tools/moat/qualify_image_progressive_subset.py
+index f76c000b6..e0afe9a5d 100644
+--- a/tools/moat/qualify_image_progressive_subset.py
++++ b/tools/moat/qualify_image_progressive_subset.py
+@@ -27,15 +27,17 @@ def main():
+     prototype = json.loads((ROOT / 'migration/reports/image-progressive-runs.json').read_text())
+     trace = json.loads((ROOT / 'migration/reports/image-progressive-trace.json').read_text())
+     corpus = json.loads((ROOT / 'migration/reports/image-progressive-original-corpus.json').read_text())
++    archive = json.loads((ROOT / 'migration/reports/image-progressive-harness-archive.json').read_text())
+     refs = [latest('nvJPEG-isolated-backend-six-entry-regression'),
+             latest('nvJPEG-isolated-backend-six-entry-CPU-CUDA'),
+-            trace['evidence'], corpus['evidence']]
++            trace['evidence'], corpus['evidence'], archive['evidence']]
+     refs += [r['evidence'] for r in prototype]
+     if any(audit_check(ROOT / ref) for ref in refs):
+         raise ValueError('a referenced MOAT evidence seal is invalid')
+     if not (len(runs) == len(validations) == 6 and len(prototype) == 2 and
+             all(r['status'] == 'PASSED' for r in prototype) and
+-            trace['status'] == corpus['status'] == 'PASSED'):
++            trace['status'] == corpus['status'] == archive['status'] == 'PASSED' and
++            archive['text_file_count'] >= 880 and archive['binary_product_count'] >= 511):
+         raise ValueError('all six adapters and both original progressive inputs required')
+     qualifications = []
+     for source, run in runs.items():
+@@ -85,6 +87,7 @@ def main():
+                      ROOT / 'migration/reports/image-progressive-runs.json',
+                      ROOT / 'migration/reports/image-progressive-trace.json',
+                      ROOT / 'migration/reports/image-progressive-original-corpus.json',
++                     ROOT / 'migration/reports/image-progressive-harness-archive.json',
+                      ROOT / 'migration/rewrite/image-progressive-gpu-profile.json'])
+         q = dict(kind='image-progressive-GPU-subset', status='PASSED',
+                  contract_status='PARTIAL', sample_id=source.rsplit('/', 1)[0] +
+@@ -95,7 +98,7 @@ def main():
+                  ['I4/progressive-GPU-pixel-synthesis'],
+                  checks=checks, dependencies=dependencies,
+                  evidence_references=refs,
+-                 rocm_evidence=original['evidence'],
++                 rocm_evidence=archive['evidence'] + '/harness/' + source.replace('/', '__'),
+                  cuda_evidence=validation['cuda_evidence'],
+                  comparison_mode='GPU_PROGRESSIVE_PROJECT_ALGORITHM',
+                  remaining='native backend enum/pipeline or automatic scheduling, CPU JPEG encoding, and fixed-commit cold review vary by entrypoint')

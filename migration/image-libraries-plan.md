@@ -282,7 +282,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-12T08:48:58.001924+00:00。26入口当前13通过/8部分/5失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-12T08:51:53.796663+00:00。26入口当前13通过/8部分/5失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -1801,5 +1801,12 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-12T08:47:20.603915+00:00 | I4 | nvJPEG/nvJPEG-Decoder-MultipleInstances/nvJPEGDecMultipleInstances.cpp 七组历史合同+两原始 progressive GPU像素/trace/current source 复合子集证据封存；整例仍 PARTIAL，待剩余语义/冷检出复审。 | `migration/reports/evidence/rewrite/I4/nvJPEG_nvJPEG-Decoder-MultipleInstances_nvJPEGDecMultipleInstances.cpp/20261112T084719.547286Z-I4-composite-subset-qualification-d981f0012b` |
 | 2026-11-12T08:47:22.218494+00:00 | I4 | nvJPEG/nvJPEG-Decoder/tests/test_decoder.py 七组历史合同+两原始 progressive GPU像素/trace/current source 复合子集证据封存；整例仍 PARTIAL，待剩余语义/冷检出复审。 | `migration/reports/evidence/rewrite/I4/nvJPEG_nvJPEG-Decoder_tests_test_decoder.py/20261112T084721.188703Z-I4-composite-subset-qualification-d5e26b423e` |
 | 2026-11-12T08:48:58.001924+00:00 | I4 | 最终源码SHA重建与六入口42组回归/CPU-CUDA对照重新通过；source-tree 1622文件已更新，final_validate暂存空行失败修正后PASSED。六子集资格仍只表示部分支持。 | `migration/reports/final-validation.json`；`migration/reports/image-progressive-subset-qualifications.json` |
+| 2026-11-12T08:51:00.726219+00:00 | I4 | 六JPEG入口当前完整harness归档 880 个日志/JSON 与 511 个二进制产品SHA：PASSED；大产品按固定命令重建。 | `migration/reports/evidence/rewrite/I4/six-JPEG-entry-current-full-harness-logs-and-product-hashes/20261112T085059.002402Z-I4-host-evidence-archive-2ec54e2d04` |
+| 2026-11-12T08:51:47.107297+00:00 | I4 | nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp 七组历史合同+两原始 progressive GPU像素/trace/current source 复合子集证据封存；整例仍 PARTIAL，待剩余语义/冷检出复审。 | `migration/reports/evidence/rewrite/I4/nvJPEG_nvJPEG-Decoder_nvjpegDecoder.cpp/20261112T085146.130045Z-I4-composite-subset-qualification-8ffe536cdf` |
+| 2026-11-12T08:51:48.458126+00:00 | I4 | nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp 七组历史合同+两原始 progressive GPU像素/trace/current source 复合子集证据封存；整例仍 PARTIAL，待剩余语义/冷检出复审。 | `migration/reports/evidence/rewrite/I4/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp/20261112T085147.482242Z-I4-composite-subset-qualification-671d449fb5` |
+| 2026-11-12T08:51:49.799945+00:00 | I4 | nvJPEG/Image-Resize/imageResize.cpp 七组历史合同+两原始 progressive GPU像素/trace/current source 复合子集证据封存；整例仍 PARTIAL，待剩余语义/冷检出复审。 | `migration/reports/evidence/rewrite/I4/nvJPEG_Image-Resize_imageResize.cpp/20261112T085148.827007Z-I4-composite-subset-qualification-16a304defd` |
+| 2026-11-12T08:51:51.143832+00:00 | I4 | nvJPEG/nvJPEG-Decoder-Backend-ROI/nvJPEGROIDecode.cpp 七组历史合同+两原始 progressive GPU像素/trace/current source 复合子集证据封存；整例仍 PARTIAL，待剩余语义/冷检出复审。 | `migration/reports/evidence/rewrite/I4/nvJPEG_nvJPEG-Decoder-Backend-ROI_nvJPEGROIDecode.cpp/20261112T085150.166831Z-I4-composite-subset-qualification-20660715e6` |
+| 2026-11-12T08:51:52.482357+00:00 | I4 | nvJPEG/nvJPEG-Decoder-MultipleInstances/nvJPEGDecMultipleInstances.cpp 七组历史合同+两原始 progressive GPU像素/trace/current source 复合子集证据封存；整例仍 PARTIAL，待剩余语义/冷检出复审。 | `migration/reports/evidence/rewrite/I4/nvJPEG_nvJPEG-Decoder-MultipleInstances_nvJPEGDecMultipleInstances.cpp/20261112T085151.508214Z-I4-composite-subset-qualification-1a4d02b7ec` |
+| 2026-11-12T08:51:53.796663+00:00 | I4 | nvJPEG/nvJPEG-Decoder/tests/test_decoder.py 七组历史合同+两原始 progressive GPU像素/trace/current source 复合子集证据封存；整例仍 PARTIAL，待剩余语义/冷检出复审。 | `migration/reports/evidence/rewrite/I4/nvJPEG_nvJPEG-Decoder_tests_test_decoder.py/20261112T085152.831043Z-I4-composite-subset-qualification-fbbed580cf` |
 
 <!-- IMAGE_EXECUTION:END -->

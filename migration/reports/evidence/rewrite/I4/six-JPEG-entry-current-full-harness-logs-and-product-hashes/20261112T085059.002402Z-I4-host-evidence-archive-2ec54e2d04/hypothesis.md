@@ -1,0 +1,1 @@
+Test host-evidence-archive for six-JPEG-entry-current-full-harness-logs-and-product-hashes, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: none.
