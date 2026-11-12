@@ -68812,25 +68812,47 @@
         "RPP HIP",
         "rocPRIM"
       ],
-      "actual_library": null,
-      "backend_library": null,
+      "actual_library": "Project HIP C1 Canny and Hough accumulator/peak kernels",
+      "backend_library": "project HIP image Hough",
       "implementation": "rocm/ported/NPP/houghLines/houghLines.cpp",
-      "status": "FAILED",
-      "level": "L1",
+      "status": "PARTIAL",
+      "level": "L3",
       "required_cases": [
-        "original-functional-contract",
-        "independent-numerical-or-semantic-reference"
+        "hough/14-frozen-CLI-and-PPM",
+        "hough/5-valid-nondefault-CLI",
+        "hough/11-runtime-and-independent-peaks",
+        "hough/native-complete-PPM-comparison",
+        "hough/real-Canny-vote-peak-kernel-trace",
+        "hough/cold-clean-checkout",
+        "hough/three-independent-reviews",
+        "hough/sealed-qualification-and-Git-publication"
       ],
-      "passed_cases": [],
-      "reason_code": "BUILD_ERROR",
-      "reason": "build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/NPP/houghLines/houghLines.cpp:33:10: fatal error: 'npp.h' file not found；failed to execute:/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib/llvm/bin/clang++  --offload-arch=gfx1201 --driver-mode=g++ --hip-link  -std=c++17 -O2 -D__HIP_PLATFORM_AMD__ --rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySample",
+      "passed_cases": [
+        "hough/14-frozen-CLI-and-PPM",
+        "hough/5-valid-nondefault-CLI",
+        "hough/11-runtime-and-independent-peaks",
+        "hough/native-complete-PPM-comparison",
+        "hough/real-Canny-vote-peak-kernel-trace"
+      ],
+      "reason_code": "QUALIFICATION_PENDING",
+      "reason": "19个完整C++ CLI及逐字节PPM/逐峰CPU、11项GPU运行合同、原生5090对照和真实kernel trace通过；低阈值1196峰由项目诊断CSV完整核对。项目与NPP默认PPM有10627 RGB像素差异，五条真值都覆盖。固定提交冷检出、三范围复审、组合资格Git锚定尚未完成，因此仅PARTIAL。",
       "cuda_baseline": "PASSED",
-      "cuda_comparison": "BLOCKED",
-      "benchmark": "NOT_RUN",
+      "cuda_comparison": "OBSERVED",
+      "benchmark": "NOT_QUALIFIED",
       "evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/NPP_houghLines_houghLines.cpp",
         "migration/reports/evidence/20261109T084256.329631Z/original-rocm/NPP_houghLines_houghLines.cpp",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP_houghLines_houghLines.cpp"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP_houghLines_houghLines.cpp",
+        "migration/reports/image-hough.md",
+        "migration/reports/image-hough-contracts.json",
+        "migration/reports/image-hough-build.json",
+        "migration/reports/image-hough-runs.json",
+        "migration/reports/image-hough-validation.json",
+        "migration/reports/image-hough-options.json",
+        "migration/reports/image-hough-runtime.json",
+        "migration/reports/image-hough-runtime-validation.json",
+        "migration/reports/image-hough-trace.json",
+        "migration/reports/image-hough-native-comparison.json"
       ],
       "attempts": [
         {
@@ -68921,15 +68943,15 @@
         "qualified_physical_devices": true
       },
       "original_implementation": "rocm/ported/NPP/houghLines/houghLines.cpp",
-      "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
+      "retry_condition": "固定源码冷检出、独立复审和组合资格通过后才升级PASSED。",
       "original_semantics": {
         "contract_source": "NPP/houghLines/houghLines.cpp",
         "source_sha256": "2433c9caa3838ee4f32d31f3e1d1930c1b1b9add72883335c64928ba3e7d7b50",
         "api_tokens": [],
         "review_scope": "Original source is the authoritative dtype/layout/batch/API contract; qualified subset and deviations are explicit in reason and required_cases."
       },
-      "equivalence": "API_PORT",
-      "next_step": "按当前逐例错误和 retry_condition 改写/补齐，再运行原始 profile 与独立参考。",
+      "equivalence": "DOCUMENTED_HOUGH_ACCUMULATOR_VARIANT",
+      "next_step": "I3 Hough冷检出与资格；随后两种watershed和OpenCV benchmark。",
       "original_cuda": {
         "sample_id": "NPP/houghLines::houghLines.cpp",
         "scope": "original_profile",
@@ -68954,7 +68976,10 @@
       },
       "cuda_baseline_scope": "Original source with observation-only output where present; build/run qualification, separate from independent correctness comparison.",
       "cuda_baseline_reason": "原始教学输入构建运行通过；独立正确性验证待完成",
-      "cuda_comparison_reason": "当前 AMD 路线尚未通过正确性验收。"
+      "cuda_comparison_reason": "原始NPP与项目均检出10条线且五真值覆盖，部分rho偏1像素；red IoU 0.23946，不声称逐像素相同。",
+      "cuda_comparison_mode": "DOCUMENTED_HOUGH_ACCUMULATOR_VARIANT",
+      "active_batch": "I3",
+      "reproduce": "python3 tools/moat/image_hough_contracts.py\npython3 tools/moat/image_hough_build.py\npython3 tools/moat/image_hough_run.py\nbuild/image-cpu-venv/bin/python tools/moat/image_hough_reference.py"
     },
     {
       "id": "NPP/nppCanny::npp_canny_simple.cpp",

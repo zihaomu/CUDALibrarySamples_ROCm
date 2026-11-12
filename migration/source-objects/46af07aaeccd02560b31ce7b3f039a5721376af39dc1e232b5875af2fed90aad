@@ -1,0 +1,120 @@
+#!/usr/bin/env python3
+"""Independent NumPy CPU oracle for full Hough C++ output products."""
+import ctypes,json,math,re,struct,tempfile
+from pathlib import Path
+import numpy as np
+from experiment import ROOT,Experiment,write,digest
+from image_progress import record
+from image_canny_stages_reference import reference as canny_stages
+from image_canny_local_research import local_mask
+
+PROFILE=ROOT/'migration/rewrite/image-hough-profile.json'
+RUNS=ROOT/'migration/reports/image-hough-runs.json'
+TRUTH=[(-150,30),(80,100),(200,75),(-60,160),(0,45)]
+LINE=re.compile(r'^  theta\s+([\d.]+) deg\s+rho\s+([\d.-]+) px$',re.M)
+
+def synthetic(w,h):
+    yy,xx=np.indices((h,w),dtype=np.float64);image=np.full((h,w),40,np.uint8)
+    for rho,theta in TRUTH:
+        rad=theta*math.pi/180
+        image[np.abs((xx-(w>>1))*math.cos(rad)+(yy-(h>>1))*math.sin(rad)-rho)<1.5]=220
+    libc=ctypes.CDLL('libc.so.6');libc.srand(7);rand=libc.rand;rand.restype=ctypes.c_int
+    perturb=np.fromiter((rand()%7-3 for _ in range(w*h)),dtype=np.int16,count=w*h).reshape(h,w)
+    return np.clip(image.astype(np.int16)+perturb,0,255).astype(np.uint8)
+
+def hough(image,threshold,max_lines,low=60,high=120):
+    h,w=image.shape
+    with tempfile.TemporaryDirectory(prefix='hough-cpu-') as t:
+        p=Path(t);write(p/'config.json',dict(width=w,height=h,channels=1,pitch=w));(p/'input.bin').write_bytes(image.tobytes())
+        edge=local_mask(canny_stages(p),low,high)
+    rows=math.ceil(math.sqrt(2.)*max(w,h));cy,cx=h>>1,w>>1
+    yy,xx=np.nonzero(edge);xx=xx.astype(np.float32)-cx;yy=yy.astype(np.float32)-cy
+    votes=np.zeros((180,rows),dtype=np.int32)
+    for theta in range(180):
+        c=np.float32(math.cos(theta*math.pi/180));s=np.float32(math.sin(theta*math.pi/180))
+        rho=np.rint(xx*c+yy*s).astype(np.int32)+(rows>>1)
+        rho=rho[(rho>=0)&(rho<rows)]
+        votes[theta]=np.bincount(rho,minlength=rows)
+    # Compare 3x3 neighbors with deterministic tie priority at the lower bin.
+    peaks=[]
+    for theta,rho in np.argwhere(votes>=threshold):
+        value=votes[theta,rho];earlier=False
+        for dt in (-1,0,1):
+            a=theta+dt
+            if a<0 or a>=180:continue
+            for dr in (-1,0,1):
+                b=rho+dr
+                if (dt==0 and dr==0) or b<0 or b>=rows:continue
+                other=votes[a,b]
+                if other>value or (other==value and (a,b)<(theta,rho)):
+                    earlier=True;break
+            if earlier:break
+        if not earlier:peaks.append((int(value),int(theta),int(rho)))
+    peaks.sort(key=lambda p:(-p[0],p[1],p[2]))
+    lines=sorted(((rho-(rows>>1),theta) for _,theta,rho in peaks[:max_lines]),key=lambda x:(x[1],x[0]))
+    return lines,int(np.count_nonzero(edge)),len(peaks)
+
+def lround(v):return math.floor(v+0.5) if v>=0 else math.ceil(v-0.5)
+
+def ppm(image,lines):
+    h,w=image.shape;rgb=np.repeat(image[:,:,None],3,axis=2).copy();cx,cy=w>>1,h>>1
+    for rho,theta in lines:
+        rad=theta*math.pi/180;c=math.cos(rad);s=math.sin(rad)
+        if 45<=theta<=135:
+            for x in range(w):
+                y=lround((rho-(x-cx)*c)/s+cy)
+                if 0<=y<h:rgb[y,x]=[255,40,40]
+        else:
+            for y in range(h):
+                x=lround((rho-(y-cy)*s)/c+cx)
+                if 0<=x<w:rgb[y,x]=[255,40,40]
+    return f'P6\n{w} {h}\n255\n'.encode()+rgb.tobytes()
+
+def validate(case,row):
+    ref=ROOT/row['evidence'];raw=ROOT/json.loads((ref/'manifest.json').read_text())['raw_artifact_dir']
+    cmd=json.loads((ref/'commands.json').read_text())[0]
+    stdout=(ref/'logs/0001-execute-complete-Hough-entry.stdout.log').read_text()
+    stderr=(ref/'logs/0001-execute-complete-Hough-entry.stderr.log').read_text()
+    checks=[dict(check='actual-process-and-frozen-return-code',passed=row['status']=='EXECUTED' and cmd['return_code']==row['return_code']==case['expected_return_code']),
+            dict(check='binary-and-command-source',passed=cmd['argv'][0]==str(ROOT/json.loads((ROOT/'migration/reports/image-hough-build.json').read_text())['binary'])),
+            dict(check='device-identity',passed={d['physical_id'] for d in json.loads((ref/'backend.observed.json').read_text())['devices']}=={1})]
+    if case['kind']=='valid':
+        w,h=case['width'],case['height'];image=synthetic(w,h) if case['case'].startswith('synthetic') else np.fromfile(ROOT/case['input'],np.uint8).reshape(h,w)
+        threshold=int(case['arguments'][case['arguments'].index('-t')+1]) if '-t' in case['arguments'] else 300
+        max_lines=int(case['arguments'][case['arguments'].index('-m')+1]) if '-m' in case['arguments'] else 500
+        canny_low=int(case['arguments'][case['arguments'].index('-cl')+1]) if '-cl' in case['arguments'] else 60
+        canny_high=int(case['arguments'][case['arguments'].index('-ch')+1]) if '-ch' in case['arguments'] else 120
+        lines,edge_count,peak_count=hough(image,threshold,max_lines,canny_low,canny_high)
+        got=[(int(float(rho)),int(float(theta))) for theta,rho in LINE.findall(stdout)]
+        checks.extend([dict(check='independent-full-line-list',passed=got==lines,actual=got,expected=lines),
+                       dict(check='independent-line-count',passed=f'Detected {len(lines)} line(s)' in stdout),
+                       dict(check='complete-PPM-bytes',passed=(raw/'outputs/hough_result.ppm').read_bytes()==ppm(image,lines)),
+                       dict(check='reported-PPM-hash-and-size',passed=digest(raw/'outputs/hough_result.ppm')==row['ppm_sha256'] and (raw/'outputs/hough_result.ppm').stat().st_size==row['ppm_bytes'])])
+        if case['case'].startswith('synthetic'):
+            checks.append(dict(check='five-truth-lines-covered',passed=all(any(abs(r-r0)<=3 and abs(t-t0)<=1 for r,t in lines) for r0,t0 in TRUTH) and 'All five lines found: [PASS]' in stdout))
+            checks.append(dict(check='timing-branch',passed=('GPU time per frame:' in stdout) if case['case']=='synthetic-default' else ('Timing skipped (-n 0)' in stdout)))
+        return dict(case=case['case'],status='PASSED' if all(c['passed'] for c in checks) else 'FAILED',checks=checks,edge_pixels=edge_count,peak_count=peak_count)
+    checks.append(dict(check='no-success-product-for-error-or-help',passed=row['ppm_sha256'] is None))
+    if case['kind']=='invalid':checks.append(dict(check='specific-diagnostic',passed=bool(stderr.strip()) and not stdout.strip()))
+    else:checks.append(dict(check='help-text',passed='Usage:' in stdout and not stderr.strip()))
+    return dict(case=case['case'],status='PASSED' if all(c['passed'] for c in checks) else 'FAILED',checks=checks)
+
+def main():
+    profile=json.loads(PROFILE.read_text());rows=json.loads(RUNS.read_text())
+    cases={c['case']:c for c in profile['cases']}
+    if len(rows)!=len(cases) or {r['case'] for r in rows}!=set(cases):raise ValueError('complete unique Hough case set required')
+    result=[]
+    for row in rows:
+        e=Experiment('I3','Hough-complete-image-and-line-independent-CPU','CPU-reference',case=row['case'],
+                     parent=row['experiment_id'],sources=[__file__,PROFILE,RUNS,
+                     ROOT/'tools/moat/image_canny_stages_reference.py',ROOT/'tools/moat/image_canny_local_research.py'])
+        try:v=validate(cases[row['case']],row)
+        except Exception as error:v=dict(case=row['case'],status='FAILED',checks=[dict(check='independent-reproduction',passed=False,error=repr(error))])
+        write(e.path/'results.json',v)
+        v['evidence']=e.finish('PASSED' if v['status']=='PASSED' else 'NUMERIC_MISMATCH',dict(status=v['status'],checks=v['checks']))
+        result.append(v);write(ROOT/'migration/reports/image-hough-validation.json',result)
+        record('I3','Hough '+row['case']+' 完整线列表/PPM/返回码独立CPU：'+v['status']+'。',[v['evidence']])
+        print(row['case'],v['status'],[c['check'] for c in v['checks'] if not c['passed']],flush=True)
+    return int(any(v['status']!='PASSED' for v in result))
+
+if __name__=='__main__':raise SystemExit(main())

@@ -1,0 +1,1 @@
+Test CPU-reference for Hough-complete-native-CUDA-project-HIP-CPU-comparison, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: none.

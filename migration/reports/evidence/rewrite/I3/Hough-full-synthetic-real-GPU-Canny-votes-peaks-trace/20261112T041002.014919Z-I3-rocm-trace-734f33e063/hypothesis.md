@@ -1,0 +1,1 @@
+Test rocm-trace for Hough-full-synthetic-real-GPU-Canny-votes-peaks-trace, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T040629.582452Z-I3-rocm-build-ee556fac20.

@@ -13,8 +13,8 @@
 | 当前结论 | 入口数 |
 | --- | ---: |
 | 已通过（PASSED） | 250 |
-| 部分支持（PARTIAL） | 21 |
-| 尚未通过（FAILED） | 368 |
+| 部分支持（PARTIAL） | 22 |
+| 尚未通过（FAILED） | 367 |
 
 尚未整例通过 **389 个入口**。通过结论限于该入口登记的原始功能和必需用例；精度、规模、语言、batch 和存储变体不重复增加算子数。未通过原因、部分实现范围和重现日志统一列在[详细记录](migration/reports/support-log-index.md)。
 
@@ -47,7 +47,7 @@
 | [MathDx/cuSolverDx](migration/reports/support-log-index/MathDx__cuSolverDx.md) | 调用方 HIP kernel 内的分解和求解 | 4 | 4/42 | 0 | 38 |
 | [MathDx/libmathdx](migration/reports/support-log-index/MathDx__libmathdx.md) | 尚无整例通过 | 0 | 0/12 | 0 | 12 |
 | [MathDx/nvCOMPDx](migration/reports/support-log-index/MathDx__nvCOMPDx.md) | 尚无整例通过 | 0 | 0/7 | 0 | 7 |
-| [NPP](migration/reports/support-log-index/NPP.md) | 项目 HIP 图像处理实现 | 5 | 6/9 | 0 | 3 |
+| [NPP](migration/reports/support-log-index/NPP.md) | 项目 HIP 图像处理实现 | 5 | 6/9 | 1 | 2 |
 | [NPP+](migration/reports/support-log-index/NPP+.md) | 项目 HIP 图像处理 + ROCm Torch | 5 | 5/6 | 0 | 1 |
 | [nvJPEG](migration/reports/support-log-index/nvJPEG.md) | 尚无整例通过 | 0 | 0/7 | 6 | 1 |
 | [nvJPEG2000](migration/reports/support-log-index/nvJPEG2000.md) | 尚无整例通过 | 0 | 0/4 | 0 | 4 |

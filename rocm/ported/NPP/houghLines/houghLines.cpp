@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// Straight-line detection with the Hough transform in NPP.
+// Straight-line detection using project HIP Canny and Hough accumulator kernels.
 //
 //     gray image --nppiFilterCannyBorder_8u_C1R_Ctx--> binary edge image
 //                --nppiFilterHoughLine_8u32f_C1R_Ctx--> list of lines (rho, theta) in device memory
@@ -24,13 +24,14 @@
 // detections can be checked against the truth.  A real 8-bit gray RAW image can be used instead with -i/-w/-h, in which
 // case the detected lines are only drawn.
 //
-// NPP returns each line as NppPointPolar {rho, theta}.  theta is in degrees.  rho is an accumulator index: the signed
+// HIP returns each peak as {rho index, theta degrees, votes}.  theta is in degrees.  rho is an accumulator index: the signed
 // distance of the line from the image centre in pixels is rho - accumulatorHeight/2, with
 //     x*cos(theta) + y*sin(theta) = rho_signed     (x, y measured from the image centre).
 // This sample uses the recommended discretization nDelta = {1.0, 1.0} (1 pixel, 1 degree).
 
 #include <hip/hip_runtime.h>
-#include <npp.h>
+#include "../../../common/image/canny.h"
+#include "../../../common/image/hough.h"
 
 #include <algorithm>
 #include <cmath>
@@ -50,42 +51,14 @@
         }                                                                                     \
     } while (0)
 
-#define CHECK_NPP(call)                                                                       \
-    do {                                                                                      \
-        NppStatus s_ = (call);                                                                \
-        if (s_ != NPP_SUCCESS) {                                                              \
-            fprintf(stderr, "NPP error %d at %s:%d\n", (int)s_, __FILE__, __LINE__);          \
-            exit(EXIT_FAILURE);                                                               \
-        }                                                                                     \
-    } while (0)
-
 static const double kPi = 3.14159265358979323846;
-
-static NppStreamContext makeStreamContext(hipStream_t stream)
-{
-    NppStreamContext ctx = {}; // zero-initialize: hWorkspace (formerly nReserved0) must be 0 unless a workspace is created
-    int dev = 0;
-    CHECK_CUDA(hipGetDevice(&dev));
-    hipDeviceProp_t prop;
-    CHECK_CUDA(hipGetDeviceProperties(&prop, dev));
-    ctx.hStream                            = stream;
-    ctx.nCudaDeviceId                      = dev;
-    ctx.nMultiProcessorCount               = prop.multiProcessorCount;
-    ctx.nMaxThreadsPerMultiProcessor       = prop.maxThreadsPerMultiProcessor;
-    ctx.nMaxThreadsPerBlock                = prop.maxThreadsPerBlock;
-    ctx.nSharedMemPerBlock                 = prop.sharedMemPerBlock;
-    ctx.nCudaDevAttrComputeCapabilityMajor = prop.major;
-    ctx.nCudaDevAttrComputeCapabilityMinor = prop.minor;
-    CHECK_CUDA(hipStreamGetFlags(stream, &ctx.nStreamFlags));
-    return ctx;
-}
 
 struct Line { double rho, theta; }; // rho: signed distance from the image centre (pixels), theta: degrees
 
 // Synthetic test image: dark gray background, five 3-pixel-wide bright lines, light noise.
 static const Line kTruth[5] = {{-150, 30}, {80, 100}, {200, 75}, {-60, 160}, {0, 45}};
 
-static void makeSyntheticImage(std::vector<Npp8u>& img, int W, int H)
+static void makeSyntheticImage(std::vector<uint8_t>& img, int W, int H)
 {
     img.assign((size_t)W * H, 40);
     const double cx = W >> 1, cy = H >> 1;
@@ -96,15 +69,15 @@ static void makeSyntheticImage(std::vector<Npp8u>& img, int W, int H)
                 if (std::fabs((x - cx) * c + (y - cy) * s - l.rho) < 1.5) img[(size_t)y * W + x] = 220;
     }
     srand(7);
-    for (auto& p : img) p = (Npp8u)std::min(255, std::max(0, (int)p + (rand() % 7) - 3));
+    for (auto& p : img) p = (uint8_t)std::min(255, std::max(0, (int)p + (rand() % 7) - 3));
 }
 
 // Draw one line (rho signed from the centre, theta degrees) into an RGB image, clipped to the image.
-static void drawLine(std::vector<Npp8u>& rgb, int W, int H, const Line& l)
+static void drawLine(std::vector<uint8_t>& rgb, int W, int H, const Line& l)
 {
     const double cx = W >> 1, cy = H >> 1, t = l.theta * kPi / 180.0, c = std::cos(t), s = std::sin(t);
     auto put = [&](int x, int y) {
-        if (x >= 0 && x < W && y >= 0 && y < H) { Npp8u* p = &rgb[((size_t)y * W + x) * 3]; p[0] = 255; p[1] = 40; p[2] = 40; }
+        if (x >= 0 && x < W && y >= 0 && y < H) { uint8_t* p = &rgb[((size_t)y * W + x) * 3]; p[0] = 255; p[1] = 40; p[2] = 40; }
     };
     if (l.theta >= 45 && l.theta <= 135) {
         for (int x = 0; x < W; ++x) put(x, (int)std::lround((l.rho - (x - cx) * c) / s + cy));
@@ -144,7 +117,7 @@ int main(int argc, char** argv)
     }
 
     const bool synthetic = imagePath.empty();
-    std::vector<Npp8u> gray;
+    std::vector<uint8_t> gray;
     if (synthetic) {
         makeSyntheticImage(gray, W, H);
     } else {
@@ -158,52 +131,63 @@ int main(int argc, char** argv)
 
     hipStream_t stream;
     CHECK_CUDA(hipStreamCreate(&stream));
-    NppStreamContext ctx = makeStreamContext(stream);
-
-    const NppiSize      roi = {W, H};
-    const NppPointPolar delta = {1.0f, 1.0f}; // 1 pixel, 1 degree (recommended; also what the rho conversion below assumes)
-
-    int cannyBufSize = 0, houghBufSize = 0;
-    CHECK_NPP(nppiFilterCannyBorderGetBufferSize(roi, &cannyBufSize));
-    CHECK_NPP(nppiFilterHoughLineGetBufferSize(roi, delta, maxLines, &houghBufSize));
-
-    Npp8u *d_gray, *d_edges, *d_cannyBuf, *d_houghBuf;
-    NppPointPolar* d_lines;
-    int*           d_lineCount;
+    uint64_t cannyBytes = 0;
+    CHECK_CUDA(rocm_image_canny_workspace_size(W, H, &cannyBytes));
+    const int accHeight = rocm_image_hough_accumulator_height(W, H);
+    const int capacity = accHeight * 180;
+    uint8_t *d_gray, *d_edges;
+    void* d_cannyBuf;
+    RocmHoughPeak* d_lines;
+    int* d_lineCount;
     CHECK_CUDA(hipMalloc(&d_gray, gray.size()));
     CHECK_CUDA(hipMalloc(&d_edges, gray.size()));
-    CHECK_CUDA(hipMalloc(&d_cannyBuf, std::max(cannyBufSize, 1))); // never pass NPP a null buffer
-    CHECK_CUDA(hipMalloc(&d_houghBuf, std::max(houghBufSize, 1)));
-    CHECK_CUDA(hipMalloc(&d_lines, (size_t)maxLines * sizeof(NppPointPolar)));
-    CHECK_CUDA(hipMalloc(&d_lineCount, sizeof(int))); // must be device memory
+    CHECK_CUDA(hipMalloc(&d_cannyBuf, cannyBytes));
+    CHECK_CUDA(hipMalloc(&d_lines, (size_t)capacity * sizeof(RocmHoughPeak)));
+    CHECK_CUDA(hipMalloc(&d_lineCount, sizeof(int)));
     CHECK_CUDA(hipMemcpyAsync(d_gray, gray.data(), gray.size(), hipMemcpyHostToDevice, stream));
 
     auto canny = [&]() {
-        CHECK_NPP(nppiFilterCannyBorder_8u_C1R_Ctx(d_gray, W, roi, {0, 0}, d_edges, W, roi, NPP_FILTER_SOBEL,
-                                                   NPP_MASK_SIZE_3_X_3, (Npp16s)cannyLow, (Npp16s)cannyHigh, nppiNormL2,
-                                                   NPP_BORDER_REPLICATE, d_cannyBuf, ctx));
+        CHECK_CUDA(rocm_image_canny_local(d_gray, gray.size(), W, W, H, 1,
+            cannyLow, cannyHigh, d_edges, gray.size(), W, d_cannyBuf, cannyBytes, stream));
     };
     auto hough = [&]() {
-        CHECK_CUDA(hipMemsetAsync(d_lineCount, 0, sizeof(int), stream));
-        CHECK_NPP(nppiFilterHoughLine_8u32f_C1R_Ctx(d_edges, W, roi, delta, threshold, d_lines, maxLines, d_lineCount,
-                                                    d_houghBuf, ctx));
+        CHECK_CUDA(rocm_image_hough_peaks(d_edges, W, H, threshold,
+            d_lines, capacity, d_lineCount, stream));
     };
 
     canny();
     hough();
-    int found = 0;
-    std::vector<NppPointPolar> raw(maxLines);
-    CHECK_CUDA(hipMemcpyAsync(&found, d_lineCount, sizeof(int), hipMemcpyDeviceToHost, stream));
-    CHECK_CUDA(hipMemcpyAsync(raw.data(), d_lines, raw.size() * sizeof(NppPointPolar), hipMemcpyDeviceToHost, stream));
+    int candidateCount = 0;
+    CHECK_CUDA(hipMemcpyAsync(&candidateCount, d_lineCount, sizeof(int), hipMemcpyDeviceToHost, stream));
     CHECK_CUDA(hipStreamSynchronize(stream));
-    found = std::min(found, maxLines);
-
-    // Convert NPP's accumulator-index rho to a signed distance from the image centre; order the lines (NPP does not).
-    const double nHough = (std::sqrt(2.0) * std::max(W, H)) / 2.0;
-    const int    accHeight = (int)std::ceil(nHough * 2.0); // delta.rho == 1
+    if (candidateCount < 0 || candidateCount > capacity) {
+        fprintf(stderr, "Hough candidate count out of range\n");
+        return EXIT_FAILURE;
+    }
+    std::vector<RocmHoughPeak> raw(candidateCount);
+    if (candidateCount) CHECK_CUDA(hipMemcpyAsync(raw.data(), d_lines,
+        raw.size() * sizeof(RocmHoughPeak), hipMemcpyDeviceToHost, stream));
+    CHECK_CUDA(hipStreamSynchronize(stream));
+    std::sort(raw.begin(), raw.end(), [](const RocmHoughPeak& a, const RocmHoughPeak& b) {
+        if (a.votes != b.votes) return a.votes > b.votes;
+        if (a.theta_degrees != b.theta_degrees) return a.theta_degrees < b.theta_degrees;
+        return a.rho_index < b.rho_index;
+    });
+    const int found = std::min(candidateCount, maxLines);
     std::vector<Line> lines(found);
-    for (int i = 0; i < found; ++i) lines[i] = {raw[i].rho - (accHeight >> 1), raw[i].theta};
-    std::sort(lines.begin(), lines.end(), [](const Line& a, const Line& b) { return a.theta != b.theta ? a.theta < b.theta : a.rho < b.rho; });
+    for (int i = 0; i < found; ++i)
+        lines[i] = {double(raw[i].rho_index - (accHeight >> 1)), double(raw[i].theta_degrees)};
+    std::sort(lines.begin(), lines.end(), [](const Line& a, const Line& b) {
+        return a.theta != b.theta ? a.theta < b.theta : a.rho < b.rho;
+    });
+    // Project diagnostic: keep every GPU peak inspectable even when the
+    // original sample suppresses stdout for more than forty lines.
+    {
+        std::ofstream csv("hough_lines.csv",std::ios::binary);
+        csv << "rho,theta\n";
+        for (const Line& l:lines) csv << int(l.rho) << ',' << int(l.theta) << '\n';
+        if (!csv) { std::fprintf(stderr,"Cannot write hough_lines.csv\n"); return EXIT_FAILURE; }
+    }
 
     printf("%s image %dx%d, Canny %d/%d, Hough threshold %d\n", synthetic ? "Synthetic" : imagePath.c_str(), W, H, cannyLow,
            cannyHigh, threshold);
@@ -236,7 +220,7 @@ int main(int argc, char** argv)
 
     // Output: input image in gray with the detected lines in red.
     {
-        std::vector<Npp8u> rgb((size_t)W * H * 3);
+        std::vector<uint8_t> rgb((size_t)W * H * 3);
         for (size_t i = 0; i < gray.size(); ++i) rgb[3 * i] = rgb[3 * i + 1] = rgb[3 * i + 2] = gray[i];
         for (const Line& l : lines) drawLine(rgb, W, H, l);
         std::ofstream ppm("hough_result.ppm", std::ios::binary);
@@ -266,7 +250,7 @@ int main(int argc, char** argv)
 
         hipEventDestroy(e0); hipEventDestroy(e1); hipEventDestroy(e2);
     }
-    hipFree(d_gray); hipFree(d_edges); hipFree(d_cannyBuf); hipFree(d_houghBuf); hipFree(d_lines); hipFree(d_lineCount);
+    hipFree(d_gray); hipFree(d_edges); hipFree(d_cannyBuf); hipFree(d_lines); hipFree(d_lineCount);
     hipStreamDestroy(stream);
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

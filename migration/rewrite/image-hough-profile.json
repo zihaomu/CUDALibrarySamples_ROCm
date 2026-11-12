@@ -1,0 +1,265 @@
+{
+  "status": "FROZEN",
+  "sample_id": "NPP/houghLines::houghLines.cpp",
+  "source": "NPP/houghLines/houghLines.cpp",
+  "source_sha256": "2433c9caa3838ee4f32d31f3e1d1930c1b1b9add72883335c64928ba3e7d7b50",
+  "native_original_evidence": "migration/reports/evidence/rewrite/I3/NPP__houghLines_houghLines.cpp/20261111T181159.322261Z-I3-cuda-original-6e3b3023be",
+  "comparison_mode": "DOCUMENTED_HOUGH_ACCUMULATOR_VARIANT",
+  "image_contract": "Complete 8-bit C1 synthetic or exact RAW; project GPU Canny then GPU rho/theta voting and peak selection; deterministic line list, truth coverage and exact PPM reproduction against independent CPU project oracle.",
+  "rho_step_pixels": 1,
+  "theta_step_degrees": 1,
+  "theta_bins": 180,
+  "truth": [
+    [
+      -150,
+      30
+    ],
+    [
+      80,
+      100
+    ],
+    [
+      200,
+      75
+    ],
+    [
+      -60,
+      160
+    ],
+    [
+      0,
+      45
+    ]
+  ],
+  "default": {
+    "width": 1024,
+    "height": 768,
+    "threshold": 300,
+    "max_lines": 500,
+    "iterations": 50,
+    "canny_low": 60,
+    "canny_high": 120
+  },
+  "cases": [
+    {
+      "case": "raw-blank",
+      "kind": "valid",
+      "arguments": [
+        "-i",
+        "tests/fixtures/image-hough/blank.raw",
+        "-w",
+        "256",
+        "-h",
+        "192",
+        "-n",
+        "0"
+      ],
+      "width": 256,
+      "height": 192,
+      "input": "tests/fixtures/image-hough/blank.raw",
+      "bytes": 49152,
+      "sha256": "a4b0c7ae568af2f003834d282ba82af802c8b52e08e6f6770173553566ad5c41",
+      "products": [
+        "hough_result.ppm",
+        "stdout"
+      ],
+      "expected_return_code": 0
+    },
+    {
+      "case": "raw-cross",
+      "kind": "valid",
+      "arguments": [
+        "-i",
+        "tests/fixtures/image-hough/cross.raw",
+        "-w",
+        "256",
+        "-h",
+        "192",
+        "-n",
+        "0"
+      ],
+      "width": 256,
+      "height": 192,
+      "input": "tests/fixtures/image-hough/cross.raw",
+      "bytes": 49152,
+      "sha256": "798493922eb460520d638ed19a7344b0642151cbd2a2815d85d15e0083b98de7",
+      "products": [
+        "hough_result.ppm",
+        "stdout"
+      ],
+      "expected_return_code": 0
+    },
+    {
+      "case": "raw-diagonal",
+      "kind": "valid",
+      "arguments": [
+        "-i",
+        "tests/fixtures/image-hough/diagonal.raw",
+        "-w",
+        "256",
+        "-h",
+        "192",
+        "-n",
+        "0"
+      ],
+      "width": 256,
+      "height": 192,
+      "input": "tests/fixtures/image-hough/diagonal.raw",
+      "bytes": 49152,
+      "sha256": "d1651484ba0862d493e7a5f0cff9d9d39661769e58b682219765cc418f37ed1d",
+      "products": [
+        "hough_result.ppm",
+        "stdout"
+      ],
+      "expected_return_code": 0
+    },
+    {
+      "case": "raw-noise-cross",
+      "kind": "valid",
+      "arguments": [
+        "-i",
+        "tests/fixtures/image-hough/noise-cross.raw",
+        "-w",
+        "256",
+        "-h",
+        "192",
+        "-n",
+        "0"
+      ],
+      "width": 256,
+      "height": 192,
+      "input": "tests/fixtures/image-hough/noise-cross.raw",
+      "bytes": 49152,
+      "sha256": "737f7aa8541f4c49cdc5242fb6d2a04665e9caedbf09458a4896860daa8cf86a",
+      "products": [
+        "hough_result.ppm",
+        "stdout"
+      ],
+      "expected_return_code": 0
+    },
+    {
+      "case": "raw-odd-line",
+      "kind": "valid",
+      "arguments": [
+        "-i",
+        "tests/fixtures/image-hough/odd-line.raw",
+        "-w",
+        "19",
+        "-h",
+        "17",
+        "-n",
+        "0"
+      ],
+      "width": 19,
+      "height": 17,
+      "input": "tests/fixtures/image-hough/odd-line.raw",
+      "bytes": 323,
+      "sha256": "e0b3f1946b123989994c0d0e549caa4da26f2147888d83b636bb8727330c944c",
+      "products": [
+        "hough_result.ppm",
+        "stdout"
+      ],
+      "expected_return_code": 0
+    },
+    {
+      "case": "synthetic-default",
+      "kind": "valid",
+      "arguments": [],
+      "width": 1024,
+      "height": 768,
+      "products": [
+        "hough_result.ppm",
+        "stdout",
+        "GPU Canny timing",
+        "GPU Hough timing"
+      ],
+      "expected_return_code": 0
+    },
+    {
+      "case": "synthetic-no-timing",
+      "kind": "valid",
+      "arguments": [
+        "-n",
+        "0"
+      ],
+      "width": 1024,
+      "height": 768,
+      "products": [
+        "hough_result.ppm",
+        "stdout"
+      ],
+      "expected_return_code": 0
+    },
+    {
+      "case": "invalid-width",
+      "kind": "invalid",
+      "arguments": [
+        "-w",
+        "15"
+      ],
+      "expected_return_code": 1
+    },
+    {
+      "case": "invalid-height",
+      "kind": "invalid",
+      "arguments": [
+        "-h",
+        "16385"
+      ],
+      "expected_return_code": 1
+    },
+    {
+      "case": "invalid-threshold",
+      "kind": "invalid",
+      "arguments": [
+        "-t",
+        "0"
+      ],
+      "expected_return_code": 1
+    },
+    {
+      "case": "invalid-lines",
+      "kind": "invalid",
+      "arguments": [
+        "-m",
+        "0"
+      ],
+      "expected_return_code": 1
+    },
+    {
+      "case": "invalid-canny",
+      "kind": "invalid",
+      "arguments": [
+        "-cl",
+        "121",
+        "-ch",
+        "120"
+      ],
+      "expected_return_code": 1
+    },
+    {
+      "case": "truncated-raw",
+      "kind": "invalid",
+      "arguments": [
+        "-i",
+        "tests/fixtures/image-hough/odd-line.raw",
+        "-w",
+        "19",
+        "-h",
+        "18",
+        "-n",
+        "0"
+      ],
+      "expected_return_code": 1
+    },
+    {
+      "case": "help",
+      "kind": "help",
+      "arguments": [
+        "--help"
+      ],
+      "expected_return_code": 0
+    }
+  ],
+  "case_count": 14
+}
