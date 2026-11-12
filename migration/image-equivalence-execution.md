@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-12T09:57:53.420922+00:00。26入口当前13通过/9部分/4失败。
+更新时间：2026-11-12T10:10:35.754139+00:00。26入口当前13通过/9部分/4失败。
 
-I5：nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp 35件全 GPU baseline JPEG 产品/七组原入口/独立CPU与CUDA/实际GPU trace 已绑定主表；源模式metadata缺口仍 PARTIAL。
+I5：nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp 完整 GPU baseline JPEG 重编码原入口子集封存；七组 CPU/CUDA、四原型、真实 C++ GPU trace 通过，metadata/progressive 仍 PARTIAL。
 
-证据：`migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261112T095507.951209Z-I5-full-GPU-JPEG-original-entry-subset-qualification-b0a5e51346`；`migration/reports/evidence/rewrite/I5/all-68-original-resize-JPEG-independent-pixel-comparison/20261112T095424.191828Z-I5-CPU-reference-58dc0f8f8b`
+证据：`migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261112T101034.778214Z-I5-full-GPU-JPEG-original-entry-subset-qualification-d1c172995a`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

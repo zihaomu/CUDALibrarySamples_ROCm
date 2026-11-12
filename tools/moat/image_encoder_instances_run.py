@@ -39,7 +39,8 @@ def main():
  for name,args,count,quality,sampling,optimize in CASES:
   e=Experiment('I5','nvJPEG-Encoder-MultipleInstances-original-CLI','rocm-original-entry',case=name,
    sources=[__file__,PROFILE,BUILD,*inputs,ROOT/'rocm/common/image/jpeg_encoder_instances.hpp',
-            ROOT/'rocm/common/image/jpeg_encoder_gpu.hpp'],parent=build['experiment_id'])
+            ROOT/'rocm/common/image/jpeg_encoder_gpu.hpp',ROOT/'rocm/common/image/jpeg_full_gpu.hpp',
+            ROOT/'rocm/common/image/jpeg_entropy_gpu.hpp'],parent=build['experiment_id'])
   write(e.path/'backend.observed.json',capture());out=e.path/'outputs';out.mkdir()
   directory=e.path/'missing' if name=='missing-input' else inputs[0].parent
   argv=[str(ROOT/build['binary']),'-i',str(directory),'-o',str(out),*args]
@@ -50,6 +51,9 @@ def main():
                {p.name for p in products}=={str(i)+'.jpg' for i in range(count)})]
   metrics=[]
   if count and rc==0:
+   log=(e.path/f'logs/0001-original-multi-instance-{name}.stdout.log').read_text()
+   checks.append(dict(check='baseline-GPU-entropy-or-explicit-optimized-CPU-path',passed=
+      ('cpu_entropy=1 gpu_full_encode=0' if optimize else 'cpu_entropy=0 gpu_full_encode=1') in log))
    for i,path in enumerate(products):
     source=inputs[i%len(inputs)]
     with Image.open(source) as src:rgb=np.asarray(src.convert('RGB'))
@@ -93,8 +97,8 @@ def main():
                           'EXPECTED_REJECTION' if status=='PASSED' else 'NUMERIC_MISMATCH',
                           dict(status=status,checks=checks))
   rows.append(row);write(REPORT,rows)
-  record('I5','原始多实例编码器 '+name+'：'+status+'，产品 '+str(len(products))+' 件；'
-         'CPU entropy 与硬件能力按真实路径标注。',[row['evidence']])
+  record('I5','原始多实例编码器 '+name+'：'+status+'，产品 '+str(len(products))+' 件；'+
+         ('优化 Huffman 使用 CPU entropy。' if optimize else 'baseline 全 GPU entropy。'),[row['evidence']])
   print(name,status,len(products),flush=True)
  return int(any(x['status']!='PASSED' for x in rows))
 if __name__=='__main__':raise SystemExit(main())

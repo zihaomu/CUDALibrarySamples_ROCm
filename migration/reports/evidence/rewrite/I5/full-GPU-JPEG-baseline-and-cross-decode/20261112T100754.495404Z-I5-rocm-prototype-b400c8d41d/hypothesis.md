@@ -1,0 +1,1 @@
+Test rocm-prototype for full-GPU-JPEG-baseline-and-cross-decode, case tiny-444. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T100741.007869Z-I5-rocm-build-362b254886.

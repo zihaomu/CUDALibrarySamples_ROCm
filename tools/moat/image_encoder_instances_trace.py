@@ -16,7 +16,8 @@ def main():
  src=ROOT/profile['inputs'][0]['path'];folder=src.parent
  e=Experiment('I5','original-JPEG-encoder-concurrent-HIP-streams-and-changed-input','rocm-trace',
   sources=[__file__,PROFILE,BUILD,*[ROOT/x['path'] for x in profile['inputs']],
-   ROOT/'rocm/common/image/jpeg_encoder_instances.hpp',ROOT/'rocm/common/image/jpeg_encoder_gpu.hpp'],
+   ROOT/'rocm/common/image/jpeg_encoder_instances.hpp',ROOT/'rocm/common/image/jpeg_encoder_gpu.hpp',
+   ROOT/'rocm/common/image/jpeg_full_gpu.hpp',ROOT/'rocm/common/image/jpeg_entropy_gpu.hpp'],
   parent=original['experiment_id'])
  observed=capture();write(e.path/'backend.observed.json',observed)
  output=e.path/'outputs';output.mkdir()
@@ -24,8 +25,10 @@ def main():
   '--',str(ROOT/build['binary']),'-i',str(folder),'-n','7','-j','2','-s','4',
   '-o',str(output),'-b','gpu','-q','75']
  rc=e.command(cmd,'concurrent-real-GPU-JPEG-encode',timeout=300)
+ stdout=(e.path/'logs/0001-concurrent-real-GPU-JPEG-encode.stdout.log').read_text()
  traces=list((e.path/'trace').rglob('*kernel_trace.csv'));agents=list((e.path/'trace').rglob('*agent_info.csv'))
  checks=[dict(check='profiler-command-exit-zero',passed=rc==0),
+  dict(check='baseline-full-GPU-entropy-reported',passed='cpu_entropy=0 gpu_full_encode=1' in stdout),
   dict(check='one-GPU-kernel-trace-and-agent-map',passed=len(traces)==len(agents)==1),
   dict(check='seven-traced-products-match-nonprofiled',passed=all(
    (output/(str(i)+'.jpg')).is_file() and digest(output/(str(i)+'.jpg'))==
@@ -35,7 +38,9 @@ def main():
   lookup={r['Node_Id']:r for r in csv.DictReader(agents[0].open())}
   allowed={d['pci_bdf'] for d in observed['devices'] if d['physical_id']==1}
   for row in csv.DictReader(traces[0].open()):
-   stage=next((x for x in ('rgb_to_plane','forward_dct_quantize') if x in row['Kernel_Name']),None)
+   stage=next((x for x in ('rgb_to_plane','forward_dct_quantize','gather_mcu_coefficients',
+      'encode_blocks','prefix_bits','pack_bytes','prefix_stuff','scatter_stuff')
+      if x in row['Kernel_Name']),None)
    if not stage:continue
    stage_counts[stage]=stage_counts.get(stage,0)+1;streams.add(row['Stream_Id'])
    agent=lookup[row['Agent_Id'].split()[-1]];loc=int(agent['Location_Id'])
@@ -44,8 +49,11 @@ def main():
    checks.append(dict(check=stage+'-actual-physical-GPU1-'+str(stage_counts[stage]),
     passed=location in allowed and int(row['End_Timestamp'])>int(row['Start_Timestamp'])
     and int(row['Grid_Size_X'])>0,pci_bdf=location,stream_id=row['Stream_Id']))
-  checks.append(dict(check='all-seven-images-three-color-and-FDCT-kernels',
-   passed=stage_counts=={'rgb_to_plane':21,'forward_dct_quantize':21},counts=stage_counts))
+  expected={'rgb_to_plane':21,'forward_dct_quantize':21,**{x:7 for x in
+      ('gather_mcu_coefficients','encode_blocks','prefix_bits','pack_bytes',
+       'prefix_stuff','scatter_stuff')}}
+  checks.append(dict(check='all-seven-images-full-12-kernel-JPEG-encode',
+   passed=stage_counts==expected,counts=stage_counts,expected=expected))
   checks.append(dict(check='at-least-two-actual-HIP-streams',passed=len(streams)>=2,
    stream_ids=sorted(streams)))
  changed=e.path/'changed-input';shutil.copytree(folder,changed)
@@ -67,6 +75,6 @@ def main():
   kernel_counts=stage_counts,stream_ids=sorted(streams),pci_bdfs=sorted(pci),experiment_id=e.id)
  write(e.path/'trace-result.json',result)
  result['evidence']=e.finish(status,dict(status=status,checks=checks));write(REPORT,result)
- record('I5','原始多实例 JPEG 编码器 7 图/42 kernel、多 HIP stream、物理 GPU1、改输入重放：'+status+'。',
+ record('I5','原始多实例 JPEG 编码器 7 图/84 kernel、多 HIP stream、物理 GPU1、改输入重放：'+status+'。',
   [result['evidence']]);print(status,stage_counts,sorted(streams));return int(status!='PASSED')
 if __name__=='__main__':raise SystemExit(main())

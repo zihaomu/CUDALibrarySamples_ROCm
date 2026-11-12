@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Compare every original resize JPEG product by independent decoded pixels."""
 import json
+import os
 import numpy as np
 from PIL import Image,JpegImagePlugin
 from experiment import ROOT,Experiment,digest,write
 from image_progress import record
-PROFILE=ROOT/'migration/rewrite/image-jpeg-encoder-full-gpu-products-profile.json'
+PROFILE=ROOT/'migration/rewrite'/os.environ.get('IMAGE_JPEG_PRODUCTS_PROFILE','image-jpeg-encoder-full-gpu-products-profile.json')
 REPORT=ROOT/'migration/reports/image-jpeg-encoder-full-gpu-products-comparison.json'
 def main():
  profile=json.loads(PROFILE.read_text());integration=json.loads((ROOT/'migration/reports/image-jpeg-encoder-full-gpu-integration.json').read_text())

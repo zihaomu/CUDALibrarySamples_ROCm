@@ -12,9 +12,11 @@ def main():
  runs=json.loads((ROOT/'migration/reports/image-jpeg-encoder-instances-runs.json').read_text())
  trace=json.loads((ROOT/'migration/reports/image-jpeg-encoder-instances-trace.json').read_text())
  profile=json.loads((ROOT/'migration/rewrite/image-jpeg-encoder-instances-profile.json').read_text())
- refs=[build['evidence'],trace['evidence'],*[x['evidence'] for x in runs]]
+ comparison=json.loads((ROOT/'migration/reports/image-jpeg-encoder-instances-full-comparison.json').read_text())
+ full_profile=ROOT/'migration/rewrite/image-jpeg-encoder-instances-full-gpu-profile.json'
+ refs=[build['evidence'],trace['evidence'],comparison['evidence'],*[x['evidence'] for x in runs]]
  if any(audit_check(ROOT/r) for r in refs):raise ValueError('unsealed I5 instance evidence')
- if build['status']!='BUILT' or len(runs)!=7 or trace['status']!='PASSED' or any(x['status']!='PASSED' for x in runs):raise ValueError('incomplete original CLI/trace')
+ if build['status']!='BUILT' or len(runs)!=7 or trace['status']!='PASSED' or comparison['status']!='PASSED' or any(x['status']!='PASSED' for x in runs):raise ValueError('incomplete original CLI/trace/comparison')
  source=ROOT/'rocm/ported/nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp'
  deps=dict(build['dependencies']);deps[str(source.relative_to(ROOT))]=digest(source)
  checks=[dict(check='seven-predeclared-original-CLI-groups',passed=len(runs)==7 and all(x['status']=='PASSED' for x in runs)),
@@ -23,8 +25,15 @@ def main():
    next(x for x in runs if x['case']=='repeat-seven')['products'][6]['source']=='img1.bmp'),
   dict(check='independent-JPEG-cross-decode-and-quant-sampling-for-all-16-products',passed=
    sum(len(x['products']) for x in runs)==16 and all(c['passed'] for x in runs for c in x['checks'])),
-  dict(check='four-actual-HIP-streams-or-at-least-two',passed=len(trace['stream_ids'])>=2 and
-   trace['kernel_counts']=={'rgb_to_plane':21,'forward_dct_quantize':21}),
+  dict(check='actual-full-JPEG-84-kernels-on-at-least-two-HIP-streams',passed=len(trace['stream_ids'])>=2 and
+   trace['kernel_counts']=={'rgb_to_plane':21,'forward_dct_quantize':21,**{x:7 for x in
+    ('gather_mcu_coefficients','encode_blocks','prefix_bits','pack_bytes','prefix_stuff','scatter_stuff')}}),
+  dict(check='baseline-full-GPU-entropy-and-explicit-optimized-CPU-path',passed=all(
+   any(c['check']=='baseline-GPU-entropy-or-explicit-optimized-CPU-path' and c['passed'] for c in row['checks'])
+   for row in runs if row['products'])),
+  dict(check='sixteen-prior-products-exact-independent-decoded-RGB',passed=
+   len(comparison['products'])==16 and all(x['exact_decoded_rgb'] and
+   x['header_sampling_quant_match'] for x in comparison['products'])),
   dict(check='changed-input-produces-changed-output-and-stable-other-outputs',passed=
    any(c['check']=='changed-source-changes-JPEG-while-others-stable' and c['passed'] for c in trace['checks'])),
   dict(check='optimized-Huffman-DHT-actually-changed',passed=
@@ -37,19 +46,21 @@ def main():
  e=Experiment('I5',SAMPLE,'composite-subset-qualification',sources=[__file__,source,
   ROOT/'migration/reports/image-jpeg-encoder-instances-runs.json',
   ROOT/'migration/reports/image-jpeg-encoder-instances-trace.json',
-  ROOT/'migration/rewrite/image-jpeg-encoder-instances-profile.json'])
+  ROOT/'migration/reports/image-jpeg-encoder-instances-full-comparison.json',
+  ROOT/'migration/rewrite/image-jpeg-encoder-instances-profile.json',full_profile])
  devices=json.loads((ROOT/trace['evidence']/'backend.observed.json').read_text())['devices']
- q=dict(kind='image-JPEG-multiple-instances-GPU-forward-subset',status='PASSED',contract_status='PARTIAL',
+ q=dict(kind='image-JPEG-multiple-instances-full-GPU-baseline-subset',status='PASSED',contract_status='PARTIAL',
   sample_id=SAMPLE,implementation=str(source.relative_to(ROOT)),implementation_sha256=digest(source),
-  source_commit=git('rev-parse','HEAD').strip(),case_count=8,
-  case_ids=['I5/'+x['case'] for x in runs]+['I5/multi-stream-changed-input-replay'],
+  source_commit=git('rev-parse','HEAD').strip(),case_count=9,
+  case_ids=['I5/'+x['case'] for x in runs]+['I5/multi-stream-changed-input-replay',
+   'I5/sixteen-prior-JPEG-exact-decoded-RGB'],
   checks=checks,devices=devices,dependencies=deps,evidence_references=refs,
   rocm_evidence=trace['evidence'],cuda_evidence=None,
-  comparison_mode='INDEPENDENT_CPU_JPEG_AND_GPU_TRACE',
-  remaining='GPU entropy/Huffman; pinned host/device workspace and event overlap; original auto calibration; hardware backend unavailable on AMD')
+  comparison_mode='FULL_GPU_BASELINE_JPEG_INDEPENDENT_CPU_DECODE_AND_TRACE',
+  remaining='optimized Huffman still CPU entropy; pinned host/device workspace and event overlap; original auto calibration; parallel prefix throughput and hardware backend unavailable on AMD')
  q['qualification_id']=e.id
  write(e.path/'qualification.json',{k:v for k,v in q.items() if k not in {'qualification_id','evidence'}})
  q['evidence']=e.finish('PASSED',dict(status='PASSED',checks=checks));write(REPORT,q)
- record('I5','原始 nvJPEG 多实例编码器 7 CLI+多stream/改输入重放已封存子集资格；CPU Huffman 与原自动标定等缺口保留 PARTIAL。',[q['evidence']])
+ record('I5','原始 nvJPEG 多实例编码器 7 CLI+多stream/改输入重放+16件独立跨解码已封存全 GPU baseline 子集；优化 Huffman 等缺口保留 PARTIAL。',[q['evidence']])
  print('MULTI_INSTANCE_SUBSET_PASSED',q['evidence'])
 if __name__=='__main__':main()

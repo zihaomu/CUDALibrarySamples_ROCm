@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Freeze all 68 original resize JPEG products for GPU vs prior encoder comparison."""
 import json
+import os
 from pathlib import Path
 from experiment import ROOT,Experiment,digest,write
 from image_progress import record
-PROFILE=ROOT/'migration/rewrite/image-jpeg-encoder-full-gpu-products-profile.json'
+PROFILE=ROOT/'migration/rewrite'/os.environ.get('IMAGE_JPEG_PRODUCTS_PROFILE','image-jpeg-encoder-full-gpu-products-profile.json')
 def main():
  if PROFILE.exists():raise ValueError('full GPU product comparison profile already frozen')
  old=json.loads((ROOT/'migration/reports/image-jpeg-encoder-integration.json').read_text())

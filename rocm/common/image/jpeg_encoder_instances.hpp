@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
-// I5 multi-instance adapter: HIP color/FDCT and CPU JPEG entropy.
+// I5 multi-instance adapter: HIP baseline JPEG; optimized DHT still uses libjpeg.
 #pragma once
 #include "jpeg_encoder_gpu.hpp"
+#include "jpeg_full_gpu.hpp"
 #include <atomic>
 #include <chrono>
 #include <filesystem>
@@ -81,8 +82,16 @@ inline int run(int argc,const char*argv[]){
    for(int i=next.fetch_add(1),slot=0;i<a.images;i=next.fetch_add(1),++slot){auto pic=bmp(input[i%input.size()]);
     fs::path out=a.write?a.output/(std::to_string(i)+".jpg"):
       fs::temp_directory_path()/("rocm-jpeg-"+std::to_string(rep)+"-"+std::to_string(tid)+"-"+std::to_string(i)+".jpg");
-    image_jpeg_encoder::encode(pic.rgb,pic.w,pic.h,a.quality,a.sampling420?2:1,
-      out.c_str(),a.optimize,streams[slot%streams.size()]);if(!a.write)fs::remove(out);++completed;}
+    auto stream=streams[slot%streams.size()];
+    if(a.optimize){
+     image_jpeg_encoder::encode(pic.rgb,pic.w,pic.h,a.quality,a.sampling420?2:1,
+       out.c_str(),true,stream);
+    }else{
+     auto jpeg=image_jpeg_full::encode(pic.rgb,pic.w,pic.h,a.quality,
+       a.sampling420?2:1,stream);
+     image_jpeg_encoder::write_binary(out.c_str(),jpeg.data(),jpeg.size());
+    }
+    if(!a.write)fs::remove(out);++completed;}
    for(auto stream:streams)image_jpeg_encoder::check(hipStreamDestroy(stream),"destroy state stream");
   }catch(const std::exception&e){std::lock_guard<std::mutex>guard(lock);if(failure.empty())failure=e.what();}});
   for(auto&worker:workers)worker.join();if(!failure.empty())throw std::runtime_error(failure);
@@ -94,6 +103,7 @@ inline int run(int argc,const char*argv[]){
  <<"\nOptimized Huffman: "<<(a.optimize?"on":"off")<<"\nQuality: "<<a.quality
  <<"\nThroughput: "<<best<<" images/s\nLatency: "<<latency<<" ms\nPercentage: 100, 0 %\nNum threads: "
  <<a.threads<<"\nNum states: "<<a.states<<"\nNum runs: "<<a.runs
- <<"\nRESULT status=PASS encoded="<<a.images<<" cpu_entropy=1 gpu_fdct=1 hardware_encoder=0\n";return 0;
+ <<"\nRESULT status=PASS encoded="<<a.images<<" cpu_entropy="<<(a.optimize?1:0)
+ <<" gpu_full_encode="<<(a.optimize?0:1)<<" gpu_fdct=1 hardware_encoder=0\n";return 0;
  }catch(const std::exception&e){std::cerr<<"RESULT status=FAIL reason="<<e.what()<<'\n';return 1;}}
 } // namespace image_jpeg_instances

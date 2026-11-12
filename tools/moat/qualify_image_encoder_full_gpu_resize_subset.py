@@ -52,7 +52,8 @@ def main():
    sources=[__file__,original,ROOT/'migration/reports/image-jpeg-encoder-full-gpu-integration.json',
             ROOT/'migration/reports/image-jpeg-encoder-full-gpu-frontend-trace.json',
             ROOT/'migration/reports/image-jpeg-encoder-full-gpu-products-comparison.json',
-            ROOT/'migration/rewrite/image-jpeg-encoder-resize-full-gpu-profile.json'])
+            ROOT/'migration/rewrite/image-jpeg-encoder-resize-full-gpu-profile.json',
+            ROOT/'migration/rewrite/image-jpeg-encoder-full-gpu-stream-products-profile.json'])
   devices=json.loads((ROOT/frontend['evidence']/'backend.observed.json').read_text())['devices']
   q=dict(kind='image-JPEG-full-GPU-baseline-reencode-subset',status='PASSED',contract_status='PARTIAL',
    sample_id=sample,implementation=str(original.relative_to(ROOT)),implementation_sha256=digest(original),
