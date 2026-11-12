@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-12T07:06:08.610261+00:00。26入口当前12通过/7部分/7失败。
+更新时间：2026-11-12T07:17:50.930982+00:00。26入口当前12通过/7部分/7失败。
 
-I3：benchmark最终固定源码冷证据已锚定；组合资格预检发现主负例回执仍封存于上一个资格源码版本，已在不改源码的情况下重新执行25项负例PASSED并封存，准备补充证据锚点。
+I3：独立复审对源码67f7dd83给出两份REQUEST_CHANGES：5090 nvcc编译命令未绑定；冷子build/runtime等依赖名与CAS未对应固定Git，合同profile、CLI argv和精确状态可配对伪造。现资格门绑定六条原生命令、全kind必需源码集合/固定提交SHA与生成报告、冷合同/运行命令/状态，31项本地反例PASSED。主表冷检出门退回待验证。
 
-证据：`migration/reports/image-benchmark-cold.json`
+证据：`migration/samples.yaml`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

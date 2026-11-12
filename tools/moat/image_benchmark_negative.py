@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Check that benchmark qualification readers reject known false positives."""
-import copy,json,shutil,tempfile
+import copy,json,shutil,subprocess,tempfile
 from pathlib import Path
 from experiment import ROOT,Experiment,write,digest
 from image_progress import record
@@ -8,7 +8,7 @@ from image_benchmark_reference import validate
 from image_benchmark_native_comparison import native_execution_ok
 from image_benchmark_cold import same_build_source_hashes
 from image_benchmark_build import dependencies
-from qualify_image_benchmark import cpu_recompute,runtime_recompute,trace_recompute,native_recompute,cold_structure_ok,cold_recipe_ok,native_recipe_ok
+from qualify_image_benchmark import cpu_recompute,runtime_recompute,trace_recompute,native_recompute,cold_structure_ok,cold_recipe_ok,native_recipe_ok,cold_source_ok,cold_run_ok
 
 def main():
     native=json.loads((ROOT/'migration/reports/image-I3-benchmark-native.json').read_text())
@@ -29,6 +29,8 @@ def main():
          ROOT/'migration/reports/image-benchmark-native-comparison.json',
          ROOT/'migration/reports/image-benchmark-runtime.json',
          ROOT/'migration/reports/image-benchmark-trace.json',
+         ROOT/'migration/reports/image-benchmark-build.json',
+         ROOT/'migration/reports/image-I3-rocm-OpenCV.json',
          ROOT/'migration/rewrite/image-benchmark-profile.json'])
     checks=[]
     checks.append(dict(check='actual-native-baseline-accepted',passed=native_execution_ok(native,manifest,commands,proof,logs)))
@@ -41,6 +43,8 @@ def main():
     checks.append(dict(check='actual-native-execution-recipe',passed=native_recipe_ok(commands)))
     changed=copy.deepcopy(commands);changed[4]['argv']=['echo','replayed-stdout']
     checks.append(dict(check='reject-native-echo-replay',passed=not native_recipe_ok(changed)))
+    changed=copy.deepcopy(commands);changed[3]['argv']=['ssh','nvidia-5090x2','true']
+    checks.append(dict(check='reject-native-compile-replaced-with-true',passed=not native_recipe_ok(changed)))
     missing=cases['missing-input'];invalid=next(r for r in runs if r['case']=='invalid-dimensions')
     swapped=validate(missing,invalid,profile)
     checks.append(dict(check='reject-mismatched-error-CLI-and-diagnostic',passed=swapped['status']=='FAILED'
@@ -54,6 +58,32 @@ def main():
     bad=copy.deepcopy(validations);next(r for r in bad if r['case']=='small')['metrics']['gauss.raw']['project']['max_abs']=255
     checks.append(dict(check='reject-forged-sealed-CPU-metrics',passed=not cpu_recompute(profile,runs,bad)))
     build=json.loads((ROOT/'migration/reports/image-benchmark-build.json').read_text())
+    build_source=json.loads((ROOT/build['evidence']/'source.json').read_text())
+    dep=json.loads((ROOT/'migration/reports/image-I3-rocm-OpenCV.json').read_text())
+    generated={'migration/reports/image-I3-rocm-OpenCV.json':dep}
+    commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
+    checks.append(dict(check='accept-fixed-build-source-and-generated-dependency',
+      passed=cold_source_ok(build_source,'build',build,generated,commit)))
+    bad=copy.deepcopy(build_source);key='rocm/common/image/benchmark.hip'
+    bad['dependencies']['rocm/common/image/benchmark.xip']=bad['dependencies'].pop(key)
+    bad['source_objects']['rocm/common/image/benchmark.xip']=bad['source_objects'].pop(key)
+    checks.append(dict(check='reject-nonexistent-cold-build-dependency-name',
+      passed=not cold_source_ok(bad,'build',build,generated,commit)))
+    bad=copy.deepcopy(build_source);other='rocm/common/image/canny.hip'
+    bad['dependencies'][key]=bad['dependencies'][other]
+    bad['source_objects'][key]=bad['source_objects'][other]
+    checks.append(dict(check='reject-cold-build-dependency-wrong-CAS',
+      passed=not cold_source_ok(bad,'build',build,generated,commit)))
+    small=next(r for r in runs if r['case']=='small');small_case=cases['small']
+    small_folder=ROOT/small['evidence'];small_manifest=json.loads((small_folder/'manifest.json').read_text())
+    checks.append(dict(check='accept-actual-cold-run-command-recipe',
+      passed=cold_run_ok(small_folder,small_manifest,small,small_case,build,ROOT,profile)))
+    with tempfile.TemporaryDirectory(prefix='benchmark-cold-run-negative-') as temporary:
+      copied=Path(temporary)/'run';shutil.copytree(small_folder,copied)
+      command_file=copied/'commands.json';bad_commands=json.loads(command_file.read_text())
+      bad_commands[-1]['argv'][0]=bad_commands[-1]['argv'][0]+'X';write(command_file,bad_commands)
+      checks.append(dict(check='reject-cold-run-nonexistent-binary-command',
+        passed=not cold_run_ok(copied,small_manifest,small,small_case,build,ROOT,profile)))
     runtime=json.loads((ROOT/'migration/reports/image-benchmark-runtime.json').read_text())
     checks.append(dict(check='accept-actual-runtime-stdout',passed=runtime_recompute(runtime,build)))
     bad=copy.deepcopy(runtime);bad['rows'][0][2]='0'
