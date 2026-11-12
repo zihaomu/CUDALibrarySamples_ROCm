@@ -235,7 +235,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | [NPP/nppCanny/npp_canny_simple.py](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP/nppCanny/npp_canny_simple.py) | FAILED | I1 | Shared HIP C1/C3 Canny under declared equivalence profile + C ABI; real C++/ROCm Python caller |
 | [NPP/batchedLabelMarkersAndCompression/batchedLabelMarkersAndCompression.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP/batchedLabelMarkersAndCompression/batchedLabelMarkersAndCompression.cpp) | FAILED | I2 | HIP CCL/union-find + scan/label compact; independent batch descriptors |
 | [NPP/findContour/findContour.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP/findContour/findContour.cpp) | FAILED | I2 | Shared HIP labels + contour mask/direction/offset; NPP+ geometry adapters |
-| [NPP/houghLines/houghLines.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP/houghLines/houghLines.cpp) | FAILED | I3 | HIP Canny + Hough accumulator/peak extraction |
+| [NPP/houghLines/houghLines.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP/houghLines/houghLines.cpp) | PASSED | I3 | 项目 HIP Canny + Hough GPU 投票/峰提取；完整 19 CLI、独立 CPU、5090 原生差异、19 运行合同与冷检出资格 |
 | [NPP/opencvBenchmark/opencvBenchmark.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP/opencvBenchmark/opencvBenchmark.cpp) | FAILED | I3 | Shared HIP Gaussian/Canny/resize/color + independent CPU OpenCV benchmark |
 | [NPP/watershedSegmentation/watershedSegmentation.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP/watershedSegmentation/watershedSegmentation.cpp) | FAILED | I3 | HIP bucket/sort flooding + plateau assignment + segmentation outputs |
 | [NPP/distanceTransform/distanceTransform.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP/distanceTransform/distanceTransform.cpp) | PASSED | I9（回归守护） | HIP exact separable Euclidean distance/Voronoi/integer truncation kernels |
@@ -280,7 +280,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-12T05:29:41.758189+00:00。26入口当前11通过/7部分/8失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-12T05:34:37.782316+00:00。26入口当前12通过/6部分/8失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -1635,5 +1635,8 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-12T05:25:39.010933+00:00 | I3 | Hough28项实际组合资格与子封印正反向变异：PASSED。 | `migration/reports/evidence/rewrite/I3/Hough-actual-qualification-mutations/20261112T052522.441353Z-I3-CPU-validator-test-f935316728` |
 | 2026-11-12T05:26:15.434798+00:00 | I3 | Hough第六轮验收复审发现资格ROCm/CUDA/环境/设备四对外指针可配对伪造；发布门现逐一核回已验证运行、原生和构建证据，28/28反例通过。主表保持PARTIAL待独立复审。 | `migration/reports/image-hough-qualification-checks.json`；`migration/reports/image-hough.md` |
 | 2026-11-12T05:29:41.758189+00:00 | I3 | Hough固定源码ddf6a824e三范围全部APPROVED，组合资格19 case/12门通过；未Git锚定先发布被selected_proofs按预期拒绝，主表保持PARTIAL。 | `migration/reports/image-hough-review.json`；`migration/reports/image-hough-qualification.json` |
+| 2026-11-12T05:31:25.371795+00:00 | I3 | NPP Hough原例资格先Git锚定后发布门通过，主表升级PASSED；图像26入口11通过/7部分/8失败，项目251通过/21部分/367失败；跨厂商10627像素差异单列。 | `migration/reports/image-hough-qualification.json`；`migration/reports/image-hough.md` |
+| 2026-11-12T05:34:31.377500+00:00 | I3 | Hough发布后项目级检查：251 PASSED/21 PARTIAL/367 FAILED、127? 算子族以operator-support.json实际值为准；已选资格41条与final_validate通过。原v5断言中断attempt按未形成数值资格恢复封存，4301条实验审计全部通过。 | `migration/reports/rewrite-selected-proof-audit.json`；`migration/reports/final-validation.json`；`migration/reports/rewrite-evidence-audit.json`；`migration/reports/image-hough.md` |
+| 2026-11-12T05:34:37.782316+00:00 | I3 | 算子统计校正：operator-support.json实际为128个按模块去重的已验收功能族；上一事件的127?仅为未核实占位，当前以128为准。Hough项目变体新增1族。 | `migration/reports/operator-support.json` |
 
 <!-- IMAGE_EXECUTION:END -->

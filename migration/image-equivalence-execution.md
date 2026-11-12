@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-12T05:29:41.758189+00:00。26入口当前11通过/7部分/8失败。
+更新时间：2026-11-12T05:34:37.782316+00:00。26入口当前12通过/6部分/8失败。
 
-I3：Hough固定源码ddf6a824e三范围全部APPROVED，组合资格19 case/12门通过；未Git锚定先发布被selected_proofs按预期拒绝，主表保持PARTIAL。
+I3：算子统计校正：operator-support.json实际为128个按模块去重的已验收功能族；上一事件的127?仅为未核实占位，当前以128为准。Hough项目变体新增1族。
 
-证据：`migration/reports/image-hough-review.json`；`migration/reports/image-hough-qualification.json`
+证据：`migration/reports/operator-support.json`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

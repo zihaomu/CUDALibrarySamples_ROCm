@@ -1,8 +1,8 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-12T05:29:41.758189+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-12T05:34:37.782316+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
-26入口当前：11 PASSED / 7 PARTIAL / 8 FAILED。
+26入口当前：12 PASSED / 6 PARTIAL / 8 FAILED。
 
 | 阶段 | 执行状态 |
 | --- | --- |
@@ -1372,3 +1372,6 @@
 | 2026-11-12T05:25:39.010933+00:00 | I3 | Hough28项实际组合资格与子封印正反向变异：PASSED。 | [20261112T052522.441353Z-I3-CPU-validator-test-f935316728](evidence/rewrite/I3/Hough-actual-qualification-mutations/20261112T052522.441353Z-I3-CPU-validator-test-f935316728) |
 | 2026-11-12T05:26:15.434798+00:00 | I3 | Hough第六轮验收复审发现资格ROCm/CUDA/环境/设备四对外指针可配对伪造；发布门现逐一核回已验证运行、原生和构建证据，28/28反例通过。主表保持PARTIAL待独立复审。 | [image-hough-qualification-checks.json](image-hough-qualification-checks.json)；[image-hough.md](image-hough.md) |
 | 2026-11-12T05:29:41.758189+00:00 | I3 | Hough固定源码ddf6a824e三范围全部APPROVED，组合资格19 case/12门通过；未Git锚定先发布被selected_proofs按预期拒绝，主表保持PARTIAL。 | [image-hough-review.json](image-hough-review.json)；[image-hough-qualification.json](image-hough-qualification.json) |
+| 2026-11-12T05:31:25.371795+00:00 | I3 | NPP Hough原例资格先Git锚定后发布门通过，主表升级PASSED；图像26入口11通过/7部分/8失败，项目251通过/21部分/367失败；跨厂商10627像素差异单列。 | [image-hough-qualification.json](image-hough-qualification.json)；[image-hough.md](image-hough.md) |
+| 2026-11-12T05:34:31.377500+00:00 | I3 | Hough发布后项目级检查：251 PASSED/21 PARTIAL/367 FAILED、127? 算子族以operator-support.json实际值为准；已选资格41条与final_validate通过。原v5断言中断attempt按未形成数值资格恢复封存，4301条实验审计全部通过。 | [rewrite-selected-proof-audit.json](rewrite-selected-proof-audit.json)；[final-validation.json](final-validation.json)；[rewrite-evidence-audit.json](rewrite-evidence-audit.json)；[image-hough.md](image-hough.md) |
+| 2026-11-12T05:34:37.782316+00:00 | I3 | 算子统计校正：operator-support.json实际为128个按模块去重的已验收功能族；上一事件的127?仅为未核实占位，当前以128为准。Hough项目变体新增1族。 | [operator-support.json](operator-support.json) |
