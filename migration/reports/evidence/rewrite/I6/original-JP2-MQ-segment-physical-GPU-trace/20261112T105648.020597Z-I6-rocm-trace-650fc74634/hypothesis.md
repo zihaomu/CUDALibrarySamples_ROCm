@@ -1,0 +1,1 @@
+Test rocm-trace for original-JP2-MQ-segment-physical-GPU-trace, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T105608.671309Z-I6-rocm-GPU-9826e590fe.

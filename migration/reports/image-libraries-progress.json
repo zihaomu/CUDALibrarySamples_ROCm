@@ -13953,9 +13953,84 @@
         "migration/reports/image-j2k-mq-trace.json",
         "migration/reports/image-jpeg2000-I6.md"
       ]
+    },
+    {
+      "time": "2026-11-12T10:51:42.111375+00:00",
+      "phase": "I6",
+      "message": "真实原始2k_lossless.jp2首个MQ码块段预登记：先捕获CPU码流/context+bit，再HIP逐bit核对；未实现完整码块。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I6/first-original-JP2-real-MQ-segment-contract/20261112T105141.111379Z-I6-CPU-contract-1b026fa27e",
+        "migration/rewrite/image-j2k-real-mq-profile.json"
+      ]
+    },
+    {
+      "time": "2026-11-12T10:54:27.787763+00:00",
+      "phase": "I6",
+      "message": "真实原始 JP2 首个 MQ 码块段 CPU 捕获：CAPTURE_ERROR，0 个context/bit；仅CPU参考，不计AMD整例。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I6/real-original-JP2-MQ-segment-OpenJPEG-CPU-capture/20261112T105420.738321Z-I6-CPU-instrumented-reference-edf207f4c0",
+        "migration/reports/image-j2k-real-mq-capture.json"
+      ]
+    },
+    {
+      "time": "2026-11-12T10:55:09.703401+00:00",
+      "phase": "I6",
+      "message": "真实原始 JP2 首个 MQ 码块段 CPU 捕获：CAPTURED，26590 个context/bit；仅CPU参考，不计AMD整例。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I6/real-original-JP2-MQ-segment-OpenJPEG-CPU-capture/20261112T105502.973454Z-I6-CPU-instrumented-reference-90fb762d28",
+        "migration/reports/image-j2k-real-mq-capture.json"
+      ]
+    },
+    {
+      "time": "2026-11-12T10:56:08.314251+00:00",
+      "phase": "I6",
+      "message": "原始JP2首个真实64x64码块MQ段2941字节、26590个context/bit先冻结SHA；CPU上下文供重放，非GPU EBCOT。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I6/original-JP2-first-real-MQ-vector-freeze/20261112T105606.974393Z-I6-CPU-contract-d021d0dcf7",
+        "migration/rewrite/image-j2k-real-mq-vector.json"
+      ]
+    },
+    {
+      "time": "2026-11-12T10:56:10.869303+00:00",
+      "phase": "I6",
+      "message": "真实JP2码块 MQ HIP 重放26590 bit：PASSED；CPU生成context，尚非GPU整图解码。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I6/original-JP2-first-MQ-segment-HIP-full-bit-replay/20261112T105608.671309Z-I6-rocm-GPU-9826e590fe",
+        "migration/reports/image-j2k-real-mq-replay.json"
+      ]
+    },
+    {
+      "time": "2026-11-12T10:56:50.491987+00:00",
+      "phase": "I6",
+      "message": "真实JP2 MQ 段26590 bit 物理GPU1 trace：PASSED；仅算术解码组件。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I6/original-JP2-MQ-segment-physical-GPU-trace/20261112T105648.020597Z-I6-rocm-trace-650fc74634",
+        "migration/reports/image-j2k-real-mq-trace.json"
+      ]
+    },
+    {
+      "time": "2026-11-12T10:57:36.995305+00:00",
+      "phase": "I6",
+      "message": "OpenJPEG只读MQ捕获对整张原图解码无扰动：PASSED；6,220,800 RGB 字节与既存独立CPU及原生CUDA精确一致，仅CPU交叉检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I6/instrumented-OpenJPEG-original-JP2-full-RGB-crosscheck/20261112T105735.873804Z-I6-CPU-reference-d67dad309c",
+        "migration/reports/image-j2k-real-mq-crosscheck.json"
+      ]
+    },
+    {
+      "time": "2026-11-12T10:58:36.104710+00:00",
+      "phase": "I6",
+      "message": "原始2k无损JP2真实64x64码块：OpenJPEG捕获2941字节MQ段/26590个context-bit，HIP GPU逐bit精确，物理GPU1 trace通过；整图CPU捕获与原生CUDA 6220800 RGB字节精确。GPU EBCOT context/码块系数/packet链尚缺，四原入口仍FAILED。",
+      "evidence": [
+        "migration/reports/image-j2k-real-mq-capture.json",
+        "migration/reports/image-j2k-real-mq-replay.json",
+        "migration/reports/image-j2k-real-mq-trace.json",
+        "migration/reports/image-j2k-real-mq-crosscheck.json",
+        "migration/reports/image-jpeg2000-I6.md"
+      ]
     }
   ],
-  "updated_at": "2026-11-12T10:47:02.142188+00:00",
+  "updated_at": "2026-11-12T10:58:36.104710+00:00",
   "acceptance_policy": "migration/rewrite/image-acceptance-policy.json",
   "execution_plan": "migration/image-equivalence-execution.md"
 }

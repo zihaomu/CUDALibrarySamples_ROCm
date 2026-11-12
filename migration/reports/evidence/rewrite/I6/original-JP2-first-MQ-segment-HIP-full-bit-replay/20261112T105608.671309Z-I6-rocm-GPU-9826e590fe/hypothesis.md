@@ -1,0 +1,1 @@
+Test rocm-GPU for original-JP2-first-MQ-segment-HIP-full-bit-replay, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T105606.974393Z-I6-CPU-contract-d021d0dcf7.

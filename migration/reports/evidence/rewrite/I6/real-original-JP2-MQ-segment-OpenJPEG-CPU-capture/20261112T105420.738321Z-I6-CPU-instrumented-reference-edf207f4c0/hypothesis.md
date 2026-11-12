@@ -1,0 +1,1 @@
+Test CPU-instrumented-reference for real-original-JP2-MQ-segment-OpenJPEG-CPU-capture, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T105141.111379Z-I6-CPU-contract-1b026fa27e.

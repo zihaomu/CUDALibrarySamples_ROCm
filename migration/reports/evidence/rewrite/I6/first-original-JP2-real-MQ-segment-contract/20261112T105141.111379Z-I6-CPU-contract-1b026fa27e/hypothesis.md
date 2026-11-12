@@ -1,0 +1,1 @@
+Test CPU-contract for first-original-JP2-real-MQ-segment-contract, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T103503.237936Z-I6-host-source-lock-a514c63cdd.

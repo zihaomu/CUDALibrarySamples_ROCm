@@ -1,0 +1,1 @@
+Test CPU-contract for original-JP2-first-real-MQ-vector-freeze, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T105502.973454Z-I6-CPU-instrumented-reference-90fb762d28.

@@ -1,0 +1,176 @@
+#!/usr/bin/env python3
+"""Capture one real JP2 MQ segment from a private instrumented OpenJPEG copy."""
+import json
+import shutil
+from pathlib import Path
+from experiment import ROOT, Experiment, digest, write
+from image_progress import record
+
+ORIGINAL = ROOT / 'build/openjpeg-v2.5.4'
+COPY = ROOT / 'build/openjpeg-v2.5.4-mq-capture-source'
+BUILD_DIR = ROOT / 'build/openjpeg-v2.5.4-mq-capture-build'
+FIXTURE = ROOT / 'migration/fixtures/image-j2k-real-mq'
+PROFILE = ROOT / 'migration/rewrite/image-j2k-real-mq-profile.json'
+LOCK = ROOT / 'migration/rewrite/image-j2k-openjpeg-reference-lock.json'
+REPORT = ROOT / 'migration/reports/image-j2k-real-mq-capture.json'
+
+
+def one_replace(text, before, after):
+    if text.count(before) != 1:
+        raise ValueError('OpenJPEG instrument insertion did not match exactly once')
+    return text.replace(before, after, 1)
+
+
+def instrument():
+    lock = json.loads(LOCK.read_text())
+    for name, sha in lock['files'].items():
+        if digest(ORIGINAL / name) != sha:
+            raise ValueError('pinned source changed: ' + name)
+    if not COPY.exists():
+        shutil.copytree(ORIGINAL, COPY, ignore=shutil.ignore_patterns('.git'))
+    inl = COPY / 'src/lib/openjp2/mqc_inl.h'
+    t1 = COPY / 'src/lib/openjp2/t1.c'
+    original_inl = (ORIGINAL / 'src/lib/openjp2/mqc_inl.h').read_text()
+    original_t1 = (ORIGINAL / 'src/lib/openjp2/t1.c').read_text()
+    prelude = '''#ifdef IMAGE_J2K_CAPTURE
+#include <stdio.h>
+extern _Thread_local FILE *image_j2k_capture_stream;
+#define IMAGE_J2K_TRACE_PRE(mqc, curctx) \\
+    unsigned char image_j2k_ctx = (unsigned char)((curctx) - (mqc)->ctxs)
+#define IMAGE_J2K_TRACE_POST(value) \\
+    do { if (image_j2k_capture_stream) { \\
+        fputc(image_j2k_ctx, image_j2k_capture_stream); \\
+        fputc((int)(value), image_j2k_capture_stream); \\
+    } } while (0)
+#else
+#define IMAGE_J2K_TRACE_PRE(mqc, curctx)
+#define IMAGE_J2K_TRACE_POST(value)
+#endif
+
+'''
+    macro_start = ('#define opj_mqc_decode_macro(d, mqc, curctx, a, c, ct) '
+                   + '\\' + '\n{ ' + '\\' + '\n')
+    updated_inl = one_replace(original_inl, macro_start,
+                              macro_start + '    IMAGE_J2K_TRACE_PRE(mqc, curctx); '
+                              + '\\' + '\n')
+    marker = '    } ' + '\\' + '\n}\n\n#define DOWNLOAD_MQC_VARIABLES'
+    updated_inl = one_replace(updated_inl, marker,
+                              '    } ' + '\\' + '\n    IMAGE_J2K_TRACE_POST(d); '
+                              + '\\' + '\n}\n\n#define DOWNLOAD_MQC_VARIABLES')
+    updated_inl = one_replace(updated_inl, '#define opj_mqc_decode_macro', prelude + '#define opj_mqc_decode_macro')
+    t1_prelude = '''#ifdef IMAGE_J2K_CAPTURE
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+_Thread_local FILE *image_j2k_capture_stream = NULL;
+#endif
+'''
+    updated_t1 = one_replace(original_t1, '#include "opj_includes.h"',
+                             '#include "opj_includes.h"\n' + t1_prelude)
+    capture = '''#ifdef IMAGE_J2K_CAPTURE
+    const char *image_j2k_prefix = getenv("IMAGE_J2K_CAPTURE_PREFIX");
+    int image_j2k_selected = 0;
+#endif
+    for (segno = 0; segno < cblk->real_num_segs; ++segno) {'''
+    updated_t1 = one_replace(updated_t1,
+                             '    for (segno = 0; segno < cblk->real_num_segs; ++segno) {', capture)
+    inject = '''#ifdef IMAGE_J2K_CAPTURE
+        if (image_j2k_prefix && !image_j2k_selected &&
+                type == T1_TYPE_MQ && seg->len >= 2) {
+            char path[1024];
+            snprintf(path, sizeof(path), "%s.claim", image_j2k_prefix);
+            int fd = open(path, O_WRONLY | O_CREAT | O_EXCL, 0600);
+            if (fd >= 0) {
+                close(fd);
+                snprintf(path, sizeof(path), "%s.mq", image_j2k_prefix);
+                FILE *coded = fopen(path, "wb");
+                if (coded) {
+                    fwrite(cblkdata + cblkdataindex, 1, seg->len, coded);
+                    fclose(coded);
+                }
+                snprintf(path, sizeof(path), "%s.meta", image_j2k_prefix);
+                FILE *meta = fopen(path, "w");
+                if (meta) {
+                    fprintf(meta, "width=%d\\nheight=%d\\norient=%u\\n"
+                            "numbps=%u\\nsegment_bytes=%u\\nsegment_passes=%u\\n"
+                            "cblk_style=%u\\n", cblk->x1-cblk->x0,
+                            cblk->y1-cblk->y0, orient, cblk->numbps,
+                            seg->len, seg->real_num_passes, cblksty);
+                    fclose(meta);
+                }
+                snprintf(path, sizeof(path), "%s.pairs", image_j2k_prefix);
+                image_j2k_capture_stream = fopen(path, "wb");
+                image_j2k_selected = 1;
+            }
+        }
+#endif
+        if (type == T1_TYPE_RAW) {'''
+    updated_t1 = one_replace(updated_t1,
+                             '        if (type == T1_TYPE_RAW) {\n            opj_mqc_raw_init_dec',
+                             inject + '\n            opj_mqc_raw_init_dec')
+    close = '''#ifdef IMAGE_J2K_CAPTURE
+        if (image_j2k_selected && image_j2k_capture_stream) {
+            fclose(image_j2k_capture_stream);
+            image_j2k_capture_stream = NULL;
+        }
+#endif
+        opq_mqc_finish_dec(mqc);'''
+    updated_t1 = one_replace(updated_t1, '        opq_mqc_finish_dec(mqc);', close)
+    inl.write_text(updated_inl)
+    t1.write_text(updated_t1)
+    return inl, t1
+
+
+def main():
+    profile = json.loads(PROFILE.read_text())
+    source = ROOT / profile['original_jp2']
+    if profile['status'] != 'FROZEN' or digest(source) != profile['original_jp2_sha256']:
+        raise ValueError('original JP2 capture contract mismatch')
+    FIXTURE.mkdir(parents=True, exist_ok=True)
+    inl, t1 = instrument()
+    e = Experiment('I6', 'real-original-JP2-MQ-segment-OpenJPEG-CPU-capture',
+                   'CPU-instrumented-reference', sources=[__file__, PROFILE, inl, t1, source],
+                   parent=profile['evidence'].split('/')[-1])
+    rc = e.command(['cmake', '-S', str(COPY), '-B', str(BUILD_DIR),
+                    '-DCMAKE_BUILD_TYPE=Release', '-DCMAKE_C_FLAGS=-DIMAGE_J2K_CAPTURE',
+                    '-DBUILD_SHARED_LIBS=OFF', '-DBUILD_CODEC=ON', '-DBUILD_TESTING=OFF'],
+                   'configure-instrumented-private-OpenJPEG', timeout=300)
+    if rc == 0:
+        rc = e.command(['cmake', '--build', str(BUILD_DIR), '--parallel', '4'],
+                       'build-instrumented-private-OpenJPEG', timeout=300)
+    binary = next(iter(BUILD_DIR.rglob('opj_decompress')), None) if rc == 0 else None
+    prefix = FIXTURE / 'original-first'
+    output = e.path / 'full.ppm'
+    if rc == 0 and binary:
+        rc = e.command(['env', 'IMAGE_J2K_CAPTURE_PREFIX=' + str(prefix),
+                        str(binary), '-i', str(source), '-o', str(output), '-threads', '1'],
+                       'decode-original-JP2-and-capture-first-real-MQ-segment', timeout=300)
+    paths = {kind: prefix.with_suffix('.' + kind) for kind in ('mq', 'pairs', 'meta')}
+    pairs = paths['pairs'].read_bytes() if paths['pairs'].exists() else b''
+    valid = rc == 0 and output.is_file() and all(p.exists() for p in paths.values()) and \
+        len(pairs) >= 2 and len(pairs) % 2 == 0 and \
+        all(x < 19 for x in pairs[::2]) and all(x < 2 for x in pairs[1::2])
+    result = dict(status='CAPTURED' if valid else 'CAPTURE_ERROR', return_code=rc,
+                  symbols=len(pairs) // 2, original_jp2_sha256=digest(source),
+                  image_output_sha256=digest(output) if output.exists() else None,
+                  files={kind: dict(path=str(path.relative_to(ROOT)), sha256=digest(path))
+                         for kind, path in paths.items() if path.exists()},
+                  instrumented_sources={str(p.relative_to(ROOT)): digest(p) for p in (inl, t1)},
+                  binary=str(binary.relative_to(ROOT)) if binary else None)
+    write(e.path / 'capture-result.json', result)
+    result['evidence'] = e.finish('PASSED' if valid else 'BUILD_ERROR',
+                                  dict(status=result['status'], checks=[
+                                      dict(check='original-CPU-JP2-decode', passed=rc == 0 and output.is_file()),
+                                      dict(check='one-real-MQ-segment-and-context-bits', passed=valid)]),
+                                  reason=None if valid else 'instrumented build/decode/capture failed')
+    write(REPORT, result)
+    record('I6', '真实原始 JP2 首个 MQ 码块段 CPU 捕获：' + result['status'] +
+           f'，{result["symbols"]} 个context/bit；仅CPU参考，不计AMD整例。',
+           [result['evidence'], str(REPORT.relative_to(ROOT))])
+    print(result['status'], result['symbols'], result['evidence'])
+    return int(not valid)
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

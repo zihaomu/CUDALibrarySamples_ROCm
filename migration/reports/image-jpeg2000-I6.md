@@ -8,7 +8,13 @@
 
 在 GPU 实现前冻结四组 OpenJPEG 自编码、自解码的 MQ 码流、19 个 context 的调度序列及期望 bit SHA。HIP 算术解码在 97、256、511、1023 个 symbol 上全部逐 bit 精确，共 1,887 bit；改变码流字节后输出变化，单字节截断和非法 context 均拒绝且不产出结果，合计 7/7 项通过。1023-bit 用例的 rocprofv3 显示一个实际 `decode_one` kernel，在物理 GPU1 `0000:23:00.0` 执行，追踪输出仍与 CPU oracle 精确一致。[冻结合同](../rewrite/image-j2k-mq-profile.json) · [逐项结果](image-j2k-mq-runs.json) · [GPU trace](image-j2k-mq-trace.json)。
 
-该 kernel 目前每条码流只用一个 GPU 线程，尚无吞吐结论；输入是独立生成的 MQ symbol/context 序列，**不是**从原始 JP2/J2K packet 中分出的 EBCOT 码块。尚缺 bitplane 上下文生成、significance/refinement/cleanup pass、raw bypass、码块终止/重启、packet/tile 解析及把 MQ 输出连接到逆小波。它不升级任何原始样例资格，也不构成完整 JPEG2000 解码。
+该 kernel 目前每条码流只用一个 GPU 线程，尚无吞吐结论；上述首轮四组输入是独立生成的 MQ symbol/context 序列，**不是**从原始 JP2/J2K packet 中分出的 EBCOT 码块。尚缺 bitplane 上下文生成、significance/refinement/cleanup pass、raw bypass、码块终止/重启、packet/tile 解析及把 MQ 输出连接到逆小波。它不升级任何原始样例资格，也不构成完整 JPEG2000 解码。
+
+### 原始 JP2 的真实 MQ 码块段复放
+
+为超越合成向量，从仓库原始 `2k_lossless.jp2` 先冻结输入 SHA，并在**私有、固定源码的 OpenJPEG 副本**中加入只读捕获钩子。首次工具脚本定位错误发生在实验记录器初始化前，只有当前会话命令输出；首次插桩编译违反原项目 C90 声明规则的尝试有不可变构建失败日志。修正后 CPU 完整解码成功。捕获到一个真实 64×64 码块、方向 2、7 bitplane、19 pass、style 0 的 2,941 字节 MQ 段，以及该段 26,590 个实际 context/bit。按捕获 SHA 拆分并冻结向量后，HIP 算术解码全部 26,590 bit 与 OpenJPEG 精确一致；rocprofv3 再次观察到物理 GPU1 `0000:23:00.0` 的实际 `decode_one` kernel 和相同输出。[预登记合同](../rewrite/image-j2k-real-mq-profile.json) · [CPU 捕获](image-j2k-real-mq-capture.json) · [真实向量](../rewrite/image-j2k-real-mq-vector.json) · [GPU 复放](image-j2k-real-mq-replay.json) · [trace](image-j2k-real-mq-trace.json)。
+
+只读捕获没有改变原图 CPU 解码结果：完整 1920×1080 图像的 6,220,800 个 RGB 字节，与先前独立 OpenJPEG 和原始 CUDA 无损输出的 SHA 相同。[整图交叉检查](image-j2k-real-mq-crosscheck.json)。这里的 context 序列仍由 CPU OpenJPEG 的 EBCOT 过程产生，GPU 仅执行 MQ 算术解码；还未在 GPU 上从像素邻域生成 context，也未把解码 bit 还原为码块系数，因此四个 nvJPEG2000 原始入口保持 FAILED。
 
 ## 真实 JP2/J2K 容器与主头
 
@@ -26,7 +32,7 @@
 | GPU kernel、PCI 和重放 | 3/3 kernel，物理 GPU1 | [trace](image-j2k-i53-trace.json) |
 | 输入/系数/预期值先冻结 | 5/5 SHA 对 | [合同](../rewrite/image-j2k-i53-rct-profile.json) |
 
-本组件使用一层、原点为偶数相位的 5/3 表示，局部输入尺寸上限 64。它尚未接收真实 JP2/J2K 的 packet/codeblock 数据，也未处理 MQ/EBCOT、HTJ2K、9/7、tile/ROI、NLT3、编码或多 stream pipeline。下一步必须让真实码流的 GPU tier1 输出进入该变换链，并对多分辨率/奇数原点与原始四个 C++ 入口重新验收；当前五组实验不能升级任何原始入口。
+本变换组件使用一层、原点为偶数相位的 5/3 表示，局部输入尺寸上限 64。它尚未接收真实 JP2/J2K 的 packet/codeblock 系数，也未连接上方的 MQ 算术解码组件；完整 EBCOT、HTJ2K、9/7、tile/ROI、NLT3、编码及多 stream pipeline 仍未处理。下一步必须让真实码流的 GPU tier1 输出进入该变换链，并对多分辨率/奇数原点与原始四个 C++ 入口重新验收；当前五组变换实验不能升级任何原始入口。
 
 ## 独立 CPU 与原始 CUDA 对照
 
