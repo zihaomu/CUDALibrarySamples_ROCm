@@ -36,6 +36,17 @@ def cold_verify(cold,parent_override=None):
     expected={'contracts':1,'options-contracts':1,'build':1,'runs':14,'validation':14,
               'options-run':5,'options-validation':5,'runtime':1,'runtime-validation':1,
               'foreign-stream':1,'trace':1}
+    state={'contracts':('FROZEN','CPU-contract','OBSERVED',14),
+           'options-contracts':('FROZEN','CPU-contract','OBSERVED',5),
+           'build':('BUILT','rocm-build','EXECUTED',None),
+           'runs':('EXECUTED','rocm-original','EXECUTED',None),
+           'validation':('PASSED','CPU-reference','PASSED',None),
+           'options-run':('EXECUTED','rocm-original','EXECUTED',None),
+           'options-validation':('PASSED','CPU-reference','PASSED',None),
+           'runtime':('PASSED','rocm-runtime','PASSED',19),
+           'runtime-validation':('PASSED','CPU-reference','PASSED',None),
+           'foreign-stream':('PASSED','rocm-runtime','PASSED',None),
+           'trace':('PASSED','rocm-trace','PASSED',None)}
     children=cold['children']
     if (cold['status']!='PASSED' or cold['return_code']!=0 or len(children)!=45
         or collections.Counter(c['name'] for c in children)!=expected
@@ -44,6 +55,7 @@ def cold_verify(cold,parent_override=None):
         or not all(c['passed'] for c in cold['checks'])):return False
     parent=Path(parent_override) if parent_override else ROOT/json.loads((ROOT/cold['evidence']/'manifest.json').read_text())['raw_artifact_dir']
     by=collections.defaultdict(dict)
+    child_lookup={(c['name'],c['index']):c for c in children}
     for name,count in expected.items():
         if {c['index'] for c in children if c['name']==name}!=set(range(count)):return False
     for child in children:
@@ -55,6 +67,16 @@ def cold_verify(cold,parent_override=None):
         if any((path/name).stat().st_size!=meta['bytes'] or digest(path/name)!=meta['sha256'] for name,meta in seal.items()):return False
         manifest=json.loads((path/'manifest.json').read_text());source=json.loads((path/'source.json').read_text())
         if manifest['experiment_id']!=Path(child['report']['evidence']).name or source['commit']!=cold['source_commit']:return False
+        status,backend,outcome,case_count=state[name]
+        if name=='runs' and next(c for c in profile()['cases'] if c['case']==child['report']['case'])['expected_return_code']:
+            outcome='EXPECTED_REJECTION'
+        if (child['report'].get('status')!=status or manifest['backend']!=backend
+            or manifest['experiment_outcome']!=outcome
+            or (case_count is not None and child['report'].get('case_count')!=case_count)):return False
+        linked={'validation':'runs','options-validation':'options-run','runtime-validation':'runtime','trace':'build'}.get(name)
+        expected_parent=Path(child_lookup[(linked,index if linked in {'runs','options-run'} else 0)]['report']['evidence']).name if linked else None
+        expected_case=child['report']['case'] if name in {'runs','validation','options-run','options-validation'} else 'all'
+        if manifest['parent_experiment_id']!=expected_parent or manifest['case_id']!=expected_case:return False
         for dep,sha in source['dependencies'].items():
             obj=source['source_objects'][dep]
             if not (ROOT/obj).is_file() or digest(ROOT/obj)!=sha:return False
@@ -339,12 +361,12 @@ def collect(review=None):
     gate('forty-five-sealed-child-clean-checkout-replay',cold_gate)
     def mutations():
         r=load('qualification-checks')
-        names=json.loads((ROOT/'migration/rewrite/image-hough-qualification-checks-v3.json').read_text())
+        names=json.loads((ROOT/'migration/rewrite/image-hough-qualification-checks-v4.json').read_text())
         return (record(r,'checks.json','CPU-validator-test') and r['status']=='PASSED'
-                and r['case_count']==len(r['checks'])==len(names)==16
+                and r['case_count']==len(r['checks'])==len(names)==20
                 and [c['check'] for c in r['checks']]==names
                 and all(c['passed'] for c in r['checks']))
-    gate('sixteen-real-qualification-and-archive-mutation-checks',mutations)
+    gate('twenty-real-qualification-and-archive-mutation-checks',mutations)
     sources.update({'tools/moat/qualify_image_hough.py','tools/moat/publish_image_hough.py',
                     'tools/moat/image_hough_qualification_checks.py',
                     'tools/moat/image_hough_native_reference.py','tools/moat/image_regions_native.py',

@@ -1,0 +1,143 @@
+diff --git a/tools/moat/image_hough_qualification_checks.py b/tools/moat/image_hough_qualification_checks.py
+index f0a7b384c..e8525c6c1 100644
+--- a/tools/moat/image_hough_qualification_checks.py
++++ b/tools/moat/image_hough_qualification_checks.py
+@@ -16,7 +16,11 @@ NAMES=['real-45-child-cold-archive','actual-14-CPU-reference-gate',
+        'coupled-cold-runtime-failed-report-and-seal',
+        'coupled-cold-runtime-validation-failed-report-and-seal',
+        'coupled-cold-foreign-stream-failed-report-and-seal',
+-       'coupled-cold-trace-failed-report-and-seal']
++       'coupled-cold-trace-failed-report-and-seal',
++       'coupled-cold-contract-failed-report-and-seal',
++       'coupled-cold-build-failed-manifest-and-seal',
++       'coupled-cold-foreign-wrong-backend-and-seal',
++       'coupled-cold-trace-wrong-parent-and-seal']
+ 
+ def run_checks():
+     checks=[];original=q.load
+@@ -86,19 +90,37 @@ def run_checks():
+             seal=target/'child-seal.json';members=json.loads(seal.read_text())
+             members['files'][member]=dict(bytes=product.stat().st_size,sha256=digest(product));write(seal,members)
+             check(NAMES[position],lambda:q.cold_verify(changed,parent_override=root),False)
++    for position,group,member,field,value in [
++            (16,'contracts','contracts.json','status','FAILED'),
++            (17,'build','manifest.json','experiment_outcome','BUILD_ERROR'),
++            (18,'foreign-stream','manifest.json','backend','CPU-reference'),
++            (19,'trace','manifest.json','parent_experiment_id','forged-build')]:
++        with tempfile.TemporaryDirectory(prefix='hough-cold-identity-') as temporary:
++            root=Path(temporary);changed=copy.deepcopy(cold)
++            for child in changed['children']:
++                source=parent/child['relative'];dest=root/child['relative'];dest.parent.mkdir(parents=True,exist_ok=True)
++                if child['name']==group:shutil.copytree(source,dest)
++                else:dest.symlink_to(source,target_is_directory=True)
++            child=next(c for c in changed['children'] if c['name']==group)
++            target=root/child['relative'];product=target/member
++            data=json.loads(product.read_text());data[field]=value;write(product,data)
++            if group=='contracts':child['report']['status']=value
++            seal=target/'child-seal.json';members=json.loads(seal.read_text())
++            members['files'][member]=dict(bytes=product.stat().st_size,sha256=digest(product));write(seal,members)
++            check(NAMES[position],lambda:q.cold_verify(changed,parent_override=root),False)
+     if [c['check'] for c in checks]!=NAMES:raise ValueError('fixed Hough mutation suite')
+     return dict(status='PASSED' if all(c['passed'] for c in checks) else 'FAILED',
+                 case_count=len(checks),checks=checks)
+ 
+ def main():
+-    path=ROOT/'migration/rewrite/image-hough-qualification-checks-v3.json'
++    path=ROOT/'migration/rewrite/image-hough-qualification-checks-v4.json'
+     if not path.exists():
+         contract=Experiment('I3','Hough-qualification-mutation-contract','CPU-contract',sources=[__file__,ROOT/'migration/rewrite/image-hough-profile.json'])
+         write(path,NAMES);write(contract.path/'cases.json',NAMES)
+         result=dict(status='FROZEN',case_count=len(NAMES));write(contract.path/'contracts.json',result)
+         result['evidence']=contract.finish('OBSERVED')
+-        write(ROOT/'migration/reports/image-hough-qualification-check-contract-v3.json',result)
+-        record('I3','Hough组合资格与45子封印的16项正反向检查合同冻结。',[result['evidence']])
++        write(ROOT/'migration/reports/image-hough-qualification-check-contract-v4.json',result)
++        record('I3','Hough组合资格与45子封印的20项正反向检查合同冻结。',[result['evidence']])
+     if json.loads(path.read_text())!=NAMES:raise ValueError('fixed Hough mutation names')
+     e=Experiment('I3','Hough-actual-qualification-mutations','CPU-validator-test',
+                  sources=[__file__,ROOT/'tools/moat/qualify_image_hough.py',path,ROOT/'migration/rewrite/image-hough-profile.json'])
+@@ -106,7 +128,7 @@ def main():
+     result['evidence']=e.finish('PASSED' if result['status']=='PASSED' else 'VALIDATOR_GAP',
+                                 dict(status=result['status'],checks=result['checks']))
+     write(ROOT/'migration/reports/image-hough-qualification-checks.json',result)
+-    record('I3','Hough16项实际组合资格与子封印正反向变异：'+result['status']+'。',[result['evidence']])
++    record('I3','Hough20项实际组合资格与子封印正反向变异：'+result['status']+'。',[result['evidence']])
+     print(result['status'],[c['check'] for c in result['checks'] if not c['passed']])
+     return int(result['status']!='PASSED')
+ 
+diff --git a/tools/moat/publish_image_hough.py b/tools/moat/publish_image_hough.py
+index c92667e1e..0bc7e5222 100644
+--- a/tools/moat/publish_image_hough.py
++++ b/tools/moat/publish_image_hough.py
+@@ -35,7 +35,7 @@ def main():
+         'image-hough/complete-native-PPM-and-declared-differences',
+         'image-hough/five-real-GPU-kernel-dispatches',
+         'image-hough/forty-five-child-cold-replay',
+-        'image-hough/sixteen-qualification-and-archive-mutation-checks',
++        'image-hough/twenty-qualification-and-archive-mutation-checks',
+         'image-hough/three-independent-fixed-source-reviews']
+     sample.update(status='PASSED',level='L4',reason_code='VALIDATED_MOAT_REWRITE',
+                   implementation=IMPLEMENTATION,selected_validation=q,
+diff --git a/tools/moat/qualify_image_hough.py b/tools/moat/qualify_image_hough.py
+index 9421e01a0..e24cb7793 100644
+--- a/tools/moat/qualify_image_hough.py
++++ b/tools/moat/qualify_image_hough.py
+@@ -36,6 +36,17 @@ def cold_verify(cold,parent_override=None):
+     expected={'contracts':1,'options-contracts':1,'build':1,'runs':14,'validation':14,
+               'options-run':5,'options-validation':5,'runtime':1,'runtime-validation':1,
+               'foreign-stream':1,'trace':1}
++    state={'contracts':('FROZEN','CPU-contract','OBSERVED',14),
++           'options-contracts':('FROZEN','CPU-contract','OBSERVED',5),
++           'build':('BUILT','rocm-build','EXECUTED',None),
++           'runs':('EXECUTED','rocm-original','EXECUTED',None),
++           'validation':('PASSED','CPU-reference','PASSED',None),
++           'options-run':('EXECUTED','rocm-original','EXECUTED',None),
++           'options-validation':('PASSED','CPU-reference','PASSED',None),
++           'runtime':('PASSED','rocm-runtime','PASSED',19),
++           'runtime-validation':('PASSED','CPU-reference','PASSED',None),
++           'foreign-stream':('PASSED','rocm-runtime','PASSED',None),
++           'trace':('PASSED','rocm-trace','PASSED',None)}
+     children=cold['children']
+     if (cold['status']!='PASSED' or cold['return_code']!=0 or len(children)!=45
+         or collections.Counter(c['name'] for c in children)!=expected
+@@ -44,6 +55,7 @@ def cold_verify(cold,parent_override=None):
+         or not all(c['passed'] for c in cold['checks'])):return False
+     parent=Path(parent_override) if parent_override else ROOT/json.loads((ROOT/cold['evidence']/'manifest.json').read_text())['raw_artifact_dir']
+     by=collections.defaultdict(dict)
++    child_lookup={(c['name'],c['index']):c for c in children}
+     for name,count in expected.items():
+         if {c['index'] for c in children if c['name']==name}!=set(range(count)):return False
+     for child in children:
+@@ -55,6 +67,16 @@ def cold_verify(cold,parent_override=None):
+         if any((path/name).stat().st_size!=meta['bytes'] or digest(path/name)!=meta['sha256'] for name,meta in seal.items()):return False
+         manifest=json.loads((path/'manifest.json').read_text());source=json.loads((path/'source.json').read_text())
+         if manifest['experiment_id']!=Path(child['report']['evidence']).name or source['commit']!=cold['source_commit']:return False
++        status,backend,outcome,case_count=state[name]
++        if name=='runs' and next(c for c in profile()['cases'] if c['case']==child['report']['case'])['expected_return_code']:
++            outcome='EXPECTED_REJECTION'
++        if (child['report'].get('status')!=status or manifest['backend']!=backend
++            or manifest['experiment_outcome']!=outcome
++            or (case_count is not None and child['report'].get('case_count')!=case_count)):return False
++        linked={'validation':'runs','options-validation':'options-run','runtime-validation':'runtime','trace':'build'}.get(name)
++        expected_parent=Path(child_lookup[(linked,index if linked in {'runs','options-run'} else 0)]['report']['evidence']).name if linked else None
++        expected_case=child['report']['case'] if name in {'runs','validation','options-run','options-validation'} else 'all'
++        if manifest['parent_experiment_id']!=expected_parent or manifest['case_id']!=expected_case:return False
+         for dep,sha in source['dependencies'].items():
+             obj=source['source_objects'][dep]
+             if not (ROOT/obj).is_file() or digest(ROOT/obj)!=sha:return False
+@@ -339,12 +361,12 @@ def collect(review=None):
+     gate('forty-five-sealed-child-clean-checkout-replay',cold_gate)
+     def mutations():
+         r=load('qualification-checks')
+-        names=json.loads((ROOT/'migration/rewrite/image-hough-qualification-checks-v3.json').read_text())
++        names=json.loads((ROOT/'migration/rewrite/image-hough-qualification-checks-v4.json').read_text())
+         return (record(r,'checks.json','CPU-validator-test') and r['status']=='PASSED'
+-                and r['case_count']==len(r['checks'])==len(names)==16
++                and r['case_count']==len(r['checks'])==len(names)==20
+                 and [c['check'] for c in r['checks']]==names
+                 and all(c['passed'] for c in r['checks']))
+-    gate('sixteen-real-qualification-and-archive-mutation-checks',mutations)
++    gate('twenty-real-qualification-and-archive-mutation-checks',mutations)
+     sources.update({'tools/moat/qualify_image_hough.py','tools/moat/publish_image_hough.py',
+                     'tools/moat/image_hough_qualification_checks.py',
+                     'tools/moat/image_hough_native_reference.py','tools/moat/image_regions_native.py',
