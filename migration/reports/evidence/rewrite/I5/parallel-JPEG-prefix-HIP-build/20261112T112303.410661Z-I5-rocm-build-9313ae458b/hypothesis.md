@@ -1,0 +1,1 @@
+Test rocm-build for parallel-JPEG-prefix-HIP-build, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T112231.792481Z-I5-CPU-contract-8260aa3729.

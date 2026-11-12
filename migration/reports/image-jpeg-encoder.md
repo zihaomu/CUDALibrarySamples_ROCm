@@ -19,6 +19,6 @@
 
 本次 stream 版源文件变更后已重跑四组全 GPU 输入、四组负例、两个 resize 入口共 14 组 CLI 与 68 产品独立解码，结果均通过；两个原始入口各 12 个 GPU JPEG kernel 的重新追踪也通过。新产品使用[stream 版冻结合同](../rewrite/image-jpeg-encoder-full-gpu-stream-products-profile.json)封存，避免沿用旧二进制的结论。多实例入口的 [full GPU 冻结合同](../rewrite/image-jpeg-encoder-instances-full-gpu-profile.json)、[16 产品逐像素对照](image-jpeg-encoder-instances-full-comparison.json)与[多 stream 追踪](image-jpeg-encoder-instances-trace.json)分别记录输入、输出、数值和运行语义。
 
-下一步：补多实例 pinned host/device workspace 与事件重叠；让 resize/watermark 保留源 JPEG 的编码模式、量化表和 APP/COM 元数据，覆盖 progressive 重新编码；优化 GPU prefix scan 性能。全部阶段与固定提交冷检出通过后再申请整例资格。
+下一步：补多实例 pinned host/device workspace 与事件重叠；让 resize/watermark 保留源 JPEG 的编码模式、量化表和 APP/COM 元数据，覆盖 progressive 重新编码；将已验[并行前缀扫描原型](image-jpeg-prefix.md)完成性能对照后再接入。全部阶段与固定提交冷检出通过后再申请整例资格。
 
 优化 Huffman 的[独立 HIP 组件实验](image-jpeg-opt-huffman.md)和[原始入口接入合同](../rewrite/image-jpeg-encoder-instances-opt-profile.json)分别预先固定四组及七组验收。原入口新[复合资格](image-jpeg-encoder-instances-subset-qualification.json)仍是 PARTIAL，支持计数不变。

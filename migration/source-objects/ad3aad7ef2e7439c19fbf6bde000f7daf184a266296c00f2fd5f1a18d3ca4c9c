@@ -1,0 +1,69 @@
+// SPDX-License-Identifier: Apache-2.0
+#include "jpeg_parallel_prefix.hpp"
+#include <cstdint>
+#include <fstream>
+#include <iostream>
+#include <stdexcept>
+#include <vector>
+
+static void check(hipError_t result, const char* label) {
+    if (result != hipSuccess) throw std::runtime_error(std::string(label) + ": " + hipGetErrorString(result));
+}
+
+template<class T>
+static std::vector<T> read(const char* path) {
+    std::ifstream file(path, std::ios::binary | std::ios::ate);
+    if (!file) throw std::runtime_error("missing input");
+    auto bytes = file.tellg();
+    if (bytes <= 0 || bytes % sizeof(T)) throw std::runtime_error("invalid input length");
+    std::vector<T> result(size_t(bytes) / sizeof(T));
+    file.seekg(0); file.read(reinterpret_cast<char*>(result.data()), bytes);
+    if (!file) throw std::runtime_error("truncated input");
+    return result;
+}
+
+template<class T>
+static void write(const char* path, const T* data, size_t count) {
+    std::ofstream file(path, std::ios::binary);
+    file.write(reinterpret_cast<const char*>(data), std::streamsize(count * sizeof(T)));
+    if (!file) throw std::runtime_error("output write failed");
+}
+
+template<class T, bool STUFF>
+static void run(const char* input_path, const char* output_path) {
+    auto source = read<T>(input_path);
+    if (source.size() > UINT32_MAX) throw std::runtime_error("count overflow");
+    unsigned count = unsigned(source.size());
+    unsigned tiles = (count + image_jpeg_parallel_prefix::TILE - 1) / image_jpeg_parallel_prefix::TILE;
+    T *device_input{}; unsigned *device_output{}, *device_sums{}, *device_bases{}, *device_total{};
+    check(hipSetDevice(0), "select GPU");
+    check(hipMalloc(&device_input, source.size() * sizeof(T)), "input allocation");
+    check(hipMalloc(&device_output, source.size() * sizeof(unsigned)), "output allocation");
+    check(hipMalloc(&device_sums, tiles * sizeof(unsigned)), "sum allocation");
+    check(hipMalloc(&device_bases, tiles * sizeof(unsigned)), "base allocation");
+    check(hipMalloc(&device_total, sizeof(unsigned)), "total allocation");
+    check(hipMemcpy(device_input, source.data(), source.size() * sizeof(T), hipMemcpyHostToDevice), "copy input");
+    image_jpeg_parallel_prefix::launch<T,STUFF>(device_input, device_output, device_sums,
+                                                 device_bases, device_total, count);
+    check(hipGetLastError(), "launch prefix");
+    std::vector<unsigned> output(source.size()); unsigned total{};
+    check(hipMemcpy(output.data(), device_output, output.size() * sizeof(unsigned), hipMemcpyDeviceToHost), "copy output");
+    check(hipMemcpy(&total, device_total, sizeof(total), hipMemcpyDeviceToHost), "copy total");
+    write(output_path, output.data(), output.size());
+    std::cout << "RESULT status=PASS count=" << count << " total=" << total
+              << " kernels=3 mode=" << (STUFF ? "stuff" : "bits") << '\n';
+    hipFree(device_input); hipFree(device_output); hipFree(device_sums);
+    hipFree(device_bases); hipFree(device_total);
+}
+
+int main(int argc, char** argv) {
+    try {
+        if (argc != 4) throw std::runtime_error("usage: prefix bits|stuff INPUT OUTPUT");
+        if (std::string(argv[1]) == "bits") run<unsigned short,false>(argv[2],argv[3]);
+        else if (std::string(argv[1]) == "stuff") run<unsigned char,true>(argv[2],argv[3]);
+        else throw std::runtime_error("invalid mode");
+        return 0;
+    } catch (const std::exception& error) {
+        std::cerr << "RESULT status=FAIL reason=" << error.what() << '\n'; return 1;
+    }
+}

@@ -1,0 +1,59 @@
+{
+  "status": "PASSED",
+  "checks": [
+    {
+      "check": "trace-run-exact-Python-output",
+      "passed": true
+    },
+    {
+      "check": "single-trace-and-agent-map",
+      "passed": true
+    },
+    {
+      "check": "scan_tile-physical-GPU1",
+      "passed": true,
+      "pci_bdf": "0000:23:00.0"
+    },
+    {
+      "check": "scan_sums-physical-GPU1",
+      "passed": true,
+      "pci_bdf": "0000:23:00.0"
+    },
+    {
+      "check": "add_bases-physical-GPU1",
+      "passed": true,
+      "pci_bdf": "0000:23:00.0"
+    },
+    {
+      "check": "all-three-real-parallel-prefix-kernels",
+      "passed": true,
+      "counts": {
+        "scan_tile": 1,
+        "scan_sums": 1,
+        "add_bases": 1
+      }
+    },
+    {
+      "check": "changed-input-exact-and-nonempty-effect",
+      "passed": true
+    }
+  ],
+  "kernel_counts": {
+    "scan_tile": 1,
+    "scan_sums": 1,
+    "add_bases": 1
+  },
+  "pci_bdfs": [
+    "0000:23:00.0"
+  ],
+  "baseline_sha256": "4ca9f4019b4b31c7f87dd5e5acdf6812a315399d5d534735c80322503d5925ff",
+  "mutation_sha256": "2be69b18a6f1fe7fdd8f9d21a3c801d37a53b14b3f4fc9f048dcebf699e5114e",
+  "experiment_id": "20261112T112701.276509Z-I5-rocm-trace-7c490980e4",
+  "evidence": "migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-real-GPU-trace-mutation-and-rejection/20261112T112701.276509Z-I5-rocm-trace-7c490980e4",
+  "negative_return_code": 1,
+  "negative_check": {
+    "check": "oversized-block-rejected-without-product",
+    "passed": true
+  },
+  "negative_evidence": "migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-oversized-block-negative/20261112T112703.914393Z-I5-rocm-GPU-negative-a2e271bb56"
+}

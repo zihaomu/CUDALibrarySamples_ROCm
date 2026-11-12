@@ -282,7 +282,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-12T11:18:34.925327+00:00。26入口当前13通过/9部分/4失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-12T11:27:38.910319+00:00。26入口当前13通过/9部分/4失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -2034,5 +2034,34 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-12T11:17:08.835520+00:00 | I5 | 原始多实例编码16件 JPEG 独立解码：13 baseline 旧 RGB 精确，3 优化输出按同源GPU FDCT plain精确；旧CPU优化结果差值逐件记录，尺寸/采样/量化均核对：PASSED。 | `migration/reports/evidence/rewrite/I5/multi-instance-sixteen-JPEG-prior-vs-full-GPU-decode/20261112T111707.847444Z-I5-CPU-reference-a0998d3121` |
 | 2026-11-12T11:18:14.668366+00:00 | I5 | 原始 nvJPEG 多实例编码器7 CLI、16产品与 baseline 84/优化39 GPU kernel、双stream封存；CPU仅设计优化DHT表，其余调度缺口保留PARTIAL。 | `migration/reports/evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261112T111813.647313Z-I5-composite-subset-qualification-f5bc6c8843` |
 | 2026-11-12T11:18:34.925327+00:00 | I5 | 原始 nvJPEG 多实例编码器16产品/7 CLI、baseline84+优化39 GPU kernel及真实多stream通过；CPU DHT 表设计与调度缺口逐例登记。 | `migration/reports/evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261112T111813.647313Z-I5-composite-subset-qualification-f5bc6c8843`；`migration/reports/image-jpeg-encoder-instances-publication.json` |
+| 2026-11-12T11:22:32.827554+00:00 | I5 | 并行 JPEG bits/FF-stuff prefix 原型合同冻结：1/255/256/257/4096/65536 元素×2 模式，Python 独立前缀、tile边界、GPU trace与变输入重放；暂不修改原入口。 | `migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-bits-and-stuff-contract/20261112T112231.792481Z-I5-CPU-contract-8260aa3729`；`migration/rewrite/image-jpeg-prefix-profile.json` |
+| 2026-11-12T11:23:06.684432+00:00 | I5 | 并行 JPEG prefix 3-kernel HIP 原型构建：BUILT；尚未进入原入口。 | `migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-HIP-build/20261112T112303.410661Z-I5-rocm-build-9313ae458b` |
+| 2026-11-12T11:24:32.663066+00:00 | I5 | 并行 JPEG prefix bits-1：PASSED；独立Python逐位置与总量精确比对。 | `migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-Python-oracle/20261112T112430.439163Z-I5-rocm-GPU-ce67ddead5` |
+| 2026-11-12T11:24:34.941948+00:00 | I5 | 并行 JPEG prefix bits-255：PASSED；独立Python逐位置与总量精确比对。 | `migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-Python-oracle/20261112T112433.003097Z-I5-rocm-GPU-f9b98eead6` |
+| 2026-11-12T11:24:37.241619+00:00 | I5 | 并行 JPEG prefix bits-256：PASSED；独立Python逐位置与总量精确比对。 | `migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-Python-oracle/20261112T112435.314721Z-I5-rocm-GPU-d198244708` |
+| 2026-11-12T11:24:39.477705+00:00 | I5 | 并行 JPEG prefix bits-257：PASSED；独立Python逐位置与总量精确比对。 | `migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-Python-oracle/20261112T112437.594038Z-I5-rocm-GPU-4f72cb3000` |
+| 2026-11-12T11:24:41.707397+00:00 | I5 | 并行 JPEG prefix bits-4096：PASSED；独立Python逐位置与总量精确比对。 | `migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-Python-oracle/20261112T112439.799009Z-I5-rocm-GPU-2e0919c7b2` |
+| 2026-11-12T11:24:43.983075+00:00 | I5 | 并行 JPEG prefix bits-65536：PASSED；独立Python逐位置与总量精确比对。 | `migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-Python-oracle/20261112T112442.048054Z-I5-rocm-GPU-76a392a099` |
+| 2026-11-12T11:24:46.228733+00:00 | I5 | 并行 JPEG prefix stuff-1：PASSED；独立Python逐位置与总量精确比对。 | `migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-Python-oracle/20261112T112444.327092Z-I5-rocm-GPU-ae2e3e1222` |
+| 2026-11-12T11:24:48.452544+00:00 | I5 | 并行 JPEG prefix stuff-255：PASSED；独立Python逐位置与总量精确比对。 | `migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-Python-oracle/20261112T112446.570912Z-I5-rocm-GPU-bbe2c709e9` |
+| 2026-11-12T11:24:50.668650+00:00 | I5 | 并行 JPEG prefix stuff-256：PASSED；独立Python逐位置与总量精确比对。 | `migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-Python-oracle/20261112T112448.801540Z-I5-rocm-GPU-55a944683a` |
+| 2026-11-12T11:24:52.877968+00:00 | I5 | 并行 JPEG prefix stuff-257：PASSED；独立Python逐位置与总量精确比对。 | `migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-Python-oracle/20261112T112450.987190Z-I5-rocm-GPU-30dfd353aa` |
+| 2026-11-12T11:24:55.112888+00:00 | I5 | 并行 JPEG prefix stuff-4096：PASSED；独立Python逐位置与总量精确比对。 | `migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-Python-oracle/20261112T112453.204969Z-I5-rocm-GPU-9b12688a8a` |
+| 2026-11-12T11:24:57.399158+00:00 | I5 | 并行 JPEG prefix stuff-65536：PASSED；独立Python逐位置与总量精确比对。 | `migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-Python-oracle/20261112T112455.457874Z-I5-rocm-GPU-6d23a5fe35` |
+| 2026-11-12T11:25:19.408964+00:00 | I5 | 并行 JPEG prefix 3-kernel HIP 原型构建：BUILT；尚未进入原入口。 | `migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-HIP-build/20261112T112516.316592Z-I5-rocm-build-7310a755ec` |
+| 2026-11-12T11:25:29.839523+00:00 | I5 | 并行 JPEG prefix bits-1：PASSED；独立Python逐位置与总量精确比对。 | `migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-Python-oracle/20261112T112527.639326Z-I5-rocm-GPU-f75e68771f` |
+| 2026-11-12T11:25:32.102875+00:00 | I5 | 并行 JPEG prefix bits-255：PASSED；独立Python逐位置与总量精确比对。 | `migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-Python-oracle/20261112T112530.174172Z-I5-rocm-GPU-82dd26bf8d` |
+| 2026-11-12T11:25:34.309067+00:00 | I5 | 并行 JPEG prefix bits-256：PASSED；独立Python逐位置与总量精确比对。 | `migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-Python-oracle/20261112T112532.434887Z-I5-rocm-GPU-3c93de81a2` |
+| 2026-11-12T11:25:36.506058+00:00 | I5 | 并行 JPEG prefix bits-257：PASSED；独立Python逐位置与总量精确比对。 | `migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-Python-oracle/20261112T112534.630804Z-I5-rocm-GPU-b5cc26bd0b` |
+| 2026-11-12T11:25:38.674471+00:00 | I5 | 并行 JPEG prefix bits-4096：PASSED；独立Python逐位置与总量精确比对。 | `migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-Python-oracle/20261112T112536.840029Z-I5-rocm-GPU-8920faef42` |
+| 2026-11-12T11:25:40.904578+00:00 | I5 | 并行 JPEG prefix bits-65536：PASSED；独立Python逐位置与总量精确比对。 | `migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-Python-oracle/20261112T112539.009312Z-I5-rocm-GPU-04cba12bc9` |
+| 2026-11-12T11:25:43.124489+00:00 | I5 | 并行 JPEG prefix stuff-1：PASSED；独立Python逐位置与总量精确比对。 | `migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-Python-oracle/20261112T112541.243548Z-I5-rocm-GPU-adf6e65bd9` |
+| 2026-11-12T11:25:45.335774+00:00 | I5 | 并行 JPEG prefix stuff-255：PASSED；独立Python逐位置与总量精确比对。 | `migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-Python-oracle/20261112T112543.454380Z-I5-rocm-GPU-b24a4d3865` |
+| 2026-11-12T11:25:47.551761+00:00 | I5 | 并行 JPEG prefix stuff-256：PASSED；独立Python逐位置与总量精确比对。 | `migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-Python-oracle/20261112T112545.669260Z-I5-rocm-GPU-23e8fe290b` |
+| 2026-11-12T11:25:49.744130+00:00 | I5 | 并行 JPEG prefix stuff-257：PASSED；独立Python逐位置与总量精确比对。 | `migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-Python-oracle/20261112T112547.887718Z-I5-rocm-GPU-8b05b782ab` |
+| 2026-11-12T11:25:51.917999+00:00 | I5 | 并行 JPEG prefix stuff-4096：PASSED；独立Python逐位置与总量精确比对。 | `migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-Python-oracle/20261112T112550.079332Z-I5-rocm-GPU-f5c95edf0e` |
+| 2026-11-12T11:25:54.136310+00:00 | I5 | 并行 JPEG prefix stuff-65536：PASSED；独立Python逐位置与总量精确比对。 | `migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-Python-oracle/20261112T112552.237425Z-I5-rocm-GPU-eca8fa6e1e` |
+| 2026-11-12T11:27:05.620160+00:00 | I5 | 并行 JPEG prefix 三实际GPU kernel、物理GPU1、变输入重放：PASSED；超长block无产物拒绝：PASSED；仍为隔离原型。 | `migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-real-GPU-trace-mutation-and-rejection/20261112T112701.276509Z-I5-rocm-trace-7c490980e4`；`migration/reports/evidence/rewrite/I5/parallel-JPEG-prefix-oversized-block-negative/20261112T112703.914393Z-I5-rocm-GPU-negative-a2e271bb56` |
+| 2026-11-12T11:27:38.910319+00:00 | I5 | JPEG并行bits/FF-stuff prefix独立HIP原型12/12 Python逐元素精确；257元素真实GPU1三kernel trace、变输入重放及4097 bit非法block无产物拒绝通过。原始编码器未切换，性能与整例资格待验。 | `migration/reports/image-jpeg-prefix-trace.json` |
 
 <!-- IMAGE_EXECUTION:END -->

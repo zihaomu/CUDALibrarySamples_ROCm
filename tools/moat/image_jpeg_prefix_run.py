@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+"""Compare tiled GPU JPEG prefixes with an independent Python oracle."""
+import hashlib,json,random,re,struct
+from experiment import ROOT,Experiment,digest,write
+from image_progress import record
+from snapshot import capture
+
+PROFILE=ROOT/'migration/rewrite/image-jpeg-prefix-profile.json'
+BUILD=ROOT/'migration/reports/image-jpeg-prefix-build.json'
+REPORT=ROOT/'migration/reports/image-jpeg-prefix-runs.json'
+
+def source(row):
+    rng=random.Random(row['seed'])
+    if row['mode']=='bits':
+        return [rng.randrange(0,4097) if i%17 else 0 for i in range(row['count'])]
+    return [0xff if i%13==0 or rng.randrange(16)==0 else rng.randrange(255)
+            for i in range(row['count'])]
+
+def oracle(mode,values):
+    offsets=[];total=0
+    for index,value in enumerate(values):
+        offsets.append((index if mode=='stuff' else 0)+total)
+        total+=(value==0xff) if mode=='stuff' else value
+    return offsets,total+(len(values) if mode=='stuff' else 0)
+
+def packed(mode,values):
+    return bytes(values) if mode=='stuff' else struct.pack('<'+str(len(values))+'H',*values)
+
+def run_case(row,build):
+    mode,count=row['mode'],row['count']
+    e=Experiment('I5','parallel-JPEG-prefix-Python-oracle','rocm-GPU',case=mode+'-'+str(count),
+                 sources=[__file__,PROFILE,BUILD,ROOT/'rocm/common/image/jpeg_parallel_prefix.hpp',
+                          ROOT/'rocm/probes/image/jpeg_parallel_prefix.hip'],parent=build['experiment_id'])
+    write(e.path/'backend.observed.json',capture())
+    values=source(row);inp=e.path/'input.bin';inp.write_bytes(packed(mode,values));out=e.path/'output.bin'
+    expected,total=oracle(mode,values)
+    rc=e.command([str(ROOT/build['binary']),mode,str(inp),str(out)],'run-'+mode+'-'+str(count),timeout=300)
+    output=list(struct.unpack('<'+str(count)+'I',out.read_bytes())) if rc==0 and out.stat().st_size==4*count else []
+    log=(e.path/'logs'/('0001-run-'+mode+'-'+str(count)+'.stdout.log')).read_text()
+    match=re.search(r'RESULT status=PASS count=(\d+) total=(\d+) kernels=3 mode=(\w+)',log)
+    checks=[dict(check='GPU-output-exact-Python-prefix',passed=output==expected),
+            dict(check='GPU-total-exact-Python',passed=bool(match) and int(match[1])==count and int(match[2])==total and match[3]==mode),
+            dict(check='physical-GPU1-device-binding',passed=all(d['physical_id']==1 for d in json.loads((e.path/'backend.observed.json').read_text())['devices']))]
+    status='PASSED' if all(x['passed'] for x in checks) else 'NUMERIC_MISMATCH'
+    result=dict(case=mode+'-'+str(count),status=status,checks=checks,return_code=rc,
+                expected_total=total,output_sha256=digest(out) if out.is_file() else None,
+                expected_sha256=hashlib.sha256(struct.pack('<'+str(count)+'I',*expected)).hexdigest(),
+                experiment_id=e.id)
+    write(e.path/'result.json',result)
+    result['evidence']=e.finish(status,dict(status=status,checks=checks));
+    record('I5','并行 JPEG prefix '+result['case']+'：'+status+'；独立Python逐位置与总量精确比对。',[result['evidence']])
+    return result
+
+def main():
+    profile=json.loads(PROFILE.read_text());build=json.loads(BUILD.read_text())
+    if profile['status']!='FROZEN' or build['status']!='BUILT' or digest(ROOT/build['binary'])!=build['binary_sha256'] or \
+       any(digest(ROOT/n)!=h for n,h in build['dependencies'].items()):
+        raise ValueError('frozen contract and current build required')
+    rows=[]
+    for case in profile['cases']:
+        row=run_case(case,build);rows.append(row);write(REPORT,rows)
+        print(row['case'],row['status'],flush=True)
+    return int(any(x['status']!='PASSED' for x in rows))
+
+if __name__=='__main__':raise SystemExit(main())

@@ -1,0 +1,1 @@
+Test rocm-GPU for parallel-JPEG-prefix-Python-oracle, case stuff-257. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T112516.316592Z-I5-rocm-build-7310a755ec.

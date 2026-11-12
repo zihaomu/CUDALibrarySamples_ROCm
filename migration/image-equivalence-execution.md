@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-12T11:18:34.925327+00:00。26入口当前13通过/9部分/4失败。
+更新时间：2026-11-12T11:27:38.910319+00:00。26入口当前13通过/9部分/4失败。
 
-I5：原始 nvJPEG 多实例编码器16产品/7 CLI、baseline84+优化39 GPU kernel及真实多stream通过；CPU DHT 表设计与调度缺口逐例登记。
+I5：JPEG并行bits/FF-stuff prefix独立HIP原型12/12 Python逐元素精确；257元素真实GPU1三kernel trace、变输入重放及4097 bit非法block无产物拒绝通过。原始编码器未切换，性能与整例资格待验。
 
-证据：`migration/reports/evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261112T111813.647313Z-I5-composite-subset-qualification-f5bc6c8843`；`migration/reports/image-jpeg-encoder-instances-publication.json`
+证据：`migration/reports/image-jpeg-prefix-trace.json`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

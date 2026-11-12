@@ -1,0 +1,1 @@
+Test rocm-GPU-negative for parallel-JPEG-prefix-oversized-block-negative, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T112701.276509Z-I5-rocm-trace-7c490980e4.
