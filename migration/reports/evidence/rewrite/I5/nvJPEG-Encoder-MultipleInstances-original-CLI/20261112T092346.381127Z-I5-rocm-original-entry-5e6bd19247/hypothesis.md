@@ -1,0 +1,1 @@
+Test rocm-original-entry for nvJPEG-Encoder-MultipleInstances-original-CLI, case hardware-unavailable. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T092045.725688Z-I5-rocm-build-0ba86d2f6e.

@@ -1,0 +1,1 @@
+Test rocm-negative for JPEG-encoder-malformed-input-rejection, case zero-width. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T092415.885051Z-I5-rocm-build-e5957a4c88.

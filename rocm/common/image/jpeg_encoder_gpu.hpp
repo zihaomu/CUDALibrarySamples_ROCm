@@ -85,7 +85,8 @@ __global__ void forward_dct_quantize(const unsigned char* plane, const unsigned 
 }
 
 inline void encode(const std::vector<unsigned char>& rgb, int width, int height,
-                   int quality, int subsampling, const char* destination) {
+                   int quality, int subsampling, const char* destination,
+                   bool optimized_huffman = false, hipStream_t stream = nullptr) {
   if (width <= 0 || height <= 0 || quality < 1 || quality > 100 ||
       (subsampling != 1 && subsampling != 2) ||
       rgb.size() != size_t(width) * height * 3)
@@ -103,6 +104,7 @@ inline void encode(const std::vector<unsigned char>& rgb, int width, int height,
   compressor.in_color_space = JCS_RGB;
   jpeg_set_defaults(&compressor);
   jpeg_set_quality(&compressor, quality, TRUE);
+  compressor.optimize_coding = optimized_huffman ? TRUE : FALSE;
   compressor.comp_info[0].h_samp_factor = subsampling;
   compressor.comp_info[0].v_samp_factor = subsampling;
   for (int channel = 1; channel < 3; ++channel) {
@@ -134,8 +136,8 @@ inline void encode(const std::vector<unsigned char>& rgb, int width, int height,
   float* device_cosine = nullptr;
   check(hipMalloc(&device_rgb, rgb.size()), "allocate RGB");
   check(hipMalloc(&device_cosine, sizeof(cosine)), "allocate cosine");
-  check(hipMemcpy(device_rgb, rgb.data(), rgb.size(), hipMemcpyHostToDevice), "copy RGB");
-  check(hipMemcpy(device_cosine, cosine, sizeof(cosine), hipMemcpyHostToDevice), "copy cosine");
+  check(hipMemcpyAsync(device_rgb, rgb.data(), rgb.size(), hipMemcpyHostToDevice, stream), "copy RGB");
+  check(hipMemcpyAsync(device_cosine, cosine, sizeof(cosine), hipMemcpyHostToDevice, stream), "copy cosine");
   for (int channel = 0; channel < 3; ++channel) {
     size_t pixel_count = size_t(plane_width[channel]) * plane_height[channel];
     size_t coefficient_count = size_t(blocks_x[channel]) * blocks_y[channel] * 64;
@@ -147,18 +149,20 @@ inline void encode(const std::vector<unsigned char>& rgb, int width, int height,
     check(hipMalloc(&coefficients, coefficient_count * sizeof(short)), "allocate coefficients");
     auto* table = compressor.quant_tbl_ptrs[compressor.comp_info[channel].quant_tbl_no];
     if (!table) throw std::runtime_error("missing compressor quantization table");
-    check(hipMemcpy(quant, table->quantval, 64 * sizeof(unsigned short), hipMemcpyHostToDevice),
+    check(hipMemcpyAsync(quant, table->quantval, 64 * sizeof(unsigned short),
+                         hipMemcpyHostToDevice, stream),
           "copy quantization table");
-    rgb_to_plane<<<(pixel_count + 255) / 256, 256>>>(device_rgb, plane, width, height,
+    rgb_to_plane<<<(pixel_count + 255) / 256, 256, 0, stream>>>(device_rgb, plane, width, height,
         plane_width[channel], plane_height[channel], channel, subsampling);
     check(hipGetLastError(), "launch RGB conversion and chroma downsampling");
-    forward_dct_quantize<<<(coefficient_count + 255) / 256, 256>>>(plane, quant, device_cosine,
+    forward_dct_quantize<<<(coefficient_count + 255) / 256, 256, 0, stream>>>(plane, quant, device_cosine,
         coefficients, plane_width[channel], plane_height[channel],
         blocks_x[channel], blocks_y[channel]);
     check(hipGetLastError(), "launch GPU FDCT and quantization");
     std::vector<short> host(coefficient_count);
-    check(hipMemcpy(host.data(), coefficients, coefficient_count * sizeof(short),
-                    hipMemcpyDeviceToHost), "copy quantized coefficients");
+    check(hipMemcpyAsync(host.data(), coefficients, coefficient_count * sizeof(short),
+                         hipMemcpyDeviceToHost, stream), "copy quantized coefficients");
+    check(hipStreamSynchronize(stream), "synchronize GPU coefficients before CPU entropy");
     for (int row = 0; row < blocks_y[channel]; ++row) {
       JBLOCKARRAY blocks = compressor.mem->access_virt_barray(
           reinterpret_cast<j_common_ptr>(&compressor), arrays[channel], row, 1, TRUE);

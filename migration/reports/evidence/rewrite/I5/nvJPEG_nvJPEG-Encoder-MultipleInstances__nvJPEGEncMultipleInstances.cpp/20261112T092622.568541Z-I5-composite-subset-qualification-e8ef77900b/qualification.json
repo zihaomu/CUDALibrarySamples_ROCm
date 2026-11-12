@@ -1,0 +1,81 @@
+{
+  "kind": "image-JPEG-multiple-instances-GPU-forward-subset",
+  "status": "PASSED",
+  "contract_status": "PARTIAL",
+  "sample_id": "nvJPEG/nvJPEG-Encoder-MultipleInstances::nvJPEGEncMultipleInstances.cpp",
+  "implementation": "rocm/ported/nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp",
+  "implementation_sha256": "3502cbc086a5d59c3968dfa7c030fbd65ef23ccba9f4e2201b8781c0ace5d90c",
+  "source_commit": "71c95a3502c3be9f8701fb6e6f1c4839ffa30c13",
+  "case_count": 8,
+  "case_ids": [
+    "I5/natural-three",
+    "I5/repeat-seven",
+    "I5/optimized-444",
+    "I5/default-backend",
+    "I5/hardware-unavailable",
+    "I5/missing-input",
+    "I5/invalid-quality",
+    "I5/multi-stream-changed-input-replay"
+  ],
+  "checks": [
+    {
+      "check": "seven-predeclared-original-CLI-groups",
+      "passed": true
+    },
+    {
+      "check": "recursive-natural-BMP-and-seven-numbered-repeat-products",
+      "passed": true
+    },
+    {
+      "check": "independent-JPEG-cross-decode-and-quant-sampling-for-all-16-products",
+      "passed": true
+    },
+    {
+      "check": "four-actual-HIP-streams-or-at-least-two",
+      "passed": true
+    },
+    {
+      "check": "changed-input-produces-changed-output-and-stable-other-outputs",
+      "passed": true
+    },
+    {
+      "check": "optimized-Huffman-DHT-actually-changed",
+      "passed": true
+    },
+    {
+      "check": "current-source-closure-and-GPU1",
+      "passed": true
+    }
+  ],
+  "devices": [
+    {
+      "logical_id": 0,
+      "pci_bdf": "0000:23:00.0",
+      "physical_id": 1,
+      "uuid": "39383130336566346332326133636363"
+    }
+  ],
+  "dependencies": {
+    "rocm/ported/nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp": "3502cbc086a5d59c3968dfa7c030fbd65ef23ccba9f4e2201b8781c0ace5d90c",
+    "rocm/common/image/jpeg_encoder_instances.hpp": "34f373e0a652b30bb4de4ccb24d8a6190d41b0229592d9bb8e3bdc5a238e4289",
+    "rocm/common/image/jpeg_encoder_gpu.hpp": "c759a9f001c5d66d628d624c37da7dcade72035f95249a0f2fe8f3f90748c048",
+    "migration/rewrite/image-jpeg-encoder-instances-profile.json": "bab6d6158c193a94daf009014efadbf4bd2c3cd8d159fbd84f5f523204aa0fbc",
+    "build/cpu-codecs/include/jpeglib.h": "dc3e8220f34b7e9f9e48620f5cb8dc070834feb3214bb12bbad78478ebb29e60",
+    "build/cpu-codecs/lib/libjpeg.so.62.4.0": "d3dee37946d3b526cd19c49b1d535047b20e2c19d0edd3cf6782e257680b7466"
+  },
+  "evidence_references": [
+    "migration/reports/evidence/rewrite/I5/original-nvJPEG-Encoder-MultipleInstances-GPU-build/20261112T092045.725688Z-I5-rocm-build-0ba86d2f6e",
+    "migration/reports/evidence/rewrite/I5/original-JPEG-encoder-concurrent-HIP-streams-and-changed-input/20261112T092401.701358Z-I5-rocm-trace-7b05ec56f3",
+    "migration/reports/evidence/rewrite/I5/nvJPEG-Encoder-MultipleInstances-original-CLI/20261112T092337.024631Z-I5-rocm-original-entry-fa7a6c6ad5",
+    "migration/reports/evidence/rewrite/I5/nvJPEG-Encoder-MultipleInstances-original-CLI/20261112T092339.599246Z-I5-rocm-original-entry-3e6f15c750",
+    "migration/reports/evidence/rewrite/I5/nvJPEG-Encoder-MultipleInstances-original-CLI/20261112T092341.819189Z-I5-rocm-original-entry-b5643aeb82",
+    "migration/reports/evidence/rewrite/I5/nvJPEG-Encoder-MultipleInstances-original-CLI/20261112T092344.200214Z-I5-rocm-original-entry-481ac2ec22",
+    "migration/reports/evidence/rewrite/I5/nvJPEG-Encoder-MultipleInstances-original-CLI/20261112T092346.381127Z-I5-rocm-original-entry-5e6bd19247",
+    "migration/reports/evidence/rewrite/I5/nvJPEG-Encoder-MultipleInstances-original-CLI/20261112T092348.388297Z-I5-rocm-original-entry-edc204bc08",
+    "migration/reports/evidence/rewrite/I5/nvJPEG-Encoder-MultipleInstances-original-CLI/20261112T092350.522285Z-I5-rocm-original-entry-0a76b6ee9f"
+  ],
+  "rocm_evidence": "migration/reports/evidence/rewrite/I5/original-JPEG-encoder-concurrent-HIP-streams-and-changed-input/20261112T092401.701358Z-I5-rocm-trace-7b05ec56f3",
+  "cuda_evidence": null,
+  "comparison_mode": "INDEPENDENT_CPU_JPEG_AND_GPU_TRACE",
+  "remaining": "GPU entropy/Huffman; pinned host/device workspace and event overlap; original auto calibration; hardware backend unavailable on AMD"
+}
