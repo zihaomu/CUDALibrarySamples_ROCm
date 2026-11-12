@@ -157,8 +157,19 @@ def trace_recompute(trace,build,small_run):
     return (dict(counts)==trace['counts'] and all(counts[name]>=1 for name in names)
       and trace['return_code']==0 and loaded['status']=='PASSED' and all(c['passed'] for c in loaded['checks']))
 
+def cold_structure_ok(cold):
+    expected={'contracts':1,'deps':1,'build':1,'runs':6,'validation':6,'native-comparison':1,
+      'runtime':1,'trace':1,'negative':1}
+    children=cold['children']
+    return (len(children)==19 and collections.Counter(c['kind'] for c in children)==expected
+       and len({(c['kind'],c['index']) for c in children})==19
+       and len({c['evidence'] for c in children})==19
+       and len({c['raw'] for c in children})==19
+       and all({c['index'] for c in children if c['kind']==kind}==set(range(count)) for kind,count in expected.items()))
+
 def cold_recompute(cold,profile,runs,valid):
-    if cold['status']!='PASSED' or cold['return_code']!=0 or any(not c['passed'] for c in cold['checks']):return False
+    if (cold['status']!='PASSED' or cold['return_code']!=0 or any(not c['passed'] for c in cold['checks'])
+      or not cold_structure_ok(cold)):return False
     path=ROOT/cold['evidence'];outer=json.loads((path/'manifest.json').read_text());raw=ROOT/outer['raw_artifact_dir']
     clone=Path(cold['clone'])
     if (clone.name!='src' or clone.parent.parent!=ROOT.parent
@@ -177,12 +188,6 @@ def cold_recompute(cold,profile,runs,valid):
     expected={'contracts':1,'deps':1,'build':1,'runs':6,'validation':6,'native-comparison':1,
       'runtime':1,'trace':1,'negative':1}
     children=cold['children']
-    if (len(children)!=19 or collections.Counter(c['kind'] for c in children)!=expected
-       or len({(c['kind'],c['index']) for c in children})!=19
-       or len({c['evidence'] for c in children})!=19
-       or len({c['raw'] for c in children})!=19):return False
-    for kind,count in expected.items():
-      if {c['index'] for c in children if c['kind']==kind}!=set(range(count)):return False
     by={kind:[c for c in children if c['kind']==kind] for kind in expected}
     outcomes={'contracts':'OBSERVED','deps':'PASSED','build':'EXECUTED','validation':'PASSED',
       'native-comparison':'PASSED','runtime':'PASSED','trace':'PASSED','negative':'PASSED'}

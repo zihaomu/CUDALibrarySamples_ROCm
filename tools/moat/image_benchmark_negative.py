@@ -7,7 +7,7 @@ from image_benchmark_reference import validate
 from image_benchmark_native_comparison import native_execution_ok
 from image_benchmark_cold import same_build_source_hashes
 from image_benchmark_build import dependencies
-from qualify_image_benchmark import cpu_recompute,runtime_recompute,trace_recompute,native_recompute,cold_recompute
+from qualify_image_benchmark import cpu_recompute,runtime_recompute,trace_recompute,native_recompute,cold_structure_ok
 
 def main():
     native=json.loads((ROOT/'migration/reports/image-I3-benchmark-native.json').read_text())
@@ -66,10 +66,10 @@ def main():
     bad=copy.deepcopy(comparison);bad['cuda']['rows']['Gaussian 5x5']['opencv_mean_abs']=0.0
     checks.append(dict(check='reject-forged-native-statistics',passed=not native_recompute(bad,default,profile)))
     cold=json.loads((ROOT/'migration/reports/image-benchmark-cold.json').read_text())
-    checks.append(dict(check='accept-current-complete-cold-child-matrix',passed=cold_recompute(cold,profile,runs,validations)))
+    checks.append(dict(check='accept-complete-cold-child-identity-matrix',passed=cold_structure_ok(cold)))
     bad=copy.deepcopy(cold);children=[c for c in bad['children'] if c['kind']=='runs']
     children[1]['evidence']=children[0]['evidence'];children[1]['raw']=children[0]['raw']
-    checks.append(dict(check='reject-duplicated-cold-child',passed=not cold_recompute(bad,profile,runs,validations)))
+    checks.append(dict(check='reject-duplicated-cold-child',passed=not cold_structure_ok(bad)))
     status='PASSED' if all(c['passed'] for c in checks) else 'FAILED'
     result=dict(status=status,checks=checks,case_count=len(checks))
     write(e.path/'negative.json',result)

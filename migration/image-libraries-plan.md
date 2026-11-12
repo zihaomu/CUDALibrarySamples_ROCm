@@ -280,7 +280,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-12T06:34:56.790190+00:00。26入口当前12通过/7部分/7失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-12T06:38:20.870452+00:00。26入口当前12通过/7部分/7失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -1707,5 +1707,8 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-12T06:25:52.725542+00:00 | I3 | benchmark固定Git冷检出同版OpenCV/四算子/六CLI/独立CPU/原生统计/运行/trace及18子封存：PASSED | `migration/reports/evidence/rewrite/I3/OpenCV-benchmark-fixed-Git-cold-four-operations-and-CPU/20261112T062422.659298Z-I3-host-cold-replay-5234f0bb39` |
 | 2026-11-12T06:34:21.464224+00:00 | I3 | benchmark原生/错误CLI/依赖及CPU/runtime/trace/cold配对篡改共19项正反证据：PASSED。 | `migration/reports/evidence/rewrite/I3/OpenCV-benchmark-sealed-reader-counterexamples/20261112T063418.563234Z-I3-CPU-negative-a0acd92e2d` |
 | 2026-11-12T06:34:56.790190+00:00 | I3 | 组合资格复审证实可配对伪造已封存CPU结果；资格门现重新计算真实四产品、原生stdout/返回码、runtime原始行、trace CSV/PCI和冷19子唯一身份/父关系/结果；19正反例通过，历史REQUEST_CHANGES保留。状态仍PARTIAL待固定提交与复审。 | `migration/reports/image-benchmark-negative.json`；`migration/reports/image-benchmark.md` |
+| 2026-11-12T06:37:16.862844+00:00 | I3 | benchmark固定Git冷检出同版OpenCV/四算子/六CLI/独立CPU/原生统计/运行/trace及18子封存：FAILED | `migration/reports/evidence/rewrite/I3/OpenCV-benchmark-fixed-Git-cold-four-operations-and-CPU/20261112T063539.400801Z-I3-host-cold-replay-3bff3d2d09` |
+| 2026-11-12T06:38:12.648532+00:00 | I3 | benchmark原生/错误CLI/依赖及CPU/runtime/trace/cold配对篡改共19项正反证据：PASSED。 | `migration/reports/evidence/rewrite/I3/OpenCV-benchmark-sealed-reader-counterexamples/20261112T063808.645269Z-I3-CPU-negative-b36043678b` |
+| 2026-11-12T06:38:20.870452+00:00 | I3 | 最终冷检出九项主作业成功，第十项反例因尝试在隔离clone读取上一轮未归档的完整冷raw而失败；失败封存，反例已缩为纯19子身份结构检查，完整raw复算仍由主资格单独执行；现19项反例本地通过，等待新Git冷检出。 | `migration/reports/evidence/rewrite/I3/OpenCV-benchmark-fixed-Git-cold-four-operations-and-CPU/20261112T063539.400801Z-I3-host-cold-replay-3bff3d2d09`；`migration/reports/image-benchmark-negative.json` |
 
 <!-- IMAGE_EXECUTION:END -->

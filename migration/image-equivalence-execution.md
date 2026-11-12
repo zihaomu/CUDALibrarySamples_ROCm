@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-12T06:34:56.790190+00:00。26入口当前12通过/7部分/7失败。
+更新时间：2026-11-12T06:38:20.870452+00:00。26入口当前12通过/7部分/7失败。
 
-I3：组合资格复审证实可配对伪造已封存CPU结果；资格门现重新计算真实四产品、原生stdout/返回码、runtime原始行、trace CSV/PCI和冷19子唯一身份/父关系/结果；19正反例通过，历史REQUEST_CHANGES保留。状态仍PARTIAL待固定提交与复审。
+I3：最终冷检出九项主作业成功，第十项反例因尝试在隔离clone读取上一轮未归档的完整冷raw而失败；失败封存，反例已缩为纯19子身份结构检查，完整raw复算仍由主资格单独执行；现19项反例本地通过，等待新Git冷检出。
 
-证据：`migration/reports/image-benchmark-negative.json`；`migration/reports/image-benchmark.md`
+证据：`migration/reports/evidence/rewrite/I3/OpenCV-benchmark-fixed-Git-cold-four-operations-and-CPU/20261112T063539.400801Z-I3-host-cold-replay-3bff3d2d09`；`migration/reports/image-benchmark-negative.json`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 
