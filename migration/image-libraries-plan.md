@@ -280,7 +280,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-12T05:09:08.853877+00:00。26入口当前11通过/7部分/8失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-12T05:15:37.422695+00:00。26入口当前11通过/7部分/8失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -1625,5 +1625,8 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-12T05:08:17.386848+00:00 | I3 | Hough组合资格与45子封印的20项正反向检查合同冻结。 | `migration/reports/evidence/rewrite/I3/Hough-qualification-mutation-contract/20261112T050816.417015Z-I3-CPU-contract-df4f92dff3` |
 | 2026-11-12T05:08:31.743209+00:00 | I3 | Hough20项实际组合资格与子封印正反向变异：PASSED。 | `migration/reports/evidence/rewrite/I3/Hough-actual-qualification-mutations/20261112T050817.766846Z-I3-CPU-validator-test-eee919a0c9` |
 | 2026-11-12T05:09:08.853877+00:00 | I3 | Hough第三轮验收复审发现冷合同及构建manifest可配对伪造；已核45子每组status/backend/outcome/case/parent，20/20真实变异通过；整例仍PARTIAL待三范围复审。 | `migration/reports/image-hough-cold.json`；`migration/reports/image-hough-qualification-checks.json`；`migration/reports/image-hough.md` |
+| 2026-11-12T05:14:09.923106+00:00 | I3 | Hough组合资格与45子封印的22项正反向检查合同冻结。 | `migration/reports/evidence/rewrite/I3/Hough-qualification-mutation-contract/20261112T051408.961818Z-I3-CPU-contract-4077aff021` |
+| 2026-11-12T05:15:03.533805+00:00 | I3 | Hough22项实际组合资格与子封印正反向变异：PASSED。 | `migration/reports/evidence/rewrite/I3/Hough-actual-qualification-mutations/20261112T051448.570746Z-I3-CPU-validator-test-aeab7e0e7e` |
+| 2026-11-12T05:15:37.422695+00:00 | I3 | Hough第四轮复审发现外层冷检出命令及当前CPU证据父运行未绑定；已验13条clone/checkout/job命令及父子身份，22/22变异通过。主表仍PARTIAL，待复审签发。 | `migration/reports/image-hough-cold.json`；`migration/reports/image-hough-qualification-checks.json`；`migration/reports/image-hough.md` |
 
 <!-- IMAGE_EXECUTION:END -->

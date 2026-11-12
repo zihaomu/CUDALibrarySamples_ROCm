@@ -1,0 +1,272 @@
+diff --git a/tools/moat/image_hough_qualification_checks.py b/tools/moat/image_hough_qualification_checks.py
+index e8525c6c1..fbfe86c3e 100644
+--- a/tools/moat/image_hough_qualification_checks.py
++++ b/tools/moat/image_hough_qualification_checks.py
+@@ -20,7 +20,9 @@ NAMES=['real-45-child-cold-archive','actual-14-CPU-reference-gate',
+        'coupled-cold-contract-failed-report-and-seal',
+        'coupled-cold-build-failed-manifest-and-seal',
+        'coupled-cold-foreign-wrong-backend-and-seal',
+-       'coupled-cold-trace-wrong-parent-and-seal']
++       'coupled-cold-trace-wrong-parent-and-seal',
++       'cold-outer-checkout-command-forgery',
++       'current-CPU-validation-wrong-parent-identity']
+ 
+ def run_checks():
+     checks=[];original=q.load
+@@ -108,19 +110,34 @@ def run_checks():
+             seal=target/'child-seal.json';members=json.loads(seal.read_text())
+             members['files'][member]=dict(bytes=product.stat().st_size,sha256=digest(product));write(seal,members)
+             check(NAMES[position],lambda:q.cold_verify(changed,parent_override=root),False)
++    with tempfile.TemporaryDirectory(prefix='hough-cold-outer-') as temporary:
++        root=Path(temporary);outer=ROOT/cold['evidence']
++        shutil.copyfile(outer/'manifest.json',root/'manifest.json')
++        commands=json.loads((outer/'commands.json').read_text())
++        commands[1]['argv'][-1]='0'*40
++        write(root/'commands.json',commands)
++        check(NAMES[20],lambda:q.cold_verify(cold,parent_override=parent,outer_override=root),False)
++    first=original('validation')[0]['evidence'];real_sealed=q.sealed
++    def wrong_parent(ref):
++        directory,manifest,source=real_sealed(ref)
++        if ref==first:manifest=dict(manifest,parent_experiment_id='forged-nonmatching-run')
++        return directory,manifest,source
++    with patch.object(q,'sealed',wrong_parent):
++        check(NAMES[21],lambda:next(c for c in q.collect(None)[0]
++              if c['check']=='fourteen-complete-line-list-CSV-PPM-independent-CPU-recomputations')['passed'],False)
+     if [c['check'] for c in checks]!=NAMES:raise ValueError('fixed Hough mutation suite')
+     return dict(status='PASSED' if all(c['passed'] for c in checks) else 'FAILED',
+                 case_count=len(checks),checks=checks)
+ 
+ def main():
+-    path=ROOT/'migration/rewrite/image-hough-qualification-checks-v4.json'
++    path=ROOT/'migration/rewrite/image-hough-qualification-checks-v5.json'
+     if not path.exists():
+         contract=Experiment('I3','Hough-qualification-mutation-contract','CPU-contract',sources=[__file__,ROOT/'migration/rewrite/image-hough-profile.json'])
+         write(path,NAMES);write(contract.path/'cases.json',NAMES)
+         result=dict(status='FROZEN',case_count=len(NAMES));write(contract.path/'contracts.json',result)
+         result['evidence']=contract.finish('OBSERVED')
+-        write(ROOT/'migration/reports/image-hough-qualification-check-contract-v4.json',result)
+-        record('I3','Hough组合资格与45子封印的20项正反向检查合同冻结。',[result['evidence']])
++        write(ROOT/'migration/reports/image-hough-qualification-check-contract-v5.json',result)
++        record('I3','Hough组合资格与45子封印的22项正反向检查合同冻结。',[result['evidence']])
+     if json.loads(path.read_text())!=NAMES:raise ValueError('fixed Hough mutation names')
+     e=Experiment('I3','Hough-actual-qualification-mutations','CPU-validator-test',
+                  sources=[__file__,ROOT/'tools/moat/qualify_image_hough.py',path,ROOT/'migration/rewrite/image-hough-profile.json'])
+@@ -128,7 +145,7 @@ def main():
+     result['evidence']=e.finish('PASSED' if result['status']=='PASSED' else 'VALIDATOR_GAP',
+                                 dict(status=result['status'],checks=result['checks']))
+     write(ROOT/'migration/reports/image-hough-qualification-checks.json',result)
+-    record('I3','Hough20项实际组合资格与子封印正反向变异：'+result['status']+'。',[result['evidence']])
++    record('I3','Hough22项实际组合资格与子封印正反向变异：'+result['status']+'。',[result['evidence']])
+     print(result['status'],[c['check'] for c in result['checks'] if not c['passed']])
+     return int(result['status']!='PASSED')
+ 
+diff --git a/tools/moat/publish_image_hough.py b/tools/moat/publish_image_hough.py
+index 0bc7e5222..70c72a77f 100644
+--- a/tools/moat/publish_image_hough.py
++++ b/tools/moat/publish_image_hough.py
+@@ -35,7 +35,7 @@ def main():
+         'image-hough/complete-native-PPM-and-declared-differences',
+         'image-hough/five-real-GPU-kernel-dispatches',
+         'image-hough/forty-five-child-cold-replay',
+-        'image-hough/twenty-qualification-and-archive-mutation-checks',
++        'image-hough/twenty-two-qualification-and-archive-mutation-checks',
+         'image-hough/three-independent-fixed-source-reviews']
+     sample.update(status='PASSED',level='L4',reason_code='VALIDATED_MOAT_REWRITE',
+                   implementation=IMPLEMENTATION,selected_validation=q,
+diff --git a/tools/moat/qualify_image_hough.py b/tools/moat/qualify_image_hough.py
+index e24cb7793..21186d62f 100644
+--- a/tools/moat/qualify_image_hough.py
++++ b/tools/moat/qualify_image_hough.py
+@@ -32,7 +32,7 @@ def build_command(build,commands,root=ROOT):
+     return (len(commands)==2 and all(c['return_code']==0 and c['cwd']==str(root)
+             and c['argv']==argv for c,argv in zip(commands,expected)))
+ 
+-def cold_verify(cold,parent_override=None):
++def cold_verify(cold,parent_override=None,outer_override=None):
+     expected={'contracts':1,'options-contracts':1,'build':1,'runs':14,'validation':14,
+               'options-run':5,'options-validation':5,'runtime':1,'runtime-validation':1,
+               'foreign-stream':1,'trace':1}
+@@ -53,7 +53,39 @@ def cold_verify(cold,parent_override=None):
+         or len({c['relative'] for c in children})!=45
+         or len({c['report']['evidence'] for c in children})!=45
+         or not all(c['passed'] for c in cold['checks'])):return False
+-    parent=Path(parent_override) if parent_override else ROOT/json.loads((ROOT/cold['evidence']/'manifest.json').read_text())['raw_artifact_dir']
++    outer=Path(outer_override) if outer_override else ROOT/cold['evidence']
++    outer_manifest=json.loads((outer/'manifest.json').read_text())
++    if (outer_manifest['backend']!='host-cold-replay' or outer_manifest['experiment_outcome']!='PASSED'
++        or outer_manifest['experiment_id']!=Path(cold['evidence']).name
++        or outer_manifest['sample_id']!='Hough-clean-fixed-checkout-all-CLI-CPU-runtime-trace'):return False
++    clone=Path(cold['clone'])
++    if clone.name!='src' or clone.parent.parent!=ROOT.parent or not clone.parent.name.startswith('image-hough-cold-'):return False
++    cpu=str(ROOT/'build/image-cpu-venv/bin/python')
++    recipe=[('fresh-checkout',['git','clone','--shared','--quiet',str(ROOT),str(clone)],str(ROOT),{}),
++            ('fixed-commit',['git','checkout','--quiet',cold['source_commit']],str(clone),{}),
++            ('regenerate-fixed-contract-and-RAW-inputs',[cpu,str(clone/'tools/moat/image_hough_contracts.py')],str(clone),{}),
++            ('regenerate-fixed-valid-option-contract',[cpu,str(clone/'tools/moat/image_hough_options_contracts.py')],str(clone),{})]
++    jobs=[('tools/migration/bootstrap_sdk.py',False),('tools/moat/image_hough_build.py',False),
++          ('tools/moat/image_hough_run.py',False),('tools/moat/image_hough_reference.py',True),
++          ('tools/moat/image_hough_options.py',False),('tools/moat/image_hough_runtime.py',False),
++          ('tools/moat/image_hough_runtime_reference.py',True),
++          ('tools/moat/image_hough_foreign_stream.py',False),('tools/moat/image_hough_trace.py',False)]
++    for job,is_cpu in jobs:
++        stem=Path(job).stem
++        if is_cpu:argv=[cpu,str(clone/job)];env={}
++        else:
++            both=stem=='image_hough_foreign_stream'
++            argv=['/home/zihaomu/zihaomu_workspace/rocm10-launch.sh','env',
++                  'ROCR_VISIBLE_DEVICES=2,3' if both else 'ROCR_VISIBLE_DEVICES=3',
++                  'HIP_VISIBLE_DEVICES=0,1' if both else 'HIP_VISIBLE_DEVICES=0',
++                  'python3',str(clone/job)]
++            env={'HIP_VISIBLE_DEVICES':'0,2' if both else '2'}
++        recipe.append(('cold-'+stem,argv,str(clone),env))
++    commands=json.loads((outer/'commands.json').read_text())
++    if (len(commands)!=len(recipe) or any(c['phase']!=phase or c['argv']!=argv or c['cwd']!=cwd
++        or c['return_code']!=0 or c.get('environment_changes',{})!=env
++        for c,(phase,argv,cwd,env) in zip(commands,recipe))):return False
++    parent=Path(parent_override) if parent_override else ROOT/outer_manifest['raw_artifact_dir']
+     by=collections.defaultdict(dict)
+     child_lookup={(c['name'],c['index']):c for c in children}
+     for name,count in expected.items():
+@@ -184,16 +216,19 @@ def collect(review=None):
+         try:ok=bool(fn())
+         except (OSError,ValueError,KeyError,TypeError,IndexError,StopIteration,AssertionError,subprocess.CalledProcessError):ok=False
+         checks.append(dict(check=name,passed=ok));return ok
+-    def record(r,member,backend=None):
++    def record(r,member,backend,sample,*,parent=None,outcome='PASSED'):
+         refs.add(r['evidence']);d,m,src=sealed(r['evidence']);sources.update(src['dependencies'])
+-        return ((backend is None or m['backend']==backend)
++        return (m['backend']==backend and m['sample_id']==sample
++                and m['experiment_id']==Path(r['evidence']).name
++                and m['case_id']==r.get('case','all')
++                and m['parent_experiment_id']==parent and m['experiment_outcome']==outcome
+                 and json.loads((d/member).read_text())=={k:v for k,v in r.items() if k!='evidence'})
+     def physical(r):
+         observed=json.loads((ROOT/r['evidence']/'backend.observed.json').read_text())
+         return {d['physical_id'] for d in observed['devices']}=={1}
+     def frozen():
+         cases=p['cases'];names={c['case'] for c in cases}
+-        return (record(contract,'contracts.json','CPU-contract') and contract['status']=='FROZEN'
++        return (record(contract,'contracts.json','CPU-contract','Hough-full-entry-contract',outcome='OBSERVED') and contract['status']=='FROZEN'
+                 and p['status']=='FROZEN' and p['sample_id']==SAMPLE
+                 and p['source_sha256']==digest(ROOT/p['source'])
+                 and p['case_count']==len(cases)==len(names)==14
+@@ -202,7 +237,7 @@ def collect(review=None):
+                         for c in cases if 'input' in c))
+     gate('frozen-fourteen-complete-CLI-and-RAW-contract',frozen)
+     def built():
+-        return (record(build,'build.json','rocm-build') and physical(build)
++        return (record(build,'build.json','rocm-build','Hough-Canny-GPU-and-complete-C++-build',outcome='EXECUTED') and physical(build)
+                 and build['status']=='BUILT' and build['return_code']==0
+                 and digest(ROOT/build['binary'])==build['binary_sha256']
+                 and digest(ROOT/build['library'])==build['library_sha256']
+@@ -217,7 +252,9 @@ def collect(review=None):
+             c=cases[r['case']];args=c['arguments'].copy()
+             if '-i' in args:args[args.index('-i')+1]=str(ROOT/args[args.index('-i')+1])
+             commands=json.loads((ROOT/r['evidence']/'commands.json').read_text())
+-            if (not record(r,'run.json','rocm-original') or not physical(r) or r['status']!='EXECUTED'
++            if (not record(r,'run.json','rocm-original','Hough-complete-C++-original-CLI',
++                           outcome='EXPECTED_REJECTION' if c['expected_return_code'] else 'EXECUTED')
++                or not physical(r) or r['status']!='EXECUTED'
+                 or r['build']!=build['evidence'] or r['return_code']!=c['expected_return_code']
+                 or len(commands)!=1 or commands[0]['argv']!=[str(ROOT/build['binary']),*args]
+                 or commands[0]['return_code']!=r['return_code']):return False
+@@ -233,13 +270,14 @@ def collect(review=None):
+         if len(cpu)!=14 or {r['case'] for r in cpu}!=set(cases):return False
+         by={r['case']:r for r in runs}
+         for v in cpu:
+-            if (not record(v,'results.json','CPU-reference') or v['status']!='PASSED'
++            if (not record(v,'results.json','CPU-reference','Hough-complete-image-and-line-independent-CPU',
++                           parent=Path(by[v['case']]['evidence']).name) or v['status']!='PASSED'
+                 or not all(c['passed'] for c in v['checks'])
+                 or json.loads(json.dumps(validate(cases[v['case']],by[v['case']])))!={k:x for k,x in v.items() if k!='evidence'}):return False
+         return True
+     gate('fourteen-complete-line-list-CSV-PPM-independent-CPU-recomputations',cpu_cases)
+     def valid_options():
+-        if (not record(options_contract,'contracts.json','CPU-contract')
++        if (not record(options_contract,'contracts.json','CPU-contract','Hough-valid-nondefault-options-contract',outcome='OBSERVED')
+             or options_contract['status']!='FROZEN' or op['status']!='FROZEN'
+             or json.loads((ROOT/options_contract['evidence']/'profile.json').read_text())!=op
+             or op['sample_id']!=SAMPLE or op['case_count']!=len(op['cases'])==5
+@@ -253,7 +291,7 @@ def collect(review=None):
+             args=c['arguments'].copy();args[args.index('-i')+1]=str(ROOT/c['input'])
+             commands=json.loads((ROOT/r['evidence']/'commands.json').read_text())
+             raw=ROOT/json.loads((ROOT/r['evidence']/'manifest.json').read_text())['raw_artifact_dir']
+-            if (not record(r,'run.json','rocm-original') or not physical(r)
++            if (not record(r,'run.json','rocm-original','Hough-valid-nondefault-original-options',outcome='EXECUTED') or not physical(r)
+                 or r['status']!='EXECUTED' or r['return_code']!=0
+                 or r['build']!=build['evidence'] or r['arguments']!=args
+                 or len(commands)!=1 or commands[0]['argv']!=[str(ROOT/build['binary']),*args]
+@@ -264,7 +302,10 @@ def collect(review=None):
+                 or v['status']!='PASSED' or not all(ch['passed'] for ch in v['checks'])
+                 or json.loads(json.dumps(validate(c,r)))!={k:y for k,y in v.items() if k!='evidence'}):return False
+             refs.add(v['evidence']);d,m,src=sealed(v['evidence']);sources.update(src['dependencies'])
+-            if m['backend']!='CPU-reference' or json.loads((d/'validation.json').read_text())!=dict(status='PASSED',checks=v['checks']):return False
++            if (m['backend']!='CPU-reference' or m['sample_id']!='Hough-valid-options-independent-CPU'
++                or m['experiment_id']!=Path(v['evidence']).name or m['case_id']!=c['case']
++                or m['parent_experiment_id']!=Path(r['evidence']).name or m['experiment_outcome']!='PASSED'
++                or json.loads((d/'validation.json').read_text())!=dict(status='PASSED',checks=v['checks'])):return False
+         return True
+     gate('five-valid-nondefault-parameter-and-1196-peak-complete-products',valid_options)
+     def runtime_gate():
+@@ -279,7 +320,7 @@ def collect(review=None):
+                   '-L'+str(lib.parent),'-limage_hough','-Wl,-rpath,'+str(lib.parent),
+                   '-L'+str(core/'lib'),'-Wl,-rpath,'+str(core/'lib'),'-lamdhip64','-o',str(binary)]
+         recomputed=json.loads(json.dumps(runtime_validate(runtime)))
+-        return (record(runtime,'runtime.json','rocm-runtime') and physical(runtime)
++        return (record(runtime,'runtime.json','rocm-runtime','Hough-actual-device-allocation-and-stream-runtime') and physical(runtime)
+                 and runtime['status']=='PASSED' and runtime['case_count']==19
+                 and runtime['build_evidence']==build['evidence']
+                 and len(commands)==2 and commands[0]['argv']==expected
+@@ -288,7 +329,7 @@ def collect(review=None):
+                 and (d/commands[1]['stdout']).read_text().splitlines()==['|'.join(row) for row in runtime['rows']]
+                 and (d/commands[1]['stderr']).read_text().strip()=='alignment-spans-proven|1|1'
+                 and len(runtime['checks'])>=9 and all(c['passed'] for c in runtime['checks'])
+-                and record(runtime_cpu,'results.json','CPU-reference')
++                and record(runtime_cpu,'results.json','CPU-reference','Hough-runtime-independent-CPU-all-peaks',parent=Path(runtime['evidence']).name)
+                 and runtime_cpu['status']=='PASSED' and all(c['passed'] for c in runtime_cpu['checks'])
+                 and recomputed=={k:v for k,v in runtime_cpu.items() if k!='evidence'})
+     gate('nineteen-real-device-runtime-and-all-peaks-independent-CPU',runtime_gate)
+@@ -304,7 +345,7 @@ def collect(review=None):
+                   '-L'+str(lib.parent),'-limage_hough','-Wl,-rpath,'+str(lib.parent),
+                   '-L'+str(core/'lib'),'-Wl,-rpath,'+str(core/'lib'),'-lamdhip64','-o',str(binary)]
+         observed=json.loads((d/'backend.observed.json').read_text())
+-        return (record(foreign,'results.json','rocm-runtime')
++        return (record(foreign,'results.json','rocm-runtime','Hough-foreign-device-empty-stream-rejection')
+                 and foreign['status']=='PASSED' and foreign['build_evidence']==build['evidence']
+                 and {x['physical_id'] for x in observed['devices']}=={0,1}
+                 and foreign['output']=='foreign-device-stream|101|1'
+@@ -334,7 +375,7 @@ def collect(review=None):
+             agent=lookup[row['Agent_Id'].split()[-1]];loc=int(agent['Location_Id'])
+             pci=f"{int(agent['Domain']):04x}:{loc>>8:02x}:{(loc>>3)&31:02x}.{loc&7}"
+             if pci not in allowed or int(row['End_Timestamp'])<=int(row['Start_Timestamp']) or int(row['Grid_Size_X'])<=0:return False
+-        return (record(trace,'trace-result.json','rocm-trace') and physical(trace)
++        return (record(trace,'trace-result.json','rocm-trace','Hough-full-synthetic-real-GPU-Canny-votes-peaks-trace',parent=Path(build['evidence']).name) and physical(trace)
+                 and trace['status']=='PASSED' and trace['return_code']==0
+                 and trace['build_evidence']==build['evidence'] and trace['original_evidence']==original['evidence']
+                 and dict(counter)==trace['counts'] and all(counter[k]==1 for k in names)
+@@ -346,7 +387,7 @@ def collect(review=None):
+         refs.add(original['evidence']);d,m,src=sealed(original['evidence']);sources.update(src['dependencies'])
+         project=next(r for r in runs if r['case']=='synthetic-default')
+         independently=native_validate(original,project,native)
+-        return (record(native,'comparison.json','CPU-reference') and native['status']=='PASSED'
++        return (record(native,'comparison.json','CPU-reference','Hough-complete-native-CUDA-project-HIP-CPU-comparison') and native['status']=='PASSED'
+                 and m['backend']=='cuda-original' and independently['status']=='PASSED'
+                 and all(c['passed'] for c in independently['checks'])
+                 and original['return_code']==original['build_return_code']==original['collection_return_code']==0
+@@ -361,12 +402,12 @@ def collect(review=None):
+     gate('forty-five-sealed-child-clean-checkout-replay',cold_gate)
+     def mutations():
+         r=load('qualification-checks')
+-        names=json.loads((ROOT/'migration/rewrite/image-hough-qualification-checks-v4.json').read_text())
+-        return (record(r,'checks.json','CPU-validator-test') and r['status']=='PASSED'
+-                and r['case_count']==len(r['checks'])==len(names)==20
++        names=json.loads((ROOT/'migration/rewrite/image-hough-qualification-checks-v5.json').read_text())
++        return (record(r,'checks.json','CPU-validator-test','Hough-actual-qualification-mutations') and r['status']=='PASSED'
++                and r['case_count']==len(r['checks'])==len(names)==22
+                 and [c['check'] for c in r['checks']]==names
+                 and all(c['passed'] for c in r['checks']))
+-    gate('twenty-real-qualification-and-archive-mutation-checks',mutations)
++    gate('twenty-two-real-qualification-and-archive-mutation-checks',mutations)
+     sources.update({'tools/moat/qualify_image_hough.py','tools/moat/publish_image_hough.py',
+                     'tools/moat/image_hough_qualification_checks.py',
+                     'tools/moat/image_hough_native_reference.py','tools/moat/image_regions_native.py',
