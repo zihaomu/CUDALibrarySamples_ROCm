@@ -73738,34 +73738,42 @@
       "actual_library": "Project HIP Gaussian/Canny/resize/RGB gray plus pinned OpenCV 4.12 CPU benchmark",
       "backend_library": "project HIP image benchmark",
       "implementation": "rocm/ported/NPP/opencvBenchmark/opencvBenchmark.cpp",
-      "status": "PARTIAL",
-      "level": "L3",
+      "status": "PASSED",
+      "level": "L4",
       "required_cases": [
-        "image-benchmark/frozen-six-CLI",
+        "image-benchmark/small",
+        "image-benchmark/odd-half",
+        "image-benchmark/original-default",
+        "image-benchmark/invalid-dimensions",
+        "image-benchmark/missing-input",
+        "image-benchmark/unknown-option",
         "image-benchmark/matched-OpenCV4.12-and-four-HIP-build",
-        "image-benchmark/six-real-GPU-CLI",
-        "image-benchmark/all-four-independent-CPU",
-        "image-benchmark/original-CUDA-observed-semantics",
+        "image-benchmark/all-four-independent-CPU-and-printed-metrics",
+        "image-benchmark/original-5090-and-algorithm-variants",
         "image-benchmark/eighteen-device-contracts",
         "image-benchmark/real-four-operation-trace",
         "image-benchmark/thirty-five-reader-counterexamples",
-        "image-benchmark/fixed-commit-cold-replay",
-        "image-benchmark/independent-review",
-        "image-benchmark/composite-qualification-and-Git-anchor"
+        "image-benchmark/nineteen-child-fixed-commit-cold-replay",
+        "image-benchmark/three-independent-reviews"
       ],
       "passed_cases": [
-        "image-benchmark/frozen-six-CLI",
+        "image-benchmark/small",
+        "image-benchmark/odd-half",
+        "image-benchmark/original-default",
+        "image-benchmark/invalid-dimensions",
+        "image-benchmark/missing-input",
+        "image-benchmark/unknown-option",
         "image-benchmark/matched-OpenCV4.12-and-four-HIP-build",
-        "image-benchmark/six-real-GPU-CLI",
-        "image-benchmark/all-four-independent-CPU",
-        "image-benchmark/original-CUDA-observed-semantics",
+        "image-benchmark/all-four-independent-CPU-and-printed-metrics",
+        "image-benchmark/original-5090-and-algorithm-variants",
         "image-benchmark/eighteen-device-contracts",
         "image-benchmark/real-four-operation-trace",
         "image-benchmark/thirty-five-reader-counterexamples",
-        "image-benchmark/fixed-commit-cold-replay"
+        "image-benchmark/nineteen-child-fixed-commit-cold-replay",
+        "image-benchmark/three-independent-reviews"
       ],
-      "reason_code": "QUALIFICATION_PENDING",
-      "reason": "原始四算子C++流程、6组真实GPU CLI与独立CPU全量输出、5090原生同输入同版OpenCV对照、18运行合同、真实GPU trace及35项证据反例通过；六组CLI、runtime、trace及冷运行的原始ldd输出已重新解析并核库路径/SHA。Gaussian/Canny项目算法变体记录，原生NPP不输出像素。最终固定源码10任务/19子证据冷检出及原始记录复算通过；待独立复审与组合资格，当前不计整例通过或新增功能族。",
+      "reason_code": "VALIDATED_MOAT_REWRITE",
+      "reason": "完整四算子C++原例、6 CLI、独立CPU全量产品/四行OpenCV统计、5090原生同输入与同构建OpenCV对照、18设备合同、真实GPU trace、35项反例及19子证据固定提交冷检出、三份独立复审通过。Gaussian/Canny为明确项目算法变体；NPP原生未输出像素，不宣称NPP逐像素等价；计时仅观察。",
       "cuda_baseline": "PASSED",
       "cuda_comparison": "OBSERVED",
       "benchmark": "OBSERVED_NOT_QUALIFIED",
@@ -73783,7 +73791,30 @@
         "migration/reports/image-benchmark-runtime.json",
         "migration/reports/image-benchmark-trace.json",
         "migration/reports/image-benchmark-negative.json",
-        "migration/reports/image-benchmark-cold.json"
+        "migration/reports/image-benchmark-cold.json",
+        "migration/reports/evidence/rewrite/I3/NPP_opencvBenchmark__opencvBenchmark.cpp/20261112T074053.375259Z-I3-composite-qualification-ad2742c777",
+        "migration/reports/evidence/rewrite/I3/NPP-opencvBenchmark-full-native-default/20261111T182242.064805Z-I3-cuda-original-a496dad9bb",
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-all-four-actual-GPU-kernel-traces/20261112T061221.830455Z-I3-rocm-trace-1a89755682",
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T061117.241930Z-I3-rocm-original-80f5434d27",
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T061120.055544Z-I3-rocm-original-ded2a762ad",
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T061122.474001Z-I3-rocm-original-a3458ca46b",
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T061127.645369Z-I3-rocm-original-48b36e7151",
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T061129.639226Z-I3-rocm-original-e94347a94e",
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T061131.639388Z-I3-rocm-original-87f7d1be6b",
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-fixed-Git-cold-four-operations-and-CPU/20261112T073608.903658Z-I3-host-cold-replay-947f7840c5",
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-four-HIP-operations-and-original-C__-CLI-build/20261112T061100.216767Z-I3-rocm-build-1f299febbf",
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T061142.072482Z-I3-CPU-reference-42a5fa4b43",
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T061143.419217Z-I3-CPU-reference-35f91a2a0a",
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T061144.753101Z-I3-CPU-reference-3b52d898dc",
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T061147.857851Z-I3-CPU-reference-4164617835",
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T061149.193614Z-I3-CPU-reference-b186686eab",
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T061150.560065Z-I3-CPU-reference-9635b29507",
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-original-CLI-contract/20261112T060923.250526Z-I3-CPU-contract-7eb6a4ae0d",
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-original-CUDA-and-HIP-sealed-semantics/20261112T061704.756281Z-I3-CPU-comparison-0fbcaea16c",
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-sealed-reader-counterexamples/20261112T073237.928177Z-I3-CPU-negative-5b56d4c016",
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-three-kernel-device-and-stream-contracts/20261112T061210.603243Z-I3-rocm-runtime-25f70fa5b7",
+        "migration/reports/evidence/rewrite/I3/OpenCV-private-native-core-imgproc-dependency/20261111T182002.363914Z-I3-CPU-native-setup-d6a8d00729",
+        "migration/reports/evidence/rewrite/I3/benchmark-matched-private-OpenCV-4.12/20261112T060931.475676Z-I3-rocm-setup-9380f08fd5"
       ],
       "attempts": [
         {
@@ -73835,6 +73866,131 @@
             }
           ],
           "qualified_physical_devices": true
+        },
+        {
+          "sample_id": "NPP/opencvBenchmark::opencvBenchmark.cpp",
+          "kind": "image-benchmark-full",
+          "status": "PASSED",
+          "implementation": "rocm/ported/NPP/opencvBenchmark/opencvBenchmark.cpp",
+          "implementation_sha256": "afdb9093d89b28a6963840989bf23446a3fc866b9a79832dcd4b090e395c04da",
+          "dependencies": {
+            "rocm/ported/NPP/opencvBenchmark/opencvBenchmark.cpp": "afdb9093d89b28a6963840989bf23446a3fc866b9a79832dcd4b090e395c04da",
+            "NPP/opencvBenchmark/opencvBenchmark.cpp": "0332d73b327bbf76726b6eb13e38bbf68110baff7f923f328dbaabbca54fb30e",
+            "NPP/opencvBenchmark/images/CircuitBoard_2048x1024_8u.raw": "4fdc3295d8f6dde8bc9ec0850bc8d29c8a80e991ce8461dab08056e172ab89ec",
+            "migration/reports/image-I3-rocm-OpenCV.json": "db187a764caa42f94c0a7b7994434e987c51e7518cc04ea7bb78febfb0fa4227",
+            "migration/reports/image-I3-native-OpenCV.json": "e59e5abb6f0043cd6af7075c706eb16358fa4dd1f8d70379c8c1199deebf1310",
+            "rocm/common/image/benchmark.h": "6e17c053f533be87af013193e549c50c177b65df355991c7302b340dcd06edb0",
+            "rocm/common/image/benchmark.hip": "c383ab6d3583294fb88915d7f9b93fe3c97fa6134a5a7794997e6c4610b8ff08",
+            "rocm/common/image/canny.h": "b0fd6536f299550aa30357067fa56d5d599318aeee274e1146a6645720c29424",
+            "rocm/common/image/canny.hip": "250f0704d2d66038a04e7990a5c49a17628c64674a834c8124304fb48cc7592b",
+            "rocm/common/image/canny_stages.h": "afd4be4bedbfc218a36169437f086f86ce82d6486e174db2bc534de208dce4b9",
+            "rocm/common/image/canny_stages.hip": "dd0a7b1c89003532626ad73e9f6355f866f015fad0d7cf6629aee92a2c6e06b6",
+            "migration/rewrite/image-benchmark-profile.json": "b67da24e718078658ef14ecf589a5f09e0419758e12729bb4acca0e484b72d24",
+            "tools/moat/image_benchmark_reference.py": "631458e9556fb560b49fc7169b3ce46c773826402831fa1789b12196b8808b10",
+            "tools/moat/image_benchmark_native_comparison.py": "eeb56c3b0c2f67bd11a9a5e1b550cbc05ace4befd0bf16edcb99ebc59d367bee",
+            "tools/moat/image_benchmark_identity.py": "edb121d86c9a9ea65283621604d74b57d8794f2d2c41605bbbcd91fc8454db72",
+            "tools/moat/image_benchmark_cold.py": "b4cf560fedef597f4aacbd120d5c85bb8c0d65766bd74f11cf581157ebc6aa3a",
+            "tools/moat/qualify_image_benchmark.py": "6c52e21249c06df99b30169fa273970a1db529787846048eb127ba4445ba453c"
+          },
+          "case_ids": [
+            "small",
+            "odd-half",
+            "original-default",
+            "invalid-dimensions",
+            "missing-input",
+            "unknown-option"
+          ],
+          "case_count": 6,
+          "comparison_mode": "DOCUMENTED_IMAGE_ALGORITHM_VARIANTS",
+          "checks": [
+            {
+              "check": "frozen-original-six-CLI-and-mathematics",
+              "passed": true
+            },
+            {
+              "check": "sealed-contract",
+              "passed": true
+            },
+            {
+              "check": "pinned-native-matched-OpenCV-dependency",
+              "passed": true
+            },
+            {
+              "check": "current-four-operation-GPU-build",
+              "passed": true
+            },
+            {
+              "check": "six-unique-actual-GPU-CLI-and-loaded-libraries",
+              "passed": true
+            },
+            {
+              "check": "six-independent-full-products-and-error-diagnostics",
+              "passed": true
+            },
+            {
+              "check": "real-unmodified-5090-four-operation-comparison",
+              "passed": true
+            },
+            {
+              "check": "eighteen-actual-device-memory-and-stream-contracts",
+              "passed": true
+            },
+            {
+              "check": "four-GPU-operation-and-Canny-real-kernel-trace",
+              "passed": true
+            },
+            {
+              "check": "thirty-five-native-CLI-and-closure-counterexamples",
+              "passed": true
+            },
+            {
+              "check": "fixed-commit-clean-ten-job-nineteen-child-replay",
+              "passed": true
+            },
+            {
+              "check": "three-independent-fixed-source-reviews",
+              "passed": true
+            }
+          ],
+          "evidence_references": [
+            "migration/reports/evidence/rewrite/I3/NPP-opencvBenchmark-full-native-default/20261111T182242.064805Z-I3-cuda-original-a496dad9bb",
+            "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-all-four-actual-GPU-kernel-traces/20261112T061221.830455Z-I3-rocm-trace-1a89755682",
+            "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T061117.241930Z-I3-rocm-original-80f5434d27",
+            "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T061120.055544Z-I3-rocm-original-ded2a762ad",
+            "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T061122.474001Z-I3-rocm-original-a3458ca46b",
+            "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T061127.645369Z-I3-rocm-original-48b36e7151",
+            "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T061129.639226Z-I3-rocm-original-e94347a94e",
+            "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T061131.639388Z-I3-rocm-original-87f7d1be6b",
+            "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-fixed-Git-cold-four-operations-and-CPU/20261112T073608.903658Z-I3-host-cold-replay-947f7840c5",
+            "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-four-HIP-operations-and-original-C__-CLI-build/20261112T061100.216767Z-I3-rocm-build-1f299febbf",
+            "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T061142.072482Z-I3-CPU-reference-42a5fa4b43",
+            "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T061143.419217Z-I3-CPU-reference-35f91a2a0a",
+            "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T061144.753101Z-I3-CPU-reference-3b52d898dc",
+            "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T061147.857851Z-I3-CPU-reference-4164617835",
+            "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T061149.193614Z-I3-CPU-reference-b186686eab",
+            "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T061150.560065Z-I3-CPU-reference-9635b29507",
+            "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-original-CLI-contract/20261112T060923.250526Z-I3-CPU-contract-7eb6a4ae0d",
+            "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-original-CUDA-and-HIP-sealed-semantics/20261112T061704.756281Z-I3-CPU-comparison-0fbcaea16c",
+            "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-sealed-reader-counterexamples/20261112T073237.928177Z-I3-CPU-negative-5b56d4c016",
+            "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-three-kernel-device-and-stream-contracts/20261112T061210.603243Z-I3-rocm-runtime-25f70fa5b7",
+            "migration/reports/evidence/rewrite/I3/OpenCV-private-native-core-imgproc-dependency/20261111T182002.363914Z-I3-CPU-native-setup-d6a8d00729",
+            "migration/reports/evidence/rewrite/I3/benchmark-matched-private-OpenCV-4.12/20261112T060931.475676Z-I3-rocm-setup-9380f08fd5"
+          ],
+          "source_commit": "96b9c5f0f695ba018783613a770889e89a7acb61",
+          "rocm_evidence": "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T061122.474001Z-I3-rocm-original-a3458ca46b",
+          "cuda_evidence": "migration/reports/evidence/rewrite/I3/NPP-opencvBenchmark-full-native-default/20261111T182242.064805Z-I3-cuda-original-a496dad9bb",
+          "environment": "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-four-HIP-operations-and-original-C__-CLI-build/20261112T061100.216767Z-I3-rocm-build-1f299febbf/backend.observed.json",
+          "devices": [
+            {
+              "logical_id": 0,
+              "pci_bdf": "0000:23:00.0",
+              "physical_id": 1,
+              "uuid": "39383130336566346332326133636363"
+            }
+          ],
+          "scope": "Four original NPP/OpenCV benchmark operations, six valid/error CLI cases, full independent CPU outputs, 18 real device contracts, actual kernel trace, matched OpenCV 4.12 loaded libraries, original 5090 statistics and documented Gaussian/Canny variants. Linux/gfx1201/ROCm10.1 only; no NPP pixel-exact or cross-device performance claim.",
+          "qualification_id": "20261112T074053.375259Z-I3-composite-qualification-ad2742c777",
+          "evidence": "migration/reports/evidence/rewrite/I3/NPP_opencvBenchmark__opencvBenchmark.cpp/20261112T074053.375259Z-I3-composite-qualification-ad2742c777"
         }
       ],
       "milestone": "M3",
@@ -73874,7 +74030,7 @@
         "qualified_physical_devices": true
       },
       "original_implementation": "rocm/ported/NPP/opencvBenchmark/opencvBenchmark.cpp",
-      "retry_condition": "重建和原例/CPU/运行/trace任一改变须重新资格；NPP逐像素等价需原生输出采集。",
+      "retry_condition": "四算子数学政策、共享HIP核、CPU oracle、OpenCV版本/动态库、CLI或实验门改变需重新资格。",
       "original_semantics": {
         "contract_source": "NPP/opencvBenchmark/opencvBenchmark.cpp",
         "source_sha256": "0332d73b327bbf76726b6eb13e38bbf68110baff7f923f328dbaabbca54fb30e",
@@ -73882,7 +74038,7 @@
         "review_scope": "Original source is the authoritative dtype/layout/batch/API contract; qualified subset and deviations are explicit in reason and required_cases."
       },
       "equivalence": "DOCUMENTED_IMAGE_ALGORITHM_VARIANTS",
-      "next_step": "固定Git提交冷检出、独立复审、组合资格和发布。",
+      "next_step": "I3两个watershed完整入口、I4–I9 JPEG/JPEG2000 队列。",
       "original_cuda": {
         "sample_id": "NPP/opencvBenchmark::opencvBenchmark.cpp",
         "scope": "original_profile",
@@ -73907,10 +74063,135 @@
       },
       "cuda_baseline_scope": "Original source with observation-only output where present; build/run qualification, separate from independent correctness comparison.",
       "cuda_baseline_reason": "Missing optional CUDA SDK/input or skipped compute",
-      "cuda_comparison_reason": "同4096×2048/20×5、同OpenCV4.12、同输入；NPP原例只输出统计与计时，不输出像素，故不声称NPP逐像素相等；性能未资格。",
-      "cuda_comparison_mode": "ORIGINAL_NATIVE_STATISTICAL_OBSERVATION",
+      "cuda_comparison_reason": "5090原生与ROCm同输入/4096×2048/20×5/OpenCV4.12。NPP不输出产品像素；Gaussian原生vsOpenCV均差1.70、项目0.00（原始尺寸），Canny计数同546308但掩码不保证相同。",
+      "cuda_comparison_mode": "DOCUMENTED_IMAGE_ALGORITHM_VARIANTS",
       "active_batch": "I3",
-      "reproduce": "python3 tools/moat/image_benchmark_contracts.py\npython3 tools/moat/image_benchmark_deps.py\npython3 tools/moat/image_benchmark_build.py\npython3 tools/moat/image_benchmark_run.py\nbuild/image-cpu-venv/bin/python tools/moat/image_benchmark_reference.py\npython3 tools/moat/image_benchmark_runtime.py\npython3 tools/moat/image_benchmark_trace.py"
+      "reproduce": "python3 tools/moat/image_benchmark_contracts.py\npython3 tools/moat/image_benchmark_deps.py\npython3 tools/moat/image_benchmark_build.py\npython3 tools/moat/image_benchmark_run.py\nbuild/image-cpu-venv/bin/python tools/moat/image_benchmark_reference.py\npython3 tools/moat/image_benchmark_native_comparison.py\npython3 tools/moat/image_benchmark_runtime.py\npython3 tools/moat/image_benchmark_trace.py\npython3 tools/moat/image_benchmark_cold.py\npython3 tools/moat/qualify_image_benchmark.py",
+      "selected_validation": {
+        "sample_id": "NPP/opencvBenchmark::opencvBenchmark.cpp",
+        "kind": "image-benchmark-full",
+        "status": "PASSED",
+        "implementation": "rocm/ported/NPP/opencvBenchmark/opencvBenchmark.cpp",
+        "implementation_sha256": "afdb9093d89b28a6963840989bf23446a3fc866b9a79832dcd4b090e395c04da",
+        "dependencies": {
+          "rocm/ported/NPP/opencvBenchmark/opencvBenchmark.cpp": "afdb9093d89b28a6963840989bf23446a3fc866b9a79832dcd4b090e395c04da",
+          "NPP/opencvBenchmark/opencvBenchmark.cpp": "0332d73b327bbf76726b6eb13e38bbf68110baff7f923f328dbaabbca54fb30e",
+          "NPP/opencvBenchmark/images/CircuitBoard_2048x1024_8u.raw": "4fdc3295d8f6dde8bc9ec0850bc8d29c8a80e991ce8461dab08056e172ab89ec",
+          "migration/reports/image-I3-rocm-OpenCV.json": "db187a764caa42f94c0a7b7994434e987c51e7518cc04ea7bb78febfb0fa4227",
+          "migration/reports/image-I3-native-OpenCV.json": "e59e5abb6f0043cd6af7075c706eb16358fa4dd1f8d70379c8c1199deebf1310",
+          "rocm/common/image/benchmark.h": "6e17c053f533be87af013193e549c50c177b65df355991c7302b340dcd06edb0",
+          "rocm/common/image/benchmark.hip": "c383ab6d3583294fb88915d7f9b93fe3c97fa6134a5a7794997e6c4610b8ff08",
+          "rocm/common/image/canny.h": "b0fd6536f299550aa30357067fa56d5d599318aeee274e1146a6645720c29424",
+          "rocm/common/image/canny.hip": "250f0704d2d66038a04e7990a5c49a17628c64674a834c8124304fb48cc7592b",
+          "rocm/common/image/canny_stages.h": "afd4be4bedbfc218a36169437f086f86ce82d6486e174db2bc534de208dce4b9",
+          "rocm/common/image/canny_stages.hip": "dd0a7b1c89003532626ad73e9f6355f866f015fad0d7cf6629aee92a2c6e06b6",
+          "migration/rewrite/image-benchmark-profile.json": "b67da24e718078658ef14ecf589a5f09e0419758e12729bb4acca0e484b72d24",
+          "tools/moat/image_benchmark_reference.py": "631458e9556fb560b49fc7169b3ce46c773826402831fa1789b12196b8808b10",
+          "tools/moat/image_benchmark_native_comparison.py": "eeb56c3b0c2f67bd11a9a5e1b550cbc05ace4befd0bf16edcb99ebc59d367bee",
+          "tools/moat/image_benchmark_identity.py": "edb121d86c9a9ea65283621604d74b57d8794f2d2c41605bbbcd91fc8454db72",
+          "tools/moat/image_benchmark_cold.py": "b4cf560fedef597f4aacbd120d5c85bb8c0d65766bd74f11cf581157ebc6aa3a",
+          "tools/moat/qualify_image_benchmark.py": "6c52e21249c06df99b30169fa273970a1db529787846048eb127ba4445ba453c"
+        },
+        "case_ids": [
+          "small",
+          "odd-half",
+          "original-default",
+          "invalid-dimensions",
+          "missing-input",
+          "unknown-option"
+        ],
+        "case_count": 6,
+        "comparison_mode": "DOCUMENTED_IMAGE_ALGORITHM_VARIANTS",
+        "checks": [
+          {
+            "check": "frozen-original-six-CLI-and-mathematics",
+            "passed": true
+          },
+          {
+            "check": "sealed-contract",
+            "passed": true
+          },
+          {
+            "check": "pinned-native-matched-OpenCV-dependency",
+            "passed": true
+          },
+          {
+            "check": "current-four-operation-GPU-build",
+            "passed": true
+          },
+          {
+            "check": "six-unique-actual-GPU-CLI-and-loaded-libraries",
+            "passed": true
+          },
+          {
+            "check": "six-independent-full-products-and-error-diagnostics",
+            "passed": true
+          },
+          {
+            "check": "real-unmodified-5090-four-operation-comparison",
+            "passed": true
+          },
+          {
+            "check": "eighteen-actual-device-memory-and-stream-contracts",
+            "passed": true
+          },
+          {
+            "check": "four-GPU-operation-and-Canny-real-kernel-trace",
+            "passed": true
+          },
+          {
+            "check": "thirty-five-native-CLI-and-closure-counterexamples",
+            "passed": true
+          },
+          {
+            "check": "fixed-commit-clean-ten-job-nineteen-child-replay",
+            "passed": true
+          },
+          {
+            "check": "three-independent-fixed-source-reviews",
+            "passed": true
+          }
+        ],
+        "evidence_references": [
+          "migration/reports/evidence/rewrite/I3/NPP-opencvBenchmark-full-native-default/20261111T182242.064805Z-I3-cuda-original-a496dad9bb",
+          "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-all-four-actual-GPU-kernel-traces/20261112T061221.830455Z-I3-rocm-trace-1a89755682",
+          "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T061117.241930Z-I3-rocm-original-80f5434d27",
+          "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T061120.055544Z-I3-rocm-original-ded2a762ad",
+          "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T061122.474001Z-I3-rocm-original-a3458ca46b",
+          "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T061127.645369Z-I3-rocm-original-48b36e7151",
+          "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T061129.639226Z-I3-rocm-original-e94347a94e",
+          "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T061131.639388Z-I3-rocm-original-87f7d1be6b",
+          "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-fixed-Git-cold-four-operations-and-CPU/20261112T073608.903658Z-I3-host-cold-replay-947f7840c5",
+          "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-four-HIP-operations-and-original-C__-CLI-build/20261112T061100.216767Z-I3-rocm-build-1f299febbf",
+          "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T061142.072482Z-I3-CPU-reference-42a5fa4b43",
+          "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T061143.419217Z-I3-CPU-reference-35f91a2a0a",
+          "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T061144.753101Z-I3-CPU-reference-3b52d898dc",
+          "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T061147.857851Z-I3-CPU-reference-4164617835",
+          "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T061149.193614Z-I3-CPU-reference-b186686eab",
+          "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T061150.560065Z-I3-CPU-reference-9635b29507",
+          "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-original-CLI-contract/20261112T060923.250526Z-I3-CPU-contract-7eb6a4ae0d",
+          "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-original-CUDA-and-HIP-sealed-semantics/20261112T061704.756281Z-I3-CPU-comparison-0fbcaea16c",
+          "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-sealed-reader-counterexamples/20261112T073237.928177Z-I3-CPU-negative-5b56d4c016",
+          "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-three-kernel-device-and-stream-contracts/20261112T061210.603243Z-I3-rocm-runtime-25f70fa5b7",
+          "migration/reports/evidence/rewrite/I3/OpenCV-private-native-core-imgproc-dependency/20261111T182002.363914Z-I3-CPU-native-setup-d6a8d00729",
+          "migration/reports/evidence/rewrite/I3/benchmark-matched-private-OpenCV-4.12/20261112T060931.475676Z-I3-rocm-setup-9380f08fd5"
+        ],
+        "source_commit": "96b9c5f0f695ba018783613a770889e89a7acb61",
+        "rocm_evidence": "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T061122.474001Z-I3-rocm-original-a3458ca46b",
+        "cuda_evidence": "migration/reports/evidence/rewrite/I3/NPP-opencvBenchmark-full-native-default/20261111T182242.064805Z-I3-cuda-original-a496dad9bb",
+        "environment": "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-four-HIP-operations-and-original-C__-CLI-build/20261112T061100.216767Z-I3-rocm-build-1f299febbf/backend.observed.json",
+        "devices": [
+          {
+            "logical_id": 0,
+            "pci_bdf": "0000:23:00.0",
+            "physical_id": 1,
+            "uuid": "39383130336566346332326133636363"
+          }
+        ],
+        "scope": "Four original NPP/OpenCV benchmark operations, six valid/error CLI cases, full independent CPU outputs, 18 real device contracts, actual kernel trace, matched OpenCV 4.12 loaded libraries, original 5090 statistics and documented Gaussian/Canny variants. Linux/gfx1201/ROCm10.1 only; no NPP pixel-exact or cross-device performance claim.",
+        "qualification_id": "20261112T074053.375259Z-I3-composite-qualification-ad2742c777",
+        "evidence": "migration/reports/evidence/rewrite/I3/NPP_opencvBenchmark__opencvBenchmark.cpp/20261112T074053.375259Z-I3-composite-qualification-ad2742c777"
+      }
     },
     {
       "id": "NPP/templateMatching::templateMatching.cpp",

@@ -42,6 +42,13 @@ def operator_name(sample):
  if family=='cuTENSOR':return {'contraction':'张量 contraction','contraction_trinary':'张量 contraction','contraction_plan_cache':'张量 plan cache','einsum':'张量 einsum','elementwise_permute_padding':'张量 permutation','elementwise_binary':'二元逐元素运算','elementwise_trinary':'三元逐元素运算','elementwise_permute':'张量 permutation','reduction':'张量 reduction'}[path.stem]
  raise ValueError('Qualified family needs an explicit operator grouping: '+family)
 
+def operator_names(sample):
+ path=pathlib.PurePosixPath(sample['source'])
+ if sample['family']=='NPP' and path.parent.name=='opencvBenchmark':
+  return ('Gaussian 5×5 滤波','Canny 边缘检测','1/2 双线性缩放','RGB→灰度')
+ if sample['family']=='NPP' and path.parent.name=='nppCanny':return ('Canny 边缘检测',)
+ return (operator_name(sample),)
+
 SCOPES={
  'cuBLAS':'固定教学输入与所列扩展 cases；第二批含并列/空索引、旋转 flags、batch/grouped 和正负 alpha；rotmg 极端缩放使用明确登记的 HIP 修正。其它精度/API 仍逐例管理。',
  'cuBLASLt':'3 个 profile：FP32 SGEMM、HSH FP16 input/output + FP32 compute 的 pointer-array 与 strided batch。',
@@ -76,10 +83,12 @@ def summarize(cat):
  for family in CANDIDATES:
   samples=[s for s in cat['samples'] if s['family']==family];groups=collections.defaultdict(list)
   for s in samples:
-   if s['status']=='PASSED':groups[operator_name(s)].append(s)
+   if s['status']=='PASSED':
+    for name in operator_names(s):groups[name].append(s)
   operations=[{'name':name,'sample_ids':[s['id'] for s in rows],'sample_reports':['migration/sample-reports/'+s['source']+'.md' for s in rows],'source_profiles':len(rows)} for name,rows in sorted(groups.items())];counts=collections.Counter(s['status'] for s in samples);total_operators+=len(operations)
   scope=SCOPES.get(family,'尚无通过整例验收的算子族。')
-  if family=='NPP' and '三通道 Canny' in groups:scope='精确Euclidean距离/Voronoi/整数截断与完整NCC已通过；C3 Canny使用项目HIP经典8连接强种子滞后变体，C++/Python三PNG与10次原流程、22组CPU精确mask及native完整差异、stream/并发/错误/trace/冷重放和复审通过。原图比NPP少4328个弱边缘像素（IoU0.6323），不声明native mask逐点兼容；其它入口单列。'
+  if family=='NPP' and 'Canny 边缘检测' in groups:scope='精确Euclidean距离/Voronoi/整数截断与完整NCC已通过；C3 Canny使用项目HIP经典8连接强种子滞后变体，C++/Python三PNG与10次原流程、22组CPU精确mask及native完整差异、stream/并发/错误/trace/冷重放和复审通过。原图比NPP少4328个弱边缘像素（IoU0.6323），不声明native mask逐点兼容；其它入口单列。'
+  if family=='NPP' and 'Gaussian 5×5 滤波' in groups:scope+=' OpenCV benchmark原四算子（Gaussian、C1 Canny、半尺寸双线性缩放、RGB灰度）共享一个通过入口，六CLI和独立CPU全量像素、18运行合同、5090同版OpenCV原生统计、GPU trace、35反例与19子冷重放验收；Gaussian/Canny差异按项目算法变体记录，不宣称NPP逐像素或跨设备性能等价。'
   if family in {'NPP','NPP+'} and '等值八连接 CCL 与标签压缩' in groups:scope+=' 等值八连接CCL与GPU标签压缩覆盖所有值（含0）、两个真实C++入口、单图/异构batch及NPP+默认/条件编译模式；原生NPP/NPP+分区失败独立记录，项目按CPU正确分区验收。'
   if family in {'NPP','NPP+'} and '轮廓/闭环有序几何与重建' in groups:scope+=' 轮廓采用项目HIP有向像素单元边、GPU闭环排序及geometry驱动重建；保持原例三/四RAW、范围/bypass与有序诊断，22全量输入和15实际流程55文件验收。此表示非NPP专有packed ABI，原生分区差异与历史ABI1失败另存。'
   if family=='NPP' and 'Hough 直线检测' in groups:scope+=' Hough原例使用项目HIP Canny/180角投票/GPU峰提取，19完整CLI及逐字节PPM/逐峰CPU、19运行合同、45子冷检出及28变异通过；与5090原生默认图差10627 RGB像素、红线IoU0.23946，作为固定项目算法变体，不声明NPP逐位一致。'
@@ -99,7 +108,7 @@ def render_overview(report,prefix=''):
  text+='\n以下仅有子集/能力探针，**不计入上述整例支持数**：\n\n| 模块 | 已验证子集 | 原始样例尚缺什么 |\n| --- | --- | --- |\n'
  if not report['modules']['nvCOMP']['verified_operator_family_count']:text+='| nvCOMP | hipCOMP LZ4 单 chunk 往返 | 完整 batch/manager 待验收 |\n'
  text+='| nvJPEG | rocJPEG baseline 解码；CLI/布局/缩放/ROI/多实例/后处理逐例验收 | progressive缺少原生GPU后端；显式CPU fallback/encode另标注；'+str(report['modules']['nvJPEG']['sample_outcomes'].get('PARTIAL',0))+' PARTIAL、0 PASSED |\n'
- if not any(v['name']=='三通道 Canny' for v in report['modules']['NPP']['verified_operators']):text+='| NPP | 精确Euclidean距离/Voronoi与NCC已整例通过；Canny有数值子集 | 原生Canny像素策略及其它尚未完成合同按逐例状态记录 |\n'
+ if not any(v['name']=='Canny 边缘检测' for v in report['modules']['NPP']['verified_operators']):text+='| NPP | 精确Euclidean距离/Voronoi与NCC已整例通过；Canny有数值子集 | 原生Canny像素策略及其它尚未完成合同按逐例状态记录 |\n'
  text+=f'\n逐个算子族与样例的可追溯映射见 [operator-support.json]({prefix}migration/reports/operator-support.json)；失败仍按具体入口和原因保留。\n\n'
  return text
 

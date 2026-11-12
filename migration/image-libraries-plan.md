@@ -280,7 +280,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-12T07:41:06.437509+00:00。26入口当前12通过/7部分/7失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-12T07:45:45.718765+00:00。26入口当前13通过/6部分/7失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -1742,5 +1742,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-12T07:37:49.863773+00:00 | I3 | benchmark固定Git冷检出同版OpenCV/四算子/六CLI/独立CPU/原生统计/运行/trace及18子封存：PASSED | `migration/reports/evidence/rewrite/I3/OpenCV-benchmark-fixed-Git-cold-four-operations-and-CPU/20261112T073608.903658Z-I3-host-cold-replay-947f7840c5` |
 | 2026-11-12T07:38:31.360263+00:00 | I3 | benchmark发布器同步后的固定源码96b9c5f0冷检出10/10作业、19/19子封存PASSED；cold_recompute对原始命令、源码、加载器、产品和状态重算True，35项负例仍PASSED。主表PARTIAL/L3，9/11门槛，待固定版本三份独立复审与组合资格。 | `migration/reports/image-benchmark.md` |
 | 2026-11-12T07:41:06.437509+00:00 | I3 | benchmark三份固定源码96b9c5f0/证据6a915664独立复审均APPROVED：原例合同、证据闭环、HIP算法。组合资格12/12门PASSED，引用22份封存、6组CLI；资格实验已封存，待先Git锚定再由发布器更新主表。 | `migration/reports/image-benchmark-qualification.json` |
+| 2026-11-12T07:44:44.005216+00:00 | I3 | NPP OpenCV benchmark整例PASSED/L4：四原算子C++完整入口、6 CLI、独立CPU全量产品、5090原例统计、18设备合同、真实GPU trace、35反例、固定Git10作业/19子证据与三份独立复审均通过。主表252 PASSED/21 PARTIAL/366 FAILED；算子族131，新增Gaussian/半尺寸双线性缩放/RGB灰度3族，Canny与既有入口去重。原NPP不输出像素，性能仅观察。 | `migration/reports/operator-support.json` |
+| 2026-11-12T07:45:45.718765+00:00 | I3 | 计划首页同步当前四图像模块13/26整例、6 PARTIAL、7 FAILED；I3仍有NPP/NPP+两个watershed，I4–I8 JPEG/JPEG2000整例目标尚未完成。项目最终验证与4385条封存尝试审计PASSED。 | `migration/reports/rewrite-evidence-audit.json` |
 
 <!-- IMAGE_EXECUTION:END -->
