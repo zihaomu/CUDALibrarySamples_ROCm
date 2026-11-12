@@ -1,0 +1,1 @@
+Test CPU-reference for FloodFill-real-dispatch-and-full-pixels-independent-CPU, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T033122.630121Z-I3-rocm-trace-f786a54879.

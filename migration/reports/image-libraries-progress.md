@@ -1,6 +1,6 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-12T03:28:40.590473+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-12T03:35:04.789587+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
 26入口当前：10 PASSED / 7 PARTIAL / 9 FAILED。
 
@@ -1138,3 +1138,8 @@
 | 2026-11-12T03:28:34.183272+00:00 | I3 | flood29完整RGB输入真实GPU trace执行rc=0；全像素与实际kernel/PCI/grid/时间另验。 | [20261112T032830.020403Z-I3-rocm-trace-fb0791eb96](evidence/rewrite/I3/FloodFill-all29-real-device-dispatch-trace/20261112T032830.020403Z-I3-rocm-trace-fb0791eb96) |
 | 2026-11-12T03:28:36.305721+00:00 | I3 | flood29完整RGB/metadata/padding与prepare/output/finish/union真实GPU分发独立CPU：PASSED | [20261112T032834.886182Z-I3-CPU-reference-f616f52b6d](evidence/rewrite/I3/FloodFill-real-dispatch-and-full-pixels-independent-CPU/20261112T032834.886182Z-I3-CPU-reference-f616f52b6d) |
 | 2026-11-12T03:28:40.590473+00:00 | I3 | flood30项72运行/18CLI/4原例真实验收器变异：PASSED | [20261112T032836.801106Z-I3-CPU-validator-test-553bdb52e0](evidence/rewrite/I3/FloodFill-runtime-CLI-original-validator-mutations/20261112T032836.801106Z-I3-CPU-validator-test-553bdb52e0) |
+| 2026-11-12T03:31:08.476987+00:00 | I3 | Flood完整入口固定源码独立复审退回资格检查：冷子记录重复/摘要可被接受、旧padding失败记录未核、构建及CUDA执行命令未完全绑定。已补全唯一身份与全部子封存报告/CPU重算、旧新版同调用字节和编译/原生执行配方核对；重新执行18CLI、trace、native CPU和验收器，现重新冷检出。原支持PARTIAL不提前升级。 | [image-flood-cold.json](image-flood-cold.json)；[image-flood-legacy-padding-failure.json](image-flood-legacy-padding-failure.json) |
+| 2026-11-12T03:31:37.222121+00:00 | I3 | flood固定Git检出重建四合同、HIP/C++、29完整RGB、四原例、72运行、18CLI、GPU trace及五CPU验收与36封存子记录：PASSED | [20261112T032927.151752Z-I3-host-cold-replay-f21d7ab95b](evidence/rewrite/I3/FloodFill-clean-checkout-complete-RGB-runtime-CLI-trace/20261112T032927.151752Z-I3-host-cold-replay-f21d7ab95b) |
+| 2026-11-12T03:34:06.832675+00:00 | I3 | Flood资格发布门15项归档/编译/旧反例/原生执行负向检查合同固定。 | [20261112T033405.894474Z-I3-CPU-contract-dca5588b9b](evidence/rewrite/I3/FloodFill-qualification-check-contract/20261112T033405.894474Z-I3-CPU-contract-dca5588b9b) |
+| 2026-11-12T03:34:16.650010+00:00 | I3 | Flood资格门15项真实历史padding/源命令/重复子记录/摘要/像素和配对hash反例：PASSED | [20261112T033407.202650Z-I3-CPU-validator-test-fb88b66561](evidence/rewrite/I3/FloodFill-qualification-and-cold-archive-validator-checks/20261112T033407.202650Z-I3-CPU-validator-test-fb88b66561) |
+| 2026-11-12T03:35:04.789587+00:00 | I3 | Flood独立复审指出的四类资格门缺口已修复：冷36子唯一/实际封存及五CPU重算，旧padding真实失败/新库同代码拒绝，HIP编译完整argv/产物绑定，原生CUDA实际执行收据代码绑定。新冷检出PASSED、15组资格门正反向PASSED；最终固定源码复审前仍PARTIAL。 | [20261112T032927.151752Z-I3-host-cold-replay-f21d7ab95b](evidence/rewrite/I3/FloodFill-clean-checkout-complete-RGB-runtime-CLI-trace/20261112T032927.151752Z-I3-host-cold-replay-f21d7ab95b)；[20261112T033407.202650Z-I3-CPU-validator-test-fb88b66561](evidence/rewrite/I3/FloodFill-qualification-and-cold-archive-validator-checks/20261112T033407.202650Z-I3-CPU-validator-test-fb88b66561)；[20261112T032629.115960Z-I3-CPU-reference-67e9160223](evidence/rewrite/I3/FloodFill-full-native-CPU-HIP-and-metadata-comparison/20261112T032629.115960Z-I3-CPU-reference-67e9160223)；[20261111T185159.117890Z-I3-rocm-contract-probe-354c9ab01a](evidence/rewrite/I3/FloodFill-fixed-exact-last-row-padding-counterexample/20261111T185159.117890Z-I3-rocm-contract-probe-354c9ab01a) |

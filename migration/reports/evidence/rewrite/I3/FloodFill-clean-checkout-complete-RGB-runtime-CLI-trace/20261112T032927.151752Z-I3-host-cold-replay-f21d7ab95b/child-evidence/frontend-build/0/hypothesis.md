@@ -1,0 +1,1 @@
+Test rocm-build for FloodFill-full-five-workflow-C++-build, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T033004.919407Z-I3-rocm-build-080e9f2eec.

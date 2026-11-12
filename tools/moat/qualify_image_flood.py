@@ -384,6 +384,14 @@ def collect(review=None):
         r = load('cold')
         return report(r,'cold.json','host-cold-replay') and cold_verify(r,build,sources)
     gate('thirty-six-sealed-child-clean-checkout',cold)
+    def publication_mutations():
+        r=load('qualification-checks')
+        names=json.loads((ROOT/'migration/rewrite/image-flood-qualification-validator-cases.json').read_text())
+        return (report(r,'checks.json','CPU-validator-test') and r['status']=='PASSED'
+                and r['case_count']==len(r['checks'])==len(names)==15
+                and [c['check'] for c in r['checks']]==names
+                and all(c['passed'] for c in r['checks']))
+    gate('fifteen-archive-provenance-and-publication-reader-checks',publication_mutations)
     sources.update({'tools/moat/qualify_image_flood.py', 'tools/moat/publish_image_flood.py',
                     'tools/moat/qualify_canny_plus.py', 'tools/moat/qualify_first.py',
                     'tools/moat/selected_proofs.py', 'tools/moat/audit.py',

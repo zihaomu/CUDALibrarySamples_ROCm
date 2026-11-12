@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-12T03:28:40.590473+00:00。26入口当前10通过/7部分/9失败。
+更新时间：2026-11-12T03:35:04.789587+00:00。26入口当前10通过/7部分/9失败。
 
-I3：flood30项72运行/18CLI/4原例真实验收器变异：PASSED
+I3：Flood独立复审指出的四类资格门缺口已修复：冷36子唯一/实际封存及五CPU重算，旧padding真实失败/新库同代码拒绝，HIP编译完整argv/产物绑定，原生CUDA实际执行收据代码绑定。新冷检出PASSED、15组资格门正反向PASSED；最终固定源码复审前仍PARTIAL。
 
-证据：`migration/reports/evidence/rewrite/I3/FloodFill-runtime-CLI-original-validator-mutations/20261112T032836.801106Z-I3-CPU-validator-test-553bdb52e0`
+证据：`migration/reports/evidence/rewrite/I3/FloodFill-clean-checkout-complete-RGB-runtime-CLI-trace/20261112T032927.151752Z-I3-host-cold-replay-f21d7ab95b`；`migration/reports/evidence/rewrite/I3/FloodFill-qualification-and-cold-archive-validator-checks/20261112T033407.202650Z-I3-CPU-validator-test-fb88b66561`；`migration/reports/evidence/rewrite/I3/FloodFill-full-native-CPU-HIP-and-metadata-comparison/20261112T032629.115960Z-I3-CPU-reference-67e9160223`；`migration/reports/evidence/rewrite/I3/FloodFill-fixed-exact-last-row-padding-counterexample/20261111T185159.117890Z-I3-rocm-contract-probe-354c9ab01a`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

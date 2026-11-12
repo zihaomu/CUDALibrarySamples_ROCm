@@ -1,0 +1,1 @@
+Test rocm-trace for FloodFill-all29-real-device-dispatch-trace, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T033004.919407Z-I3-rocm-build-080e9f2eec.

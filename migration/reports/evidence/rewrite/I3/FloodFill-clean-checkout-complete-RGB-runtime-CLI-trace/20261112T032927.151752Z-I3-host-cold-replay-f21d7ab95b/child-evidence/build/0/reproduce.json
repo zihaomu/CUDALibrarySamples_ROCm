@@ -1,0 +1,47 @@
+{
+  "commands": [
+    {
+      "command_id": 1,
+      "phase": "compile-RGB-predicates-source-copy-components-boundary-and-device-metadata",
+      "argv": [
+        "hipcc",
+        "--rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-flood-cold-ljpbks3g/src/build/rocm-sdk-overlay",
+        "--hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-flood-cold-ljpbks3g/src/build/rocm-sdk-overlay",
+        "--rocm-device-lib-path=/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode",
+        "--offload-arch=gfx1201",
+        "-std=c++17",
+        "-O2",
+        "-fPIC",
+        "-D__HIP_PLATFORM_AMD__",
+        "-x",
+        "hip",
+        "-shared",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-flood-cold-ljpbks3g/src/rocm/common/image/flood.hip",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-flood-cold-ljpbks3g/src/rocm/common/image/connectivity.hip",
+        "-L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib",
+        "-Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib",
+        "-lamdhip64",
+        "-o",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-flood-cold-ljpbks3g/src/artifacts/rewrite/I3/FloodFill-full-RGB-GPU-backend-build/20261112T033004.919407Z-I3-rocm-build-080e9f2eec/libimage_flood.so"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-flood-cold-ljpbks3g/src",
+      "started_at_utc": "2026-11-12T03:30:06.342449+00:00",
+      "timeout_seconds": 300,
+      "environment": {
+        "HIP_VISIBLE_DEVICES": "0",
+        "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "DEEPINFER_ROCM_RELEASE": "10.1.0",
+        "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+        "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+      },
+      "stdout": "logs/0001-compile-RGB-predicates-source-copy-components-boundary-and-device-metadata.stdout.log",
+      "stderr": "logs/0001-compile-RGB-predicates-source-copy-components-boundary-and-device-metadata.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-12T03:30:08.714126+00:00",
+      "seconds": 2.369621123012621
+    }
+  ],
+  "source": "source.json",
+  "inputs": "inputs/manifest.json",
+  "expected_environment": "environment.expected.json"
+}
