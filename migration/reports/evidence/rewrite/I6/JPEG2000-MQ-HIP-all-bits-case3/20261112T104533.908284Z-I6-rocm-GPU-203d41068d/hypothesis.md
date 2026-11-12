@@ -1,0 +1,1 @@
+Test rocm-GPU for JPEG2000-MQ-HIP-all-bits-case3, case case3. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T104423.376672Z-I6-rocm-build-fd99184ccd.

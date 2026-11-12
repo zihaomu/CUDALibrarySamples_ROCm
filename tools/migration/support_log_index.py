@@ -109,7 +109,7 @@ def write_index(cat):
     text+='实现方式是逐例登记值：库 API 迁移、生态库 + 项目 HIP、算法流程重写、执行语义适配或未实现语言绑定；**实际库名称和逐例范围决定具体支持边界**。例如 cuDSS 的 CPU 符号分析 + GPU CSRRF、rotmg 的项目 HIP 修正，不因同样标为 PASSED 而隐去区别。\n\n'
     text+='原始 CUDA baseline 与 CUDA 数学对照分列：原语言工具链缺失时，即使兼容 C++ API 对照通过，原语言 baseline 仍保留 BLOCKED。每个入口的实际误差、残差、阈值和逐项检查结果在 CPU/复合验收 JSON 中；日志包含对应命令、环境和源码/输入 hash。GPU 计时不等于性能资格，'+link('性能验证','migration/reports/performance-comparison.md')+'单独登记。\n\n'
     text+='图像库后续重写的逐步实验见 '+link('图像库执行记录','migration/reports/image-libraries-progress.md')+'；候选阶段检查与原生能力调查不增加本表的整例通过数。\n\n'
-    text+='JPEG2000 的已验 HIP 变换组件、原图 CPU/CUDA 跨解码与仍缺的完整码流阶段见 '+link('I6 组件与缺口报告','migration/reports/image-jpeg2000-I6.md')+'。\n\n'
+    text+='JPEG2000 的已验 HIP MQ 算术解码与可逆变换组件、原图 CPU/CUDA 跨解码，以及仍缺的真实码块和完整码流阶段见 '+link('I6 组件与缺口报告','migration/reports/image-jpeg2000-I6.md')+'。组件成功不增加原始入口通过数。\n\n'
     text+=render_overview(summarize(cat),'../../')
     reasons=collections.Counter((r['status'],r['reason_code']) for r in report['samples'] if r['status']!='PASSED')
     labels={'BUILD_ERROR':'当前移植稿的 API、类型、链接或算法实现未完成，实际构建失败。',

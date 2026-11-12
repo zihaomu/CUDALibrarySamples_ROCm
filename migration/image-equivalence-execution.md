@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-12T10:28:20.092809+00:00。26入口当前13通过/9部分/4失败。
+更新时间：2026-11-12T10:47:02.142188+00:00。26入口当前13通过/9部分/4失败。
 
-I6：原始JP2/J2K容器和SOC/SIZ/COD主头解析9/9预冻用例通过；三真实JP2几何/分量与独立CPU一致，4损坏拒绝、变更SIZ生效；仅CPU描述层，未增加AMD整例。
+I6：固定OpenJPEG 2.5.4 的MQ oracle；HIP MQ 4组1887 bit精确，变化重放与2项负例通过，真实GPU1 kernel trace通过；仅孤立算术解码，原始JPEG2000四入口仍FAILED。
 
-证据：`migration/reports/image-j2k-container-runs.json`；`migration/reports/image-jpeg2000-I6.md`
+证据：`migration/reports/image-j2k-mq-runs.json`；`migration/reports/image-j2k-mq-trace.json`；`migration/reports/image-jpeg2000-I6.md`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+"""Freeze independent OpenJPEG MQ bit/context vectors before writing HIP decoder."""
+import json
+from pathlib import Path
+from experiment import ROOT, Experiment, digest, write
+from image_progress import record
+
+SOURCE = ROOT / 'build/openjpeg-v2.5.4'
+STATIC = ROOT / 'build/openjpeg-v2.5.4-static'
+PROBE = ROOT / 'rocm/probes/image/jpeg2000_mq_openjpeg_oracle.c'
+FIXTURES = ROOT / 'migration/fixtures/image-j2k-mq'
+PROFILE = ROOT / 'migration/rewrite/image-j2k-mq-profile.json'
+BUILD = ROOT / 'migration/reports/image-j2k-openjpeg-build.json'
+
+
+def main():
+    if PROFILE.exists():
+        raise ValueError('MQ contract already frozen')
+    reference = json.loads((ROOT / 'migration/rewrite/image-j2k-openjpeg-reference-lock.json').read_text())
+    built = json.loads(BUILD.read_text())
+    library = ROOT / built['library']
+    if reference['status'] != 'PINNED' or built['status'] != 'BUILT' or \
+            digest(library) != built['library_sha256']:
+        raise ValueError('OpenJPEG CPU reference not locked')
+    FIXTURES.mkdir(parents=True, exist_ok=True)
+    e = Experiment('I6', 'independent-OpenJPEG-MQ-CPU-contract', 'CPU-contract',
+                   sources=[__file__, PROBE, SOURCE / 'src/lib/openjp2/mqc.c',
+                            SOURCE / 'src/lib/openjp2/mqc.h',
+                            SOURCE / 'src/lib/openjp2/mqc_inl.h', library],
+                   parent=built['experiment_id'])
+    binary = e.path / 'mq-oracle'
+    src = SOURCE / 'src/lib/openjp2'
+    generated = STATIC / 'src/lib/openjp2'
+    rc = e.command(['cc', '-O2', '-std=c11', '-I' + str(src), '-I' + str(generated),
+                    str(PROBE), str(library), '-lm', '-o', str(binary)], 'build-OpenJPEG-MQ-oracle')
+    if rc == 0:
+        rc = e.command([str(binary), str(FIXTURES)], 'freeze-four-MQ-encoded-vectors')
+    cases = []
+    if rc == 0:
+        for case_id, length in enumerate((97, 256, 511, 1023)):
+            files = {kind: FIXTURES / f'case{case_id}.{kind}'
+                     for kind in ('mq', 'bits', 'ctx')}
+            if any(not path.exists() for path in files.values()):
+                rc = 3
+                break
+            bits = files['bits'].read_bytes(); ctx = files['ctx'].read_bytes()
+            if len(bits) != length or len(ctx) != length or \
+                    set(bits) - {0, 1} or max(ctx) > 18 or len(files['mq'].read_bytes()) < 2:
+                rc = 4
+                break
+            cases.append(dict(id=f'case{case_id}', symbols=length,
+                              encoded_bytes=files['mq'].stat().st_size,
+                              files={kind: dict(path=str(path.relative_to(ROOT)),
+                                                sha256=digest(path)) for kind, path in files.items()}))
+    status = 'FROZEN' if rc == 0 and len(cases) == 4 else 'BUILD_ERROR'
+    profile = dict(status=status, phase='I6', OpenJPEG_commit=reference['commit'],
+                   OpenJPEG_license=reference['license'], library_sha256=digest(library),
+                   cases=cases, initial_context_states={'0': 8, '17': 6, '18': 92,
+                                                         'others': 0},
+                   gates=dict(exact_all_decoded_bits=True, actual_HIP_GPU_kernel=True,
+                              physical_GPU1=True, changed_encoded_input_replay=True,
+                              truncated_payload_rejected=True, invalid_context_rejected=True),
+                   scope='Isolated MQ arithmetic decoder, not JPEG2000 codeblock, packet, image or original-entrypoint support.')
+    write(e.path / 'profile.json', profile)
+    checks = [dict(check='four-OpenJPEG-encode-decode-verified-vectors', passed=len(cases) == 4),
+              dict(check='pinned-reference-library', passed=digest(library) == built['library_sha256'])]
+    evidence = e.finish('PASSED' if status == 'FROZEN' else 'BUILD_ERROR',
+                        dict(status=status, checks=checks),
+                        reason=None if status == 'FROZEN' else f'build/vector error {rc}')
+    profile['evidence'] = evidence
+    write(PROFILE, profile)
+    record('I6', f'OpenJPEG MQ 独立 CPU 向量合同：{status}；4组bit/context/码流SHA先冻结；暂不计GPU/整例。',
+           [evidence, str(PROFILE.relative_to(ROOT))])
+    print(status, evidence)
+    if status != 'FROZEN':
+        raise SystemExit(1)
+
+
+if __name__ == '__main__':
+    main()

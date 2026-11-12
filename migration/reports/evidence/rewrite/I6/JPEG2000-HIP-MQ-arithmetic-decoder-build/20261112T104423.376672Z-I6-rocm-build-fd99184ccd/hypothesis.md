@@ -1,0 +1,1 @@
+Test rocm-build for JPEG2000-HIP-MQ-arithmetic-decoder-build, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T104159.651832Z-I6-CPU-contract-34b662d319.

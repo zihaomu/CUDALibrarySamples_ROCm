@@ -1,0 +1,1 @@
+Test CPU-research for watershed-regional-minima-priority-flood-vs-original, case CT_skull_512x512_8u_Gray.raw. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: none.

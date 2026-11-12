@@ -1,6 +1,14 @@
 # I6：JPEG2000 可逆变换组件与原图参考
 
-状态：**I6 IN_PROGRESS；nvJPEG2000 仍为 0/4 整例通过、0/4 部分支持**。本记录只验收可逆 5/3 逆小波和逆 RCT 的独立 HIP 组件，没有把 CPU OpenJPEG 解码当作 AMD GPU 解码。
+状态：**I6 IN_PROGRESS；nvJPEG2000 仍为 0/4 整例通过、0/4 部分支持**。本记录验收独立 MQ 算术解码、可逆 5/3 逆小波和逆 RCT 的 HIP 组件，没有把 CPU OpenJPEG 解码当作 AMD GPU 解码。
+
+## 固定版本 MQ 算术解码纵向组件
+
+独立 CPU oracle 固定为 OpenJPEG v2.5.4 commit `6c4a29b00211eb0430fa0e5e890f1ce5c80f409f`。静态参考库构建成功，首次宿主环境缺少 `cmake` 的构建失败和第一次内部头缺少类型定义的探针构建失败均保留在不可变日志中；后者改为按 OpenJPEG 原项目 include 顺序构建。依据固定 `mqc.c` 生成 94 项状态表，并随代码保留 BSD-2-Clause 许可。[参考锁](../rewrite/image-j2k-openjpeg-reference-lock.json) · [构建记录](image-j2k-openjpeg-build.json) · [状态表派生](image-j2k-mq-table.json)。
+
+在 GPU 实现前冻结四组 OpenJPEG 自编码、自解码的 MQ 码流、19 个 context 的调度序列及期望 bit SHA。HIP 算术解码在 97、256、511、1023 个 symbol 上全部逐 bit 精确，共 1,887 bit；改变码流字节后输出变化，单字节截断和非法 context 均拒绝且不产出结果，合计 7/7 项通过。1023-bit 用例的 rocprofv3 显示一个实际 `decode_one` kernel，在物理 GPU1 `0000:23:00.0` 执行，追踪输出仍与 CPU oracle 精确一致。[冻结合同](../rewrite/image-j2k-mq-profile.json) · [逐项结果](image-j2k-mq-runs.json) · [GPU trace](image-j2k-mq-trace.json)。
+
+该 kernel 目前每条码流只用一个 GPU 线程，尚无吞吐结论；输入是独立生成的 MQ symbol/context 序列，**不是**从原始 JP2/J2K packet 中分出的 EBCOT 码块。尚缺 bitplane 上下文生成、significance/refinement/cleanup pass、raw bypass、码块终止/重启、packet/tile 解析及把 MQ 输出连接到逆小波。它不升级任何原始样例资格，也不构成完整 JPEG2000 解码。
 
 ## 真实 JP2/J2K 容器与主头
 
@@ -35,3 +43,5 @@
 ## 后续门槛
 
 I6 还需真实 JP2/J2K 容器与 packet/codeblock 解析、GPU MQ tier1、5/3 与 9/7 多级/tile 还原、RGB/YUV/位深/符号分支、局部 ROI 的实际 tile 调度和原始 decoder/pipeline/tile 三入口。I7 需要对应 encoder 与 HT/NLT3；I8 才能组合验收四个原始入口。每一项必须在前置合同中固定输入、数据类型、CPU/CUDA 比较和拒绝路径。
+
+后续 MQ/codeblock 研究的独立 CPU 参考固定为 [OpenJPEG v2.5.4 源码锁](../rewrite/image-j2k-openjpeg-reference-lock.json)，commit `6c4a29b00211eb0430fa0e5e890f1ce5c80f409f`，BSD-2-Clause 许可及 `mqc.c`、`t1.c`、DWT 源文件 SHA 均已记录。该私有参考源码不作为已移植的 GPU 后端。

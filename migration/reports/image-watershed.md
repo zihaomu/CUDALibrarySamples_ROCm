@@ -12,3 +12,5 @@ NPP+ 原生边界模式的最低逐像素一致率为 43.53%。原生标签 ID �
 证据： [合同](../rewrite/image-watershed-profile.json)、[AMD 执行](image-watershed-runs.json)、[独立 CPU](image-watershed-reference.json)、[22 产品原生比较](image-watershed-native-comparison.json)、[缺图拒绝](image-watershed-negative.json)、[真实 GPU trace](image-watershed-trace.json)。
 
 下一步：实现分桶浸没/平台区分配，对 5090 原例预固定可接受的分割、边界和标签分区阈值后重做完整资格。
+
+2026-11-12 的区域极小值/优先级浸没 CPU 候选已作为[独立研究记录](image-watershed-immersion-research.json)封存：CT skull 与原生分割仅 57.23% 一致、Lena 仅 42.18%，低于当前八邻域下降实现的 71.71% 和 92.51%。该候选没有接入 HIP，不能用于升级支持。下一轮先根据原生差异的图像强度、平台连通块和边界分布定位语义，再固定新算法门槛。
