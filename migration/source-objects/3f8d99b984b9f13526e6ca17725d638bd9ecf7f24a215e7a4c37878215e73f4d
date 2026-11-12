@@ -1,0 +1,54 @@
+#!/usr/bin/env python3
+"""Exercise JPEG optimized-DHT length and prefix boundaries independently of images."""
+import json
+from pathlib import Path
+from experiment import ROOT, Experiment, digest, write
+from image_progress import record
+
+SOURCE = ROOT / 'rocm/probes/image/jpeg_opt_huffman_edges.hip'
+HEADER = ROOT / 'rocm/common/image/jpeg_optimal_huffman.hpp'
+PROFILE = ROOT / 'migration/rewrite/image-jpeg-opt-huffman-profile.json'
+REPORT = ROOT / 'migration/reports/image-jpeg-opt-huffman-edges.json'
+
+
+def main():
+    core = Path('/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core')
+    overlay = ROOT / 'build/rocm-sdk-overlay'
+    jpeg = ROOT / 'build/cpu-codecs'
+    e = Experiment('I5', 'optimized-Huffman-length-limit-and-prefix-edge-gates',
+                   'CPU-table-boundary', sources=[__file__, SOURCE, HEADER, PROFILE,
+                                                  ROOT / 'rocm/common/image/jpeg_full_gpu.hpp',
+                                                  jpeg / 'include/jpeglib.h'],
+                   parent=json.loads(PROFILE.read_text())['evidence'].split('/')[-1])
+    binary = e.path / 'probe'
+    rc = e.command(['hipcc', '--rocm-path=' + str(overlay), '--hip-path=' + str(overlay),
+                    '--rocm-device-lib-path=' + str(core / 'lib/llvm/amdgcn/bitcode'),
+                    '--offload-arch=gfx1201', '-std=c++17', '-O2',
+                    '-D__HIP_PLATFORM_AMD__', '-I' + str(jpeg / 'include'),
+                    '-I' + str(HEADER.parent), '-x', 'hip', str(SOURCE),
+                    '-L' + str(core / 'lib'), '-L' + str(jpeg / 'lib'),
+                    '-Wl,-rpath,' + str(core / 'lib'),
+                    '-Wl,-rpath,' + str(jpeg / 'lib'), '-lamdhip64', '-ljpeg',
+                    '-o', str(binary)], 'build-DHT-edge-checker', timeout=300)
+    if rc == 0:
+        rc = e.command([str(binary)], 'check-singleton-uniform-long-tail-sparse-skewed')
+    metrics = {}
+    if rc == 0:
+        stdout = (e.path / 'logs/0002-check-singleton-uniform-long-tail-sparse-skewed.stdout.log').read_text()
+        metrics = json.loads(stdout.splitlines()[-1])
+    passed = rc == 0 and set(metrics) == {'singleton','uniform256','fibonacci25','sparse120','max-skew'} and \
+        all(1 <= n <= 16 for n in metrics.values()) and metrics['fibonacci25'] == 16
+    result = dict(status='PASSED' if passed else 'FAILED', return_code=rc, longest_lengths=metrics)
+    write(e.path / 'edge-result.json', result)
+    result['evidence'] = e.finish('PASSED' if passed else 'SELF_TEST_FAILED',
+                                  dict(status=result['status'], checks=[
+                                      dict(check='five-distributions-prefix-free-and-length-limited', passed=passed)]))
+    write(REPORT, result)
+    record('I5', '优化 JPEG DHT 单符号/全256符号/长尾/稀疏/极端偏斜边界：' + result['status'] +
+           '；仅CPU表生成合法性检查。', [result['evidence']])
+    print(result['status'], metrics)
+    return int(not passed)
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

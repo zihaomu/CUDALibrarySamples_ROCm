@@ -1,0 +1,1 @@
+Test rocm-GPU for optimized-Huffman-GPU-JPEG-tiny-444, case tiny-444. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T110519.404336Z-I5-rocm-build-0ab69ad822.

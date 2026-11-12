@@ -282,7 +282,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-12T10:58:36.104710+00:00。26入口当前13通过/9部分/4失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-12T11:10:53.758891+00:00。26入口当前13通过/9部分/4失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -2010,5 +2010,16 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-12T10:56:50.491987+00:00 | I6 | 真实JP2 MQ 段26590 bit 物理GPU1 trace：PASSED；仅算术解码组件。 | `migration/reports/evidence/rewrite/I6/original-JP2-MQ-segment-physical-GPU-trace/20261112T105648.020597Z-I6-rocm-trace-650fc74634`；`migration/reports/image-j2k-real-mq-trace.json` |
 | 2026-11-12T10:57:36.995305+00:00 | I6 | OpenJPEG只读MQ捕获对整张原图解码无扰动：PASSED；6,220,800 RGB 字节与既存独立CPU及原生CUDA精确一致，仅CPU交叉检查。 | `migration/reports/evidence/rewrite/I6/instrumented-OpenJPEG-original-JP2-full-RGB-crosscheck/20261112T105735.873804Z-I6-CPU-reference-d67dad309c`；`migration/reports/image-j2k-real-mq-crosscheck.json` |
 | 2026-11-12T10:58:36.104710+00:00 | I6 | 原始2k无损JP2真实64x64码块：OpenJPEG捕获2941字节MQ段/26590个context-bit，HIP GPU逐bit精确，物理GPU1 trace通过；整图CPU捕获与原生CUDA 6220800 RGB字节精确。GPU EBCOT context/码块系数/packet链尚缺，四原入口仍FAILED。 | `migration/reports/image-j2k-real-mq-capture.json`；`migration/reports/image-j2k-real-mq-replay.json`；`migration/reports/image-j2k-real-mq-trace.json`；`migration/reports/image-j2k-real-mq-crosscheck.json`；`migration/reports/image-jpeg2000-I6.md` |
+| 2026-11-12T11:03:08.988082+00:00 | I5 | 优化 Huffman GPU 熵编码阶段先冻结4组原 RGB/采样/质量及DHT、独立解码和真实GPU门槛；未改原入口资格。 | `migration/reports/evidence/rewrite/I5/optimized-Huffman-GPU-entropy-stage-contract/20261112T110308.014353Z-I5-CPU-contract-e68caf79c9`；`migration/rewrite/image-jpeg-opt-huffman-profile.json` |
+| 2026-11-12T11:05:23.162531+00:00 | I5 | 优化 Huffman GPU 直方图与 GPU 熵编码孤立原型编译：BUILT；尚未进入原始多实例入口。 | `migration/reports/evidence/rewrite/I5/GPU-optimized-Huffman-JPEG-build/20261112T110519.404336Z-I5-rocm-build-0ab69ad822` |
+| 2026-11-12T11:06:34.679586+00:00 | I5 | 优化 Huffman GPU 熵编码 odd-420：PASSED；独立解码/基线RGB/DHT核对。 | `migration/reports/evidence/rewrite/I5/optimized-Huffman-GPU-JPEG-odd-420/20261112T110632.454739Z-I5-rocm-GPU-272f750f09` |
+| 2026-11-12T11:06:36.934317+00:00 | I5 | 优化 Huffman GPU 熵编码 odd-444：PASSED；独立解码/基线RGB/DHT核对。 | `migration/reports/evidence/rewrite/I5/optimized-Huffman-GPU-JPEG-odd-444/20261112T110635.036636Z-I5-rocm-GPU-b2f62c52a5` |
+| 2026-11-12T11:06:39.128386+00:00 | I5 | 优化 Huffman GPU 熵编码 mcu-boundary：PASSED；独立解码/基线RGB/DHT核对。 | `migration/reports/evidence/rewrite/I5/optimized-Huffman-GPU-JPEG-mcu-boundary/20261112T110637.278522Z-I5-rocm-GPU-6681ae2a5a` |
+| 2026-11-12T11:06:41.350655+00:00 | I5 | 优化 Huffman GPU 熵编码 tiny-444：PASSED；独立解码/基线RGB/DHT核对。 | `migration/reports/evidence/rewrite/I5/optimized-Huffman-GPU-JPEG-tiny-444/20261112T110639.456257Z-I5-rocm-GPU-7089962e2f` |
+| 2026-11-12T11:06:43.378813+00:00 | I5 | 优化 Huffman 截断 RGB 负例：PASSED，必须拒绝且无输出。 | `migration/reports/evidence/rewrite/I5/optimized-Huffman-truncated-RGB-rejection/20261112T110641.685785Z-I5-rocm-GPU-negative-11874bbb4e` |
+| 2026-11-12T11:07:28.533342+00:00 | I5 | 优化 Huffman 原型真实 GPU1 的直方图、FDCT/量化、MCU/Huffman/pack/stuff trace：PASSED；保持孤立阶段，不升级原入口。 | `migration/reports/evidence/rewrite/I5/optimized-JPEG-GPU-histogram-entropy-trace/20261112T110726.135830Z-I5-rocm-trace-3189dfe853` |
+| 2026-11-12T11:08:58.296708+00:00 | I5 | 优化JPEG Huffman独立原型：四组GPU符号直方图+GPU熵编码的合法JPEG跨解码、RGB与旧GPU FDCT基线精确、DHT变化；一截断拒绝，物理GPU1 trace通过；尚未接入原始-f，多实例入口保持PARTIAL。 | `migration/reports/image-jpeg-opt-huffman.md`；`migration/reports/image-jpeg-opt-huffman-runs.json`；`migration/reports/image-jpeg-opt-huffman-trace.json` |
+| 2026-11-12T11:09:52.705685+00:00 | I5 | 优化 JPEG DHT 单符号/全256符号/长尾/稀疏/极端偏斜边界：FAILED；仅CPU表生成合法性检查。 | `migration/reports/evidence/rewrite/I5/optimized-Huffman-length-limit-and-prefix-edge-gates/20261112T110949.676027Z-I5-CPU-table-boundary-4c2a811062` |
+| 2026-11-12T11:10:53.758891+00:00 | I5 | 优化 JPEG DHT 单符号/全256符号/长尾/稀疏/极端偏斜边界：PASSED；仅CPU表生成合法性检查。 | `migration/reports/evidence/rewrite/I5/optimized-Huffman-length-limit-and-prefix-edge-gates/20261112T111050.603804Z-I5-CPU-table-boundary-84069729e7` |
 
 <!-- IMAGE_EXECUTION:END -->

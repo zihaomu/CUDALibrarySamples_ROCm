@@ -1,0 +1,55 @@
+{
+  "status": "FROZEN",
+  "phase": "I5",
+  "cases": [
+    {
+      "case": "odd-420",
+      "path": "migration/fixtures/image-jpeg-encoder/odd-420.rgb",
+      "sha256": "91430de5cc2c584c6296f233215a594b220eb90c7617cf978daa28e1f5fe89ef",
+      "width": 33,
+      "height": 29,
+      "quality": 75,
+      "subsampling": "420"
+    },
+    {
+      "case": "odd-444",
+      "path": "migration/fixtures/image-jpeg-encoder/odd-444.rgb",
+      "sha256": "a1997f28549c8a4263729fb7a54a56b896e19ed7e879499a1fffdac5ae6e4388",
+      "width": 13,
+      "height": 11,
+      "quality": 90,
+      "subsampling": "444"
+    },
+    {
+      "case": "mcu-boundary",
+      "path": "migration/fixtures/image-jpeg-encoder/mcu-boundary.rgb",
+      "sha256": "856b9241dc106d3f4739b3828947a75ffda5c85425c572b6d89d71e265e9aa28",
+      "width": 64,
+      "height": 40,
+      "quality": 75,
+      "subsampling": "420"
+    },
+    {
+      "case": "tiny-444",
+      "path": "migration/fixtures/image-jpeg-encoder/tiny-444.rgb",
+      "sha256": "709e80c88487a2411e1ee4dfb9f22a861492d20c4765150c0c794abd70f8147c",
+      "width": 1,
+      "height": 1,
+      "quality": 75,
+      "subsampling": "444"
+    }
+  ],
+  "gates": {
+    "valid_JPEG_all_four": true,
+    "independent_full_RGB_decode": true,
+    "quantization_and_sampling_equal_baseline": true,
+    "DHT_differs_from_standard_for_nonconstant_cases": true,
+    "GPU_symbol_histogram": true,
+    "GPU_entropy_pack_stuff": true,
+    "physical_GPU1_trace": true,
+    "corrupted_input_rejected": true
+  },
+  "policy": "CPU may construct canonical length-limited optimized Huffman tables from GPU symbol histograms; MCU coefficients and entropy emission remain on HIP GPU.",
+  "scope": "Isolated optimized baseline JPEG component, not original multi-instance entrypoint qualification or progressive JPEG.",
+  "evidence": "migration/reports/evidence/rewrite/I5/optimized-Huffman-GPU-entropy-stage-contract/20261112T110308.014353Z-I5-CPU-contract-e68caf79c9"
+}

@@ -1,0 +1,1 @@
+Test CPU-table-boundary for optimized-Huffman-length-limit-and-prefix-edge-gates, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T110308.014353Z-I5-CPU-contract-e68caf79c9.

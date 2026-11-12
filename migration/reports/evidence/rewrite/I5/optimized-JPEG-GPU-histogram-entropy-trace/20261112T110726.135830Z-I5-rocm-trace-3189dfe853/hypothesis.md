@@ -1,0 +1,1 @@
+Test rocm-trace for optimized-JPEG-GPU-histogram-entropy-trace, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T110632.454739Z-I5-rocm-GPU-272f750f09.
