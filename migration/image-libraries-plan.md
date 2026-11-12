@@ -282,7 +282,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-12T10:10:35.754139+00:00。26入口当前13通过/9部分/4失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-12T10:13:36.176181+00:00。26入口当前13通过/9部分/4失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -1950,5 +1950,9 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-12T10:10:32.868020+00:00 | I5 | 原始 nvJPEG 多实例编码器 7 CLI+多stream/改输入重放+16件独立跨解码已封存全 GPU baseline 子集；优化 Huffman 等缺口保留 PARTIAL。 | `migration/reports/evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261112T101031.858636Z-I5-composite-subset-qualification-48ce947c56` |
 | 2026-11-12T10:10:34.398235+00:00 | I5 | nvJPEG/Image-Resize/imageResize.cpp 完整 GPU baseline JPEG 重编码原入口子集封存；七组 CPU/CUDA、四原型、真实 C++ GPU trace 通过，metadata/progressive 仍 PARTIAL。 | `migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize__imageResize.cpp/20261112T101033.399316Z-I5-full-GPU-JPEG-original-entry-subset-qualification-bc3df8784b` |
 | 2026-11-12T10:10:35.754139+00:00 | I5 | nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp 完整 GPU baseline JPEG 重编码原入口子集封存；七组 CPU/CUDA、四原型、真实 C++ GPU trace 通过，metadata/progressive 仍 PARTIAL。 | `migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261112T101034.778214Z-I5-full-GPU-JPEG-original-entry-subset-qualification-d1c172995a` |
+| 2026-11-12T10:11:19.498231+00:00 | I5 | 原始 nvJPEG 多实例编码器 16产品/7 CLI/84 GPU kernel+真实多stream通过；优化 Huffman CPU fallback 与调度缺口逐例登记。 | `migration/reports/evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261112T101031.858636Z-I5-composite-subset-qualification-48ce947c56`；`migration/reports/image-jpeg-encoder-instances-publication.json` |
+| 2026-11-12T10:11:20.628255+00:00 | I5 | nvJPEG/Image-Resize/imageResize.cpp 33件全 GPU baseline JPEG 产品/七组原入口/独立CPU与CUDA/实际GPU trace 已绑定主表；源模式metadata缺口仍 PARTIAL。 | `migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize__imageResize.cpp/20261112T101033.399316Z-I5-full-GPU-JPEG-original-entry-subset-qualification-bc3df8784b`；`migration/reports/evidence/rewrite/I5/all-68-original-resize-JPEG-independent-pixel-comparison/20261112T100910.848426Z-I5-CPU-reference-76406ad8b9` |
+| 2026-11-12T10:11:21.106180+00:00 | I5 | nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp 35件全 GPU baseline JPEG 产品/七组原入口/独立CPU与CUDA/实际GPU trace 已绑定主表；源模式metadata缺口仍 PARTIAL。 | `migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261112T101034.778214Z-I5-full-GPU-JPEG-original-entry-subset-qualification-d1c172995a`；`migration/reports/evidence/rewrite/I5/all-68-original-resize-JPEG-independent-pixel-comparison/20261112T100910.848426Z-I5-CPU-reference-76406ad8b9` |
+| 2026-11-12T10:13:36.176181+00:00 | I5 | 审计发现的错误解释器初始化尝试已以 INTERRUPTED 封存：CPU-only Python 3.12 缺少 _rocm_sdk_core；保留失败身份与原始环境，/opt/venv Python 3.13 七组重跑全部通过。 | `migration/reports/evidence/rewrite/I5/nvJPEG-Encoder-MultipleInstances-original-CLI/20261112T100531.170885Z-I5-rocm-original-entry-f35ad8db1d` |
 
 <!-- IMAGE_EXECUTION:END -->

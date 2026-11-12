@@ -79,3 +79,5 @@ HIP_VISIBLE_DEVICES=2 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh env ROCR_
 - [migration/reports/image-jpeg-encoder-full-gpu-integration.json](../../../reports/image-jpeg-encoder-full-gpu-integration.json)
 - [migration/reports/image-jpeg-encoder-full-gpu-frontend-trace.json](../../../reports/image-jpeg-encoder-full-gpu-frontend-trace.json)
 - [migration/reports/image-jpeg-encoder-full-gpu-products-comparison.json](../../../reports/image-jpeg-encoder-full-gpu-products-comparison.json)
+- [migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize__imageResize.cpp/20261112T101033.399316Z-I5-full-GPU-JPEG-original-entry-subset-qualification-bc3df8784b](../../../reports/evidence/rewrite/I5/nvJPEG_Image-Resize__imageResize.cpp/20261112T101033.399316Z-I5-full-GPU-JPEG-original-entry-subset-qualification-bc3df8784b)
+- [migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize_imageResize.cpp/20261112T100821.274252Z-I5-rocm-full-GPU-JPEG-original-entry-integration-69e4628c9b](../../../reports/evidence/rewrite/I5/nvJPEG_Image-Resize_imageResize.cpp/20261112T100821.274252Z-I5-rocm-full-GPU-JPEG-original-entry-integration-69e4628c9b)

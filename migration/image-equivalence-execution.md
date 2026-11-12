@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-12T10:10:35.754139+00:00。26入口当前13通过/9部分/4失败。
+更新时间：2026-11-12T10:13:36.176181+00:00。26入口当前13通过/9部分/4失败。
 
-I5：nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp 完整 GPU baseline JPEG 重编码原入口子集封存；七组 CPU/CUDA、四原型、真实 C++ GPU trace 通过，metadata/progressive 仍 PARTIAL。
+I5：审计发现的错误解释器初始化尝试已以 INTERRUPTED 封存：CPU-only Python 3.12 缺少 _rocm_sdk_core；保留失败身份与原始环境，/opt/venv Python 3.13 七组重跑全部通过。
 
-证据：`migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261112T101034.778214Z-I5-full-GPU-JPEG-original-entry-subset-qualification-d1c172995a`
+证据：`migration/reports/evidence/rewrite/I5/nvJPEG-Encoder-MultipleInstances-original-CLI/20261112T100531.170885Z-I5-rocm-original-entry-f35ad8db1d`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 
