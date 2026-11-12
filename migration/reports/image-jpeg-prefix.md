@@ -8,4 +8,15 @@
 
 [预冻结合同](../rewrite/image-jpeg-prefix-profile.json) · [HIP 构建](image-jpeg-prefix-build.json) · [12 组逐元素结果](image-jpeg-prefix-runs.json) · [真实 GPU trace/变输入/负例](image-jpeg-prefix-trace.json) · [逐步实验记录](image-libraries-progress.md)。
 
-该原型尚无与旧单线程 kernel 的隔离性能对照、长输入溢出门槛及 JPEG 整码流集成验证。三 kernel 的固定启动开销可能使小图更慢，不能据此声称性能提升。接入生产编码器后，必须重新验收两个 resize 入口和多实例入口、保留旧结果独立对照并重发逐例资格。
+按预先冻结的[性能合同](../rewrite/image-jpeg-prefix-bench-profile.json)，在同一物理 GPU1 上分别检查旧单线程和新 tiled 输出与主机参考精确一致，再对每条路径做 3 次预热、20 次 HIP event 计时，取中位数：[逐次日志](image-jpeg-prefix-benchmark.json)。
+
+| 模式 | 元素数 | 旧单线程中位数 | tiled 中位数 | tiled / 旧 |
+| --- | ---: | ---: | ---: | ---: |
+| block bits | 256 | 0.014520 ms | 0.015039 ms | 1.036 |
+| block bits | 65,536 | 1.357940 ms | 0.059839 ms | 0.044 |
+| block bits | 1,048,576 | 21.397400 ms | 0.387511 ms | 0.018 |
+| `0xff` stuffing | 256 | 0.038399 ms | 0.015680 ms | 0.408 |
+| `0xff` stuffing | 65,536 | 6.431180 ms | 0.059038 ms | 0.009 |
+| `0xff` stuffing | 1,048,576 | 98.599400 ms | 0.382472 ms | 0.004 |
+
+这只是隔离前缀阶段的单机实测；小图 bits 路线的三 kernel 启动开销略高。原型尚无 JPEG 整码流集成、全图吞吐和 32 bit 总位数溢出门槛验收，不能据此声称原始入口性能提升。接入生产编码器时应按输入规模选择路径，并重新验收两个 resize 入口和多实例入口、保留旧结果独立对照并重发逐例资格。

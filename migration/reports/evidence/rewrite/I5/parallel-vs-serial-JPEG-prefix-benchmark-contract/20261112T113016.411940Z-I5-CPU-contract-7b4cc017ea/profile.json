@@ -1,0 +1,37 @@
+{
+  "status": "FROZEN",
+  "cases": [
+    {
+      "mode": "bits",
+      "count": 256,
+      "seed": 29241
+    },
+    {
+      "mode": "bits",
+      "count": 65536,
+      "seed": 94521
+    },
+    {
+      "mode": "bits",
+      "count": 1048576,
+      "seed": 1077561
+    },
+    {
+      "mode": "stuff",
+      "count": 256,
+      "seed": 229241
+    },
+    {
+      "mode": "stuff",
+      "count": 65536,
+      "seed": 294521
+    },
+    {
+      "mode": "stuff",
+      "count": 1048576,
+      "seed": 1277561
+    }
+  ],
+  "method": "Same GPU, same input, each candidate checked against host oracle, 3 warmup + 20 timed HIP event runs; report median milliseconds; serial then parallel.",
+  "limits": "Single physical GPU1, no end-to-end JPEG throughput claim. Small cases may favor serial; integration decision is separate."
+}

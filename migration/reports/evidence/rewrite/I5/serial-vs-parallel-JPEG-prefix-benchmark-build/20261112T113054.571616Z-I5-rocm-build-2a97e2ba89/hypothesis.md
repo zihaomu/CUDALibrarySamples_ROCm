@@ -1,0 +1,1 @@
+Test rocm-build for serial-vs-parallel-JPEG-prefix-benchmark-build, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T113016.411940Z-I5-CPU-contract-7b4cc017ea.

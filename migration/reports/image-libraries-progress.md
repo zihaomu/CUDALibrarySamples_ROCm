@@ -1,6 +1,6 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-12T11:27:38.910319+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-12T11:31:49.139157+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
 26入口当前：13 PASSED / 9 PARTIAL / 4 FAILED。
 
@@ -1798,3 +1798,12 @@
 | 2026-11-12T11:25:54.136310+00:00 | I5 | 并行 JPEG prefix stuff-65536：PASSED；独立Python逐位置与总量精确比对。 | [20261112T112552.237425Z-I5-rocm-GPU-eca8fa6e1e](evidence/rewrite/I5/parallel-JPEG-prefix-Python-oracle/20261112T112552.237425Z-I5-rocm-GPU-eca8fa6e1e) |
 | 2026-11-12T11:27:05.620160+00:00 | I5 | 并行 JPEG prefix 三实际GPU kernel、物理GPU1、变输入重放：PASSED；超长block无产物拒绝：PASSED；仍为隔离原型。 | [20261112T112701.276509Z-I5-rocm-trace-7c490980e4](evidence/rewrite/I5/parallel-JPEG-prefix-real-GPU-trace-mutation-and-rejection/20261112T112701.276509Z-I5-rocm-trace-7c490980e4)；[20261112T112703.914393Z-I5-rocm-GPU-negative-a2e271bb56](evidence/rewrite/I5/parallel-JPEG-prefix-oversized-block-negative/20261112T112703.914393Z-I5-rocm-GPU-negative-a2e271bb56) |
 | 2026-11-12T11:27:38.910319+00:00 | I5 | JPEG并行bits/FF-stuff prefix独立HIP原型12/12 Python逐元素精确；257元素真实GPU1三kernel trace、变输入重放及4097 bit非法block无产物拒绝通过。原始编码器未切换，性能与整例资格待验。 | [image-jpeg-prefix-trace.json](image-jpeg-prefix-trace.json) |
+| 2026-11-12T11:30:17.419593+00:00 | I5 | JPEG prefix 并行与旧单线程性能实验先冻结：bits/stuff 各 256、65536、1048576 元素，同GPU event中位数、每候选先CPU精确验收，不把孤立速度冒充整码流吞吐。 | [20261112T113016.411940Z-I5-CPU-contract-7b4cc017ea](evidence/rewrite/I5/parallel-vs-serial-JPEG-prefix-benchmark-contract/20261112T113016.411940Z-I5-CPU-contract-7b4cc017ea)；`migration/rewrite/image-jpeg-prefix-bench-profile.json` |
+| 2026-11-12T11:30:57.828838+00:00 | I5 | JPEG prefix 旧单线程与并行 tiled 性能探针构建：BUILT。 | [20261112T113054.571616Z-I5-rocm-build-2a97e2ba89](evidence/rewrite/I5/serial-vs-parallel-JPEG-prefix-benchmark-build/20261112T113054.571616Z-I5-rocm-build-2a97e2ba89) |
+| 2026-11-12T11:31:00.311974+00:00 | I5 | JPEG prefix bits-256 GPU event对照：PASSED；旧单线程0.01452ms，并行0.015039ms。 | [20261112T113058.173627Z-I5-rocm-GPU-benchmark-51d8c3f623](evidence/rewrite/I5/serial-vs-parallel-JPEG-prefix-event-timing/20261112T113058.173627Z-I5-rocm-GPU-benchmark-51d8c3f623) |
+| 2026-11-12T11:31:02.571054+00:00 | I5 | JPEG prefix bits-65536 GPU event对照：PASSED；旧单线程1.35794ms，并行0.059839ms。 | [20261112T113100.648746Z-I5-rocm-GPU-benchmark-0d5043ee49](evidence/rewrite/I5/serial-vs-parallel-JPEG-prefix-event-timing/20261112T113100.648746Z-I5-rocm-GPU-benchmark-0d5043ee49) |
+| 2026-11-12T11:31:05.359776+00:00 | I5 | JPEG prefix bits-1048576 GPU event对照：PASSED；旧单线程21.3974ms，并行0.387511ms。 | [20261112T113102.918325Z-I5-rocm-GPU-benchmark-12c8374db9](evidence/rewrite/I5/serial-vs-parallel-JPEG-prefix-event-timing/20261112T113102.918325Z-I5-rocm-GPU-benchmark-12c8374db9) |
+| 2026-11-12T11:31:07.588527+00:00 | I5 | JPEG prefix stuff-256 GPU event对照：PASSED；旧单线程0.038399ms，并行0.01568ms。 | [20261112T113105.695639Z-I5-rocm-GPU-benchmark-ba91a846ca](evidence/rewrite/I5/serial-vs-parallel-JPEG-prefix-event-timing/20261112T113105.695639Z-I5-rocm-GPU-benchmark-ba91a846ca) |
+| 2026-11-12T11:31:09.990948+00:00 | I5 | JPEG prefix stuff-65536 GPU event对照：PASSED；旧单线程6.43118ms，并行0.059038ms。 | [20261112T113107.930520Z-I5-rocm-GPU-benchmark-83d9a4d150](evidence/rewrite/I5/serial-vs-parallel-JPEG-prefix-event-timing/20261112T113107.930520Z-I5-rocm-GPU-benchmark-83d9a4d150) |
+| 2026-11-12T11:31:14.682779+00:00 | I5 | JPEG prefix stuff-1048576 GPU event对照：PASSED；旧单线程98.5994ms，并行0.382472ms。 | [20261112T113110.313047Z-I5-rocm-GPU-benchmark-dd1a837ed4](evidence/rewrite/I5/serial-vs-parallel-JPEG-prefix-event-timing/20261112T113110.313047Z-I5-rocm-GPU-benchmark-dd1a837ed4) |
+| 2026-11-12T11:31:49.139157+00:00 | I5 | JPEG bits/stuff prefix隔离GPU性能对照6/6先经CPU数值门槛；65536元素bits 1.357940→0.059839ms、stuff 6.431180→0.059038ms，256 bits 0.014520→0.015039ms。仅单阶段事件中位数，整JPEG与规模切换仍待验。 | [image-jpeg-prefix.md](image-jpeg-prefix.md) |

@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-12T11:27:38.910319+00:00。26入口当前13通过/9部分/4失败。
+更新时间：2026-11-12T11:31:49.139157+00:00。26入口当前13通过/9部分/4失败。
 
-I5：JPEG并行bits/FF-stuff prefix独立HIP原型12/12 Python逐元素精确；257元素真实GPU1三kernel trace、变输入重放及4097 bit非法block无产物拒绝通过。原始编码器未切换，性能与整例资格待验。
+I5：JPEG bits/stuff prefix隔离GPU性能对照6/6先经CPU数值门槛；65536元素bits 1.357940→0.059839ms、stuff 6.431180→0.059038ms，256 bits 0.014520→0.015039ms。仅单阶段事件中位数，整JPEG与规模切换仍待验。
 
-证据：`migration/reports/image-jpeg-prefix-trace.json`
+证据：`migration/reports/image-jpeg-prefix.md`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 
