@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Bind fresh native receipts/files and report full native/CPU/HIP flood differences."""
-import json,re,shlex
+import ast,json,re,shlex
 from pathlib import Path
 import numpy as np
 from experiment import ROOT,Experiment,write,digest
@@ -8,11 +8,20 @@ from qualify_canny_plus import sealed
 from image_flood_reference import model,validate as validate_gpu,exact_file
 from image_flood_inputs import load_case
 from image_progress import record
+def receipt_code():
+ tree=ast.parse((ROOT/'tools/moat/image_regions_native.py').read_text())
+ values=[n.value.value for n in ast.walk(tree) if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='code' for t in n.targets) and isinstance(n.value,ast.Constant) and isinstance(n.value.value,str)]
+ if len(values)!=1:raise ValueError('one fixed CUDA receipt and execution recipe')
+ return values[0]
 def validate(native):
  spec=json.loads((ROOT/'migration/rewrite/image-flood-profile.json').read_text());originals=[c for c in spec['cases'] if c['original']];d,m,_=sealed(native['evidence']);commands=json.loads((d/'commands.json').read_text());execute=next(c for c in commands if c['phase']=='actual-complete-native-default-with-source-input-library-GPU-receipt');args=shlex.split(execute['argv'][-1]);config=json.loads(args[-1]);receipt=json.loads((d/execute['stdout']).read_text().splitlines()[0]);root=ROOT/native['outputs'];source=spec['original_source'];assets={Path(c['original']['source']).name:c['original'] for c in originals};products={c['product']:3*c['width']*c['height'] for c in originals};names={'images/'+k for k in assets}|{'images/'+k for k in products};sdk=next(r for r in json.loads((ROOT/'migration/reports/image-I0-native-private-SDKs.json').read_text()) if r['SDK']=='nppplus')['identity'];checks=[]
  checks.append(dict(check='unchanged-original-source-inputs-and-actual-command-configuration',passed=native['source']==source and native['source_sha256']==spec['original_source_sha256']==digest(ROOT/source) and config==native['config'] and config['source']==Path(source).name and config['source_sha256']==receipt['source_sha256']==spec['original_source_sha256'] and config['inputs']==receipt['inputs']=={n:x['sha256'] for n,x in assets.items()}))
  checks.append(dict(check='actual-native-success-and-5090-device-binary-receipt',passed=native['status']=='EXECUTED' and native['build_return_code']==native['return_code']==native['collection_return_code']==0 and len(commands)==6 and all(c['return_code']==0 for c in commands) and receipt['physical_device_index']==1 and receipt['CUDA_VISIBLE_DEVICES']=='1' and '5090' in receipt['device'] and bool(re.fullmatch('[0-9a-f]{64}',receipt['binary_sha256']))))
  compile=shlex.split(next(c for c in commands if c['phase']=='compile-complete-unmodified-original')['argv'][-1]);checks.append(dict(check='actual-native-source-binary-and-private-SDK-build',passed=config['remote']==native['remote'] and native['remote']+'/'+Path(source).name in compile and compile[compile.index('-o')+1]==native['remote']+'/original' and '-DNPP_PLUS_ENABLE' in compile))
+ phases=[c['phase'] for c in commands];remote=native['remote'];plus='/tmp/image-library-private-SDKs/nppplus-0.10.0.0/libnpp_plus-linux-x86_64-0.10.0.0_cuda12-archive'
+ expected_compile=['/usr/local/cuda-13.4/bin/nvcc','-O2','-std=c++17','-arch=sm_120','-DNPP_PLUS_ENABLE','-I'+plus+'/include','-L'+plus+'/lib','-Xlinker=-rpath','-Xlinker='+plus+'/lib','-lnpp_plus_if','-lnpp_plus_c',remote+'/'+Path(source).name,'-o',remote+'/original']
+ launch=shlex.split(execute['argv'][-1]);expected_phases=['prepare-private-full-original','upload-unmodified-sources-and-exact-inputs','extract-private-original','compile-complete-unmodified-original','actual-complete-native-default-with-source-input-library-GPU-receipt','collect-all-inputs-products-and-original-workflow-files']
+ checks.append(dict(check='actual-native-compile-execute-recipe-binds-binary-GPU-SDK-and-collection',passed=phases==expected_phases and all(c['cwd']==str(ROOT) for c in commands) and commands[3]['argv'][:2]==['ssh','nvidia-5090x2'] and compile==expected_compile and execute['argv'][:2]==['ssh','nvidia-5090x2'] and launch==['env','CUDA_VISIBLE_DEVICES=1','python3','-c',receipt_code(),json.dumps(config,separators=(',',':'))] and commands[5]['argv']==['scp','-r','nvidia-5090x2:'+remote+'/images','nvidia-5090x2:'+remote+'/work',str(root)]))
  families=set()
  for p,v in receipt['libraries'].items():
   for family in ['if','c']:

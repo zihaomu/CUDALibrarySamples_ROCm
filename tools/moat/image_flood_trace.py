@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """Trace all full RGB inputs and check actual project dispatches and physical GPU."""
 import argparse,collections,csv,json,sys
+from pathlib import Path
 from experiment import ROOT,Experiment,write,digest
 from image_flood_build import dependencies
 from image_progress import record
 def execute():
  from snapshot import capture
  b=json.loads((ROOT/'migration/reports/image-flood-build.json').read_text());assert b['status']=='BUILT' and digest(ROOT/b['library'])==b['library_sha256'] and all(digest(ROOT/n)==sha for n,sha in b['dependencies'].items());e=Experiment('I3','FloodFill-all29-real-device-dispatch-trace','rocm-trace',sources=[__file__,ROOT/'tools/moat/image_flood_worker.py',ROOT/'tools/moat/image_flood_inputs.py',*dependencies()],parent=b['experiment_id']);write(e.path/'backend.observed.json',capture());out=e.path/'outputs';rc=e.command(['rocprofv3','--kernel-trace','--output-format','csv','--output-directory',str(e.path/'trace'),'--',sys.executable,str(ROOT/'tools/moat/image_flood_worker.py'),'--library',str(ROOT/b['library']),'--sha',b['library_sha256'],'--output',str(out)],'actual-all29-RGB-predicate-union-output-and-metadata-kernels',timeout=900);r=dict(return_code=rc,build=b,experiment_id=e.id,outputs=str(out.relative_to(ROOT)));write(e.path/'run.json',r);r['evidence']=e.finish('EXECUTED' if not rc else 'PROFILER_FAILED');write(ROOT/'migration/reports/image-flood-trace.json',r);record('I3','flood29完整RGB输入真实GPU trace执行rc='+str(rc)+'；全像素与实际kernel/PCI/grid/时间另验。',[r['evidence']]);print(rc,r['evidence']);return rc
-def validate(run):
+def validate(run,raw_override=None):
  from image_flood_reference import validate as pixels
- results=pixels(run);meta=json.loads((ROOT/run['evidence']/'manifest.json').read_text());raw=ROOT/meta['raw_artifact_dir'];traces=list((raw/'trace').rglob('*kernel_trace.csv'));agents=list((raw/'trace').rglob('*agent_info.csv'))
+ results=pixels(run,raw_override=raw_override);meta=json.loads((ROOT/run['evidence']/'manifest.json').read_text());raw=Path(raw_override) if raw_override else ROOT/meta['raw_artifact_dir'];traces=list((raw/'trace').rglob('*kernel_trace.csv'));agents=list((raw/'trace').rglob('*agent_info.csv'))
  if len(traces)!=1 or len(agents)!=1:raise ValueError('one actual kernel trace and agent inventory')
  counter=collections.Counter();lookup={r['Node_Id']:r for r in csv.DictReader(agents[0].open())};allowed={d['pci_bdf'] for d in json.loads((raw/'backend.observed.json').read_text())['devices'] if d['physical_id']==1};project=[]
  for row in csv.DictReader(traces[0].open()):

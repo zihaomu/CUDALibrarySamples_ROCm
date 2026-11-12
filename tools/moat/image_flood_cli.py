@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Freeze, execute and independently check complete flood C++ CLI/file errors."""
 import argparse,json,shutil
+from pathlib import Path
 from experiment import ROOT,Experiment,write,digest
 from image_progress import record
 def freeze():
@@ -28,13 +29,16 @@ def execute():
   if rule['no_gpu']:env['HIP_VISIBLE_DEVICES']=''
   rc=e.command(argv(rule,ROOT/b['binary'],inp,out),'actual-complete-RGB-C++-CLI-'+name,cwd=cwd,env=env,timeout=600);r=dict(case=name,return_code=rc,inputs=str(inp.relative_to(ROOT)),outputs=str(out.relative_to(ROOT)),audit=str(audit.relative_to(ROOT)),build=b,experiment_id=e.id,stdout=e.commands[-1]['stdout'],stderr=e.commands[-1]['stderr']);write(e.path/'run.json',r);r['evidence']=e.finish(('EXPECTED_REJECTION' if rc else 'EXECUTED') if rc==rule['return_code'] else 'CLI_GAP');rows.append(r);write(ROOT/'migration/reports/image-flood-cli.json',rows);record('I3','flood真实CLI/'+name+'返回'+str(rc)+'；固定命令/输入/诊断/空产品集合由CPU另验。',[r['evidence']]);print(name,rc,flush=True)
  return 0
-def validate(rows):
+def validate(rows,raw_overrides=None):
  spec=json.loads((ROOT/'migration/rewrite/image-flood-original-contract.json').read_text());contract=json.loads((ROOT/'migration/rewrite/image-flood-cli-contract.json').read_text());rules={r['case']:r for r in contract['cases']};inputs=spec['datasets']['original'];results=[]
  if contract['status']!='FROZEN' or len(rows)!=len(rules) or len(rows)!=18 or {r['case'] for r in rows}!=set(rules):raise ValueError('all18 unique frozen CLI cases')
  for r in rows:
-  rule=rules[r['case']];name=rule['case'];meta=json.loads((ROOT/r['evidence']/'manifest.json').read_text());raw=ROOT/meta['raw_artifact_dir'];commands=json.loads((raw/'commands.json').read_text());inp=raw/('images' if rule['args_mode']=='default' else 'inputs');out=inp if rule['args_mode']=='default' else raw/'outputs';audit=raw/'audit'
+  rule=rules[r['case']];name=rule['case'];meta=json.loads((ROOT/r['evidence']/'manifest.json').read_text());raw=Path(raw_overrides[name]) if raw_overrides else ROOT/meta['raw_artifact_dir'];commands=json.loads((raw/'commands.json').read_text());inp=raw/('images' if rule['args_mode']=='default' else 'inputs');out=inp if rule['args_mode']=='default' else raw/'outputs';audit=raw/'audit'
   if len(commands)!=1:raise ValueError('one actual CLI producer command')
-  cmd=commands[0];stdout=(raw/r['stdout']).read_text();stderr=(raw/r['stderr']).read_text();checks=[dict(check='actual-fixed-argv-cwd-return-logs-and-input-output-audit-binding',passed=cmd['argv']==argv(rule,ROOT/r['build']['binary'],inp,out) and cmd['cwd']==str(raw/'work') and cmd['return_code']==r['return_code']==rule['return_code'] and cmd['stdout']==r['stdout'] and cmd['stderr']==r['stderr'] and (ROOT/r['inputs']).resolve()==inp.resolve() and (ROOT/r['outputs']).resolve()==out.resolve() and (ROOT/r['audit']).resolve()==audit.resolve() and cmd['environment_changes']['MIGRATION_IMAGE_FLOOD_AUDIT_DIR']==str(audit))]
+  cmd=commands[0];stored=Path(cmd['cwd']).parent;origin=stored
+  for _ in Path(meta['raw_artifact_dir']).parts:origin=origin.parent
+  stored_inp=stored/('images' if rule['args_mode']=='default' else 'inputs');stored_out=stored_inp if rule['args_mode']=='default' else stored/'outputs'
+  stdout=(raw/r['stdout']).read_text();stderr=(raw/r['stderr']).read_text();checks=[dict(check='actual-fixed-argv-cwd-return-logs-and-input-output-audit-binding',passed=origin/meta['raw_artifact_dir']==stored and cmd['argv']==argv(rule,origin/r['build']['binary'],stored_inp,stored_out) and cmd['cwd']==str(stored/'work') and cmd['return_code']==r['return_code']==rule['return_code'] and cmd['stdout']==r['stdout'] and cmd['stderr']==r['stderr'] and (ROOT/r['inputs']).resolve()==inp.resolve() and (ROOT/r['outputs']).resolve()==out.resolve() and (ROOT/r['audit']).resolve()==audit.resolve() and cmd['environment_changes']['MIGRATION_IMAGE_FLOOD_AUDIT_DIR']==str(stored/'audit'))]
   if name=='missing-default':checks.append(dict(check='actual-absent-default-input-directory',passed=not inp.exists()))
   else:
    wanted=set()

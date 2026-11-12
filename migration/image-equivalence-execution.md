@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-12T03:04:35.618709+00:00。26入口当前10通过/7部分/9失败。
+更新时间：2026-11-12T03:28:40.590473+00:00。26入口当前10通过/7部分/9失败。
 
-I3：flood固定Git检出重建四合同、HIP/C++、29完整RGB、四原例、72运行、18CLI、GPU trace及五CPU验收与36封存子记录：PASSED
+I3：flood30项72运行/18CLI/4原例真实验收器变异：PASSED
 
-证据：`migration/reports/evidence/rewrite/I3/FloodFill-clean-checkout-complete-RGB-runtime-CLI-trace/20261112T030223.110738Z-I3-host-cold-replay-c47fb30c0a`
+证据：`migration/reports/evidence/rewrite/I3/FloodFill-runtime-CLI-original-validator-mutations/20261112T032836.801106Z-I3-CPU-validator-test-553bdb52e0`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

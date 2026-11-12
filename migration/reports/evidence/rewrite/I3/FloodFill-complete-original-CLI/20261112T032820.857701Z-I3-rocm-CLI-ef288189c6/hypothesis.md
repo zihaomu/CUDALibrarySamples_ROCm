@@ -1,0 +1,1 @@
+Test rocm-CLI for FloodFill-complete-original-CLI, case first-product-is-directory. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T184721.211118Z-I3-rocm-build-255448be41.
