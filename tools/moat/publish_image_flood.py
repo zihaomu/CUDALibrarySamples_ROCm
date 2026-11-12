@@ -2,7 +2,7 @@
 """Publish the Flood Fill entry after Git anchoring its complete qualification."""
 import json
 from experiment import ROOT,write,digest
-from qualify_image_flood import collect,load,SAMPLE,IMPLEMENTATION,COMPARISON,metadata
+from qualify_image_flood import collect,load,SAMPLE,IMPLEMENTATION,COMPARISON,metadata,historical_refs
 from qualify_canny_plus import sealed
 from selected_proofs import inspect
 
@@ -24,6 +24,7 @@ def validate(q,sample,review,closure=None):
         or not checks or not all(c['passed'] for c in checks)
         or q['dependencies']!=load('frontend-build')['dependencies']
         or set(q['evidence_references'])!=refs
+        or q['historical_evidence_references']!=historical_refs()
         or any(q.get(k)!=v for k,v in frozen.items())
         or set(q)!=set(frozen)|{'qualification_id','evidence'}
         or q['case_ids']!=[c['case'] for c in spec['cases']]
@@ -66,7 +67,7 @@ def main():
                   retry_condition='修改连接、边界、输入布局、元数据或接口须重签合同与复验。',
                   next_step='继续I3两类watershed、Hough和OpenCV benchmark，然后I4–I9。',
                   reproduce='python3 tools/moat/image_flood_contracts.py\npython3 tools/moat/image_flood_build.py\npython3 tools/moat/image_flood_run.py\npython3 tools/moat/image_flood_frontend_build.py\npython3 tools/moat/image_flood_originals.py\npython3 tools/moat/image_flood_runtime.py')
-    for ref in ['migration/reports/image-flood.md',q['evidence'],*q['evidence_references']]:
+    for ref in ['migration/reports/image-flood.md',q['evidence'],*q['evidence_references'],*q['historical_evidence_references']]:
         if ref not in sample['evidence']:
             sample['evidence'].append(ref)
     if not any(a.get('qualification_id')==q['qualification_id'] for a in sample['attempts']):

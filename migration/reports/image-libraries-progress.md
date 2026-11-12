@@ -1,6 +1,6 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-12T03:43:45.453015+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-12T03:47:53.478951+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
 26入口当前：10 PASSED / 7 PARTIAL / 9 FAILED。
 
@@ -1147,3 +1147,5 @@
 | 2026-11-12T03:40:07.131772+00:00 | I3 | Flood资格门16项真实历史padding/源命令/重复子记录/摘要/像素和配对hash反例：PASSED | [20261112T033957.495517Z-I3-CPU-validator-test-43a8ab1c6f](evidence/rewrite/I3/FloodFill-qualification-and-cold-archive-validator-checks/20261112T033957.495517Z-I3-CPU-validator-test-43a8ab1c6f) |
 | 2026-11-12T03:40:43.896880+00:00 | I3 | 复审发现冷重放四份子profile.json没有逐字绑定冻结合同；现逐份核对完整profile/status/count，增加同步改写子封印仍必须拒绝的第16项反例。16/16资格门正反向通过；资格dry-run仅独立复审未满足，支持表维持PARTIAL。 | [20261112T033957.495517Z-I3-CPU-validator-test-43a8ab1c6f](evidence/rewrite/I3/FloodFill-qualification-and-cold-archive-validator-checks/20261112T033957.495517Z-I3-CPU-validator-test-43a8ab1c6f) |
 | 2026-11-12T03:43:45.453015+00:00 | I3 | Flood未首次提交的组合资格被真实publisher拒绝，样例主表hash保持；先提交资格封印后才能升级支持：PASSED | [20261112T034338.085846Z-I3-CPU-publication-gate-30fd8a5f0c](evidence/rewrite/I3/FloodFill-unpublished-qualification-must-not-update-catalog/20261112T034338.085846Z-I3-CPU-publication-gate-30fd8a5f0c) |
+| 2026-11-12T03:45:45.148854+00:00 | I3 | Flood组合资格首次发布被当前源码传递闭包门正确拒绝：旧失败实验的历史HIP源不能作为当前通过证明；catalog保持不变。正在改为历史引用与当前CAS绑定，拒绝证据独立保留。 | [20261112T034537.140996Z-I3-CPU-publication-gate-20e29ff3be](evidence/rewrite/I3/FloodFill-selected-proof-rejects-stale-historical-kernel-as-current/20261112T034537.140996Z-I3-CPU-publication-gate-20e29ff3be) |
+| 2026-11-12T03:47:53.478951+00:00 | I3 | Flood资格门16项真实历史padding/源命令/重复子记录/摘要/像素和配对hash反例：PASSED | [20261112T034743.636243Z-I3-CPU-validator-test-3b569ed53c](evidence/rewrite/I3/FloodFill-qualification-and-cold-archive-validator-checks/20261112T034743.636243Z-I3-CPU-validator-test-3b569ed53c) |

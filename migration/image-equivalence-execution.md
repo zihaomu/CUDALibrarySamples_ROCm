@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-12T03:43:45.453015+00:00。26入口当前10通过/7部分/9失败。
+更新时间：2026-11-12T03:47:53.478951+00:00。26入口当前10通过/7部分/9失败。
 
-I3：Flood未首次提交的组合资格被真实publisher拒绝，样例主表hash保持；先提交资格封印后才能升级支持：PASSED
+I3：Flood资格门16项真实历史padding/源命令/重复子记录/摘要/像素和配对hash反例：PASSED
 
-证据：`migration/reports/evidence/rewrite/I3/FloodFill-unpublished-qualification-must-not-update-catalog/20261112T034338.085846Z-I3-CPU-publication-gate-30fd8a5f0c`
+证据：`migration/reports/evidence/rewrite/I3/FloodFill-qualification-and-cold-archive-validator-checks/20261112T034743.636243Z-I3-CPU-validator-test-3b569ed53c`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

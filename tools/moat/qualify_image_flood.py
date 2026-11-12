@@ -26,6 +26,10 @@ def native_run():
     return next(r for r in json.loads((ROOT/'migration/reports/image-I3-native-originals.json').read_text())
                 if r['source'] == 'NPP+/floodFill/floodFillVariousRegionTypesNPPPlus.cpp')
 
+def historical_refs():
+    old=load('legacy-padding-failure')
+    return sorted({old['evidence'],old['build']['evidence']})
+
 def build_command(r,command,frontend=False):
     """Bind the actual hipcc argv to the recorded source, device and output."""
     root=Path(command['cwd']);core=Path('/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core')
@@ -328,12 +332,21 @@ def collect(review=None):
     def padding_fix():
         old, fixed = load('legacy-padding-failure'), load('padding-fix-validation')
         old_dir=ROOT/old['evidence'];old_build_dir=ROOT/old['build']['evidence']
-        refs.update({old['evidence'],old['build']['evidence']})
         if audit(old_dir) or audit(old_build_dir):return False
         old_source=json.loads((old_dir/'source.json').read_text())
         old_build_source=json.loads((old_build_dir/'source.json').read_text())
         sources.update(old_source['source_objects'].values())
         sources.update(old_build_source['source_objects'].values())
+        # Retain the failed attempt as immutable historical evidence. Its HIP
+        # source was superseded, so neither old proof is a selected current ref.
+        sources.update({
+            'migration/reports/image-flood-legacy-padding-failure.json',
+            *[str(Path(old['evidence'])/n) for n in
+              ('sealed.json','counterexample.json','manifest.json','commands.json',
+               'outputs/observed.json','source.json')],
+            *[str(Path(old['build']['evidence'])/n) for n in
+              ('sealed.json','build.json','manifest.json','commands.json','source.json')],
+        })
         old_manifest=json.loads((old_dir/'manifest.json').read_text())
         new_dir,manifest,_=sealed(fixed['evidence'])
         old_command=json.loads((old_dir/'commands.json').read_text())
@@ -407,7 +420,7 @@ def collect(review=None):
                     'migration/environments/project.lock.json',
                     'migration/rewrite/image-acceptance-policy.json'})
     gate('three-independent-exact-source-and-proof-reviews',
-         lambda: reviewed(review, sorted(sources), refs))
+         lambda: reviewed(review, sorted(sources), refs|set(historical_refs())))
     return checks, refs, sorted(sources), build, spec
 
 def metadata():
@@ -431,7 +444,9 @@ def main():
              dependencies=load('frontend-build')['dependencies'],
              case_ids=[c['case'] for c in spec['cases']], case_count=29,
              comparison_mode=COMPARISON, checks=checks,
-             evidence_references=sorted(refs), source_commit=review['source_commit'],
+             evidence_references=sorted(refs),
+             historical_evidence_references=historical_refs(),
+             source_commit=review['source_commit'],
              scope='Complete five-mode/two-image/five-product C++ entry; independently exact fixed-seed eight-connected GPU flood fill. Native NPP+ differences documented. Linux/gfx1201/ROCm10.1; no vendor ABI/performance/wave64/Windows claim.',
              **metadata())
     e = Experiment('I3', SAMPLE, 'composite-qualification', sources=[ROOT/n for n in sources])
