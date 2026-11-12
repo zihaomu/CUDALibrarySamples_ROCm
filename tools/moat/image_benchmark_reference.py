@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Independent NumPy/OpenCV CPU checks for the complete HIP benchmark products."""
-import argparse,json,tempfile
+import argparse,json,re,tempfile
 from pathlib import Path
 import cv2,numpy as np
 from experiment import ROOT,Experiment,write,digest
@@ -29,9 +29,25 @@ def gpu_product(path,name,w,h,sha):
 
 def validate(case,run,profile):
     proof=ROOT/run['evidence'];manifest=json.loads((proof/'manifest.json').read_text())
-    command=json.loads((proof/'commands.json').read_text())[0]
+    commands=json.loads((proof/'commands.json').read_text())
+    actual=[c for c in commands if c['phase']=='actual-four-operation-original-CLI']
+    build=json.loads((ROOT/'migration/reports/image-benchmark-build.json').read_text())
+    command=actual[0] if len(actual)==1 else {}
+    raw=ROOT/manifest['raw_artifact_dir']
+    stdout=(raw/command['stdout']).read_text() if command else ''
+    stderr=(raw/command['stderr']).read_text() if command else ''
     checks=[dict(check='actual-return-and-source',passed=run['status']=='EXECUTED'
-                 and command['return_code']==run['return_code']==case['expected_return_code']),
+                 and command.get('return_code')==run['return_code']==case['expected_return_code']
+                 and manifest['case_id']==run['case']==case['case']
+                 and manifest['parent_experiment_id']==build['experiment_id']
+                 and command.get('argv')==[str(ROOT/build['binary']),*case['arguments']]
+                 and command.get('cwd')==str(raw/'outputs')
+                 and run['arguments']==case['arguments']
+                 and run['build_evidence']==build['evidence']),
+            dict(check='actual-input-and-diagnostics',passed=digest(raw/'images'/Path(profile['image']).name)==profile['image_sha256']
+                 and stdout.startswith(case['stdout_starts']) and stderr.startswith(case['stderr_starts'])
+                 and (bool(stdout)==bool(case['stdout_starts']))
+                 and (bool(stderr)==bool(case['stderr_starts']))),
             dict(check='actual-physical-GPU1',passed={d['physical_id'] for d in json.loads((proof/'backend.observed.json').read_text())['devices']}=={1}),
             dict(check='complete-four-product-set',passed={name:x['bytes'] for name,x in run['products'].items()}==case['products'])]
     if case['expected_return_code']:
@@ -47,18 +63,20 @@ def validate(case,run,profile):
         fixture=Path(temporary);write(fixture/'config.json',dict(width=w,height=h,channels=1,pitch=w))
         (fixture/'input.bin').write_bytes(gray.tobytes())
         project_canny=local_mask(canny_stages(fixture),60,120)
-    cv_gauss=cv2.GaussianBlur(gray,(5,5),0,borderType=cv2.BORDER_REPLICATE)
+    # Original CUDA and the HIP C++ benchmark use OpenCV's default REFLECT_101.
+    cv_gauss=cv2.GaussianBlur(gray,(5,5),0)
     cv_canny=cv2.Canny(gray,60,120,apertureSize=3,L2gradient=True)
     cv_resize=cv2.resize(gray,(w//2,h//2),interpolation=cv2.INTER_LINEAR)
     # OpenCV MatExpr gray/2+40 uses integer saturation after division.
     blue=cv2.addWeighted(gray,0.5,gray,0,40)
     rgb=cv2.merge((gray,255-gray,blue))
     cv_color=cv2.cvtColor(rgb,cv2.COLOR_RGB2GRAY)
-    expected={'gauss.raw':(project_gauss,cv_gauss,0,0),
-              'canny.raw':(project_canny,cv_canny,0,0),
-              'resize.raw':(cv_resize,cv_resize,1,0.3),
-              'color.raw':(cv_color,cv_color,1,0.3)}
-    metrics={};raw=ROOT/manifest['raw_artifact_dir']
+    policy=profile['semantic_policy']
+    expected={'gauss.raw':(project_gauss,cv_gauss,policy['gaussian']['project_max_abs'],policy['gaussian']['project_mean_abs']),
+              'canny.raw':(project_canny,cv_canny,policy['canny']['project_max_abs'],policy['canny']['project_mean_abs']),
+              'resize.raw':(cv_resize,cv_resize,policy['resize']['project_max_abs'],policy['resize']['project_mean_abs']),
+              'color.raw':(cv_color,cv_color,policy['rgb_gray']['project_max_abs'],policy['rgb_gray']['project_mean_abs'])}
+    metrics={}
     for name,(project,cv,limit,mean_limit) in expected.items():
         got=gpu_product(raw,name,w,h,run['products'][name]['sha256'])
         project_diff=difference(got,project);native_diff=difference(got,cv)
@@ -69,6 +87,23 @@ def validate(case,run,profile):
     checks.append(dict(check='Canny-OpenCV-structural-comparison-recorded',
                        passed=metrics['canny.raw']['opencv']['mismatches']>=0
                        and metrics['canny.raw']['nonzero']>0))
+    labels={'gauss.raw':'Gaussian 5x5','canny.raw':'Canny 3x3 L2',
+            'resize.raw':'Resize 1/2 bilinear','color.raw':'RGB to gray'}
+    lines=[line for line in stdout.splitlines() if any(line.startswith(label) for label in labels.values())]
+    checks.append(dict(check='four-printed-operation-rows-in-original-order',
+                       passed=[next((label for label in labels.values() if line.startswith(label)),None) for line in lines]
+                       ==list(labels.values())))
+    if len(lines)==4:
+        for (name,_),line in zip(labels.items(),lines):
+            try:printed=float(line.rsplit('|',1)[1].strip())
+            except (IndexError,ValueError):printed=float('inf')
+            observed=metrics[name]['opencv']['mean_abs']
+            checks.append(dict(check=name+'/printed-OpenCV-mean-abs',
+                               passed=abs(printed-observed)<=policy['printed_mean_abs_tolerance'],printed=printed,independent=observed))
+    match=re.search(r'^Canny edge pixels: ROCm (\d+), OpenCV (\d+)',stdout,re.MULTILINE)
+    checks.append(dict(check='printed-Canny-edge-counts',passed=bool(match)
+                       and (int(match[1]),int(match[2]))==
+                       (metrics['canny.raw']['nonzero'],int(np.count_nonzero(cv_canny)))))
     return dict(case=case['case'],status='PASSED' if all(c['passed'] for c in checks) else 'FAILED',
                 checks=checks,metrics=metrics)
 

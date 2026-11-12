@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-12T06:00:51.048912+00:00。26入口当前12通过/7部分/7失败。
+更新时间：2026-11-12T06:17:14.379323+00:00。26入口当前12通过/7部分/7失败。
 
-I3：benchmark首轮固定Git冷检出九作业及18子证据均通过，最后同源hash比较错误地把每次不同的依赖实验回执ID当作固定源码；失败封存，改为比对固定源码hash和OpenCV固定commit/200文件后重跑。
+I3：benchmark原生失败伪成功/错误CLI互换/裁剪源码依赖共9项正反证据：PASSED。
 
-证据：`migration/reports/image-benchmark-cold.json`
+证据：`migration/reports/evidence/rewrite/I3/OpenCV-benchmark-sealed-reader-counterexamples/20261112T061713.382398Z-I3-CPU-negative-4b3c3786c6`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

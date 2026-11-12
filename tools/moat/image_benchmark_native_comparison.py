@@ -9,6 +9,20 @@ OPERATIONS=['Gaussian 5x5','Canny 3x3 L2','Resize 1/2 bilinear','RGB to gray']
 ROW=re.compile(r'^(.+?)\s+([0-9.]+)\s+([0-9.]+)\s+([0-9.]+)\s+([0-9.]+)\s+\|\s+([0-9.]+)x\s+([0-9.]+)x\s+([0-9.]+)x\s+\|\s+([0-9.]+)$')
 EDGE=re.compile(r'^Canny edge pixels: (\w+) (\d+), OpenCV (\d+)')
 HEADER=re.compile(r'^Image (\d+)x(\d+), (\d+) iterations per timing, median of (\d+)')
+NATIVE_PHASES=['prepare-full-native-benchmark','upload-unchanged-source-and-original-image',
+  'extract-full-original','compile-unmodified-native-with-private-OpenCV',
+  'actual-4096x2048-four-operations-warmup-five-times-twenty-default-iterations',
+  'collect-original-input-and-all-produced-files']
+
+def native_execution_ok(native,manifest,commands,proof,logs):
+    return (native['status']=='EXECUTED' and
+      native['build_return_code']==native['return_code']==native['collection_return_code']==0
+      and manifest['backend']=='cuda-original' and manifest['experiment_outcome']=='OBSERVED'
+      and manifest['experiment_id']==native['experiment_id']
+      and native['remote']==native['config']['remote']
+      and [c['phase'] for c in commands]==NATIVE_PHASES
+      and all(c['return_code']==0 for c in commands)
+      and len(logs)==1 and (proof/commands[4]['stdout']).resolve()==logs[0].resolve())
 
 def parse(stdout):
     lines=stdout.splitlines(); rows={};edges=None;size=None;device=None
@@ -26,12 +40,17 @@ def main():
     runs=json.loads((ROOT/'migration/reports/image-benchmark-runs.json').read_text())
     rocm=next(r for r in runs if r['case']=='original-default')
     dep=json.loads((ROOT/'migration/reports/image-I3-rocm-OpenCV.json').read_text())
+    reference=next(r for r in json.loads((ROOT/'migration/reports/image-benchmark-validation.json').read_text())
+                   if r['case']=='original-default')
+    policy=json.loads((ROOT/'migration/rewrite/image-benchmark-profile.json').read_text())['semantic_policy']
     nproof=ROOT/native['evidence'];rproof=ROOT/rocm['evidence']
     nlogs=list((nproof/'logs').glob('*actual-4096x2048*stdout.log'))
     rlogs=list((rproof/'logs').glob('*actual-four-operation-original-CLI.stdout.log'))
     e=Experiment('I3','OpenCV-benchmark-original-CUDA-and-HIP-sealed-semantics','CPU-comparison',
         sources=[__file__,ROOT/'migration/reports/image-I3-benchmark-native.json',
                  ROOT/'migration/reports/image-benchmark-runs.json',
+                 ROOT/'migration/reports/image-benchmark-validation.json',
+                 ROOT/'migration/rewrite/image-benchmark-profile.json',
                  ROOT/'migration/reports/image-I3-rocm-OpenCV.json',
                  ROOT/'NPP/opencvBenchmark/opencvBenchmark.cpp'])
     checks=[dict(check='one-sealed-stdout-per-backend',passed=len(nlogs)==len(rlogs)==1)]
@@ -39,17 +58,33 @@ def main():
         cuda=parse(nlogs[0].read_text());amd=parse(rlogs[0].read_text())
         first=json.loads(nlogs[0].read_text().splitlines()[0]);libs=first['libraries']
         receipt=json.loads((ROOT/'migration/reports/image-I3-native-OpenCV.json').read_text())['receipt']['files']
+        loader=json.loads((rproof/'loaded-libraries.json').read_text())
+        nmanifest=json.loads((nproof/'manifest.json').read_text())
+        ncommands=json.loads((nproof/'commands.json').read_text())
         checks += [dict(check='original-source-unchanged',passed=native['source_sha256']==digest(ROOT/native['source'])==first['source_sha256']),
+            dict(check='actual-native-build-run-collection-and-seal',passed=native_execution_ok(native,nmanifest,ncommands,nproof,nlogs)),
             dict(check='same-input-and-4096x2048-20x5-contract',passed=first['input_sha256']==native['config']['input_sha256']
                  and first['input_sha256']==json.loads((ROOT/'migration/rewrite/image-benchmark-profile.json').read_text())['image_sha256']
                  and cuda['size']==amd['size']==(4096,2048,20,5)),
             dict(check='same-pinned-OpenCV-build',passed=first['OpenCV_source']['commit']==dep['source']['commit']
+                 and loader['status']=='PASSED' and all(c['passed'] for c in loader['checks'])
                  and any('libopencv_core' in name and info['sha256']==receipt['lib/libopencv_core.so.4.12.0']['sha256'] for name,info in libs.items())
                  and any('libopencv_imgproc' in name and info['sha256']==receipt['lib/libopencv_imgproc.so.4.12.0']['sha256'] for name,info in libs.items())),
             dict(check='all-four-operations-in-original-order',passed=list(cuda['rows'])==list(amd['rows'])==OPERATIONS),
             dict(check='real-distinct-GPU-identities',passed='RTX 5090' in cuda['device'] and 'R9700' in amd['device']),
             dict(check='Canny-edge-counts-recorded',passed=cuda['edges']==dict(label='NPP',gpu=546308,opencv=324128)
                  and amd['edges']==dict(label='ROCm',gpu=546308,opencv=324128)),
+            dict(check='all-four-HIP-printed-OpenCV-differences-independently-recomputed',
+                 passed=reference['status']=='PASSED' and all(abs(amd['rows'][name]['opencv_mean_abs']-
+                   reference['metrics'][product]['opencv']['mean_abs'])<=policy['printed_mean_abs_tolerance']
+                   for name,product in zip(OPERATIONS,['gauss.raw','canny.raw','resize.raw','color.raw']))),
+            dict(check='documented-Gaussian-and-Canny-native-variant',
+                 passed=cuda['rows']['Gaussian 5x5']['opencv_mean_abs']==1.70
+                   and amd['rows']['Gaussian 5x5']['opencv_mean_abs']==0.00
+                   and cuda['rows']['Canny 3x3 L2']['opencv_mean_abs']==6.75
+                   and amd['rows']['Canny 3x3 L2']['opencv_mean_abs']==6.75
+                   and 'variant' in policy['gaussian']['equivalence']
+                   and 'variant' in policy['canny']['equivalence']),
             dict(check='all-numeric-results-finite-and-nonnegative',passed=all(v>=0 and v<1e8 for p in (cuda,amd) for row in p['rows'].values() for v in row.values()))]
     else:cuda=amd={}
     status='PASSED' if all(c['passed'] for c in checks) else 'FAILED'

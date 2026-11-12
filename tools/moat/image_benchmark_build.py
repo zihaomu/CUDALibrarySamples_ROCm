@@ -12,6 +12,7 @@ def dependencies():
     return [SOURCE,ROOT/'NPP/opencvBenchmark/opencvBenchmark.cpp',
             ROOT/'NPP/opencvBenchmark/images/CircuitBoard_2048x1024_8u.raw',
             ROOT/'migration/reports/image-I3-rocm-OpenCV.json',
+            ROOT/'migration/reports/image-I3-native-OpenCV.json',
             *[base/n for n in ['benchmark.h','benchmark.hip','canny.h','canny.hip',
                               'canny_stages.h','canny_stages.hip']]]
 
@@ -24,7 +25,15 @@ def main():
     opencv=ROOT/dep['prefix'];mismatch=[name for name,identity in receipt['files'].items()
                 if not (opencv/name).is_file() or (opencv/name).stat().st_size!=identity['bytes']
                 or digest(opencv/name)!=identity['sha256']]
-    if dep['status']!='READY' or mismatch:raise ValueError('Pinned matched native OpenCV dependency changed: '+str(mismatch[:3]))
+    if dep['status']!='READY' or mismatch:
+        result=dict(status='DEPENDENCY_FAILED',return_code=None,experiment_id=e.id,
+                    dependency_status=dep['status'],opencv_mismatches=mismatch,
+                    opencv_files_checked=len(receipt['files']))
+        write(e.path/'build.json',result)
+        result['evidence']=e.finish('ENV_BLOCKED',dict(status=result['status'],mismatches=mismatch))
+        write(ROOT/'migration/reports/image-benchmark-build.json',result)
+        record('I3','OpenCV benchmark构建依赖校验失败，200文件回执或READY状态不符；失败已封存。',[result['evidence']])
+        print(result['status'],result['evidence']);return 1
     core=Path('/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core')
     overlay=ROOT/'build/rocm-sdk-overlay';common=['hipcc','--rocm-path='+str(overlay),
            '--hip-path='+str(overlay),'--rocm-device-lib-path='+str(core/'lib/llvm/amdgcn/bitcode'),
@@ -47,6 +56,8 @@ def main():
                 binary=str(binary.relative_to(ROOT)) if binary.is_file() else None,
                 binary_sha256=digest(binary) if binary.is_file() else None,
                 opencv_prefix=dep['prefix'],opencv_files_checked=len(receipt['files']),
+                opencv_core_sha256=receipt['files']['lib/libopencv_core.so.4.12.0']['sha256'],
+                opencv_imgproc_sha256=receipt['files']['lib/libopencv_imgproc.so.4.12.0']['sha256'],
                 dependencies={str(p.relative_to(ROOT)):digest(p) for p in dependencies()},
                 build_recipe_sha256=digest(__file__))
     write(e.path/'build.json',result)

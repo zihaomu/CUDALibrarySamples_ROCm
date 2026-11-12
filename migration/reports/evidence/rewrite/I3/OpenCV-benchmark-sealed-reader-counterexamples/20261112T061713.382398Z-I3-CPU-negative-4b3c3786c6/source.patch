@@ -1,0 +1,439 @@
+diff --git a/tools/moat/image_benchmark_build.py b/tools/moat/image_benchmark_build.py
+index 12b2913fc..ea35afa55 100644
+--- a/tools/moat/image_benchmark_build.py
++++ b/tools/moat/image_benchmark_build.py
+@@ -12,6 +12,7 @@ def dependencies():
+     return [SOURCE,ROOT/'NPP/opencvBenchmark/opencvBenchmark.cpp',
+             ROOT/'NPP/opencvBenchmark/images/CircuitBoard_2048x1024_8u.raw',
+             ROOT/'migration/reports/image-I3-rocm-OpenCV.json',
++            ROOT/'migration/reports/image-I3-native-OpenCV.json',
+             *[base/n for n in ['benchmark.h','benchmark.hip','canny.h','canny.hip',
+                               'canny_stages.h','canny_stages.hip']]]
+ 
+@@ -24,7 +25,15 @@ def main():
+     opencv=ROOT/dep['prefix'];mismatch=[name for name,identity in receipt['files'].items()
+                 if not (opencv/name).is_file() or (opencv/name).stat().st_size!=identity['bytes']
+                 or digest(opencv/name)!=identity['sha256']]
+-    if dep['status']!='READY' or mismatch:raise ValueError('Pinned matched native OpenCV dependency changed: '+str(mismatch[:3]))
++    if dep['status']!='READY' or mismatch:
++        result=dict(status='DEPENDENCY_FAILED',return_code=None,experiment_id=e.id,
++                    dependency_status=dep['status'],opencv_mismatches=mismatch,
++                    opencv_files_checked=len(receipt['files']))
++        write(e.path/'build.json',result)
++        result['evidence']=e.finish('ENV_BLOCKED',dict(status=result['status'],mismatches=mismatch))
++        write(ROOT/'migration/reports/image-benchmark-build.json',result)
++        record('I3','OpenCV benchmark构建依赖校验失败，200文件回执或READY状态不符；失败已封存。',[result['evidence']])
++        print(result['status'],result['evidence']);return 1
+     core=Path('/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core')
+     overlay=ROOT/'build/rocm-sdk-overlay';common=['hipcc','--rocm-path='+str(overlay),
+            '--hip-path='+str(overlay),'--rocm-device-lib-path='+str(core/'lib/llvm/amdgcn/bitcode'),
+@@ -47,6 +56,8 @@ def main():
+                 binary=str(binary.relative_to(ROOT)) if binary.is_file() else None,
+                 binary_sha256=digest(binary) if binary.is_file() else None,
+                 opencv_prefix=dep['prefix'],opencv_files_checked=len(receipt['files']),
++                opencv_core_sha256=receipt['files']['lib/libopencv_core.so.4.12.0']['sha256'],
++                opencv_imgproc_sha256=receipt['files']['lib/libopencv_imgproc.so.4.12.0']['sha256'],
+                 dependencies={str(p.relative_to(ROOT)):digest(p) for p in dependencies()},
+                 build_recipe_sha256=digest(__file__))
+     write(e.path/'build.json',result)
+diff --git a/tools/moat/image_benchmark_cold.py b/tools/moat/image_benchmark_cold.py
+index e8092b373..77c552594 100644
+--- a/tools/moat/image_benchmark_cold.py
++++ b/tools/moat/image_benchmark_cold.py
+@@ -4,17 +4,29 @@ import collections,json,os,shutil,tempfile
+ from pathlib import Path
+ from experiment import ROOT,Experiment,write,digest,git
+ from image_progress import record
++from image_benchmark_build import dependencies
+ 
+-REPORTS={'contracts':1,'deps':1,'build':1,'runs':6,'validation':6,'native-comparison':1,'runtime':1,'trace':1}
++REPORTS={'contracts':1,'deps':1,'build':1,'runs':6,'validation':6,'native-comparison':1,'runtime':1,'trace':1,'negative':1}
+ FILES={'contracts':'image-benchmark-contracts.json','deps':'image-I3-rocm-OpenCV.json',
+        'build':'image-benchmark-build.json','runs':'image-benchmark-runs.json',
+        'validation':'image-benchmark-validation.json','native-comparison':'image-benchmark-native-comparison.json',
+-       'runtime':'image-benchmark-runtime.json','trace':'image-benchmark-trace.json'}
++       'runtime':'image-benchmark-runtime.json','trace':'image-benchmark-trace.json',
++       'negative':'image-benchmark-negative.json'}
++
++def same_build_source_hashes(cold_deps,clone):
++    volatile='migration/reports/image-I3-rocm-OpenCV.json'
++    expected={str(path.relative_to(ROOT)) for path in dependencies()}
++    if set(cold_deps)!=expected:return False
++    pinned={name:sha for name,sha in cold_deps.items() if name!=volatile}
++    return (pinned=={name:digest(ROOT/name) for name in pinned}
++       and json.loads((clone/volatile).read_text())['source']==
++           json.loads((ROOT/volatile).read_text())['source']
++       and json.loads((clone/volatile).read_text())['files_checked']==200)
+ 
+ def main():
+     commit=git('rev-parse','HEAD').strip()
+     scripts=[ROOT/'tools/moat'/('image_benchmark_'+name+'.py') for name in
+-       ['contracts','deps','build','run','reference','native_comparison','runtime','trace']]
++       ['contracts','deps','build','identity','run','reference','native_comparison','runtime','trace','negative']]
+     e=Experiment('I3','OpenCV-benchmark-fixed-Git-cold-four-operations-and-CPU','host-cold-replay',
+        sources=[__file__,*scripts,ROOT/'migration/rewrite/image-benchmark-profile.json'])
+     clone=Path(tempfile.mkdtemp(prefix='image-benchmark-cold-',dir=ROOT.parent))/'src'
+@@ -32,7 +44,8 @@ def main():
+             ('tools/moat/image_benchmark_reference.py','cpu'),
+             ('tools/moat/image_benchmark_native_comparison.py','cpu'),
+             ('tools/moat/image_benchmark_runtime.py','gpu'),
+-            ('tools/moat/image_benchmark_trace.py','gpu')]
++            ('tools/moat/image_benchmark_trace.py','gpu'),
++            ('tools/moat/image_benchmark_negative.py','cpu')]
+       for name,kind in jobs:
+         if rc:break
+         if kind=='cpu':argv=[cpu,str(clone/name)];env=None
+@@ -42,7 +55,7 @@ def main():
+                 'HIP_VISIBLE_DEVICES=0','python3',str(clone/name)]
+           env=dict(os.environ,HIP_VISIBLE_DEVICES='2')
+         rc=e.command(argv,'cold-'+Path(name).stem,cwd=clone,env=env,timeout=1800)
+-      checks.append(dict(check='all-nine-cold-jobs-success',passed=rc==0))
++      checks.append(dict(check='all-ten-cold-jobs-success',passed=rc==0))
+       if rc==0:
+         checks.append(dict(check='identical-frozen-contract',passed=digest(clone/'migration/rewrite/image-benchmark-profile.json')
+            ==digest(ROOT/'migration/rewrite/image-benchmark-profile.json')))
+@@ -62,15 +75,9 @@ def main():
+               else:shutil.copyfile(source,target)
+             children.append(dict(kind=kind,index=index,evidence=row['evidence'],raw=str(dest.relative_to(e.path))))
+       counts=collections.Counter(c['kind'] for c in children)
+-      checks.append(dict(check='complete-18-child-inventory',passed=dict(counts)==REPORTS and len(children)==18))
++      checks.append(dict(check='complete-19-child-inventory',passed=dict(counts)==REPORTS and len(children)==19))
+       cold_deps=json.loads((clone/'migration/reports/image-benchmark-build.json').read_text())['dependencies'] if rc==0 else {}
+-      volatile='migration/reports/image-I3-rocm-OpenCV.json'
+-      pinned={name:sha for name,sha in cold_deps.items() if name!=volatile}
+-      checks.append(dict(check='same-build-source-hashes',passed=rc==0 and pinned and
+-        pinned=={name:digest(ROOT/name) for name in pinned} and
+-        json.loads((clone/volatile).read_text())['source']==
+-        json.loads((ROOT/volatile).read_text())['source'] and
+-        json.loads((clone/volatile).read_text())['files_checked']==200))
++      checks.append(dict(check='same-build-source-hashes',passed=rc==0 and same_build_source_hashes(cold_deps,clone)))
+     except Exception as error:checks.append(dict(check='cold-replay-finished',passed=False,error=repr(error)));rc=rc or 1
+     checks.append(dict(check='final-return-code',passed=rc==0))
+     status='PASSED' if all(c['passed'] for c in checks) else 'FAILED'
+diff --git a/tools/moat/image_benchmark_contracts.py b/tools/moat/image_benchmark_contracts.py
+index 15e23f1d5..eb3750705 100644
+--- a/tools/moat/image_benchmark_contracts.py
++++ b/tools/moat/image_benchmark_contracts.py
+@@ -12,13 +12,31 @@ def main():
+     for name,w,h,iters in [('small',128,96,1),('odd-half',129,97,1),('original-default',4096,2048,20)]:
+         argv=[] if name=='original-default' else ['-w',str(w),'-h',str(h),'-n',str(iters)]
+         cases.append(dict(case=name,arguments=argv,width=w,height=h,iterations=iters,expected_return_code=0,
++                          stdout_starts=f'Image {w}x{h}, {iters} iterations per timing, median of 5',stderr_starts='',
+                           products={'gauss.raw':w*h,'canny.raw':w*h,'resize.raw':(w//2)*(h//2),'color.raw':w*h}))
+-    cases += [dict(case='invalid-dimensions',arguments=['-w','15'],expected_return_code=1,products={}),
+-              dict(case='missing-input',arguments=['-i','/definitely/missing/benchmark.raw'],expected_return_code=1,products={}),
+-              dict(case='unknown-option',arguments=['--unknown'],expected_return_code=1,products={})]
++    cases += [dict(case='invalid-dimensions',arguments=['-w','15'],expected_return_code=1,products={},stdout_starts='',stderr_starts='Invalid option: need 16 <= -w/-h <= 16384 and -n >= 1'),
++              dict(case='missing-input',arguments=['-i','/definitely/missing/benchmark.raw'],expected_return_code=1,products={},stdout_starts='',stderr_starts='Cannot read 2097152 bytes from /definitely/missing/benchmark.raw'),
++              dict(case='unknown-option',arguments=['--unknown'],expected_return_code=1,products={},stdout_starts='Usage: ',stderr_starts='')]
++    semantics=dict(
++        policy_history='Expanded after independent review; earlier coarse CLI-only contracts remain sealed and all cases must be replayed.',
++        gaussian=dict(project='separable [1,4,6,4,1]^2 /256, replicate border, integer round half up',
++                      project_max_abs=0,project_mean_abs=0,
++                      opencv='OpenCV GaussianBlur ksize5 sigma0 default REFLECT_101',
++                      native='NPP 5x5 Gaussian replicate border; original emits mean absolute error but no output pixels',
++                      equivalence='documented project binomial algorithm variant; no NPP pixel equivalence claim'),
++        canny=dict(project='independent Sobel/L2/NMS/local threshold existing C1 contract',
++                   project_max_abs=0,project_mean_abs=0,
++                   opencv='OpenCV Canny thresholds60/120 aperture3 L2=true',
++                   equivalence='documented edge algorithm variant; no mask inference from matching counts'),
++        resize=dict(project='floor half dimensions, pixel-center bilinear, nearest rounding',
++                    project_max_abs=1,project_mean_abs=0.3,opencv='OpenCV INTER_LINEAR'),
++        rgb_gray=dict(project='RGB coefficients [19595,38470,7471]/65536 nearest rounding',
++                      project_max_abs=1,project_mean_abs=0.3,opencv='OpenCV COLOR_RGB2GRAY'),
++        printed_mean_abs_tolerance=0.0051,
++        performance='raw per-device timings observed only; no cross-device speedup claim')
+     profile=dict(status='FROZEN',sample_id=SAMPLE,source=str(SOURCE.relative_to(ROOT)),source_sha256=digest(SOURCE),
+                  image=str(IMAGE.relative_to(ROOT)),image_sha256=digest(IMAGE),image_bytes=IMAGE.stat().st_size,
+-                 case_count=len(cases),cases=cases)
++                 case_count=len(cases),cases=cases,semantic_policy=semantics)
+     e=Experiment('I3','OpenCV-benchmark-original-CLI-contract','CPU-contract',sources=[__file__,SOURCE,IMAGE])
+     write(e.path/'profile.json',profile)
+     result=dict(status='FROZEN',case_count=len(cases),case_ids=[c['case'] for c in cases])
+diff --git a/tools/moat/image_benchmark_native_comparison.py b/tools/moat/image_benchmark_native_comparison.py
+index f9af53f5a..9c3dd629e 100644
+--- a/tools/moat/image_benchmark_native_comparison.py
++++ b/tools/moat/image_benchmark_native_comparison.py
+@@ -9,6 +9,20 @@ OPERATIONS=['Gaussian 5x5','Canny 3x3 L2','Resize 1/2 bilinear','RGB to gray']
+ ROW=re.compile(r'^(.+?)\s+([0-9.]+)\s+([0-9.]+)\s+([0-9.]+)\s+([0-9.]+)\s+\|\s+([0-9.]+)x\s+([0-9.]+)x\s+([0-9.]+)x\s+\|\s+([0-9.]+)$')
+ EDGE=re.compile(r'^Canny edge pixels: (\w+) (\d+), OpenCV (\d+)')
+ HEADER=re.compile(r'^Image (\d+)x(\d+), (\d+) iterations per timing, median of (\d+)')
++NATIVE_PHASES=['prepare-full-native-benchmark','upload-unchanged-source-and-original-image',
++  'extract-full-original','compile-unmodified-native-with-private-OpenCV',
++  'actual-4096x2048-four-operations-warmup-five-times-twenty-default-iterations',
++  'collect-original-input-and-all-produced-files']
++
++def native_execution_ok(native,manifest,commands,proof,logs):
++    return (native['status']=='EXECUTED' and
++      native['build_return_code']==native['return_code']==native['collection_return_code']==0
++      and manifest['backend']=='cuda-original' and manifest['experiment_outcome']=='OBSERVED'
++      and manifest['experiment_id']==native['experiment_id']
++      and native['remote']==native['config']['remote']
++      and [c['phase'] for c in commands]==NATIVE_PHASES
++      and all(c['return_code']==0 for c in commands)
++      and len(logs)==1 and (proof/commands[4]['stdout']).resolve()==logs[0].resolve())
+ 
+ def parse(stdout):
+     lines=stdout.splitlines(); rows={};edges=None;size=None;device=None
+@@ -26,12 +40,17 @@ def main():
+     runs=json.loads((ROOT/'migration/reports/image-benchmark-runs.json').read_text())
+     rocm=next(r for r in runs if r['case']=='original-default')
+     dep=json.loads((ROOT/'migration/reports/image-I3-rocm-OpenCV.json').read_text())
++    reference=next(r for r in json.loads((ROOT/'migration/reports/image-benchmark-validation.json').read_text())
++                   if r['case']=='original-default')
++    policy=json.loads((ROOT/'migration/rewrite/image-benchmark-profile.json').read_text())['semantic_policy']
+     nproof=ROOT/native['evidence'];rproof=ROOT/rocm['evidence']
+     nlogs=list((nproof/'logs').glob('*actual-4096x2048*stdout.log'))
+     rlogs=list((rproof/'logs').glob('*actual-four-operation-original-CLI.stdout.log'))
+     e=Experiment('I3','OpenCV-benchmark-original-CUDA-and-HIP-sealed-semantics','CPU-comparison',
+         sources=[__file__,ROOT/'migration/reports/image-I3-benchmark-native.json',
+                  ROOT/'migration/reports/image-benchmark-runs.json',
++                 ROOT/'migration/reports/image-benchmark-validation.json',
++                 ROOT/'migration/rewrite/image-benchmark-profile.json',
+                  ROOT/'migration/reports/image-I3-rocm-OpenCV.json',
+                  ROOT/'NPP/opencvBenchmark/opencvBenchmark.cpp'])
+     checks=[dict(check='one-sealed-stdout-per-backend',passed=len(nlogs)==len(rlogs)==1)]
+@@ -39,17 +58,33 @@ def main():
+         cuda=parse(nlogs[0].read_text());amd=parse(rlogs[0].read_text())
+         first=json.loads(nlogs[0].read_text().splitlines()[0]);libs=first['libraries']
+         receipt=json.loads((ROOT/'migration/reports/image-I3-native-OpenCV.json').read_text())['receipt']['files']
++        loader=json.loads((rproof/'loaded-libraries.json').read_text())
++        nmanifest=json.loads((nproof/'manifest.json').read_text())
++        ncommands=json.loads((nproof/'commands.json').read_text())
+         checks += [dict(check='original-source-unchanged',passed=native['source_sha256']==digest(ROOT/native['source'])==first['source_sha256']),
++            dict(check='actual-native-build-run-collection-and-seal',passed=native_execution_ok(native,nmanifest,ncommands,nproof,nlogs)),
+             dict(check='same-input-and-4096x2048-20x5-contract',passed=first['input_sha256']==native['config']['input_sha256']
+                  and first['input_sha256']==json.loads((ROOT/'migration/rewrite/image-benchmark-profile.json').read_text())['image_sha256']
+                  and cuda['size']==amd['size']==(4096,2048,20,5)),
+             dict(check='same-pinned-OpenCV-build',passed=first['OpenCV_source']['commit']==dep['source']['commit']
++                 and loader['status']=='PASSED' and all(c['passed'] for c in loader['checks'])
+                  and any('libopencv_core' in name and info['sha256']==receipt['lib/libopencv_core.so.4.12.0']['sha256'] for name,info in libs.items())
+                  and any('libopencv_imgproc' in name and info['sha256']==receipt['lib/libopencv_imgproc.so.4.12.0']['sha256'] for name,info in libs.items())),
+             dict(check='all-four-operations-in-original-order',passed=list(cuda['rows'])==list(amd['rows'])==OPERATIONS),
+             dict(check='real-distinct-GPU-identities',passed='RTX 5090' in cuda['device'] and 'R9700' in amd['device']),
+             dict(check='Canny-edge-counts-recorded',passed=cuda['edges']==dict(label='NPP',gpu=546308,opencv=324128)
+                  and amd['edges']==dict(label='ROCm',gpu=546308,opencv=324128)),
++            dict(check='all-four-HIP-printed-OpenCV-differences-independently-recomputed',
++                 passed=reference['status']=='PASSED' and all(abs(amd['rows'][name]['opencv_mean_abs']-
++                   reference['metrics'][product]['opencv']['mean_abs'])<=policy['printed_mean_abs_tolerance']
++                   for name,product in zip(OPERATIONS,['gauss.raw','canny.raw','resize.raw','color.raw']))),
++            dict(check='documented-Gaussian-and-Canny-native-variant',
++                 passed=cuda['rows']['Gaussian 5x5']['opencv_mean_abs']==1.70
++                   and amd['rows']['Gaussian 5x5']['opencv_mean_abs']==0.00
++                   and cuda['rows']['Canny 3x3 L2']['opencv_mean_abs']==6.75
++                   and amd['rows']['Canny 3x3 L2']['opencv_mean_abs']==6.75
++                   and 'variant' in policy['gaussian']['equivalence']
++                   and 'variant' in policy['canny']['equivalence']),
+             dict(check='all-numeric-results-finite-and-nonnegative',passed=all(v>=0 and v<1e8 for p in (cuda,amd) for row in p['rows'].values() for v in row.values()))]
+     else:cuda=amd={}
+     status='PASSED' if all(c['passed'] for c in checks) else 'FAILED'
+diff --git a/tools/moat/image_benchmark_reference.py b/tools/moat/image_benchmark_reference.py
+index b49bfe412..137c20ae3 100644
+--- a/tools/moat/image_benchmark_reference.py
++++ b/tools/moat/image_benchmark_reference.py
+@@ -1,6 +1,6 @@
+ #!/usr/bin/env python3
+ """Independent NumPy/OpenCV CPU checks for the complete HIP benchmark products."""
+-import argparse,json,tempfile
++import argparse,json,re,tempfile
+ from pathlib import Path
+ import cv2,numpy as np
+ from experiment import ROOT,Experiment,write,digest
+@@ -29,9 +29,25 @@ def gpu_product(path,name,w,h,sha):
+ 
+ def validate(case,run,profile):
+     proof=ROOT/run['evidence'];manifest=json.loads((proof/'manifest.json').read_text())
+-    command=json.loads((proof/'commands.json').read_text())[0]
++    commands=json.loads((proof/'commands.json').read_text())
++    actual=[c for c in commands if c['phase']=='actual-four-operation-original-CLI']
++    build=json.loads((ROOT/'migration/reports/image-benchmark-build.json').read_text())
++    command=actual[0] if len(actual)==1 else {}
++    raw=ROOT/manifest['raw_artifact_dir']
++    stdout=(raw/command['stdout']).read_text() if command else ''
++    stderr=(raw/command['stderr']).read_text() if command else ''
+     checks=[dict(check='actual-return-and-source',passed=run['status']=='EXECUTED'
+-                 and command['return_code']==run['return_code']==case['expected_return_code']),
++                 and command.get('return_code')==run['return_code']==case['expected_return_code']
++                 and manifest['case_id']==run['case']==case['case']
++                 and manifest['parent_experiment_id']==build['experiment_id']
++                 and command.get('argv')==[str(ROOT/build['binary']),*case['arguments']]
++                 and command.get('cwd')==str(raw/'outputs')
++                 and run['arguments']==case['arguments']
++                 and run['build_evidence']==build['evidence']),
++            dict(check='actual-input-and-diagnostics',passed=digest(raw/'images'/Path(profile['image']).name)==profile['image_sha256']
++                 and stdout.startswith(case['stdout_starts']) and stderr.startswith(case['stderr_starts'])
++                 and (bool(stdout)==bool(case['stdout_starts']))
++                 and (bool(stderr)==bool(case['stderr_starts']))),
+             dict(check='actual-physical-GPU1',passed={d['physical_id'] for d in json.loads((proof/'backend.observed.json').read_text())['devices']}=={1}),
+             dict(check='complete-four-product-set',passed={name:x['bytes'] for name,x in run['products'].items()}==case['products'])]
+     if case['expected_return_code']:
+@@ -47,18 +63,20 @@ def validate(case,run,profile):
+         fixture=Path(temporary);write(fixture/'config.json',dict(width=w,height=h,channels=1,pitch=w))
+         (fixture/'input.bin').write_bytes(gray.tobytes())
+         project_canny=local_mask(canny_stages(fixture),60,120)
+-    cv_gauss=cv2.GaussianBlur(gray,(5,5),0,borderType=cv2.BORDER_REPLICATE)
++    # Original CUDA and the HIP C++ benchmark use OpenCV's default REFLECT_101.
++    cv_gauss=cv2.GaussianBlur(gray,(5,5),0)
+     cv_canny=cv2.Canny(gray,60,120,apertureSize=3,L2gradient=True)
+     cv_resize=cv2.resize(gray,(w//2,h//2),interpolation=cv2.INTER_LINEAR)
+     # OpenCV MatExpr gray/2+40 uses integer saturation after division.
+     blue=cv2.addWeighted(gray,0.5,gray,0,40)
+     rgb=cv2.merge((gray,255-gray,blue))
+     cv_color=cv2.cvtColor(rgb,cv2.COLOR_RGB2GRAY)
+-    expected={'gauss.raw':(project_gauss,cv_gauss,0,0),
+-              'canny.raw':(project_canny,cv_canny,0,0),
+-              'resize.raw':(cv_resize,cv_resize,1,0.3),
+-              'color.raw':(cv_color,cv_color,1,0.3)}
+-    metrics={};raw=ROOT/manifest['raw_artifact_dir']
++    policy=profile['semantic_policy']
++    expected={'gauss.raw':(project_gauss,cv_gauss,policy['gaussian']['project_max_abs'],policy['gaussian']['project_mean_abs']),
++              'canny.raw':(project_canny,cv_canny,policy['canny']['project_max_abs'],policy['canny']['project_mean_abs']),
++              'resize.raw':(cv_resize,cv_resize,policy['resize']['project_max_abs'],policy['resize']['project_mean_abs']),
++              'color.raw':(cv_color,cv_color,policy['rgb_gray']['project_max_abs'],policy['rgb_gray']['project_mean_abs'])}
++    metrics={}
+     for name,(project,cv,limit,mean_limit) in expected.items():
+         got=gpu_product(raw,name,w,h,run['products'][name]['sha256'])
+         project_diff=difference(got,project);native_diff=difference(got,cv)
+@@ -69,6 +87,23 @@ def validate(case,run,profile):
+     checks.append(dict(check='Canny-OpenCV-structural-comparison-recorded',
+                        passed=metrics['canny.raw']['opencv']['mismatches']>=0
+                        and metrics['canny.raw']['nonzero']>0))
++    labels={'gauss.raw':'Gaussian 5x5','canny.raw':'Canny 3x3 L2',
++            'resize.raw':'Resize 1/2 bilinear','color.raw':'RGB to gray'}
++    lines=[line for line in stdout.splitlines() if any(line.startswith(label) for label in labels.values())]
++    checks.append(dict(check='four-printed-operation-rows-in-original-order',
++                       passed=[next((label for label in labels.values() if line.startswith(label)),None) for line in lines]
++                       ==list(labels.values())))
++    if len(lines)==4:
++        for (name,_),line in zip(labels.items(),lines):
++            try:printed=float(line.rsplit('|',1)[1].strip())
++            except (IndexError,ValueError):printed=float('inf')
++            observed=metrics[name]['opencv']['mean_abs']
++            checks.append(dict(check=name+'/printed-OpenCV-mean-abs',
++                               passed=abs(printed-observed)<=policy['printed_mean_abs_tolerance'],printed=printed,independent=observed))
++    match=re.search(r'^Canny edge pixels: ROCm (\d+), OpenCV (\d+)',stdout,re.MULTILINE)
++    checks.append(dict(check='printed-Canny-edge-counts',passed=bool(match)
++                       and (int(match[1]),int(match[2]))==
++                       (metrics['canny.raw']['nonzero'],int(np.count_nonzero(cv_canny)))))
+     return dict(case=case['case'],status='PASSED' if all(c['passed'] for c in checks) else 'FAILED',
+                 checks=checks,metrics=metrics)
+ 
+diff --git a/tools/moat/image_benchmark_run.py b/tools/moat/image_benchmark_run.py
+index a98e8e9d6..a22bc247b 100644
+--- a/tools/moat/image_benchmark_run.py
++++ b/tools/moat/image_benchmark_run.py
+@@ -5,26 +5,39 @@ from pathlib import Path
+ from experiment import ROOT,Experiment,write,digest
+ from snapshot import capture
+ from image_progress import record
++from image_benchmark_identity import inspect
+ 
+ def main():
+     profile=json.loads((ROOT/'migration/rewrite/image-benchmark-profile.json').read_text())
+     build=json.loads((ROOT/'migration/reports/image-benchmark-build.json').read_text())
+-    if build['status']!='BUILT' or digest(ROOT/build['binary'])!=build['binary_sha256']:
+-        raise ValueError('current benchmark binary differs from sealed build')
++    if build['status']!='BUILT':raise ValueError('complete benchmark build required')
+     source=ROOT/profile['image'];assert digest(source)==profile['image_sha256']
+     results=[]
+     for case in profile['cases']:
+         e=Experiment('I3','OpenCV-benchmark-complete-original-CLI','rocm-original',
+                      case=case['case'],parent=build['experiment_id'],
+-                     sources=[__file__,ROOT/'migration/rewrite/image-benchmark-profile.json',
++                     sources=[__file__,ROOT/'tools/moat/image_benchmark_identity.py',
++                              ROOT/'migration/reports/image-I3-native-OpenCV.json',
++                              ROOT/'migration/rewrite/image-benchmark-profile.json',
+                               ROOT/'migration/reports/image-benchmark-build.json',source])
+         write(e.path/'backend.observed.json',capture())
++        identity=inspect(e,build)
++        if identity['status']!='PASSED':
++            result=dict(case=case['case'],status='FAILED',arguments=case['arguments'],
++                        return_code=None,build_evidence=build['evidence'],products={},
++                        checks=identity['checks'])
++            write(e.path/'run.json',result)
++            result['evidence']=e.finish('ENV_BLOCKED',dict(status='FAILED',checks=identity['checks']))
++            results.append(result);write(ROOT/'migration/reports/image-benchmark-runs.json',results)
++            record('I3','OpenCV benchmark '+case['case']+' 实际动态库身份失败；已拒绝运行并封存。',[result['evidence']])
++            continue
+         images=e.path/'images';images.mkdir();shutil.copyfile(source,images/source.name)
+         work=e.path/'outputs';work.mkdir()
+         binary=ROOT/build['binary']
+         rc=e.command([str(binary),*case['arguments']],'actual-four-operation-original-CLI',cwd=work,timeout=1800)
+         products={p.name:dict(bytes=p.stat().st_size,sha256=digest(p)) for p in work.iterdir() if p.is_file()}
+         checks=[dict(check='expected-return-code',passed=rc==case['expected_return_code']),
++                dict(check='actual-loaded-pinned-GPU-and-OpenCV-libraries',passed=identity['status']=='PASSED'),
+                 dict(check='pinned-input-copied',passed=digest(images/source.name)==profile['image_sha256']),
+                 dict(check='complete-product-name-and-byte-size',passed={name:v['bytes'] for name,v in products.items()}==case['products'])]
+         status='EXECUTED' if all(c['passed'] for c in checks) else 'FAILED'
+diff --git a/tools/moat/image_benchmark_runtime.py b/tools/moat/image_benchmark_runtime.py
+index 9a4e1c8dd..7029fd53c 100644
+--- a/tools/moat/image_benchmark_runtime.py
++++ b/tools/moat/image_benchmark_runtime.py
+@@ -6,12 +6,15 @@ from experiment import ROOT,Experiment,write,digest
+ from snapshot import capture
+ from image_progress import record
+ from image_benchmark_build import dependencies
++from image_benchmark_identity import inspect
+ 
+ def main():
+     build=json.loads((ROOT/'migration/reports/image-benchmark-build.json').read_text())
+     e=Experiment('I3','OpenCV-benchmark-three-kernel-device-and-stream-contracts','rocm-runtime',
+-       sources=[__file__,ROOT/'tools/moat/image_benchmark_runtime.cpp',*dependencies()],parent=build['experiment_id'])
++       sources=[__file__,ROOT/'tools/moat/image_benchmark_runtime.cpp',
++                ROOT/'tools/moat/image_benchmark_identity.py',*dependencies()],parent=build['experiment_id'])
+     write(e.path/'backend.observed.json',capture())
++    identity=inspect(e,build)
+     core=Path('/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core');overlay=ROOT/'build/rocm-sdk-overlay';binary=e.path/'runtime'
+     flags=['hipcc','--rocm-path='+str(overlay),'--hip-path='+str(overlay),
+        '--rocm-device-lib-path='+str(core/'lib/llvm/amdgcn/bitcode'),'--offload-arch=gfx1201',
+@@ -19,14 +22,17 @@ def main():
+     rc=e.command([*flags,'-x','hip',str(ROOT/'tools/moat/image_benchmark_runtime.cpp'),
+        '-L'+str((ROOT/build['library']).parent),'-limage_benchmark',
+        '-Wl,-rpath,'+str((ROOT/build['library']).parent),'-L'+str(core/'lib'),
+-       '-Wl,-rpath,'+str(core/'lib'),'-lamdhip64','-o',str(binary)],'compile-runtime-contracts',timeout=300)
++       '-Wl,-rpath,'+str(core/'lib'),'-lamdhip64','-o',str(binary)],'compile-runtime-contracts',timeout=300) if identity['status']=='PASSED' else 1
+     rows=[]
+     if rc==0:
+         rc=e.command([str(binary)],'run-actual-device-contracts',timeout=120)
+-        rows=[line.split('|') for line in (e.path/'logs/0002-run-actual-device-contracts.stdout.log').read_text().splitlines()]
++        commands=json.loads((e.path/'commands.json').read_text())
++        logfile=next(c['stdout'] for c in commands if c['phase']=='run-actual-device-contracts')
++        rows=[line.split('|') for line in (e.path/logfile).read_text().splitlines()]
+     names=['normal','changed-to-zero','restored','default-stream',
+            'invalid-rejected-and-output-preserved','destroyed-stream-rejected']
+     checks=[dict(check='process-success',passed=rc==0),
++       dict(check='actual-loaded-library-identity',passed=identity['status']=='PASSED'),
+        dict(check='all-18-frozen-runtime-contracts',passed=rows==[[op,name,'1'] for op in ('gauss','resize','color') for name in names]),
+        dict(check='current-library-build',passed=all(digest(ROOT/n)==h for n,h in build['dependencies'].items())),
+        dict(check='real-GPU1-backend',passed={d['physical_id'] for d in json.loads((e.path/'backend.observed.json').read_text())['devices']}=={1})]
+diff --git a/tools/moat/image_benchmark_trace.py b/tools/moat/image_benchmark_trace.py
+index 86fa80b07..9089cd182 100644
+--- a/tools/moat/image_benchmark_trace.py
++++ b/tools/moat/image_benchmark_trace.py
+@@ -6,6 +6,7 @@ from experiment import ROOT,Experiment,write,digest
+ from snapshot import capture
+ from image_progress import record
+ from image_benchmark_build import dependencies
++from image_benchmark_identity import inspect
+ 
+ NAMES=['gauss5','sobel','suppress','local_threshold','resize_half','rgb_gray']
+ def main():
+@@ -13,14 +14,16 @@ def main():
+     run=next(x for x in json.loads((ROOT/'migration/reports/image-benchmark-runs.json').read_text()) if x['case']=='small')
+     source=ROOT/'NPP/opencvBenchmark/images/CircuitBoard_2048x1024_8u.raw'
+     e=Experiment('I3','OpenCV-benchmark-all-four-actual-GPU-kernel-traces','rocm-trace',
+-       sources=[__file__,source,*dependencies()],parent=build['experiment_id'])
++       sources=[__file__,ROOT/'tools/moat/image_benchmark_identity.py',source,*dependencies()],parent=build['experiment_id'])
+     observed=capture();write(e.path/'backend.observed.json',observed)
++    identity=inspect(e,build)
+     output=e.path/'outputs';output.mkdir()
+     rc=e.command(['rocprofv3','--kernel-trace','--output-format','csv','--output-directory',str(e.path/'trace'),
+        '--',str(ROOT/build['binary']),'-i',str(source),'-w','128','-h','96','-n','1'],
+-       'profile-complete-four-operation-C++-entry',cwd=output,timeout=300)
++       'profile-complete-four-operation-C++-entry',cwd=output,timeout=300) if identity['status']=='PASSED' else 1
+     traces=list((e.path/'trace').rglob('*kernel_trace.csv'));agents=list((e.path/'trace').rglob('*agent_info.csv'))
+     checks=[dict(check='actual-process-success',passed=rc==0),
++      dict(check='actual-loaded-library-identity',passed=identity['status']=='PASSED'),
+       dict(check='single-kernel-and-agent-trace',passed=len(traces)==len(agents)==1),
+       dict(check='all-four-GPU-products-match-unprofiled-CLI',passed={p.name:digest(p) for p in output.iterdir() if p.is_file()}
+         =={name:x['sha256'] for name,x in run['products'].items()}),

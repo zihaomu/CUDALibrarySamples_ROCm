@@ -6,6 +6,7 @@ from experiment import ROOT,Experiment,write,digest
 from snapshot import capture
 from image_progress import record
 from image_benchmark_build import dependencies
+from image_benchmark_identity import inspect
 
 NAMES=['gauss5','sobel','suppress','local_threshold','resize_half','rgb_gray']
 def main():
@@ -13,14 +14,16 @@ def main():
     run=next(x for x in json.loads((ROOT/'migration/reports/image-benchmark-runs.json').read_text()) if x['case']=='small')
     source=ROOT/'NPP/opencvBenchmark/images/CircuitBoard_2048x1024_8u.raw'
     e=Experiment('I3','OpenCV-benchmark-all-four-actual-GPU-kernel-traces','rocm-trace',
-       sources=[__file__,source,*dependencies()],parent=build['experiment_id'])
+       sources=[__file__,ROOT/'tools/moat/image_benchmark_identity.py',source,*dependencies()],parent=build['experiment_id'])
     observed=capture();write(e.path/'backend.observed.json',observed)
+    identity=inspect(e,build)
     output=e.path/'outputs';output.mkdir()
     rc=e.command(['rocprofv3','--kernel-trace','--output-format','csv','--output-directory',str(e.path/'trace'),
        '--',str(ROOT/build['binary']),'-i',str(source),'-w','128','-h','96','-n','1'],
-       'profile-complete-four-operation-C++-entry',cwd=output,timeout=300)
+       'profile-complete-four-operation-C++-entry',cwd=output,timeout=300) if identity['status']=='PASSED' else 1
     traces=list((e.path/'trace').rglob('*kernel_trace.csv'));agents=list((e.path/'trace').rglob('*agent_info.csv'))
     checks=[dict(check='actual-process-success',passed=rc==0),
+      dict(check='actual-loaded-library-identity',passed=identity['status']=='PASSED'),
       dict(check='single-kernel-and-agent-trace',passed=len(traces)==len(agents)==1),
       dict(check='all-four-GPU-products-match-unprofiled-CLI',passed={p.name:digest(p) for p in output.iterdir() if p.is_file()}
         =={name:x['sha256'] for name,x in run['products'].items()}),

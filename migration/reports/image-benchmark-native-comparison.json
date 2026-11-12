@@ -10,6 +10,10 @@
       "passed": true
     },
     {
+      "check": "actual-native-build-run-collection-and-seal",
+      "passed": true
+    },
+    {
       "check": "same-input-and-4096x2048-20x5-contract",
       "passed": true
     },
@@ -27,6 +31,14 @@
     },
     {
       "check": "Canny-edge-counts-recorded",
+      "passed": true
+    },
+    {
+      "check": "all-four-HIP-printed-OpenCV-differences-independently-recomputed",
+      "passed": true
+    },
+    {
+      "check": "documented-Gaussian-and-Canny-native-variant",
       "passed": true
     },
     {
@@ -94,36 +106,36 @@
     "rows": {
       "Gaussian 5x5": {
         "kernel_ms": 0.169,
-        "e2e_ms": 0.672,
-        "cpu_one_ms": 3.021,
-        "cpu_many_ms": 0.412,
+        "e2e_ms": 0.684,
+        "cpu_one_ms": 3.093,
+        "cpu_many_ms": 6.2,
         "opencv_mean_abs": 0.0
       },
       "Canny 3x3 L2": {
-        "kernel_ms": 0.426,
-        "e2e_ms": 0.9,
-        "cpu_one_ms": 17.056,
-        "cpu_many_ms": 2.584,
+        "kernel_ms": 0.424,
+        "e2e_ms": 0.919,
+        "cpu_one_ms": 17.541,
+        "cpu_many_ms": 4.48,
         "opencv_mean_abs": 6.75
       },
       "Resize 1/2 bilinear": {
         "kernel_ms": 0.029,
-        "e2e_ms": 0.346,
-        "cpu_one_ms": 0.22,
-        "cpu_many_ms": 0.287,
+        "e2e_ms": 0.354,
+        "cpu_one_ms": 0.227,
+        "cpu_many_ms": 4.932,
         "opencv_mean_abs": 0.0
       },
       "RGB to gray": {
-        "kernel_ms": 0.06,
-        "e2e_ms": 1.002,
-        "cpu_one_ms": 1.814,
-        "cpu_many_ms": 0.206,
+        "kernel_ms": 0.062,
+        "e2e_ms": 1.025,
+        "cpu_one_ms": 1.816,
+        "cpu_many_ms": 0.76,
         "opencv_mean_abs": 0.0
       }
     }
   },
   "limitation": "Timing values are observations only; different GPU and CPU occupancy, no cross-device speedup claim. Original NPP did not emit pixels, so equal Canny counts do not prove equal masks.",
   "native_evidence": "migration/reports/evidence/rewrite/I3/NPP-opencvBenchmark-full-native-default/20261111T182242.064805Z-I3-cuda-original-a496dad9bb",
-  "rocm_evidence": "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T055404.414427Z-I3-rocm-original-a34b4c2e04",
-  "evidence": "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-original-CUDA-and-HIP-sealed-semantics/20261112T055442.135418Z-I3-CPU-comparison-b7b12a27e8"
+  "rocm_evidence": "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T061122.474001Z-I3-rocm-original-a3458ca46b",
+  "evidence": "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-original-CUDA-and-HIP-sealed-semantics/20261112T061704.756281Z-I3-CPU-comparison-0fbcaea16c"
 }

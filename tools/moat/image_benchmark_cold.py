@@ -4,17 +4,29 @@ import collections,json,os,shutil,tempfile
 from pathlib import Path
 from experiment import ROOT,Experiment,write,digest,git
 from image_progress import record
+from image_benchmark_build import dependencies
 
-REPORTS={'contracts':1,'deps':1,'build':1,'runs':6,'validation':6,'native-comparison':1,'runtime':1,'trace':1}
+REPORTS={'contracts':1,'deps':1,'build':1,'runs':6,'validation':6,'native-comparison':1,'runtime':1,'trace':1,'negative':1}
 FILES={'contracts':'image-benchmark-contracts.json','deps':'image-I3-rocm-OpenCV.json',
        'build':'image-benchmark-build.json','runs':'image-benchmark-runs.json',
        'validation':'image-benchmark-validation.json','native-comparison':'image-benchmark-native-comparison.json',
-       'runtime':'image-benchmark-runtime.json','trace':'image-benchmark-trace.json'}
+       'runtime':'image-benchmark-runtime.json','trace':'image-benchmark-trace.json',
+       'negative':'image-benchmark-negative.json'}
+
+def same_build_source_hashes(cold_deps,clone):
+    volatile='migration/reports/image-I3-rocm-OpenCV.json'
+    expected={str(path.relative_to(ROOT)) for path in dependencies()}
+    if set(cold_deps)!=expected:return False
+    pinned={name:sha for name,sha in cold_deps.items() if name!=volatile}
+    return (pinned=={name:digest(ROOT/name) for name in pinned}
+       and json.loads((clone/volatile).read_text())['source']==
+           json.loads((ROOT/volatile).read_text())['source']
+       and json.loads((clone/volatile).read_text())['files_checked']==200)
 
 def main():
     commit=git('rev-parse','HEAD').strip()
     scripts=[ROOT/'tools/moat'/('image_benchmark_'+name+'.py') for name in
-       ['contracts','deps','build','run','reference','native_comparison','runtime','trace']]
+       ['contracts','deps','build','identity','run','reference','native_comparison','runtime','trace','negative']]
     e=Experiment('I3','OpenCV-benchmark-fixed-Git-cold-four-operations-and-CPU','host-cold-replay',
        sources=[__file__,*scripts,ROOT/'migration/rewrite/image-benchmark-profile.json'])
     clone=Path(tempfile.mkdtemp(prefix='image-benchmark-cold-',dir=ROOT.parent))/'src'
@@ -32,7 +44,8 @@ def main():
             ('tools/moat/image_benchmark_reference.py','cpu'),
             ('tools/moat/image_benchmark_native_comparison.py','cpu'),
             ('tools/moat/image_benchmark_runtime.py','gpu'),
-            ('tools/moat/image_benchmark_trace.py','gpu')]
+            ('tools/moat/image_benchmark_trace.py','gpu'),
+            ('tools/moat/image_benchmark_negative.py','cpu')]
       for name,kind in jobs:
         if rc:break
         if kind=='cpu':argv=[cpu,str(clone/name)];env=None
@@ -42,7 +55,7 @@ def main():
                 'HIP_VISIBLE_DEVICES=0','python3',str(clone/name)]
           env=dict(os.environ,HIP_VISIBLE_DEVICES='2')
         rc=e.command(argv,'cold-'+Path(name).stem,cwd=clone,env=env,timeout=1800)
-      checks.append(dict(check='all-nine-cold-jobs-success',passed=rc==0))
+      checks.append(dict(check='all-ten-cold-jobs-success',passed=rc==0))
       if rc==0:
         checks.append(dict(check='identical-frozen-contract',passed=digest(clone/'migration/rewrite/image-benchmark-profile.json')
            ==digest(ROOT/'migration/rewrite/image-benchmark-profile.json')))
@@ -62,15 +75,9 @@ def main():
               else:shutil.copyfile(source,target)
             children.append(dict(kind=kind,index=index,evidence=row['evidence'],raw=str(dest.relative_to(e.path))))
       counts=collections.Counter(c['kind'] for c in children)
-      checks.append(dict(check='complete-18-child-inventory',passed=dict(counts)==REPORTS and len(children)==18))
+      checks.append(dict(check='complete-19-child-inventory',passed=dict(counts)==REPORTS and len(children)==19))
       cold_deps=json.loads((clone/'migration/reports/image-benchmark-build.json').read_text())['dependencies'] if rc==0 else {}
-      volatile='migration/reports/image-I3-rocm-OpenCV.json'
-      pinned={name:sha for name,sha in cold_deps.items() if name!=volatile}
-      checks.append(dict(check='same-build-source-hashes',passed=rc==0 and pinned and
-        pinned=={name:digest(ROOT/name) for name in pinned} and
-        json.loads((clone/volatile).read_text())['source']==
-        json.loads((ROOT/volatile).read_text())['source'] and
-        json.loads((clone/volatile).read_text())['files_checked']==200))
+      checks.append(dict(check='same-build-source-hashes',passed=rc==0 and same_build_source_hashes(cold_deps,clone)))
     except Exception as error:checks.append(dict(check='cold-replay-finished',passed=False,error=repr(error)));rc=rc or 1
     checks.append(dict(check='final-return-code',passed=rc==0))
     status='PASSED' if all(c['passed'] for c in checks) else 'FAILED'

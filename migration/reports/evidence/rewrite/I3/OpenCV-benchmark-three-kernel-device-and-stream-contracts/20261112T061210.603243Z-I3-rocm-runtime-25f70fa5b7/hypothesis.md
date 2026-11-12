@@ -1,0 +1,1 @@
+Test rocm-runtime for OpenCV-benchmark-three-kernel-device-and-stream-contracts, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T061100.216767Z-I3-rocm-build-1f299febbf.
