@@ -1,0 +1,1 @@
+Test CPU-reference for OpenCV-benchmark-independent-four-operation-CPU, case missing-input. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T064245.888766Z-I3-rocm-original-ddbd0d941d.

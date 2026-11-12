@@ -280,7 +280,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-12T06:40:51.986069+00:00。26入口当前12通过/7部分/7失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-12T06:44:04.136383+00:00。26入口当前12通过/7部分/7失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -1712,5 +1712,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-12T06:38:20.870452+00:00 | I3 | 最终冷检出九项主作业成功，第十项反例因尝试在隔离clone读取上一轮未归档的完整冷raw而失败；失败封存，反例已缩为纯19子身份结构检查，完整raw复算仍由主资格单独执行；现19项反例本地通过，等待新Git冷检出。 | `migration/reports/evidence/rewrite/I3/OpenCV-benchmark-fixed-Git-cold-four-operations-and-CPU/20261112T063539.400801Z-I3-host-cold-replay-3bff3d2d09`；`migration/reports/image-benchmark-negative.json` |
 | 2026-11-12T06:40:41.126923+00:00 | I3 | benchmark固定Git冷检出同版OpenCV/四算子/六CLI/独立CPU/原生统计/运行/trace及18子封存：PASSED | `migration/reports/evidence/rewrite/I3/OpenCV-benchmark-fixed-Git-cold-four-operations-and-CPU/20261112T063901.107429Z-I3-host-cold-replay-a7ad6368a5` |
 | 2026-11-12T06:40:51.986069+00:00 | I3 | benchmark原生/错误CLI/依赖及CPU/runtime/trace/cold配对篡改共19项正反证据：PASSED。 | `migration/reports/evidence/rewrite/I3/OpenCV-benchmark-sealed-reader-counterexamples/20261112T064048.101076Z-I3-CPU-negative-4fb8ec13db` |
+| 2026-11-12T06:43:16.867844+00:00 | I3 | benchmark固定Git冷检出同版OpenCV/四算子/六CLI/独立CPU/原生统计/运行/trace及18子封存：PASSED | `migration/reports/evidence/rewrite/I3/OpenCV-benchmark-fixed-Git-cold-four-operations-and-CPU/20261112T064137.820805Z-I3-host-cold-replay-cbb6b1ae3e` |
+| 2026-11-12T06:44:04.136383+00:00 | I3 | benchmark最终源码df735afe固定提交冷检出10/10作业和19/19子封存通过；主表PARTIAL/L3门槛9/11，待三份复审和组合资格/Git锚定。 | `migration/reports/image-benchmark-cold.json`；`migration/reports/image-benchmark.md` |
 
 <!-- IMAGE_EXECUTION:END -->

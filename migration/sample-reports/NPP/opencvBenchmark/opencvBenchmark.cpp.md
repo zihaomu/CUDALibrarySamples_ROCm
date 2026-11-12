@@ -2,7 +2,7 @@
 
 **PARTIAL / L3**
 
-原始四算子C++流程、6组真实GPU CLI与独立CPU全量输出、5090原生同输入同版OpenCV对照、18运行合同、真实GPU trace及19项证据反例通过；动态加载的GPU/OpenCV库字节已核。Gaussian/Canny项目算法变体记录，原生NPP不输出像素。待最后源码固定提交冷检出、独立复审与组合资格，当前不计整例通过或新增功能族。
+原始四算子C++流程、6组真实GPU CLI与独立CPU全量输出、5090原生同输入同版OpenCV对照、18运行合同、真实GPU trace及19项证据反例通过；动态加载的GPU/OpenCV库字节已核。Gaussian/Canny项目算法变体记录，原生NPP不输出像素。固定源码19子证据冷检出已通过；待独立复审与组合资格，当前不计整例通过或新增功能族。
 
 | 字段 | 当前记录 |
 | --- | --- |
@@ -10,7 +10,7 @@
 | 实际库 / 后端 | Project HIP Gaussian/Canny/resize/RGB gray plus pinned OpenCV 4.12 CPU benchmark / project HIP image benchmark |
 | 候选路线 | RPP HIP, rocPRIM |
 | 代码 | [rocm/ported/NPP/opencvBenchmark/opencvBenchmark.cpp](../../../../rocm/ported/NPP/opencvBenchmark/opencvBenchmark.cpp) |
-| required cases | 8/11 |
+| required cases | 9/11 |
 | CUDA baseline / comparison | PASSED / OBSERVED |
 | 性能 | OBSERVED_NOT_QUALIFIED |
 | 原始源码 SHA256 | `0332d73b327bbf76726b6eb13e38bbf68110baff7f923f328dbaabbca54fb30e` |
@@ -62,3 +62,4 @@ python3 tools/moat/image_benchmark_trace.py
 - [migration/reports/image-benchmark-runtime.json](../../../reports/image-benchmark-runtime.json)
 - [migration/reports/image-benchmark-trace.json](../../../reports/image-benchmark-trace.json)
 - [migration/reports/image-benchmark-negative.json](../../../reports/image-benchmark-negative.json)
+- [migration/reports/image-benchmark-cold.json](../../../reports/image-benchmark-cold.json)

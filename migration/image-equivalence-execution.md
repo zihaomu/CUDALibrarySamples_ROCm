@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-12T06:40:51.986069+00:00。26入口当前12通过/7部分/7失败。
+更新时间：2026-11-12T06:44:04.136383+00:00。26入口当前12通过/7部分/7失败。
 
-I3：benchmark原生/错误CLI/依赖及CPU/runtime/trace/cold配对篡改共19项正反证据：PASSED。
+I3：benchmark最终源码df735afe固定提交冷检出10/10作业和19/19子封存通过；主表PARTIAL/L3门槛9/11，待三份复审和组合资格/Git锚定。
 
-证据：`migration/reports/evidence/rewrite/I3/OpenCV-benchmark-sealed-reader-counterexamples/20261112T064048.101076Z-I3-CPU-negative-4fb8ec13db`
+证据：`migration/reports/image-benchmark-cold.json`；`migration/reports/image-benchmark.md`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 
