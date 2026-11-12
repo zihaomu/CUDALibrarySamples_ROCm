@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-12T06:54:37.217224+00:00。26入口当前12通过/7部分/7失败。
+更新时间：2026-11-12T06:59:57.887629+00:00。26入口当前12通过/7部分/7失败。
 
-I3：独立复审再次发现冷十作业argv与子运行命令未绑定，且冷子聚合依赖临时clone；现按实际命令/环境重算所有job、主和冷runtime/trace/native、子build SHA/源码对象，移除clone聚合依赖。25项含echo/true替换反例通过；最终冷证据需重跑。
+I3：benchmark固定提交6f4cc243冷检出前九作业通过，末项反例因原生CUDA实际运行cwd固定在主工作区、隔离clone误比较到clone路径而失败；失败终态已封存。现在把原生基线路径明确固定，25项反例主工作区重跑PASSED，待新源码提交冷检出。
 
-证据：`migration/reports/image-benchmark-negative.json`；`migration/reports/image-benchmark.md`
+证据：`migration/reports/image-benchmark-negative.json`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

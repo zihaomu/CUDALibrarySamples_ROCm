@@ -74,12 +74,13 @@ def digest_bytes(data):
     return hashlib.sha256(data).hexdigest()
 
 NATIVE_RUN_ARGV_SHA256='8458240dc321542ad63309c491f662fadaad3c643ebaeb98446bc18b56c96461'
+NATIVE_ORIGINAL_ROOT=Path('/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm')
 
 def native_recipe_ok(commands):
     argv=commands[4]['argv']
     return (len(argv)==3 and argv[:2]==['ssh','nvidia-5090x2']
       and digest_bytes(json.dumps(argv,sort_keys=True,separators=(',',':')).encode())==NATIVE_RUN_ARGV_SHA256
-      and all(c['cwd']==str(ROOT) for c in commands))
+      and all(c['cwd']==str(NATIVE_ORIGINAL_ROOT) for c in commands))
 
 def build_recompute(build,raw_override=None,project_root=ROOT):
     path=Path(raw_override) if raw_override else project_root/build['evidence']

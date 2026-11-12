@@ -1,6 +1,6 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-12T06:54:37.217224+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-12T06:59:57.887629+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
 26入口当前：12 PASSED / 7 PARTIAL / 7 FAILED。
 
@@ -1453,3 +1453,6 @@
 | 2026-11-12T06:44:04.136383+00:00 | I3 | benchmark最终源码df735afe固定提交冷检出10/10作业和19/19子封存通过；主表PARTIAL/L3门槛9/11，待三份复审和组合资格/Git锚定。 | [image-benchmark-cold.json](image-benchmark-cold.json)；[image-benchmark.md](image-benchmark.md) |
 | 2026-11-12T06:54:02.680207+00:00 | I3 | benchmark原生/错误CLI/依赖及CPU/runtime/trace/cold配对篡改共25项正反证据：PASSED。 | [20261112T065359.062795Z-I3-CPU-negative-7712428b74](evidence/rewrite/I3/OpenCV-benchmark-sealed-reader-counterexamples/20261112T065359.062795Z-I3-CPU-negative-7712428b74) |
 | 2026-11-12T06:54:37.217224+00:00 | I3 | 独立复审再次发现冷十作业argv与子运行命令未绑定，且冷子聚合依赖临时clone；现按实际命令/环境重算所有job、主和冷runtime/trace/native、子build SHA/源码对象，移除clone聚合依赖。25项含echo/true替换反例通过；最终冷证据需重跑。 | [image-benchmark-negative.json](image-benchmark-negative.json)；[image-benchmark.md](image-benchmark.md) |
+| 2026-11-12T06:58:29.478960+00:00 | I3 | benchmark固定Git冷检出同版OpenCV/四算子/六CLI/独立CPU/原生统计/运行/trace及18子封存：FAILED | [20261112T065651.762726Z-I3-host-cold-replay-e8e89f6509](evidence/rewrite/I3/OpenCV-benchmark-fixed-Git-cold-four-operations-and-CPU/20261112T065651.762726Z-I3-host-cold-replay-e8e89f6509) |
+| 2026-11-12T06:59:52.009988+00:00 | I3 | benchmark原生/错误CLI/依赖及CPU/runtime/trace/cold配对篡改共25项正反证据：PASSED。 | [20261112T065948.143197Z-I3-CPU-negative-f0da14f837](evidence/rewrite/I3/OpenCV-benchmark-sealed-reader-counterexamples/20261112T065948.143197Z-I3-CPU-negative-f0da14f837) |
+| 2026-11-12T06:59:57.887629+00:00 | I3 | benchmark固定提交6f4cc243冷检出前九作业通过，末项反例因原生CUDA实际运行cwd固定在主工作区、隔离clone误比较到clone路径而失败；失败终态已封存。现在把原生基线路径明确固定，25项反例主工作区重跑PASSED，待新源码提交冷检出。 | [image-benchmark-negative.json](image-benchmark-negative.json) |
