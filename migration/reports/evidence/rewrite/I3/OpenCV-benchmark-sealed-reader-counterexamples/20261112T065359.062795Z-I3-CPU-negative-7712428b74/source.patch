@@ -1,0 +1,375 @@
+diff --git a/tools/moat/image_benchmark_negative.py b/tools/moat/image_benchmark_negative.py
+index e624db6f5..3fe90d942 100644
+--- a/tools/moat/image_benchmark_negative.py
++++ b/tools/moat/image_benchmark_negative.py
+@@ -1,13 +1,14 @@
+ #!/usr/bin/env python3
+ """Check that benchmark qualification readers reject known false positives."""
+-import copy,json
++import copy,json,shutil,tempfile
++from pathlib import Path
+ from experiment import ROOT,Experiment,write,digest
+ from image_progress import record
+ from image_benchmark_reference import validate
+ from image_benchmark_native_comparison import native_execution_ok
+ from image_benchmark_cold import same_build_source_hashes
+ from image_benchmark_build import dependencies
+-from qualify_image_benchmark import cpu_recompute,runtime_recompute,trace_recompute,native_recompute,cold_structure_ok
++from qualify_image_benchmark import cpu_recompute,runtime_recompute,trace_recompute,native_recompute,cold_structure_ok,cold_recipe_ok,native_recipe_ok
+ 
+ def main():
+     native=json.loads((ROOT/'migration/reports/image-I3-benchmark-native.json').read_text())
+@@ -28,7 +29,6 @@ def main():
+          ROOT/'migration/reports/image-benchmark-native-comparison.json',
+          ROOT/'migration/reports/image-benchmark-runtime.json',
+          ROOT/'migration/reports/image-benchmark-trace.json',
+-         ROOT/'migration/reports/image-benchmark-cold.json',
+          ROOT/'migration/rewrite/image-benchmark-profile.json'])
+     checks=[]
+     checks.append(dict(check='actual-native-baseline-accepted',passed=native_execution_ok(native,manifest,commands,proof,logs)))
+@@ -38,6 +38,9 @@ def main():
+     changed=copy.deepcopy(commands);changed[4]['return_code']=137
+     checks.append(dict(check='reject-native-actual-command-failure',
+       passed=not native_execution_ok(native,manifest,changed,proof,logs)))
++    checks.append(dict(check='actual-native-execution-recipe',passed=native_recipe_ok(commands)))
++    changed=copy.deepcopy(commands);changed[4]['argv']=['echo','replayed-stdout']
++    checks.append(dict(check='reject-native-echo-replay',passed=not native_recipe_ok(changed)))
+     missing=cases['missing-input'];invalid=next(r for r in runs if r['case']=='invalid-dimensions')
+     swapped=validate(missing,invalid,profile)
+     checks.append(dict(check='reject-mismatched-error-CLI-and-diagnostic',passed=swapped['status']=='FAILED'
+@@ -55,21 +58,59 @@ def main():
+     checks.append(dict(check='accept-actual-runtime-stdout',passed=runtime_recompute(runtime,build)))
+     bad=copy.deepcopy(runtime);bad['rows'][0][2]='0'
+     checks.append(dict(check='reject-forged-runtime-rows',passed=not runtime_recompute(bad,build)))
++    runtime_manifest=json.loads((ROOT/runtime['evidence']/'manifest.json').read_text())
++    with tempfile.TemporaryDirectory(prefix='benchmark-runtime-command-negative-') as temporary:
++      copied=Path(temporary)/'runtime';shutil.copytree(ROOT/runtime_manifest['raw_artifact_dir'],copied)
++      command_file=copied/'commands.json';bad_commands=json.loads(command_file.read_text())
++      bad_commands[-1]['argv']=['echo','fabricated-runtime'];write(command_file,bad_commands)
++      checks.append(dict(check='reject-runtime-echo-replay',
++        passed=not runtime_recompute(runtime,build,copied)))
+     trace=json.loads((ROOT/'migration/reports/image-benchmark-trace.json').read_text())
+     small=next(r for r in runs if r['case']=='small')
+     checks.append(dict(check='accept-actual-trace-CSV-and-PCI',passed=trace_recompute(trace,build,small)))
+     bad=copy.deepcopy(trace);bad['counts']['gauss5']+=1
+     checks.append(dict(check='reject-forged-trace-count',passed=not trace_recompute(bad,build,small)))
++    trace_manifest=json.loads((ROOT/trace['evidence']/'manifest.json').read_text())
++    with tempfile.TemporaryDirectory(prefix='benchmark-trace-command-negative-') as temporary:
++      copied=Path(temporary)/'trace';shutil.copytree(ROOT/trace_manifest['raw_artifact_dir'],copied)
++      command_file=copied/'commands.json';bad_commands=json.loads(command_file.read_text())
++      bad_commands[-1]['argv']=['echo','fabricated-trace'];write(command_file,bad_commands)
++      checks.append(dict(check='reject-trace-echo-replay',
++        passed=not trace_recompute(trace,build,small,copied)))
+     comparison=json.loads((ROOT/'migration/reports/image-benchmark-native-comparison.json').read_text())
+     default=next(r for r in runs if r['case']=='original-default')
+     checks.append(dict(check='accept-native-stdout-recomputation',passed=native_recompute(comparison,default,profile)))
+     bad=copy.deepcopy(comparison);bad['cuda']['rows']['Gaussian 5x5']['opencv_mean_abs']=0.0
+     checks.append(dict(check='reject-forged-native-statistics',passed=not native_recompute(bad,default,profile)))
+-    cold=json.loads((ROOT/'migration/reports/image-benchmark-cold.json').read_text())
+-    checks.append(dict(check='accept-complete-cold-child-identity-matrix',passed=cold_structure_ok(cold)))
+-    bad=copy.deepcopy(cold);children=[c for c in bad['children'] if c['kind']=='runs']
++    groups={'contracts':1,'deps':1,'build':1,'runs':6,'validation':6,
++            'native-comparison':1,'runtime':1,'trace':1,'negative':1}
++    synthetic={'children':[dict(kind=kind,index=i,evidence=f'fixture/{kind}/{i}',raw=f'child-evidence/{kind}/{i}')
++                           for kind,count in groups.items() for i in range(count)]}
++    checks.append(dict(check='accept-complete-cold-child-identity-matrix',passed=cold_structure_ok(synthetic)))
++    bad=copy.deepcopy(synthetic);children=[c for c in bad['children'] if c['kind']=='runs']
+     children[1]['evidence']=children[0]['evidence'];children[1]['raw']=children[0]['raw']
+     checks.append(dict(check='reject-duplicated-cold-child',passed=not cold_structure_ok(bad)))
++    clone=ROOT.parent/'image-benchmark-cold-fixture/src';commit='fixture-source-commit'
++    recipe=[dict(phase='fresh-checkout',argv=['git','clone','--shared','--quiet',str(ROOT),str(clone)],
++                 cwd=str(ROOT),return_code=0),
++            dict(phase='fixed-commit',argv=['git','checkout','--quiet',commit],cwd=str(clone),return_code=0)]
++    jobs=[('image_benchmark_contracts','cpu'),('image_benchmark_deps','host'),('bootstrap_sdk','gpu'),
++          ('image_benchmark_build','gpu'),('image_benchmark_run','gpu'),('image_benchmark_reference','cpu'),
++          ('image_benchmark_native_comparison','cpu'),('image_benchmark_runtime','gpu'),
++          ('image_benchmark_trace','gpu'),('image_benchmark_negative','cpu')]
++    for name,kind in jobs:
++      file=('tools/migration/' if name=='bootstrap_sdk' else 'tools/moat/')+name+'.py'
++      script=str(clone/file)
++      argv=([str(ROOT/'build/image-cpu-venv/bin/python'),script] if kind=='cpu'
++            else ['python3',script] if kind=='host'
++            else ['/home/zihaomu/zihaomu_workspace/rocm10-launch.sh','env',
++                  'ROCR_VISIBLE_DEVICES=3','HIP_VISIBLE_DEVICES=0','python3',script])
++      item=dict(phase='cold-'+name,argv=argv,cwd=str(clone),return_code=0)
++      if kind=='gpu':item['environment_changes']={'HIP_VISIBLE_DEVICES':'2'}
++      recipe.append(item)
++    checks.append(dict(check='accept-exact-ten-job-cold-recipe',passed=cold_recipe_ok(recipe,clone,commit)))
++    bad=copy.deepcopy(recipe);bad[5]['argv']=['/bin/true']
++    checks.append(dict(check='reject-cold-build-replaced-with-true',passed=not cold_recipe_ok(bad,clone,commit)))
+     status='PASSED' if all(c['passed'] for c in checks) else 'FAILED'
+     result=dict(status=status,checks=checks,case_count=len(checks))
+     write(e.path/'negative.json',result)
+diff --git a/tools/moat/publish_image_benchmark.py b/tools/moat/publish_image_benchmark.py
+index 486f2ad39..51dba26dc 100644
+--- a/tools/moat/publish_image_benchmark.py
++++ b/tools/moat/publish_image_benchmark.py
+@@ -38,7 +38,7 @@ def main():
+        'image-benchmark/original-5090-and-algorithm-variants',
+        'image-benchmark/eighteen-device-contracts',
+        'image-benchmark/real-four-operation-trace',
+-       'image-benchmark/nineteen-reader-counterexamples',
++       'image-benchmark/twenty-five-reader-counterexamples',
+        'image-benchmark/nineteen-child-fixed-commit-cold-replay',
+        'image-benchmark/three-independent-reviews']
+     sample.update(status='PASSED',level='L4',reason_code='VALIDATED_MOAT_REWRITE',
+@@ -46,7 +46,7 @@ def main():
+        required_cases=required,passed_cases=required,
+        actual_library='Project HIP Gaussian/Canny/resize/RGB gray plus pinned OpenCV 4.12 CPU benchmark',
+        backend_library='project HIP image benchmark',equivalence=COMPARISON,
+-       reason='完整四算子C++原例、6 CLI、独立CPU全量产品/四行OpenCV统计、5090原生同输入与同构建OpenCV对照、18设备合同、真实GPU trace、19项反例及19子证据固定提交冷检出、三份独立复审通过。Gaussian/Canny为明确项目算法变体；NPP原生未输出像素，不宣称NPP逐像素等价；计时仅观察。',
++       reason='完整四算子C++原例、6 CLI、独立CPU全量产品/四行OpenCV统计、5090原生同输入与同构建OpenCV对照、18设备合同、真实GPU trace、25项反例及19子证据固定提交冷检出、三份独立复审通过。Gaussian/Canny为明确项目算法变体；NPP原生未输出像素，不宣称NPP逐像素等价；计时仅观察。',
+        cuda_baseline='PASSED',cuda_comparison='OBSERVED',
+        cuda_comparison_mode=COMPARISON,
+        cuda_comparison_reason='5090原生与ROCm同输入/4096×2048/20×5/OpenCV4.12。NPP不输出产品像素；Gaussian原生vsOpenCV均差1.70、项目0.00（原始尺寸），Canny计数同546308但掩码不保证相同。',
+diff --git a/tools/moat/qualify_image_benchmark.py b/tools/moat/qualify_image_benchmark.py
+index d2cc4c8e0..acdb61444 100644
+--- a/tools/moat/qualify_image_benchmark.py
++++ b/tools/moat/qualify_image_benchmark.py
+@@ -8,7 +8,6 @@ from image_benchmark_build import dependencies
+ from image_benchmark_reference import validate as cpu_validate
+ from image_benchmark_native_comparison import parse as parse_benchmark,native_execution_ok
+ from qualify_first import review_identity
+-from image_benchmark_cold import FILES as COLD_FILES
+ 
+ SAMPLE='NPP/opencvBenchmark::opencvBenchmark.cpp'
+ IMPLEMENTATION='rocm/ported/NPP/opencvBenchmark/opencvBenchmark.cpp'
+@@ -74,12 +73,59 @@ def digest_bytes(data):
+     import hashlib
+     return hashlib.sha256(data).hexdigest()
+ 
+-def runtime_recompute(runtime,build):
+-    path=ROOT/runtime['evidence'];manifest=json.loads((path/'manifest.json').read_text())
+-    raw=ROOT/manifest['raw_artifact_dir'];commands=json.loads((raw/'commands.json').read_text())
++NATIVE_RUN_ARGV_SHA256='8458240dc321542ad63309c491f662fadaad3c643ebaeb98446bc18b56c96461'
++
++def native_recipe_ok(commands):
++    argv=commands[4]['argv']
++    return (len(argv)==3 and argv[:2]==['ssh','nvidia-5090x2']
++      and digest_bytes(json.dumps(argv,sort_keys=True,separators=(',',':')).encode())==NATIVE_RUN_ARGV_SHA256
++      and all(c['cwd']==str(ROOT) for c in commands))
++
++def build_recompute(build,raw_override=None,project_root=ROOT):
++    path=Path(raw_override) if raw_override else project_root/build['evidence']
++    manifest=json.loads((path/'manifest.json').read_text())
++    raw=path if raw_override else project_root/manifest['raw_artifact_dir']
++    logical=project_root/manifest['raw_artifact_dir'];commands=json.loads((raw/'commands.json').read_text())
++    core=Path('/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core');overlay=project_root/'build/rocm-sdk-overlay'
++    opencv=project_root/build['opencv_prefix']
++    flags=['hipcc','--rocm-path='+str(overlay),'--hip-path='+str(overlay),
++      '--rocm-device-lib-path='+str(core/'lib/llvm/amdgcn/bitcode'),'--offload-arch=gfx1201',
++      '-std=c++17','-O2','-ffp-contract=off','-D__HIP_PLATFORM_AMD__']
++    shared=[str(project_root/'rocm/common/image'/n) for n in ['canny_stages.hip','canny.hip','benchmark.hip']]
++    recipe=[[*flags,'-fPIC','-x','hip','-shared',*shared,
++      '-L'+str(core/'lib'),'-Wl,-rpath,'+str(core/'lib'),'-lamdhip64','-o',str(logical/'libimage_benchmark.so')],
++      [*flags,'-x','hip','-I'+str(opencv/'include/opencv4'),str(project_root/IMPLEMENTATION),
++       '-L'+str(logical),'-limage_benchmark','-Wl,-rpath,'+str(logical),
++       '-L'+str(opencv/'lib'),'-Wl,-rpath,'+str(opencv/'lib'),
++       '-lopencv_imgproc','-lopencv_core','-L'+str(core/'lib'),
++       '-Wl,-rpath,'+str(core/'lib'),'-lamdhip64','-o',str(logical/'opencvBenchmark')]]
++    return (build['status']=='BUILT' and manifest['backend']=='rocm-build'
++      and len(commands)==2 and all(c['argv']==argv and c['cwd']==str(project_root)
++          and c['return_code']==0 and c.get('environment_changes',{})=={}
++          for c,argv in zip(commands,recipe))
++      and digest(raw/'libimage_benchmark.so')==build['library_sha256']
++      and digest(raw/'opencvBenchmark')==build['binary_sha256'])
++
++def runtime_recompute(runtime,build,raw_override=None,project_root=ROOT):
++    path=Path(raw_override) if raw_override else project_root/runtime['evidence']
++    manifest=json.loads((path/'manifest.json').read_text())
++    raw=path if raw_override else project_root/manifest['raw_artifact_dir']
++    logical=project_root/manifest['raw_artifact_dir'];commands=json.loads((raw/'commands.json').read_text())
+     expected=['resolve-real-image-libraries','compile-runtime-contracts','run-actual-device-contracts']
+     if ([c['phase'] for c in commands]!=expected or any(c['return_code'] for c in commands)
+         or manifest['parent_experiment_id']!=build['experiment_id']):return False
++    core=Path('/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core');overlay=project_root/'build/rocm-sdk-overlay'
++    lib=project_root/build['library'];binary=project_root/build['binary']
++    flags=['hipcc','--rocm-path='+str(overlay),'--hip-path='+str(overlay),
++      '--rocm-device-lib-path='+str(core/'lib/llvm/amdgcn/bitcode'),'--offload-arch=gfx1201',
++      '-std=c++17','-O2','-D__HIP_PLATFORM_AMD__']
++    recipe=[['ldd',str(binary)],
++      [*flags,'-x','hip',str(project_root/'tools/moat/image_benchmark_runtime.cpp'),
++       '-L'+str(lib.parent),'-limage_benchmark','-Wl,-rpath,'+str(lib.parent),
++       '-L'+str(core/'lib'),'-Wl,-rpath,'+str(core/'lib'),'-lamdhip64','-o',str(logical/'runtime')],
++      [str(logical/'runtime')]]
++    if any(c['argv']!=argv or c['cwd']!=str(project_root)
++       or c.get('environment_changes',{})!={} for c,argv in zip(commands,recipe)):return False
+     rows=[line.split('|') for line in (raw/commands[-1]['stdout']).read_text().splitlines()]
+     names=['normal','changed-to-zero','restored','default-stream',
+            'invalid-rejected-and-output-preserved','destroyed-stream-rejected']
+@@ -90,16 +136,25 @@ def runtime_recompute(runtime,build):
+         and len(observed)==1 and observed[0]['physical_id']==1
+         and loaded['status']=='PASSED' and all(c['passed'] for c in loaded['checks']))
+ 
+-def native_recompute(comparison,default_run,profile):
++def native_recompute(comparison,default_run,profile,run_raw_override=None,project_root=ROOT,build_override=None):
+     native=json.loads((ROOT/'migration/reports/image-I3-benchmark-native.json').read_text())
+     nproof=ROOT/native['evidence'];nmanifest=json.loads((nproof/'manifest.json').read_text())
+     ncommands=json.loads((nproof/'commands.json').read_text())
+     nlogs=list((nproof/'logs').glob('*actual-4096x2048*stdout.log'))
+-    if not native_execution_ok(native,nmanifest,ncommands,nproof,nlogs):return False
+-    rproof=ROOT/default_run['evidence'];rmanifest=json.loads((rproof/'manifest.json').read_text())
+-    raw=ROOT/rmanifest['raw_artifact_dir'];rcommands=json.loads((raw/'commands.json').read_text())
++    if not native_execution_ok(native,nmanifest,ncommands,nproof,nlogs) or not native_recipe_ok(ncommands):return False
++    rproof=Path(run_raw_override) if run_raw_override else project_root/default_run['evidence']
++    rmanifest=json.loads((rproof/'manifest.json').read_text())
++    raw=rproof if run_raw_override else project_root/rmanifest['raw_artifact_dir']
++    rcommands=json.loads((raw/'commands.json').read_text())
+     actual=[c for c in rcommands if c['phase']=='actual-four-operation-original-CLI']
+-    if len(actual)!=1 or actual[0]['return_code']!=0:return False
++    build=build_override if build_override is not None else json.loads((ROOT/'migration/reports/image-benchmark-build.json').read_text())
++    binary=project_root/build['binary'];logical=project_root/rmanifest['raw_artifact_dir']
++    if (len(rcommands)!=2 or len(actual)!=1 or actual[0]['return_code']!=0
++      or rcommands[0]['phase']!='resolve-real-image-libraries'
++      or rcommands[0]['argv']!=['ldd',str(binary)]
++      or actual[0]['argv']!=[str(binary),*default_run['arguments']]
++      or actual[0]['cwd']!=str(logical/'outputs')
++      or any(c.get('environment_changes',{})!={} for c in rcommands)):return False
+     original=nlogs[0].read_text();amd=(raw/actual[0]['stdout']).read_text()
+     first=json.loads(original.splitlines()[0]);loader=json.loads((raw/'loaded-libraries.json').read_text())
+     dep=json.loads((ROOT/'migration/reports/image-I3-rocm-OpenCV.json').read_text())
+@@ -135,11 +190,19 @@ def cpu_recompute(profile,runs,valid):
+         return False
+     return True
+ 
+-def trace_recompute(trace,build,small_run):
+-    path=ROOT/trace['evidence'];manifest=json.loads((path/'manifest.json').read_text())
+-    raw=ROOT/manifest['raw_artifact_dir'];commands=json.loads((raw/'commands.json').read_text())
++def trace_recompute(trace,build,small_run,raw_override=None,project_root=ROOT):
++    path=Path(raw_override) if raw_override else project_root/trace['evidence']
++    manifest=json.loads((path/'manifest.json').read_text())
++    raw=path if raw_override else project_root/manifest['raw_artifact_dir']
++    logical=project_root/manifest['raw_artifact_dir'];commands=json.loads((raw/'commands.json').read_text())
+     if ([c['phase'] for c in commands]!=['resolve-real-image-libraries','profile-complete-four-operation-C++-entry']
+       or any(c['return_code'] for c in commands) or manifest['parent_experiment_id']!=build['experiment_id']):return False
++    binary=project_root/build['binary'];source=project_root/'NPP/opencvBenchmark/images/CircuitBoard_2048x1024_8u.raw'
++    expected=[['ldd',str(binary)],
++      ['rocprofv3','--kernel-trace','--output-format','csv','--output-directory',str(logical/'trace'),
++       '--',str(binary),'-i',str(source),'-w','128','-h','96','-n','1']]
++    if (any(c['argv']!=argv or c['cwd']!=(str(project_root) if i==0 else str(logical/'outputs'))
++       or c.get('environment_changes',{})!={} for i,(c,argv) in enumerate(zip(commands,expected)))):return False
+     observed=json.loads((raw/'backend.observed.json').read_text())['devices']
+     if len(observed)!=1 or observed[0]['physical_id']!=1:return False
+     if ({p.name:digest(p) for p in (raw/'outputs').iterdir() if p.is_file()}
+@@ -170,6 +233,34 @@ def cold_structure_ok(cold):
+        and len({c['raw'] for c in children})==19
+        and all({c['index'] for c in children if c['kind']==kind}==set(range(count)) for kind,count in expected.items()))
+ 
++def cold_recipe_ok(commands,clone,commit):
++    phases=['fresh-checkout','fixed-commit']+['cold-'+name for name in
++      ['image_benchmark_contracts','image_benchmark_deps','bootstrap_sdk','image_benchmark_build',
++       'image_benchmark_run','image_benchmark_reference','image_benchmark_native_comparison',
++       'image_benchmark_runtime','image_benchmark_trace','image_benchmark_negative']]
++    if (len(commands)!=len(phases) or [c['phase'] for c in commands]!=phases
++       or any(c['return_code'] for c in commands)
++       or commands[0]['argv']!=['git','clone','--shared','--quiet',str(ROOT),str(clone)]
++       or commands[0]['cwd']!=str(ROOT)
++       or commands[1]['argv']!=['git','checkout','--quiet',commit]
++       or any(c['cwd']!=str(clone) for c in commands[1:])):return False
++    jobs=[('tools/moat/image_benchmark_contracts.py','cpu'),
++      ('tools/moat/image_benchmark_deps.py','host'),('tools/migration/bootstrap_sdk.py','gpu'),
++      ('tools/moat/image_benchmark_build.py','gpu'),('tools/moat/image_benchmark_run.py','gpu'),
++      ('tools/moat/image_benchmark_reference.py','cpu'),
++      ('tools/moat/image_benchmark_native_comparison.py','cpu'),
++      ('tools/moat/image_benchmark_runtime.py','gpu'),('tools/moat/image_benchmark_trace.py','gpu'),
++      ('tools/moat/image_benchmark_negative.py','cpu')]
++    cpu=str(ROOT/'build/image-cpu-venv/bin/python')
++    for command,(name,kind) in zip(commands[2:],jobs):
++      script=str(clone/name)
++      argv=([cpu,script] if kind=='cpu' else ['python3',script] if kind=='host' else
++        ['/home/zihaomu/zihaomu_workspace/rocm10-launch.sh','env','ROCR_VISIBLE_DEVICES=3',
++         'HIP_VISIBLE_DEVICES=0','python3',script])
++      env={'HIP_VISIBLE_DEVICES':'2'} if kind=='gpu' else {}
++      if command['argv']!=argv or command.get('environment_changes',{})!=env:return False
++    return True
++
+ def cold_recompute(cold,profile,runs,valid):
+     if (cold['status']!='PASSED' or cold['return_code']!=0 or any(not c['passed'] for c in cold['checks'])
+       or not cold_structure_ok(cold)):return False
+@@ -179,15 +270,7 @@ def cold_recompute(cold,profile,runs,valid):
+       or not clone.parent.name.startswith('image-benchmark-cold-')
+       or outer['backend']!='host-cold-replay' or outer['experiment_outcome']!='PASSED'):return False
+     commands=json.loads((raw/'commands.json').read_text())
+-    phases=['fresh-checkout','fixed-commit']+['cold-'+name for name in
+-      ['image_benchmark_contracts','image_benchmark_deps','bootstrap_sdk','image_benchmark_build',
+-       'image_benchmark_run','image_benchmark_reference','image_benchmark_native_comparison',
+-       'image_benchmark_runtime','image_benchmark_trace','image_benchmark_negative']]
+-    if (len(commands)!=len(phases) or [c['phase'] for c in commands]!=phases
+-       or any(c['return_code'] for c in commands)
+-       or commands[0]['argv']!=['git','clone','--shared','--quiet',str(ROOT),str(clone)]
+-       or commands[1]['argv']!=['git','checkout','--quiet',cold['source_commit']]
+-       or any(c['cwd']!=str(clone) for c in commands[1:])):return False
++    if not cold_recipe_ok(commands,clone,cold['source_commit']):return False
+     expected={'contracts':1,'deps':1,'build':1,'runs':6,'validation':6,'native-comparison':1,
+       'runtime':1,'trace':1,'negative':1}
+     children=cold['children']
+@@ -198,7 +281,8 @@ def cold_recompute(cold,profile,runs,valid):
+       typ='native' if child['kind']=='native-comparison' else child['kind']
+       report=json.loads((raw/child['raw']/MEMBERS[typ]).read_text());report['evidence']=child['evidence']
+       return report
+-    cold_build=child_report(by['build'][0])['experiment_id'];case_ids={c['case'] for c in profile['cases']}
++    cold_build_row=child_report(by['build'][0]);cold_build=cold_build_row['experiment_id']
++    case_ids={c['case'] for c in profile['cases']}
+     run_cases={child_report(c)['case']:c for c in by['runs']}
+     validation_cases={child_report(c)['case']:c for c in by['validation']}
+     if set(run_cases)!=case_ids or set(validation_cases)!=case_ids:return False
+@@ -211,11 +295,15 @@ def cold_recompute(cold,profile,runs,valid):
+       if any((folder/name).stat().st_size!=meta['bytes'] or digest(folder/name)!=meta['sha256'] for name,meta in seal.items()):return False
+       manifest=json.loads((folder/'manifest.json').read_text());source=json.loads((folder/'source.json').read_text())
+       typ='native' if kind=='native-comparison' else kind
+-      aggregate=json.loads((clone/'migration/reports'/COLD_FILES[kind]).read_text())
+-      aggregate=aggregate[index] if isinstance(aggregate,list) else aggregate
++      dependencies=source['dependencies'];objects=source['source_objects']
++      if (not dependencies or set(dependencies)!=set(objects)
++        or any(not (ROOT/object_name).is_file() or digest(ROOT/object_name)!=sha
++               for name,sha in dependencies.items() for object_name in [objects[name]])):return False
++      if kind=='build' and set(dependencies)!=(set(report['dependencies'])|
++         {'tools/moat/image_benchmark_build.py','tools/moat/experiment.py'}):return False
+       if (source['commit']!=cold['source_commit'] or manifest['experiment_id']!=Path(child['evidence']).name
+         or report['evidence']!=child['evidence'] or manifest['backend']!=BACKENDS[typ]
+-        or aggregate!=report):return False
++        or report['status'] not in {'READY','FROZEN','BUILT','EXECUTED','PASSED'}):return False
+       expected_outcome=outcomes.get(kind,'EXPECTED_REJECTION' if next(
+         (c['expected_return_code'] for c in profile['cases'] if c['case']==report.get('case')),0) else 'EXECUTED')
+       if manifest['experiment_outcome']!=expected_outcome:return False
+@@ -236,6 +324,19 @@ def cold_recompute(cold,profile,runs,valid):
+         if report.get('metrics')!=current.get('metrics'):return False
+       if kind in {'runtime','trace'} and manifest['parent_experiment_id']!=cold_build:return False
+       if report['status'] not in {'READY','FROZEN','BUILT','EXECUTED','PASSED'}:return False
++    if not build_recompute(cold_build_row,raw/by['build'][0]['raw'],clone):return False
++    runtime_child=by['runtime'][0];runtime_row=child_report(runtime_child)
++    if not runtime_recompute(runtime_row,cold_build_row,raw/runtime_child['raw'],clone):return False
++    trace_child=by['trace'][0];trace_row=child_report(trace_child)
++    if not trace_recompute(trace_row,cold_build_row,child_report(run_cases['small']),
++       raw/trace_child['raw'],clone):return False
++    native_child=by['native-comparison'][0];native_row=child_report(native_child)
++    if not native_recompute(native_row,child_report(run_cases['original-default']),profile,
++       raw/run_cases['original-default']['raw'],clone,cold_build_row):return False
++    negative_row=child_report(by['negative'][0])
++    current_negative=json.loads((ROOT/'migration/reports/image-benchmark-negative.json').read_text())
++    if (negative_row['status']!='PASSED' or negative_row['case_count']!=19
++      or negative_row['checks']!=current_negative['checks']):return False
+     return True
+ 
+ def collect(review):
+@@ -265,7 +366,8 @@ def collect(review):
+        and all(digest(ROOT/name)==sha for name,sha in build['dependencies'].items())
+        and digest(ROOT/build['binary'])==build['binary_sha256']
+        and digest(ROOT/build['library'])==build['library_sha256']
+-       and build['build_recipe_sha256']==digest(ROOT/'tools/moat/image_benchmark_build.py'))
++       and build['build_recipe_sha256']==digest(ROOT/'tools/moat/image_benchmark_build.py')
++       and build_recompute(build))
+     case_ids=[c['case'] for c in p['cases']];by_case={r['case']:r for r in runs}
+     gate('six-unique-actual-GPU-CLI-and-loaded-libraries',len(runs)==len(by_case)==6
+        and set(by_case)==set(case_ids) and evidence('runs',runs)
+@@ -291,8 +393,8 @@ def collect(review):
+           ['gauss5','sobel','suppress','local_threshold','resize_half','rgb_gray'])
+        and all(c['passed'] for c in trace['checks']) and trace_recompute(trace,build,by_case['small']))
+     negative=data['negative']
+-    gate('nineteen-native-CLI-and-closure-counterexamples',evidence('negative',[negative])
+-       and negative['status']=='PASSED' and negative['case_count']==len(negative['checks'])==19
++    gate('twenty-five-native-CLI-and-closure-counterexamples',evidence('negative',[negative])
++       and negative['status']=='PASSED' and negative['case_count']==len(negative['checks'])==25
+        and all(c['passed'] for c in negative['checks']))
+     expected={'contracts':1,'deps':1,'build':1,'runs':6,'validation':6,'native-comparison':1,
+        'runtime':1,'trace':1,'negative':1}

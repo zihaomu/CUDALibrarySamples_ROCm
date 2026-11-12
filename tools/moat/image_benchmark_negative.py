@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Check that benchmark qualification readers reject known false positives."""
-import copy,json
+import copy,json,shutil,tempfile
+from pathlib import Path
 from experiment import ROOT,Experiment,write,digest
 from image_progress import record
 from image_benchmark_reference import validate
 from image_benchmark_native_comparison import native_execution_ok
 from image_benchmark_cold import same_build_source_hashes
 from image_benchmark_build import dependencies
-from qualify_image_benchmark import cpu_recompute,runtime_recompute,trace_recompute,native_recompute,cold_structure_ok
+from qualify_image_benchmark import cpu_recompute,runtime_recompute,trace_recompute,native_recompute,cold_structure_ok,cold_recipe_ok,native_recipe_ok
 
 def main():
     native=json.loads((ROOT/'migration/reports/image-I3-benchmark-native.json').read_text())
@@ -28,7 +29,6 @@ def main():
          ROOT/'migration/reports/image-benchmark-native-comparison.json',
          ROOT/'migration/reports/image-benchmark-runtime.json',
          ROOT/'migration/reports/image-benchmark-trace.json',
-         ROOT/'migration/reports/image-benchmark-cold.json',
          ROOT/'migration/rewrite/image-benchmark-profile.json'])
     checks=[]
     checks.append(dict(check='actual-native-baseline-accepted',passed=native_execution_ok(native,manifest,commands,proof,logs)))
@@ -38,6 +38,9 @@ def main():
     changed=copy.deepcopy(commands);changed[4]['return_code']=137
     checks.append(dict(check='reject-native-actual-command-failure',
       passed=not native_execution_ok(native,manifest,changed,proof,logs)))
+    checks.append(dict(check='actual-native-execution-recipe',passed=native_recipe_ok(commands)))
+    changed=copy.deepcopy(commands);changed[4]['argv']=['echo','replayed-stdout']
+    checks.append(dict(check='reject-native-echo-replay',passed=not native_recipe_ok(changed)))
     missing=cases['missing-input'];invalid=next(r for r in runs if r['case']=='invalid-dimensions')
     swapped=validate(missing,invalid,profile)
     checks.append(dict(check='reject-mismatched-error-CLI-and-diagnostic',passed=swapped['status']=='FAILED'
@@ -55,21 +58,59 @@ def main():
     checks.append(dict(check='accept-actual-runtime-stdout',passed=runtime_recompute(runtime,build)))
     bad=copy.deepcopy(runtime);bad['rows'][0][2]='0'
     checks.append(dict(check='reject-forged-runtime-rows',passed=not runtime_recompute(bad,build)))
+    runtime_manifest=json.loads((ROOT/runtime['evidence']/'manifest.json').read_text())
+    with tempfile.TemporaryDirectory(prefix='benchmark-runtime-command-negative-') as temporary:
+      copied=Path(temporary)/'runtime';shutil.copytree(ROOT/runtime_manifest['raw_artifact_dir'],copied)
+      command_file=copied/'commands.json';bad_commands=json.loads(command_file.read_text())
+      bad_commands[-1]['argv']=['echo','fabricated-runtime'];write(command_file,bad_commands)
+      checks.append(dict(check='reject-runtime-echo-replay',
+        passed=not runtime_recompute(runtime,build,copied)))
     trace=json.loads((ROOT/'migration/reports/image-benchmark-trace.json').read_text())
     small=next(r for r in runs if r['case']=='small')
     checks.append(dict(check='accept-actual-trace-CSV-and-PCI',passed=trace_recompute(trace,build,small)))
     bad=copy.deepcopy(trace);bad['counts']['gauss5']+=1
     checks.append(dict(check='reject-forged-trace-count',passed=not trace_recompute(bad,build,small)))
+    trace_manifest=json.loads((ROOT/trace['evidence']/'manifest.json').read_text())
+    with tempfile.TemporaryDirectory(prefix='benchmark-trace-command-negative-') as temporary:
+      copied=Path(temporary)/'trace';shutil.copytree(ROOT/trace_manifest['raw_artifact_dir'],copied)
+      command_file=copied/'commands.json';bad_commands=json.loads(command_file.read_text())
+      bad_commands[-1]['argv']=['echo','fabricated-trace'];write(command_file,bad_commands)
+      checks.append(dict(check='reject-trace-echo-replay',
+        passed=not trace_recompute(trace,build,small,copied)))
     comparison=json.loads((ROOT/'migration/reports/image-benchmark-native-comparison.json').read_text())
     default=next(r for r in runs if r['case']=='original-default')
     checks.append(dict(check='accept-native-stdout-recomputation',passed=native_recompute(comparison,default,profile)))
     bad=copy.deepcopy(comparison);bad['cuda']['rows']['Gaussian 5x5']['opencv_mean_abs']=0.0
     checks.append(dict(check='reject-forged-native-statistics',passed=not native_recompute(bad,default,profile)))
-    cold=json.loads((ROOT/'migration/reports/image-benchmark-cold.json').read_text())
-    checks.append(dict(check='accept-complete-cold-child-identity-matrix',passed=cold_structure_ok(cold)))
-    bad=copy.deepcopy(cold);children=[c for c in bad['children'] if c['kind']=='runs']
+    groups={'contracts':1,'deps':1,'build':1,'runs':6,'validation':6,
+            'native-comparison':1,'runtime':1,'trace':1,'negative':1}
+    synthetic={'children':[dict(kind=kind,index=i,evidence=f'fixture/{kind}/{i}',raw=f'child-evidence/{kind}/{i}')
+                           for kind,count in groups.items() for i in range(count)]}
+    checks.append(dict(check='accept-complete-cold-child-identity-matrix',passed=cold_structure_ok(synthetic)))
+    bad=copy.deepcopy(synthetic);children=[c for c in bad['children'] if c['kind']=='runs']
     children[1]['evidence']=children[0]['evidence'];children[1]['raw']=children[0]['raw']
     checks.append(dict(check='reject-duplicated-cold-child',passed=not cold_structure_ok(bad)))
+    clone=ROOT.parent/'image-benchmark-cold-fixture/src';commit='fixture-source-commit'
+    recipe=[dict(phase='fresh-checkout',argv=['git','clone','--shared','--quiet',str(ROOT),str(clone)],
+                 cwd=str(ROOT),return_code=0),
+            dict(phase='fixed-commit',argv=['git','checkout','--quiet',commit],cwd=str(clone),return_code=0)]
+    jobs=[('image_benchmark_contracts','cpu'),('image_benchmark_deps','host'),('bootstrap_sdk','gpu'),
+          ('image_benchmark_build','gpu'),('image_benchmark_run','gpu'),('image_benchmark_reference','cpu'),
+          ('image_benchmark_native_comparison','cpu'),('image_benchmark_runtime','gpu'),
+          ('image_benchmark_trace','gpu'),('image_benchmark_negative','cpu')]
+    for name,kind in jobs:
+      file=('tools/migration/' if name=='bootstrap_sdk' else 'tools/moat/')+name+'.py'
+      script=str(clone/file)
+      argv=([str(ROOT/'build/image-cpu-venv/bin/python'),script] if kind=='cpu'
+            else ['python3',script] if kind=='host'
+            else ['/home/zihaomu/zihaomu_workspace/rocm10-launch.sh','env',
+                  'ROCR_VISIBLE_DEVICES=3','HIP_VISIBLE_DEVICES=0','python3',script])
+      item=dict(phase='cold-'+name,argv=argv,cwd=str(clone),return_code=0)
+      if kind=='gpu':item['environment_changes']={'HIP_VISIBLE_DEVICES':'2'}
+      recipe.append(item)
+    checks.append(dict(check='accept-exact-ten-job-cold-recipe',passed=cold_recipe_ok(recipe,clone,commit)))
+    bad=copy.deepcopy(recipe);bad[5]['argv']=['/bin/true']
+    checks.append(dict(check='reject-cold-build-replaced-with-true',passed=not cold_recipe_ok(bad,clone,commit)))
     status='PASSED' if all(c['passed'] for c in checks) else 'FAILED'
     result=dict(status=status,checks=checks,case_count=len(checks))
     write(e.path/'negative.json',result)

@@ -13,9 +13,9 @@
 | 当前跨实现差异 | [封存 stdout 重算](image-benchmark-native-comparison.json)确认同一输入/4096×2048/20×5/同一 OpenCV 构建和四算子顺序，且原生编译/运行/收集命令均成功。项目 Gaussian 的 replicate 边界与整数 binomial 变体相对 OpenCV 默认 REFLECT_101：small 均差0.109375、odd 0.061376、原始默认0.0004425；原生 NPP 相对 OpenCV 默认均差1.70。默认 Canny ROCm 相对 OpenCV 均差6.7539；原生 NPP 和 ROCm 都报546308边缘像素，OpenCV为324128。原始 NPP 像素文件未输出，不能据计数或均差推断两家逐像素一致。 |
 | 实际设备语义 | [三新增核18项合同](image-benchmark-runtime.json)通过：普通/零输入/恢复/默认流、主机指针/不足物理分配/别名/非法尺寸/销毁流等拒绝与输出保持。首轮暴露被拒流后有效启动误报历史 HIP 错误，修复并保留失败实验。 |
 | 真实 GPU 分发 | [rocprof trace](image-benchmark-trace.json)确认四算子及 Canny Sobel/NMS/阈值，六类 kernel 各13次，PCI/网格/时间和四个产品 SHA 已核。 |
-| 资格反例 | [19项正反检查](image-benchmark-negative.json)拒绝原生失败状态/非零编译运行收集、CLI 案例互换、裁剪构建依赖，以及配对篡改CPU数值、runtime行、trace计数、原生统计与冷检出重复子项；动态链接器在每次运行、runtime和trace前核实际GPU/OpenCV库路径与SHA。 |
+| 资格反例 | [25项正反检查](image-benchmark-negative.json)拒绝原生失败状态/非零编译运行收集、CLI 案例互换、裁剪构建依赖，以及配对篡改CPU数值、runtime行、trace计数、原生统计与冷检出重复子项及把真实执行替换为 echo/true；动态链接器在每次运行、runtime和trace前核实际GPU/OpenCV库路径与SHA。 |
 | 性能 | 原始 GPU/OpenCV 时间及比率保存在各自 stdout；尚无同负载空闲设备、重复测量、同步与统计资格，**不发布跨 GPU 加速比**。 |
 
 首次全尺度 CPU 验证误读了实验归档的大文件策略：大于4 MiB 的 RAW 输出保留在原始 artifact，并在 seal 中登记完整 SHA256，精简 archive 不复制这些字节。该失败检查及修正后重新验收均保留；当前验收从 manifest 指向原始 artifact，并核对 seal 与产品 SHA。
 
-固定提交首次冷检出完成九项重跑和18项子封存，但最终比较误把随实验 ID 改变的依赖回执视为固定源码，故最终 FAILED；后续冷检出通过。独立复审又以成对篡改封存报告复现组合资格的假通过：原资格门只信报告状态，未从产品、原始命令、CSV和冷子结果独立重算。现已补复算和19项正反例，历史复审 REQUEST_CHANGES 与失败保留。随后固定提交冷检出的前九项成功，第十项反例因隔离检出无法读取上轮未归档的完整冷 raw 而失败；已把该反例限制为纯身份结构测试，完整 raw 独立重算仍在组合资格中，失败证据保留。最终源码提交 `df735afe9aab285fa2898e7d535565366004d292` 的10任务/19子证据冷检出已 PASSED。动态库身份门首次把 scp 复制的同 SHA SONAME 文件误判为不同路径，失败运行已恢复封存并改为核实际加载文件。剩余：独立复审、组合资格与 Git 锚定后发布。任一缺口未闭合时维持 PARTIAL。命令、源码 hash、物理设备、stdout/stderr 和产品 SHA 见逐实验封存；实施时间线见[图像库进展](image-libraries-progress.md)。
+固定提交首次冷检出完成九项重跑和18项子封存，但最终比较误把随实验 ID 改变的依赖回执视为固定源码，故最终 FAILED；后续冷检出通过。独立复审又以成对篡改封存报告复现组合资格的假通过：原资格门只信报告状态，未从产品、原始命令、CSV和冷子结果独立重算。现已补复算和25项正反例，历史复审 REQUEST_CHANGES 与失败保留。随后固定提交冷检出的前九项成功，第十项反例因隔离检出无法读取上轮未归档的完整冷 raw 而失败；已把该反例限制为纯身份结构测试，完整 raw 独立重算仍在组合资格中，失败证据保留。最终源码提交 `df735afe9aab285fa2898e7d535565366004d292` 的10任务/19子证据冷检出已 PASSED。动态库身份门首次把 scp 复制的同 SHA SONAME 文件误判为不同路径，失败运行已恢复封存并改为核实际加载文件。剩余：独立复审、组合资格与 Git 锚定后发布。任一缺口未闭合时维持 PARTIAL。命令、源码 hash、物理设备、stdout/stderr 和产品 SHA 见逐实验封存；实施时间线见[图像库进展](image-libraries-progress.md)。

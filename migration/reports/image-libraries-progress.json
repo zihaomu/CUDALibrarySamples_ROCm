@@ -11629,9 +11629,26 @@
         "migration/reports/image-benchmark-cold.json",
         "migration/reports/image-benchmark.md"
       ]
+    },
+    {
+      "time": "2026-11-12T06:54:02.680207+00:00",
+      "phase": "I3",
+      "message": "benchmark原生/错误CLI/依赖及CPU/runtime/trace/cold配对篡改共25项正反证据：PASSED。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-sealed-reader-counterexamples/20261112T065359.062795Z-I3-CPU-negative-7712428b74"
+      ]
+    },
+    {
+      "time": "2026-11-12T06:54:37.217224+00:00",
+      "phase": "I3",
+      "message": "独立复审再次发现冷十作业argv与子运行命令未绑定，且冷子聚合依赖临时clone；现按实际命令/环境重算所有job、主和冷runtime/trace/native、子build SHA/源码对象，移除clone聚合依赖。25项含echo/true替换反例通过；最终冷证据需重跑。",
+      "evidence": [
+        "migration/reports/image-benchmark-negative.json",
+        "migration/reports/image-benchmark.md"
+      ]
     }
   ],
-  "updated_at": "2026-11-12T06:44:04.136383+00:00",
+  "updated_at": "2026-11-12T06:54:37.217224+00:00",
   "acceptance_policy": "migration/rewrite/image-acceptance-policy.json",
   "execution_plan": "migration/image-equivalence-execution.md"
 }

@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-12T06:44:04.136383+00:00。26入口当前12通过/7部分/7失败。
+更新时间：2026-11-12T06:54:37.217224+00:00。26入口当前12通过/7部分/7失败。
 
-I3：benchmark最终源码df735afe固定提交冷检出10/10作业和19/19子封存通过；主表PARTIAL/L3门槛9/11，待三份复审和组合资格/Git锚定。
+I3：独立复审再次发现冷十作业argv与子运行命令未绑定，且冷子聚合依赖临时clone；现按实际命令/环境重算所有job、主和冷runtime/trace/native、子build SHA/源码对象，移除clone聚合依赖。25项含echo/true替换反例通过；最终冷证据需重跑。
 
-证据：`migration/reports/image-benchmark-cold.json`；`migration/reports/image-benchmark.md`
+证据：`migration/reports/image-benchmark-negative.json`；`migration/reports/image-benchmark.md`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 
