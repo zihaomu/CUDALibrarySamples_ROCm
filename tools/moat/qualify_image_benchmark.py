@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Issue a composite qualification for the complete four-operation benchmark."""
-import argparse,collections,csv,json,subprocess
+import argparse,collections,csv,json,re,subprocess
 from pathlib import Path
 from experiment import ROOT,Experiment,write,digest,git
 from audit import check as audit
@@ -107,6 +107,34 @@ def build_recompute(build,raw_override=None,project_root=ROOT):
       and digest(raw/'libimage_benchmark.so')==build['library_sha256']
       and digest(raw/'opencvBenchmark')==build['binary_sha256'])
 
+def loaded_recompute(raw,build,project_root=ROOT):
+    commands=json.loads((raw/'commands.json').read_text())
+    matches=[c for c in commands if c['phase']=='resolve-real-image-libraries']
+    binary=project_root/build['binary'];library=project_root/build['library']
+    opencv=project_root/build['opencv_prefix']
+    if (len(matches)!=1 or matches[0]['argv']!=['ldd',str(binary)]
+      or matches[0]['cwd']!=str(project_root) or matches[0]['return_code']!=0
+      or matches[0].get('environment_changes',{})!={}):return False
+    loader=(raw/matches[0]['stdout']).read_text()
+    if 'not found' in loader:return False
+    loaded=json.loads((raw/'loaded-libraries.json').read_text())
+    receipt=json.loads((ROOT/'migration/reports/image-I3-native-OpenCV.json').read_text())['receipt']['files']
+    expected={'libimage_benchmark.so':(library,build['library_sha256']),
+      'libopencv_core.so.412':(opencv/'lib/libopencv_core.so.412',receipt['lib/libopencv_core.so.412']['sha256']),
+      'libopencv_imgproc.so.412':(opencv/'lib/libopencv_imgproc.so.412',receipt['lib/libopencv_imgproc.so.412']['sha256'])}
+    checks={c['check']:c for c in loaded['checks']}
+    if (loaded['status']!='PASSED' or len(loaded['checks'])!=7 or len(checks)!=7
+      or not all(c['passed'] for c in checks.values())
+      or loaded['binary']!=str(binary) or loaded['library']!=str(library)
+      or loaded['opencv_prefix']!=str(opencv)):return False
+    for soname,(path,sha) in expected.items():
+      found=re.findall(r'^\s*'+re.escape(soname)+r'\s*=>\s*(\S+)',loader,re.MULTILINE)
+      check=checks['actual-loaded-'+soname]
+      if len(found)!=1 or found[0]!=str(path) or check['resolved']!=str(path) or check['sha256']!=sha:return False
+    if project_root==ROOT and (digest(binary)!=build['binary_sha256'] or digest(library)!=build['library_sha256']
+      or any(digest(path)!=sha for path,sha in expected.values())):return False
+    return True
+
 def runtime_recompute(runtime,build,raw_override=None,project_root=ROOT):
     path=Path(raw_override) if raw_override else project_root/runtime['evidence']
     manifest=json.loads((path/'manifest.json').read_text())
@@ -135,7 +163,8 @@ def runtime_recompute(runtime,build,raw_override=None,project_root=ROOT):
     loaded=json.loads((raw/'loaded-libraries.json').read_text())
     return (rows==runtime['rows']==expected_rows and runtime['return_code']==0
         and len(observed)==1 and observed[0]['physical_id']==1
-        and loaded['status']=='PASSED' and all(c['passed'] for c in loaded['checks']))
+        and loaded['status']=='PASSED' and all(c['passed'] for c in loaded['checks'])
+        and loaded_recompute(raw,build,project_root))
 
 def native_recompute(comparison,default_run,profile,run_raw_override=None,project_root=ROOT,build_override=None):
     native=json.loads((ROOT/'migration/reports/image-I3-benchmark-native.json').read_text())
@@ -155,7 +184,8 @@ def native_recompute(comparison,default_run,profile,run_raw_override=None,projec
       or rcommands[0]['argv']!=['ldd',str(binary)]
       or actual[0]['argv']!=[str(binary),*default_run['arguments']]
       or actual[0]['cwd']!=str(logical/'outputs')
-      or any(c.get('environment_changes',{})!={} for c in rcommands)):return False
+      or any(c.get('environment_changes',{})!={} for c in rcommands)
+      or not loaded_recompute(raw,build,project_root)):return False
     original=nlogs[0].read_text();amd=(raw/actual[0]['stdout']).read_text()
     first=json.loads(original.splitlines()[0]);loader=json.loads((raw/'loaded-libraries.json').read_text())
     dep=json.loads((ROOT/'migration/reports/image-I3-rocm-OpenCV.json').read_text())
@@ -222,7 +252,8 @@ def trace_recompute(trace,build,small_run,raw_override=None,project_root=ROOT):
         or int(row['Grid_Size_X'])<=0):return False
     loaded=json.loads((raw/'loaded-libraries.json').read_text())
     return (dict(counts)==trace['counts'] and all(counts[name]>=1 for name in names)
-      and trace['return_code']==0 and loaded['status']=='PASSED' and all(c['passed'] for c in loaded['checks']))
+      and trace['return_code']==0 and loaded['status']=='PASSED' and all(c['passed'] for c in loaded['checks'])
+      and loaded_recompute(raw,build,project_root))
 
 def cold_structure_ok(cold):
     expected={'contracts':1,'deps':1,'build':1,'runs':6,'validation':6,'native-comparison':1,
@@ -326,6 +357,7 @@ def cold_run_ok(folder,manifest,report,case,build,project_root,profile):
       or digest(folder/'images'/Path(profile['image']).name)!=profile['image_sha256']
       or not (folder/commands[1]['stdout']).read_text().startswith(case['stdout_starts'])
       or not (folder/commands[1]['stderr']).read_text().startswith(case['stderr_starts'])
+      or not loaded_recompute(folder,build,project_root)
       or loaded['status']!='PASSED' or loaded['binary']!=str(binary)
       or loaded['library']!=str(project_root/build['library'])
       or loaded['opencv_prefix']!=str(project_root/build['opencv_prefix'])
@@ -417,7 +449,7 @@ def cold_recompute(cold,profile,runs,valid):
        raw/run_cases['original-default']['raw'],clone,cold_build_row):return False
     negative_row=child_report(by['negative'][0])
     current_negative=json.loads((ROOT/'migration/reports/image-benchmark-negative.json').read_text())
-    if (negative_row['status']!='PASSED' or negative_row['case_count']!=31
+    if (negative_row['status']!='PASSED' or negative_row['case_count']!=35
       or negative_row['checks']!=current_negative['checks']):return False
     return True
 
@@ -454,7 +486,7 @@ def collect(review):
     gate('six-unique-actual-GPU-CLI-and-loaded-libraries',len(runs)==len(by_case)==6
        and set(by_case)==set(case_ids) and evidence('runs',runs)
        and all(r['status']=='EXECUTED' and all(c['passed'] for c in r['checks'])
-       and json.loads((ROOT/r['evidence']/'loaded-libraries.json').read_text())['status']=='PASSED'
+       and loaded_recompute(ROOT/json.loads((ROOT/r['evidence']/'manifest.json').read_text())['raw_artifact_dir'],build)
        for r in runs))
     gate('six-independent-full-products-and-error-diagnostics',
          cpu_recompute(p,runs,valid) and evidence('validation',valid))
@@ -475,8 +507,8 @@ def collect(review):
           ['gauss5','sobel','suppress','local_threshold','resize_half','rgb_gray'])
        and all(c['passed'] for c in trace['checks']) and trace_recompute(trace,build,by_case['small']))
     negative=data['negative']
-    gate('thirty-one-native-CLI-and-closure-counterexamples',evidence('negative',[negative])
-       and negative['status']=='PASSED' and negative['case_count']==len(negative['checks'])==31
+    gate('thirty-five-native-CLI-and-closure-counterexamples',evidence('negative',[negative])
+       and negative['status']=='PASSED' and negative['case_count']==len(negative['checks'])==35
        and all(c['passed'] for c in negative['checks']))
     expected={'contracts':1,'deps':1,'build':1,'runs':6,'validation':6,'native-comparison':1,
        'runtime':1,'trace':1,'negative':1}

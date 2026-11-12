@@ -2,7 +2,7 @@
 
 **PARTIAL / L3**
 
-原始四算子C++流程、6组真实GPU CLI与独立CPU全量输出、5090原生同输入同版OpenCV对照、18运行合同、真实GPU trace及31项证据反例通过；动态加载的GPU/OpenCV库字节已核。Gaussian/Canny项目算法变体记录，原生NPP不输出像素。最终固定源码10任务/19子证据冷检出及原始记录复算通过；待独立复审与组合资格，当前不计整例通过或新增功能族。
+原始四算子C++流程、6组真实GPU CLI与独立CPU全量输出、5090原生同输入同版OpenCV对照、18运行合同、真实GPU trace及35项证据反例通过；六组CLI、runtime、trace及冷运行的原始ldd输出已重新解析并核库路径/SHA。Gaussian/Canny项目算法变体记录，原生NPP不输出像素。最新资格源码须固定提交冷检出及复审，当前不计整例通过或新增功能族。
 
 | 字段 | 当前记录 |
 | --- | --- |
@@ -10,14 +10,14 @@
 | 实际库 / 后端 | Project HIP Gaussian/Canny/resize/RGB gray plus pinned OpenCV 4.12 CPU benchmark / project HIP image benchmark |
 | 候选路线 | RPP HIP, rocPRIM |
 | 代码 | [rocm/ported/NPP/opencvBenchmark/opencvBenchmark.cpp](../../../../rocm/ported/NPP/opencvBenchmark/opencvBenchmark.cpp) |
-| required cases | 9/11 |
+| required cases | 8/11 |
 | CUDA baseline / comparison | PASSED / OBSERVED |
 | 性能 | OBSERVED_NOT_QUALIFIED |
 | 原始源码 SHA256 | `0332d73b327bbf76726b6eb13e38bbf68110baff7f923f328dbaabbca54fb30e` |
 
 编译/运行返回 0 仅对应 L3；通过独立参考检查后才记 L4。失败的候选库不列为已使用库。
 
-必需用例：`image-benchmark/frozen-six-CLI`, `image-benchmark/matched-OpenCV4.12-and-four-HIP-build`, `image-benchmark/six-real-GPU-CLI`, `image-benchmark/all-four-independent-CPU`, `image-benchmark/original-CUDA-observed-semantics`, `image-benchmark/eighteen-device-contracts`, `image-benchmark/real-four-operation-trace`, `image-benchmark/thirty-one-reader-counterexamples`, `image-benchmark/fixed-commit-cold-replay`, `image-benchmark/independent-review`, `image-benchmark/composite-qualification-and-Git-anchor`。
+必需用例：`image-benchmark/frozen-six-CLI`, `image-benchmark/matched-OpenCV4.12-and-four-HIP-build`, `image-benchmark/six-real-GPU-CLI`, `image-benchmark/all-four-independent-CPU`, `image-benchmark/original-CUDA-observed-semantics`, `image-benchmark/eighteen-device-contracts`, `image-benchmark/real-four-operation-trace`, `image-benchmark/thirty-five-reader-counterexamples`, `image-benchmark/fixed-commit-cold-replay`, `image-benchmark/independent-review`, `image-benchmark/composite-qualification-and-Git-anchor`。
 
 实现方式：`DOCUMENTED_IMAGE_ALGORITHM_VARIANTS`。
 

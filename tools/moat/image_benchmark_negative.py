@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Check that benchmark qualification readers reject known false positives."""
-import copy,json,shutil,subprocess,tempfile
+import copy,json,re,shutil,subprocess,tempfile
 from pathlib import Path
 from experiment import ROOT,Experiment,write,digest
 from image_progress import record
@@ -8,7 +8,16 @@ from image_benchmark_reference import validate
 from image_benchmark_native_comparison import native_execution_ok
 from image_benchmark_cold import same_build_source_hashes
 from image_benchmark_build import dependencies
-from qualify_image_benchmark import cpu_recompute,runtime_recompute,trace_recompute,native_recompute,cold_structure_ok,cold_recipe_ok,native_recipe_ok,cold_source_ok,cold_run_ok
+from qualify_image_benchmark import cpu_recompute,runtime_recompute,trace_recompute,native_recompute,cold_structure_ok,cold_recipe_ok,native_recipe_ok,cold_source_ok,cold_run_ok,loaded_recompute
+
+def fake_loader(folder):
+    commands=json.loads((folder/'commands.json').read_text())
+    path=folder/next(c['stdout'] for c in commands if c['phase']=='resolve-real-image-libraries')
+    original=path.read_text();changed,count=re.subn(r'(libopencv_core\.so\.412\s*=>\s*)\S+',
+      r'\1/tmp/fake-opencv.so',original,count=1)
+    if count!=1:raise ValueError('real OpenCV loader line required')
+    path.write_text(changed)
+    return path,original
 
 def main():
     native=json.loads((ROOT/'migration/reports/image-I3-benchmark-native.json').read_text())
@@ -80,6 +89,11 @@ def main():
       passed=cold_run_ok(small_folder,small_manifest,small,small_case,build,ROOT,profile)))
     with tempfile.TemporaryDirectory(prefix='benchmark-cold-run-negative-') as temporary:
       copied=Path(temporary)/'run';shutil.copytree(small_folder,copied)
+      loader_file,loader_original=fake_loader(copied)
+      checks.append(dict(check='reject-main-run-forged-ldd-stdout',passed=not loaded_recompute(copied,build)))
+      checks.append(dict(check='reject-cold-run-forged-ldd-stdout',
+        passed=not cold_run_ok(copied,small_manifest,small,small_case,build,ROOT,profile)))
+      loader_file.write_text(loader_original)
       command_file=copied/'commands.json';bad_commands=json.loads(command_file.read_text())
       bad_commands[-1]['argv'][0]=bad_commands[-1]['argv'][0]+'X';write(command_file,bad_commands)
       checks.append(dict(check='reject-cold-run-nonexistent-binary-command',
@@ -91,6 +105,10 @@ def main():
     runtime_manifest=json.loads((ROOT/runtime['evidence']/'manifest.json').read_text())
     with tempfile.TemporaryDirectory(prefix='benchmark-runtime-command-negative-') as temporary:
       copied=Path(temporary)/'runtime';shutil.copytree(ROOT/runtime_manifest['raw_artifact_dir'],copied)
+      loader_file,loader_original=fake_loader(copied)
+      checks.append(dict(check='reject-runtime-forged-ldd-stdout',
+        passed=not runtime_recompute(runtime,build,copied)))
+      loader_file.write_text(loader_original)
       command_file=copied/'commands.json';bad_commands=json.loads(command_file.read_text())
       bad_commands[-1]['argv']=['echo','fabricated-runtime'];write(command_file,bad_commands)
       checks.append(dict(check='reject-runtime-echo-replay',
@@ -103,6 +121,10 @@ def main():
     trace_manifest=json.loads((ROOT/trace['evidence']/'manifest.json').read_text())
     with tempfile.TemporaryDirectory(prefix='benchmark-trace-command-negative-') as temporary:
       copied=Path(temporary)/'trace';shutil.copytree(ROOT/trace_manifest['raw_artifact_dir'],copied)
+      loader_file,loader_original=fake_loader(copied)
+      checks.append(dict(check='reject-trace-forged-ldd-stdout',
+        passed=not trace_recompute(trace,build,small,copied)))
+      loader_file.write_text(loader_original)
       command_file=copied/'commands.json';bad_commands=json.loads(command_file.read_text())
       bad_commands[-1]['argv']=['echo','fabricated-trace'];write(command_file,bad_commands)
       checks.append(dict(check='reject-trace-echo-replay',

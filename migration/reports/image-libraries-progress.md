@@ -1,6 +1,6 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-12T07:24:08.425802+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-12T07:30:10.956374+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
 26入口当前：12 PASSED / 7 PARTIAL / 7 FAILED。
 
@@ -1470,3 +1470,5 @@
 | 2026-11-12T07:23:17.754025+00:00 | I3 | benchmark固定Git冷检出同版OpenCV/四算子/六CLI/独立CPU/原生统计/运行/trace及18子封存：PASSED | [20261112T072134.641184Z-I3-host-cold-replay-c3858ebd5c](evidence/rewrite/I3/OpenCV-benchmark-fixed-Git-cold-four-operations-and-CPU/20261112T072134.641184Z-I3-host-cold-replay-c3858ebd5c) |
 | 2026-11-12T07:23:32.642421+00:00 | I3 | benchmark原生/错误CLI/依赖及CPU/runtime/trace/cold配对篡改共31项正反证据：PASSED。 | [20261112T072329.930099Z-I3-CPU-negative-29833f45df](evidence/rewrite/I3/OpenCV-benchmark-sealed-reader-counterexamples/20261112T072329.930099Z-I3-CPU-negative-29833f45df) |
 | 2026-11-12T07:24:08.425802+00:00 | I3 | benchmark最终源码a08e9e09固定Git冷检出10/10作业、19/19子封存PASSED；cold_recompute从复制子raw重算命令/源码/生成报告/产品/运行语义=True，31项主负例按最终源码重跑PASSED。主表PARTIAL/L3，9/11门槛，待三份新复审与组合资格。 | [image-benchmark.md](image-benchmark.md) |
+| 2026-11-12T07:29:29.609483+00:00 | I3 | benchmark原生/错误CLI/依赖及CPU/runtime/trace/cold配对篡改共35项正反证据：PASSED。 | [20261112T072926.893677Z-I3-CPU-negative-4f76db343d](evidence/rewrite/I3/OpenCV-benchmark-sealed-reader-counterexamples/20261112T072926.893677Z-I3-CPU-negative-4f76db343d) |
+| 2026-11-12T07:30:10.956374+00:00 | I3 | 第三份独立复审REQUEST_CHANGES：六CLI/runtime/trace/冷运行的loaded-libraries.json可与伪造ldd stdout配对通过。现资格门逐次解析原始ldd三库唯一路径，核build与OpenCV回执SHA，四类ldd篡改反例加入，35/35本地PASSED。主表冷检出门回退待新源码，维持PARTIAL。 | `migration/samples.yaml` |
