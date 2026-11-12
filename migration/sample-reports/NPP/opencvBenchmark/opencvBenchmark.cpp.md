@@ -2,7 +2,7 @@
 
 **PARTIAL / L3**
 
-原始四算子C++流程、6组真实GPU CLI与独立CPU全量输出、5090原生同输入同版OpenCV对照、18运行合同、真实GPU trace及9项证据反例通过；动态加载的GPU/OpenCV库字节已核。Gaussian/Canny项目算法变体记录，原生NPP不输出像素。待最后源码固定提交冷检出、独立复审与组合资格，当前不计整例通过或新增功能族。
+原始四算子C++流程、6组真实GPU CLI与独立CPU全量输出、5090原生同输入同版OpenCV对照、18运行合同、真实GPU trace及19项证据反例通过；动态加载的GPU/OpenCV库字节已核。Gaussian/Canny项目算法变体记录，原生NPP不输出像素。待最后源码固定提交冷检出、独立复审与组合资格，当前不计整例通过或新增功能族。
 
 | 字段 | 当前记录 |
 | --- | --- |
@@ -17,7 +17,7 @@
 
 编译/运行返回 0 仅对应 L3；通过独立参考检查后才记 L4。失败的候选库不列为已使用库。
 
-必需用例：`image-benchmark/frozen-six-CLI`, `image-benchmark/matched-OpenCV4.12-and-four-HIP-build`, `image-benchmark/six-real-GPU-CLI`, `image-benchmark/all-four-independent-CPU`, `image-benchmark/original-CUDA-observed-semantics`, `image-benchmark/eighteen-device-contracts`, `image-benchmark/real-four-operation-trace`, `image-benchmark/nine-reader-counterexamples`, `image-benchmark/fixed-commit-cold-replay`, `image-benchmark/independent-review`, `image-benchmark/composite-qualification-and-Git-anchor`。
+必需用例：`image-benchmark/frozen-six-CLI`, `image-benchmark/matched-OpenCV4.12-and-four-HIP-build`, `image-benchmark/six-real-GPU-CLI`, `image-benchmark/all-four-independent-CPU`, `image-benchmark/original-CUDA-observed-semantics`, `image-benchmark/eighteen-device-contracts`, `image-benchmark/real-four-operation-trace`, `image-benchmark/nineteen-reader-counterexamples`, `image-benchmark/fixed-commit-cold-replay`, `image-benchmark/independent-review`, `image-benchmark/composite-qualification-and-Git-anchor`。
 
 实现方式：`DOCUMENTED_IMAGE_ALGORITHM_VARIANTS`。
 

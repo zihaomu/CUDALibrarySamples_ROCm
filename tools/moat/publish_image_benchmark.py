@@ -2,7 +2,7 @@
 """Publish the complete NPP benchmark only after its composite proof is in Git."""
 import json
 from experiment import ROOT,write,digest
-from qualify_image_benchmark import SAMPLE,IMPLEMENTATION,COMPARISON,collect
+from qualify_image_benchmark import SAMPLE,IMPLEMENTATION,COMPARISON,collect,expected_dependencies,load
 from selected_proofs import inspect,anchored_seal,publication
 
 def main():
@@ -18,9 +18,14 @@ def main():
       or q['implementation']!=IMPLEMENTATION or q['implementation_sha256']!=digest(ROOT/IMPLEMENTATION)
       or q['source_commit']!=review['source_commit']
       or q['comparison_mode']!=COMPARISON
+      or q['dependencies']!=expected_dependencies(build)
       or q['checks']!=checks or not all(c['passed'] for c in checks)
       or set(q['evidence_references'])!=refs
       or q['case_ids']!=[c['case'] for c in profile['cases']] or q['case_count']!=6
+      or q['rocm_evidence']!=next(r['evidence'] for r in load('runs') if r['case']=='original-default')
+      or q['cuda_evidence']!=json.loads((ROOT/'migration/reports/image-I3-benchmark-native.json').read_text())['evidence']
+      or q['environment']!=build['evidence']+'/backend.observed.json'
+      or q['devices']!=json.loads((ROOT/build['evidence']/'backend.observed.json').read_text())['devices']
       or manifest['backend']!='composite-qualification' or manifest['sample_id']!=SAMPLE
       or manifest['experiment_outcome']!='PASSED' or manifest['experiment_id']!=q['qualification_id']
       or {k:v for k,v in q.items() if k not in {'qualification_id','evidence'}}!=frozen):
@@ -33,7 +38,7 @@ def main():
        'image-benchmark/original-5090-and-algorithm-variants',
        'image-benchmark/eighteen-device-contracts',
        'image-benchmark/real-four-operation-trace',
-       'image-benchmark/nine-reader-counterexamples',
+       'image-benchmark/nineteen-reader-counterexamples',
        'image-benchmark/nineteen-child-fixed-commit-cold-replay',
        'image-benchmark/three-independent-reviews']
     sample.update(status='PASSED',level='L4',reason_code='VALIDATED_MOAT_REWRITE',
@@ -41,7 +46,7 @@ def main():
        required_cases=required,passed_cases=required,
        actual_library='Project HIP Gaussian/Canny/resize/RGB gray plus pinned OpenCV 4.12 CPU benchmark',
        backend_library='project HIP image benchmark',equivalence=COMPARISON,
-       reason='完整四算子C++原例、6 CLI、独立CPU全量产品/四行OpenCV统计、5090原生同输入与同构建OpenCV对照、18设备合同、真实GPU trace、9项反例及19子证据固定提交冷检出、三份独立复审通过。Gaussian/Canny为明确项目算法变体；NPP原生未输出像素，不宣称NPP逐像素等价；计时仅观察。',
+       reason='完整四算子C++原例、6 CLI、独立CPU全量产品/四行OpenCV统计、5090原生同输入与同构建OpenCV对照、18设备合同、真实GPU trace、19项反例及19子证据固定提交冷检出、三份独立复审通过。Gaussian/Canny为明确项目算法变体；NPP原生未输出像素，不宣称NPP逐像素等价；计时仅观察。',
        cuda_baseline='PASSED',cuda_comparison='OBSERVED',
        cuda_comparison_mode=COMPARISON,
        cuda_comparison_reason='5090原生与ROCm同输入/4096×2048/20×5/OpenCV4.12。NPP不输出产品像素；Gaussian原生vsOpenCV均差1.70、项目0.00（原始尺寸），Canny计数同546308但掩码不保证相同。',
