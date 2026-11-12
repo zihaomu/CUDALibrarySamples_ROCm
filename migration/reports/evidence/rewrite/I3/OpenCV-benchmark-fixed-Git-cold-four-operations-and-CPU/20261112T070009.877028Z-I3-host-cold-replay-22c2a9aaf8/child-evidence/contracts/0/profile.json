@@ -1,0 +1,138 @@
+{
+  "status": "FROZEN",
+  "sample_id": "NPP/opencvBenchmark::opencvBenchmark.cpp",
+  "source": "NPP/opencvBenchmark/opencvBenchmark.cpp",
+  "source_sha256": "0332d73b327bbf76726b6eb13e38bbf68110baff7f923f328dbaabbca54fb30e",
+  "image": "NPP/opencvBenchmark/images/CircuitBoard_2048x1024_8u.raw",
+  "image_sha256": "4fdc3295d8f6dde8bc9ec0850bc8d29c8a80e991ce8461dab08056e172ab89ec",
+  "image_bytes": 2097152,
+  "case_count": 6,
+  "cases": [
+    {
+      "case": "small",
+      "arguments": [
+        "-w",
+        "128",
+        "-h",
+        "96",
+        "-n",
+        "1"
+      ],
+      "width": 128,
+      "height": 96,
+      "iterations": 1,
+      "expected_return_code": 0,
+      "stdout_starts": "Image 128x96, 1 iterations per timing, median of 5",
+      "stderr_starts": "",
+      "products": {
+        "gauss.raw": 12288,
+        "canny.raw": 12288,
+        "resize.raw": 3072,
+        "color.raw": 12288
+      }
+    },
+    {
+      "case": "odd-half",
+      "arguments": [
+        "-w",
+        "129",
+        "-h",
+        "97",
+        "-n",
+        "1"
+      ],
+      "width": 129,
+      "height": 97,
+      "iterations": 1,
+      "expected_return_code": 0,
+      "stdout_starts": "Image 129x97, 1 iterations per timing, median of 5",
+      "stderr_starts": "",
+      "products": {
+        "gauss.raw": 12513,
+        "canny.raw": 12513,
+        "resize.raw": 3072,
+        "color.raw": 12513
+      }
+    },
+    {
+      "case": "original-default",
+      "arguments": [],
+      "width": 4096,
+      "height": 2048,
+      "iterations": 20,
+      "expected_return_code": 0,
+      "stdout_starts": "Image 4096x2048, 20 iterations per timing, median of 5",
+      "stderr_starts": "",
+      "products": {
+        "gauss.raw": 8388608,
+        "canny.raw": 8388608,
+        "resize.raw": 2097152,
+        "color.raw": 8388608
+      }
+    },
+    {
+      "case": "invalid-dimensions",
+      "arguments": [
+        "-w",
+        "15"
+      ],
+      "expected_return_code": 1,
+      "products": {},
+      "stdout_starts": "",
+      "stderr_starts": "Invalid option: need 16 <= -w/-h <= 16384 and -n >= 1"
+    },
+    {
+      "case": "missing-input",
+      "arguments": [
+        "-i",
+        "/definitely/missing/benchmark.raw"
+      ],
+      "expected_return_code": 1,
+      "products": {},
+      "stdout_starts": "",
+      "stderr_starts": "Cannot read 2097152 bytes from /definitely/missing/benchmark.raw"
+    },
+    {
+      "case": "unknown-option",
+      "arguments": [
+        "--unknown"
+      ],
+      "expected_return_code": 1,
+      "products": {},
+      "stdout_starts": "Usage: ",
+      "stderr_starts": ""
+    }
+  ],
+  "semantic_policy": {
+    "policy_history": "Expanded after independent review; earlier coarse CLI-only contracts remain sealed and all cases must be replayed.",
+    "gaussian": {
+      "project": "separable [1,4,6,4,1]^2 /256, replicate border, integer round half up",
+      "project_max_abs": 0,
+      "project_mean_abs": 0,
+      "opencv": "OpenCV GaussianBlur ksize5 sigma0 default REFLECT_101",
+      "native": "NPP 5x5 Gaussian replicate border; original emits mean absolute error but no output pixels",
+      "equivalence": "documented project binomial algorithm variant; no NPP pixel equivalence claim"
+    },
+    "canny": {
+      "project": "independent Sobel/L2/NMS/local threshold existing C1 contract",
+      "project_max_abs": 0,
+      "project_mean_abs": 0,
+      "opencv": "OpenCV Canny thresholds60/120 aperture3 L2=true",
+      "equivalence": "documented edge algorithm variant; no mask inference from matching counts"
+    },
+    "resize": {
+      "project": "floor half dimensions, pixel-center bilinear, nearest rounding",
+      "project_max_abs": 1,
+      "project_mean_abs": 0.3,
+      "opencv": "OpenCV INTER_LINEAR"
+    },
+    "rgb_gray": {
+      "project": "RGB coefficients [19595,38470,7471]/65536 nearest rounding",
+      "project_max_abs": 1,
+      "project_mean_abs": 0.3,
+      "opencv": "OpenCV COLOR_RGB2GRAY"
+    },
+    "printed_mean_abs_tolerance": 0.0051,
+    "performance": "raw per-device timings observed only; no cross-device speedup claim"
+  }
+}

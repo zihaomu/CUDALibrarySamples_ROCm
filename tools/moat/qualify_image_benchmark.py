@@ -336,7 +336,7 @@ def cold_recompute(cold,profile,runs,valid):
        raw/run_cases['original-default']['raw'],clone,cold_build_row):return False
     negative_row=child_report(by['negative'][0])
     current_negative=json.loads((ROOT/'migration/reports/image-benchmark-negative.json').read_text())
-    if (negative_row['status']!='PASSED' or negative_row['case_count']!=19
+    if (negative_row['status']!='PASSED' or negative_row['case_count']!=25
       or negative_row['checks']!=current_negative['checks']):return False
     return True
 
