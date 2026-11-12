@@ -1,6 +1,6 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-12T07:04:58.379891+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-12T07:06:08.610261+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
 26入口当前：12 PASSED / 7 PARTIAL / 7 FAILED。
 
@@ -1460,3 +1460,5 @@
 | 2026-11-12T07:02:32.137846+00:00 | I3 | benchmark源码6734d8b4固定Git冷检出10/10作业、19/19子封存PASSED；组合资格复算发现负例数仍硬编码19，实际25，修正后cold_recompute=True。因资格源码改变，再次从新固定提交冷检出，旧成功证据保留。 | [image-benchmark-negative.json](image-benchmark-negative.json) |
 | 2026-11-12T07:04:16.669658+00:00 | I3 | benchmark固定Git冷检出同版OpenCV/四算子/六CLI/独立CPU/原生统计/运行/trace及18子封存：PASSED | [20261112T070245.168472Z-I3-host-cold-replay-a5ef7e20e0](evidence/rewrite/I3/OpenCV-benchmark-fixed-Git-cold-four-operations-and-CPU/20261112T070245.168472Z-I3-host-cold-replay-a5ef7e20e0) |
 | 2026-11-12T07:04:58.379891+00:00 | I3 | benchmark最终源码67f7dd83316b固定Git冷检出10/10作业、19/19子封存PASSED，主工作区cold_recompute对复制的原始子记录/命令/产品/源码对象重新计算为True；25项反例PASSED。当前仍PARTIAL/L3，待证据Git锚定和三份独立复审。 | [image-benchmark.md](image-benchmark.md) |
+| 2026-11-12T07:06:02.695685+00:00 | I3 | benchmark原生/错误CLI/依赖及CPU/runtime/trace/cold配对篡改共25项正反证据：PASSED。 | [20261112T070600.097053Z-I3-CPU-negative-c7a7edef4f](evidence/rewrite/I3/OpenCV-benchmark-sealed-reader-counterexamples/20261112T070600.097053Z-I3-CPU-negative-c7a7edef4f) |
+| 2026-11-12T07:06:08.610261+00:00 | I3 | benchmark最终固定源码冷证据已锚定；组合资格预检发现主负例回执仍封存于上一个资格源码版本，已在不改源码的情况下重新执行25项负例PASSED并封存，准备补充证据锚点。 | [image-benchmark-cold.json](image-benchmark-cold.json) |

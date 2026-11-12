@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-12T07:04:58.379891+00:00。26入口当前12通过/7部分/7失败。
+更新时间：2026-11-12T07:06:08.610261+00:00。26入口当前12通过/7部分/7失败。
 
-I3：benchmark最终源码67f7dd83316b固定Git冷检出10/10作业、19/19子封存PASSED，主工作区cold_recompute对复制的原始子记录/命令/产品/源码对象重新计算为True；25项反例PASSED。当前仍PARTIAL/L3，待证据Git锚定和三份独立复审。
+I3：benchmark最终固定源码冷证据已锚定；组合资格预检发现主负例回执仍封存于上一个资格源码版本，已在不改源码的情况下重新执行25项负例PASSED并封存，准备补充证据锚点。
 
-证据：`migration/reports/image-benchmark.md`
+证据：`migration/reports/image-benchmark-cold.json`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 
