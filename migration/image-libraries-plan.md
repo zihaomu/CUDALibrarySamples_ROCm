@@ -282,7 +282,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-12T09:10:37.621502+00:00。26入口当前13通过/8部分/5失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-12T09:12:49.667112+00:00。26入口当前13通过/8部分/5失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -1826,5 +1826,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-12T09:08:40.061014+00:00 | I5 | nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp GPU DCT/量化+CPU entropy 原始七组流程与独立CPU验收：PASSED_SUBSET；progressive 输出/metadata 和 GPU Huffman 尚未验收。 | `migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp/20261112T090828.673890Z-I5-rocm-original-entry-integration-faa2e75109` |
 | 2026-11-12T09:10:36.289268+00:00 | I5 | nvJPEG/Image-Resize/imageResize.cpp 七组完整入口+GPU JPEG 前向变换与CPU熵编码子集资格封存；待GPU entropy、模式/metadata与冷检出，整例仍 PARTIAL。 | `migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize__imageResize.cpp/20261112T091035.196617Z-I5-composite-subset-qualification-365ff89950` |
 | 2026-11-12T09:10:37.621502+00:00 | I5 | nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp 七组完整入口+GPU JPEG 前向变换与CPU熵编码子集资格封存；待GPU entropy、模式/metadata与冷检出，整例仍 PARTIAL。 | `migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261112T091036.654996Z-I5-composite-subset-qualification-9b880eedfb` |
+| 2026-11-12T09:12:49.198797+00:00 | I5 | nvJPEG/Image-Resize/imageResize.cpp 新 GPU 前向 JPEG 编码子集已绑定逐例主表；33 件产品、七组原入口/CPU/CUDA 通过，整例仍 PARTIAL。 | `migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize__imageResize.cpp/20261112T091035.196617Z-I5-composite-subset-qualification-365ff89950`；`migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize_imageResize.cpp/20261112T090817.747006Z-I5-rocm-original-entry-integration-07f90e636a` |
+| 2026-11-12T09:12:49.667112+00:00 | I5 | nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp 新 GPU 前向 JPEG 编码子集已绑定逐例主表；35 件产品、七组原入口/CPU/CUDA 通过，整例仍 PARTIAL。 | `migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261112T091036.654996Z-I5-composite-subset-qualification-9b880eedfb`；`migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp/20261112T090828.673890Z-I5-rocm-original-entry-integration-faa2e75109` |
 
 <!-- IMAGE_EXECUTION:END -->

@@ -2,28 +2,28 @@
 
 **PARTIAL / L4**
 
-七组原登记流程与同输入 CUDA 数学对照重新通过；12 原始 JPEG 中 10 张 rocJPEG 硬件解码、2 张 progressive 使用 CPU 熵装配 + AMD GPU IDCT/色度/RGB，独立 CPU maxAbs≤3、PSNR≥60.76 dB，真实 GPU kernel trace 已验。当前仍缺：I4/fixed-commit-cold-replay-and-independent-review、I5/GPU-JPEG-reencoding-and-metadata。
+七组原登记 CLI/数值流程及同输入 CUDA 数学对照通过；33 件重编码 JPEG 使用 AMD GPU 色彩转换、色度降采样、FDCT 与量化，CPU libjpeg-turbo 完成熵编码/头部；四组预登记输入独立跨解码及物理 GPU trace 通过。完整 GPU Huffman、原编码模式/表/元数据复制和冷检出尚缺，故只算 PARTIAL。
 
 | 字段 | 当前记录 |
 | --- | --- |
 | 原始入口 | [nvJPEG/Image-Resize/imageResize.cpp](../../../../nvJPEG/Image-Resize/imageResize.cpp) |
-| 实际库 / 后端 | rocJPEG hardware baseline + project HIP progressive IDCT/chroma/RGB; libjpeg-turbo CPU entropy assembly + current CPU JPEG encode / rocJPEG + project HIP image decoder + libjpeg-turbo entropy |
+| 实际库 / 后端 | rocJPEG baseline hardware + project HIP progressive IDCT/chroma/RGB + project HIP JPEG color/downsample/FDCT/quant; libjpeg-turbo CPU progressive entropy and JPEG encode entropy/headers / rocJPEG + project HIP image decoder/forward encoder + libjpeg-turbo entropy |
 | 候选路线 | rocJPEG (decode only), RPP |
 | 代码 | [rocm/ported/nvJPEG/Image-Resize/imageResize.cpp](../../../../rocm/ported/nvJPEG/Image-Resize/imageResize.cpp) |
-| required cases | 8/10 |
+| required cases | 9/12 |
 | CUDA baseline / comparison | PASSED / PASSED |
 | 性能 | NOT_RUN |
 | 原始源码 SHA256 | `2fe18e4c075972ba4612b3fcf71d37baffb47c14ebe952f79b527846603b6ca1` |
 
 编译/运行返回 0 仅对应 L3；通过独立参考检查后才记 L4。失败的候选库不列为已使用库。
 
-必需用例：`batches9_11/original-corpus`, `batches9_11/formats-scale`, `batches9_11/roi-boundary`, `batches9_11/batch-multi-instance`, `batches9_11/invalid-cli`, `batches9_11/postprocess`, `batches9_11/python-integration`, `I4/progressive-GPU-pixel-synthesis`, `I4/fixed-commit-cold-replay-and-independent-review`, `I5/GPU-JPEG-reencoding-and-metadata`。
+必需用例：`batches9_11/original-corpus`, `batches9_11/formats-scale`, `batches9_11/roi-boundary`, `batches9_11/batch-multi-instance`, `batches9_11/invalid-cli`, `batches9_11/postprocess`, `batches9_11/python-integration`, `I4/progressive-GPU-pixel-synthesis`, `I5/GPU-JPEG-forward-transform-and-cross-decode`, `I5/GPU-Huffman-entropy-and-bitstream-packing`, `I5/original-encoding-mode-tables-and-APP-COM-metadata`, `I4-I5/fixed-commit-cold-replay-and-independent-review`。
 
 实现方式：`HYBRID_CPU_GPU`。
 
-恢复/扩展条件：完成 I4/fixed-commit-cold-replay-and-independent-review、I5/GPU-JPEG-reencoding-and-metadata 后重做固定提交资格；progressive灰度/采样变体及错误流仍需增补输入合同。
+恢复/扩展条件：完成 GPU 熵编码/Huffman、原编码模式/表/APP-COM 继承和冷检出后重做全入口资格；跨编码器不要求合法码流字节完全一致。
 
-CUDA 对照限制：既有七组同输入 CUDA 数学对照通过；progressive 采用项目 HIP 与 CPU 熵装配，不声称 nvJPEG 私有 backend/流水线 ABI 一致。
+CUDA 对照限制：既有七组同输入 CUDA 数学对照通过；I5 GPU FDCT 对独立 CPU JPEG 解码和固定门槛验收，不声称与 NVIDIA 私有编码 backend 字节一致。
 
 ## 原始 API 自动移植稿最近一次尝试
 
@@ -40,10 +40,8 @@ build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_mi
 在已锁定并通过 guard 的 ROCm 10.1.0 容器中（多 GPU 用例须暴露两个允许的设备）：
 
 ```bash
-HIP_VISIBLE_DEVICES=2 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh python3 tools/moat/image_progressive_build.py
-HIP_VISIBLE_DEVICES=2 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh python3 tools/migration/batches9_11_run.py b10
-build/image-cpu-venv/bin/python tools/migration/batches9_11_validate.py b10
-python3 tools/moat/qualify_image_progressive_subset.py
+HIP_VISIBLE_DEVICES=2 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh env ROCR_VISIBLE_DEVICES=3 HIP_VISIBLE_DEVICES=0 python3 tools/moat/image_encoder_integration.py
+python3 tools/moat/qualify_image_encoder_subset.py
 ```
 
 - [migration/reports/evidence/20261109T083217.050455Z/original-rocm/nvJPEG_Image-Resize_imageResize.cpp](../../../reports/evidence/20261109T083217.050455Z/original-rocm/nvJPEG_Image-Resize_imageResize.cpp)
@@ -59,3 +57,10 @@ python3 tools/moat/qualify_image_progressive_subset.py
 - [migration/reports/image-progressive-original-corpus.json](../../../reports/image-progressive-original-corpus.json)
 - [migration/reports/image-progressive-runs.json](../../../reports/image-progressive-runs.json)
 - [migration/reports/image-progressive-trace.json](../../../reports/image-progressive-trace.json)
+- [migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize__imageResize.cpp/20261112T091035.196617Z-I5-composite-subset-qualification-365ff89950](../../../reports/evidence/rewrite/I5/nvJPEG_Image-Resize__imageResize.cpp/20261112T091035.196617Z-I5-composite-subset-qualification-365ff89950)
+- [migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize_imageResize.cpp/20261112T090817.747006Z-I5-rocm-original-entry-integration-07f90e636a](../../../reports/evidence/rewrite/I5/nvJPEG_Image-Resize_imageResize.cpp/20261112T090817.747006Z-I5-rocm-original-entry-integration-07f90e636a)
+- [migration/reports/image-jpeg-encoder.md](../../../reports/image-jpeg-encoder.md)
+- [migration/reports/image-jpeg-encoder-integration.json](../../../reports/image-jpeg-encoder-integration.json)
+- [migration/reports/image-jpeg-encoder-runs.json](../../../reports/image-jpeg-encoder-runs.json)
+- [migration/reports/image-jpeg-encoder-trace.json](../../../reports/image-jpeg-encoder-trace.json)
+- [migration/reports/image-jpeg-encoder-negative.json](../../../reports/image-jpeg-encoder-negative.json)

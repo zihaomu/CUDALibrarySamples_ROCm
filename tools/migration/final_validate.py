@@ -15,7 +15,7 @@ def main():
  def require(ok,message):
   if not ok:errors.append(message)
  sys.path.insert(0,str(ROOT/'tools/moat'))
- from selected_proofs import inspect as inspect_selected
+ from selected_proofs import inspect as inspect_selected, anchored_seal, publication
  rewrite_checks=[inspect_selected(s) for s in samples if s['status']=='PASSED' and s.get('reason_code')=='VALIDATED_MOAT_REWRITE']
  for r in rewrite_checks:require(r['status']=='PASSED','Selected MOAT qualification: '+r['sample_id']+' '+str(r['errors']))
  selected_rewrites={r['sample_id'] for r in rewrite_checks if r['status']=='PASSED'}
@@ -24,6 +24,24 @@ def main():
  def withdrawn(source):
   s=next(s for s in samples if s['source']==source)
   return source=='cuDSS/simple_reordering_phase/simple_reordering_phase.cpp' and s['status']=='PARTIAL' and s['reason_code']=='VENDOR_PERMUTATION_POLICY_DIFFERS' and bool(s.get('historical_selected_validation')) and 'migration/reports/rewrite-reordering-cpp-repair.json' in s['evidence']
+ def image_i5_revalidated(source):
+  if source not in {'nvJPEG/Image-Resize/imageResize.cpp','nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp'}:return False
+  s=next(x for x in samples if x['source']==source)
+  q=s.get('selected_validation',{})
+  try:
+   proof=ROOT/q['evidence'];sealed=json.loads((proof/'qualification.json').read_text())
+   return (s['status']=='PARTIAL' and s['reason_code']=='VALIDATED_I5_GPU_JPEG_FORWARD_SUBSET' and
+    q['kind']=='image-JPEG-GPU-forward-transform-subset' and q['status']=='PASSED' and
+    q['contract_status']=='PARTIAL' and q['case_count']==len(q['case_ids'])==9 and
+    all(c['passed'] for c in q['checks']) and
+    all(k in q and q[k]==v for k,v in sealed.items()) and
+    q['sample_id']==s['id'] and q['implementation']==s['implementation'] and
+    digest(ROOT/q['implementation'])==q['implementation_sha256'] and
+    bool(q['dependencies']) and all(digest(ROOT/n)==h for n,h in q['dependencies'].items()) and
+    all(d['physical_id']==1 for d in q['devices']) and
+    anchored_seal(proof,publication(proof),qualification=True) and
+    all(anchored_seal(ROOT/ref,publication(ROOT/ref)) for ref in q['evidence_references']))
+  except (KeyError,ValueError,OSError,TypeError):return False
  require(len(samples)==639 and len({s['id'] for s in samples})==639,'Expected 639 unique source entrypoints')
  require(not counts['NOT_STARTED'] and not counts['IN_PROGRESS'],'Unfinished sample states remain')
  require(len(cat['sources'])==866 and len(cat['build_definitions'])==477,'Upstream inventory denominator changed')
@@ -126,7 +144,7 @@ def main():
  for r in cohort911:
   require(r['status']==r['cuda_comparison']=='PASSED' and r.get('current_source_proof') and r.get('current_cuda_source_proof'),'B9-B11 execution/source gate failed '+r['source'])
   require({c['case'] for c in r['cases']}==set(BATCHES9_11[r['source']]) and len(r['cuda_cases'])==len(r['cases']) and all(c['status']=='PASSED' and c['checks'] and all(v['passed'] for v in c['checks']) for c in r['cases']) and all(c['status']=='PASSED' and c['identical_input'] and c['cuda_cpu_checks']['status']=='PASSED' and all(v['passed'] for v in c['cuda_cpu_checks']['checks']) for c in r['cuda_cases']),'B9-B11 independent numerical/CLI checks incomplete '+r['source'])
-  require(r['validation_source_sha256']==digest(ROOT/'tools/migration/batches9_11_validate.py') and (superseded(r['source']) or withdrawn(r['source']) or sealed_hash(r['implementation'])==r['implementation_sha256']),'B9-B11 qualifier/implementation stale '+r['source'])
+  require(r['validation_source_sha256']==digest(ROOT/'tools/migration/batches9_11_validate.py') and (superseded(r['source']) or withdrawn(r['source']) or image_i5_revalidated(r['source']) or sealed_hash(r['implementation'])==r['implementation_sha256']),'B9-B11 qualifier/implementation stale '+r['source'])
   require(manifest['files'].get('build/cuda-observed/'+r['source'],{}).get('sha256')==r['cuda_implementation_sha256'],'B9-B11 CUDA observation stale '+r['source'])
   for name,sha in dict(r['dependencies'],**r['cuda_dependencies']).items():require(sealed_hash(name)==sha,'B9-B11 helper/oracle stale '+name)
   allowed_pci={int(d['gpu']):d['bdf'].lower() for d in json.loads((ROOT/'migration/environments/physical-device-map.json').read_text()) if int(d['gpu']) in {0,1}}
