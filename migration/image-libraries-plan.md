@@ -280,7 +280,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-12T07:02:32.137846+00:00。26入口当前12通过/7部分/7失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-12T07:04:58.379891+00:00。26入口当前12通过/7部分/7失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -1721,5 +1721,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-12T06:59:57.887629+00:00 | I3 | benchmark固定提交6f4cc243冷检出前九作业通过，末项反例因原生CUDA实际运行cwd固定在主工作区、隔离clone误比较到clone路径而失败；失败终态已封存。现在把原生基线路径明确固定，25项反例主工作区重跑PASSED，待新源码提交冷检出。 | `migration/reports/image-benchmark-negative.json` |
 | 2026-11-12T07:01:47.762784+00:00 | I3 | benchmark固定Git冷检出同版OpenCV/四算子/六CLI/独立CPU/原生统计/运行/trace及18子封存：PASSED | `migration/reports/evidence/rewrite/I3/OpenCV-benchmark-fixed-Git-cold-four-operations-and-CPU/20261112T070009.877028Z-I3-host-cold-replay-22c2a9aaf8` |
 | 2026-11-12T07:02:32.137846+00:00 | I3 | benchmark源码6734d8b4固定Git冷检出10/10作业、19/19子封存PASSED；组合资格复算发现负例数仍硬编码19，实际25，修正后cold_recompute=True。因资格源码改变，再次从新固定提交冷检出，旧成功证据保留。 | `migration/reports/image-benchmark-negative.json` |
+| 2026-11-12T07:04:16.669658+00:00 | I3 | benchmark固定Git冷检出同版OpenCV/四算子/六CLI/独立CPU/原生统计/运行/trace及18子封存：PASSED | `migration/reports/evidence/rewrite/I3/OpenCV-benchmark-fixed-Git-cold-four-operations-and-CPU/20261112T070245.168472Z-I3-host-cold-replay-a5ef7e20e0` |
+| 2026-11-12T07:04:58.379891+00:00 | I3 | benchmark最终源码67f7dd83316b固定Git冷检出10/10作业、19/19子封存PASSED，主工作区cold_recompute对复制的原始子记录/命令/产品/源码对象重新计算为True；25项反例PASSED。当前仍PARTIAL/L3，待证据Git锚定和三份独立复审。 | `migration/reports/image-benchmark.md` |
 
 <!-- IMAGE_EXECUTION:END -->

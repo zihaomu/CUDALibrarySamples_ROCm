@@ -1,0 +1,1 @@
+Test CPU-reference for OpenCV-benchmark-independent-four-operation-CPU, case odd-half. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T070336.021207Z-I3-rocm-original-d906b8ee27.
