@@ -2,9 +2,9 @@
   "schema_version": 1,
   "counting_rule": "Operator/functional families are deduplicated within each module; dtypes, sizes, language, batch, storage formats and algorithm variants do not create extra operators. At least one explicitly scoped PASSED source profile is required. Cross-module totals may include the same mathematical operation implemented through different library interfaces.",
   "qualification_rule": "A verified family proves only its linked PASSED source profiles/required cases, not every API configuration. PARTIAL examples and capability probes are excluded.",
-  "verified_operator_families": 126,
+  "verified_operator_families": 127,
   "modules_with_verified_operators": 19,
-  "passed_source_profiles": 249,
+  "passed_source_profiles": 250,
   "modules": {
     "cuBLAS": {
       "verified_operator_family_count": 52,
@@ -1755,7 +1755,7 @@
       }
     },
     "NPP+": {
-      "verified_operator_family_count": 4,
+      "verified_operator_family_count": 5,
       "verified_operators": [
         {
           "name": "Unsigned EDT 与子像素 signed 距离/Voronoi",
@@ -1774,6 +1774,16 @@
           ],
           "sample_reports": [
             "migration/sample-reports/NPP+/cannyEdgeDetectorPython/cannyEdgeDetector.py.md"
+          ],
+          "source_profiles": 1
+        },
+        {
+          "name": "固定种子八连接区域填充",
+          "sample_ids": [
+            "NPP+/floodFill::floodFillVariousRegionTypesNPPPlus.cpp"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/NPP+/floodFill/floodFillVariousRegionTypesNPPPlus.cpp.md"
           ],
           "source_profiles": 1
         },
@@ -1800,11 +1810,10 @@
       ],
       "sample_count": 6,
       "sample_outcomes": {
-        "PASSED": 4,
-        "PARTIAL": 1,
+        "PASSED": 5,
         "FAILED": 1
       },
-      "validation_scope": "项目HIP C1 Sobel3/整数L2/NMS/局部阈值，ROCm Torch/C ABI；原例8分辨率、5次预热/1000测量和PNG/CSV，31组CPU精确mask及native API比较，stream/并发/非法span/trace与独立审查。native内部精确一致，3外圈差异按项目边界定义接受；无跨设备性能结论。其它入口单列。 等值八连接CCL与GPU标签压缩覆盖所有值（含0）、两个真实C++入口、单图/异构batch及NPP+默认/条件编译模式；原生NPP/NPP+分区失败独立记录，项目按CPU正确分区验收。 轮廓采用项目HIP有向像素单元边、GPU闭环排序及geometry驱动重建；保持原例三/四RAW、范围/bypass与有序诊断，22全量输入和15实际流程55文件验收。此表示非NPP专有packed ABI，原生分区差异与历史ABI1失败另存。 距离变换为项目HIP exact unsigned EDT与预固定的线性阈值交点signed点集距离；完整五图12RAW、30输入及确定性site/Voronoi、4流程48文件、运行/冷检出验收。signed与NPP+闭源算法差异明确单列，非vendor逐位一致；项目CPU/GPU30输入maxAbs=0。",
+      "validation_scope": "项目HIP C1 Sobel3/整数L2/NMS/局部阈值，ROCm Torch/C ABI；原例8分辨率、5次预热/1000测量和PNG/CSV，31组CPU精确mask及native API比较，stream/并发/非法span/trace与独立审查。native内部精确一致，3外圈差异按项目边界定义接受；无跨设备性能结论。其它入口单列。 等值八连接CCL与GPU标签压缩覆盖所有值（含0）、两个真实C++入口、单图/异构batch及NPP+默认/条件编译模式；原生NPP/NPP+分区失败独立记录，项目按CPU正确分区验收。 轮廓采用项目HIP有向像素单元边、GPU闭环排序及geometry驱动重建；保持原例三/四RAW、范围/bypass与有序诊断，22全量输入和15实际流程55文件验收。此表示非NPP专有packed ABI，原生分区差异与历史ABI1失败另存。 距离变换为项目HIP exact unsigned EDT与预固定的线性阈值交点signed点集距离；完整五图12RAW、30输入及确定性site/Voronoi、4流程48文件、运行/冷检出验收。signed与NPP+闭源算法差异明确单列，非vendor逐位一致；项目CPU/GPU30输入maxAbs=0。 Flood Fill为项目HIP固定seed八连接算法变体：五模式、两张完整原图、29输入、四个C++完整流程与20件RGB产品、72运行合同、18CLI、36子记录冷检出及独立CPU验收通过；与当前原生NPP+结果存在380/14/2948/2990/4959个RGB像素差异，旧padding失败保留历史证据，不声明vendor逐字节一致。",
       "failure_reason_counts": {
         "BUILD_ERROR": 1
       }

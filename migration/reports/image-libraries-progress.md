@@ -1,8 +1,8 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-12T03:52:19.132551+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-12T03:55:35.364577+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
-26入口当前：10 PASSED / 7 PARTIAL / 9 FAILED。
+26入口当前：11 PASSED / 6 PARTIAL / 9 FAILED。
 
 | 阶段 | 执行状态 |
 | --- | --- |
@@ -1151,3 +1151,5 @@
 | 2026-11-12T03:47:53.478951+00:00 | I3 | Flood资格门16项真实历史padding/源命令/重复子记录/摘要/像素和配对hash反例：PASSED | [20261112T034743.636243Z-I3-CPU-validator-test-3b569ed53c](evidence/rewrite/I3/FloodFill-qualification-and-cold-archive-validator-checks/20261112T034743.636243Z-I3-CPU-validator-test-3b569ed53c) |
 | 2026-11-12T03:51:55.850323+00:00 | I3 | Flood历史证据与当前引用分离后，三项固定源码复审通过；新组合资格21/21门通过，未首次Git锚定的真实publisher仍拒绝且catalog SHA不变。 | [20261112T035148.860738Z-I3-CPU-publication-gate-5781827759](evidence/rewrite/I3/FloodFill-new-unanchored-qualification/20261112T035148.860738Z-I3-CPU-publication-gate-5781827759) |
 | 2026-11-12T03:52:19.132551+00:00 | I3 | Flood新资格首次发布门真实拒绝且catalog不变：PASSED。首次校验脚本只匹配了错误诊断字符串而误报FAILED，保留原始尝试并以真实异常消息重验。 | [20261112T035211.964332Z-I3-CPU-publication-gate-cc704324ce](evidence/rewrite/I3/FloodFill-new-unanchored-qualification-corrected-gate/20261112T035211.964332Z-I3-CPU-publication-gate-cc704324ce) |
+| 2026-11-12T03:53:43.283883+00:00 | I3 | Flood Fill完整五模式/两原图29输入、四原例20RGB、72运行合同、18CLI、16资格门变异、36子记录冷检出与三范围复审通过；新资格Git锚定后真实发布成功，主表由249/22/368更新至250/21/368，图像11/6/9，算子族新增1。历史旧padding失败仍单列。 | [image-flood-qualification.json](image-flood-qualification.json)；[image-flood-review.json](image-flood-review.json)；[image-flood.md](image-flood.md) |
+| 2026-11-12T03:55:35.364577+00:00 | I3 | Flood发布后的全局一致性验收：40份已选资格当前依赖PASSED；4071份不可变attempt完整性、639任务ID与未收尾attempt核算PASSED；主表、首页、NPP+算子表和逐例日志均同步。I3其它四入口继续实施。 | [image-flood-qualification.json](image-flood-qualification.json)；[rewrite-selected-proof-audit.json](rewrite-selected-proof-audit.json)；[image-flood.md](image-flood.md) |

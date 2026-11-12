@@ -10360,1146 +10360,251 @@
       "family": "NPP+",
       "primary_phase": "R3",
       "baseline_status": "PARTIAL",
-      "state": "ASSESSED_GAP_REMAINS",
+      "state": "QUALIFIED",
       "reason_code": "VALIDATED_B12_B15_SUBSET",
       "reason": "使用HIP connected-region equal/gradient/range/boundary kernels + GPU area/bbox metadata；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。五种GPU连接/gradient/range/boundary路径及区域统计已验收；原生NPP+ SDK缺失，原例完整paint值/metadata结构和边界策略未逐项等价。",
       "retry_condition": "Replay original image files, ROI/borders/stride/colorspace and native pixel outputs; isolate codec metadata and GPU pixel work. Complete frozen original contract, independent review and immutable qualification before changing support status.",
       "implementation": "rocm/ported/NPP+/floodFill/floodFillVariousRegionTypesNPPPlus.cpp",
       "selected_validation": {
-        "source": "NPP+/floodFill/floodFillVariousRegionTypesNPPPlus.cpp",
-        "batch": "b15",
-        "execution_model": "single",
-        "implementation": "rocm/ported/NPP+/floodFill/floodFillVariousRegionTypesNPPPlus.cpp",
-        "implementation_sha256": "7b266c87722393ed12c3baf36169bd1456120e8066cc5820d90e3537c2cc9dcd",
-        "original_sha256": "b607b3cc985c64e4504fa62a9e08f0fd296821737726f87d90d74653c683eb5c",
-        "build_return_code": 0,
-        "runs": [
-          {
-            "case": "original",
-            "return_code": 0,
-            "evidence": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/original"
-          },
-          {
-            "case": "irregular",
-            "return_code": 0,
-            "evidence": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/irregular"
-          },
-          {
-            "case": "changed-values",
-            "return_code": 0,
-            "evidence": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/changed-values"
-          },
-          {
-            "case": "boundary",
-            "return_code": 0,
-            "evidence": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/boundary"
-          },
-          {
-            "case": "repeat",
-            "return_code": 0,
-            "evidence": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/repeat"
-          },
-          {
-            "case": "singular-or-empty",
-            "return_code": 0,
-            "evidence": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/singular-or-empty"
-          }
-        ],
-        "evidence": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp",
-        "environment": {
-          "backend": "rocm",
-          "devices": [
-            {
-              "logical_id": 0,
-              "pci_bdf": "0000:03:00.0",
-              "physical_id": 0
-            }
-          ],
-          "image_id": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
-          "rocm_release": "10.1.0",
-          "visible_devices": "2"
-        },
-        "libraries": [
-          "mpi",
-          "amdhip64",
-          "hipblas",
-          "rccl",
-          "hipfft",
-          "rocrand"
-        ],
-        "dependencies": {
-          "rocm/common/batch15_image.hpp": "684fdb5404368e2e07fe3da83b5be20bc3fdf6445dc748bd0af31fc15c93e449",
-          "rocm/common/batches_runtime.hpp": "04dc008dae2ade89ea3ef3e349d4a2dd0a842601737c77f0c7f076187b34f26f",
-          "rocm/common/observe.hpp": "3bd452d352dfce533bfb51a6e32ea308d9ca5d85a3a22afeca109d1cae743410",
-          "rocm/common/binary_observe.hpp": "c932e3d979f33ea8c62b38e687be1a083dfec0481d5e9ffbb04ffe6865899e73",
-          "tools/migration/batch15_reference.py": "ab77e3cf48118292c2e2c980afdea964b5a07f44693c01f70c2d4e448a4fbdab",
-          "tools/migration/batches12_15_spec.py": "b8220530db3a3a8319ac5fb39050003a3ac6db12b5d6bc52b801ff66426b6f7b"
-        },
+        "sample_id": "NPP+/floodFill::floodFillVariousRegionTypesNPPPlus.cpp",
+        "kind": "image-flood-full",
         "status": "PASSED",
-        "level": "L4",
-        "cases": [
+        "implementation": "rocm/ported/NPP+/floodFill/floodFillVariousRegionTypesNPPPlus.cpp",
+        "implementation_sha256": "c953d12e4cc6fb6c0a926195a5fb132f9d5e81fc89a00a361241f1abe0bc89c0",
+        "dependencies": {
+          "rocm/common/image/flood.h": "c0fc95af2575ff65cdb72bce4bde075cc92b83d9a1fb62d20bc3a7547bb82dfe",
+          "rocm/common/image/flood.hip": "a04e134222aa5976d3b0f06e2393aeebb43c6332ddb6f7fd51fbbf5a38431562",
+          "rocm/common/image/connectivity.h": "f6a25d07f6f3f499b72f2877dfe4674f76e60410141f2f9462476843d4b871da",
+          "rocm/common/image/connectivity.hip": "fffe2c0096705d0fb8f8b6bc0770f15944bf526135c12c8f746b4ead4af3d412",
+          "rocm/common/image/image_memory.hpp": "4a24dd7cd8efc50e2b65d50fc1dfe872a9b8ba09654b6f220524cd64c1131f35",
+          "migration/rewrite/image-flood-profile.json": "8220c184842d76398e5d92eacca062fe0c438f446726b4595de0dfadb2e45b3b",
+          "rocm/common/image/flood_sample.hpp": "a9a455e47440009239d5897e891696668b9e6e9e303b7c03271cfed3c307ca1b",
+          "rocm/ported/NPP+/floodFill/floodFillVariousRegionTypesNPPPlus.cpp": "c953d12e4cc6fb6c0a926195a5fb132f9d5e81fc89a00a361241f1abe0bc89c0"
+        },
+        "case_ids": [
+          "exact-original",
+          "gradient-original",
+          "gradient-boundary-original",
+          "range-original",
+          "range-boundary-original",
+          "constant-all-region",
+          "equal-region-with-hole",
+          "hole-boundary",
+          "diagonal-eight-connectivity",
+          "fixed-gradient-independent-ramp",
+          "fixed-gradient-boundary-independent-ramp",
+          "range-independent-noise-771183",
+          "range-boundary-independent-noise-771183",
+          "seed-outside-absolute-range",
+          "gradient-upper-saturation",
+          "gradient-lower-saturation",
+          "one-pixel",
+          "single-row",
+          "single-column",
+          "fill-color-already-present-mode0",
+          "fill-color-already-present-mode2",
+          "fill-color-already-present-mode4",
+          "changed-full-original-mode0",
+          "changed-full-original-mode1",
+          "changed-full-original-mode2",
+          "changed-full-original-mode3",
+          "changed-full-original-mode4",
+          "large-irregular-structured-range",
+          "inclusive-fixed-gradient-limits"
+        ],
+        "case_count": 29,
+        "comparison_mode": "ALGORITHM_VARIANT_EXACT_PROJECT_FIXED_SEED_8_CONNECTED",
+        "checks": [
           {
-            "status": "PASSED",
-            "checks": [
-              {
-                "check": "registered-image-count-no-empty-work",
-                "passed": true
-              },
-              {
-                "check": "actual-kernel-and-repeat-0",
-                "passed": true
-              },
-              {
-                "check": "eligibility-all-pixels-0",
-                "passed": true
-              },
-              {
-                "check": "full-connected-mask-0",
-                "passed": true
-              },
-              {
-                "check": "GPU-area-bbox-boundary-query-0",
-                "passed": true
-              },
-              {
-                "check": "padded-output-row-canaries-0",
-                "passed": true
-              },
-              {
-                "check": "every-output-pixel-0",
-                "passed": true
-              },
-              {
-                "check": "real-convergence-check-0",
-                "passed": true
-              },
-              {
-                "check": "actual-kernel-and-repeat-1",
-                "passed": true
-              },
-              {
-                "check": "eligibility-all-pixels-1",
-                "passed": true
-              },
-              {
-                "check": "full-connected-mask-1",
-                "passed": true
-              },
-              {
-                "check": "GPU-area-bbox-boundary-query-1",
-                "passed": true
-              },
-              {
-                "check": "padded-output-row-canaries-1",
-                "passed": true
-              },
-              {
-                "check": "every-output-pixel-1",
-                "passed": true
-              },
-              {
-                "check": "real-convergence-check-1",
-                "passed": true
-              },
-              {
-                "check": "actual-kernel-and-repeat-2",
-                "passed": true
-              },
-              {
-                "check": "eligibility-all-pixels-2",
-                "passed": true
-              },
-              {
-                "check": "full-connected-mask-2",
-                "passed": true
-              },
-              {
-                "check": "GPU-area-bbox-boundary-query-2",
-                "passed": true
-              },
-              {
-                "check": "padded-output-row-canaries-2",
-                "passed": true
-              },
-              {
-                "check": "every-output-pixel-2",
-                "passed": true
-              },
-              {
-                "check": "real-convergence-check-2",
-                "passed": true
-              },
-              {
-                "check": "actual-kernel-and-repeat-3",
-                "passed": true
-              },
-              {
-                "check": "eligibility-all-pixels-3",
-                "passed": true
-              },
-              {
-                "check": "full-connected-mask-3",
-                "passed": true
-              },
-              {
-                "check": "GPU-area-bbox-boundary-query-3",
-                "passed": true
-              },
-              {
-                "check": "padded-output-row-canaries-3",
-                "passed": true
-              },
-              {
-                "check": "every-output-pixel-3",
-                "passed": true
-              },
-              {
-                "check": "real-convergence-check-3",
-                "passed": true
-              },
-              {
-                "check": "actual-kernel-and-repeat-4",
-                "passed": true
-              },
-              {
-                "check": "eligibility-all-pixels-4",
-                "passed": true
-              },
-              {
-                "check": "full-connected-mask-4",
-                "passed": true
-              },
-              {
-                "check": "GPU-area-bbox-boundary-query-4",
-                "passed": true
-              },
-              {
-                "check": "padded-output-row-canaries-4",
-                "passed": true
-              },
-              {
-                "check": "every-output-pixel-4",
-                "passed": true
-              },
-              {
-                "check": "real-convergence-check-4",
-                "passed": true
-              }
-            ],
-            "input_sha256": "ffd4946fc4b94c7c83e3e3e81ebf9da5bbf1ef29baf3b479ae3bb171d9282538",
-            "output_values": {},
-            "oracle": "SciPy Euclidean distance/nearest sites, FP64 FFT-NCC/integral variance, independent Sobel/NMS and queue/ndimage connectivity; full pixels and GPU region statistics/padding",
-            "output_manifest": {
-              "path": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/original/outputs-manifest.json",
-              "sha256": "35a25597fa85679087f664b11ec6dc0d43737b2c23b73d4687f3a259da9772bb",
-              "files": 34
-            },
-            "case": "original"
+            "check": "four-frozen-input-workflow-runtime-CLI-contracts",
+            "passed": true
           },
           {
-            "status": "PASSED",
-            "checks": [
-              {
-                "check": "registered-image-count-no-empty-work",
-                "passed": true
-              },
-              {
-                "check": "actual-kernel-and-repeat-0",
-                "passed": true
-              },
-              {
-                "check": "eligibility-all-pixels-0",
-                "passed": true
-              },
-              {
-                "check": "full-connected-mask-0",
-                "passed": true
-              },
-              {
-                "check": "GPU-area-bbox-boundary-query-0",
-                "passed": true
-              },
-              {
-                "check": "padded-output-row-canaries-0",
-                "passed": true
-              },
-              {
-                "check": "every-output-pixel-0",
-                "passed": true
-              },
-              {
-                "check": "real-convergence-check-0",
-                "passed": true
-              }
-            ],
-            "input_sha256": "170361680c3dd78d467dffeb60ed82a47b82b18ba3bab7842a39736054521abd",
-            "output_values": {},
-            "oracle": "SciPy Euclidean distance/nearest sites, FP64 FFT-NCC/integral variance, independent Sobel/NMS and queue/ndimage connectivity; full pixels and GPU region statistics/padding",
-            "output_manifest": {
-              "path": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/irregular/outputs-manifest.json",
-              "sha256": "8fca76f6c1d0b4afaaddd136a75040505a817e0cc8fccc52e932ce7c2347ce3a",
-              "files": 10
-            },
-            "case": "irregular"
+            "check": "all-frozen-full-RGB-fixture-and-source-image-bytes",
+            "passed": true
           },
           {
-            "status": "PASSED",
-            "checks": [
-              {
-                "check": "registered-image-count-no-empty-work",
-                "passed": true
-              },
-              {
-                "check": "actual-kernel-and-repeat-0",
-                "passed": true
-              },
-              {
-                "check": "eligibility-all-pixels-0",
-                "passed": true
-              },
-              {
-                "check": "full-connected-mask-0",
-                "passed": true
-              },
-              {
-                "check": "GPU-area-bbox-boundary-query-0",
-                "passed": true
-              },
-              {
-                "check": "padded-output-row-canaries-0",
-                "passed": true
-              },
-              {
-                "check": "every-output-pixel-0",
-                "passed": true
-              },
-              {
-                "check": "real-convergence-check-0",
-                "passed": true
-              }
-            ],
-            "input_sha256": "3b08206244984e096297addb5606d75a12252b55d69fb11e7c1be8925b85e79a",
-            "output_values": {},
-            "oracle": "SciPy Euclidean distance/nearest sites, FP64 FFT-NCC/integral variance, independent Sobel/NMS and queue/ndimage connectivity; full pixels and GPU region statistics/padding",
-            "output_manifest": {
-              "path": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/changed-values/outputs-manifest.json",
-              "sha256": "dd69a8a0f05081a041ae9359b2e918609f06c6c115b5ba4a894e8ac630044615",
-              "files": 10
-            },
-            "case": "changed-values"
+            "check": "current-GPU-ABI-and-complete-C++-build",
+            "passed": true
           },
           {
-            "status": "PASSED",
-            "checks": [
-              {
-                "check": "registered-image-count-no-empty-work",
-                "passed": true
-              },
-              {
-                "check": "actual-kernel-and-repeat-0",
-                "passed": true
-              },
-              {
-                "check": "eligibility-all-pixels-0",
-                "passed": true
-              },
-              {
-                "check": "full-connected-mask-0",
-                "passed": true
-              },
-              {
-                "check": "GPU-area-bbox-boundary-query-0",
-                "passed": true
-              },
-              {
-                "check": "padded-output-row-canaries-0",
-                "passed": true
-              },
-              {
-                "check": "every-output-pixel-0",
-                "passed": true
-              },
-              {
-                "check": "real-convergence-check-0",
-                "passed": true
-              }
-            ],
-            "input_sha256": "c86637cca85a7438b79022548ece1cee754de062d686e0cbcd3653e53ff729bf",
-            "output_values": {},
-            "oracle": "SciPy Euclidean distance/nearest sites, FP64 FFT-NCC/integral variance, independent Sobel/NMS and queue/ndimage connectivity; full pixels and GPU region statistics/padding",
-            "output_manifest": {
-              "path": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/boundary/outputs-manifest.json",
-              "sha256": "92c258cdbeedaf6a531ad0ef19f84d58f41f729c1ef0142f3c41df369d5e708f",
-              "files": 10
-            },
-            "case": "boundary"
+            "check": "all/actual-current-GPU-process",
+            "passed": true
           },
           {
-            "status": "PASSED",
-            "checks": [
-              {
-                "check": "registered-image-count-no-empty-work",
-                "passed": true
-              },
-              {
-                "check": "actual-kernel-and-repeat-0",
-                "passed": true
-              },
-              {
-                "check": "eligibility-all-pixels-0",
-                "passed": true
-              },
-              {
-                "check": "full-connected-mask-0",
-                "passed": true
-              },
-              {
-                "check": "GPU-area-bbox-boundary-query-0",
-                "passed": true
-              },
-              {
-                "check": "padded-output-row-canaries-0",
-                "passed": true
-              },
-              {
-                "check": "every-output-pixel-0",
-                "passed": true
-              },
-              {
-                "check": "real-convergence-check-0",
-                "passed": true
-              },
-              {
-                "check": "actual-kernel-and-repeat-1",
-                "passed": true
-              },
-              {
-                "check": "eligibility-all-pixels-1",
-                "passed": true
-              },
-              {
-                "check": "full-connected-mask-1",
-                "passed": true
-              },
-              {
-                "check": "GPU-area-bbox-boundary-query-1",
-                "passed": true
-              },
-              {
-                "check": "padded-output-row-canaries-1",
-                "passed": true
-              },
-              {
-                "check": "every-output-pixel-1",
-                "passed": true
-              },
-              {
-                "check": "real-convergence-check-1",
-                "passed": true
-              },
-              {
-                "check": "actual-kernel-and-repeat-2",
-                "passed": true
-              },
-              {
-                "check": "eligibility-all-pixels-2",
-                "passed": true
-              },
-              {
-                "check": "full-connected-mask-2",
-                "passed": true
-              },
-              {
-                "check": "GPU-area-bbox-boundary-query-2",
-                "passed": true
-              },
-              {
-                "check": "padded-output-row-canaries-2",
-                "passed": true
-              },
-              {
-                "check": "every-output-pixel-2",
-                "passed": true
-              },
-              {
-                "check": "real-convergence-check-2",
-                "passed": true
-              },
-              {
-                "check": "actual-kernel-and-repeat-3",
-                "passed": true
-              },
-              {
-                "check": "eligibility-all-pixels-3",
-                "passed": true
-              },
-              {
-                "check": "full-connected-mask-3",
-                "passed": true
-              },
-              {
-                "check": "GPU-area-bbox-boundary-query-3",
-                "passed": true
-              },
-              {
-                "check": "padded-output-row-canaries-3",
-                "passed": true
-              },
-              {
-                "check": "every-output-pixel-3",
-                "passed": true
-              },
-              {
-                "check": "real-convergence-check-3",
-                "passed": true
-              },
-              {
-                "check": "actual-kernel-and-repeat-4",
-                "passed": true
-              },
-              {
-                "check": "eligibility-all-pixels-4",
-                "passed": true
-              },
-              {
-                "check": "full-connected-mask-4",
-                "passed": true
-              },
-              {
-                "check": "GPU-area-bbox-boundary-query-4",
-                "passed": true
-              },
-              {
-                "check": "padded-output-row-canaries-4",
-                "passed": true
-              },
-              {
-                "check": "every-output-pixel-4",
-                "passed": true
-              },
-              {
-                "check": "real-convergence-check-4",
-                "passed": true
-              }
-            ],
-            "input_sha256": "ffd4946fc4b94c7c83e3e3e81ebf9da5bbf1ef29baf3b479ae3bb171d9282538",
-            "output_values": {},
-            "oracle": "SciPy Euclidean distance/nearest sites, FP64 FFT-NCC/integral variance, independent Sobel/NMS and queue/ndimage connectivity; full pixels and GPU region statistics/padding",
-            "output_manifest": {
-              "path": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/repeat/outputs-manifest.json",
-              "sha256": "a47724b399292815dcea35a459bce64b259ab35c2d78c3799a91b044263c16af",
-              "files": 34
-            },
-            "case": "repeat"
+            "check": "runtime/actual-current-GPU-process",
+            "passed": true
           },
           {
-            "status": "PASSED",
-            "checks": [
-              {
-                "check": "registered-image-count-no-empty-work",
-                "passed": true
-              },
-              {
-                "check": "actual-kernel-and-repeat-0",
-                "passed": true
-              },
-              {
-                "check": "eligibility-all-pixels-0",
-                "passed": true
-              },
-              {
-                "check": "full-connected-mask-0",
-                "passed": true
-              },
-              {
-                "check": "GPU-area-bbox-boundary-query-0",
-                "passed": true
-              },
-              {
-                "check": "padded-output-row-canaries-0",
-                "passed": true
-              },
-              {
-                "check": "every-output-pixel-0",
-                "passed": true
-              },
-              {
-                "check": "real-convergence-check-0",
-                "passed": true
-              }
-            ],
-            "input_sha256": "b35816ade8663b99ac9d87ec41be9f865f5961bde83b71bad8879a53a13c6686",
-            "output_values": {},
-            "oracle": "SciPy Euclidean distance/nearest sites, FP64 FFT-NCC/integral variance, independent Sobel/NMS and queue/ndimage connectivity; full pixels and GPU region statistics/padding",
-            "output_manifest": {
-              "path": "migration/reports/evidence/20261110T053436.400711Z/batches12_15-rocm/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/singular-or-empty/outputs-manifest.json",
-              "sha256": "83d33477123a1468b51e8da829c3f6cd9db24a653ebbd2eeb6073e58d21a7c38",
-              "files": 10
-            },
-            "case": "singular-or-empty"
+            "check": "trace/actual-current-GPU-process",
+            "passed": true
+          },
+          {
+            "check": "all/independently-recomputed-complete-results",
+            "passed": true
+          },
+          {
+            "check": "originals/independently-recomputed-complete-results",
+            "passed": true
+          },
+          {
+            "check": "runtime/independently-recomputed-complete-results",
+            "passed": true
+          },
+          {
+            "check": "cli/independently-recomputed-complete-results",
+            "passed": true
+          },
+          {
+            "check": "trace/independently-recomputed-complete-results",
+            "passed": true
+          },
+          {
+            "check": "native/independently-recomputed-complete-results",
+            "passed": true
+          },
+          {
+            "check": "four-complete-original-C++-processes",
+            "passed": true
+          },
+          {
+            "check": "eighteen-actual-CLI-processes",
+            "passed": true
+          },
+          {
+            "check": "unmodified-native-CUDA-original-and-device-receipts",
+            "passed": true
+          },
+          {
+            "check": "thirty-core-acceptance-reader-checks",
+            "passed": true
+          },
+          {
+            "check": "thirty-runtime-CLI-original-reader-checks",
+            "passed": true
+          },
+          {
+            "check": "same-one-pixel-padding-counterexample-now-rejected",
+            "passed": true
+          },
+          {
+            "check": "thirty-six-sealed-child-clean-checkout",
+            "passed": true
+          },
+          {
+            "check": "sixteen-archive-provenance-and-publication-reader-checks",
+            "passed": true
+          },
+          {
+            "check": "three-independent-exact-source-and-proof-reviews",
+            "passed": true
           }
         ],
-        "cuda_cases": [
+        "evidence_references": [
+          "migration/reports/evidence/rewrite/I3/FloodFill-all29-real-device-dispatch-trace/20261112T032830.020403Z-I3-rocm-trace-fb0791eb96",
+          "migration/reports/evidence/rewrite/I3/FloodFill-clean-checkout-complete-RGB-runtime-CLI-trace/20261112T032927.151752Z-I3-host-cold-replay-f21d7ab95b",
+          "migration/reports/evidence/rewrite/I3/FloodFill-complete-CLI-independent-CPU/20261112T032826.087556Z-I3-CPU-reference-92ef892b1b",
+          "migration/reports/evidence/rewrite/I3/FloodFill-complete-original-CLI/20261112T032750.012706Z-I3-rocm-CLI-aae5d70103",
+          "migration/reports/evidence/rewrite/I3/FloodFill-complete-original-CLI/20261112T032752.147310Z-I3-rocm-CLI-1cfd70eac6",
+          "migration/reports/evidence/rewrite/I3/FloodFill-complete-original-CLI/20261112T032754.082582Z-I3-rocm-CLI-281676d4ee",
+          "migration/reports/evidence/rewrite/I3/FloodFill-complete-original-CLI/20261112T032756.015191Z-I3-rocm-CLI-e1d537eff3",
+          "migration/reports/evidence/rewrite/I3/FloodFill-complete-original-CLI/20261112T032757.927552Z-I3-rocm-CLI-0a3946b178",
+          "migration/reports/evidence/rewrite/I3/FloodFill-complete-original-CLI/20261112T032759.825297Z-I3-rocm-CLI-2b520d2a8a",
+          "migration/reports/evidence/rewrite/I3/FloodFill-complete-original-CLI/20261112T032801.740692Z-I3-rocm-CLI-f4307cd039",
+          "migration/reports/evidence/rewrite/I3/FloodFill-complete-original-CLI/20261112T032803.655655Z-I3-rocm-CLI-b756460f19",
+          "migration/reports/evidence/rewrite/I3/FloodFill-complete-original-CLI/20261112T032805.519925Z-I3-rocm-CLI-fd440f6696",
+          "migration/reports/evidence/rewrite/I3/FloodFill-complete-original-CLI/20261112T032807.417953Z-I3-rocm-CLI-cbd9d0466b",
+          "migration/reports/evidence/rewrite/I3/FloodFill-complete-original-CLI/20261112T032809.346489Z-I3-rocm-CLI-267ecfdea0",
+          "migration/reports/evidence/rewrite/I3/FloodFill-complete-original-CLI/20261112T032811.244987Z-I3-rocm-CLI-963ea92be5",
+          "migration/reports/evidence/rewrite/I3/FloodFill-complete-original-CLI/20261112T032813.125158Z-I3-rocm-CLI-8fac2cf5e5",
+          "migration/reports/evidence/rewrite/I3/FloodFill-complete-original-CLI/20261112T032815.027020Z-I3-rocm-CLI-716d3d2740",
+          "migration/reports/evidence/rewrite/I3/FloodFill-complete-original-CLI/20261112T032816.918888Z-I3-rocm-CLI-280adc0af4",
+          "migration/reports/evidence/rewrite/I3/FloodFill-complete-original-CLI/20261112T032818.877008Z-I3-rocm-CLI-b3023d7699",
+          "migration/reports/evidence/rewrite/I3/FloodFill-complete-original-CLI/20261112T032820.857701Z-I3-rocm-CLI-ef288189c6",
+          "migration/reports/evidence/rewrite/I3/FloodFill-complete-original-CLI/20261112T032822.757939Z-I3-rocm-CLI-cc307c7000",
+          "migration/reports/evidence/rewrite/I3/FloodFill-five-mode-original-file-workflow-contracts/20261111T182147.977319Z-I3-CPU-contract-04a6b2abbc",
+          "migration/reports/evidence/rewrite/I3/FloodFill-fixed-complete-runtime-arguments-alias-streams/20261111T184741.537835Z-I3-rocm-runtime-c6825b3a19",
+          "migration/reports/evidence/rewrite/I3/FloodFill-fixed-exact-last-row-padding-counterexample/20261111T185159.117890Z-I3-rocm-contract-probe-354c9ab01a",
+          "migration/reports/evidence/rewrite/I3/FloodFill-fixed-runtime-storage-and-stream-obligations/20261111T184701.926333Z-I3-CPU-contract-d8cd1bf154",
+          "migration/reports/evidence/rewrite/I3/FloodFill-four-complete-originals-independent-CPU/20261111T184737.035874Z-I3-CPU-reference-d493dfe224",
+          "migration/reports/evidence/rewrite/I3/FloodFill-frozen-complete-RGB-and-boundary-contracts/20261111T181141.472226Z-I3-CPU-contract-06f2821c15",
+          "migration/reports/evidence/rewrite/I3/FloodFill-full-RGB-GPU-backend-build/20261111T184705.604796Z-I3-rocm-build-8994ea81f0",
+          "migration/reports/evidence/rewrite/I3/FloodFill-full-five-workflow-C__-build/20261111T184721.211118Z-I3-rocm-build-255448be41",
+          "migration/reports/evidence/rewrite/I3/FloodFill-full-native-CPU-HIP-and-metadata-comparison/20261112T032629.115960Z-I3-CPU-reference-67e9160223",
+          "migration/reports/evidence/rewrite/I3/FloodFill-full-runtime-storage-and-stream-independent-CPU/20261111T184748.494425Z-I3-CPU-reference-b4160111f6",
+          "migration/reports/evidence/rewrite/I3/FloodFill-independent-complete-RGB-CPU/20261111T184716.905244Z-I3-CPU-reference-453b5eda43",
+          "migration/reports/evidence/rewrite/I3/FloodFill-original-CLI-and-malformed-file-contracts/20261112T032745.159503Z-I3-CPU-contract-e4008fb9dc",
+          "migration/reports/evidence/rewrite/I3/FloodFill-qualification-and-cold-archive-validator-checks/20261112T034743.636243Z-I3-CPU-validator-test-3b569ed53c",
+          "migration/reports/evidence/rewrite/I3/FloodFill-real-core-validator-mutations/20261111T184924.859738Z-I3-CPU-validator-test-3ff03081b8",
+          "migration/reports/evidence/rewrite/I3/FloodFill-real-dispatch-and-full-pixels-independent-CPU/20261112T032834.886182Z-I3-CPU-reference-f616f52b6d",
+          "migration/reports/evidence/rewrite/I3/FloodFill-runtime-CLI-original-validator-mutations/20261112T032836.801106Z-I3-CPU-validator-test-553bdb52e0",
+          "migration/reports/evidence/rewrite/I3/FloodFill-twenty-nine-complete-RGB-inputs/20261111T184712.446213Z-I3-rocm-prototype-ce1da57cfa",
+          "migration/reports/evidence/rewrite/I3/NPP___floodFill_floodFillVariousRegionTypesNPPPlus.cpp/20261111T181153.969229Z-I3-cuda-original-820d020ffa",
+          "migration/reports/evidence/rewrite/I3/NPP__floodFill__floodFillVariousRegionTypesNPPPlus.cpp/20261111T184727.534283Z-I3-rocm-original-58aa02544e",
+          "migration/reports/evidence/rewrite/I3/NPP__floodFill__floodFillVariousRegionTypesNPPPlus.cpp/20261111T184730.028521Z-I3-rocm-original-38b49ab979",
+          "migration/reports/evidence/rewrite/I3/NPP__floodFill__floodFillVariousRegionTypesNPPPlus.cpp/20261111T184732.267138Z-I3-rocm-original-e043d81120",
+          "migration/reports/evidence/rewrite/I3/NPP__floodFill__floodFillVariousRegionTypesNPPPlus.cpp/20261111T184734.468761Z-I3-rocm-original-2be8922773"
+        ],
+        "historical_evidence_references": [
+          "migration/reports/evidence/rewrite/I3/FloodFill-full-RGB-GPU-backend-build/20261111T181533.727560Z-I3-rocm-build-895672330e",
+          "migration/reports/evidence/rewrite/I3/FloodFill-legacy-last-row-padding-actual-counterexample/20261111T184511.535189Z-I3-rocm-contract-probe-d3ff42ca14"
+        ],
+        "source_commit": "c0e6c3ff732ad75791824b165138537f73ec6dcb",
+        "scope": "Complete five-mode/two-image/five-product C++ entry; independently exact fixed-seed eight-connected GPU flood fill. Native NPP+ differences documented. Linux/gfx1201/ROCm10.1; no vendor ABI/performance/wave64/Windows claim.",
+        "rocm_evidence": "migration/reports/evidence/rewrite/I3/FloodFill-twenty-nine-complete-RGB-inputs/20261111T184712.446213Z-I3-rocm-prototype-ce1da57cfa",
+        "cuda_evidence": "migration/reports/evidence/rewrite/I3/NPP___floodFill_floodFillVariousRegionTypesNPPPlus.cpp/20261111T181153.969229Z-I3-cuda-original-820d020ffa",
+        "environment": "migration/reports/evidence/rewrite/I3/FloodFill-twenty-nine-complete-RGB-inputs/20261111T184712.446213Z-I3-rocm-prototype-ce1da57cfa/backend.observed.json",
+        "devices": [
           {
-            "case": "original",
-            "status": "PASSED",
-            "identical_input": true,
-            "cuda_cpu_checks": {
-              "status": "PASSED",
-              "checks": [
-                {
-                  "check": "registered-image-count-no-empty-work",
-                  "passed": true
-                },
-                {
-                  "check": "actual-kernel-and-repeat-0",
-                  "passed": true
-                },
-                {
-                  "check": "eligibility-all-pixels-0",
-                  "passed": true
-                },
-                {
-                  "check": "full-connected-mask-0",
-                  "passed": true
-                },
-                {
-                  "check": "GPU-area-bbox-boundary-query-0",
-                  "passed": true
-                },
-                {
-                  "check": "padded-output-row-canaries-0",
-                  "passed": true
-                },
-                {
-                  "check": "every-output-pixel-0",
-                  "passed": true
-                },
-                {
-                  "check": "real-convergence-check-0",
-                  "passed": true
-                },
-                {
-                  "check": "actual-kernel-and-repeat-1",
-                  "passed": true
-                },
-                {
-                  "check": "eligibility-all-pixels-1",
-                  "passed": true
-                },
-                {
-                  "check": "full-connected-mask-1",
-                  "passed": true
-                },
-                {
-                  "check": "GPU-area-bbox-boundary-query-1",
-                  "passed": true
-                },
-                {
-                  "check": "padded-output-row-canaries-1",
-                  "passed": true
-                },
-                {
-                  "check": "every-output-pixel-1",
-                  "passed": true
-                },
-                {
-                  "check": "real-convergence-check-1",
-                  "passed": true
-                },
-                {
-                  "check": "actual-kernel-and-repeat-2",
-                  "passed": true
-                },
-                {
-                  "check": "eligibility-all-pixels-2",
-                  "passed": true
-                },
-                {
-                  "check": "full-connected-mask-2",
-                  "passed": true
-                },
-                {
-                  "check": "GPU-area-bbox-boundary-query-2",
-                  "passed": true
-                },
-                {
-                  "check": "padded-output-row-canaries-2",
-                  "passed": true
-                },
-                {
-                  "check": "every-output-pixel-2",
-                  "passed": true
-                },
-                {
-                  "check": "real-convergence-check-2",
-                  "passed": true
-                },
-                {
-                  "check": "actual-kernel-and-repeat-3",
-                  "passed": true
-                },
-                {
-                  "check": "eligibility-all-pixels-3",
-                  "passed": true
-                },
-                {
-                  "check": "full-connected-mask-3",
-                  "passed": true
-                },
-                {
-                  "check": "GPU-area-bbox-boundary-query-3",
-                  "passed": true
-                },
-                {
-                  "check": "padded-output-row-canaries-3",
-                  "passed": true
-                },
-                {
-                  "check": "every-output-pixel-3",
-                  "passed": true
-                },
-                {
-                  "check": "real-convergence-check-3",
-                  "passed": true
-                },
-                {
-                  "check": "actual-kernel-and-repeat-4",
-                  "passed": true
-                },
-                {
-                  "check": "eligibility-all-pixels-4",
-                  "passed": true
-                },
-                {
-                  "check": "full-connected-mask-4",
-                  "passed": true
-                },
-                {
-                  "check": "GPU-area-bbox-boundary-query-4",
-                  "passed": true
-                },
-                {
-                  "check": "padded-output-row-canaries-4",
-                  "passed": true
-                },
-                {
-                  "check": "every-output-pixel-4",
-                  "passed": true
-                },
-                {
-                  "check": "real-convergence-check-4",
-                  "passed": true
-                }
-              ],
-              "input_sha256": "ffd4946fc4b94c7c83e3e3e81ebf9da5bbf1ef29baf3b479ae3bb171d9282538",
-              "output_values": {},
-              "oracle": "SciPy Euclidean distance/nearest sites, FP64 FFT-NCC/integral variance, independent Sobel/NMS and queue/ndimage connectivity; full pixels and GPU region statistics/padding",
-              "output_manifest": {
-                "path": "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/original/outputs-manifest.json",
-                "sha256": "610cccd3b38242402f16b235827c72a62b4c8068bb6e812c270b73284d4dbeb5",
-                "files": 34
-              }
-            }
-          },
-          {
-            "case": "irregular",
-            "status": "PASSED",
-            "identical_input": true,
-            "cuda_cpu_checks": {
-              "status": "PASSED",
-              "checks": [
-                {
-                  "check": "registered-image-count-no-empty-work",
-                  "passed": true
-                },
-                {
-                  "check": "actual-kernel-and-repeat-0",
-                  "passed": true
-                },
-                {
-                  "check": "eligibility-all-pixels-0",
-                  "passed": true
-                },
-                {
-                  "check": "full-connected-mask-0",
-                  "passed": true
-                },
-                {
-                  "check": "GPU-area-bbox-boundary-query-0",
-                  "passed": true
-                },
-                {
-                  "check": "padded-output-row-canaries-0",
-                  "passed": true
-                },
-                {
-                  "check": "every-output-pixel-0",
-                  "passed": true
-                },
-                {
-                  "check": "real-convergence-check-0",
-                  "passed": true
-                }
-              ],
-              "input_sha256": "170361680c3dd78d467dffeb60ed82a47b82b18ba3bab7842a39736054521abd",
-              "output_values": {},
-              "oracle": "SciPy Euclidean distance/nearest sites, FP64 FFT-NCC/integral variance, independent Sobel/NMS and queue/ndimage connectivity; full pixels and GPU region statistics/padding",
-              "output_manifest": {
-                "path": "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/irregular/outputs-manifest.json",
-                "sha256": "ff7a687a0211d57c8de14aee78cc2beba809fd8811aeb5506fce897c4f0611b6",
-                "files": 10
-              }
-            }
-          },
-          {
-            "case": "changed-values",
-            "status": "PASSED",
-            "identical_input": true,
-            "cuda_cpu_checks": {
-              "status": "PASSED",
-              "checks": [
-                {
-                  "check": "registered-image-count-no-empty-work",
-                  "passed": true
-                },
-                {
-                  "check": "actual-kernel-and-repeat-0",
-                  "passed": true
-                },
-                {
-                  "check": "eligibility-all-pixels-0",
-                  "passed": true
-                },
-                {
-                  "check": "full-connected-mask-0",
-                  "passed": true
-                },
-                {
-                  "check": "GPU-area-bbox-boundary-query-0",
-                  "passed": true
-                },
-                {
-                  "check": "padded-output-row-canaries-0",
-                  "passed": true
-                },
-                {
-                  "check": "every-output-pixel-0",
-                  "passed": true
-                },
-                {
-                  "check": "real-convergence-check-0",
-                  "passed": true
-                }
-              ],
-              "input_sha256": "3b08206244984e096297addb5606d75a12252b55d69fb11e7c1be8925b85e79a",
-              "output_values": {},
-              "oracle": "SciPy Euclidean distance/nearest sites, FP64 FFT-NCC/integral variance, independent Sobel/NMS and queue/ndimage connectivity; full pixels and GPU region statistics/padding",
-              "output_manifest": {
-                "path": "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/changed-values/outputs-manifest.json",
-                "sha256": "f82b0738753726ace07b8f4096d22455ff9f7fa54376f9f5a370d3444aed923c",
-                "files": 10
-              }
-            }
-          },
-          {
-            "case": "boundary",
-            "status": "PASSED",
-            "identical_input": true,
-            "cuda_cpu_checks": {
-              "status": "PASSED",
-              "checks": [
-                {
-                  "check": "registered-image-count-no-empty-work",
-                  "passed": true
-                },
-                {
-                  "check": "actual-kernel-and-repeat-0",
-                  "passed": true
-                },
-                {
-                  "check": "eligibility-all-pixels-0",
-                  "passed": true
-                },
-                {
-                  "check": "full-connected-mask-0",
-                  "passed": true
-                },
-                {
-                  "check": "GPU-area-bbox-boundary-query-0",
-                  "passed": true
-                },
-                {
-                  "check": "padded-output-row-canaries-0",
-                  "passed": true
-                },
-                {
-                  "check": "every-output-pixel-0",
-                  "passed": true
-                },
-                {
-                  "check": "real-convergence-check-0",
-                  "passed": true
-                }
-              ],
-              "input_sha256": "c86637cca85a7438b79022548ece1cee754de062d686e0cbcd3653e53ff729bf",
-              "output_values": {},
-              "oracle": "SciPy Euclidean distance/nearest sites, FP64 FFT-NCC/integral variance, independent Sobel/NMS and queue/ndimage connectivity; full pixels and GPU region statistics/padding",
-              "output_manifest": {
-                "path": "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/boundary/outputs-manifest.json",
-                "sha256": "ce643147c59cdc096a30e3b2511feb8924c69ee14bb52ab9aebb2255e1436f68",
-                "files": 10
-              }
-            }
-          },
-          {
-            "case": "repeat",
-            "status": "PASSED",
-            "identical_input": true,
-            "cuda_cpu_checks": {
-              "status": "PASSED",
-              "checks": [
-                {
-                  "check": "registered-image-count-no-empty-work",
-                  "passed": true
-                },
-                {
-                  "check": "actual-kernel-and-repeat-0",
-                  "passed": true
-                },
-                {
-                  "check": "eligibility-all-pixels-0",
-                  "passed": true
-                },
-                {
-                  "check": "full-connected-mask-0",
-                  "passed": true
-                },
-                {
-                  "check": "GPU-area-bbox-boundary-query-0",
-                  "passed": true
-                },
-                {
-                  "check": "padded-output-row-canaries-0",
-                  "passed": true
-                },
-                {
-                  "check": "every-output-pixel-0",
-                  "passed": true
-                },
-                {
-                  "check": "real-convergence-check-0",
-                  "passed": true
-                },
-                {
-                  "check": "actual-kernel-and-repeat-1",
-                  "passed": true
-                },
-                {
-                  "check": "eligibility-all-pixels-1",
-                  "passed": true
-                },
-                {
-                  "check": "full-connected-mask-1",
-                  "passed": true
-                },
-                {
-                  "check": "GPU-area-bbox-boundary-query-1",
-                  "passed": true
-                },
-                {
-                  "check": "padded-output-row-canaries-1",
-                  "passed": true
-                },
-                {
-                  "check": "every-output-pixel-1",
-                  "passed": true
-                },
-                {
-                  "check": "real-convergence-check-1",
-                  "passed": true
-                },
-                {
-                  "check": "actual-kernel-and-repeat-2",
-                  "passed": true
-                },
-                {
-                  "check": "eligibility-all-pixels-2",
-                  "passed": true
-                },
-                {
-                  "check": "full-connected-mask-2",
-                  "passed": true
-                },
-                {
-                  "check": "GPU-area-bbox-boundary-query-2",
-                  "passed": true
-                },
-                {
-                  "check": "padded-output-row-canaries-2",
-                  "passed": true
-                },
-                {
-                  "check": "every-output-pixel-2",
-                  "passed": true
-                },
-                {
-                  "check": "real-convergence-check-2",
-                  "passed": true
-                },
-                {
-                  "check": "actual-kernel-and-repeat-3",
-                  "passed": true
-                },
-                {
-                  "check": "eligibility-all-pixels-3",
-                  "passed": true
-                },
-                {
-                  "check": "full-connected-mask-3",
-                  "passed": true
-                },
-                {
-                  "check": "GPU-area-bbox-boundary-query-3",
-                  "passed": true
-                },
-                {
-                  "check": "padded-output-row-canaries-3",
-                  "passed": true
-                },
-                {
-                  "check": "every-output-pixel-3",
-                  "passed": true
-                },
-                {
-                  "check": "real-convergence-check-3",
-                  "passed": true
-                },
-                {
-                  "check": "actual-kernel-and-repeat-4",
-                  "passed": true
-                },
-                {
-                  "check": "eligibility-all-pixels-4",
-                  "passed": true
-                },
-                {
-                  "check": "full-connected-mask-4",
-                  "passed": true
-                },
-                {
-                  "check": "GPU-area-bbox-boundary-query-4",
-                  "passed": true
-                },
-                {
-                  "check": "padded-output-row-canaries-4",
-                  "passed": true
-                },
-                {
-                  "check": "every-output-pixel-4",
-                  "passed": true
-                },
-                {
-                  "check": "real-convergence-check-4",
-                  "passed": true
-                }
-              ],
-              "input_sha256": "ffd4946fc4b94c7c83e3e3e81ebf9da5bbf1ef29baf3b479ae3bb171d9282538",
-              "output_values": {},
-              "oracle": "SciPy Euclidean distance/nearest sites, FP64 FFT-NCC/integral variance, independent Sobel/NMS and queue/ndimage connectivity; full pixels and GPU region statistics/padding",
-              "output_manifest": {
-                "path": "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/repeat/outputs-manifest.json",
-                "sha256": "57c69c0bbf0f98a6269a1debcc4fd625758924331522010c656193420e6de530",
-                "files": 34
-              }
-            }
-          },
-          {
-            "case": "singular-or-empty",
-            "status": "PASSED",
-            "identical_input": true,
-            "cuda_cpu_checks": {
-              "status": "PASSED",
-              "checks": [
-                {
-                  "check": "registered-image-count-no-empty-work",
-                  "passed": true
-                },
-                {
-                  "check": "actual-kernel-and-repeat-0",
-                  "passed": true
-                },
-                {
-                  "check": "eligibility-all-pixels-0",
-                  "passed": true
-                },
-                {
-                  "check": "full-connected-mask-0",
-                  "passed": true
-                },
-                {
-                  "check": "GPU-area-bbox-boundary-query-0",
-                  "passed": true
-                },
-                {
-                  "check": "padded-output-row-canaries-0",
-                  "passed": true
-                },
-                {
-                  "check": "every-output-pixel-0",
-                  "passed": true
-                },
-                {
-                  "check": "real-convergence-check-0",
-                  "passed": true
-                }
-              ],
-              "input_sha256": "b35816ade8663b99ac9d87ec41be9f865f5961bde83b71bad8879a53a13c6686",
-              "output_values": {},
-              "oracle": "SciPy Euclidean distance/nearest sites, FP64 FFT-NCC/integral variance, independent Sobel/NMS and queue/ndimage connectivity; full pixels and GPU region statistics/padding",
-              "output_manifest": {
-                "path": "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp/singular-or-empty/outputs-manifest.json",
-                "sha256": "316233dd17a2794b9e31e5bde8ac57a319d2719cca65f432836db3e8d3fbee97",
-                "files": 10
-              }
-            }
+            "logical_id": 0,
+            "pci_bdf": "0000:23:00.0",
+            "physical_id": 1,
+            "uuid": "39383130336566346332326133636363"
           }
         ],
-        "cuda_comparison": "PASSED",
-        "contract_status": "PARTIAL",
-        "missing_contract": [
-          "native-NPPPlus-five-mode-metadata-and-paint-contract"
-        ],
-        "limitation": "五种GPU连接/gradient/range/boundary路径及区域统计已验收；原生NPP+ SDK缺失，原例完整paint值/metadata结构和边界策略未逐项等价。",
-        "cuda_dependencies": {
-          "rocm/common/batch15_image.hpp": "684fdb5404368e2e07fe3da83b5be20bc3fdf6445dc748bd0af31fc15c93e449",
-          "rocm/common/batches_runtime.hpp": "04dc008dae2ade89ea3ef3e349d4a2dd0a842601737c77f0c7f076187b34f26f",
-          "rocm/common/observe.hpp": "3bd452d352dfce533bfb51a6e32ea308d9ca5d85a3a22afeca109d1cae743410",
-          "rocm/common/binary_observe.hpp": "c932e3d979f33ea8c62b38e687be1a083dfec0481d5e9ffbb04ffe6865899e73"
-        },
-        "current_source_proof": true,
-        "current_cuda_source_proof": true,
-        "cuda_evidence": "migration/reports/evidence/20261110T053230.152526Z/batches12_15-cuda/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp",
-        "cuda_implementation_sha256": "7b266c87722393ed12c3baf36169bd1456120e8066cc5820d90e3537c2cc9dcd",
-        "cuda_baseline_kind": "COMPATIBLE_CUDA_MATH_BASELINE",
-        "native_cuda_attempt": {
-          "source": "NPP+/floodFill/floodFillVariousRegionTypesNPPPlus.cpp",
-          "original_sha256": "b607b3cc985c64e4504fa62a9e08f0fd296821737726f87d90d74653c683eb5c",
-          "build_return_code": 1,
-          "run_return_code": null,
-          "evidence": "migration/reports/evidence/20261110T051620.655991Z/batches12_15-native-cuda/NPP+_floodFill_floodFillVariousRegionTypesNPPPlus.cpp",
-          "scope": "Original vendor program; success does not provide shared-input equivalence without additional numerical observations."
-        },
-        "validation_source_sha256": "b1f9658af04bdff00e3d836178a8361fd1465ff64a505c723db1d374c45b1083"
+        "qualification_id": "20261112T035123.857880Z-I3-composite-qualification-0c2958e5dc",
+        "evidence": "migration/reports/evidence/rewrite/I3/NPP__floodFill__floodFillVariousRegionTypesNPPPlus.cpp/20261112T035123.857880Z-I3-composite-qualification-0c2958e5dc"
       },
       "required_cases": [
-        "batches12_15/original",
-        "batches12_15/irregular",
-        "batches12_15/changed-values",
-        "batches12_15/boundary",
-        "batches12_15/repeat",
-        "batches12_15/singular-or-empty",
-        "batches12_15/native-NPPPlus-five-mode-metadata-and-paint-contract"
+        "image-flood/exact-original",
+        "image-flood/gradient-original",
+        "image-flood/gradient-boundary-original",
+        "image-flood/range-original",
+        "image-flood/range-boundary-original",
+        "image-flood/constant-all-region",
+        "image-flood/equal-region-with-hole",
+        "image-flood/hole-boundary",
+        "image-flood/diagonal-eight-connectivity",
+        "image-flood/fixed-gradient-independent-ramp",
+        "image-flood/fixed-gradient-boundary-independent-ramp",
+        "image-flood/range-independent-noise-771183",
+        "image-flood/range-boundary-independent-noise-771183",
+        "image-flood/seed-outside-absolute-range",
+        "image-flood/gradient-upper-saturation",
+        "image-flood/gradient-lower-saturation",
+        "image-flood/one-pixel",
+        "image-flood/single-row",
+        "image-flood/single-column",
+        "image-flood/fill-color-already-present-mode0",
+        "image-flood/fill-color-already-present-mode2",
+        "image-flood/fill-color-already-present-mode4",
+        "image-flood/changed-full-original-mode0",
+        "image-flood/changed-full-original-mode1",
+        "image-flood/changed-full-original-mode2",
+        "image-flood/changed-full-original-mode3",
+        "image-flood/changed-full-original-mode4",
+        "image-flood/large-irregular-structured-range",
+        "image-flood/inclusive-fixed-gradient-limits",
+        "image-flood/four-original-workflows-twenty-RGB-products",
+        "image-flood/seventy-two-runtime-memory-and-stream-cases",
+        "image-flood/eighteen-CLI-and-error-cases",
+        "image-flood/full-real-GPU-trace",
+        "image-flood/independent-CPU-and-native-comparison",
+        "image-flood/sixty-acceptance-reader-checks",
+        "image-flood/sixteen-archive-provenance-and-publication-reader-checks",
+        "image-flood/exact-padding-counterexample-fixed",
+        "image-flood/thirty-six-child-cold-checkout",
+        "image-flood/independent-review"
       ],
       "prerequisites": [
         "Replay original image files, ROI/borders/stride/colorspace and native pixel outputs; isolate codec metadata and GPU pixel work."
@@ -11507,8 +10612,8 @@
       "experiments": [
         "20261110T090659.627848Z-R3-host-contract-review-6e5a45758c"
       ],
-      "current_status": "PARTIAL",
-      "current_reason": "使用HIP connected-region equal/gradient/range/boundary kernels + GPU area/bbox metadata；6个预登记case通过独立CPU与同输入兼容CUDA数学基线。五种GPU连接/gradient/range/boundary路径及区域统计已验收；原生NPP+ SDK缺失，原例完整paint值/metadata结构和边界策略未逐项等价。",
+      "current_status": "PASSED",
+      "current_reason": "完整五模式/两原图/五RGB产品C++入口；29全量输入、4流程20RGB、72运行合同、18CLI、60基础验收器与16资格门反例、真实GPU trace、36子记录冷检出及独立复审通过。项目固定seed八连通/内边界与原生NPP+的分区和元数据差异单列；项目GPU对独立CPU逐字节精确。",
       "remaining_contract": [
         "batches12_15/native-NPPPlus-five-mode-metadata-and-paint-contract"
       ],
@@ -11518,7 +10623,7 @@
       "candidate_route": "rocJPEG / RPP / project HIP with per-pixel reference",
       "cost_class": "L",
       "source_sha256": "b607b3cc985c64e4504fa62a9e08f0fd296821737726f87d90d74653c683eb5c",
-      "active_batch": null
+      "active_batch": "I3"
     },
     {
       "sample_id": "NPP+/watershedSegmentation::watershedSegmentationNPPPlus.cpp",

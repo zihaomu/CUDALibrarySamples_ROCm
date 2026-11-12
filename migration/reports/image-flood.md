@@ -1,6 +1,6 @@
 # 完整 RGB flood fill 实现与实验记录
 
-状态：**实施中，尚未签发整例资格**。项目保持249通过、图像10/26通过。
+状态：**PASSED，整例资格已签发并发布**。发布后项目250通过、图像11/26通过；验收限于下述固定种子八连接算法变体。
 
 入口：`NPP+/floodFill::floodFillVariousRegionTypesNPPPlus.cpp`。实际计算为项目 HIP；复用未修改的八连通 GPU union-find 核心。生产 CPU 只负责文件、参数和调度，连接、区域填色、边界、count/bbox/seed 信息全部在 GPU 生成。
 
@@ -24,7 +24,8 @@ C ABI1，descriptor160字节，支持byte pitch、相同pitch的精确原地alia
 | CLI/追踪 | [18项CLI与畸形文件独立检查](image-flood-cli-validation.json) · [真实GPU trace](image-flood-trace-validation.json)：五种GPU阶段均有实际dispatch，全部RGB/mask/metadata仍由CPU核对 |
 | 验收器反例 | [30项核心读取器检查](image-flood-checks.json) · [30项运行时/CLI/原例读取器检查](image-flood-runtime-checks.json)：均含完整归档重定位正例；拒绝伪造输出、配对hash、buffer/stream/命令及原例产品 |
 | 干净检出 | [固定提交重放](image-flood-cold.json)：无预建库的新克隆重建四合同、HIP和C++，29全图、4原例、72运行、18CLI、trace及五独立CPU检查全部通过，36份完整子实验封存；第一次外层容器重入失败另存原始日志 |
-| 发布资格反向检查 | [16项实际门槛检查](image-flood-qualification-checks.json)：36子记录唯一性、实际run/results封存对应、旧padding失败真实性、编译/原生执行配方，以及像素与hash同步改写和子合同内容改写的拒绝均通过。固定资格尚待新源码独立复审 |
+| 发布资格反向检查 | [16项实际门槛检查](image-flood-qualification-checks.json)：36子记录唯一性、实际run/results封存对应、旧padding失败真实性、编译/原生执行配方，以及像素与hash同步改写和子合同内容改写的拒绝均通过。三范围[独立复审](image-flood-review.json)与[21项组合资格](image-flood-qualification.json)全部通过 |
+| 发布门 | [未锚定拒绝](image-flood-new-anchor-gate-corrected.json)保留目录不变；第一次[当前源码闭包拒绝](image-flood-historical-source-gate.json)指出旧失败源不应纳入当前选中引用。修正后旧记录列在`historical_evidence_references`并以封印/字节/CAS绑定，通过证据另列 |
 | 当前原生NPP+ | [未改五原例执行](image-I3-native-originals.json) · [flood完整比较](image-flood-native-validation.json)：源码/输入/binary/实际SDK/GPU receipt及两输入五完整产品验证；数值差异单列 |
 | 历史捆绑文件 | [CPU研究](image-I3-flood-bundled-research.json)，仅为旧vendor文件观察，和新的实际native记录分开 |
 
@@ -36,7 +37,7 @@ C ABI1，descriptor160字节，支持byte pitch、相同pitch的精确原地alia
 
 GPU图像计算均在物理GPU1；物理GPU0只创建/查询空的外设备stream，未存储图像或运行图像kernel。两实例并发验证使用实际不同流、独立全部地址范围和重叠的API+自身流同步区间。
 
-尚需固定源码独立复审和固定资格发布。完成全部门槛后才把该入口从PARTIAL升级。
+三范围固定源码独立复审与首次Git锚定后，真实publisher通过并将入口从PARTIAL升级为PASSED。该资格不等同于NPP+厂商ABI、逐像素一致或性能资格。
 
 ## 复现
 
