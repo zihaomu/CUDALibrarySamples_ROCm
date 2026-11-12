@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-12T07:30:10.956374+00:00。26入口当前12通过/7部分/7失败。
+更新时间：2026-11-12T07:33:11.184505+00:00。26入口当前12通过/7部分/7失败。
 
-I3：第三份独立复审REQUEST_CHANGES：六CLI/runtime/trace/冷运行的loaded-libraries.json可与伪造ldd stdout配对通过。现资格门逐次解析原始ldd三库唯一路径，核build与OpenCV回执SHA，四类ldd篡改反例加入，35/35本地PASSED。主表冷检出门回退待新源码，维持PARTIAL。
+I3：benchmark最终源码a389b711固定Git冷检出10/10作业、19/19子封存PASSED；主工作区从各自原始ldd和复制子raw重算库身份/命令/数值/源码=True。35项负例按最终源码重跑PASSED。主表PARTIAL/L3，9/11门槛，待三份新复审与组合资格。
 
-证据：`migration/samples.yaml`
+证据：`migration/reports/image-benchmark.md`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

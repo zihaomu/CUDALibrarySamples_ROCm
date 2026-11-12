@@ -1,0 +1,1 @@
+Test CPU-comparison for OpenCV-benchmark-original-CUDA-and-HIP-sealed-semantics, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: none.

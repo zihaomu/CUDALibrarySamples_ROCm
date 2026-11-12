@@ -1,0 +1,1 @@
+Test rocm-trace for OpenCV-benchmark-all-four-actual-GPU-kernel-traces, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T073129.774256Z-I3-rocm-build-1b324695a9.
