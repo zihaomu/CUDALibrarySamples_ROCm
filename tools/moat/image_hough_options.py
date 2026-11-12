@@ -6,31 +6,24 @@ from snapshot import capture
 from image_progress import record
 from image_hough_reference import validate
 
-CASE_PATH=ROOT/'tests/fixtures/image-hough/cross.raw'
-BLANK=ROOT/'tests/fixtures/image-hough/blank.raw'
-CASES=[
-    ('low-vote-threshold',CASE_PATH,['-t','8','-n','0']),
-    ('maximum-one-line',CASE_PATH,['-t','8','-m','1','-n','0']),
-    ('changed-canny-thresholds',CASE_PATH,['-cl','50','-ch','100','-n','0']),
-    ('combined-nondefault-timed',CASE_PATH,['-t','8','-m','2','-cl','50','-ch','100','-n','2']),
-    ('blank-low-threshold',BLANK,['-t','1','-n','0']),
-]
+PROFILE=ROOT/'migration/rewrite/image-hough-options-profile.json'
 
 def main():
     build=json.loads((ROOT/'migration/reports/image-hough-build.json').read_text())
     if build['status']!='BUILT' or any(digest(ROOT/n)!=h for n,h in build['dependencies'].items()):
         raise ValueError('current Hough binary required')
+    spec=json.loads(PROFILE.read_text())
+    if spec['status']!='FROZEN' or spec['case_count']!=len(spec['cases'])==5 or len({c['case'] for c in spec['cases']})!=5:
+        raise ValueError('fixed five-option contract')
     rows=[]
-    for name,path,options in CASES:
-        case=dict(case='raw-option-'+name,kind='valid',arguments=['-i',str(path.relative_to(ROOT)),
-                  '-w','256','-h','192',*options],width=256,height=192,
-                  input=str(path.relative_to(ROOT)),sha256=digest(path),bytes=path.stat().st_size,
-                  expected_return_code=0,products=['hough_result.ppm','stdout'])
+    for case in spec['cases']:
+        path=ROOT/case['input'];name=case['case'].removeprefix('raw-option-')
+        if path.stat().st_size!=case['bytes'] or digest(path)!=case['sha256']:raise ValueError('fixed RAW input bytes')
         e=Experiment('I3','Hough-valid-nondefault-original-options','rocm-original',case=case['case'],
                      sources=[__file__,ROOT/'tools/moat/image_hough_reference.py',path,
-                              ROOT/'migration/rewrite/image-hough-profile.json'])
+                              ROOT/'migration/rewrite/image-hough-profile.json',PROFILE])
         write(e.path/'backend.observed.json',capture());out=e.path/'outputs';out.mkdir(exist_ok=True)
-        args=case['arguments'].copy();args[1]=str(path)
+        args=case['arguments'].copy();args[args.index('-i')+1]=str(path)
         rc=e.command([str(ROOT/build['binary']),*args],'execute-valid-nondefault-options',cwd=out,timeout=180)
         ppm=out/'hough_result.ppm'
         line_file=out/'hough_lines.csv'

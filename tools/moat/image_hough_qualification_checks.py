@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 """Mutation checks for Hough qualification and copied cold child archives."""
-import copy,json
+import copy,json,shutil,tempfile
 from pathlib import Path
 from unittest.mock import patch
 from experiment import ROOT,Experiment,write,digest
 from image_progress import record
 import qualify_image_hough as q
 
-NAMES=['real-43-child-cold-archive','actual-14-CPU-reference-gate',
+NAMES=['real-45-child-cold-archive','actual-14-CPU-reference-gate',
        'duplicate-original-CLI','forged-PPM-SHA','forged-line-CSV-SHA',
        'forged-CPU-result','forged-nondefault-parameter-result',
        'forged-runtime-result','missing-GPU-vote-dispatch',
-       'forged-native-pixel-difference','altered-cold-child-file']
+       'forged-native-pixel-difference','altered-cold-child-file',
+       'coupled-cold-PPM-report-and-seal-forgery']
 
 def run_checks():
     checks=[];original=q.load
@@ -40,7 +41,7 @@ def run_checks():
     check(NAMES[6],lambda:mutation('options',lambda rows:rows[0]['validation'].update(status='FAILED'),
                                    'five-valid-nondefault-parameter-and-1196-peak-complete-products'),False)
     check(NAMES[7],lambda:mutation('runtime',lambda row:row.update(status='FAILED'),
-                                   'eleven-real-device-runtime-and-all-peaks-independent-CPU'),False)
+                                   'nineteen-real-device-runtime-and-all-peaks-independent-CPU'),False)
     check(NAMES[8],lambda:mutation('trace',lambda row:row['counts'].update(cast_votes=0),
                                    'five-actual-Canny-and-Hough-GPU-dispatches-on-physical-one'),False)
     check(NAMES[9],lambda:mutation('native-comparison',lambda row:row.update(differing_RGB_pixels=0),
@@ -49,19 +50,36 @@ def run_checks():
     target=parent/'child-evidence/contracts/0/profile.json';real_digest=q.digest
     def wrong(path):return '0'*64 if Path(path)==target else real_digest(path)
     with patch.object(q,'digest',wrong):check(NAMES[10],lambda:q.cold_verify(cold),False)
+    with tempfile.TemporaryDirectory(prefix='hough-cold-coupled-') as temporary:
+        root=Path(temporary)
+        changed=copy.deepcopy(cold)
+        for child in changed['children']:
+            source=parent/child['relative'];dest=root/child['relative'];dest.parent.mkdir(parents=True,exist_ok=True)
+            if child['name']=='runs' and child['index']==1:shutil.copytree(source,dest)
+            else:dest.symlink_to(source,target_is_directory=True)
+        child=next(c for c in changed['children'] if c['name']=='runs' and c['index']==1)
+        target=root/child['relative'];ppm=target/'outputs/hough_result.ppm'
+        data=bytearray(ppm.read_bytes());data[-1]^=1;ppm.write_bytes(data)
+        row=json.loads((target/'run.json').read_text());row['ppm_sha256']=digest(ppm)
+        write(target/'run.json',row);child['report']['ppm_sha256']=row['ppm_sha256']
+        seal=target/'child-seal.json';members=json.loads(seal.read_text())
+        for filename in ['outputs/hough_result.ppm','run.json']:
+            file=target/filename;members['files'][filename]=dict(bytes=file.stat().st_size,sha256=digest(file))
+        write(seal,members)
+        check(NAMES[11],lambda:q.cold_verify(changed,parent_override=root),False)
     if [c['check'] for c in checks]!=NAMES:raise ValueError('fixed Hough mutation suite')
     return dict(status='PASSED' if all(c['passed'] for c in checks) else 'FAILED',
                 case_count=len(checks),checks=checks)
 
 def main():
-    path=ROOT/'migration/rewrite/image-hough-qualification-checks.json'
+    path=ROOT/'migration/rewrite/image-hough-qualification-checks-v2.json'
     if not path.exists():
         contract=Experiment('I3','Hough-qualification-mutation-contract','CPU-contract',sources=[__file__,ROOT/'migration/rewrite/image-hough-profile.json'])
         write(path,NAMES);write(contract.path/'cases.json',NAMES)
         result=dict(status='FROZEN',case_count=len(NAMES));write(contract.path/'contracts.json',result)
         result['evidence']=contract.finish('OBSERVED')
-        write(ROOT/'migration/reports/image-hough-qualification-check-contract.json',result)
-        record('I3','Hough组合资格与43子封印的11项正反向检查合同冻结。',[result['evidence']])
+        write(ROOT/'migration/reports/image-hough-qualification-check-contract-v2.json',result)
+        record('I3','Hough组合资格与45子封印的12项正反向检查合同冻结。',[result['evidence']])
     if json.loads(path.read_text())!=NAMES:raise ValueError('fixed Hough mutation names')
     e=Experiment('I3','Hough-actual-qualification-mutations','CPU-validator-test',
                  sources=[__file__,ROOT/'tools/moat/qualify_image_hough.py',path,ROOT/'migration/rewrite/image-hough-profile.json'])
@@ -69,7 +87,7 @@ def main():
     result['evidence']=e.finish('PASSED' if result['status']=='PASSED' else 'VALIDATOR_GAP',
                                 dict(status=result['status'],checks=result['checks']))
     write(ROOT/'migration/reports/image-hough-qualification-checks.json',result)
-    record('I3','Hough11项实际组合资格与子封印正反向变异：'+result['status']+'。',[result['evidence']])
+    record('I3','Hough12项实际组合资格与子封印正反向变异：'+result['status']+'。',[result['evidence']])
     print(result['status'],[c['check'] for c in result['checks'] if not c['passed']])
     return int(result['status']!='PASSED')
 

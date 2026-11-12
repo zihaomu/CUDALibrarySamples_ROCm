@@ -7,9 +7,11 @@ from snapshot import capture
 from image_progress import record
 from image_hough_build import dependencies
 
-NAMES=['normal','changed-to-zero','restore','null-input','zero-threshold','wrong-capacity',
+NAMES=['normal','changed-to-zero','restore','default-stream','null-input','zero-threshold','wrong-capacity',
        'host-input','short-physical-allocation','overlap-count-and-peaks',
-       'overlap-input-and-output','host-count']
+       'overlap-input-and-output','host-count','misaligned-peaks','misaligned-count',
+       'destroyed-stream','invalid-storage-preserved',
+       'large-grid-plan','large-zero-8192','fp32-half-grid']
 
 def main():
     build=json.loads((ROOT/'migration/reports/image-hough-build.json').read_text())
@@ -35,11 +37,16 @@ def main():
                 dict(check='actual-process-exit',passed=rc==0),
                 dict(check='current-library-build',passed=all(digest(ROOT/n)==h for n,h in build['dependencies'].items()))]
         if len(rows)==len(NAMES):
-            normal,zero,restore=rows[:3]
+            normal,zero,restore,default=rows[:4]
             checks += [dict(check='normal-nonempty-GPU-peaks',passed=normal[1]=='0' and int(normal[2])>0 and len(normal)==int(normal[2])+3),
                        dict(check='changed-input-returns-zero',passed=zero==['changed-to-zero','0','0']),
                        dict(check='restored-input-reproduces-peaks',passed=restore[1:]==normal[1:]),
-                       dict(check='all-invalid-spans-and-parameters-rejected',passed=all(int(r[1])!=0 for r in rows[3:]))]
+                       dict(check='default-stream-reproduces-peaks',passed=default[1:]==normal[1:]),
+                       dict(check='all-invalid-spans-streams-and-parameters-rejected',passed=all(int(r[1])!=0 for r in rows[4:15])),
+                       dict(check='invalid-call-preserves-all-three-device-spans',passed=rows[15]==['invalid-storage-preserved','0','1']),
+                       dict(check='grid-stride-plan-under-32-bit-launch-limit',passed=rows[16]==['large-grid-plan','0','8192'] and 8192*180*256<2**32),
+                       dict(check='actual-over-32-bit-workload-executes',passed=rows[17]==['large-zero-8192','0','0'] and 8192*8192*180>2**32),
+                       dict(check='half-grid-two-pixel-separate-FP32-products',passed=rows[18]==['fp32-half-grid','0','1','147,49,2'])]
         result=dict(status='PASSED' if checks and all(c['passed'] for c in checks) else 'FAILED',
                     return_code=rc,case_count=len(rows),rows=rows,checks=checks,build_evidence=build['evidence'])
     write(e.path/'runtime.json',result)

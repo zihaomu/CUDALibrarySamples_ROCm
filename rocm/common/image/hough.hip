@@ -23,14 +23,16 @@ hipError_t device_span(const void*pointer,size_t bytes,int current){
     return hipSuccess;
 }
 __global__ void cast_votes(const uint8_t* edges,int w,int h,int rows,int* votes){
-    unsigned long long t=static_cast<unsigned long long>(blockIdx.x)*blockDim.x+threadIdx.x;
-    unsigned long long total=static_cast<unsigned long long>(w)*h*180;
-    if(t>=total)return;
-    int theta=t%180,pixel=t/180;
-    if(!edges[pixel])return;
-    int x=pixel%w-(w>>1),y=pixel/w-(h>>1);
-    int rho=__float2int_rn(float(x)*kHoughCos[theta]+float(y)*kHoughSin[theta])+(rows>>1);
-    if(rho>=0&&rho<rows)atomicAdd(votes+theta*rows+rho,1);
+    unsigned long long pixel=static_cast<unsigned long long>(blockIdx.x)*blockDim.x+threadIdx.x;
+    const unsigned long long stride=static_cast<unsigned long long>(gridDim.x)*blockDim.x;
+    const unsigned long long total=static_cast<unsigned long long>(w)*h;
+    const int theta=blockIdx.y;
+    for(;pixel<total;pixel+=stride){
+        if(!edges[pixel])continue;
+        int x=int(pixel%w)-(w>>1),y=int(pixel/w)-(h>>1);
+        int rho=__float2int_rn(float(x)*kHoughCos[theta]+float(y)*kHoughSin[theta])+(rows>>1);
+        if(rho>=0&&rho<rows)atomicAdd(votes+theta*rows+rho,1);
+    }
 }
 __global__ void extract_peaks(const int* votes,int rows,int threshold,
                               RocmHoughPeak* peaks,int* count){
@@ -53,10 +55,17 @@ extern "C" int rocm_image_hough_accumulator_height(int w,int h){
     if(w<16||h<16||w>16384||h>16384)return 0;
     return int(std::ceil(std::sqrt(2.0)*double(w>h?w:h)));
 }
+extern "C" int rocm_image_hough_vote_grid_x(int w,int h){
+    if(!rocm_image_hough_accumulator_height(w,h))return 0;
+    unsigned long long blocks=(static_cast<unsigned long long>(w)*h+255)/256;
+    return int(blocks<8192?blocks:8192);
+}
 extern "C" hipError_t rocm_image_hough_peaks(const uint8_t* edges,int w,int h,
         int threshold,RocmHoughPeak* peaks,int capacity,int* count,hipStream_t stream){
     int rows=rocm_image_hough_accumulator_height(w,h);
-    if(!edges||!peaks||!count||!rows||threshold<1||capacity!=rows*180)
+    if(!edges||!peaks||!count||!rows||threshold<1||capacity!=rows*180
+       ||reinterpret_cast<uintptr_t>(peaks)%alignof(RocmHoughPeak)
+       ||reinterpret_cast<uintptr_t>(count)%alignof(int))
         return hipErrorInvalidValue;
     size_t edge_bytes=size_t(w)*h,peak_bytes=size_t(capacity)*sizeof(RocmHoughPeak);
     if(overlaps(edges,edge_bytes,peaks,peak_bytes)||overlaps(edges,edge_bytes,count,sizeof(int))||
@@ -73,8 +82,7 @@ extern "C" hipError_t rocm_image_hough_peaks(const uint8_t* edges,int w,int h,
     rc=hipMemsetAsync(votes,0,size_t(rows)*180*sizeof(int),stream);
     if(rc==hipSuccess)rc=hipMemsetAsync(count,0,sizeof(int),stream);
     if(rc==hipSuccess){
-        unsigned long long total=static_cast<unsigned long long>(w)*h*180;
-        cast_votes<<<(total+255)/256,256,0,stream>>>(edges,w,h,rows,votes);
+        cast_votes<<<dim3(rocm_image_hough_vote_grid_x(w,h),180,1),256,0,stream>>>(edges,w,h,rows,votes);
         rc=hipGetLastError();
     }
     if(rc==hipSuccess){

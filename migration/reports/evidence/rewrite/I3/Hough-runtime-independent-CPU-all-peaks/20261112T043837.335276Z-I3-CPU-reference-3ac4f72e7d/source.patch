@@ -1,0 +1,555 @@
+diff --git a/rocm/common/image/hough.h b/rocm/common/image/hough.h
+index 9eabf1e38..6ea4e7b1b 100644
+--- a/rocm/common/image/hough.h
++++ b/rocm/common/image/hough.h
+@@ -9,4 +9,5 @@ struct RocmHoughPeak { int rho_index; int theta_degrees; int votes; };
+ extern "C" hipError_t rocm_image_hough_peaks(const uint8_t* edges,int width,int height,
+     int threshold,RocmHoughPeak* peaks,int candidate_capacity,int* count,hipStream_t stream);
+ extern "C" int rocm_image_hough_accumulator_height(int width,int height);
++extern "C" int rocm_image_hough_vote_grid_x(int width,int height);
+ #endif
+diff --git a/rocm/common/image/hough.hip b/rocm/common/image/hough.hip
+index eb88e0666..4f0ed4786 100644
+--- a/rocm/common/image/hough.hip
++++ b/rocm/common/image/hough.hip
+@@ -23,14 +23,16 @@ hipError_t device_span(const void*pointer,size_t bytes,int current){
+     return hipSuccess;
+ }
+ __global__ void cast_votes(const uint8_t* edges,int w,int h,int rows,int* votes){
+-    unsigned long long t=static_cast<unsigned long long>(blockIdx.x)*blockDim.x+threadIdx.x;
+-    unsigned long long total=static_cast<unsigned long long>(w)*h*180;
+-    if(t>=total)return;
+-    int theta=t%180,pixel=t/180;
+-    if(!edges[pixel])return;
+-    int x=pixel%w-(w>>1),y=pixel/w-(h>>1);
+-    int rho=__float2int_rn(float(x)*kHoughCos[theta]+float(y)*kHoughSin[theta])+(rows>>1);
+-    if(rho>=0&&rho<rows)atomicAdd(votes+theta*rows+rho,1);
++    unsigned long long pixel=static_cast<unsigned long long>(blockIdx.x)*blockDim.x+threadIdx.x;
++    const unsigned long long stride=static_cast<unsigned long long>(gridDim.x)*blockDim.x;
++    const unsigned long long total=static_cast<unsigned long long>(w)*h;
++    const int theta=blockIdx.y;
++    for(;pixel<total;pixel+=stride){
++        if(!edges[pixel])continue;
++        int x=int(pixel%w)-(w>>1),y=int(pixel/w)-(h>>1);
++        int rho=__float2int_rn(float(x)*kHoughCos[theta]+float(y)*kHoughSin[theta])+(rows>>1);
++        if(rho>=0&&rho<rows)atomicAdd(votes+theta*rows+rho,1);
++    }
+ }
+ __global__ void extract_peaks(const int* votes,int rows,int threshold,
+                               RocmHoughPeak* peaks,int* count){
+@@ -53,10 +55,17 @@ extern "C" int rocm_image_hough_accumulator_height(int w,int h){
+     if(w<16||h<16||w>16384||h>16384)return 0;
+     return int(std::ceil(std::sqrt(2.0)*double(w>h?w:h)));
+ }
++extern "C" int rocm_image_hough_vote_grid_x(int w,int h){
++    if(!rocm_image_hough_accumulator_height(w,h))return 0;
++    unsigned long long blocks=(static_cast<unsigned long long>(w)*h+255)/256;
++    return int(blocks<8192?blocks:8192);
++}
+ extern "C" hipError_t rocm_image_hough_peaks(const uint8_t* edges,int w,int h,
+         int threshold,RocmHoughPeak* peaks,int capacity,int* count,hipStream_t stream){
+     int rows=rocm_image_hough_accumulator_height(w,h);
+-    if(!edges||!peaks||!count||!rows||threshold<1||capacity!=rows*180)
++    if(!edges||!peaks||!count||!rows||threshold<1||capacity!=rows*180
++       ||reinterpret_cast<uintptr_t>(peaks)%alignof(RocmHoughPeak)
++       ||reinterpret_cast<uintptr_t>(count)%alignof(int))
+         return hipErrorInvalidValue;
+     size_t edge_bytes=size_t(w)*h,peak_bytes=size_t(capacity)*sizeof(RocmHoughPeak);
+     if(overlaps(edges,edge_bytes,peaks,peak_bytes)||overlaps(edges,edge_bytes,count,sizeof(int))||
+@@ -73,8 +82,7 @@ extern "C" hipError_t rocm_image_hough_peaks(const uint8_t* edges,int w,int h,
+     rc=hipMemsetAsync(votes,0,size_t(rows)*180*sizeof(int),stream);
+     if(rc==hipSuccess)rc=hipMemsetAsync(count,0,sizeof(int),stream);
+     if(rc==hipSuccess){
+-        unsigned long long total=static_cast<unsigned long long>(w)*h*180;
+-        cast_votes<<<(total+255)/256,256,0,stream>>>(edges,w,h,rows,votes);
++        cast_votes<<<dim3(rocm_image_hough_vote_grid_x(w,h),180,1),256,0,stream>>>(edges,w,h,rows,votes);
+         rc=hipGetLastError();
+     }
+     if(rc==hipSuccess){
+diff --git a/tools/moat/image_hough_build.py b/tools/moat/image_hough_build.py
+index 74379c83a..f9569db98 100644
+--- a/tools/moat/image_hough_build.py
++++ b/tools/moat/image_hough_build.py
+@@ -18,7 +18,7 @@ def main():
+     overlay=ROOT/'build/rocm-sdk-overlay'
+     common=['hipcc','--rocm-path='+str(overlay),'--hip-path='+str(overlay),
+             '--rocm-device-lib-path='+str(core/'lib/llvm/amdgcn/bitcode'),
+-            '--offload-arch=gfx1201','-std=c++17','-O2','-D__HIP_PLATFORM_AMD__']
++            '--offload-arch=gfx1201','-std=c++17','-O2','-ffp-contract=off','-D__HIP_PLATFORM_AMD__']
+     lib=e.path/'libimage_hough.so';binary=e.path/'houghLines'
+     rc=e.command([*common,'-fPIC','-x','hip','-shared',
+             *[str(ROOT/'rocm/common/image'/n) for n in ['canny_stages.hip','canny.hip','hough.hip']],
+diff --git a/tools/moat/image_hough_cold.py b/tools/moat/image_hough_cold.py
+index 2c40a2ab2..23e246c28 100644
+--- a/tools/moat/image_hough_cold.py
++++ b/tools/moat/image_hough_cold.py
+@@ -5,7 +5,7 @@ from pathlib import Path
+ from experiment import ROOT,Experiment,write,digest,git
+ from image_progress import record
+ 
+-GROUPS=['contracts','build','runs','validation','options','runtime','runtime-validation','trace']
++GROUPS=['contracts','options-contracts','build','runs','validation','options','runtime','runtime-validation','trace']
+ 
+ def reports(clone):
+     for name in GROUPS:
+@@ -21,9 +21,9 @@ def reports(clone):
+ 
+ def main():
+     commit=git('rev-parse','HEAD').strip()
+-    sources=[__file__,*[ROOT/'tools/moat'/p for p in
++        sources=[__file__,*[ROOT/'tools/moat'/p for p in
+              ['image_hough_contracts.py','image_hough_build.py','image_hough_run.py',
+-              'image_hough_reference.py','image_hough_options.py','image_hough_runtime.py',
++              'image_hough_reference.py','image_hough_options_contracts.py','image_hough_options.py','image_hough_runtime.py',
+               'image_hough_runtime_reference.py','image_hough_trace.py']],
+              ROOT/'migration/rewrite/image-hough-profile.json']
+     e=Experiment('I3','Hough-clean-fixed-checkout-all-CLI-CPU-runtime-trace',
+@@ -37,9 +37,12 @@ def main():
+         cpu=str(ROOT/'build/image-cpu-venv/bin/python')
+         if not rc:rc=e.command([cpu,str(clone/'tools/moat/image_hough_contracts.py')],
+                                 'regenerate-fixed-contract-and-RAW-inputs',cwd=clone,timeout=180)
++        if not rc:rc=e.command([cpu,str(clone/'tools/moat/image_hough_options_contracts.py')],
++                                'regenerate-fixed-valid-option-contract',cwd=clone,timeout=180)
+         expected=ROOT/'migration/rewrite/image-hough-profile.json'
+         checks.append(dict(check='identical-frozen-contract-and-five-RAW-fixtures',
+                            passed=rc==0 and digest(clone/'migration/rewrite/image-hough-profile.json')==digest(expected)
++                           and digest(clone/'migration/rewrite/image-hough-options-profile.json')==digest(ROOT/'migration/rewrite/image-hough-options-profile.json')
+                            and all(digest(clone/'tests/fixtures/image-hough'/p.name)==digest(p)
+                                    for p in sorted((ROOT/'tests/fixtures/image-hough').glob('*.raw')))))
+         jobs=[('tools/migration/bootstrap_sdk.py',False),
+@@ -57,14 +60,14 @@ def main():
+             rc=e.command(argv,'cold-'+Path(name).stem,cwd=clone,env=env,timeout=1200)
+         checks.append(dict(check='clean-rebuild-19-full-CLI-CPU-runtime-and-real-trace',passed=rc==0))
+         rows=list(reports(clone)) if not rc else []
+-        count={'contracts':1,'build':1,'runs':14,'validation':14,'options-run':5,
++        count={'contracts':1,'options-contracts':1,'build':1,'runs':14,'validation':14,'options-run':5,
+                'options-validation':5,'runtime':1,'runtime-validation':1,'trace':1}
+         from collections import Counter
+-        checks.append(dict(check='complete-43-sealed-child-inventory',
+-                           passed=len(rows)==43 and Counter(name for name,_,_ in rows)==count
++        checks.append(dict(check='complete-44-sealed-child-inventory',
++                           passed=len(rows)==44 and Counter(name for name,_,_ in rows)==count
+                            and all(row.get('evidence') for _,_,row in rows)))
+         checks.append(dict(check='all-cold-results-passed-and-build-current',
+-                           passed=rc==0 and len(rows)==43
++                           passed=rc==0 and len(rows)==44
+                            and all(row.get('status') in {'FROZEN','BUILT','EXECUTED','PASSED'} for _,_,row in rows)
+                            and json.loads((clone/'migration/reports/image-hough-build.json').read_text())['dependencies']==
+                            {n:digest(ROOT/n) for n in json.loads((ROOT/'migration/reports/image-hough-build.json').read_text())['dependencies']}))
+@@ -82,7 +85,7 @@ def main():
+                     if digest(src)!=digest(dst):raise ValueError('source object collision')
+                 else:shutil.copyfile(src,dst)
+             children.append(dict(name=name,index=index,relative=str(dest.relative_to(e.path)),report=row))
+-        checks.append(dict(check='all-forty-three-complete-children-copied',passed=len(children)==43))
++        checks.append(dict(check='all-forty-four-complete-children-copied',passed=len(children)==44))
+     except Exception as error:
+         checks.append(dict(check='cold-replay-finished',passed=False,error=repr(error)));rc=rc or 1
+     checks.append(dict(check='final-return-code',passed=rc==0))
+@@ -92,7 +95,7 @@ def main():
+     write(e.path/'cold.json',result)
+     result['evidence']=e.finish('PASSED' if status=='PASSED' else 'SELF_TEST_FAILED',dict(status=status,checks=checks))
+     write(ROOT/'migration/reports/image-hough-cold.json',result)
+-    record('I3','Hough固定Git检出重建合同/RAW、HIP/C++、14主CLI+5有效参数、全部独立CPU、运行合同与GPU trace及43子记录：'+status,[result['evidence']])
++    record('I3','Hough固定Git检出重建双合同/RAW、HIP/C++、14主CLI+5有效参数、全部独立CPU、运行合同与GPU trace及44子记录：'+status,[result['evidence']])
+     print(status,result['evidence'])
+     return int(status!='PASSED')
+ 
+diff --git a/tools/moat/image_hough_options.py b/tools/moat/image_hough_options.py
+index 0e19984b6..6b301976d 100644
+--- a/tools/moat/image_hough_options.py
++++ b/tools/moat/image_hough_options.py
+@@ -6,31 +6,24 @@ from snapshot import capture
+ from image_progress import record
+ from image_hough_reference import validate
+ 
+-CASE_PATH=ROOT/'tests/fixtures/image-hough/cross.raw'
+-BLANK=ROOT/'tests/fixtures/image-hough/blank.raw'
+-CASES=[
+-    ('low-vote-threshold',CASE_PATH,['-t','8','-n','0']),
+-    ('maximum-one-line',CASE_PATH,['-t','8','-m','1','-n','0']),
+-    ('changed-canny-thresholds',CASE_PATH,['-cl','50','-ch','100','-n','0']),
+-    ('combined-nondefault-timed',CASE_PATH,['-t','8','-m','2','-cl','50','-ch','100','-n','2']),
+-    ('blank-low-threshold',BLANK,['-t','1','-n','0']),
+-]
++PROFILE=ROOT/'migration/rewrite/image-hough-options-profile.json'
+ 
+ def main():
+     build=json.loads((ROOT/'migration/reports/image-hough-build.json').read_text())
+     if build['status']!='BUILT' or any(digest(ROOT/n)!=h for n,h in build['dependencies'].items()):
+         raise ValueError('current Hough binary required')
++    spec=json.loads(PROFILE.read_text())
++    if spec['status']!='FROZEN' or spec['case_count']!=len(spec['cases'])==5 or len({c['case'] for c in spec['cases']})!=5:
++        raise ValueError('fixed five-option contract')
+     rows=[]
+-    for name,path,options in CASES:
+-        case=dict(case='raw-option-'+name,kind='valid',arguments=['-i',str(path.relative_to(ROOT)),
+-                  '-w','256','-h','192',*options],width=256,height=192,
+-                  input=str(path.relative_to(ROOT)),sha256=digest(path),bytes=path.stat().st_size,
+-                  expected_return_code=0,products=['hough_result.ppm','stdout'])
++    for case in spec['cases']:
++        path=ROOT/case['input'];name=case['case'].removeprefix('raw-option-')
++        if path.stat().st_size!=case['bytes'] or digest(path)!=case['sha256']:raise ValueError('fixed RAW input bytes')
+         e=Experiment('I3','Hough-valid-nondefault-original-options','rocm-original',case=case['case'],
+                      sources=[__file__,ROOT/'tools/moat/image_hough_reference.py',path,
+-                              ROOT/'migration/rewrite/image-hough-profile.json'])
++                              ROOT/'migration/rewrite/image-hough-profile.json',PROFILE])
+         write(e.path/'backend.observed.json',capture());out=e.path/'outputs';out.mkdir(exist_ok=True)
+-        args=case['arguments'].copy();args[1]=str(path)
++        args=case['arguments'].copy();args[args.index('-i')+1]=str(path)
+         rc=e.command([str(ROOT/build['binary']),*args],'execute-valid-nondefault-options',cwd=out,timeout=180)
+         ppm=out/'hough_result.ppm'
+         line_file=out/'hough_lines.csv'
+diff --git a/tools/moat/image_hough_reference.py b/tools/moat/image_hough_reference.py
+index fb0bec54c..bc477470c 100644
+--- a/tools/moat/image_hough_reference.py
++++ b/tools/moat/image_hough_reference.py
+@@ -70,13 +70,14 @@ def ppm(image,lines):
+                 if 0<=x<w:rgb[y,x]=[255,40,40]
+     return f'P6\n{w} {h}\n255\n'.encode()+rgb.tobytes()
+ 
+-def validate(case,row):
+-    ref=ROOT/row['evidence'];raw=ROOT/json.loads((ref/'manifest.json').read_text())['raw_artifact_dir']
++def validate(case,row,proof_override=None,raw_override=None,expected_binary=None):
++    ref=Path(proof_override) if proof_override else ROOT/row['evidence']
++    raw=Path(raw_override) if raw_override else ROOT/json.loads((ref/'manifest.json').read_text())['raw_artifact_dir']
+     cmd=json.loads((ref/'commands.json').read_text())[0]
+     stdout=(ref/cmd['stdout']).read_text()
+     stderr=(ref/cmd['stderr']).read_text()
+     checks=[dict(check='actual-process-and-frozen-return-code',passed=row['status']=='EXECUTED' and cmd['return_code']==row['return_code']==case['expected_return_code']),
+-            dict(check='binary-and-command-source',passed=cmd['argv'][0]==str(ROOT/json.loads((ROOT/'migration/reports/image-hough-build.json').read_text())['binary'])),
++            dict(check='binary-and-command-source',passed=cmd['argv'][0]==(expected_binary or str(ROOT/json.loads((ROOT/'migration/reports/image-hough-build.json').read_text())['binary']))),
+             dict(check='device-identity',passed={d['physical_id'] for d in json.loads((ref/'backend.observed.json').read_text())['devices']}=={1})]
+     if case['kind']=='valid':
+         w,h=case['width'],case['height'];image=synthetic(w,h) if case['case'].startswith('synthetic') else np.fromfile(ROOT/case['input'],np.uint8).reshape(h,w)
+diff --git a/tools/moat/image_hough_runtime.cpp b/tools/moat/image_hough_runtime.cpp
+index f41fe2d58..b48baf6e8 100644
+--- a/tools/moat/image_hough_runtime.cpp
++++ b/tools/moat/image_hough_runtime.cpp
+@@ -39,6 +39,7 @@ int main(){
+     show("changed-to-zero",rocm_image_hough_peaks(edge,w,h,8,peaks,capacity,count,stream),count,peaks,capacity,stream);
+     check(hipMemcpyAsync(edge,host,sizeof(host),hipMemcpyHostToDevice,stream),"restore-input");
+     show("restore",rocm_image_hough_peaks(edge,w,h,8,peaks,capacity,count,stream),count,peaks,capacity,stream);
++    show("default-stream",rocm_image_hough_peaks(edge,w,h,8,peaks,capacity,count,nullptr),count,peaks,capacity,nullptr);
+     show("null-input",rocm_image_hough_peaks(nullptr,w,h,8,peaks,capacity,count,stream));
+     show("zero-threshold",rocm_image_hough_peaks(edge,w,h,0,peaks,capacity,count,stream));
+     show("wrong-capacity",rocm_image_hough_peaks(edge,w,h,8,peaks,capacity-1,count,stream));
+@@ -48,6 +49,24 @@ int main(){
+     show("overlap-count-and-peaks",rocm_image_hough_peaks(edge,w,h,8,peaks,capacity,reinterpret_cast<int*>(peaks),stream));
+     show("overlap-input-and-output",rocm_image_hough_peaks(edge,w,h,8,reinterpret_cast<RocmHoughPeak*>(edge),capacity,count,stream));
+     int host_count=0;show("host-count",rocm_image_hough_peaks(edge,w,h,8,peaks,capacity,&host_count,stream));
++    show("misaligned-peaks",rocm_image_hough_peaks(edge,w,h,8,reinterpret_cast<RocmHoughPeak*>(reinterpret_cast<uint8_t*>(peaks)+1),capacity,count,stream));
++    show("misaligned-count",rocm_image_hough_peaks(edge,w,h,8,peaks,capacity,reinterpret_cast<int*>(reinterpret_cast<uint8_t*>(count)+1),stream));
++    std::printf("large-grid-plan|0|%d\n",rocm_image_hough_vote_grid_x(16384,16384));
++    constexpr int large=8192;const int largecap=rocm_image_hough_accumulator_height(large,large)*180;
++    uint8_t*large_edges=nullptr;RocmHoughPeak*large_peaks=nullptr;
++    check(hipMalloc(&large_edges,size_t(large)*large),"large-edges");
++    check(hipMalloc(&large_peaks,size_t(largecap)*sizeof(*large_peaks)),"large-peaks");
++    check(hipMemsetAsync(large_edges,0,size_t(large)*large,stream),"large-zero-input");
++    show("large-zero-8192",rocm_image_hough_peaks(large_edges,large,large,1,large_peaks,largecap,count,stream),count,large_peaks,largecap,stream);
++    check(hipFree(large_edges),"free-large-edges");check(hipFree(large_peaks),"free-large-peaks");
++    constexpr int fpw=256;const int fpcap=rocm_image_hough_accumulator_height(fpw,fpw)*180;
++    uint8_t*fp_edges=nullptr;RocmHoughPeak*fp_peaks=nullptr;
++    check(hipMalloc(&fp_edges,fpw*fpw),"fp32-edges");
++    check(hipMalloc(&fp_peaks,size_t(fpcap)*sizeof(*fp_peaks)),"fp32-peaks");
++    uint8_t fp_host[fpw*fpw]{};fp_host[164*fpw+34]=255;fp_host[100*fpw+108]=255;
++    check(hipMemcpyAsync(fp_edges,fp_host,sizeof(fp_host),hipMemcpyHostToDevice,stream),"fp32-input");
++    show("fp32-half-grid",rocm_image_hough_peaks(fp_edges,fpw,fpw,2,fp_peaks,fpcap,count,stream),count,fp_peaks,fpcap,stream);
++    check(hipFree(fp_edges),"free-fp32-edges");check(hipFree(fp_peaks),"free-fp32-peaks");
+     check(hipFree(short_edge),"free-short");
+     check(hipFree(edge),"free-edge");check(hipFree(peaks),"free-peaks");check(hipFree(count),"free-count");
+     check(hipStreamDestroy(stream),"destroy-stream");
+diff --git a/tools/moat/image_hough_runtime.py b/tools/moat/image_hough_runtime.py
+index f7efb5d78..4264cd426 100644
+--- a/tools/moat/image_hough_runtime.py
++++ b/tools/moat/image_hough_runtime.py
+@@ -7,9 +7,10 @@ from snapshot import capture
+ from image_progress import record
+ from image_hough_build import dependencies
+ 
+-NAMES=['normal','changed-to-zero','restore','null-input','zero-threshold','wrong-capacity',
++NAMES=['normal','changed-to-zero','restore','default-stream','null-input','zero-threshold','wrong-capacity',
+        'host-input','short-physical-allocation','overlap-count-and-peaks',
+-       'overlap-input-and-output','host-count']
++       'overlap-input-and-output','host-count','misaligned-peaks','misaligned-count',
++       'large-grid-plan','large-zero-8192','fp32-half-grid']
+ 
+ def main():
+     build=json.loads((ROOT/'migration/reports/image-hough-build.json').read_text())
+@@ -35,11 +36,15 @@ def main():
+                 dict(check='actual-process-exit',passed=rc==0),
+                 dict(check='current-library-build',passed=all(digest(ROOT/n)==h for n,h in build['dependencies'].items()))]
+         if len(rows)==len(NAMES):
+-            normal,zero,restore=rows[:3]
++            normal,zero,restore,default=rows[:4]
+             checks += [dict(check='normal-nonempty-GPU-peaks',passed=normal[1]=='0' and int(normal[2])>0 and len(normal)==int(normal[2])+3),
+                        dict(check='changed-input-returns-zero',passed=zero==['changed-to-zero','0','0']),
+                        dict(check='restored-input-reproduces-peaks',passed=restore[1:]==normal[1:]),
+-                       dict(check='all-invalid-spans-and-parameters-rejected',passed=all(int(r[1])!=0 for r in rows[3:]))]
++                       dict(check='default-stream-reproduces-peaks',passed=default[1:]==normal[1:]),
++                       dict(check='all-invalid-spans-and-parameters-rejected',passed=all(int(r[1])!=0 for r in rows[4:14])),
++                       dict(check='grid-stride-plan-under-32-bit-launch-limit',passed=rows[14]==['large-grid-plan','0','8192'] and 8192*180*256<2**32),
++                       dict(check='actual-over-32-bit-workload-executes',passed=rows[15]==['large-zero-8192','0','0'] and 8192*8192*180>2**32),
++                       dict(check='half-grid-two-pixel-separate-FP32-products',passed=rows[16]==['fp32-half-grid','0','1','147,49,2'])]
+         result=dict(status='PASSED' if checks and all(c['passed'] for c in checks) else 'FAILED',
+                     return_code=rc,case_count=len(rows),rows=rows,checks=checks,build_evidence=build['evidence'])
+     write(e.path/'runtime.json',result)
+diff --git a/tools/moat/image_hough_runtime_reference.py b/tools/moat/image_hough_runtime_reference.py
+index 7ab86b967..3d99e662f 100644
+--- a/tools/moat/image_hough_runtime_reference.py
++++ b/tools/moat/image_hough_runtime_reference.py
+@@ -4,6 +4,8 @@ import json,math
+ import numpy as np
+ from experiment import ROOT,Experiment,write
+ from image_progress import record
++from image_hough_runtime import NAMES
++from pathlib import Path
+ 
+ def expected():
+     w=h=16;rows=math.ceil(math.sqrt(2.)*16);edge=np.zeros((h,w),np.uint8);edge[8,:]=255
+@@ -22,23 +24,28 @@ def expected():
+         peaks.append((int(rho),int(theta),int(v)))
+     return sorted(peaks,key=lambda p:(p[1],p[0]))
+ 
+-def main():
+-    run=json.loads((ROOT/'migration/reports/image-hough-runtime.json').read_text())
++def validate(run,proof_override=None):
+     wanted=expected();rows=run['rows'];actual=[tuple(map(int,p.split(','))) for p in rows[0][3:]]
+     restored=[tuple(map(int,p.split(','))) for p in rows[2][3:]]
+     checks=[dict(check='independent-complete-peak-set',passed=actual==wanted,expected=wanted,actual=actual),
+             dict(check='changed-input-zero-and-restored-peak-set',passed=rows[1]==['changed-to-zero','0','0'] and restored==wanted),
+-            dict(check='eleven-actual-runtime-cases',passed=run['status']=='PASSED' and run['case_count']==11),
+-            dict(check='physical-GPU1',passed={d['physical_id'] for d in json.loads((ROOT/run['evidence']/'backend.observed.json').read_text())['devices']}=={1})]
++            dict(check='seventeen-actual-runtime-cases',passed=run['status']=='PASSED' and run['case_count']==len(rows)==len(NAMES)==17 and [r[0] for r in rows]==NAMES and rows[3][1:]==rows[0][1:] and rows[15]==['large-zero-8192','0','0'] and rows[16]==['fp32-half-grid','0','1','147,49,2']),
++            dict(check='all-invalid-parameters-and-spans-rejected',passed=all(int(r[1])!=0 for r in rows[4:14])),
++            dict(check='large-grid-plan-under-launch-limit',passed=rows[14]==['large-grid-plan','0','8192'] and 8192*180*256<2**32 and 8192*8192*180>2**32),
++            dict(check='physical-GPU1',passed={d['physical_id'] for d in json.loads(((Path(proof_override) if proof_override else ROOT/run['evidence'])/'backend.observed.json').read_text())['devices']}=={1})]
+     status='PASSED' if all(c['passed'] for c in checks) else 'FAILED'
++    return dict(status=status,checks=checks,peak_count=len(wanted),runtime_evidence=run['evidence'])
++
++def main():
++    run=json.loads((ROOT/'migration/reports/image-hough-runtime.json').read_text())
++    result=validate(run);status=result['status'];checks=result['checks']
+     e=Experiment('I3','Hough-runtime-independent-CPU-all-peaks','CPU-reference',parent=run['evidence'].split('/')[-1],
+                  sources=[__file__,ROOT/'migration/reports/image-hough-runtime.json',ROOT/'tools/moat/image_hough_runtime.cpp'])
+-    result=dict(status=status,checks=checks,peak_count=len(wanted),runtime_evidence=run['evidence'])
+     write(e.path/'results.json',result)
+     result['evidence']=e.finish('PASSED' if status=='PASSED' else 'NUMERIC_MISMATCH',dict(status=status,checks=checks))
+     write(ROOT/'migration/reports/image-hough-runtime-validation.json',result)
+-    record('I3','Hough运行合同正常/变化/恢复的全部GPU峰由独立CPU完整重算：'+status+'；其余8类非法跨度/参数真实拒绝。',[result['evidence']])
+-    print(status,len(wanted))
++    record('I3','Hough17组运行合同正常/变化/恢复全部GPU峰由独立CPU重算，含>2^32工作量和FP32半格：'+status+'。',[result['evidence']])
++    print(status,result['peak_count'])
+     return int(status!='PASSED')
+ 
+ if __name__=='__main__':raise SystemExit(main())
+diff --git a/tools/moat/publish_image_hough.py b/tools/moat/publish_image_hough.py
+index a4c88aa01..a15856127 100644
+--- a/tools/moat/publish_image_hough.py
++++ b/tools/moat/publish_image_hough.py
+@@ -2,7 +2,7 @@
+ """Publish the Hough entry only after sealed qualification enters Git."""
+ import json
+ from experiment import ROOT,write,digest
+-from qualify_image_hough import collect,load,SAMPLE,IMPLEMENTATION,COMPARISON
++from qualify_image_hough import collect,load,options_profile,SAMPLE,IMPLEMENTATION,COMPARISON
+ from qualify_canny_plus import sealed
+ from selected_proofs import inspect
+ 
+@@ -14,7 +14,7 @@ def validate(q,sample,review,closure=None):
+         or manifest['experiment_id']!=q['qualification_id'] or manifest['experiment_outcome']!='PASSED'
+         or q['implementation']!=IMPLEMENTATION or q['implementation_sha256']!=digest(ROOT/IMPLEMENTATION)
+         or q['source_commit']!=review['source_commit']):raise ValueError('Hough qualification identity')
+-    ids=[c['case'] for c in p['cases']]+[x['case']['case'] for x in load('options')]
++    ids=[c['case'] for c in p['cases']]+[x['case'] for x in options_profile()['cases']]
+     if (q['status']!='PASSED' or q['checks']!=checks or not all(c['passed'] for c in checks)
+         or set(q['evidence_references'])!=refs or q['dependencies']!=build['dependencies']
+         or q['case_ids']!=ids or q['case_count']!=len(ids)==19
+@@ -34,6 +34,7 @@ def main():
+         'image-hough/complete-native-PPM-and-declared-differences',
+         'image-hough/five-real-GPU-kernel-dispatches',
+         'image-hough/forty-three-child-cold-replay',
++        'image-hough/eleven-qualification-and-archive-mutation-checks',
+         'image-hough/three-independent-fixed-source-reviews']
+     sample.update(status='PASSED',level='L4',reason_code='VALIDATED_MOAT_REWRITE',
+                   implementation=IMPLEMENTATION,selected_validation=q,
+diff --git a/tools/moat/qualify_image_hough.py b/tools/moat/qualify_image_hough.py
+index d22194cce..fc4c03c38 100644
+--- a/tools/moat/qualify_image_hough.py
++++ b/tools/moat/qualify_image_hough.py
+@@ -6,6 +6,7 @@ from experiment import ROOT,Experiment,write,digest
+ from qualify_canny_plus import sealed,reviewed
+ from image_hough_reference import validate
+ from image_hough_build import dependencies
++from image_hough_native_reference import validate as native_validate
+ 
+ SAMPLE='NPP/houghLines::houghLines.cpp'
+ IMPLEMENTATION='rocm/ported/NPP/houghLines/houghLines.cpp'
+@@ -13,21 +14,38 @@ COMPARISON='DOCUMENTED_HOUGH_ACCUMULATOR_VARIANT'
+ 
+ def load(name):return json.loads((ROOT/f'migration/reports/image-hough-{name}.json').read_text())
+ def profile():return json.loads((ROOT/'migration/rewrite/image-hough-profile.json').read_text())
++def options_profile():return json.loads((ROOT/'migration/rewrite/image-hough-options-profile.json').read_text())
++
++def build_command(build,commands,root=ROOT):
++    core=Path('/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core')
++    overlay=root/'build/rocm-sdk-overlay';lib=root/build['library'];binary=root/build['binary']
++    flags=['hipcc','--rocm-path='+str(overlay),'--hip-path='+str(overlay),
++           '--rocm-device-lib-path='+str(core/'lib/llvm/amdgcn/bitcode'),
++           '--offload-arch=gfx1201','-std=c++17','-O2','-ffp-contract=off','-D__HIP_PLATFORM_AMD__']
++    expected=[[*flags,'-fPIC','-x','hip',
++               *[str(root/'rocm/common/image'/n) for n in ['canny_stages.hip','canny.hip','hough.hip']],
++               '-L'+str(core/'lib'),'-Wl,-rpath,'+str(core/'lib'),'-lamdhip64','-o',str(lib)],
++              [*flags,'-x','hip',str(root/IMPLEMENTATION),'-L'+str(lib.parent),'-limage_hough',
++               '-Wl,-rpath,'+str(lib.parent),'-L'+str(core/'lib'),
++               '-Wl,-rpath,'+str(core/'lib'),'-lamdhip64','-o',str(binary)]]
++    return (len(commands)==2 and all(c['return_code']==0 and c['cwd']==str(root)
++            and c['argv']==argv for c,argv in zip(commands,expected)))
+ 
+ def cold_verify(cold):
+-    expected={'contracts':1,'build':1,'runs':14,'validation':14,'options-run':5,
+-              'options-validation':5,'runtime':1,'runtime-validation':1,'trace':1}
++    expected={'contracts':1,'options-contracts':1,'build':1,'runs':14,'validation':14,
++              'options-run':5,'options-validation':5,'runtime':1,'runtime-validation':1,'trace':1}
+     children=cold['children']
+-    if (cold['status']!='PASSED' or cold['return_code']!=0 or len(children)!=43
++    if (cold['status']!='PASSED' or cold['return_code']!=0 or len(children)!=44
+         or collections.Counter(c['name'] for c in children)!=expected
+-        or len({c['relative'] for c in children})!=43
+-        or len({c['report']['evidence'] for c in children})!=43
++        or len({c['relative'] for c in children})!=44
++        or len({c['report']['evidence'] for c in children})!=44
+         or not all(c['passed'] for c in cold['checks'])):return False
+     parent=ROOT/json.loads((ROOT/cold['evidence']/'manifest.json').read_text())['raw_artifact_dir']
++    by=collections.defaultdict(dict)
+     for name,count in expected.items():
+         if {c['index'] for c in children if c['name']==name}!=set(range(count)):return False
+     for child in children:
+-        path=parent/child['relative']
++        name,index=child['name'],child['index'];path=parent/child['relative'];by[name][index]=(child,path)
+         if child['relative']!=f"child-evidence/{child['name']}/{child['index']}":return False
+         seal=json.loads((path/'child-seal.json').read_text())['files']
+         if not {'manifest.json','source.json','validation.json'}<=set(seal):return False
+@@ -35,19 +53,49 @@ def cold_verify(cold):
+         if any((path/name).stat().st_size!=meta['bytes'] or digest(path/name)!=meta['sha256'] for name,meta in seal.items()):return False
+         manifest=json.loads((path/'manifest.json').read_text());source=json.loads((path/'source.json').read_text())
+         if manifest['experiment_id']!=Path(child['report']['evidence']).name or source['commit']!=cold['source_commit']:return False
+-        if any(not (ROOT/obj).is_file() or digest(ROOT/obj)!=sha
+-               for n,sha in source['dependencies'].items()
+-               for obj in [source['source_objects'][n]]):return False
+-        member='contracts.json' if child['name']=='contracts' else 'build.json' if child['name']=='build' else 'run.json' if child['name'] in {'runs','options-run'} else 'results.json' if child['name'] in {'validation','runtime-validation'} else 'runtime.json' if child['name']=='runtime' else 'trace-result.json' if child['name']=='trace' else None
++        for dep,sha in source['dependencies'].items():
++            obj=source['source_objects'][dep]
++            if not (ROOT/obj).is_file() or digest(ROOT/obj)!=sha:return False
++            if not dep.startswith('migration/reports/image-hough-') and (not (ROOT/dep).is_file() or digest(ROOT/dep)!=sha):return False
++        member='contracts.json' if name in {'contracts','options-contracts'} else 'build.json' if name=='build' else 'run.json' if name in {'runs','options-run'} else 'results.json' if name in {'validation','runtime-validation'} else 'runtime.json' if name=='runtime' else 'trace-result.json' if name=='trace' else None
+         if member and json.loads((path/member).read_text())!={k:v for k,v in child['report'].items() if k!='evidence'}:return False
+-        if child['name']=='options-validation':
++        if name=='options-validation':
+             v=json.loads((path/'validation.json').read_text())
+             if v['status']!='PASSED' or v['checks']!=child['report']['checks']:return False
++    main_cases=profile()['cases'];option_cases=options_profile()['cases']
++    if ([by['runs'][i][0]['report']['case'] for i in range(14)]!=[c['case'] for c in main_cases]
++        or [by['validation'][i][0]['report']['case'] for i in range(14)]!=[c['case'] for c in main_cases]
++        or [by['options-run'][i][0]['report']['case'] for i in range(5)]!=[c['case'] for c in option_cases]
++        or [by['options-validation'][i][0]['report']['case'] for i in range(5)]!=[c['case'] for c in option_cases]):return False
++    build,buildpath=by['build'][0];build=build['report'];clone=Path(cold['clone'])
++    if (build['status']!='BUILT' or build['dependencies']!={str(p.relative_to(ROOT)):digest(p) for p in dependencies()}
++        or digest(buildpath/'libimage_hough.so')!=build['library_sha256']
++        or digest(buildpath/'houghLines')!=build['binary_sha256']
++        or not build_command(build,json.loads((buildpath/'commands.json').read_text()),clone)):return False
++    if (json.loads((by['contracts'][0][1]/'profile.json').read_text())!=profile()
++        or json.loads((by['options-contracts'][0][1]/'profile.json').read_text())!=options_profile()):return False
++    binary=str(clone/build['binary'])
++    for group,cases,validation_group in [('runs',main_cases,'validation'),('options-run',option_cases,'options-validation')]:
++        for index,case in enumerate(cases):
++            run,runpath=by[group][index];run=run['report']
++            verified,vpath=by[validation_group][index];verified=verified['report']
++            args=case['arguments'].copy()
++            if '-i' in args:args[args.index('-i')+1]=str(clone/args[args.index('-i')+1])
++            commands=json.loads((runpath/'commands.json').read_text())
++            original_raw=Path(json.loads((runpath/'manifest.json').read_text())['raw_artifact_dir'])
++            if (run['build']!=build['evidence'] or run['arguments']!=args
++                or len(commands)!=1 or commands[0]['argv']!=[binary,*args]
++                or commands[0]['cwd']!=str(original_raw/'outputs')
++                or commands[0]['return_code']!=case['expected_return_code']
++                or json.loads((vpath/'manifest.json').read_text())['parent_experiment_id']!=run['experiment_id']):return False
++            recomputed=json.loads(json.dumps(validate(case,run,proof_override=runpath,
++                                                        raw_override=runpath,expected_binary=binary)))
++            if recomputed!={k:v for k,v in verified.items() if k!='evidence'} or verified['status']!='PASSED':return False
+     return True
+ 
+ def collect(review=None):
+     p=profile();contract=load('contracts');build=load('build');runs=load('runs');cpu=load('validation')
+-    options=load('options');runtime=load('runtime');runtime_cpu=load('runtime-validation')
++    options_contract=load('options-contracts');op=options_profile();options=load('options');runtime=load('runtime');runtime_cpu=load('runtime-validation')
+     trace=load('trace');native=load('native-comparison');cold=load('cold')
+     refs=set();sources={str(x.relative_to(ROOT)) for x in dependencies()};checks=[]
+     def gate(name,fn):
+@@ -78,7 +126,7 @@ def collect(review=None):
+                 and digest(ROOT/build['library'])==build['library_sha256']
+                 and build['dependencies']=={str(x.relative_to(ROOT)):digest(x) for x in dependencies()}
+                 and build['build_recipe_sha256']==digest(ROOT/'tools/moat/image_hough_build.py')
+-                and len(json.loads((ROOT/build['evidence']/'commands.json').read_text()))==2)
++                and build_command(build,json.loads((ROOT/build['evidence']/'commands.json').read_text())))
+     gate('current-compiled-shared-Canny-and-Hough-GPU-binary',built)
+     cases={c['case']:c for c in p['cases']}
+     def original_workflows():
+@@ -109,11 +157,27 @@ def collect(review=None):
+         return True
+     gate('fourteen-complete-line-list-CSV-PPM-independent-CPU-recomputations',cpu_cases)
+     def valid_options():
+-        if len(options)!=5 or len({x['case']['case'] for x in options})!=5:return False
++        if (not record(options_contract,'contracts.json','CPU-contract')
++            or options_contract['status']!='FROZEN' or op['status']!='FROZEN'
++            or op['sample_id']!=SAMPLE or op['case_count']!=len(op['cases'])==5
++            or options_contract['case_ids']!=[c['case'] for c in op['cases']]
++            or len(options)!=5 or len({x['case']['case'] for x in options})!=5
++            or {x['case']['case'] for x in options}!={c['case'] for c in op['cases']}):return False
++        fixed={c['case']:c for c in op['cases']}
+         for x in options:
+             c,r,v=x['case'],x['run'],x['validation']
++            if c!=fixed[c['case']] or (ROOT/c['input']).stat().st_size!=c['bytes'] or digest(ROOT/c['input'])!=c['sha256']:return False
++            args=c['arguments'].copy();args[args.index('-i')+1]=str(ROOT/c['input'])
++            commands=json.loads((ROOT/r['evidence']/'commands.json').read_text())
++            raw=ROOT/json.loads((ROOT/r['evidence']/'manifest.json').read_text())['raw_artifact_dir']
+             if (not record(r,'run.json','rocm-original') or not physical(r)
+                 or r['status']!='EXECUTED' or r['return_code']!=0
++                or r['build']!=build['evidence'] or r['arguments']!=args
++                or len(commands)!=1 or commands[0]['argv']!=[str(ROOT/build['binary']),*args]
++                or commands[0]['cwd']!=str(raw/'outputs') or commands[0]['return_code']!=0
++                or any(not (raw/'outputs'/file).is_file() or digest(raw/'outputs'/file)!=r[key+'_sha256']
++                       or (raw/'outputs'/file).stat().st_size!=r[key+'_bytes']
++                       for file,key in [('hough_result.ppm','ppm'),('hough_lines.csv','lines')])
+                 or v['status']!='PASSED' or not all(ch['passed'] for ch in v['checks'])
+                 or json.loads(json.dumps(validate(c,r)))!={k:y for k,y in v.items() if k!='evidence'}):return False
+             refs.add(v['evidence']);d,m,src=sealed(v['evidence']);sources.update(src['dependencies'])
+@@ -136,7 +200,12 @@ def collect(review=None):
+     def native_gate():
+         original=next(r for r in json.loads((ROOT/'migration/reports/image-I3-native-originals.json').read_text())
+                       if r['source']=='NPP/houghLines/houghLines.cpp')
++        refs.add(original['evidence']);d,m,src=sealed(original['evidence']);sources.update(src['dependencies'])
++        project=next(r for r in runs if r['case']=='synthetic-default')
++        independently=native_validate(original,project,native)
+         return (record(native,'comparison.json','CPU-reference') and native['status']=='PASSED'
++                and m['backend']=='cuda-original' and independently['status']=='PASSED'
++                and all(c['passed'] for c in independently['checks'])
+                 and original['return_code']==original['build_return_code']==original['collection_return_code']==0
+                 and native['native_evidence']==original['evidence']
+                 and native['native_line_count']==native['project_line_count']==10
+@@ -157,6 +226,7 @@ def collect(review=None):
+     gate('eleven-real-qualification-and-archive-mutation-checks',mutations)
+     sources.update({'tools/moat/qualify_image_hough.py','tools/moat/publish_image_hough.py',
+                     'tools/moat/image_hough_qualification_checks.py',
++                    'tools/moat/image_hough_native_reference.py','tools/moat/image_regions_native.py',
+                     'tools/moat/qualify_canny_plus.py','tools/moat/qualify_first.py',
+                     'tools/moat/selected_proofs.py','tools/moat/audit.py',
+                     'migration/environments/project.lock.json',
+@@ -173,7 +243,7 @@ def main():
+     if a.dry_run or status!='PASSED':return int(status!='PASSED')
+     q=dict(sample_id=SAMPLE,kind='image-hough-full',status=status,
+            implementation=IMPLEMENTATION,implementation_sha256=digest(ROOT/IMPLEMENTATION),
+-           dependencies=build['dependencies'],case_ids=[c['case'] for c in p['cases']]+[x['case']['case'] for x in load('options')],
++           dependencies=build['dependencies'],case_ids=[c['case'] for c in p['cases']]+[x['case'] for x in options_profile()['cases']],
+            case_count=19,comparison_mode=COMPARISON,checks=checks,
+            evidence_references=sorted(refs),source_commit=review['source_commit'],
+            rocm_evidence=next(r for r in load('runs') if r['case']=='synthetic-default')['evidence'],

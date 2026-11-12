@@ -18,7 +18,7 @@ def main():
     overlay=ROOT/'build/rocm-sdk-overlay'
     common=['hipcc','--rocm-path='+str(overlay),'--hip-path='+str(overlay),
             '--rocm-device-lib-path='+str(core/'lib/llvm/amdgcn/bitcode'),
-            '--offload-arch=gfx1201','-std=c++17','-O2','-D__HIP_PLATFORM_AMD__']
+            '--offload-arch=gfx1201','-std=c++17','-O2','-ffp-contract=off','-D__HIP_PLATFORM_AMD__']
     lib=e.path/'libimage_hough.so';binary=e.path/'houghLines'
     rc=e.command([*common,'-fPIC','-x','hip','-shared',
             *[str(ROOT/'rocm/common/image'/n) for n in ['canny_stages.hip','canny.hip','hough.hip']],

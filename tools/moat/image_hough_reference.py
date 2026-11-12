@@ -70,13 +70,14 @@ def ppm(image,lines):
                 if 0<=x<w:rgb[y,x]=[255,40,40]
     return f'P6\n{w} {h}\n255\n'.encode()+rgb.tobytes()
 
-def validate(case,row):
-    ref=ROOT/row['evidence'];raw=ROOT/json.loads((ref/'manifest.json').read_text())['raw_artifact_dir']
+def validate(case,row,proof_override=None,raw_override=None,expected_binary=None):
+    ref=Path(proof_override) if proof_override else ROOT/row['evidence']
+    raw=Path(raw_override) if raw_override else ROOT/json.loads((ref/'manifest.json').read_text())['raw_artifact_dir']
     cmd=json.loads((ref/'commands.json').read_text())[0]
     stdout=(ref/cmd['stdout']).read_text()
     stderr=(ref/cmd['stderr']).read_text()
     checks=[dict(check='actual-process-and-frozen-return-code',passed=row['status']=='EXECUTED' and cmd['return_code']==row['return_code']==case['expected_return_code']),
-            dict(check='binary-and-command-source',passed=cmd['argv'][0]==str(ROOT/json.loads((ROOT/'migration/reports/image-hough-build.json').read_text())['binary'])),
+            dict(check='binary-and-command-source',passed=cmd['argv'][0]==(expected_binary or str(ROOT/json.loads((ROOT/'migration/reports/image-hough-build.json').read_text())['binary']))),
             dict(check='device-identity',passed={d['physical_id'] for d in json.loads((ref/'backend.observed.json').read_text())['devices']}=={1})]
     if case['kind']=='valid':
         w,h=case['width'],case['height'];image=synthetic(w,h) if case['case'].startswith('synthetic') else np.fromfile(ROOT/case['input'],np.uint8).reshape(h,w)

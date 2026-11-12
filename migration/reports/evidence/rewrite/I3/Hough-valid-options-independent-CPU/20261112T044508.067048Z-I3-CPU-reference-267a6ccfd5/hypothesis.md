@@ -1,0 +1,1 @@
+Test CPU-reference for Hough-valid-options-independent-CPU, case raw-option-changed-canny-thresholds. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T044506.200558Z-I3-rocm-original-55f20154be.

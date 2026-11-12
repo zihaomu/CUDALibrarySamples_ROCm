@@ -1,0 +1,58 @@
+#!/usr/bin/env python3
+"""Execute Hough device-memory, stream and input-change contracts."""
+import json
+from pathlib import Path
+from experiment import ROOT,Experiment,write,digest
+from snapshot import capture
+from image_progress import record
+from image_hough_build import dependencies
+
+NAMES=['normal','changed-to-zero','restore','default-stream','null-input','zero-threshold','wrong-capacity',
+       'host-input','short-physical-allocation','overlap-count-and-peaks',
+       'overlap-input-and-output','host-count','misaligned-peaks','misaligned-count',
+       'large-grid-plan','large-zero-8192','fp32-half-grid']
+
+def main():
+    build=json.loads((ROOT/'migration/reports/image-hough-build.json').read_text())
+    e=Experiment('I3','Hough-actual-device-allocation-and-stream-runtime','rocm-runtime',
+                 sources=[__file__,ROOT/'tools/moat/image_hough_runtime.cpp',*dependencies()])
+    write(e.path/'backend.observed.json',capture())
+    core=Path('/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core')
+    overlay=ROOT/'build/rocm-sdk-overlay';binary=e.path/'runtime'
+    flags=['hipcc','--rocm-path='+str(overlay),'--hip-path='+str(overlay),
+           '--rocm-device-lib-path='+str(core/'lib/llvm/amdgcn/bitcode'),
+           '--offload-arch=gfx1201','-std=c++17','-O2','-D__HIP_PLATFORM_AMD__']
+    rc=e.command([*flags,'-x','hip',str(ROOT/'tools/moat/image_hough_runtime.cpp'),
+                  '-L'+str((ROOT/build['library']).parent),'-limage_hough',
+                  '-Wl,-rpath,'+str((ROOT/build['library']).parent),'-L'+str(core/'lib'),
+                  '-Wl,-rpath,'+str(core/'lib'),'-lamdhip64','-o',str(binary)],'compile-runtime-harness',timeout=300)
+    if rc:
+        result=dict(status='BUILD_ERROR',return_code=rc,checks=[])
+    else:
+        rc=e.command([str(binary)],'actual-device-runtime-cases',timeout=120)
+        output=(e.path/'logs/0002-actual-device-runtime-cases.stdout.log').read_text()
+        rows=[line.split('|') for line in output.splitlines()]
+        checks=[dict(check='exact-case-list',passed=[r[0] for r in rows]==NAMES),
+                dict(check='actual-process-exit',passed=rc==0),
+                dict(check='current-library-build',passed=all(digest(ROOT/n)==h for n,h in build['dependencies'].items()))]
+        if len(rows)==len(NAMES):
+            normal,zero,restore,default=rows[:4]
+            checks += [dict(check='normal-nonempty-GPU-peaks',passed=normal[1]=='0' and int(normal[2])>0 and len(normal)==int(normal[2])+3),
+                       dict(check='changed-input-returns-zero',passed=zero==['changed-to-zero','0','0']),
+                       dict(check='restored-input-reproduces-peaks',passed=restore[1:]==normal[1:]),
+                       dict(check='default-stream-reproduces-peaks',passed=default[1:]==normal[1:]),
+                       dict(check='all-invalid-spans-and-parameters-rejected',passed=all(int(r[1])!=0 for r in rows[4:14])),
+                       dict(check='grid-stride-plan-under-32-bit-launch-limit',passed=rows[14]==['large-grid-plan','0','8192'] and 8192*180*256<2**32),
+                       dict(check='actual-over-32-bit-workload-executes',passed=rows[15]==['large-zero-8192','0','0'] and 8192*8192*180>2**32),
+                       dict(check='half-grid-two-pixel-separate-FP32-products',passed=rows[16]==['fp32-half-grid','0','1','147,49,2'])]
+        result=dict(status='PASSED' if checks and all(c['passed'] for c in checks) else 'FAILED',
+                    return_code=rc,case_count=len(rows),rows=rows,checks=checks,build_evidence=build['evidence'])
+    write(e.path/'runtime.json',result)
+    result['evidence']=e.finish('PASSED' if result['status']=='PASSED' else 'RUNTIME_ERROR',
+                               dict(status=result['status'],checks=result.get('checks',[])))
+    write(ROOT/'migration/reports/image-hough-runtime.json',result)
+    record('I3','Hough 11组真实设备存储/非默认流/输入变化/非法形参运行检查：'+result['status']+'；CPU逐峰数值与全图另验。',[result['evidence']])
+    print(result['status'],result['evidence'])
+    return int(result['status']!='PASSED')
+
+if __name__=='__main__':raise SystemExit(main())

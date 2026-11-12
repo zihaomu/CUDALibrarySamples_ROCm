@@ -1,7 +1,7 @@
 {
   "status": "PASSED",
   "return_code": 0,
-  "case_count": 11,
+  "case_count": 19,
   "rows": [
     [
       "normal",
@@ -17,6 +17,13 @@
     ],
     [
       "restore",
+      "0",
+      "2",
+      "11,83,9",
+      "11,87,16"
+    ],
+    [
+      "default-stream",
       "0",
       "2",
       "11,83,9",
@@ -53,6 +60,39 @@
     [
       "host-count",
       "1"
+    ],
+    [
+      "misaligned-peaks",
+      "1"
+    ],
+    [
+      "misaligned-count",
+      "1"
+    ],
+    [
+      "destroyed-stream",
+      "709"
+    ],
+    [
+      "invalid-storage-preserved",
+      "0",
+      "1"
+    ],
+    [
+      "large-grid-plan",
+      "0",
+      "8192"
+    ],
+    [
+      "large-zero-8192",
+      "0",
+      "0"
+    ],
+    [
+      "fp32-half-grid",
+      "0",
+      "1",
+      "147,49,2"
     ]
   ],
   "checks": [
@@ -81,10 +121,30 @@
       "passed": true
     },
     {
-      "check": "all-invalid-spans-and-parameters-rejected",
+      "check": "default-stream-reproduces-peaks",
+      "passed": true
+    },
+    {
+      "check": "all-invalid-spans-streams-and-parameters-rejected",
+      "passed": true
+    },
+    {
+      "check": "invalid-call-preserves-all-three-device-spans",
+      "passed": true
+    },
+    {
+      "check": "grid-stride-plan-under-32-bit-launch-limit",
+      "passed": true
+    },
+    {
+      "check": "actual-over-32-bit-workload-executes",
+      "passed": true
+    },
+    {
+      "check": "half-grid-two-pixel-separate-FP32-products",
       "passed": true
     }
   ],
-  "build_evidence": "migration/reports/evidence/rewrite/I3/Hough-Canny-GPU-and-complete-C__-build/20261112T041353.856273Z-I3-rocm-build-9139676720",
-  "evidence": "migration/reports/evidence/rewrite/I3/Hough-actual-device-allocation-and-stream-runtime/20261112T041515.366961Z-I3-rocm-runtime-a5210f51a6"
+  "build_evidence": "migration/reports/evidence/rewrite/I3/Hough-Canny-GPU-and-complete-C__-build/20261112T043041.079819Z-I3-rocm-build-3164e51cae",
+  "evidence": "migration/reports/evidence/rewrite/I3/Hough-actual-device-allocation-and-stream-runtime/20261112T044111.430721Z-I3-rocm-runtime-a70f2deae9"
 }

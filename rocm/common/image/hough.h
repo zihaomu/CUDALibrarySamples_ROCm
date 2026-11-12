@@ -9,4 +9,5 @@ struct RocmHoughPeak { int rho_index; int theta_degrees; int votes; };
 extern "C" hipError_t rocm_image_hough_peaks(const uint8_t* edges,int width,int height,
     int threshold,RocmHoughPeak* peaks,int candidate_capacity,int* count,hipStream_t stream);
 extern "C" int rocm_image_hough_accumulator_height(int width,int height);
+extern "C" int rocm_image_hough_vote_grid_x(int width,int height);
 #endif
