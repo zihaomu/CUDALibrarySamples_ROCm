@@ -280,7 +280,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-12T07:38:31.360263+00:00。26入口当前12通过/7部分/7失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-12T07:41:06.437509+00:00。26入口当前12通过/7部分/7失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -1741,5 +1741,6 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-12T07:35:35.985189+00:00 | I3 | benchmark复审前发布器预检发现将最终必需反例仍写为旧25项；已同步实际35项并撤回当前源码冷检出门，旧a389b711冷证据保留。需新固定Git提交冷检出及三份复审，PARTIAL/L3不变。 | `migration/samples.yaml` |
 | 2026-11-12T07:37:49.863773+00:00 | I3 | benchmark固定Git冷检出同版OpenCV/四算子/六CLI/独立CPU/原生统计/运行/trace及18子封存：PASSED | `migration/reports/evidence/rewrite/I3/OpenCV-benchmark-fixed-Git-cold-four-operations-and-CPU/20261112T073608.903658Z-I3-host-cold-replay-947f7840c5` |
 | 2026-11-12T07:38:31.360263+00:00 | I3 | benchmark发布器同步后的固定源码96b9c5f0冷检出10/10作业、19/19子封存PASSED；cold_recompute对原始命令、源码、加载器、产品和状态重算True，35项负例仍PASSED。主表PARTIAL/L3，9/11门槛，待固定版本三份独立复审与组合资格。 | `migration/reports/image-benchmark.md` |
+| 2026-11-12T07:41:06.437509+00:00 | I3 | benchmark三份固定源码96b9c5f0/证据6a915664独立复审均APPROVED：原例合同、证据闭环、HIP算法。组合资格12/12门PASSED，引用22份封存、6组CLI；资格实验已封存，待先Git锚定再由发布器更新主表。 | `migration/reports/image-benchmark-qualification.json` |
 
 <!-- IMAGE_EXECUTION:END -->
