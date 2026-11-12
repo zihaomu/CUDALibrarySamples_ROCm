@@ -1,6 +1,6 @@
 # NPP/OpenCV benchmark 完整入口实施记录
 
-状态：**PARTIAL，整例资格待签发**。当前已确认 HIP 四算子 C++ 流程、6 组 CLI、独立 CPU 数值、设备合同和 GPU 分发；发布器同步后最新源码需重新冷检出、复审和组合资格。尚不计入 PASSED 或已验收算子族。
+状态：**PARTIAL，整例资格待签发**。当前已确认 HIP 四算子 C++ 流程、6 组 CLI、独立 CPU 数值、设备合同和 GPU 分发；发布器同步后最新源码冷检出与原始记录复算已通过，待复审和组合资格。尚不计入 PASSED 或已验收算子族。
 
 入口：`NPP/opencvBenchmark::opencvBenchmark.cpp`。项目 C++ 入口保留原始 2048×1024 RAW 镜像平铺、4096×2048 默认规模、4 个算子、GPU kernel 与端到端计时、OpenCV 单线程与多线程计时、5 轮取中位数及 `-i/-w/-h/-n` 参数。AMD 计算使用 HIP C1 Canny、项目 HIP Gaussian 5×5、half bilinear resize、RGB→gray。CPU 列使用与 5090 原生 benchmark **同一固定源码提交**的 OpenCV 4.12.0 C++ 私有构建；200 个文件 SHA256/大小及 ROCm10 容器实际动态加载已核。[依赖记录](image-I3-rocm-OpenCV.json)
 
@@ -25,3 +25,5 @@
 第三项复审发现六组CLI、runtime、trace与冷运行的加载库身份只信汇总JSON，没有从本次 `ldd` stdout 重算。现已逐次解析原始输出的三条目标库路径，绑定构建库SHA和固定OpenCV回执，并以四类篡改反例验证拒绝；35项反例通过。固定源码 `a389b711d5ecd3e1b30ff199296662d6aa077ca7` 冷检出10任务/19子记录PASSED，完整原始记录复算True；待再次复审。
 
 发布器核对时发现其整例必需用例和文字仍写旧25项，已同步为实际35项。该源码变化使前一冷检出只作历史证据，须再做固定提交冷检出和复审。
+
+发布器修订后的固定源码 `96b9c5f0f695ba018783613a770889e89a7acb61` 冷检出10任务/19子记录PASSED，原始记录复算True；继续等待此提交的独立复审与最终资格。

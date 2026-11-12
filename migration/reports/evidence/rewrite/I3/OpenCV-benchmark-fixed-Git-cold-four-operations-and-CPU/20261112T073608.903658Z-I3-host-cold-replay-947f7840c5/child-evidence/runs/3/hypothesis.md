@@ -1,0 +1,1 @@
+Test rocm-original for OpenCV-benchmark-complete-original-CLI, case invalid-dimensions. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T073654.036814Z-I3-rocm-build-bd6873e673.

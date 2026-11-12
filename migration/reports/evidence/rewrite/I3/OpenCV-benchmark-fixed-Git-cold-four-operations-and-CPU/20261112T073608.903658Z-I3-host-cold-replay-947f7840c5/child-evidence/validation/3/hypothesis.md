@@ -1,0 +1,1 @@
+Test CPU-reference for OpenCV-benchmark-independent-four-operation-CPU, case invalid-dimensions. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T073715.422646Z-I3-rocm-original-bd27e642f9.
