@@ -19,7 +19,10 @@ C ABI1，descriptor160字节，支持byte pitch、相同pitch的精确原地alia
 | 原始源码面 | [五入口调查](image-I3-contract-surface.json)；本入口两图、五完整RGB产品和region信息 |
 | 29完整输入 | [GPU](image-flood-all.json) · [独立CPU](image-flood-all-validation.json)：完整RGB/mask/metadata/padding全部精确一致 |
 | 完整文件入口 | [合同](image-flood-original-contracts.json) · [构建](image-flood-frontend-build.json) · [四流程](image-flood-originals.json) · [CPU](image-flood-originals-validation.json)：默认/显式/完整规模变化/完整规模常量，共20RGB产品及全部实际GPU审计通过 |
-| 运行语义 | [63项冻结合同](../rewrite/image-flood-runtime-contract.json) · [实际执行](image-flood-runtime.json) · [独立CPU](image-flood-runtime-validation.json)：全存储before/after、32字节guard、真实hipMalloc16字节、query、alias、复用变化/还原、禁mask、并发与外设备/销毁流通过 |
+| 运行语义 | [72项冻结合同](../rewrite/image-flood-runtime-contract.json) · [实际执行](image-flood-runtime.json) · [独立CPU](image-flood-runtime-validation.json)：全存储before/after、32字节guard、真实hipMalloc16字节、query、alias、复用变化/还原、禁mask、并发与外设备/销毁流通过；新增末行padding交叠与短物理分配9项 |
+| 末行padding反例 | [旧库实际错误](image-flood-legacy-padding-failure.json) · [新库同一反例](image-flood-padding-fix-validation.json)：旧库在1×1、pitch4、mask=input+3时改写输入末行padding197→255；新库rc1且全部缓冲保持。旧失败证据独立归档，不用作新库通过证明 |
+| CLI/追踪 | [18项CLI与畸形文件独立检查](image-flood-cli-validation.json) · [真实GPU trace](image-flood-trace-validation.json)：五种GPU阶段均有实际dispatch，全部RGB/mask/metadata仍由CPU核对 |
+| 验收器反例 | [30项核心读取器检查](image-flood-checks.json) · [30项运行时/CLI/原例读取器检查](image-flood-runtime-checks.json)：均含完整归档重定位正例；拒绝伪造输出、配对hash、buffer/stream/命令及原例产品 |
 | 当前原生NPP+ | [未改五原例执行](image-I3-native-originals.json) · [flood完整比较](image-flood-native-validation.json)：源码/输入/binary/实际SDK/GPU receipt及两输入五完整产品验证；数值差异单列 |
 | 历史捆绑文件 | [CPU研究](image-I3-flood-bundled-research.json)，仅为旧vendor文件观察，和新的实际native记录分开 |
 
@@ -31,7 +34,7 @@ C ABI1，descriptor160字节，支持byte pitch、相同pitch的精确原地alia
 
 GPU图像计算均在物理GPU1；物理GPU0只创建/查询空的外设备stream，未存储图像或运行图像kernel。两实例并发验证使用实际不同流、独立全部地址范围和重叠的API+自身流同步区间。
 
-尚需完整CLI错误矩阵、真实trace、验收器反例、干净检出重放与固定源码独立复审。完成全部门槛后才把该入口从PARTIAL升级。
+尚需干净检出重放、固定源码独立复审和固定资格发布。完成全部门槛后才把该入口从PARTIAL升级。
 
 ## 复现
 
@@ -46,6 +49,10 @@ python3 tools/moat/image_flood_frontend_build.py
 python3 tools/moat/image_flood_originals.py
 python3 tools/moat/image_flood_runtime_contracts.py
 python3 tools/moat/image_flood_runtime.py
+python3 tools/moat/image_flood_cli.py
+python3 tools/moat/image_flood_trace.py
+build/image-cpu-venv/bin/python tools/moat/image_flood_checks.py
+build/image-cpu-venv/bin/python tools/moat/image_flood_runtime_checks.py
 ```
 
 详细命令、环境和原始输出在每项独立experiment目录，实时步骤见[实施记录](image-libraries-progress.md)。CPU参考运行 `image_flood_reference.py`、`image_flood_original_reference.py`、`image_flood_runtime_reference.py`、`image_flood_native_reference.py`。

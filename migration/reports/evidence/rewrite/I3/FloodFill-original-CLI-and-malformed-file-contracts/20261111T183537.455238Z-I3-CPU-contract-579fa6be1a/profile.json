@@ -1,0 +1,199 @@
+{
+  "schema_version": 1,
+  "status": "FROZEN",
+  "cases": [
+    {
+      "case": "help",
+      "args": [
+        "--help"
+      ],
+      "args_mode": "replace",
+      "return_code": 0,
+      "error_contains": null,
+      "change": null,
+      "no_gpu": false
+    },
+    {
+      "case": "help-no-GPU",
+      "args": [
+        "--help"
+      ],
+      "args_mode": "replace",
+      "return_code": 0,
+      "error_contains": null,
+      "change": null,
+      "no_gpu": true
+    },
+    {
+      "case": "unknown",
+      "args": [
+        "--bogus"
+      ],
+      "args_mode": "append",
+      "return_code": 1,
+      "error_contains": "Unknown option: --bogus",
+      "change": null,
+      "no_gpu": false
+    },
+    {
+      "case": "missing-input-value",
+      "args": [
+        "--input-dir"
+      ],
+      "args_mode": "replace",
+      "return_code": 1,
+      "error_contains": "Missing option value: --input-dir",
+      "change": null,
+      "no_gpu": false
+    },
+    {
+      "case": "missing-output-value",
+      "args": [
+        "--output-dir"
+      ],
+      "args_mode": "replace",
+      "return_code": 1,
+      "error_contains": "Missing option value: --output-dir",
+      "change": null,
+      "no_gpu": false
+    },
+    {
+      "case": "empty-input",
+      "args": [
+        "--input-dir",
+        ""
+      ],
+      "args_mode": "replace",
+      "return_code": 1,
+      "error_contains": "Missing option value: --input-dir",
+      "change": null,
+      "no_gpu": false
+    },
+    {
+      "case": "empty-output",
+      "args": [
+        "--output-dir",
+        ""
+      ],
+      "args_mode": "replace",
+      "return_code": 1,
+      "error_contains": "Missing option value: --output-dir",
+      "change": null,
+      "no_gpu": false
+    },
+    {
+      "case": "option-as-value",
+      "args": [
+        "--input-dir",
+        "--output-dir",
+        "@OUTPUT@"
+      ],
+      "args_mode": "replace",
+      "return_code": 1,
+      "error_contains": "Missing option value: --input-dir",
+      "change": null,
+      "no_gpu": false
+    },
+    {
+      "case": "duplicate-input",
+      "args": [
+        "--input-dir",
+        "@INPUT@"
+      ],
+      "args_mode": "append",
+      "return_code": 1,
+      "error_contains": "Duplicate option: --input-dir",
+      "change": null,
+      "no_gpu": false
+    },
+    {
+      "case": "duplicate-output",
+      "args": [
+        "--output-dir",
+        "@OUTPUT@"
+      ],
+      "args_mode": "append",
+      "return_code": 1,
+      "error_contains": "Duplicate option: --output-dir",
+      "change": null,
+      "no_gpu": false
+    },
+    {
+      "case": "missing-default",
+      "args": [],
+      "args_mode": "default",
+      "return_code": 1,
+      "error_contains": "Input size or file invalid:",
+      "change": "missing-default",
+      "no_gpu": false
+    },
+    {
+      "case": "missing-first",
+      "args": [],
+      "args_mode": "append",
+      "return_code": 1,
+      "error_contains": "Input size or file invalid:",
+      "change": "missing-first",
+      "no_gpu": false
+    },
+    {
+      "case": "missing-last",
+      "args": [],
+      "args_mode": "append",
+      "return_code": 1,
+      "error_contains": "Input size or file invalid:",
+      "change": "missing-last",
+      "no_gpu": false
+    },
+    {
+      "case": "truncated-first",
+      "args": [],
+      "args_mode": "append",
+      "return_code": 1,
+      "error_contains": "Input size or file invalid:",
+      "change": "truncated-first",
+      "no_gpu": false
+    },
+    {
+      "case": "trailing-last",
+      "args": [],
+      "args_mode": "append",
+      "return_code": 1,
+      "error_contains": "Input size or file invalid:",
+      "change": "trailing-last",
+      "no_gpu": false
+    },
+    {
+      "case": "output-directory-is-file",
+      "args": [],
+      "args_mode": "append",
+      "return_code": 1,
+      "error_contains": "directory",
+      "change": "output-directory-is-file",
+      "no_gpu": false
+    },
+    {
+      "case": "first-product-is-directory",
+      "args": [],
+      "args_mode": "append",
+      "return_code": 1,
+      "error_contains": "Product path is not a file:",
+      "change": "first-product-is-directory",
+      "no_gpu": false
+    },
+    {
+      "case": "no-GPU",
+      "args": [],
+      "args_mode": "append",
+      "return_code": 1,
+      "error_contains": [
+        "No HIP GPU available",
+        "HIP:"
+      ],
+      "change": null,
+      "no_gpu": true
+    }
+  ],
+  "case_count": 18,
+  "help_stdout": "Usage: floodFill [--input-dir images] [--output-dir products]\nFive complete RGB flood workflows; default input/output ../images.\n\n"
+}

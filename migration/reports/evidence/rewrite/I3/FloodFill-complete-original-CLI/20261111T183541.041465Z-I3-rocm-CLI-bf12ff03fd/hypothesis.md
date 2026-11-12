@@ -1,0 +1,1 @@
+Test rocm-CLI for FloodFill-complete-original-CLI, case help. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T182151.554270Z-I3-rocm-build-a61644460f.

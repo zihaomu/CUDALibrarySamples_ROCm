@@ -23,9 +23,12 @@ def exact_file(path,size,sha=None):
 def validate(run,raw_override=None):
  spec=json.loads((ROOT/'migration/rewrite/image-flood-profile.json').read_text());cases={c['case']:c for c in spec['cases']};out=ROOT/run['outputs'];meta=json.loads((ROOT/run['evidence']/'manifest.json').read_text());raw=Path(raw_override) if raw_override else ROOT/meta['raw_artifact_dir'];commands=json.loads((raw/'commands.json').read_text());rows=json.loads((out/'runs.json').read_text())
  if run['return_code'] or spec['status']!='FROZEN' or len(rows)!=len(cases) or spec['case_count']!=len(cases) or len(cases)!=29 or {r['case'] for r in rows}!=set(cases) or {p.name for p in out.iterdir()}!=set(cases)|{'runs.json'} or len(commands)!=1 or commands[0]['return_code'] or out.resolve()!=(raw/'outputs').resolve():raise ValueError('complete unique frozen flood cases and actual output binding')
- argv=commands[0]['argv'];stored=Path(argv[argv.index('--output')+1]);origin=stored.parent
+ argv=commands[0]['argv']
+ if any(argv.count(option)!=1 for option in ['--output','--library','--sha']):raise ValueError('one actual flood producer argument per artifact')
+ stored=Path(argv[argv.index('--output')+1]);origin=stored.parent
  for _ in Path(meta['raw_artifact_dir']).parts:origin=origin.parent
- if origin/meta['raw_artifact_dir']/'outputs'!=stored or str(origin/'tools/moat/image_flood_worker.py') not in argv or argv[argv.index('--library')+1]!=str(origin/run['build']['library']) or argv[argv.index('--sha')+1]!=run['build']['library_sha256']:raise ValueError('actual flood producer library and hash')
+ worker=str(origin/'tools/moat/image_flood_worker.py');expected=[worker,'--library',str(origin/run['build']['library']),'--sha',run['build']['library_sha256'],'--output',str(stored)]
+ if origin/meta['raw_artifact_dir']/'outputs'!=stored or worker not in argv or argv[argv.index(worker):]!=expected:raise ValueError('actual flood producer library and hash')
  results=[]
  for r in rows:
   c=cases[r['case']];w,h=c['width'],c['height'];n=w*h;payload=load_case(c);a=np.frombuffer(payload,np.uint8).reshape(h,c['pitch'])[:,:w*3].copy().reshape(h,w,3);expected=model(a,c);p=out/c['case'];names={'input-after.bin','output.bin','mask.bin','region.bin'}

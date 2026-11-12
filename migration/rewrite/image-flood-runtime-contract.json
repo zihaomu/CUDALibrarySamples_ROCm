@@ -468,6 +468,98 @@
       "return_code": 1
     },
     {
+      "case": "mask-in-input-last-row-padding",
+      "kind": "rejected",
+      "source_case": "one-pixel",
+      "changes": {
+        "mask": "input+3",
+        "mask_pitch": 1
+      },
+      "setup": null,
+      "return_code": 1
+    },
+    {
+      "case": "mask-in-output-last-row-padding",
+      "kind": "rejected",
+      "source_case": "one-pixel",
+      "changes": {
+        "mask": "output+3",
+        "mask_pitch": 1
+      },
+      "setup": null,
+      "return_code": 1
+    },
+    {
+      "case": "region-in-input-last-row-padding",
+      "kind": "rejected",
+      "source_case": "one-pixel",
+      "changes": {
+        "region": "input+4"
+      },
+      "setup": null,
+      "return_code": 1
+    },
+    {
+      "case": "region-in-output-last-row-padding",
+      "kind": "rejected",
+      "source_case": "one-pixel",
+      "changes": {
+        "region": "output+4"
+      },
+      "setup": null,
+      "return_code": 1
+    },
+    {
+      "case": "workspace-in-input-last-row-padding",
+      "kind": "rejected",
+      "source_case": "one-pixel",
+      "changes": {
+        "workspace": "input+4"
+      },
+      "setup": null,
+      "return_code": 1
+    },
+    {
+      "case": "workspace-in-output-last-row-padding",
+      "kind": "rejected",
+      "source_case": "one-pixel",
+      "changes": {
+        "workspace": "output+4"
+      },
+      "setup": null,
+      "return_code": 1
+    },
+    {
+      "case": "actual-input-missing-last-row-padding",
+      "kind": "rejected",
+      "source_case": "one-pixel",
+      "changes": {
+        "input": "small"
+      },
+      "setup": null,
+      "return_code": 1
+    },
+    {
+      "case": "actual-output-missing-last-row-padding",
+      "kind": "rejected",
+      "source_case": "one-pixel",
+      "changes": {
+        "output": "small"
+      },
+      "setup": null,
+      "return_code": 1
+    },
+    {
+      "case": "actual-mask-missing-last-row-padding",
+      "kind": "rejected",
+      "source_case": "one-pixel",
+      "changes": {
+        "mask": "small"
+      },
+      "setup": null,
+      "return_code": 1
+    },
+    {
       "case": "query-one",
       "kind": "query",
       "width": 1,
@@ -628,7 +720,7 @@
       "return_code": 709
     }
   ],
-  "case_count": 63,
+  "case_count": 72,
   "storage": "All source/output/mask/metadata/workspace bytes plus32-byte end guards,16-byte actual hipMalloc and host buffer observed. Invalid calls preserve all storage. Valid workspace may change only declared bytes. Alias changes logical input/output together; optional mask storage stays unchanged.",
   "device_policy": "All image buffers/kernels on physical1. Physical0 used only for creating/querying empty foreign stream. Two concurrent instances use independent actual streams/spans and overlapping API-plus-own-sync intervals."
 }

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Independently check every actual runtime descriptor, storage byte and stream relation."""
 import hashlib,json
+from pathlib import Path
 import numpy as np
 from experiment import ROOT,Experiment,write
 from image_flood_inputs import load_case
@@ -24,11 +25,15 @@ def expected_descriptor(c,pointers):
 def resolve(value,pointers):
  if not isinstance(value,str):return value
  parts=value.split('+');return pointers[parts[0]]['pointer']+(int(parts[1]) if len(parts)==2 else 0)
-def validate(run):
- contract=json.loads((ROOT/'migration/rewrite/image-flood-runtime-contract.json').read_text());profile=json.loads((ROOT/'migration/rewrite/image-flood-profile.json').read_text());cases={c['case']:c for c in profile['cases']};rules=contract['cases'];out=ROOT/run['outputs'];rows=json.loads((out/'runs.json').read_text());meta=json.loads((ROOT/run['evidence']/'manifest.json').read_text());raw=ROOT/meta['raw_artifact_dir'];commands=json.loads((raw/'commands.json').read_text());devices={d['logical_id']:d['physical_id'] for d in json.loads((out/'devices.json').read_text())['devices']}
- if run['return_code'] or contract['status']!='FROZEN' or contract['case_count']!=len(rows) or len(rows)!=len(rules) or len(rules)!=63 or [r['case'] for r in rows]!=[r['case'] for r in rules] or set(devices.values())!={0,1} or len(devices)!=2 or out.resolve()!=(raw/'outputs').resolve() or len(commands)!=1 or commands[0]['return_code']:raise ValueError('all63 ordered actual runtime calls on exact allowed devices')
+def validate(run,raw_override=None):
+ contract=json.loads((ROOT/'migration/rewrite/image-flood-runtime-contract.json').read_text());profile=json.loads((ROOT/'migration/rewrite/image-flood-profile.json').read_text());cases={c['case']:c for c in profile['cases']};rules=contract['cases'];out=ROOT/run['outputs'];rows=json.loads((out/'runs.json').read_text());meta=json.loads((ROOT/run['evidence']/'manifest.json').read_text());raw=Path(raw_override) if raw_override else ROOT/meta['raw_artifact_dir'];commands=json.loads((raw/'commands.json').read_text());devices={d['logical_id']:d['physical_id'] for d in json.loads((out/'devices.json').read_text())['devices']}
+ if run['return_code'] or contract['status']!='FROZEN' or contract['case_count']!=len(rows) or len(rows)!=len(rules) or len(rules)!=72 or [r['case'] for r in rows]!=[r['case'] for r in rules] or set(devices.values())!={0,1} or len(devices)!=2 or out.resolve()!=(raw/'outputs').resolve() or len(commands)!=1 or commands[0]['return_code']:raise ValueError('all72 ordered actual runtime calls on exact allowed devices')
  argv=commands[0]['argv']
- if str(ROOT/'tools/moat/image_flood_runtime.py') not in argv or '--worker' not in argv or argv[argv.index('--output')+1]!=str(out) or argv[argv.index('--library')+1]!=str(ROOT/run['build']['library']) or argv[argv.index('--sha')+1]!=run['build']['library_sha256']:raise ValueError('actual runtime worker/library/output identity')
+ if any(argv.count(option)!=1 for option in ['--output','--library','--sha','--worker']):raise ValueError('one actual runtime producer argument per artifact')
+ stored=Path(argv[argv.index('--output')+1]);origin=stored.parent
+ for _ in Path(meta['raw_artifact_dir']).parts:origin=origin.parent
+ expected=[str(origin/'tools/moat/image_flood_runtime.py'),'--worker','--library',str(origin/run['build']['library']),'--sha',run['build']['library_sha256'],'--output',str(stored)]
+ if origin/meta['raw_artifact_dir']/'outputs'!=stored or argv[1:]!=expected or commands[0]['cwd']!=str(origin):raise ValueError('actual runtime worker/library/output identity')
  wanted={r['case'] for r in rules if r['kind']!='query'}|{'runs.json','devices.json'}
  if {p.name for p in out.iterdir()}!=wanted:raise ValueError('exact runtime inventory')
  states={};pointers={};results=[];concurrent=[]
@@ -73,5 +78,5 @@ def main():
  run=json.loads((ROOT/'migration/reports/image-flood-runtime.json').read_text());e=Experiment('I3','FloodFill-full-runtime-storage-and-stream-independent-CPU','CPU-reference',sources=[__file__,ROOT/'tools/moat/image_flood_reference.py',ROOT/'tools/moat/image_flood_inputs.py',ROOT/'migration/rewrite/image-flood-profile.json',ROOT/'migration/rewrite/image-flood-runtime-contract.json'],parent=run['experiment_id'])
  try:v=validate(run)
  except Exception as error:v=dict(status='FAILED',results=[],error=repr(error))
- write(e.path/'results.json',v);v['evidence']=e.finish('PASSED' if v['status']=='PASSED' else 'NUMERIC_MISMATCH',dict(status=v['status'],checks=[dict(check='all63-actual-descriptors-complete-buffers-aliases-reuse-streams-concurrency',passed=v['status']=='PASSED')]));write(ROOT/'migration/reports/image-flood-runtime-validation.json',v);record('I3','flood63固定运行项/完整before-after所有buffer与guards/真实分配/指针role/query/默认与alias/禁mask/并发/错误流独立CPU：'+v['status'],[v['evidence']]);print(v['status'],v.get('error'),[r for r in v['results'] if r['status']=='FAILED']);return int(v['status']!='PASSED')
+ write(e.path/'results.json',v);v['evidence']=e.finish('PASSED' if v['status']=='PASSED' else 'NUMERIC_MISMATCH',dict(status=v['status'],checks=[dict(check='all72-actual-descriptors-complete-buffers-aliases-reuse-streams-concurrency',passed=v['status']=='PASSED')]));write(ROOT/'migration/reports/image-flood-runtime-validation.json',v);record('I3','flood72固定运行项/完整before-after所有buffer与guards/真实分配/指针role/query/默认与alias/禁mask/并发/错误流独立CPU：'+v['status'],[v['evidence']]);print(v['status'],v.get('error'),[r for r in v['results'] if r['status']=='FAILED']);return int(v['status']!='PASSED')
 if __name__=='__main__':raise SystemExit(main())

@@ -1,0 +1,113 @@
+diff --git a/rocm/common/image/flood.hip b/rocm/common/image/flood.hip
+index b84c30984..a3229b6f6 100644
+--- a/rocm/common/image/flood.hip
++++ b/rocm/common/image/flood.hip
+@@ -13,8 +13,10 @@ inline bool shape(int w,int h,uint64_t&n,uint64_t&bytes){
+  bytes=((3*n+3)&~uint64_t(3))+4*n+4;return true;
+ }
+ inline bool row_span(uint64_t pitch,uint64_t row,int h,uint64_t&bytes){
+- if(pitch<row||uint64_t(h-1)>(UINT64_MAX-row)/pitch)return false;
+- bytes=uint64_t(h-1)*pitch+row;return true;
++ if(pitch<row||uint64_t(h)>UINT64_MAX/pitch)return false;
++ // Padding belongs to the caller's image storage on every row, including
++ // the last one. Another writable span must not be placed inside it.
++ bytes=uint64_t(h)*pitch;return true;
+ }
+ __global__ void prepare(rocm_image_flood_descriptor d,uint8_t*original,uint32_t*parents){
+  int t=blockIdx.x*blockDim.x+threadIdx.x,n=d.width*d.height;if(t>=n)return;
+diff --git a/tools/moat/image_flood_native_reference.py b/tools/moat/image_flood_native_reference.py
+index 8841c1199..ea4abe02c 100644
+--- a/tools/moat/image_flood_native_reference.py
++++ b/tools/moat/image_flood_native_reference.py
+@@ -12,7 +12,7 @@ def validate(native):
+  spec=json.loads((ROOT/'migration/rewrite/image-flood-profile.json').read_text());originals=[c for c in spec['cases'] if c['original']];d,m,_=sealed(native['evidence']);commands=json.loads((d/'commands.json').read_text());execute=next(c for c in commands if c['phase']=='actual-complete-native-default-with-source-input-library-GPU-receipt');args=shlex.split(execute['argv'][-1]);config=json.loads(args[-1]);receipt=json.loads((d/execute['stdout']).read_text().splitlines()[0]);root=ROOT/native['outputs'];source=spec['original_source'];assets={Path(c['original']['source']).name:c['original'] for c in originals};products={c['product']:3*c['width']*c['height'] for c in originals};names={'images/'+k for k in assets}|{'images/'+k for k in products};sdk=next(r for r in json.loads((ROOT/'migration/reports/image-I0-native-private-SDKs.json').read_text()) if r['SDK']=='nppplus')['identity'];checks=[]
+  checks.append(dict(check='unchanged-original-source-inputs-and-actual-command-configuration',passed=native['source']==source and native['source_sha256']==spec['original_source_sha256']==digest(ROOT/source) and config==native['config'] and config['source']==Path(source).name and config['source_sha256']==receipt['source_sha256']==spec['original_source_sha256'] and config['inputs']==receipt['inputs']=={n:x['sha256'] for n,x in assets.items()}))
+  checks.append(dict(check='actual-native-success-and-5090-device-binary-receipt',passed=native['status']=='EXECUTED' and native['build_return_code']==native['return_code']==native['collection_return_code']==0 and len(commands)==6 and all(c['return_code']==0 for c in commands) and receipt['physical_device_index']==1 and receipt['CUDA_VISIBLE_DEVICES']=='1' and '5090' in receipt['device'] and bool(re.fullmatch('[0-9a-f]{64}',receipt['binary_sha256']))))
+- compile=shlex.split(next(c for c in commands if c['phase']=='compile-complete-unmodified-original')['argv'][-1]);checks.append(dict(check='actual-native-source-binary-and-private-SDK-build',passed=native['remote']+'/'+Path(source).name in compile and compile[compile.index('-o')+1]==native['remote']+'/original' and '-DNPP_PLUS_ENABLE' in compile))
++ compile=shlex.split(next(c for c in commands if c['phase']=='compile-complete-unmodified-original')['argv'][-1]);checks.append(dict(check='actual-native-source-binary-and-private-SDK-build',passed=config['remote']==native['remote'] and native['remote']+'/'+Path(source).name in compile and compile[compile.index('-o')+1]==native['remote']+'/original' and '-DNPP_PLUS_ENABLE' in compile))
+  families=set()
+  for p,v in receipt['libraries'].items():
+   for family in ['if','c']:
+@@ -22,7 +22,7 @@ def validate(native):
+  for name in names:
+   p=root/name;size=assets[Path(name).name]['bytes'] if Path(name).name in assets else products[Path(name).name];v=native['files'].get(name,{})
+   files_ok=files_ok and p.is_file() and p.stat().st_size==size and v.get('bytes')==size and v.get('sha256')==digest(p)
+- checks.append(dict(check='all-two-inputs-five-full-RGB-products-and-exact-byte-inventory',passed=files_ok));matches=re.findall(r'^BoundsRect x (\d+) y (\d+) width (\d+) height (\d+) count (\d+) seed0 (\d+) seed1 (\d+) seed2 (\d+)\.',(d/execute['stdout']).read_text(),re.M);checks.append(dict(check='five-actual-native-region-metadata-lines',passed=len(matches)==5))
++ checks.append(dict(check='all-two-inputs-five-full-RGB-products-and-exact-byte-inventory',passed=files_ok));checks.append(dict(check='native-products-bound-to-actual-collection-directory',passed=commands[-1]['argv'][-1]==str(root) and root.resolve()==(ROOT/m['raw_artifact_dir']/'outputs').resolve()));matches=re.findall(r'^BoundsRect x (\d+) y (\d+) width (\d+) height (\d+) count (\d+) seed0 (\d+) seed1 (\d+) seed2 (\d+)\.',(d/execute['stdout']).read_text(),re.M);checks.append(dict(check='five-actual-native-region-metadata-lines',passed=len(matches)==5))
+  if not all(c['passed'] for c in checks):return dict(status='FAILED',checks=checks,results=[])
+  gpu=json.loads((ROOT/'migration/reports/image-flood-all.json').read_text());sealed(gpu['evidence']);current=validate_gpu(gpu);checks.append(dict(check='all29-current-HIP-complete-RGB-mask-metadata-contracts',passed=len(current)==29 and all(r['status']=='PASSED' for r in current)));results=[]
+  for i,c in enumerate(originals):
+diff --git a/tools/moat/image_flood_reference.py b/tools/moat/image_flood_reference.py
+index 34a187e38..0b7103032 100644
+--- a/tools/moat/image_flood_reference.py
++++ b/tools/moat/image_flood_reference.py
+@@ -23,9 +23,12 @@ def exact_file(path,size,sha=None):
+ def validate(run,raw_override=None):
+  spec=json.loads((ROOT/'migration/rewrite/image-flood-profile.json').read_text());cases={c['case']:c for c in spec['cases']};out=ROOT/run['outputs'];meta=json.loads((ROOT/run['evidence']/'manifest.json').read_text());raw=Path(raw_override) if raw_override else ROOT/meta['raw_artifact_dir'];commands=json.loads((raw/'commands.json').read_text());rows=json.loads((out/'runs.json').read_text())
+  if run['return_code'] or spec['status']!='FROZEN' or len(rows)!=len(cases) or spec['case_count']!=len(cases) or len(cases)!=29 or {r['case'] for r in rows}!=set(cases) or {p.name for p in out.iterdir()}!=set(cases)|{'runs.json'} or len(commands)!=1 or commands[0]['return_code'] or out.resolve()!=(raw/'outputs').resolve():raise ValueError('complete unique frozen flood cases and actual output binding')
+- argv=commands[0]['argv'];stored=Path(argv[argv.index('--output')+1]);origin=stored.parent
++ argv=commands[0]['argv']
++ if any(argv.count(option)!=1 for option in ['--output','--library','--sha']):raise ValueError('one actual flood producer argument per artifact')
++ stored=Path(argv[argv.index('--output')+1]);origin=stored.parent
+  for _ in Path(meta['raw_artifact_dir']).parts:origin=origin.parent
+- if origin/meta['raw_artifact_dir']/'outputs'!=stored or str(origin/'tools/moat/image_flood_worker.py') not in argv or argv[argv.index('--library')+1]!=str(origin/run['build']['library']) or argv[argv.index('--sha')+1]!=run['build']['library_sha256']:raise ValueError('actual flood producer library and hash')
++ worker=str(origin/'tools/moat/image_flood_worker.py');expected=[worker,'--library',str(origin/run['build']['library']),'--sha',run['build']['library_sha256'],'--output',str(stored)]
++ if origin/meta['raw_artifact_dir']/'outputs'!=stored or worker not in argv or argv[argv.index(worker):]!=expected:raise ValueError('actual flood producer library and hash')
+  results=[]
+  for r in rows:
+   c=cases[r['case']];w,h=c['width'],c['height'];n=w*h;payload=load_case(c);a=np.frombuffer(payload,np.uint8).reshape(h,c['pitch'])[:,:w*3].copy().reshape(h,w,3);expected=model(a,c);p=out/c['case'];names={'input-after.bin','output.bin','mask.bin','region.bin'}
+diff --git a/tools/moat/image_flood_runtime_contracts.py b/tools/moat/image_flood_runtime_contracts.py
+index a8fe7b5db..b49add606 100644
+--- a/tools/moat/image_flood_runtime_contracts.py
++++ b/tools/moat/image_flood_runtime_contracts.py
+@@ -4,9 +4,10 @@ from experiment import ROOT,Experiment,write
+ from image_progress import record
+ def main():
+  cases=[]
+- def bad(name,changes=None,setup=None):cases.append(dict(case=name,kind='rejected',source_case='fixed-gradient-independent-ramp',changes=changes or {},setup=setup,return_code=1))
++ def bad(name,changes=None,setup=None,source='fixed-gradient-independent-ramp'):cases.append(dict(case=name,kind='rejected',source_case=source,changes=changes or {},setup=setup,return_code=1))
+  for name,changes in [
+  ('null-descriptor',{}),('version',{'version':0}),('descriptor-size',{'descriptor_bytes':152}),('reserved',{'reserved':1}),('reserved-tail',{'reserved_tail':1}),('zero-width',{'width':0}),('negative-height',{'height':-1}),('excess-dimension',{'width':32769}),('excess-pixels',{'width':32768,'height':32768}),('mode',{'mode':5}),('seed-negative',{'seed_x':-1}),('seed-right',{'seed_x':47}),('seed-bottom',{'seed_y':37}),('null-input',{'input':None}),('null-output',{'output':None}),('null-region',{'region':None}),('null-workspace',{'workspace':None}),('input-short-pitch',{'input_pitch':140}),('output-short-pitch',{'output_pitch':140}),('mask-short-pitch',{'mask_pitch':46}),('null-mask-nonzero-pitch',{'mask':None}),('present-mask-zero-pitch',{'mask_pitch':0}),('short-workspace',{'workspace_bytes':1}),('unaligned-workspace',{'workspace':'workspace+1'}),('unaligned-region',{'region':'region+1'}),('lower-value',{'lower':[256,0,0]}),('upper-value',{'upper':[0,256,0]}),('fill-value',{'fill':[0,0,256]}),('boundary-value',{'boundary':[256,0,0]}),('inverted-absolute-range',{'mode':3,'lower':[200]*3,'upper':[100]*3}),('input-output-partial-overlap',{'output':'input+1'}),('output-mask-overlap',{'mask':'output'}),('region-workspace-overlap',{'region':'workspace'}),('input-workspace-overlap',{'input':'workspace'}),('region-input-overlap',{'region':'input'}),('alias-different-pitch',{'output':'input'}),('host-input',{'input':'host'}),('actual-source-allocation-too-short',{'input':'small'}),('actual-output-allocation-too-short',{'output':'small'}),('actual-region-allocation-too-short',{'region':'small'}),('actual-workspace-allocation-too-short',{'workspace':'small'}),('input-pitch-overflow',{'input_pitch':2**64-1}),('output-pitch-overflow',{'output_pitch':2**64-1}),('mask-pitch-overflow',{'mask_pitch':2**64-1})]:bad(name,changes)
++ for name,changes in [('mask-in-input-last-row-padding',{'mask':'input+3','mask_pitch':1}),('mask-in-output-last-row-padding',{'mask':'output+3','mask_pitch':1}),('region-in-input-last-row-padding',{'region':'input+4'}),('region-in-output-last-row-padding',{'region':'output+4'}),('workspace-in-input-last-row-padding',{'workspace':'input+4'}),('workspace-in-output-last-row-padding',{'workspace':'output+4'}),('actual-input-missing-last-row-padding',{'input':'small'}),('actual-output-missing-last-row-padding',{'output':'small'}),('actual-mask-missing-last-row-padding',{'mask':'small'})]:bad(name,changes,source='one-pixel')
+  for name,w,h,rc,size in [('one',1,1,0,12),('max-width',32768,1,0,229380),('max-pixels',8192,8192,0,469762052),('zero',0,3,1,0),('negative',-1,1,1,0),('dimension-limit',32769,1,1,0),('pixel-limit',32768,32768,1,0),('null-result',1,1,1,None)]:cases.append(dict(case='query-'+name,kind='query',width=w,height=h,null_result=name=='null-result',return_code=rc,bytes=size))
+  for name,kind,source,state,change in [('default-original','default','fixed-gradient-independent-ramp','A','original'),('repeat-original','repeat','fixed-gradient-independent-ramp','A','original'),('changed-zero-logical','repeat','fixed-gradient-independent-ramp','A','zero-logical'),('restored-original','repeat','fixed-gradient-independent-ramp','A','original'),('exact-alias','alias','gradient-boundary-original','alias','original'),('optional-mask-disabled','no-mask','range-boundary-original','no-mask','original'),('valid-after-errors','valid','inclusive-fixed-gradient-limits','after','original'),('concurrent-rainbow','concurrent','gradient-boundary-original','C0','original'),('concurrent-seabed','concurrent','range-boundary-original','C1','original'),('foreign-stream','foreign','fixed-gradient-independent-ramp','foreign','original'),('destroyed-stream','destroyed','fixed-gradient-independent-ramp','destroyed','original')]:cases.append(dict(case=name,kind=kind,source_case=source,state=state,input_change=change,return_code=101 if kind=='foreign' else 709 if kind=='destroyed' else 0))
+  v=dict(schema_version=1,status='FROZEN',cases=cases,case_count=len(cases),storage='All source/output/mask/metadata/workspace bytes plus32-byte end guards,16-byte actual hipMalloc and host buffer observed. Invalid calls preserve all storage. Valid workspace may change only declared bytes. Alias changes logical input/output together; optional mask storage stays unchanged.',device_policy='All image buffers/kernels on physical1. Physical0 used only for creating/querying empty foreign stream. Two concurrent instances use independent actual streams/spans and overlapping API-plus-own-sync intervals.');e=Experiment('I3','FloodFill-fixed-runtime-storage-and-stream-obligations','CPU-contract',sources=[__file__,ROOT/'migration/rewrite/image-flood-profile.json']);write(ROOT/'migration/rewrite/image-flood-runtime-contract.json',v);write(e.path/'profile.json',v);r=dict(status='FROZEN',case_count=len(cases));write(e.path/'contracts.json',r);r['evidence']=e.finish('OBSERVED');write(ROOT/'migration/reports/image-flood-runtime-contracts.json',r);record('I3','flood运行合同冻结'+str(len(cases))+'项：完整拒绝存储/真实16字节分配/query、默认/复用变化/原尺寸alias/禁mask/双实例并发/外设备与销毁stream；GPU1图像，GPU0只空流。',[r['evidence']]);print(r['status'],r['case_count']);return 0
+diff --git a/tools/moat/image_flood_runtime_reference.py b/tools/moat/image_flood_runtime_reference.py
+index 1ada3c797..319565205 100644
+--- a/tools/moat/image_flood_runtime_reference.py
++++ b/tools/moat/image_flood_runtime_reference.py
+@@ -1,6 +1,7 @@
+ #!/usr/bin/env python3
+ """Independently check every actual runtime descriptor, storage byte and stream relation."""
+ import hashlib,json
++from pathlib import Path
+ import numpy as np
+ from experiment import ROOT,Experiment,write
+ from image_flood_inputs import load_case
+@@ -24,11 +25,15 @@ def expected_descriptor(c,pointers):
+ def resolve(value,pointers):
+  if not isinstance(value,str):return value
+  parts=value.split('+');return pointers[parts[0]]['pointer']+(int(parts[1]) if len(parts)==2 else 0)
+-def validate(run):
+- contract=json.loads((ROOT/'migration/rewrite/image-flood-runtime-contract.json').read_text());profile=json.loads((ROOT/'migration/rewrite/image-flood-profile.json').read_text());cases={c['case']:c for c in profile['cases']};rules=contract['cases'];out=ROOT/run['outputs'];rows=json.loads((out/'runs.json').read_text());meta=json.loads((ROOT/run['evidence']/'manifest.json').read_text());raw=ROOT/meta['raw_artifact_dir'];commands=json.loads((raw/'commands.json').read_text());devices={d['logical_id']:d['physical_id'] for d in json.loads((out/'devices.json').read_text())['devices']}
+- if run['return_code'] or contract['status']!='FROZEN' or contract['case_count']!=len(rows) or len(rows)!=len(rules) or len(rules)!=63 or [r['case'] for r in rows]!=[r['case'] for r in rules] or set(devices.values())!={0,1} or len(devices)!=2 or out.resolve()!=(raw/'outputs').resolve() or len(commands)!=1 or commands[0]['return_code']:raise ValueError('all63 ordered actual runtime calls on exact allowed devices')
++def validate(run,raw_override=None):
++ contract=json.loads((ROOT/'migration/rewrite/image-flood-runtime-contract.json').read_text());profile=json.loads((ROOT/'migration/rewrite/image-flood-profile.json').read_text());cases={c['case']:c for c in profile['cases']};rules=contract['cases'];out=ROOT/run['outputs'];rows=json.loads((out/'runs.json').read_text());meta=json.loads((ROOT/run['evidence']/'manifest.json').read_text());raw=Path(raw_override) if raw_override else ROOT/meta['raw_artifact_dir'];commands=json.loads((raw/'commands.json').read_text());devices={d['logical_id']:d['physical_id'] for d in json.loads((out/'devices.json').read_text())['devices']}
++ if run['return_code'] or contract['status']!='FROZEN' or contract['case_count']!=len(rows) or len(rows)!=len(rules) or len(rules)!=72 or [r['case'] for r in rows]!=[r['case'] for r in rules] or set(devices.values())!={0,1} or len(devices)!=2 or out.resolve()!=(raw/'outputs').resolve() or len(commands)!=1 or commands[0]['return_code']:raise ValueError('all72 ordered actual runtime calls on exact allowed devices')
+  argv=commands[0]['argv']
+- if str(ROOT/'tools/moat/image_flood_runtime.py') not in argv or '--worker' not in argv or argv[argv.index('--output')+1]!=str(out) or argv[argv.index('--library')+1]!=str(ROOT/run['build']['library']) or argv[argv.index('--sha')+1]!=run['build']['library_sha256']:raise ValueError('actual runtime worker/library/output identity')
++ if any(argv.count(option)!=1 for option in ['--output','--library','--sha','--worker']):raise ValueError('one actual runtime producer argument per artifact')
++ stored=Path(argv[argv.index('--output')+1]);origin=stored.parent
++ for _ in Path(meta['raw_artifact_dir']).parts:origin=origin.parent
++ expected=[str(origin/'tools/moat/image_flood_runtime.py'),'--worker','--library',str(origin/run['build']['library']),'--sha',run['build']['library_sha256'],'--output',str(stored)]
++ if origin/meta['raw_artifact_dir']/'outputs'!=stored or argv[1:]!=expected or commands[0]['cwd']!=str(origin):raise ValueError('actual runtime worker/library/output identity')
+  wanted={r['case'] for r in rules if r['kind']!='query'}|{'runs.json','devices.json'}
+  if {p.name for p in out.iterdir()}!=wanted:raise ValueError('exact runtime inventory')
+  states={};pointers={};results=[];concurrent=[]
+@@ -73,5 +78,5 @@ def main():
+  run=json.loads((ROOT/'migration/reports/image-flood-runtime.json').read_text());e=Experiment('I3','FloodFill-full-runtime-storage-and-stream-independent-CPU','CPU-reference',sources=[__file__,ROOT/'tools/moat/image_flood_reference.py',ROOT/'tools/moat/image_flood_inputs.py',ROOT/'migration/rewrite/image-flood-profile.json',ROOT/'migration/rewrite/image-flood-runtime-contract.json'],parent=run['experiment_id'])
+  try:v=validate(run)
+  except Exception as error:v=dict(status='FAILED',results=[],error=repr(error))
+- write(e.path/'results.json',v);v['evidence']=e.finish('PASSED' if v['status']=='PASSED' else 'NUMERIC_MISMATCH',dict(status=v['status'],checks=[dict(check='all63-actual-descriptors-complete-buffers-aliases-reuse-streams-concurrency',passed=v['status']=='PASSED')]));write(ROOT/'migration/reports/image-flood-runtime-validation.json',v);record('I3','flood63固定运行项/完整before-after所有buffer与guards/真实分配/指针role/query/默认与alias/禁mask/并发/错误流独立CPU：'+v['status'],[v['evidence']]);print(v['status'],v.get('error'),[r for r in v['results'] if r['status']=='FAILED']);return int(v['status']!='PASSED')
++ write(e.path/'results.json',v);v['evidence']=e.finish('PASSED' if v['status']=='PASSED' else 'NUMERIC_MISMATCH',dict(status=v['status'],checks=[dict(check='all72-actual-descriptors-complete-buffers-aliases-reuse-streams-concurrency',passed=v['status']=='PASSED')]));write(ROOT/'migration/reports/image-flood-runtime-validation.json',v);record('I3','flood72固定运行项/完整before-after所有buffer与guards/真实分配/指针role/query/默认与alias/禁mask/并发/错误流独立CPU：'+v['status'],[v['evidence']]);print(v['status'],v.get('error'),[r for r in v['results'] if r['status']=='FAILED']);return int(v['status']!='PASSED')
+ if __name__=='__main__':raise SystemExit(main())

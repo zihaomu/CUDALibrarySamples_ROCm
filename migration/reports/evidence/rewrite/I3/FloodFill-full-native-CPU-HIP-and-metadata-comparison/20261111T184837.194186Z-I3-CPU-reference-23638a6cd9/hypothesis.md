@@ -1,0 +1,1 @@
+Test CPU-reference for FloodFill-full-native-CPU-HIP-and-metadata-comparison, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261111T181153.969229Z-I3-cuda-original-820d020ffa.

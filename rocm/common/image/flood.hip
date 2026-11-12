@@ -13,8 +13,10 @@ inline bool shape(int w,int h,uint64_t&n,uint64_t&bytes){
  bytes=((3*n+3)&~uint64_t(3))+4*n+4;return true;
 }
 inline bool row_span(uint64_t pitch,uint64_t row,int h,uint64_t&bytes){
- if(pitch<row||uint64_t(h-1)>(UINT64_MAX-row)/pitch)return false;
- bytes=uint64_t(h-1)*pitch+row;return true;
+ if(pitch<row||uint64_t(h)>UINT64_MAX/pitch)return false;
+ // Padding belongs to the caller's image storage on every row, including
+ // the last one. Another writable span must not be placed inside it.
+ bytes=uint64_t(h)*pitch;return true;
 }
 __global__ void prepare(rocm_image_flood_descriptor d,uint8_t*original,uint32_t*parents){
  int t=blockIdx.x*blockDim.x+threadIdx.x,n=d.width*d.height;if(t>=n)return;

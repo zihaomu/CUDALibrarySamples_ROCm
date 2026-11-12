@@ -1,0 +1,193 @@
+#!/usr/bin/env python3
+"""Adversarial replay of the real flood runtime, CLI and original-workflow readers."""
+import copy
+import hashlib
+import json
+import shutil
+import tempfile
+from pathlib import Path
+from unittest.mock import patch
+
+from experiment import ROOT, Experiment, write, digest
+from image_progress import record
+import image_flood_runtime_reference as runtime
+import image_flood_cli as cli
+import image_flood_original_reference as originals
+import image_flood_reference as core
+
+NAMES = [
+    'actual72-runtime-pass', 'actual18-CLI-pass', 'actual4-originals-pass',
+    'relocated-complete-runtime-pass', 'runtime-unbound-output-redirect',
+    'runtime-missing-case', 'runtime-duplicate-case', 'runtime-producer-nonzero',
+    'runtime-role-redefined', 'runtime-descriptor-pitch-redefined',
+    'runtime-query-byte-count-forged', 'runtime-device-map-forged',
+    'runtime-foreign-owner-forged', 'runtime-destroyed-error-cache-forged',
+    'runtime-reuse-input-change-forged', 'runtime-concurrent-streams-same',
+    'runtime-concurrent-intervals-not-overlapping',
+    'runtime-rejection-buffer-and-matching-hash-forged',
+    'runtime-short-allocation-size-forged', 'runtime-actual-library-option-duplicated',
+    'CLI-missing-case', 'CLI-duplicate-case', 'CLI-return-code-forged',
+    'CLI-output-path-redirected', 'CLI-stdout-path-redefined',
+    'CLI-actual-command-forged', 'original-duplicate-workflow',
+    'original-RGB-product-forged', 'original-stdout-truncated',
+]
+
+def run_checks():
+    checks = []
+    cache = {}
+    model = core.model
+    def cached(a, c):
+        key = (a.shape, hashlib.sha256(a.tobytes()).hexdigest(),
+               json.dumps({k: c[k] for k in ['mode', 'seed', 'lower', 'upper', 'fill', 'boundary']}, sort_keys=True))
+        if key not in cache:
+            cache[key] = model(a, c)
+        return cache[key]
+    def check(name, fn, wanted=True):
+        try:
+            result = bool(fn())
+        except (ValueError, TypeError, KeyError, IndexError, OSError, StopIteration):
+            result = False
+        checks.append(dict(check=name, passed=result == wanted))
+    run = json.loads((ROOT/'migration/reports/image-flood-runtime.json').read_text())
+    cli_rows = json.loads((ROOT/'migration/reports/image-flood-cli.json').read_text())
+    original_rows = json.loads((ROOT/'migration/reports/image-flood-originals.json').read_text())
+    source = ROOT/run['outputs']
+    meta = json.loads((ROOT/run['evidence']/'manifest.json').read_text())
+    original_raw = ROOT/meta['raw_artifact_dir']
+    with tempfile.TemporaryDirectory(prefix='flood-runtime-readers-') as temporary, patch.object(core, 'model', cached), patch.object(runtime, 'model', cached), patch.object(originals, 'model', cached):
+        base = Path(temporary)
+        check('actual72-runtime-pass', lambda: runtime.validate(run)['status'] == 'PASSED')
+        check('actual18-CLI-pass', lambda: cli.validate(cli_rows)['status'] == 'PASSED')
+        check('actual4-originals-pass', lambda: all(r['status'] == 'PASSED' for r in originals.validate(original_rows)))
+        def mutant(name, edit=None, file=None, change=None, coupled=None, command=None, bind=True, devices=False):
+            raw = base/name/meta['raw_artifact_dir']
+            out = raw/'outputs'
+            out.mkdir(parents=True)
+            rows = copy.deepcopy(json.loads((source/'runs.json').read_text()))
+            target = None if file is None else Path(file).parts[0]
+            for p in source.iterdir():
+                dest = out/p.name
+                if p.is_dir():
+                    if p.name == target:
+                        shutil.copytree(p, dest)
+                    else:
+                        dest.symlink_to(p, target_is_directory=True)
+                elif p.name == 'devices.json' and devices:
+                    shutil.copyfile(p, dest)
+                elif p.name != 'runs.json':
+                    shutil.copyfile(p, dest)
+            if file:
+                change(out/file)
+            if edit:
+                edit(rows)
+            if coupled:
+                coupled(rows, out)
+            write(out/'runs.json', rows)
+            commands = copy.deepcopy(json.loads((original_raw/'commands.json').read_text()))
+            origin = base/name
+            cmd = commands[0]
+            cmd['argv'] = [cmd['argv'][0], str(origin/'tools/moat/image_flood_runtime.py'), '--worker',
+                           '--library', str(origin/run['build']['library']), '--sha',
+                           run['build']['library_sha256'], '--output', str(out)]
+            cmd['cwd'] = str(origin)
+            if command:
+                command(commands)
+            write(raw/'commands.json', commands)
+            view = copy.deepcopy(run)
+            view['outputs'] = str(out)
+            return runtime.validate(view, raw_override=raw if bind else None)['status'] == 'PASSED'
+        check('relocated-complete-runtime-pass', lambda: mutant('rebase'))
+        check('runtime-unbound-output-redirect', lambda: mutant('unbound', bind=False), False)
+        check('runtime-missing-case', lambda: mutant('missing', edit=lambda rs: rs.pop()), False)
+        check('runtime-duplicate-case', lambda: mutant('duplicate', edit=lambda rs: rs.append(copy.deepcopy(rs[0]))), False)
+        check('runtime-producer-nonzero', lambda: mutant('rc', command=lambda cs: cs[0].update(return_code=1)), False)
+        check('runtime-role-redefined', lambda: mutant('role', edit=lambda rs: rs[0].update(kind='valid')), False)
+        check('runtime-descriptor-pitch-redefined', lambda: mutant('pitch', edit=lambda rs: rs[0]['descriptor'].update(input_pitch=1)), False)
+        check('runtime-query-byte-count-forged', lambda: mutant('query', edit=lambda rs: next(r for r in rs if r['kind']=='query').update(bytes=1)), False)
+        def devchange(path):
+            x = json.loads(path.read_text()); x['devices'][0]['physical_id'] = 3; write(path, x)
+        check('runtime-device-map-forged', lambda: mutant('device', file='devices.json', change=devchange, devices=True), False)
+        check('runtime-foreign-owner-forged', lambda: mutant('foreign', edit=lambda rs: next(r for r in rs if r['kind']=='foreign').update(stream_owner=1)), False)
+        check('runtime-destroyed-error-cache-forged', lambda: mutant('dead', edit=lambda rs: next(r for r in rs if r['kind']=='destroyed').update(query_last_error_cleared=0)), False)
+        check('runtime-reuse-input-change-forged', lambda: mutant('reuse', edit=lambda rs: next(r for r in rs if r.get('input_change')=='zero-logical').update(input_change=None)), False)
+        def same_stream(rows):
+            a, b = [r for r in rows if r['kind']=='concurrent']; b['stream_id'] = a['stream_id']
+        check('runtime-concurrent-streams-same', lambda: mutant('same-stream', edit=same_stream), False)
+        def no_overlap(rows):
+            a, b = [r for r in rows if r['kind']=='concurrent']; span = b['finished_ns']-b['started_ns']; b['started_ns'] = a['finished_ns']+1; b['finished_ns'] = b['started_ns']+span
+        check('runtime-concurrent-intervals-not-overlapping', lambda: mutant('no-overlap', edit=no_overlap), False)
+        rejected = next(r['case'] for r in json.loads((source/'runs.json').read_text()) if r['kind']=='rejected')
+        def flip(path):
+            b = bytearray(path.read_bytes()); b[0] ^= 1; path.write_bytes(b)
+        def paired(rows, out):
+            r = next(r for r in rows if r['case']==rejected)
+            r['files']['after']['output']['sha256'] = digest(out/rejected/'after/output.bin')
+        check('runtime-rejection-buffer-and-matching-hash-forged', lambda: mutant('paired', file=rejected+'/after/output.bin', change=flip, coupled=paired), False)
+        check('runtime-short-allocation-size-forged', lambda: mutant('size', edit=lambda rs: rs[0]['buffers']['small'].update(bytes=17)), False)
+        check('runtime-actual-library-option-duplicated', lambda: mutant('cmd', command=lambda cs: cs[0]['argv'].extend(['--library', str(ROOT/run['build']['library'])])), False)
+        check('CLI-missing-case', lambda: cli.validate(cli_rows[:-1])['status']=='PASSED', False)
+        duplicate = copy.deepcopy(cli_rows); duplicate[-1] = copy.deepcopy(duplicate[0])
+        check('CLI-duplicate-case', lambda: cli.validate(duplicate)['status']=='PASSED', False)
+        forged = copy.deepcopy(cli_rows); forged[0]['return_code'] = 1
+        check('CLI-return-code-forged', lambda: cli.validate(forged)['status']=='PASSED', False)
+        forged = copy.deepcopy(cli_rows); forged[0]['outputs'] = forged[0]['inputs']
+        check('CLI-output-path-redirected', lambda: cli.validate(forged)['status']=='PASSED', False)
+        forged = copy.deepcopy(cli_rows); forged[0]['stdout'] = forged[0]['stderr']
+        check('CLI-stdout-path-redefined', lambda: cli.validate(forged)['status']=='PASSED', False)
+        cli_meta = json.loads((ROOT/cli_rows[0]['evidence']/'manifest.json').read_text())
+        actual_commands = (ROOT/cli_meta['raw_artifact_dir']/'commands.json').read_text()
+        loads = cli.json.loads
+        def changed_commands(value, *args, **kwargs):
+            v = loads(value, *args, **kwargs)
+            if value == actual_commands:
+                v[0]['argv'].append('--unrecorded-option')
+            return v
+        with patch.object(cli.json, 'loads', changed_commands):
+            check('CLI-actual-command-forged', lambda: cli.validate(cli_rows)['status']=='PASSED', False)
+        duplicate = copy.deepcopy(original_rows); duplicate[-1] = copy.deepcopy(duplicate[0])
+        check('original-duplicate-workflow', lambda: all(r['status']=='PASSED' for r in originals.validate(duplicate)), False)
+        original = next(r for r in original_rows if r['case']=='explicit-original')
+        rule = next(r for r in json.loads((ROOT/'migration/rewrite/image-flood-original-contract.json').read_text())['workflows'] if r['case']==original['case'])
+        original_meta = json.loads((ROOT/original['evidence']/'manifest.json').read_text())
+        def original_mutant(name, target, change):
+            raw = base/name
+            shutil.copytree(ROOT/original_meta['raw_artifact_dir'], raw)
+            r = copy.deepcopy(original)
+            for key in ['inputs', 'outputs', 'audit']:
+                r[key] = str(raw/(ROOT/r[key]).relative_to(ROOT/original_meta['raw_artifact_dir']))
+            if target == 'stdout':
+                change(raw/r['stdout'])
+            else:
+                change(raw/'audit'/rule['case']/'output.bin')
+            return originals.validate_one(r, rule, raw_override=raw)['status']=='PASSED'
+        check('original-RGB-product-forged', lambda: original_mutant('original-RGB', 'RGB', flip), False)
+        check('original-stdout-truncated', lambda: original_mutant('original-stdout', 'stdout', lambda p: p.write_text('')), False)
+    if len(checks)!=len(NAMES) or [c['check'] for c in checks]!=NAMES:
+        raise ValueError('frozen runtime reader mutation inventory')
+    return dict(status='PASSED' if all(c['passed'] for c in checks) else 'FAILED', case_count=len(checks), checks=checks)
+
+def main():
+    path = ROOT/'migration/rewrite/image-flood-runtime-validator-cases.json'
+    if not path.exists():
+        e = Experiment('I3', 'FloodFill-runtime-reader-mutation-contract', 'CPU-contract', sources=[__file__, ROOT/'migration/rewrite/image-flood-runtime-contract.json'])
+        write(path, NAMES)
+        write(e.path/'cases.json', NAMES)
+        r = dict(status='FROZEN', case_count=len(NAMES)); write(e.path/'contracts.json', r)
+        r['evidence'] = e.finish('OBSERVED'); write(ROOT/'migration/reports/image-flood-runtime-check-contracts.json', r)
+        record('I3', f'flood运行时/CLI/原例{len(NAMES)}项验收器反例合同固定。', [r['evidence']])
+    if json.loads(path.read_text()) != NAMES:
+        raise ValueError('frozen runtime reader mutation inventory')
+    e = Experiment('I3', 'FloodFill-runtime-CLI-original-validator-mutations', 'CPU-validator-test', sources=[__file__, path, ROOT/'tools/moat/image_flood_runtime_reference.py', ROOT/'tools/moat/image_flood_cli.py', ROOT/'tools/moat/image_flood_original_reference.py', ROOT/'tools/moat/image_flood_reference.py', ROOT/'migration/rewrite/image-flood-runtime-contract.json', ROOT/'migration/rewrite/image-flood-original-contract.json', ROOT/'migration/rewrite/image-flood-cli-contract.json'])
+    try:
+        v = run_checks()
+    except Exception as error:
+        v = dict(status='FAILED', checks=[dict(check='all-real-runtime-reader-mutations-execute', passed=False, error=repr(error))])
+    write(e.path/'checks.json', v)
+    v['evidence'] = e.finish('PASSED' if v['status']=='PASSED' else 'SELF_TEST_FAILED', dict(status=v['status'], checks=v['checks']))
+    write(ROOT/'migration/reports/image-flood-runtime-checks.json', v)
+    record('I3', f'flood{len(NAMES)}项72运行/18CLI/4原例真实验收器变异：{v["status"]}', [v['evidence']])
+    print(v['status'], v.get('case_count'), [c for c in v['checks'] if not c['passed']])
+    return int(v['status']!='PASSED')
+
+if __name__=='__main__':
+    raise SystemExit(main())
