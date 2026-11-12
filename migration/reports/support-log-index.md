@@ -63,7 +63,7 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 | PARTIAL | `VALIDATED_B12_B15_SUBSET` | 8 | 已有验收子集，原始 descriptor、低精度通信、序列或像素语义仍有缺口。 |
 | PARTIAL | `VALIDATED_B9_B11_SUBSET` | 3 | 已有验收子集，原例框架、调度或配置/查询语义仍有缺口。 |
 | PARTIAL | `VALIDATED_I4_PROGRESSIVE_SUBSET` | 4 | 按该入口的失败日志和恢复条件处理。 |
-| PARTIAL | `VALIDATED_I5_GPU_JPEG_FORWARD_SUBSET` | 2 | 按该入口的失败日志和恢复条件处理。 |
+| PARTIAL | `VALIDATED_I5_FULL_GPU_JPEG_BASELINE_SUBSET` | 2 | 按该入口的失败日志和恢复条件处理。 |
 | PARTIAL | `VALIDATED_I5_GPU_JPEG_INSTANCES_SUBSET` | 1 | 按该入口的失败日志和恢复条件处理。 |
 | PARTIAL | `VENDOR_PERMUTATION_POLICY_DIFFERS` | 1 | 置换/排序策略未满足原始 vendor 合同。 |
 
@@ -835,8 +835,8 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 
 | 样例 / 详情 | 状态 / 用例 | 实际库与实现方式 | 详细日志与范围 |
 | --- | --- | --- | --- |
-| [Image-Resize-WaterMark/imageResizeWatermark.cpp](../sample-reports/nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp.md) | PARTIAL / 9/12 | rocJPEG baseline hardware + project HIP progressive IDCT/chroma/RGB + project HIP JPEG color/downsample/FDCT/quant; libjpeg-turbo CPU progressive entropy and JPEG encode entropy/headers / rocJPEG + project HIP image decoder/forward encoder + libjpeg-turbo entropy；GPU 实现 + 明确标注的 CPU 阶段 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-9e68524b388a) |
-| [Image-Resize/imageResize.cpp](../sample-reports/nvJPEG/Image-Resize/imageResize.cpp.md) | PARTIAL / 9/12 | rocJPEG baseline hardware + project HIP progressive IDCT/chroma/RGB + project HIP JPEG color/downsample/FDCT/quant; libjpeg-turbo CPU progressive entropy and JPEG encode entropy/headers / rocJPEG + project HIP image decoder/forward encoder + libjpeg-turbo entropy；GPU 实现 + 明确标注的 CPU 阶段 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-ba8320f54095) |
+| [Image-Resize-WaterMark/imageResizeWatermark.cpp](../sample-reports/nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp.md) | PARTIAL / 10/14 | rocJPEG baseline hardware + project HIP progressive decode + project HIP full baseline JPEG encode (GPU color/FDCT/MCU/Huffman/pack/stuff; CPU marker orchestration) / rocJPEG + project HIP JPEG decoder/encoder + libjpeg-turbo progressive entropy only；GPU 实现 + 明确标注的 CPU 阶段 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-9e68524b388a) |
+| [Image-Resize/imageResize.cpp](../sample-reports/nvJPEG/Image-Resize/imageResize.cpp.md) | PARTIAL / 10/14 | rocJPEG baseline hardware + project HIP progressive decode + project HIP full baseline JPEG encode (GPU color/FDCT/MCU/Huffman/pack/stuff; CPU marker orchestration) / rocJPEG + project HIP JPEG decoder/encoder + libjpeg-turbo progressive entropy only；GPU 实现 + 明确标注的 CPU 阶段 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-ba8320f54095) |
 | [nvJPEG-Decoder-Backend-ROI/nvJPEGROIDecode.cpp](../sample-reports/nvJPEG/nvJPEG-Decoder-Backend-ROI/nvJPEGROIDecode.cpp.md) | PARTIAL / 8/10 | rocJPEG hardware baseline + project HIP progressive IDCT/chroma/RGB; libjpeg-turbo CPU entropy assembly / rocJPEG + project HIP image decoder + libjpeg-turbo entropy；GPU 实现 + 明确标注的 CPU 阶段 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-c19023c1e1d4) |
 | [nvJPEG-Decoder-MultipleInstances/nvJPEGDecMultipleInstances.cpp](../sample-reports/nvJPEG/nvJPEG-Decoder-MultipleInstances/nvJPEGDecMultipleInstances.cpp.md) | PARTIAL / 8/10 | rocJPEG hardware baseline + project HIP progressive IDCT/chroma/RGB; libjpeg-turbo CPU entropy assembly / rocJPEG + project HIP image decoder + libjpeg-turbo entropy；GPU 实现 + 明确标注的 CPU 阶段 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-f846e59c86c3) |
 | [nvJPEG-Decoder/nvjpegDecoder.cpp](../sample-reports/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp.md) | PARTIAL / 8/9 | rocJPEG hardware baseline + project HIP progressive IDCT/chroma/RGB; libjpeg-turbo CPU entropy assembly / rocJPEG + project HIP image decoder + libjpeg-turbo entropy；GPU 实现 + 明确标注的 CPU 阶段 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-340e3057571d) |

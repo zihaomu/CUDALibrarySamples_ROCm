@@ -282,7 +282,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-12T09:55:08.919821+00:00。26入口当前13通过/9部分/4失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-12T09:57:53.420922+00:00。26入口当前13通过/9部分/4失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -1918,5 +1918,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-12T09:54:41.757915+00:00 | I5 | 68产品独立CPU验收首次用宿主 python3 触发 NumPy 缺失，环境失败已封存；改用锁定CPU venv重跑并通过。 | `migration/reports/evidence/rewrite/I5/all-68-JPEG-CPU-validation-host-interpreter-missing-NumPy/20261112T095440.627980Z-I5-host-dependency-negative-6b3715821c`；`migration/reports/image-jpeg-encoder-full-gpu-products-comparison.json` |
 | 2026-11-12T09:55:07.568791+00:00 | I5 | nvJPEG/Image-Resize/imageResize.cpp 完整 GPU baseline JPEG 重编码原入口子集封存；七组 CPU/CUDA、四原型、真实 C++ GPU trace 通过，metadata/progressive 仍 PARTIAL。 | `migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize__imageResize.cpp/20261112T095506.566296Z-I5-full-GPU-JPEG-original-entry-subset-qualification-ef39d07027` |
 | 2026-11-12T09:55:08.919821+00:00 | I5 | nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp 完整 GPU baseline JPEG 重编码原入口子集封存；七组 CPU/CUDA、四原型、真实 C++ GPU trace 通过，metadata/progressive 仍 PARTIAL。 | `migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261112T095507.951209Z-I5-full-GPU-JPEG-original-entry-subset-qualification-b0a5e51346` |
+| 2026-11-12T09:57:52.875725+00:00 | I5 | nvJPEG/Image-Resize/imageResize.cpp 33件全 GPU baseline JPEG 产品/七组原入口/独立CPU与CUDA/实际GPU trace 已绑定主表；源模式metadata缺口仍 PARTIAL。 | `migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize__imageResize.cpp/20261112T095506.566296Z-I5-full-GPU-JPEG-original-entry-subset-qualification-ef39d07027`；`migration/reports/evidence/rewrite/I5/all-68-original-resize-JPEG-independent-pixel-comparison/20261112T095424.191828Z-I5-CPU-reference-58dc0f8f8b` |
+| 2026-11-12T09:57:53.420922+00:00 | I5 | nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp 35件全 GPU baseline JPEG 产品/七组原入口/独立CPU与CUDA/实际GPU trace 已绑定主表；源模式metadata缺口仍 PARTIAL。 | `migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261112T095507.951209Z-I5-full-GPU-JPEG-original-entry-subset-qualification-b0a5e51346`；`migration/reports/evidence/rewrite/I5/all-68-original-resize-JPEG-independent-pixel-comparison/20261112T095424.191828Z-I5-CPU-reference-58dc0f8f8b` |
 
 <!-- IMAGE_EXECUTION:END -->

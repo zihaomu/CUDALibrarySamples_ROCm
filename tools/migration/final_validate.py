@@ -28,11 +28,13 @@ def main():
   if source not in {'nvJPEG/Image-Resize/imageResize.cpp','nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp'}:return False
   s=next(x for x in samples if x['source']==source)
   q=s.get('selected_validation',{})
+  variants={'VALIDATED_I5_GPU_JPEG_FORWARD_SUBSET':('image-JPEG-GPU-forward-transform-subset',9),
+   'VALIDATED_I5_FULL_GPU_JPEG_BASELINE_SUBSET':('image-JPEG-full-GPU-baseline-reencode-subset',10)}
   try:
    proof=ROOT/q['evidence'];sealed=json.loads((proof/'qualification.json').read_text())
-   return (s['status']=='PARTIAL' and s['reason_code']=='VALIDATED_I5_GPU_JPEG_FORWARD_SUBSET' and
-    q['kind']=='image-JPEG-GPU-forward-transform-subset' and q['status']=='PASSED' and
-    q['contract_status']=='PARTIAL' and q['case_count']==len(q['case_ids'])==9 and
+   kind,count=variants[s['reason_code']]
+   return (s['status']=='PARTIAL' and q['kind']==kind and q['status']=='PASSED' and
+    q['contract_status']=='PARTIAL' and q['case_count']==len(q['case_ids'])==count and
     all(c['passed'] for c in q['checks']) and
     all(k in q and q[k]==v for k,v in sealed.items()) and
     q['sample_id']==s['id'] and q['implementation']==s['implementation'] and

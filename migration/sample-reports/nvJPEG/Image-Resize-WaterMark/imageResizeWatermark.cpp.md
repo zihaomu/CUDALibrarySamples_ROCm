@@ -2,28 +2,28 @@
 
 **PARTIAL / L4**
 
-七组原登记 CLI/数值流程及同输入 CUDA 数学对照通过；35 件重编码 JPEG 使用 AMD GPU 色彩转换、色度降采样、FDCT 与量化，CPU libjpeg-turbo 完成熵编码/头部；四组预登记输入独立跨解码及物理 GPU trace 通过。完整 GPU Huffman、原编码模式/表/元数据复制和冷检出尚缺，故只算 PARTIAL。
+七组原登记 CLI/独立 CPU 与同输入 CUDA 数学流程均通过；35 件重编码 JPEG 由 AMD GPU 完成色彩/FDCT/MCU/Huffman/scan/pack/stuff，CPU 仅组装标准 baseline marker，禁 CPU 熵编码。两个入口68产品共8,191,374个 RGB 字节与旧独立数值路径完全一致，采样/量化表一致；实际 C++ 入口各12个 GPU JPEG 内核及重放 SHA 已验。源 progressive 输出模式、表及 APP/COM metadata 继承和 GPU prefix 性能尚缺，故 PARTIAL。
 
 | 字段 | 当前记录 |
 | --- | --- |
 | 原始入口 | [nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp](../../../../nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp) |
-| 实际库 / 后端 | rocJPEG baseline hardware + project HIP progressive IDCT/chroma/RGB + project HIP JPEG color/downsample/FDCT/quant; libjpeg-turbo CPU progressive entropy and JPEG encode entropy/headers / rocJPEG + project HIP image decoder/forward encoder + libjpeg-turbo entropy |
+| 实际库 / 后端 | rocJPEG baseline hardware + project HIP progressive decode + project HIP full baseline JPEG encode (GPU color/FDCT/MCU/Huffman/pack/stuff; CPU marker orchestration) / rocJPEG + project HIP JPEG decoder/encoder + libjpeg-turbo progressive entropy only |
 | 候选路线 | rocJPEG (decode only), RPP |
 | 代码 | [rocm/ported/nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp](../../../../rocm/ported/nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp) |
-| required cases | 9/12 |
+| required cases | 10/14 |
 | CUDA baseline / comparison | PASSED / PASSED |
 | 性能 | NOT_RUN |
 | 原始源码 SHA256 | `e4f336ff2598fdcc5d0899d168eaf7785ed4b277fb494cd6f23960d181fe405b` |
 
 编译/运行返回 0 仅对应 L3；通过独立参考检查后才记 L4。失败的候选库不列为已使用库。
 
-必需用例：`batches9_11/original-corpus`, `batches9_11/formats-scale`, `batches9_11/roi-boundary`, `batches9_11/batch-multi-instance`, `batches9_11/invalid-cli`, `batches9_11/postprocess`, `batches9_11/python-integration`, `I4/progressive-GPU-pixel-synthesis`, `I5/GPU-JPEG-forward-transform-and-cross-decode`, `I5/GPU-Huffman-entropy-and-bitstream-packing`, `I5/original-encoding-mode-tables-and-APP-COM-metadata`, `I4-I5/fixed-commit-cold-replay-and-independent-review`。
+必需用例：`batches9_11/original-corpus`, `batches9_11/formats-scale`, `batches9_11/roi-boundary`, `batches9_11/batch-multi-instance`, `batches9_11/invalid-cli`, `batches9_11/postprocess`, `batches9_11/python-integration`, `I4/progressive-GPU-pixel-synthesis`, `I5/full-GPU-JPEG-encode-four-fixtures`, `I5/actual-original-entry-GPU-encode-trace`, `I5/source-progressive-output-mode-and-scan-contract`, `I5/source-quantization-tables-and-APP-COM-metadata-preservation`, `I5/GPU-prefix-throughput-and-optimized-Huffman`, `I9/fixed-commit-cold-replay-and-independent-review`。
 
 实现方式：`HYBRID_CPU_GPU`。
 
-恢复/扩展条件：完成 GPU 熵编码/Huffman、原编码模式/表/APP-COM 继承和冷检出后重做全入口资格；跨编码器不要求合法码流字节完全一致。
+恢复/扩展条件：完成 progressive 输出/量化表和 APP/COM metadata 继承、并行 GPU prefix 与优化 Huffman/吞吐检查，固定提交冷检出后重新验收。
 
-CUDA 对照限制：既有七组同输入 CUDA 数学对照通过；I5 GPU FDCT 对独立 CPU JPEG 解码和固定门槛验收，不声称与 NVIDIA 私有编码 backend 字节一致。
+CUDA 对照限制：七组既有同输入 CUDA 数学对照通过；全 GPU 编码输出还与已冻结旧 HIP FDCT+CPU entropy 参考68产品逐像素一致，不要求合法 JPEG 字节流一致。
 
 ## 原始 API 自动移植稿最近一次尝试
 
@@ -40,8 +40,9 @@ build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_mi
 在已锁定并通过 guard 的 ROCm 10.1.0 容器中（多 GPU 用例须暴露两个允许的设备）：
 
 ```bash
-HIP_VISIBLE_DEVICES=2 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh env ROCR_VISIBLE_DEVICES=3 HIP_VISIBLE_DEVICES=0 python3 tools/moat/image_encoder_integration.py
-python3 tools/moat/qualify_image_encoder_subset.py
+HIP_VISIBLE_DEVICES=2 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh env ROCR_VISIBLE_DEVICES=3 HIP_VISIBLE_DEVICES=0 python3 tools/moat/image_encoder_full_gpu_integration.py
+build/image-cpu-venv/bin/python tools/moat/image_encoder_full_gpu_products_compare.py
+HIP_VISIBLE_DEVICES=2 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh env ROCR_VISIBLE_DEVICES=3 HIP_VISIBLE_DEVICES=0 python3 tools/moat/image_encoder_full_gpu_frontend_trace.py
 ```
 
 - [migration/reports/evidence/20261109T083217.050455Z/original-rocm/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp](../../../reports/evidence/20261109T083217.050455Z/original-rocm/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp)
@@ -73,3 +74,8 @@ python3 tools/moat/qualify_image_encoder_subset.py
 - [migration/reports/evidence/rewrite/I5/GPU-Huffman-pack-stuff-two-real-traces-and-input-change/20261112T093942.919441Z-I5-rocm-trace-329f7dedd1](../../../reports/evidence/rewrite/I5/GPU-Huffman-pack-stuff-two-real-traces-and-input-change/20261112T093942.919441Z-I5-rocm-trace-329f7dedd1)
 - [migration/reports/evidence/rewrite/I5/GPU-JPEG-Huffman-prefix-pack-stuff-byte-parity/20261112T093902.336506Z-I5-rocm-prototype-200881a852](../../../reports/evidence/rewrite/I5/GPU-JPEG-Huffman-prefix-pack-stuff-byte-parity/20261112T093902.336506Z-I5-rocm-prototype-200881a852)
 - [migration/reports/evidence/rewrite/I5/GPU-JPEG-Huffman-prefix-pack-stuff-byte-parity/20261112T093904.854345Z-I5-rocm-prototype-c88273b9db](../../../reports/evidence/rewrite/I5/GPU-JPEG-Huffman-prefix-pack-stuff-byte-parity/20261112T093904.854345Z-I5-rocm-prototype-c88273b9db)
+- [migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261112T095507.951209Z-I5-full-GPU-JPEG-original-entry-subset-qualification-b0a5e51346](../../../reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261112T095507.951209Z-I5-full-GPU-JPEG-original-entry-subset-qualification-b0a5e51346)
+- [migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp/20261112T095002.313615Z-I5-rocm-full-GPU-JPEG-original-entry-integration-08af1af745](../../../reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp/20261112T095002.313615Z-I5-rocm-full-GPU-JPEG-original-entry-integration-08af1af745)
+- [migration/reports/image-jpeg-encoder-full-gpu-integration.json](../../../reports/image-jpeg-encoder-full-gpu-integration.json)
+- [migration/reports/image-jpeg-encoder-full-gpu-frontend-trace.json](../../../reports/image-jpeg-encoder-full-gpu-frontend-trace.json)
+- [migration/reports/image-jpeg-encoder-full-gpu-products-comparison.json](../../../reports/image-jpeg-encoder-full-gpu-products-comparison.json)

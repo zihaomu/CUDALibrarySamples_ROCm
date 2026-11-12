@@ -680054,8 +680054,8 @@
         "rocJPEG (decode only)",
         "RPP"
       ],
-      "actual_library": "rocJPEG baseline hardware + project HIP progressive IDCT/chroma/RGB + project HIP JPEG color/downsample/FDCT/quant; libjpeg-turbo CPU progressive entropy and JPEG encode entropy/headers",
-      "backend_library": "rocJPEG + project HIP image decoder/forward encoder + libjpeg-turbo entropy",
+      "actual_library": "rocJPEG baseline hardware + project HIP progressive decode + project HIP full baseline JPEG encode (GPU color/FDCT/MCU/Huffman/pack/stuff; CPU marker orchestration)",
+      "backend_library": "rocJPEG + project HIP JPEG decoder/encoder + libjpeg-turbo progressive entropy only",
       "implementation": "rocm/ported/nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp",
       "status": "PARTIAL",
       "level": "L4",
@@ -680068,10 +680068,12 @@
         "batches9_11/postprocess",
         "batches9_11/python-integration",
         "I4/progressive-GPU-pixel-synthesis",
-        "I5/GPU-JPEG-forward-transform-and-cross-decode",
-        "I5/GPU-Huffman-entropy-and-bitstream-packing",
-        "I5/original-encoding-mode-tables-and-APP-COM-metadata",
-        "I4-I5/fixed-commit-cold-replay-and-independent-review"
+        "I5/full-GPU-JPEG-encode-four-fixtures",
+        "I5/actual-original-entry-GPU-encode-trace",
+        "I5/source-progressive-output-mode-and-scan-contract",
+        "I5/source-quantization-tables-and-APP-COM-metadata-preservation",
+        "I5/GPU-prefix-throughput-and-optimized-Huffman",
+        "I9/fixed-commit-cold-replay-and-independent-review"
       ],
       "passed_cases": [
         "batches9_11/original-corpus",
@@ -680082,10 +680084,11 @@
         "batches9_11/postprocess",
         "batches9_11/python-integration",
         "I4/progressive-GPU-pixel-synthesis",
-        "I5/GPU-JPEG-forward-transform-and-cross-decode"
+        "I5/full-GPU-JPEG-encode-four-fixtures",
+        "I5/actual-original-entry-GPU-encode-trace"
       ],
-      "reason_code": "VALIDATED_I5_GPU_JPEG_FORWARD_SUBSET",
-      "reason": "七组原登记 CLI/数值流程及同输入 CUDA 数学对照通过；35 件重编码 JPEG 使用 AMD GPU 色彩转换、色度降采样、FDCT 与量化，CPU libjpeg-turbo 完成熵编码/头部；四组预登记输入独立跨解码及物理 GPU trace 通过。完整 GPU Huffman、原编码模式/表/元数据复制和冷检出尚缺，故只算 PARTIAL。",
+      "reason_code": "VALIDATED_I5_FULL_GPU_JPEG_BASELINE_SUBSET",
+      "reason": "七组原登记 CLI/独立 CPU 与同输入 CUDA 数学流程均通过；35 件重编码 JPEG 由 AMD GPU 完成色彩/FDCT/MCU/Huffman/scan/pack/stuff，CPU 仅组装标准 baseline marker，禁 CPU 熵编码。两个入口68产品共8,191,374个 RGB 字节与旧独立数值路径完全一致，采样/量化表一致；实际 C++ 入口各12个 GPU JPEG 内核及重放 SHA 已验。源 progressive 输出模式、表及 APP/COM metadata 继承和 GPU prefix 性能尚缺，故 PARTIAL。",
       "cuda_baseline": "PASSED",
       "cuda_comparison": "PASSED",
       "benchmark": "NOT_RUN",
@@ -680118,7 +680121,12 @@
         "migration/reports/evidence/rewrite/I5/GPU-Huffman-prefix-pack-stuff-build/20261112T093831.801126Z-I5-rocm-build-19a6241159",
         "migration/reports/evidence/rewrite/I5/GPU-Huffman-pack-stuff-two-real-traces-and-input-change/20261112T093942.919441Z-I5-rocm-trace-329f7dedd1",
         "migration/reports/evidence/rewrite/I5/GPU-JPEG-Huffman-prefix-pack-stuff-byte-parity/20261112T093902.336506Z-I5-rocm-prototype-200881a852",
-        "migration/reports/evidence/rewrite/I5/GPU-JPEG-Huffman-prefix-pack-stuff-byte-parity/20261112T093904.854345Z-I5-rocm-prototype-c88273b9db"
+        "migration/reports/evidence/rewrite/I5/GPU-JPEG-Huffman-prefix-pack-stuff-byte-parity/20261112T093904.854345Z-I5-rocm-prototype-c88273b9db",
+        "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261112T095507.951209Z-I5-full-GPU-JPEG-original-entry-subset-qualification-b0a5e51346",
+        "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp/20261112T095002.313615Z-I5-rocm-full-GPU-JPEG-original-entry-integration-08af1af745",
+        "migration/reports/image-jpeg-encoder-full-gpu-integration.json",
+        "migration/reports/image-jpeg-encoder-full-gpu-frontend-trace.json",
+        "migration/reports/image-jpeg-encoder-full-gpu-products-comparison.json"
       ],
       "attempts": [
         {
@@ -694485,6 +694493,107 @@
           "remaining": "GPU entropy/Huffman and bitstream packing; encoding-mode/table/APP-COM preservation; fixed-commit cold review",
           "qualification_id": "20261112T092541.290750Z-I5-composite-subset-qualification-962fb0c234",
           "evidence": "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261112T092541.290750Z-I5-composite-subset-qualification-962fb0c234"
+        },
+        {
+          "kind": "image-JPEG-full-GPU-baseline-reencode-subset",
+          "status": "PASSED",
+          "contract_status": "PARTIAL",
+          "sample_id": "nvJPEG/Image-Resize-WaterMark::imageResizeWatermark.cpp",
+          "implementation": "rocm/ported/nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp",
+          "implementation_sha256": "779bc379218c7ccc71518219e94e5593749b6e079f1ea07e28c5f24077452467",
+          "source_commit": "124cf3c83aa3fecdd78dc336c592bc36edd2db33",
+          "case_count": 10,
+          "case_ids": [
+            "batches9_11/original-corpus",
+            "batches9_11/formats-scale",
+            "batches9_11/roi-boundary",
+            "batches9_11/batch-multi-instance",
+            "batches9_11/invalid-cli",
+            "batches9_11/postprocess",
+            "batches9_11/python-integration",
+            "I4/progressive-GPU-pixel-synthesis",
+            "I5/full-GPU-JPEG-encode-four-fixtures",
+            "I5/actual-original-entry-GPU-encode-trace"
+          ],
+          "checks": [
+            {
+              "check": "four-frozen-RGB-full-GPU-JPEG-independent-cross-decodes",
+              "passed": true
+            },
+            {
+              "check": "full-GPU-FDCT-Huffman-pack-stuff-prototype-physical-trace",
+              "passed": true
+            },
+            {
+              "check": "four-invalid-input-rejections",
+              "passed": true
+            },
+            {
+              "check": "all-seven-original-CLI-CPU-pixel-and-file-oracles",
+              "passed": true
+            },
+            {
+              "check": "all-produced-JPEG-files-use-GPU-full-encode",
+              "passed": true
+            },
+            {
+              "check": "all-68-JPEG-products-exact-independent-decoded-RGB",
+              "passed": true
+            },
+            {
+              "check": "actual-C++-frontend-twelve-GPU-JPEG-kernels-and-no-CPU-entropy",
+              "passed": true
+            },
+            {
+              "check": "same-input-CUDA-math-comparisons",
+              "passed": true
+            },
+            {
+              "check": "current-compiled-source-closure",
+              "passed": true
+            }
+          ],
+          "devices": [
+            {
+              "logical_id": 0,
+              "pci_bdf": "0000:23:00.0",
+              "physical_id": 1,
+              "uuid": "39383130336566346332326133636363"
+            }
+          ],
+          "dependencies": {
+            "rocm/ported/nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp": "779bc379218c7ccc71518219e94e5593749b6e079f1ea07e28c5f24077452467",
+            "rocm/common/image/jpeg_decoder_v4.hpp": "c7c3ba389f821cd2aa6b57af990c5baceef3907b4eeeb5f90fda71426b2e3690",
+            "rocm/common/image/jpeg_full_gpu.hpp": "e62ad13e0d2f29172e3cbc325c5aa5d796f01420cbdfdf5836f93f7fd928570b",
+            "rocm/common/image/jpeg_entropy_gpu.hpp": "9914991ca52810482c0e9517cb5ffc2006dbec3d2c0b1594e306f6c7f9ac6fd6",
+            "rocm/common/image/jpeg_encoder_gpu.hpp": "c759a9f001c5d66d628d624c37da7dcade72035f95249a0f2fe8f3f90748c048",
+            "rocm/common/image/progressive_jpeg.hpp": "30ffbb73ac1a8719be81a8250fdeaa6d35e75107ba987287bf6e308c01663615",
+            "rocm/common/batches_runtime.hpp": "04dc008dae2ade89ea3ef3e349d4a2dd0a842601737c77f0c7f076187b34f26f",
+            "migration/rewrite/image-jpeg-encoder-resize-full-gpu-profile.json": "e1b124514211cf128f7a539f899469117ed13278e2474a42001be682fce12cc0"
+          },
+          "evidence_references": [
+            "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-baseline-encoder-build/20261112T095028.073221Z-I5-rocm-build-c882c44e76",
+            "migration/reports/evidence/rewrite/I5/full-JPEG-encoder-real-GPU-color-FDCT-Huffman-pack-trace/20261112T095056.766561Z-I5-rocm-trace-2ae81bc1ff",
+            "migration/reports/evidence/rewrite/I4/progressive-JPEG-real-GPU-IDCT-and-color-trace/20261112T084418.723097Z-I4-rocm-trace-9e7a19bef8",
+            "migration/reports/evidence/rewrite/I4/actual-nvJPEG-decoder-twelve-original-JPEG-files/20261112T084432.029101Z-I4-rocm-original-61702a355d",
+            "migration/reports/evidence/rewrite/I5/all-68-original-resize-JPEG-independent-pixel-comparison/20261112T095424.191828Z-I5-CPU-reference-58dc0f8f8b",
+            "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-baseline-and-cross-decode/20261112T095039.935538Z-I5-rocm-prototype-2efd3187aa",
+            "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-baseline-and-cross-decode/20261112T095042.502228Z-I5-rocm-prototype-a091015bfc",
+            "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-baseline-and-cross-decode/20261112T095044.760606Z-I5-rocm-prototype-ff52ff29f4",
+            "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-baseline-and-cross-decode/20261112T095046.980978Z-I5-rocm-prototype-6a02c39c31",
+            "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-malformed-input-rejection/20261112T095107.374808Z-I5-rocm-negative-64053cddae",
+            "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-malformed-input-rejection/20261112T095110.059893Z-I5-rocm-negative-940db13151",
+            "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-malformed-input-rejection/20261112T095112.390270Z-I5-rocm-negative-b21e712977",
+            "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-malformed-input-rejection/20261112T095114.410939Z-I5-rocm-negative-a0abcd9177",
+            "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp/20261112T095002.313615Z-I5-rocm-full-GPU-JPEG-original-entry-integration-08af1af745",
+            "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp_full-GPU-encode-trace/20261112T095206.110680Z-I5-rocm-original-entry-trace-479a2ac8e0"
+          ],
+          "rocm_evidence": "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp/20261112T095002.313615Z-I5-rocm-full-GPU-JPEG-original-entry-integration-08af1af745",
+          "cuda_evidence": "migration/reports/evidence/20261110T043816.470698Z/batches9_11-cuda/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp",
+          "comparison_mode": "GPU_BASELINE_PROJECT_JPEG_ENCODE_WITH_INDEPENDENT_CPU_ORACLE",
+          "remaining": "source progressive output mode, quantization tables and APP/COM metadata preservation; parallel GPU prefix throughput; fixed-commit cold review",
+          "qualification_id": "20261112T095507.951209Z-I5-full-GPU-JPEG-original-entry-subset-qualification-b0a5e51346",
+          "evidence": "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261112T095507.951209Z-I5-full-GPU-JPEG-original-entry-subset-qualification-b0a5e51346"
         }
       ],
       "milestone": "M3",
@@ -694524,7 +694633,7 @@
         "qualified_physical_devices": true
       },
       "original_implementation": "rocm/ported/nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp",
-      "retry_condition": "完成 GPU 熵编码/Huffman、原编码模式/表/APP-COM 继承和冷检出后重做全入口资格；跨编码器不要求合法码流字节完全一致。",
+      "retry_condition": "完成 progressive 输出/量化表和 APP/COM metadata 继承、并行 GPU prefix 与优化 Huffman/吞吐检查，固定提交冷检出后重新验收。",
       "original_semantics": {
         "contract_source": "nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp",
         "source_sha256": "e4f336ff2598fdcc5d0899d168eaf7785ed4b277fb494cd6f23960d181fe405b",
@@ -694576,7 +694685,7 @@
         "review_scope": "Original source is the authoritative dtype/layout/batch/API contract; qualified subset and deviations are explicit in reason and required_cases."
       },
       "equivalence": "HYBRID_CPU_GPU",
-      "next_step": "I5 将已验 GPU Huffman/pack/stuff 接入原始编码入口，补并行 prefix/优化表/metadata；I6–I8 JPEG2000。",
+      "next_step": "I5 源编码模式和 metadata 继承、多实例全 GPU 编码；I6–I8 JPEG2000；I9 全局验收。",
       "original_cuda": {
         "sample_id": "nvJPEG/Image-Resize-WaterMark::imageResizeWatermark.cpp",
         "scope": "original_profile",
@@ -694602,16 +694711,16 @@
       },
       "cuda_baseline_scope": "Original source with observation-only output where present; build/run qualification, separate from independent correctness comparison.",
       "cuda_baseline_reason": "Native CUDA codec/cuDSS/nvJPEG library numerical baseline; project execution adapters separately identified.",
-      "cuda_comparison_reason": "既有七组同输入 CUDA 数学对照通过；I5 GPU FDCT 对独立 CPU JPEG 解码和固定门槛验收，不声称与 NVIDIA 私有编码 backend 字节一致。",
+      "cuda_comparison_reason": "七组既有同输入 CUDA 数学对照通过；全 GPU 编码输出还与已冻结旧 HIP FDCT+CPU entropy 参考68产品逐像素一致，不要求合法 JPEG 字节流一致。",
       "selected_validation": {
-        "kind": "image-JPEG-GPU-forward-transform-subset",
+        "kind": "image-JPEG-full-GPU-baseline-reencode-subset",
         "status": "PASSED",
         "contract_status": "PARTIAL",
         "sample_id": "nvJPEG/Image-Resize-WaterMark::imageResizeWatermark.cpp",
         "implementation": "rocm/ported/nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp",
-        "implementation_sha256": "70bac8d87fe2afb438fffb51a60fb144ff77034aecc91feb8bbcda5bb79a1b6d",
-        "source_commit": "71c95a3502c3be9f8701fb6e6f1c4839ffa30c13",
-        "case_count": 9,
+        "implementation_sha256": "779bc379218c7ccc71518219e94e5593749b6e079f1ea07e28c5f24077452467",
+        "source_commit": "124cf3c83aa3fecdd78dc336c592bc36edd2db33",
+        "case_count": 10,
         "case_ids": [
           "batches9_11/original-corpus",
           "batches9_11/formats-scale",
@@ -694621,35 +694730,44 @@
           "batches9_11/postprocess",
           "batches9_11/python-integration",
           "I4/progressive-GPU-pixel-synthesis",
-          "I5/GPU-JPEG-forward-transform-and-cross-decode"
+          "I5/full-GPU-JPEG-encode-four-fixtures",
+          "I5/actual-original-entry-GPU-encode-trace"
         ],
         "checks": [
           {
-            "check": "four-predeclared-GPU-encoder-inputs-and-independent-cross-decode",
+            "check": "four-frozen-RGB-full-GPU-JPEG-independent-cross-decodes",
             "passed": true
           },
           {
-            "check": "real-physical-GPU-forward-color-FDCT-quant-trace",
+            "check": "full-GPU-FDCT-Huffman-pack-stuff-prototype-physical-trace",
             "passed": true
           },
           {
-            "check": "four-malformed-input-rejections",
+            "check": "four-invalid-input-rejections",
             "passed": true
           },
           {
-            "check": "seven-original-CLI-case-groups-and-independent-CPU-validation",
+            "check": "all-seven-original-CLI-CPU-pixel-and-file-oracles",
             "passed": true
           },
           {
-            "check": "all-produced-postprocess-JPEG-uses-GPU-FDCT",
+            "check": "all-produced-JPEG-files-use-GPU-full-encode",
             "passed": true
           },
           {
-            "check": "same-input-CUDA-math-comparison",
+            "check": "all-68-JPEG-products-exact-independent-decoded-RGB",
             "passed": true
           },
           {
-            "check": "current-source-and-compiled-header-closure",
+            "check": "actual-C++-frontend-twelve-GPU-JPEG-kernels-and-no-CPU-entropy",
+            "passed": true
+          },
+          {
+            "check": "same-input-CUDA-math-comparisons",
+            "passed": true
+          },
+          {
+            "check": "current-compiled-source-closure",
             "passed": true
           }
         ],
@@ -694662,35 +694780,41 @@
           }
         ],
         "dependencies": {
-          "rocm/ported/nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp": "70bac8d87fe2afb438fffb51a60fb144ff77034aecc91feb8bbcda5bb79a1b6d",
-          "rocm/common/image/jpeg_decoder_v3.hpp": "340c234a52b9ab3abb8a8bf7941a299e115796eefb5c758bb6154a2570c575c0",
+          "rocm/ported/nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp": "779bc379218c7ccc71518219e94e5593749b6e079f1ea07e28c5f24077452467",
+          "rocm/common/image/jpeg_decoder_v4.hpp": "c7c3ba389f821cd2aa6b57af990c5baceef3907b4eeeb5f90fda71426b2e3690",
+          "rocm/common/image/jpeg_full_gpu.hpp": "e62ad13e0d2f29172e3cbc325c5aa5d796f01420cbdfdf5836f93f7fd928570b",
+          "rocm/common/image/jpeg_entropy_gpu.hpp": "9914991ca52810482c0e9517cb5ffc2006dbec3d2c0b1594e306f6c7f9ac6fd6",
           "rocm/common/image/jpeg_encoder_gpu.hpp": "c759a9f001c5d66d628d624c37da7dcade72035f95249a0f2fe8f3f90748c048",
           "rocm/common/image/progressive_jpeg.hpp": "30ffbb73ac1a8719be81a8250fdeaa6d35e75107ba987287bf6e308c01663615",
           "rocm/common/batches_runtime.hpp": "04dc008dae2ade89ea3ef3e349d4a2dd0a842601737c77f0c7f076187b34f26f",
-          "migration/rewrite/image-jpeg-encoder-gpu-profile.json": "1117d5db611dc78aafdfa3d0aaccf0e81cf1f965b0b0b475b6905609d42cf882"
+          "migration/rewrite/image-jpeg-encoder-resize-full-gpu-profile.json": "e1b124514211cf128f7a539f899469117ed13278e2474a42001be682fce12cc0"
         },
         "evidence_references": [
-          "migration/reports/evidence/rewrite/I5/GPU-JPEG-FDCT-quantizer-build/20261112T092415.885051Z-I5-rocm-build-e5957a4c88",
-          "migration/reports/evidence/rewrite/I5/JPEG-encoder-real-GPU-color-FDCT-trace/20261112T092442.955655Z-I5-rocm-trace-81d697070a",
-          "migration/reports/evidence/rewrite/I5/GPU-JPEG-forward-transform-and-cross-decode/20261112T092426.785782Z-I5-rocm-prototype-4b794a4f8b",
-          "migration/reports/evidence/rewrite/I5/GPU-JPEG-forward-transform-and-cross-decode/20261112T092429.351561Z-I5-rocm-prototype-3a4f1199a7",
-          "migration/reports/evidence/rewrite/I5/GPU-JPEG-forward-transform-and-cross-decode/20261112T092431.508207Z-I5-rocm-prototype-e46747e957",
-          "migration/reports/evidence/rewrite/I5/GPU-JPEG-forward-transform-and-cross-decode/20261112T092433.624622Z-I5-rocm-prototype-3e523315b7",
-          "migration/reports/evidence/rewrite/I5/JPEG-encoder-malformed-input-rejection/20261112T092455.559542Z-I5-rocm-negative-d1270ccb7b",
-          "migration/reports/evidence/rewrite/I5/JPEG-encoder-malformed-input-rejection/20261112T092457.859846Z-I5-rocm-negative-355e1d327c",
-          "migration/reports/evidence/rewrite/I5/JPEG-encoder-malformed-input-rejection/20261112T092500.081211Z-I5-rocm-negative-ccb7165d90",
-          "migration/reports/evidence/rewrite/I5/JPEG-encoder-malformed-input-rejection/20261112T092502.244666Z-I5-rocm-negative-514f127b1f",
-          "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp/20261112T092522.572015Z-I5-rocm-original-entry-integration-e2c3697df4"
+          "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-baseline-encoder-build/20261112T095028.073221Z-I5-rocm-build-c882c44e76",
+          "migration/reports/evidence/rewrite/I5/full-JPEG-encoder-real-GPU-color-FDCT-Huffman-pack-trace/20261112T095056.766561Z-I5-rocm-trace-2ae81bc1ff",
+          "migration/reports/evidence/rewrite/I4/progressive-JPEG-real-GPU-IDCT-and-color-trace/20261112T084418.723097Z-I4-rocm-trace-9e7a19bef8",
+          "migration/reports/evidence/rewrite/I4/actual-nvJPEG-decoder-twelve-original-JPEG-files/20261112T084432.029101Z-I4-rocm-original-61702a355d",
+          "migration/reports/evidence/rewrite/I5/all-68-original-resize-JPEG-independent-pixel-comparison/20261112T095424.191828Z-I5-CPU-reference-58dc0f8f8b",
+          "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-baseline-and-cross-decode/20261112T095039.935538Z-I5-rocm-prototype-2efd3187aa",
+          "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-baseline-and-cross-decode/20261112T095042.502228Z-I5-rocm-prototype-a091015bfc",
+          "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-baseline-and-cross-decode/20261112T095044.760606Z-I5-rocm-prototype-ff52ff29f4",
+          "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-baseline-and-cross-decode/20261112T095046.980978Z-I5-rocm-prototype-6a02c39c31",
+          "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-malformed-input-rejection/20261112T095107.374808Z-I5-rocm-negative-64053cddae",
+          "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-malformed-input-rejection/20261112T095110.059893Z-I5-rocm-negative-940db13151",
+          "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-malformed-input-rejection/20261112T095112.390270Z-I5-rocm-negative-b21e712977",
+          "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-malformed-input-rejection/20261112T095114.410939Z-I5-rocm-negative-a0abcd9177",
+          "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp/20261112T095002.313615Z-I5-rocm-full-GPU-JPEG-original-entry-integration-08af1af745",
+          "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp_full-GPU-encode-trace/20261112T095206.110680Z-I5-rocm-original-entry-trace-479a2ac8e0"
         ],
-        "rocm_evidence": "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp/20261112T092522.572015Z-I5-rocm-original-entry-integration-e2c3697df4",
+        "rocm_evidence": "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp/20261112T095002.313615Z-I5-rocm-full-GPU-JPEG-original-entry-integration-08af1af745",
         "cuda_evidence": "migration/reports/evidence/20261110T043816.470698Z/batches9_11-cuda/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp",
-        "comparison_mode": "HYBRID_GPU_FORWARD_TRANSFORM_CPU_ENTROPY",
-        "remaining": "GPU entropy/Huffman and bitstream packing; encoding-mode/table/APP-COM preservation; fixed-commit cold review",
-        "qualification_id": "20261112T092541.290750Z-I5-composite-subset-qualification-962fb0c234",
-        "evidence": "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261112T092541.290750Z-I5-composite-subset-qualification-962fb0c234"
+        "comparison_mode": "GPU_BASELINE_PROJECT_JPEG_ENCODE_WITH_INDEPENDENT_CPU_ORACLE",
+        "remaining": "source progressive output mode, quantization tables and APP/COM metadata preservation; parallel GPU prefix throughput; fixed-commit cold review",
+        "qualification_id": "20261112T095507.951209Z-I5-full-GPU-JPEG-original-entry-subset-qualification-b0a5e51346",
+        "evidence": "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261112T095507.951209Z-I5-full-GPU-JPEG-original-entry-subset-qualification-b0a5e51346"
       },
-      "reproduce": "HIP_VISIBLE_DEVICES=2 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh env ROCR_VISIBLE_DEVICES=3 HIP_VISIBLE_DEVICES=0 python3 tools/moat/image_encoder_integration.py\npython3 tools/moat/qualify_image_encoder_subset.py",
-      "cuda_comparison_mode": "HYBRID_GPU_FORWARD_TRANSFORM_CPU_ENTROPY",
+      "reproduce": "HIP_VISIBLE_DEVICES=2 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh env ROCR_VISIBLE_DEVICES=3 HIP_VISIBLE_DEVICES=0 python3 tools/moat/image_encoder_full_gpu_integration.py\nbuild/image-cpu-venv/bin/python tools/moat/image_encoder_full_gpu_products_compare.py\nHIP_VISIBLE_DEVICES=2 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh env ROCR_VISIBLE_DEVICES=3 HIP_VISIBLE_DEVICES=0 python3 tools/moat/image_encoder_full_gpu_frontend_trace.py",
+      "cuda_comparison_mode": "GPU_BASELINE_PROJECT_JPEG_ENCODE",
       "active_batch": "I5"
     },
     {
@@ -694705,8 +694829,8 @@
         "rocJPEG (decode only)",
         "RPP"
       ],
-      "actual_library": "rocJPEG baseline hardware + project HIP progressive IDCT/chroma/RGB + project HIP JPEG color/downsample/FDCT/quant; libjpeg-turbo CPU progressive entropy and JPEG encode entropy/headers",
-      "backend_library": "rocJPEG + project HIP image decoder/forward encoder + libjpeg-turbo entropy",
+      "actual_library": "rocJPEG baseline hardware + project HIP progressive decode + project HIP full baseline JPEG encode (GPU color/FDCT/MCU/Huffman/pack/stuff; CPU marker orchestration)",
+      "backend_library": "rocJPEG + project HIP JPEG decoder/encoder + libjpeg-turbo progressive entropy only",
       "implementation": "rocm/ported/nvJPEG/Image-Resize/imageResize.cpp",
       "status": "PARTIAL",
       "level": "L4",
@@ -694719,10 +694843,12 @@
         "batches9_11/postprocess",
         "batches9_11/python-integration",
         "I4/progressive-GPU-pixel-synthesis",
-        "I5/GPU-JPEG-forward-transform-and-cross-decode",
-        "I5/GPU-Huffman-entropy-and-bitstream-packing",
-        "I5/original-encoding-mode-tables-and-APP-COM-metadata",
-        "I4-I5/fixed-commit-cold-replay-and-independent-review"
+        "I5/full-GPU-JPEG-encode-four-fixtures",
+        "I5/actual-original-entry-GPU-encode-trace",
+        "I5/source-progressive-output-mode-and-scan-contract",
+        "I5/source-quantization-tables-and-APP-COM-metadata-preservation",
+        "I5/GPU-prefix-throughput-and-optimized-Huffman",
+        "I9/fixed-commit-cold-replay-and-independent-review"
       ],
       "passed_cases": [
         "batches9_11/original-corpus",
@@ -694733,10 +694859,11 @@
         "batches9_11/postprocess",
         "batches9_11/python-integration",
         "I4/progressive-GPU-pixel-synthesis",
-        "I5/GPU-JPEG-forward-transform-and-cross-decode"
+        "I5/full-GPU-JPEG-encode-four-fixtures",
+        "I5/actual-original-entry-GPU-encode-trace"
       ],
-      "reason_code": "VALIDATED_I5_GPU_JPEG_FORWARD_SUBSET",
-      "reason": "七组原登记 CLI/数值流程及同输入 CUDA 数学对照通过；33 件重编码 JPEG 使用 AMD GPU 色彩转换、色度降采样、FDCT 与量化，CPU libjpeg-turbo 完成熵编码/头部；四组预登记输入独立跨解码及物理 GPU trace 通过。完整 GPU Huffman、原编码模式/表/元数据复制和冷检出尚缺，故只算 PARTIAL。",
+      "reason_code": "VALIDATED_I5_FULL_GPU_JPEG_BASELINE_SUBSET",
+      "reason": "七组原登记 CLI/独立 CPU 与同输入 CUDA 数学流程均通过；33 件重编码 JPEG 由 AMD GPU 完成色彩/FDCT/MCU/Huffman/scan/pack/stuff，CPU 仅组装标准 baseline marker，禁 CPU 熵编码。两个入口68产品共8,191,374个 RGB 字节与旧独立数值路径完全一致，采样/量化表一致；实际 C++ 入口各12个 GPU JPEG 内核及重放 SHA 已验。源 progressive 输出模式、表及 APP/COM metadata 继承和 GPU prefix 性能尚缺，故 PARTIAL。",
       "cuda_baseline": "PASSED",
       "cuda_comparison": "PASSED",
       "benchmark": "NOT_RUN",
@@ -694769,7 +694896,12 @@
         "migration/reports/evidence/rewrite/I5/GPU-Huffman-prefix-pack-stuff-build/20261112T093831.801126Z-I5-rocm-build-19a6241159",
         "migration/reports/evidence/rewrite/I5/GPU-Huffman-pack-stuff-two-real-traces-and-input-change/20261112T093942.919441Z-I5-rocm-trace-329f7dedd1",
         "migration/reports/evidence/rewrite/I5/GPU-JPEG-Huffman-prefix-pack-stuff-byte-parity/20261112T093902.336506Z-I5-rocm-prototype-200881a852",
-        "migration/reports/evidence/rewrite/I5/GPU-JPEG-Huffman-prefix-pack-stuff-byte-parity/20261112T093904.854345Z-I5-rocm-prototype-c88273b9db"
+        "migration/reports/evidence/rewrite/I5/GPU-JPEG-Huffman-prefix-pack-stuff-byte-parity/20261112T093904.854345Z-I5-rocm-prototype-c88273b9db",
+        "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize__imageResize.cpp/20261112T095506.566296Z-I5-full-GPU-JPEG-original-entry-subset-qualification-ef39d07027",
+        "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize_imageResize.cpp/20261112T094951.274614Z-I5-rocm-full-GPU-JPEG-original-entry-integration-d011989ac0",
+        "migration/reports/image-jpeg-encoder-full-gpu-integration.json",
+        "migration/reports/image-jpeg-encoder-full-gpu-frontend-trace.json",
+        "migration/reports/image-jpeg-encoder-full-gpu-products-comparison.json"
       ],
       "attempts": [
         {
@@ -706024,6 +706156,107 @@
           "remaining": "GPU entropy/Huffman and bitstream packing; encoding-mode/table/APP-COM preservation; fixed-commit cold review",
           "qualification_id": "20261112T092539.929042Z-I5-composite-subset-qualification-36a0288f8f",
           "evidence": "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize__imageResize.cpp/20261112T092539.929042Z-I5-composite-subset-qualification-36a0288f8f"
+        },
+        {
+          "kind": "image-JPEG-full-GPU-baseline-reencode-subset",
+          "status": "PASSED",
+          "contract_status": "PARTIAL",
+          "sample_id": "nvJPEG/Image-Resize::imageResize.cpp",
+          "implementation": "rocm/ported/nvJPEG/Image-Resize/imageResize.cpp",
+          "implementation_sha256": "e1deb233f27403c92ae1510a7300488b09929310f8d13221508d2a9fc6b006fc",
+          "source_commit": "124cf3c83aa3fecdd78dc336c592bc36edd2db33",
+          "case_count": 10,
+          "case_ids": [
+            "batches9_11/original-corpus",
+            "batches9_11/formats-scale",
+            "batches9_11/roi-boundary",
+            "batches9_11/batch-multi-instance",
+            "batches9_11/invalid-cli",
+            "batches9_11/postprocess",
+            "batches9_11/python-integration",
+            "I4/progressive-GPU-pixel-synthesis",
+            "I5/full-GPU-JPEG-encode-four-fixtures",
+            "I5/actual-original-entry-GPU-encode-trace"
+          ],
+          "checks": [
+            {
+              "check": "four-frozen-RGB-full-GPU-JPEG-independent-cross-decodes",
+              "passed": true
+            },
+            {
+              "check": "full-GPU-FDCT-Huffman-pack-stuff-prototype-physical-trace",
+              "passed": true
+            },
+            {
+              "check": "four-invalid-input-rejections",
+              "passed": true
+            },
+            {
+              "check": "all-seven-original-CLI-CPU-pixel-and-file-oracles",
+              "passed": true
+            },
+            {
+              "check": "all-produced-JPEG-files-use-GPU-full-encode",
+              "passed": true
+            },
+            {
+              "check": "all-68-JPEG-products-exact-independent-decoded-RGB",
+              "passed": true
+            },
+            {
+              "check": "actual-C++-frontend-twelve-GPU-JPEG-kernels-and-no-CPU-entropy",
+              "passed": true
+            },
+            {
+              "check": "same-input-CUDA-math-comparisons",
+              "passed": true
+            },
+            {
+              "check": "current-compiled-source-closure",
+              "passed": true
+            }
+          ],
+          "devices": [
+            {
+              "logical_id": 0,
+              "pci_bdf": "0000:23:00.0",
+              "physical_id": 1,
+              "uuid": "39383130336566346332326133636363"
+            }
+          ],
+          "dependencies": {
+            "rocm/ported/nvJPEG/Image-Resize/imageResize.cpp": "e1deb233f27403c92ae1510a7300488b09929310f8d13221508d2a9fc6b006fc",
+            "rocm/common/image/jpeg_decoder_v4.hpp": "c7c3ba389f821cd2aa6b57af990c5baceef3907b4eeeb5f90fda71426b2e3690",
+            "rocm/common/image/jpeg_full_gpu.hpp": "e62ad13e0d2f29172e3cbc325c5aa5d796f01420cbdfdf5836f93f7fd928570b",
+            "rocm/common/image/jpeg_entropy_gpu.hpp": "9914991ca52810482c0e9517cb5ffc2006dbec3d2c0b1594e306f6c7f9ac6fd6",
+            "rocm/common/image/jpeg_encoder_gpu.hpp": "c759a9f001c5d66d628d624c37da7dcade72035f95249a0f2fe8f3f90748c048",
+            "rocm/common/image/progressive_jpeg.hpp": "30ffbb73ac1a8719be81a8250fdeaa6d35e75107ba987287bf6e308c01663615",
+            "rocm/common/batches_runtime.hpp": "04dc008dae2ade89ea3ef3e349d4a2dd0a842601737c77f0c7f076187b34f26f",
+            "migration/rewrite/image-jpeg-encoder-resize-full-gpu-profile.json": "e1b124514211cf128f7a539f899469117ed13278e2474a42001be682fce12cc0"
+          },
+          "evidence_references": [
+            "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-baseline-encoder-build/20261112T095028.073221Z-I5-rocm-build-c882c44e76",
+            "migration/reports/evidence/rewrite/I5/full-JPEG-encoder-real-GPU-color-FDCT-Huffman-pack-trace/20261112T095056.766561Z-I5-rocm-trace-2ae81bc1ff",
+            "migration/reports/evidence/rewrite/I4/progressive-JPEG-real-GPU-IDCT-and-color-trace/20261112T084418.723097Z-I4-rocm-trace-9e7a19bef8",
+            "migration/reports/evidence/rewrite/I4/actual-nvJPEG-decoder-twelve-original-JPEG-files/20261112T084432.029101Z-I4-rocm-original-61702a355d",
+            "migration/reports/evidence/rewrite/I5/all-68-original-resize-JPEG-independent-pixel-comparison/20261112T095424.191828Z-I5-CPU-reference-58dc0f8f8b",
+            "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-baseline-and-cross-decode/20261112T095039.935538Z-I5-rocm-prototype-2efd3187aa",
+            "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-baseline-and-cross-decode/20261112T095042.502228Z-I5-rocm-prototype-a091015bfc",
+            "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-baseline-and-cross-decode/20261112T095044.760606Z-I5-rocm-prototype-ff52ff29f4",
+            "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-baseline-and-cross-decode/20261112T095046.980978Z-I5-rocm-prototype-6a02c39c31",
+            "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-malformed-input-rejection/20261112T095107.374808Z-I5-rocm-negative-64053cddae",
+            "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-malformed-input-rejection/20261112T095110.059893Z-I5-rocm-negative-940db13151",
+            "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-malformed-input-rejection/20261112T095112.390270Z-I5-rocm-negative-b21e712977",
+            "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-malformed-input-rejection/20261112T095114.410939Z-I5-rocm-negative-a0abcd9177",
+            "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize_imageResize.cpp/20261112T094951.274614Z-I5-rocm-full-GPU-JPEG-original-entry-integration-d011989ac0",
+            "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize_imageResize.cpp_full-GPU-encode-trace/20261112T095203.065344Z-I5-rocm-original-entry-trace-6f2d60013f"
+          ],
+          "rocm_evidence": "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize_imageResize.cpp/20261112T094951.274614Z-I5-rocm-full-GPU-JPEG-original-entry-integration-d011989ac0",
+          "cuda_evidence": "migration/reports/evidence/20261110T043816.470698Z/batches9_11-cuda/nvJPEG_Image-Resize_imageResize.cpp",
+          "comparison_mode": "GPU_BASELINE_PROJECT_JPEG_ENCODE_WITH_INDEPENDENT_CPU_ORACLE",
+          "remaining": "source progressive output mode, quantization tables and APP/COM metadata preservation; parallel GPU prefix throughput; fixed-commit cold review",
+          "qualification_id": "20261112T095506.566296Z-I5-full-GPU-JPEG-original-entry-subset-qualification-ef39d07027",
+          "evidence": "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize__imageResize.cpp/20261112T095506.566296Z-I5-full-GPU-JPEG-original-entry-subset-qualification-ef39d07027"
         }
       ],
       "milestone": "M3",
@@ -706063,7 +706296,7 @@
         "qualified_physical_devices": true
       },
       "original_implementation": "rocm/ported/nvJPEG/Image-Resize/imageResize.cpp",
-      "retry_condition": "完成 GPU 熵编码/Huffman、原编码模式/表/APP-COM 继承和冷检出后重做全入口资格；跨编码器不要求合法码流字节完全一致。",
+      "retry_condition": "完成 progressive 输出/量化表和 APP/COM metadata 继承、并行 GPU prefix 与优化 Huffman/吞吐检查，固定提交冷检出后重新验收。",
       "original_semantics": {
         "contract_source": "nvJPEG/Image-Resize/imageResize.cpp",
         "source_sha256": "2fe18e4c075972ba4612b3fcf71d37baffb47c14ebe952f79b527846603b6ca1",
@@ -706115,7 +706348,7 @@
         "review_scope": "Original source is the authoritative dtype/layout/batch/API contract; qualified subset and deviations are explicit in reason and required_cases."
       },
       "equivalence": "HYBRID_CPU_GPU",
-      "next_step": "I5 将已验 GPU Huffman/pack/stuff 接入原始编码入口，补并行 prefix/优化表/metadata；I6–I8 JPEG2000。",
+      "next_step": "I5 源编码模式和 metadata 继承、多实例全 GPU 编码；I6–I8 JPEG2000；I9 全局验收。",
       "original_cuda": {
         "sample_id": "nvJPEG/Image-Resize::imageResize.cpp",
         "scope": "original_profile",
@@ -706141,16 +706374,16 @@
       },
       "cuda_baseline_scope": "Original source with observation-only output where present; build/run qualification, separate from independent correctness comparison.",
       "cuda_baseline_reason": "Native CUDA codec/cuDSS/nvJPEG library numerical baseline; project execution adapters separately identified.",
-      "cuda_comparison_reason": "既有七组同输入 CUDA 数学对照通过；I5 GPU FDCT 对独立 CPU JPEG 解码和固定门槛验收，不声称与 NVIDIA 私有编码 backend 字节一致。",
+      "cuda_comparison_reason": "七组既有同输入 CUDA 数学对照通过；全 GPU 编码输出还与已冻结旧 HIP FDCT+CPU entropy 参考68产品逐像素一致，不要求合法 JPEG 字节流一致。",
       "selected_validation": {
-        "kind": "image-JPEG-GPU-forward-transform-subset",
+        "kind": "image-JPEG-full-GPU-baseline-reencode-subset",
         "status": "PASSED",
         "contract_status": "PARTIAL",
         "sample_id": "nvJPEG/Image-Resize::imageResize.cpp",
         "implementation": "rocm/ported/nvJPEG/Image-Resize/imageResize.cpp",
-        "implementation_sha256": "0cfc420bf2769536217acb6b3c97a2145bb953d44426db669c1b83725f8d7866",
-        "source_commit": "71c95a3502c3be9f8701fb6e6f1c4839ffa30c13",
-        "case_count": 9,
+        "implementation_sha256": "e1deb233f27403c92ae1510a7300488b09929310f8d13221508d2a9fc6b006fc",
+        "source_commit": "124cf3c83aa3fecdd78dc336c592bc36edd2db33",
+        "case_count": 10,
         "case_ids": [
           "batches9_11/original-corpus",
           "batches9_11/formats-scale",
@@ -706160,35 +706393,44 @@
           "batches9_11/postprocess",
           "batches9_11/python-integration",
           "I4/progressive-GPU-pixel-synthesis",
-          "I5/GPU-JPEG-forward-transform-and-cross-decode"
+          "I5/full-GPU-JPEG-encode-four-fixtures",
+          "I5/actual-original-entry-GPU-encode-trace"
         ],
         "checks": [
           {
-            "check": "four-predeclared-GPU-encoder-inputs-and-independent-cross-decode",
+            "check": "four-frozen-RGB-full-GPU-JPEG-independent-cross-decodes",
             "passed": true
           },
           {
-            "check": "real-physical-GPU-forward-color-FDCT-quant-trace",
+            "check": "full-GPU-FDCT-Huffman-pack-stuff-prototype-physical-trace",
             "passed": true
           },
           {
-            "check": "four-malformed-input-rejections",
+            "check": "four-invalid-input-rejections",
             "passed": true
           },
           {
-            "check": "seven-original-CLI-case-groups-and-independent-CPU-validation",
+            "check": "all-seven-original-CLI-CPU-pixel-and-file-oracles",
             "passed": true
           },
           {
-            "check": "all-produced-postprocess-JPEG-uses-GPU-FDCT",
+            "check": "all-produced-JPEG-files-use-GPU-full-encode",
             "passed": true
           },
           {
-            "check": "same-input-CUDA-math-comparison",
+            "check": "all-68-JPEG-products-exact-independent-decoded-RGB",
             "passed": true
           },
           {
-            "check": "current-source-and-compiled-header-closure",
+            "check": "actual-C++-frontend-twelve-GPU-JPEG-kernels-and-no-CPU-entropy",
+            "passed": true
+          },
+          {
+            "check": "same-input-CUDA-math-comparisons",
+            "passed": true
+          },
+          {
+            "check": "current-compiled-source-closure",
             "passed": true
           }
         ],
@@ -706201,35 +706443,41 @@
           }
         ],
         "dependencies": {
-          "rocm/ported/nvJPEG/Image-Resize/imageResize.cpp": "0cfc420bf2769536217acb6b3c97a2145bb953d44426db669c1b83725f8d7866",
-          "rocm/common/image/jpeg_decoder_v3.hpp": "340c234a52b9ab3abb8a8bf7941a299e115796eefb5c758bb6154a2570c575c0",
+          "rocm/ported/nvJPEG/Image-Resize/imageResize.cpp": "e1deb233f27403c92ae1510a7300488b09929310f8d13221508d2a9fc6b006fc",
+          "rocm/common/image/jpeg_decoder_v4.hpp": "c7c3ba389f821cd2aa6b57af990c5baceef3907b4eeeb5f90fda71426b2e3690",
+          "rocm/common/image/jpeg_full_gpu.hpp": "e62ad13e0d2f29172e3cbc325c5aa5d796f01420cbdfdf5836f93f7fd928570b",
+          "rocm/common/image/jpeg_entropy_gpu.hpp": "9914991ca52810482c0e9517cb5ffc2006dbec3d2c0b1594e306f6c7f9ac6fd6",
           "rocm/common/image/jpeg_encoder_gpu.hpp": "c759a9f001c5d66d628d624c37da7dcade72035f95249a0f2fe8f3f90748c048",
           "rocm/common/image/progressive_jpeg.hpp": "30ffbb73ac1a8719be81a8250fdeaa6d35e75107ba987287bf6e308c01663615",
           "rocm/common/batches_runtime.hpp": "04dc008dae2ade89ea3ef3e349d4a2dd0a842601737c77f0c7f076187b34f26f",
-          "migration/rewrite/image-jpeg-encoder-gpu-profile.json": "1117d5db611dc78aafdfa3d0aaccf0e81cf1f965b0b0b475b6905609d42cf882"
+          "migration/rewrite/image-jpeg-encoder-resize-full-gpu-profile.json": "e1b124514211cf128f7a539f899469117ed13278e2474a42001be682fce12cc0"
         },
         "evidence_references": [
-          "migration/reports/evidence/rewrite/I5/GPU-JPEG-FDCT-quantizer-build/20261112T092415.885051Z-I5-rocm-build-e5957a4c88",
-          "migration/reports/evidence/rewrite/I5/JPEG-encoder-real-GPU-color-FDCT-trace/20261112T092442.955655Z-I5-rocm-trace-81d697070a",
-          "migration/reports/evidence/rewrite/I5/GPU-JPEG-forward-transform-and-cross-decode/20261112T092426.785782Z-I5-rocm-prototype-4b794a4f8b",
-          "migration/reports/evidence/rewrite/I5/GPU-JPEG-forward-transform-and-cross-decode/20261112T092429.351561Z-I5-rocm-prototype-3a4f1199a7",
-          "migration/reports/evidence/rewrite/I5/GPU-JPEG-forward-transform-and-cross-decode/20261112T092431.508207Z-I5-rocm-prototype-e46747e957",
-          "migration/reports/evidence/rewrite/I5/GPU-JPEG-forward-transform-and-cross-decode/20261112T092433.624622Z-I5-rocm-prototype-3e523315b7",
-          "migration/reports/evidence/rewrite/I5/JPEG-encoder-malformed-input-rejection/20261112T092455.559542Z-I5-rocm-negative-d1270ccb7b",
-          "migration/reports/evidence/rewrite/I5/JPEG-encoder-malformed-input-rejection/20261112T092457.859846Z-I5-rocm-negative-355e1d327c",
-          "migration/reports/evidence/rewrite/I5/JPEG-encoder-malformed-input-rejection/20261112T092500.081211Z-I5-rocm-negative-ccb7165d90",
-          "migration/reports/evidence/rewrite/I5/JPEG-encoder-malformed-input-rejection/20261112T092502.244666Z-I5-rocm-negative-514f127b1f",
-          "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize_imageResize.cpp/20261112T092511.776236Z-I5-rocm-original-entry-integration-75d632cd9a"
+          "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-baseline-encoder-build/20261112T095028.073221Z-I5-rocm-build-c882c44e76",
+          "migration/reports/evidence/rewrite/I5/full-JPEG-encoder-real-GPU-color-FDCT-Huffman-pack-trace/20261112T095056.766561Z-I5-rocm-trace-2ae81bc1ff",
+          "migration/reports/evidence/rewrite/I4/progressive-JPEG-real-GPU-IDCT-and-color-trace/20261112T084418.723097Z-I4-rocm-trace-9e7a19bef8",
+          "migration/reports/evidence/rewrite/I4/actual-nvJPEG-decoder-twelve-original-JPEG-files/20261112T084432.029101Z-I4-rocm-original-61702a355d",
+          "migration/reports/evidence/rewrite/I5/all-68-original-resize-JPEG-independent-pixel-comparison/20261112T095424.191828Z-I5-CPU-reference-58dc0f8f8b",
+          "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-baseline-and-cross-decode/20261112T095039.935538Z-I5-rocm-prototype-2efd3187aa",
+          "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-baseline-and-cross-decode/20261112T095042.502228Z-I5-rocm-prototype-a091015bfc",
+          "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-baseline-and-cross-decode/20261112T095044.760606Z-I5-rocm-prototype-ff52ff29f4",
+          "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-baseline-and-cross-decode/20261112T095046.980978Z-I5-rocm-prototype-6a02c39c31",
+          "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-malformed-input-rejection/20261112T095107.374808Z-I5-rocm-negative-64053cddae",
+          "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-malformed-input-rejection/20261112T095110.059893Z-I5-rocm-negative-940db13151",
+          "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-malformed-input-rejection/20261112T095112.390270Z-I5-rocm-negative-b21e712977",
+          "migration/reports/evidence/rewrite/I5/full-GPU-JPEG-malformed-input-rejection/20261112T095114.410939Z-I5-rocm-negative-a0abcd9177",
+          "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize_imageResize.cpp/20261112T094951.274614Z-I5-rocm-full-GPU-JPEG-original-entry-integration-d011989ac0",
+          "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize_imageResize.cpp_full-GPU-encode-trace/20261112T095203.065344Z-I5-rocm-original-entry-trace-6f2d60013f"
         ],
-        "rocm_evidence": "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize_imageResize.cpp/20261112T092511.776236Z-I5-rocm-original-entry-integration-75d632cd9a",
+        "rocm_evidence": "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize_imageResize.cpp/20261112T094951.274614Z-I5-rocm-full-GPU-JPEG-original-entry-integration-d011989ac0",
         "cuda_evidence": "migration/reports/evidence/20261110T043816.470698Z/batches9_11-cuda/nvJPEG_Image-Resize_imageResize.cpp",
-        "comparison_mode": "HYBRID_GPU_FORWARD_TRANSFORM_CPU_ENTROPY",
-        "remaining": "GPU entropy/Huffman and bitstream packing; encoding-mode/table/APP-COM preservation; fixed-commit cold review",
-        "qualification_id": "20261112T092539.929042Z-I5-composite-subset-qualification-36a0288f8f",
-        "evidence": "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize__imageResize.cpp/20261112T092539.929042Z-I5-composite-subset-qualification-36a0288f8f"
+        "comparison_mode": "GPU_BASELINE_PROJECT_JPEG_ENCODE_WITH_INDEPENDENT_CPU_ORACLE",
+        "remaining": "source progressive output mode, quantization tables and APP/COM metadata preservation; parallel GPU prefix throughput; fixed-commit cold review",
+        "qualification_id": "20261112T095506.566296Z-I5-full-GPU-JPEG-original-entry-subset-qualification-ef39d07027",
+        "evidence": "migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize__imageResize.cpp/20261112T095506.566296Z-I5-full-GPU-JPEG-original-entry-subset-qualification-ef39d07027"
       },
-      "reproduce": "HIP_VISIBLE_DEVICES=2 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh env ROCR_VISIBLE_DEVICES=3 HIP_VISIBLE_DEVICES=0 python3 tools/moat/image_encoder_integration.py\npython3 tools/moat/qualify_image_encoder_subset.py",
-      "cuda_comparison_mode": "HYBRID_GPU_FORWARD_TRANSFORM_CPU_ENTROPY",
+      "reproduce": "HIP_VISIBLE_DEVICES=2 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh env ROCR_VISIBLE_DEVICES=3 HIP_VISIBLE_DEVICES=0 python3 tools/moat/image_encoder_full_gpu_integration.py\nbuild/image-cpu-venv/bin/python tools/moat/image_encoder_full_gpu_products_compare.py\nHIP_VISIBLE_DEVICES=2 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh env ROCR_VISIBLE_DEVICES=3 HIP_VISIBLE_DEVICES=0 python3 tools/moat/image_encoder_full_gpu_frontend_trace.py",
+      "cuda_comparison_mode": "GPU_BASELINE_PROJECT_JPEG_ENCODE",
       "active_batch": "I5"
     },
     {
