@@ -1,0 +1,1 @@
+Test CPU-reference for Hough-valid-options-independent-CPU, case raw-option-blank-low-threshold. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T045206.813140Z-I3-rocm-original-76ecf1f1da.

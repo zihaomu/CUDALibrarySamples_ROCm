@@ -1,0 +1,278 @@
+[
+  {
+    "command_id": 1,
+    "phase": "fresh-checkout",
+    "argv": [
+      "git",
+      "clone",
+      "--shared",
+      "--quiet",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-12T04:50:16.618565+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0001-fresh-checkout.stdout.log",
+    "stderr": "logs/0001-fresh-checkout.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-12T04:50:26.958189+00:00",
+    "seconds": 10.338979138992727
+  },
+  {
+    "command_id": 2,
+    "phase": "fixed-commit",
+    "argv": [
+      "git",
+      "checkout",
+      "--quiet",
+      "f243503e3d1739648a3eba20aba66fc4c6fd2208"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src",
+    "started_at_utc": "2026-11-12T04:50:27.022720+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0002-fixed-commit.stdout.log",
+    "stderr": "logs/0002-fixed-commit.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-12T04:50:27.895062+00:00",
+    "seconds": 0.8676214549923316
+  },
+  {
+    "command_id": 3,
+    "phase": "regenerate-fixed-contract-and-RAW-inputs",
+    "argv": [
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-cpu-venv/bin/python",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src/tools/moat/image_hough_contracts.py"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src",
+    "started_at_utc": "2026-11-12T04:50:27.898075+00:00",
+    "timeout_seconds": 180,
+    "environment": {},
+    "stdout": "logs/0003-regenerate-fixed-contract-and-RAW-inputs.stdout.log",
+    "stderr": "logs/0003-regenerate-fixed-contract-and-RAW-inputs.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-12T04:50:29.466718+00:00",
+    "seconds": 1.5677203089580871
+  },
+  {
+    "command_id": 4,
+    "phase": "regenerate-fixed-valid-option-contract",
+    "argv": [
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-cpu-venv/bin/python",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src/tools/moat/image_hough_options_contracts.py"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src",
+    "started_at_utc": "2026-11-12T04:50:29.467954+00:00",
+    "timeout_seconds": 180,
+    "environment": {},
+    "stdout": "logs/0004-regenerate-fixed-valid-option-contract.stdout.log",
+    "stderr": "logs/0004-regenerate-fixed-valid-option-contract.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-12T04:50:30.886032+00:00",
+    "seconds": 1.4175862769479863
+  },
+  {
+    "command_id": 5,
+    "phase": "cold-bootstrap_sdk",
+    "argv": [
+      "/home/zihaomu/zihaomu_workspace/rocm10-launch.sh",
+      "env",
+      "ROCR_VISIBLE_DEVICES=3",
+      "HIP_VISIBLE_DEVICES=0",
+      "python3",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src/tools/migration/bootstrap_sdk.py"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src",
+    "started_at_utc": "2026-11-12T04:50:30.889488+00:00",
+    "timeout_seconds": 1200,
+    "environment": {},
+    "stdout": "logs/0005-cold-bootstrap_sdk.stdout.log",
+    "stderr": "logs/0005-cold-bootstrap_sdk.stderr.log",
+    "environment_changes": {
+      "HIP_VISIBLE_DEVICES": "2"
+    },
+    "return_code": 0,
+    "finished_at_utc": "2026-11-12T04:50:51.603866+00:00",
+    "seconds": 20.713321849005297
+  },
+  {
+    "command_id": 6,
+    "phase": "cold-image_hough_build",
+    "argv": [
+      "/home/zihaomu/zihaomu_workspace/rocm10-launch.sh",
+      "env",
+      "ROCR_VISIBLE_DEVICES=3",
+      "HIP_VISIBLE_DEVICES=0",
+      "python3",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src/tools/moat/image_hough_build.py"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src",
+    "started_at_utc": "2026-11-12T04:50:51.605710+00:00",
+    "timeout_seconds": 1200,
+    "environment": {},
+    "stdout": "logs/0006-cold-image_hough_build.stdout.log",
+    "stderr": "logs/0006-cold-image_hough_build.stderr.log",
+    "environment_changes": {
+      "HIP_VISIBLE_DEVICES": "2"
+    },
+    "return_code": 0,
+    "finished_at_utc": "2026-11-12T04:51:01.443566+00:00",
+    "seconds": 9.836577487003524
+  },
+  {
+    "command_id": 7,
+    "phase": "cold-image_hough_run",
+    "argv": [
+      "/home/zihaomu/zihaomu_workspace/rocm10-launch.sh",
+      "env",
+      "ROCR_VISIBLE_DEVICES=3",
+      "HIP_VISIBLE_DEVICES=0",
+      "python3",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src/tools/moat/image_hough_run.py"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src",
+    "started_at_utc": "2026-11-12T04:51:01.444799+00:00",
+    "timeout_seconds": 1200,
+    "environment": {},
+    "stdout": "logs/0007-cold-image_hough_run.stdout.log",
+    "stderr": "logs/0007-cold-image_hough_run.stderr.log",
+    "environment_changes": {
+      "HIP_VISIBLE_DEVICES": "2"
+    },
+    "return_code": 0,
+    "finished_at_utc": "2026-11-12T04:51:32.177782+00:00",
+    "seconds": 30.73244767799042
+  },
+  {
+    "command_id": 8,
+    "phase": "cold-image_hough_reference",
+    "argv": [
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-cpu-venv/bin/python",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src/tools/moat/image_hough_reference.py"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src",
+    "started_at_utc": "2026-11-12T04:51:32.180013+00:00",
+    "timeout_seconds": 1200,
+    "environment": {},
+    "stdout": "logs/0008-cold-image_hough_reference.stdout.log",
+    "stderr": "logs/0008-cold-image_hough_reference.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-12T04:51:50.437044+00:00",
+    "seconds": 18.25603686401155
+  },
+  {
+    "command_id": 9,
+    "phase": "cold-image_hough_options",
+    "argv": [
+      "/home/zihaomu/zihaomu_workspace/rocm10-launch.sh",
+      "env",
+      "ROCR_VISIBLE_DEVICES=3",
+      "HIP_VISIBLE_DEVICES=0",
+      "python3",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src/tools/moat/image_hough_options.py"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src",
+    "started_at_utc": "2026-11-12T04:51:50.438397+00:00",
+    "timeout_seconds": 1200,
+    "environment": {},
+    "stdout": "logs/0009-cold-image_hough_options.stdout.log",
+    "stderr": "logs/0009-cold-image_hough_options.stderr.log",
+    "environment_changes": {
+      "HIP_VISIBLE_DEVICES": "2"
+    },
+    "return_code": 0,
+    "finished_at_utc": "2026-11-12T04:52:10.447208+00:00",
+    "seconds": 20.00837880297331
+  },
+  {
+    "command_id": 10,
+    "phase": "cold-image_hough_runtime",
+    "argv": [
+      "/home/zihaomu/zihaomu_workspace/rocm10-launch.sh",
+      "env",
+      "ROCR_VISIBLE_DEVICES=3",
+      "HIP_VISIBLE_DEVICES=0",
+      "python3",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src/tools/moat/image_hough_runtime.py"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src",
+    "started_at_utc": "2026-11-12T04:52:10.448405+00:00",
+    "timeout_seconds": 1200,
+    "environment": {},
+    "stdout": "logs/0010-cold-image_hough_runtime.stdout.log",
+    "stderr": "logs/0010-cold-image_hough_runtime.stderr.log",
+    "environment_changes": {
+      "HIP_VISIBLE_DEVICES": "2"
+    },
+    "return_code": 0,
+    "finished_at_utc": "2026-11-12T04:52:16.979253+00:00",
+    "seconds": 6.5301733069936745
+  },
+  {
+    "command_id": 11,
+    "phase": "cold-image_hough_runtime_reference",
+    "argv": [
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-cpu-venv/bin/python",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src/tools/moat/image_hough_runtime_reference.py"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src",
+    "started_at_utc": "2026-11-12T04:52:16.981259+00:00",
+    "timeout_seconds": 1200,
+    "environment": {},
+    "stdout": "logs/0011-cold-image_hough_runtime_reference.stdout.log",
+    "stderr": "logs/0011-cold-image_hough_runtime_reference.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-12T04:52:18.399995+00:00",
+    "seconds": 1.4178635450080037
+  },
+  {
+    "command_id": 12,
+    "phase": "cold-image_hough_foreign_stream",
+    "argv": [
+      "/home/zihaomu/zihaomu_workspace/rocm10-launch.sh",
+      "env",
+      "ROCR_VISIBLE_DEVICES=2,3",
+      "HIP_VISIBLE_DEVICES=0,1",
+      "python3",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src/tools/moat/image_hough_foreign_stream.py"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src",
+    "started_at_utc": "2026-11-12T04:52:18.401787+00:00",
+    "timeout_seconds": 1200,
+    "environment": {},
+    "stdout": "logs/0012-cold-image_hough_foreign_stream.stdout.log",
+    "stderr": "logs/0012-cold-image_hough_foreign_stream.stderr.log",
+    "environment_changes": {
+      "HIP_VISIBLE_DEVICES": "0,2"
+    },
+    "return_code": 0,
+    "finished_at_utc": "2026-11-12T04:52:24.580973+00:00",
+    "seconds": 6.1782058760290965
+  },
+  {
+    "command_id": 13,
+    "phase": "cold-image_hough_trace",
+    "argv": [
+      "/home/zihaomu/zihaomu_workspace/rocm10-launch.sh",
+      "env",
+      "ROCR_VISIBLE_DEVICES=3",
+      "HIP_VISIBLE_DEVICES=0",
+      "python3",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src/tools/moat/image_hough_trace.py"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src",
+    "started_at_utc": "2026-11-12T04:52:24.583156+00:00",
+    "timeout_seconds": 1200,
+    "environment": {},
+    "stdout": "logs/0013-cold-image_hough_trace.stdout.log",
+    "stderr": "logs/0013-cold-image_hough_trace.stderr.log",
+    "environment_changes": {
+      "HIP_VISIBLE_DEVICES": "2"
+    },
+    "return_code": 0,
+    "finished_at_utc": "2026-11-12T04:52:29.759895+00:00",
+    "seconds": 5.175849606981501
+  }
+]

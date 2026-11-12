@@ -1,6 +1,6 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-12T04:50:03.075391+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-12T04:54:30.833257+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
 26入口当前：11 PASSED / 7 PARTIAL / 8 FAILED。
 
@@ -1348,3 +1348,7 @@
 | 2026-11-12T04:45:16.169864+00:00 | I3 | Hough有效非默认参数 blank-low-threshold，完整线列表和PPM独立CPU：PASSED。 | [20261112T044513.080972Z-I3-rocm-original-9385bab3d1](evidence/rewrite/I3/Hough-valid-nondefault-original-options/20261112T044513.080972Z-I3-rocm-original-9385bab3d1)；[20261112T044514.912362Z-I3-CPU-reference-4e20cef9a7](evidence/rewrite/I3/Hough-valid-options-independent-CPU/20261112T044514.912362Z-I3-CPU-reference-4e20cef9a7) |
 | 2026-11-12T04:45:17.873874+00:00 | I3 | Hough 5090原生与项目HIP完整默认PPM/10线差异：PASSED；10627 RGB像素不同、red IoU 0.23946；双方五真值均覆盖，完整原始产物封存。 | [20261112T044516.922448Z-I3-CPU-reference-99bff1e3cc](evidence/rewrite/I3/Hough-complete-native-CUDA-project-HIP-CPU-comparison/20261112T044516.922448Z-I3-CPU-reference-99bff1e3cc)；[20261111T181159.322261Z-I3-cuda-original-6e3b3023be](evidence/rewrite/I3/NPP__houghLines_houghLines.cpp/20261111T181159.322261Z-I3-cuda-original-6e3b3023be) |
 | 2026-11-12T04:50:03.075391+00:00 | I3 | Hough复审修订：19项运行合同、跨设备外流、五有效参数冻结、原生收据与真实trace逐原始证据验证；主表继续PARTIAL，新版45子冷检出待执行。 | [image-hough.md](image-hough.md)；[image-hough-runtime-validation.json](image-hough-runtime-validation.json)；[image-hough-foreign-stream.json](image-hough-foreign-stream.json) |
+| 2026-11-12T04:52:30.317482+00:00 | I3 | Hough固定Git检出重建双合同/RAW、HIP/C++、14主CLI+5有效参数、全部独立CPU、运行/外流合同与GPU trace及45子记录：PASSED | [20261112T045015.900532Z-I3-host-cold-replay-cccc7d0804](evidence/rewrite/I3/Hough-clean-fixed-checkout-all-CLI-CPU-runtime-trace/20261112T045015.900532Z-I3-host-cold-replay-cccc7d0804) |
+| 2026-11-12T04:53:29.745622+00:00 | I3 | Hough组合资格与45子封印的12项正反向检查合同冻结。 | [20261112T045328.785105Z-I3-CPU-contract-e4a1f3594e](evidence/rewrite/I3/Hough-qualification-mutation-contract/20261112T045328.785105Z-I3-CPU-contract-e4a1f3594e) |
+| 2026-11-12T04:53:43.855053+00:00 | I3 | Hough12项实际组合资格与子封印正反向变异：PASSED。 | [20261112T045330.105200Z-I3-CPU-validator-test-405c471a25](evidence/rewrite/I3/Hough-actual-qualification-mutations/20261112T045330.105200Z-I3-CPU-validator-test-405c471a25) |
+| 2026-11-12T04:54:30.833257+00:00 | I3 | Hough固定提交f243503e冷检出45/45子记录重算通过；12/12资格及配对归档篡改反例通过；资格门仅余三范围独立复审，主表仍PARTIAL。 | [image-hough-cold.json](image-hough-cold.json)；[image-hough-qualification-checks.json](image-hough-qualification-checks.json) |

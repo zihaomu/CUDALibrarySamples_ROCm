@@ -91,7 +91,7 @@ def cold_verify(cold,parent_override=None):
             original_raw=Path(json.loads((runpath/'manifest.json').read_text())['raw_artifact_dir'])
             if (run['build']!=build['evidence'] or run['arguments']!=args
                 or len(commands)!=1 or commands[0]['argv']!=[binary,*args]
-                or commands[0]['cwd']!=str(original_raw/'outputs')
+                or commands[0]['cwd']!=str(clone/original_raw/'outputs')
                 or commands[0]['return_code']!=case['expected_return_code']
                 or json.loads((vpath/'manifest.json').read_text())['parent_experiment_id']!=run['experiment_id']):return False
             recomputed=json.loads(json.dumps(validate(case,run,proof_override=runpath,

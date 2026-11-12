@@ -1,0 +1,64 @@
+[
+  {
+    "command_id": 1,
+    "phase": "compile-runtime-harness",
+    "argv": [
+      "hipcc",
+      "--rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src/build/rocm-sdk-overlay",
+      "--hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src/build/rocm-sdk-overlay",
+      "--rocm-device-lib-path=/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode",
+      "--offload-arch=gfx1201",
+      "-std=c++17",
+      "-O2",
+      "-D__HIP_PLATFORM_AMD__",
+      "-x",
+      "hip",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src/tools/moat/image_hough_runtime.cpp",
+      "-L/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src/artifacts/rewrite/I3/Hough-Canny-GPU-and-complete-C__-build/20261112T045054.071940Z-I3-rocm-build-d9cf650f75",
+      "-limage_hough",
+      "-Wl,-rpath,/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src/artifacts/rewrite/I3/Hough-Canny-GPU-and-complete-C__-build/20261112T045054.071940Z-I3-rocm-build-d9cf650f75",
+      "-L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib",
+      "-Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib",
+      "-lamdhip64",
+      "-o",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src/artifacts/rewrite/I3/Hough-actual-device-allocation-and-stream-runtime/20261112T045212.791996Z-I3-rocm-runtime-3b929b2030/runtime"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src",
+    "started_at_utc": "2026-11-12T04:52:14.146029+00:00",
+    "timeout_seconds": 300,
+    "environment": {
+      "HIP_VISIBLE_DEVICES": "0",
+      "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+      "DEEPINFER_ROCM_RELEASE": "10.1.0",
+      "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+      "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+    },
+    "stdout": "logs/0001-compile-runtime-harness.stdout.log",
+    "stderr": "logs/0001-compile-runtime-harness.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-12T04:52:15.514250+00:00",
+    "seconds": 1.3676182819763198
+  },
+  {
+    "command_id": 2,
+    "phase": "actual-device-runtime-cases",
+    "argv": [
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src/artifacts/rewrite/I3/Hough-actual-device-allocation-and-stream-runtime/20261112T045212.791996Z-I3-rocm-runtime-3b929b2030/runtime"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-hough-cold-48yxhc5d/src",
+    "started_at_utc": "2026-11-12T04:52:15.515663+00:00",
+    "timeout_seconds": 120,
+    "environment": {
+      "HIP_VISIBLE_DEVICES": "0",
+      "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+      "DEEPINFER_ROCM_RELEASE": "10.1.0",
+      "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+      "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+    },
+    "stdout": "logs/0002-actual-device-runtime-cases.stdout.log",
+    "stderr": "logs/0002-actual-device-runtime-cases.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-12T04:52:16.032471+00:00",
+    "seconds": 0.5161391909932718
+  }
+]
