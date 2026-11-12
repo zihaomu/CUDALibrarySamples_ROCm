@@ -1,0 +1,1 @@
+Test rocm-prototype for GPU-JPEG-forward-transform-and-cross-decode, case odd-420. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T090228.903756Z-I5-rocm-build-c35d3f42d9.

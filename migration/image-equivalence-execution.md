@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-12T08:53:35.402065+00:00。26入口当前13通过/8部分/5失败。
+更新时间：2026-11-12T09:10:37.621502+00:00。26入口当前13通过/8部分/5失败。
 
-I4：六个 nvJPEG 入口新 progressive GPU 子集证据已按 Git 封印绑定到逐例主表；仍全部 PARTIAL，旧 CPU 回退原因改为各入口真实剩余缺口。
+I5：nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp 七组完整入口+GPU JPEG 前向变换与CPU熵编码子集资格封存；待GPU entropy、模式/metadata与冷检出，整例仍 PARTIAL。
 
-证据：`migration/reports/image-progressive-publication.json`
+证据：`migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261112T091036.654996Z-I5-composite-subset-qualification-9b880eedfb`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

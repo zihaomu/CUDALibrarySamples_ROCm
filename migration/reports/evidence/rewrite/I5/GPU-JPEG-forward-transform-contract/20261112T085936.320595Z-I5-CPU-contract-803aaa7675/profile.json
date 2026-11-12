@@ -1,0 +1,62 @@
+{
+  "status": "FROZEN",
+  "phase": "I5",
+  "scope": "GPU RGB-to-YCbCr, chroma downsample, FDCT and quantization prototype; entropy assembly remains CPU and does not qualify a sample",
+  "inputs": [
+    {
+      "case": "odd-420",
+      "path": "migration/fixtures/image-jpeg-encoder/odd-420.rgb",
+      "sha256": "91430de5cc2c584c6296f233215a594b220eb90c7617cf978daa28e1f5fe89ef",
+      "width": 33,
+      "height": 29,
+      "variant": "smooth",
+      "quality": 75,
+      "subsampling": "420"
+    },
+    {
+      "case": "odd-444",
+      "path": "migration/fixtures/image-jpeg-encoder/odd-444.rgb",
+      "sha256": "a1997f28549c8a4263729fb7a54a56b896e19ed7e879499a1fffdac5ae6e4388",
+      "width": 13,
+      "height": 11,
+      "variant": "smooth",
+      "quality": 90,
+      "subsampling": "444"
+    },
+    {
+      "case": "mcu-boundary",
+      "path": "migration/fixtures/image-jpeg-encoder/mcu-boundary.rgb",
+      "sha256": "856b9241dc106d3f4739b3828947a75ffda5c85425c572b6d89d71e265e9aa28",
+      "width": 64,
+      "height": 40,
+      "variant": "checker",
+      "quality": 75,
+      "subsampling": "420"
+    },
+    {
+      "case": "tiny-444",
+      "path": "migration/fixtures/image-jpeg-encoder/tiny-444.rgb",
+      "sha256": "709e80c88487a2411e1ee4dfb9f22a861492d20c4765150c0c794abd70f8147c",
+      "width": 1,
+      "height": 1,
+      "variant": "black",
+      "quality": 75,
+      "subsampling": "444"
+    }
+  ],
+  "gates": {
+    "all_cases": 4,
+    "actual_GPU_trace_required": true,
+    "independently_decodable": true,
+    "dimensions_exact": true,
+    "subsampling_exact": true,
+    "quantization_tables_exact": true,
+    "decoded_psnr_vs_source_min_db": {
+      "smooth": 26.0,
+      "checker": 12.0,
+      "black": 60.0
+    },
+    "malformed_input_rejected": true
+  },
+  "limitations": "No GPU entropy/Huffman, metadata/progressive re-encoding, multi-instance scheduling or source-sample integration yet."
+}

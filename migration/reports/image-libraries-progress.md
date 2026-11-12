@@ -1,6 +1,6 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-12T08:53:35.402065+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-12T09:10:37.621502+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
 26入口当前：13 PASSED / 8 PARTIAL / 5 FAILED。
 
@@ -11,7 +11,7 @@
 | I2 | COMPLETED_SCOPED |
 | I3 | IN_PROGRESS |
 | I4 | NOT_STARTED |
-| I5 | NOT_STARTED |
+| I5 | IN_PROGRESS |
 | I6 | NOT_STARTED |
 | I7 | NOT_STARTED |
 | I8 | NOT_STARTED |
@@ -1544,3 +1544,20 @@
 | 2026-11-12T08:51:52.482357+00:00 | I4 | nvJPEG/nvJPEG-Decoder-MultipleInstances/nvJPEGDecMultipleInstances.cpp 七组历史合同+两原始 progressive GPU像素/trace/current source 复合子集证据封存；整例仍 PARTIAL，待剩余语义/冷检出复审。 | [20261112T085151.508214Z-I4-composite-subset-qualification-1a4d02b7ec](evidence/rewrite/I4/nvJPEG_nvJPEG-Decoder-MultipleInstances_nvJPEGDecMultipleInstances.cpp/20261112T085151.508214Z-I4-composite-subset-qualification-1a4d02b7ec) |
 | 2026-11-12T08:51:53.796663+00:00 | I4 | nvJPEG/nvJPEG-Decoder/tests/test_decoder.py 七组历史合同+两原始 progressive GPU像素/trace/current source 复合子集证据封存；整例仍 PARTIAL，待剩余语义/冷检出复审。 | [20261112T085152.831043Z-I4-composite-subset-qualification-fbbed580cf](evidence/rewrite/I4/nvJPEG_nvJPEG-Decoder_tests_test_decoder.py/20261112T085152.831043Z-I4-composite-subset-qualification-fbbed580cf) |
 | 2026-11-12T08:53:35.402065+00:00 | I4 | 六个 nvJPEG 入口新 progressive GPU 子集证据已按 Git 封印绑定到逐例主表；仍全部 PARTIAL，旧 CPU 回退原因改为各入口真实剩余缺口。 | [image-progressive-publication.json](image-progressive-publication.json) |
+| 2026-11-12T08:59:37.312514+00:00 | I5 | GPU JPEG encoder 四组输入、420/444、奇数/MCU边界、质量与独立跨解码门槛已先冻结；当前仅计划 FDCT/量化 GPU 原型，CPU entropy 不计整例支持。 | [20261112T085936.320595Z-I5-CPU-contract-803aaa7675](evidence/rewrite/I5/GPU-JPEG-forward-transform-contract/20261112T085936.320595Z-I5-CPU-contract-803aaa7675) |
+| 2026-11-12T09:01:56.058901+00:00 | I5 | 首次 I5 构建调用在宿主而非 ROCm 容器执行，设备快照拒绝；已作为 INITIALIZATION_ERROR 归档，不推断 GPU 结果，改用绑定物理 GPU1 的容器重试。 | [20261112T090120.527067Z-I5-rocm-build-2cb791d186](evidence/rewrite/I5/GPU-JPEG-FDCT-quantizer-build/20261112T090120.527067Z-I5-rocm-build-2cb791d186) |
+| 2026-11-12T09:02:05.953627+00:00 | I5 | GPU JPEG 前向色彩/FDCT/量化原型构建：BUILD_ERROR；独立跨解码和 GPU trace 尚待验证。 | [20261112T090203.502503Z-I5-rocm-build-5864dbe709](evidence/rewrite/I5/GPU-JPEG-FDCT-quantizer-build/20261112T090203.502503Z-I5-rocm-build-5864dbe709) |
+| 2026-11-12T09:02:32.054464+00:00 | I5 | GPU JPEG 前向色彩/FDCT/量化原型构建：BUILT；独立跨解码和 GPU trace 尚待验证。 | [20261112T090228.903756Z-I5-rocm-build-c35d3f42d9](evidence/rewrite/I5/GPU-JPEG-FDCT-quantizer-build/20261112T090228.903756Z-I5-rocm-build-c35d3f42d9) |
+| 2026-11-12T09:03:30.937863+00:00 | I5 | GPU JPEG FDCT/量化+CPU entropy odd-420 独立跨解码：PASSED；PSNR=33.01776865040661 dB。 | [20261112T090328.660764Z-I5-rocm-prototype-5e079a486f](evidence/rewrite/I5/GPU-JPEG-forward-transform-and-cross-decode/20261112T090328.660764Z-I5-rocm-prototype-5e079a486f) |
+| 2026-11-12T09:03:33.252541+00:00 | I5 | GPU JPEG FDCT/量化+CPU entropy odd-444 独立跨解码：PASSED；PSNR=47.580086918380005 dB。 | [20261112T090331.280202Z-I5-rocm-prototype-63e399d859](evidence/rewrite/I5/GPU-JPEG-forward-transform-and-cross-decode/20261112T090331.280202Z-I5-rocm-prototype-63e399d859) |
+| 2026-11-12T09:03:35.507273+00:00 | I5 | GPU JPEG FDCT/量化+CPU entropy mcu-boundary 独立跨解码：PASSED；PSNR=17.202266323049326 dB。 | [20261112T090333.600039Z-I5-rocm-prototype-c50440c99f](evidence/rewrite/I5/GPU-JPEG-forward-transform-and-cross-decode/20261112T090333.600039Z-I5-rocm-prototype-c50440c99f) |
+| 2026-11-12T09:03:37.806796+00:00 | I5 | GPU JPEG FDCT/量化+CPU entropy tiny-444 独立跨解码：PASSED；PSNR=inf dB。 | [20261112T090335.840261Z-I5-rocm-prototype-c3fb9fdb2d](evidence/rewrite/I5/GPU-JPEG-forward-transform-and-cross-decode/20261112T090335.840261Z-I5-rocm-prototype-c3fb9fdb2d) |
+| 2026-11-12T09:04:13.566141+00:00 | I5 | JPEG encoder GPU 实际色彩/降采样和 FDCT/量化各三次内核、物理 GPU1 及 bitstream 重放：PASSED。 | [20261112T090411.187391Z-I5-rocm-trace-dd69400e50](evidence/rewrite/I5/JPEG-encoder-real-GPU-color-FDCT-trace/20261112T090411.187391Z-I5-rocm-trace-dd69400e50) |
+| 2026-11-12T09:04:44.325125+00:00 | I5 | JPEG encoder 负向输入 truncated-rgb：EXPECTED_REJECTION；非法输入无输出码流。 | [20261112T090442.340739Z-I5-rocm-negative-8f87561b95](evidence/rewrite/I5/JPEG-encoder-malformed-input-rejection/20261112T090442.340739Z-I5-rocm-negative-8f87561b95) |
+| 2026-11-12T09:04:46.512243+00:00 | I5 | JPEG encoder 负向输入 zero-width：EXPECTED_REJECTION；非法输入无输出码流。 | [20261112T090444.663680Z-I5-rocm-negative-900ff97af0](evidence/rewrite/I5/JPEG-encoder-malformed-input-rejection/20261112T090444.663680Z-I5-rocm-negative-900ff97af0) |
+| 2026-11-12T09:04:48.635410+00:00 | I5 | JPEG encoder 负向输入 bad-quality：EXPECTED_REJECTION；非法输入无输出码流。 | [20261112T090446.839868Z-I5-rocm-negative-aef6bd6949](evidence/rewrite/I5/JPEG-encoder-malformed-input-rejection/20261112T090446.839868Z-I5-rocm-negative-aef6bd6949) |
+| 2026-11-12T09:04:50.601893+00:00 | I5 | JPEG encoder 负向输入 bad-sampling：EXPECTED_REJECTION；非法输入无输出码流。 | [20261112T090448.948960Z-I5-rocm-negative-8af5ea8536](evidence/rewrite/I5/JPEG-encoder-malformed-input-rejection/20261112T090448.948960Z-I5-rocm-negative-8af5ea8536) |
+| 2026-11-12T09:08:28.339127+00:00 | I5 | nvJPEG/Image-Resize/imageResize.cpp GPU DCT/量化+CPU entropy 原始七组流程与独立CPU验收：PASSED_SUBSET；progressive 输出/metadata 和 GPU Huffman 尚未验收。 | [20261112T090817.747006Z-I5-rocm-original-entry-integration-07f90e636a](evidence/rewrite/I5/nvJPEG_Image-Resize_imageResize.cpp/20261112T090817.747006Z-I5-rocm-original-entry-integration-07f90e636a) |
+| 2026-11-12T09:08:40.061014+00:00 | I5 | nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp GPU DCT/量化+CPU entropy 原始七组流程与独立CPU验收：PASSED_SUBSET；progressive 输出/metadata 和 GPU Huffman 尚未验收。 | [20261112T090828.673890Z-I5-rocm-original-entry-integration-faa2e75109](evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp/20261112T090828.673890Z-I5-rocm-original-entry-integration-faa2e75109) |
+| 2026-11-12T09:10:36.289268+00:00 | I5 | nvJPEG/Image-Resize/imageResize.cpp 七组完整入口+GPU JPEG 前向变换与CPU熵编码子集资格封存；待GPU entropy、模式/metadata与冷检出，整例仍 PARTIAL。 | [20261112T091035.196617Z-I5-composite-subset-qualification-365ff89950](evidence/rewrite/I5/nvJPEG_Image-Resize__imageResize.cpp/20261112T091035.196617Z-I5-composite-subset-qualification-365ff89950) |
+| 2026-11-12T09:10:37.621502+00:00 | I5 | nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp 七组完整入口+GPU JPEG 前向变换与CPU熵编码子集资格封存；待GPU entropy、模式/metadata与冷检出，整例仍 PARTIAL。 | [20261112T091036.654996Z-I5-composite-subset-qualification-9b880eedfb](evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261112T091036.654996Z-I5-composite-subset-qualification-9b880eedfb) |

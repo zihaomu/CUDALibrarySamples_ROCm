@@ -1,0 +1,35 @@
+Warning: HIP version file: "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/share/hip/version" not found.  Cannot give HIP version information.
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/probes/image/jpeg_encoder_gpu.hip:2:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/image/jpeg_encoder_gpu.hpp:52:16: error: use of undeclared identifier 'min'; did you mean 'fmin'?
+   52 |       int sx = min(x * scale + dx, image_width - 1);
+      |                ^~~
+      |                fmin
+/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/clang/24/include/__clang_cuda_math_forward_declares.h:81:18: note: 'fmin' declared here
+   81 | __DEVICE__ float fmin(float, float);
+      |                  ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/probes/image/jpeg_encoder_gpu.hip:2:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/image/jpeg_encoder_gpu.hpp:53:16: error: use of undeclared identifier 'min'; did you mean 'fmin'?
+   53 |       int sy = min(y * scale + dy, image_height - 1);
+      |                ^~~
+      |                fmin
+/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/clang/24/include/__clang_cuda_math_forward_declares.h:81:18: note: 'fmin' declared here
+   81 | __DEVICE__ float fmin(float, float);
+      |                  ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/probes/image/jpeg_encoder_gpu.hip:2:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/image/jpeg_encoder_gpu.hpp:75:20: error: use of undeclared identifier 'min'; did you mean 'fmin'?
+   75 |     int source_y = min(block_y * 8 + y, height - 1);
+      |                    ^~~
+      |                    fmin
+/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/clang/24/include/__clang_cuda_math_forward_declares.h:81:18: note: 'fmin' declared here
+   81 | __DEVICE__ float fmin(float, float);
+      |                  ^
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/probes/image/jpeg_encoder_gpu.hip:2:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/image/jpeg_encoder_gpu.hpp:77:22: error: use of undeclared identifier 'min'; did you mean 'fmin'?
+   77 |       int source_x = min(block_x * 8 + x, width - 1);
+      |                      ^~~
+      |                      fmin
+/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/clang/24/include/__clang_cuda_math_forward_declares.h:81:18: note: 'fmin' declared here
+   81 | __DEVICE__ float fmin(float, float);
+      |                  ^
+4 errors generated when compiling for gfx1201.
+failed to execute:/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib/llvm/bin/clang++  --offload-arch=gfx1201 --driver-mode=g++ --hip-link  --rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --rocm-device-lib-path=/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode -std=c++17 -O2 -D__HIP_PLATFORM_AMD__ -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/cpu-codecs/include -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/image -x hip /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/probes/image/jpeg_encoder_gpu.hip -L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib -L/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/cpu-codecs/lib -Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib -Wl,-rpath,/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/cpu-codecs/lib -lamdhip64 -ljpeg -o "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/GPU-JPEG-FDCT-quantizer-build/20261112T090203.502503Z-I5-rocm-build-5864dbe709/jpeg_encoder_gpu"
