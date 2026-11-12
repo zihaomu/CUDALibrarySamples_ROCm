@@ -1,0 +1,1 @@
+Test rocm-trace for progressive-JPEG-real-GPU-IDCT-and-color-trace, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T084411.253675Z-I4-rocm-prototype-0d654cb363.

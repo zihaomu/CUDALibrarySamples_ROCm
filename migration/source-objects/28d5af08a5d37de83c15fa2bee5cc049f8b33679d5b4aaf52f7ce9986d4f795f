@@ -1,0 +1,210 @@
+// SPDX-License-Identifier: Apache-2.0
+// I4 prototype: CPU progressive entropy/coefficient assembly, AMD GPU pixel synthesis.
+#include <hip/hip_runtime.h>
+#include <jpeglib.h>
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
+#include <fstream>
+#include <iostream>
+#include <iterator>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
+static void checked(hipError_t result, const char* operation) {
+  if (result != hipSuccess)
+    throw std::runtime_error(std::string(operation) + ": " + hipGetErrorString(result));
+}
+static std::vector<unsigned char> read_file(const char* path) {
+  std::ifstream stream(path, std::ios::binary);
+  if (!stream) throw std::runtime_error(std::string("cannot open ") + path);
+  return {std::istreambuf_iterator<char>(stream), {}};
+}
+static void write_file(const char* path, const std::vector<unsigned char>& bytes) {
+  std::ofstream stream(path, std::ios::binary);
+  stream.write(reinterpret_cast<const char*>(bytes.data()), bytes.size());
+  if (!stream) throw std::runtime_error(std::string("cannot write ") + path);
+}
+
+struct Coefficients {
+  int width = 0, height = 0, blocks_x = 0, h_factor = 0, v_factor = 0;
+  std::vector<int16_t> data;
+  std::vector<uint16_t> quant;
+};
+struct Picture {
+  int width = 0, height = 0, max_h = 0, max_v = 0;
+  std::vector<Coefficients> components;
+};
+
+static Picture extract(const std::vector<unsigned char>& input) {
+  jpeg_decompress_struct decoder{};
+  jpeg_error_mgr errors{};
+  decoder.err = jpeg_std_error(&errors);
+  jpeg_create_decompress(&decoder);
+  jpeg_mem_src(&decoder, input.data(), input.size());
+  jpeg_read_header(&decoder, TRUE);
+  if (!decoder.progressive_mode || decoder.num_components != 3 ||
+      decoder.jpeg_color_space != JCS_YCbCr)
+    throw std::runtime_error("expected progressive three-component YCbCr JPEG");
+  Picture picture;
+  picture.width = decoder.image_width;
+  picture.height = decoder.image_height;
+  picture.max_h = decoder.max_h_samp_factor;
+  picture.max_v = decoder.max_v_samp_factor;
+  jvirt_barray_ptr* arrays = jpeg_read_coefficients(&decoder);
+  for (int component = 0; component < 3; ++component) {
+    jpeg_component_info& info = decoder.comp_info[component];
+    Coefficients current;
+    current.width = info.downsampled_width;
+    current.height = info.downsampled_height;
+    current.blocks_x = info.width_in_blocks;
+    current.h_factor = info.h_samp_factor;
+    current.v_factor = info.v_samp_factor;
+    current.data.resize(size_t(info.width_in_blocks) * info.height_in_blocks * 64);
+    for (JDIMENSION row = 0; row < info.height_in_blocks; ++row) {
+      JBLOCKARRAY blocks = decoder.mem->access_virt_barray(
+          reinterpret_cast<j_common_ptr>(&decoder), arrays[component], row, 1, FALSE);
+      for (JDIMENSION column = 0; column < info.width_in_blocks; ++column) {
+        std::copy_n(blocks[0][column], 64,
+                    current.data.begin() + (size_t(row) * info.width_in_blocks + column) * 64);
+      }
+    }
+    auto* quant = decoder.quant_tbl_ptrs[info.quant_tbl_no];
+    if (!quant) throw std::runtime_error("missing quantization table");
+    current.quant.assign(quant->quantval, quant->quantval + 64);
+    picture.components.push_back(std::move(current));
+  }
+  jpeg_finish_decompress(&decoder);
+  jpeg_destroy_decompress(&decoder);
+  return picture;
+}
+
+static std::vector<unsigned char> cpu_reference(const std::vector<unsigned char>& input,
+                                                  int width, int height) {
+  jpeg_decompress_struct decoder{};
+  jpeg_error_mgr errors{};
+  decoder.err = jpeg_std_error(&errors);
+  jpeg_create_decompress(&decoder);
+  jpeg_mem_src(&decoder, input.data(), input.size());
+  jpeg_read_header(&decoder, TRUE);
+  decoder.out_color_space = JCS_RGB;
+  decoder.do_fancy_upsampling = FALSE;
+  decoder.dct_method = JDCT_ISLOW;
+  jpeg_start_decompress(&decoder);
+  if (int(decoder.output_width) != width || int(decoder.output_height) != height ||
+      decoder.output_components != 3)
+    throw std::runtime_error("CPU reference dimensions differ");
+  std::vector<unsigned char> output(size_t(width) * height * 3);
+  while (decoder.output_scanline < decoder.output_height) {
+    JSAMPROW row = output.data() + size_t(decoder.output_scanline) * width * 3;
+    jpeg_read_scanlines(&decoder, &row, 1);
+  }
+  jpeg_finish_decompress(&decoder);
+  jpeg_destroy_decompress(&decoder);
+  return output;
+}
+
+__device__ static uint8_t clamp_byte(float value) {
+  int rounded = __float2int_rn(value);
+  return static_cast<uint8_t>(rounded < 0 ? 0 : rounded > 255 ? 255 : rounded);
+}
+__global__ static void inverse_dct(const int16_t* coefficients, const uint16_t* quant,
+                                   const float* cosine, uint8_t* pixels,
+                                   int width, int height, int blocks_x) {
+  int index = blockIdx.x * blockDim.x + threadIdx.x;
+  if (index >= width * height) return;
+  int x = index % width, y = index / width;
+  const int16_t* block = coefficients + (size_t(y / 8) * blocks_x + x / 8) * 64;
+  int local_x = x & 7, local_y = y & 7;
+  float sum = 0.0f;
+  for (int v = 0; v < 8; ++v) {
+    float cv = v ? 1.0f : 0.7071067811865475f;
+    float row_sum = 0.0f;
+    for (int u = 0; u < 8; ++u) {
+      float cu = u ? 1.0f : 0.7071067811865475f;
+      int k = v * 8 + u;
+      row_sum += cu * float(block[k]) * float(quant[k]) * cosine[local_x * 8 + u];
+    }
+    sum += cv * row_sum * cosine[local_y * 8 + v];
+  }
+  pixels[index] = clamp_byte(sum * 0.25f + 128.0f);
+}
+__global__ static void convert_rgb(const uint8_t* y_plane, const uint8_t* cb_plane,
+                                   const uint8_t* cr_plane, uint8_t* rgb,
+                                   int width, int height, int chroma_width, int chroma_height,
+                                   int chroma_h_factor, int chroma_v_factor,
+                                   int max_h, int max_v) {
+  int index = blockIdx.x * blockDim.x + threadIdx.x;
+  if (index >= width * height) return;
+  int x = index % width, y = index / width;
+  int cx = x * chroma_h_factor / max_h;
+  int cy = y * chroma_v_factor / max_v;
+  if (cx >= chroma_width) cx = chroma_width - 1;
+  if (cy >= chroma_height) cy = chroma_height - 1;
+  int chroma_index = cy * chroma_width + cx;
+  float luma = y_plane[index];
+  float cb = float(cb_plane[chroma_index]) - 128.0f;
+  float cr = float(cr_plane[chroma_index]) - 128.0f;
+  rgb[3 * index] = clamp_byte(luma + 1.40200f * cr);
+  rgb[3 * index + 1] = clamp_byte(luma - 0.344136f * cb - 0.714136f * cr);
+  rgb[3 * index + 2] = clamp_byte(luma + 1.77200f * cb);
+}
+
+int main(int argc, char** argv) {
+  try {
+    if (argc != 4) throw std::runtime_error("usage: input.jpg gpu.rgb cpu.rgb");
+    auto input = read_file(argv[1]);
+    auto picture = extract(input);
+    auto cpu = cpu_reference(input, picture.width, picture.height);
+    checked(hipSetDevice(0), "select AMD GPU");
+    std::vector<void*> allocations;
+    auto allocate = [&](size_t bytes) {
+      void* pointer = nullptr;
+      checked(hipMalloc(&pointer, bytes), "allocate GPU buffer");
+      allocations.push_back(pointer);
+      return pointer;
+    };
+    float cosine[64];
+    for (int x = 0; x < 8; ++x)
+      for (int u = 0; u < 8; ++u)
+        cosine[x * 8 + u] = std::cos(float((2 * x + 1) * u) * 3.14159265358979323846f / 16.0f);
+    auto* device_cos = static_cast<float*>(allocate(sizeof(cosine)));
+    checked(hipMemcpy(device_cos, cosine, sizeof(cosine), hipMemcpyHostToDevice), "copy cosine");
+    uint8_t* planes[3];
+    for (int channel = 0; channel < 3; ++channel) {
+      auto& component = picture.components[channel];
+      auto* device_coeff = static_cast<int16_t*>(allocate(component.data.size() * sizeof(int16_t)));
+      auto* device_quant = static_cast<uint16_t*>(allocate(64 * sizeof(uint16_t)));
+      planes[channel] = static_cast<uint8_t*>(allocate(size_t(component.width) * component.height));
+      checked(hipMemcpy(device_coeff, component.data.data(), component.data.size() * sizeof(int16_t),
+                        hipMemcpyHostToDevice), "copy coefficients");
+      checked(hipMemcpy(device_quant, component.quant.data(), 64 * sizeof(uint16_t),
+                        hipMemcpyHostToDevice), "copy quantization");
+      int pixels = component.width * component.height;
+      inverse_dct<<<(pixels + 255) / 256, 256>>>(device_coeff, device_quant, device_cos,
+        planes[channel], component.width, component.height, component.blocks_x);
+      checked(hipGetLastError(), "launch GPU IDCT");
+    }
+    int total = picture.width * picture.height;
+    auto* gpu_rgb = static_cast<uint8_t*>(allocate(size_t(total) * 3));
+    auto& cb = picture.components[1];
+    convert_rgb<<<(total + 255) / 256, 256>>>(planes[0], planes[1], planes[2], gpu_rgb,
+      picture.width, picture.height, cb.width, cb.height,
+      cb.h_factor, cb.v_factor, picture.max_h, picture.max_v);
+    checked(hipGetLastError(), "launch GPU RGB conversion");
+    checked(hipDeviceSynchronize(), "synchronize GPU pixel synthesis");
+    std::vector<unsigned char> gpu(size_t(total) * 3);
+    checked(hipMemcpy(gpu.data(), gpu_rgb, gpu.size(), hipMemcpyDeviceToHost), "copy GPU pixels");
+    for (auto* pointer : allocations) checked(hipFree(pointer), "free GPU buffer");
+    write_file(argv[2], gpu);
+    write_file(argv[3], cpu);
+    std::cout << "{\"width\":" << picture.width << ",\"height\":" << picture.height
+              << ",\"components\":3,\"progressive\":true,\"cpu_entropy\":true,"
+              << "\"gpu_idct\":true,\"gpu_chroma_rgb\":true,\"cpu_pixel_fallback\":false}\n";
+    return 0;
+  } catch (const std::exception& error) {
+    std::cerr << error.what() << '\n';
+    return 1;
+  }
+}

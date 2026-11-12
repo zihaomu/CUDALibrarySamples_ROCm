@@ -1,0 +1,1 @@
+Test rocm-missing-input for NPP/watershedSegmentation::watershedSegmentation.cpp, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T075703.512339Z-I3-rocm-build-306c18b8a2.

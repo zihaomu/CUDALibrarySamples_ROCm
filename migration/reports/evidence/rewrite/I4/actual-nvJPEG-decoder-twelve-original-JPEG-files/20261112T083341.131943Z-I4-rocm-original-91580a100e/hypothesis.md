@@ -1,0 +1,1 @@
+Test rocm-original for actual-nvJPEG-decoder-twelve-original-JPEG-files, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T083328.356303Z-I4-rocm-build-27cbb897dd.

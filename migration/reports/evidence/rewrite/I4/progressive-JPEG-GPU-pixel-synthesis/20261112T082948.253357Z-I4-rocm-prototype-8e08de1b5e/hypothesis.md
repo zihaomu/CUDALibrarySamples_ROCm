@@ -1,0 +1,1 @@
+Test rocm-prototype for progressive-JPEG-GPU-pixel-synthesis, case img9.jpg. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T082935.241172Z-I4-rocm-build-1a8686e6cc.

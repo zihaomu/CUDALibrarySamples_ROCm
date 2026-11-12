@@ -1,0 +1,31 @@
+{
+  "status": "FROZEN",
+  "phase": "I4",
+  "scope": "Experimental GPU pixel synthesis; no sample qualification",
+  "inputs": [
+    {
+      "path": "nvJPEG/nvJPEG-Decoder/input_images/cat.jpg",
+      "bytes": 3026,
+      "sha256": "0f539cae5115901c4b1be31433c15a731c1b2497bb76628f5371efbdfa997afd"
+    },
+    {
+      "path": "nvJPEG/nvJPEG-Decoder/input_images/img9.jpg",
+      "bytes": 69067,
+      "sha256": "233deede4bb1319debb983ed3e290b30f1f6a6065b8ded81833886794222cf27"
+    }
+  ],
+  "algorithm": "libjpeg-turbo progressive entropy and coefficient assembly on CPU; project HIP dequantization, 8x8 IDCT, chroma sampling and RGB conversion on AMD GPU",
+  "reference": "separate libjpeg-turbo RGB decompression with do_fancy_upsampling=FALSE and JDCT_ISLOW",
+  "gates": {
+    "all_original_progressive_inputs": 2,
+    "GPU_kernel_trace_required": true,
+    "GPU_pixel_synthesis_required": true,
+    "CPU_pixel_fallback_forbidden": true,
+    "output_bytes_exact_dimensions": true,
+    "max_abs_per_channel": 4,
+    "min_rgb_psnr_db": 50.0,
+    "abnormal_or_empty_output_rejected": true
+  },
+  "limitations": "Entropy remains on CPU as in hybrid JPEG pipelines; this profile alone does not close native backend, ROI, multi-instance or sample CLI contracts.",
+  "evidence": "migration/reports/evidence/rewrite/I4/two-original-progressive-JPEG-bitstreams/20261112T081115.958599Z-I4-CPU-contract-47ea38f38f"
+}

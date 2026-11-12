@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+"""Build and execute the actual nvJPEG decoder with the progressive HIP path."""
+import json
+from pathlib import Path
+
+from experiment import ROOT, Experiment, digest, write
+from image_progress import record
+from snapshot import capture
+
+SOURCE = ROOT / 'rocm/ported/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp'
+COMMON = ROOT / 'rocm/common/batch10_jpeg.hpp'
+PROGRESSIVE = ROOT / 'rocm/common/image/progressive_jpeg.hpp'
+PROFILE = ROOT / 'migration/rewrite/image-progressive-gpu-profile.json'
+REPORT = ROOT / 'migration/reports/image-progressive-integration.json'
+
+
+def main():
+    core = Path('/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core')
+    native = Path('/opt/rocm/core-10.1')
+    jpeg = ROOT / 'build/cpu-codecs'
+    overlay = ROOT / 'build/rocm-sdk-overlay'
+    dependencies = [SOURCE, COMMON, PROGRESSIVE, PROFILE,
+                    ROOT / 'rocm/common/batches_runtime.hpp',
+                    jpeg / 'include/jpeglib.h', jpeg / 'lib/libjpeg.so.62.4.0']
+    e = Experiment('I4', 'actual-nvJPEG-decoder-progressive-GPU-integration',
+                   'rocm-build', sources=[__file__, *dependencies])
+    write(e.path / 'backend.observed.json', capture())
+    binary = e.path / 'decoder'
+    cmd = ['hipcc', '--rocm-path=' + str(overlay), '--hip-path=' + str(overlay),
+           '--rocm-device-lib-path=' + str(core / 'lib/llvm/amdgcn/bitcode'),
+           '--offload-arch=gfx1201', '-std=c++17', '-O2', '-D__HIP_PLATFORM_AMD__',
+           '-x', 'hip', str(SOURCE), '-o', str(binary),
+           '-I' + str(ROOT / 'rocm/common'), '-I' + str(jpeg / 'include'),
+           '-I' + str(core / 'include'), '-I' + str(native / 'include'),
+           *['-I' + str(native / 'include' / name) for name in
+             ['hipblas', 'hipsolver', 'hipsparse', 'rocblas', 'rocsolver', 'rocsparse']],
+           '-L' + str(jpeg / 'lib'), '-L' + str(core / 'lib'),
+           '-Wl,-rpath,' + str(jpeg / 'lib'), '-Wl,-rpath,' + str(core / 'lib'),
+           '-lamdhip64', '-lrocjpeg', '-ljpeg']
+    rc = e.command(cmd, 'build-actual-decoder-original-entry', timeout=300)
+    build = dict(status='BUILT' if rc == 0 else 'BUILD_ERROR', return_code=rc,
+                 binary=str(binary.relative_to(ROOT)) if rc == 0 else None,
+                 binary_sha256=digest(binary) if rc == 0 else None,
+                 dependencies={str(p.relative_to(ROOT)): digest(p) for p in dependencies},
+                 experiment_id=e.id)
+    write(e.path / 'build.json', build)
+    build['evidence'] = e.finish('EXECUTED' if rc == 0 else 'BUILD_ERROR',
+        dict(status=build['status'], checks=[dict(check='original-entry-HIP-build', passed=rc == 0)]))
+    write(REPORT, build)
+    record('I4', 'nvJPEG-Decoder 完整 C++ 入口接入 progressive GPU 路径编译：' +
+           build['status'] + '；12原图运行和CPU/CUDA验收待完成。', [build['evidence']])
+    print(build['status'], build['evidence'], flush=True)
+    return int(rc != 0)
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

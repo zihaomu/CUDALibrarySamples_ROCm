@@ -129,7 +129,8 @@ def main():
   require(r['validation_source_sha256']==digest(ROOT/'tools/migration/batches9_11_validate.py') and (superseded(r['source']) or withdrawn(r['source']) or sealed_hash(r['implementation'])==r['implementation_sha256']),'B9-B11 qualifier/implementation stale '+r['source'])
   require(manifest['files'].get('build/cuda-observed/'+r['source'],{}).get('sha256')==r['cuda_implementation_sha256'],'B9-B11 CUDA observation stale '+r['source'])
   for name,sha in dict(r['dependencies'],**r['cuda_dependencies']).items():require(sealed_hash(name)==sha,'B9-B11 helper/oracle stale '+name)
-  require(r['environment']['rocm_release']=='10.1.0' and r['environment']['image_id']=='sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03' and all(d['physical_id']==0 for d in r['environment']['devices']),'B9-B11 environment/device identity changed '+r['source'])
+  allowed_pci={int(d['gpu']):d['bdf'].lower() for d in json.loads((ROOT/'migration/environments/physical-device-map.json').read_text()) if int(d['gpu']) in {0,1}}
+  require(r['environment']['rocm_release']=='10.1.0' and r['environment']['image_id']=='sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03' and len(allowed_pci)==2 and len(r['environment']['devices'])==1 and all(d['physical_id'] in allowed_pci and d['pci_bdf'].lower()==allowed_pci[d['physical_id']] for d in r['environment']['devices']),'B9-B11 environment/device identity changed '+r['source'])
   for c in r['cases']+[c['cuda_cpu_checks'] for c in r['cuda_cases']]:
    m=c['output_manifest'];require((ROOT/m['path']).exists() and digest(ROOT/m['path'])==m['sha256'] and m['files']>0,'B9-B11 output manifest missing '+r['source']+' '+c.get('case','CUDA'))
    if (ROOT/m['path']).exists():

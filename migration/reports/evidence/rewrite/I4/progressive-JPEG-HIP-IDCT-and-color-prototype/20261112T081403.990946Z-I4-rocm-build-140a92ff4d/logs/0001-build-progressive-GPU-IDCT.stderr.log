@@ -1,0 +1,89 @@
+Warning: HIP version file: "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/share/hip/version" not found.  Cannot give HIP version information.
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/probes/image/jpeg_progressive_gpu.hip:109:57: error: no matching function for call to 'nearbyintf'
+  109 |   return static_cast<uint8_t>(fminf(255.0f, fmaxf(0.0f, nearbyintf(value))));
+      |                                                         ^~~~~~~~~~
+/usr/include/x86_64-linux-gnu/bits/mathcalls.h:297:1: note: candidate function not viable: call to __host__ function from __device__ function
+  297 | __MATHCALL (nearbyint,, (_Mdouble_ __x));
+      | ^
+/usr/include/math.h:287:3: note: expanded from macro '__MATHCALL'
+  287 |   __MATHDECL (_Mdouble_,function,suffix, args)
+      |   ^
+/usr/include/math.h:289:3: note: expanded from macro '__MATHDECL'
+  289 |   __MATHDECL_1(type, function,suffix, args); \
+      |   ^
+/usr/include/math.h:299:3: note: expanded from macro '__MATHDECL_1'
+  299 |   __MATHDECL_1_IMPL(type, function, suffix, args)
+      |   ^
+/usr/include/math.h:297:15: note: expanded from macro '__MATHDECL_1_IMPL'
+  297 |   extern type __MATH_PRECNAME(function,suffix) args __THROW
+      |               ^
+/usr/include/math.h:326:34: note: expanded from macro '__MATH_PRECNAME'
+  326 | # define __MATH_PRECNAME(name,r) name##f##r
+      |                                  ^
+<scratch space>:242:1: note: expanded from here
+  242 | nearbyintf
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/probes/image/jpeg_progressive_gpu.hip:109:45: error: no matching function for call to 'fmaxf'
+  109 |   return static_cast<uint8_t>(fminf(255.0f, fmaxf(0.0f, nearbyintf(value))));
+      |                                             ^~~~~
+/usr/include/x86_64-linux-gnu/bits/mathcalls.h:333:1: note: candidate function not viable: call to __host__ function from __device__ function
+  333 | __MATHCALLX (fmax,, (_Mdouble_ __x, _Mdouble_ __y), (__const__));
+      | ^
+/usr/include/math.h:292:3: note: expanded from macro '__MATHCALLX'
+  292 |   __MATHDECLX (_Mdouble_,function,suffix, args, attrib)
+      |   ^
+/usr/include/math.h:294:3: note: expanded from macro '__MATHDECLX'
+  294 |   __MATHDECL_1(type, function,suffix, args) __attribute__ (attrib); \
+      |   ^
+/usr/include/math.h:299:3: note: expanded from macro '__MATHDECL_1'
+  299 |   __MATHDECL_1_IMPL(type, function, suffix, args)
+      |   ^
+/usr/include/math.h:297:15: note: expanded from macro '__MATHDECL_1_IMPL'
+  297 |   extern type __MATH_PRECNAME(function,suffix) args __THROW
+      |               ^
+/usr/include/math.h:326:34: note: expanded from macro '__MATH_PRECNAME'
+  326 | # define __MATH_PRECNAME(name,r) name##f##r
+      |                                  ^
+<scratch space>:270:1: note: expanded from here
+  270 | fmaxf
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/probes/image/jpeg_progressive_gpu.hip:109:31: error: no matching function for call to 'fminf'
+  109 |   return static_cast<uint8_t>(fminf(255.0f, fmaxf(0.0f, nearbyintf(value))));
+      |                               ^~~~~
+/usr/include/x86_64-linux-gnu/bits/mathcalls.h:336:1: note: candidate function not viable: call to __host__ function from __device__ function
+  336 | __MATHCALLX (fmin,, (_Mdouble_ __x, _Mdouble_ __y), (__const__));
+      | ^
+/usr/include/math.h:292:3: note: expanded from macro '__MATHCALLX'
+  292 |   __MATHDECLX (_Mdouble_,function,suffix, args, attrib)
+      |   ^
+/usr/include/math.h:294:3: note: expanded from macro '__MATHDECLX'
+  294 |   __MATHDECL_1(type, function,suffix, args) __attribute__ (attrib); \
+      |   ^
+/usr/include/math.h:299:3: note: expanded from macro '__MATHDECL_1'
+  299 |   __MATHDECL_1_IMPL(type, function, suffix, args)
+      |   ^
+/usr/include/math.h:297:15: note: expanded from macro '__MATHDECL_1_IMPL'
+  297 |   extern type __MATH_PRECNAME(function,suffix) args __THROW
+      |               ^
+/usr/include/math.h:326:34: note: expanded from macro '__MATH_PRECNAME'
+  326 | # define __MATH_PRECNAME(name,r) name##f##r
+      |                                  ^
+<scratch space>:273:1: note: expanded from here
+  273 | fminf
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/probes/image/jpeg_progressive_gpu.hip:140:12: error: use of undeclared identifier 'min'; did you mean 'fmin'?
+  140 |   int cx = min(chroma_width - 1, x * chroma_h_factor / max_h);
+      |            ^~~
+      |            fmin
+/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/clang/24/include/__clang_cuda_math_forward_declares.h:81:18: note: 'fmin' declared here
+   81 | __DEVICE__ float fmin(float, float);
+      |                  ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/probes/image/jpeg_progressive_gpu.hip:141:12: error: use of undeclared identifier 'min'; did you mean 'fmin'?
+  141 |   int cy = min(chroma_height - 1, y * chroma_v_factor / max_v);
+      |            ^~~
+      |            fmin
+/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/lib/clang/24/include/__clang_cuda_math_forward_declares.h:81:18: note: 'fmin' declared here
+   81 | __DEVICE__ float fmin(float, float);
+      |                  ^
+5 errors generated when compiling for gfx1201.
+failed to execute:/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib/llvm/bin/clang++  --offload-arch=gfx1201 --driver-mode=g++ --hip-link  --rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --rocm-device-lib-path=/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode -std=c++17 -O2 -D__HIP_PLATFORM_AMD__ -I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/cpu-codecs/include -x hip /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/probes/image/jpeg_progressive_gpu.hip -L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib -L/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/cpu-codecs/lib -Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib -Wl,-rpath,/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/cpu-codecs/lib -lamdhip64 -ljpeg -o "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I4/progressive-JPEG-HIP-IDCT-and-color-prototype/20261112T081403.990946Z-I4-rocm-build-140a92ff4d/progressive_gpu"

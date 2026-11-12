@@ -1,0 +1,2740 @@
+diff --git a/rocm/common/image/jpeg_decoder_v2.hpp b/rocm/common/image/jpeg_decoder_v2.hpp
+new file mode 100644
+index 000000000..e819c5210
+--- /dev/null
++++ b/rocm/common/image/jpeg_decoder_v2.hpp
+@@ -0,0 +1,100 @@
++// SPDX-License-Identifier: Apache-2.0
++#pragma once
++#ifdef __HIP_PLATFORM_AMD__
++#include <hip/hip_runtime.h>
++#else
++#include <cuda_runtime.h>
++#endif
++#include "batches_runtime.hpp"
++#include <jpeglib.h>
++#include <filesystem>
++#include <future>
++#include <sstream>
++#include <array>
++#include <memory>
++#include <atomic>
++#include <mutex>
++#include <map>
++#ifdef __HIP_PLATFORM_AMD__
++#include <rocjpeg/rocjpeg.h>
++#include "image/progressive_jpeg.hpp"
++#else
++#include <nvjpeg.h>
++#endif
++namespace migration_batch {
++namespace fs=std::filesystem;
++struct ImageError10:std::runtime_error{int code;ImageError10(int c,const std::string&s):std::runtime_error(s),code(c){}};
++inline void jpeg_error10(j_common_ptr c){char msg[JMSG_LENGTH_MAX];(*c->err->format_message)(c,msg);throw ImageError10(1,msg);}
++struct Header10{int w,h,components,cw,ch;bool progressive;};
++inline std::vector<unsigned char>read10(const fs::path&p){std::ifstream f(p,std::ios::binary);if(!f)throw ImageError10(1,"cannot open input "+p.string());return {(std::istreambuf_iterator<char>(f)),{}};}
++inline Header10 header10(const std::vector<unsigned char>&bytes){if(bytes.size()<4||bytes[0]!=255||bytes[1]!=216)throw ImageError10(1,"invalid JPEG stream");jpeg_decompress_struct j{};jpeg_error_mgr e;j.err=jpeg_std_error(&e);e.error_exit=jpeg_error10;jpeg_create_decompress(&j);jpeg_mem_src(&j,bytes.data(),bytes.size());jpeg_read_header(&j,TRUE);Header10 h{int(j.image_width),int(j.image_height),j.num_components,0,0,bool(j.progressive_mode)};if(h.components!=1&&h.components!=3){jpeg_destroy_decompress(&j);throw ImageError10(3,"JPEG color components unsupported");}h.cw=h.components==1?0:(h.w*j.comp_info[1].h_samp_factor+j.max_h_samp_factor-1)/j.max_h_samp_factor;h.ch=h.components==1?0:(h.h*j.comp_info[1].v_samp_factor+j.max_v_samp_factor-1)/j.max_v_samp_factor;jpeg_destroy_decompress(&j);return h;}
++struct Picture10{Header10 h;bool rgb,cpu=false,gpu_software=false;std::vector<std::unique_ptr<Buffer<unsigned char>>>planes;std::vector<std::vector<unsigned char>>host;std::vector<int>pitch;};
++inline Picture10 cpu_picture10(const std::vector<unsigned char>&bytes,bool rgb){Picture10 pic;pic.h=header10(bytes);pic.rgb=rgb;pic.cpu=true;jpeg_decompress_struct j{};jpeg_error_mgr e;j.err=jpeg_std_error(&e);e.error_exit=jpeg_error10;jpeg_create_decompress(&j);jpeg_mem_src(&j,bytes.data(),bytes.size());jpeg_read_header(&j,TRUE);j.out_color_space=rgb?JCS_RGB:(pic.h.components==1?JCS_GRAYSCALE:JCS_YCbCr);j.raw_data_out=rgb?FALSE:TRUE;jpeg_start_decompress(&j);
++ if(rgb){pic.host.emplace_back(size_t(pic.h.w)*pic.h.h*3);while(j.output_scanline<j.output_height){JSAMPROW row=pic.host[0].data()+size_t(j.output_scanline)*pic.h.w*3;jpeg_read_scanlines(&j,&row,1);}}
++ else{std::array<std::vector<unsigned char>,3>padded;std::array<std::vector<JSAMPROW>,3>rows;std::array<int,3>stride{};for(int c=0;c<pic.h.components;++c){stride[c]=j.comp_info[c].width_in_blocks*8;padded[c].resize(size_t(stride[c])*j.comp_info[c].height_in_blocks*8);rows[c].resize(j.comp_info[c].v_samp_factor*8);}while(j.output_scanline<j.output_height){JSAMPARRAY all[3]={};for(int c=0;c<pic.h.components;++c){int start=j.output_scanline*j.comp_info[c].v_samp_factor/j.max_v_samp_factor;for(size_t y=0;y<rows[c].size();++y)rows[c][y]=padded[c].data()+size_t(start+y)*stride[c];all[c]=rows[c].data();}jpeg_read_raw_data(&j,all,j.max_v_samp_factor*8);}for(int c=0;c<pic.h.components;++c){int w=c?pic.h.cw:pic.h.w,h=c?pic.h.ch:pic.h.h;pic.host.emplace_back(size_t(w)*h);for(int y=0;y<h;++y)std::copy_n(padded[c].data()+size_t(y)*stride[c],w,pic.host.back().data()+size_t(y)*w);}}
++ jpeg_finish_decompress(&j);jpeg_destroy_decompress(&j);for(auto&v:pic.host)pic.planes.emplace_back(new Buffer<unsigned char>(v));return pic;}
++__global__ void compact_pitch10(const unsigned char*src,unsigned char*dst,int width,int height,int pitch){int t=blockIdx.x*blockDim.x+threadIdx.x;if(t<width*height)dst[t]=src[(t/width)*pitch+t%width];}
++inline std::vector<Picture10>decode_batch10(const std::vector<fs::path>&paths,const std::string&format,const std::string&backend){bool rgb=format=="rgb"||format=="rgbi"||format=="bgr"||format=="bgri";std::vector<Picture10>pics;std::vector<std::vector<unsigned char>>streams;std::vector<int>native;
++ for(auto&p:paths){streams.push_back(read10(p));auto h=header10(streams.back());if(backend=="hardware"&&h.progressive)throw ImageError10(3,"hardware progressive JPEG unsupported");if((format=="nv12"&&(h.components!=3||h.cw!=(h.w+1)/2||h.ch!=(h.h+1)/2))||(format=="yuy2"&&(h.components!=3||h.cw!=(h.w+1)/2||h.ch!=h.h)))throw ImageError10(3,"incompatible output format/subsampling");
++#ifdef __HIP_PLATFORM_AMD__
++  if(h.progressive){auto decoded=progressive_gpu_decode(streams.back(),rgb);
++    Picture10 pic;pic.h=h;pic.rgb=rgb;pic.gpu_software=true;
++    for(const auto&pixels:decoded.pixels)pic.planes.emplace_back(new Buffer<unsigned char>(pixels));
++    pics.push_back(std::move(pic));continue;}
++#endif
++  Picture10 pic;pic.h=h;pic.rgb=rgb;for(int c=0;c<(rgb?1:h.components);++c){int width=rgb?h.w*3:c?h.cw:h.w,height=c?h.ch:h.h,pitch=(width+255)&~255;pic.pitch.push_back(pitch);pic.planes.emplace_back(new Buffer<unsigned char>(size_t(pitch)*((height+15)&~15)));}native.push_back(pics.size());pics.push_back(std::move(pic));}
++ if(native.empty())return pics;
++#ifdef __HIP_PLATFORM_AMD__
++ RocJpegHandle handle=nullptr;auto create=rocJpegCreate(ROCJPEG_BACKEND_HARDWARE,0,&handle);if(create)throw ImageError10(3,"rocJPEG hardware create status="+std::to_string(create));std::vector<RocJpegStreamHandle>handles(native.size());std::vector<RocJpegDecodeParams>params(native.size());std::vector<RocJpegImage>dest(native.size());
++ for(size_t j=0;j<native.size();++j){int i=native[j];auto&pic=pics[i];MB_CHECK(rocJpegStreamCreate(&handles[j]));// The decoder truncates subsampled chroma at odd logical dimensions. A padded SOF view keeps the same MCU grid; GPU compaction crops back to original geometry.
++int padded_w=pic.h.w,padded_h=pic.h.h;if(pic.h.components==3){if(pic.h.cw!=pic.h.w)padded_w=(pic.h.w+1)&~1;if(pic.h.ch!=pic.h.h)padded_h=(pic.h.h+1)&~1;}
++if(padded_w!=pic.h.w||padded_h!=pic.h.h){auto&bytes=streams[i];size_t position=2;while(position+9<bytes.size()){if(bytes[position]!=255)break;unsigned marker=bytes[position+1];size_t length=(size_t(bytes[position+2])<<8)|bytes[position+3];if(marker==0xc0||marker==0xc1){bytes[position+5]=padded_h>>8;bytes[position+6]=padded_h&255;bytes[position+7]=padded_w>>8;bytes[position+8]=padded_w&255;break;}if(length<2)break;position+=length+2;}}
++auto status=rocJpegStreamParse(streams[i].data(),streams[i].size(),handles[j]);if(status)throw ImageError10(3,"rocJPEG parser rejected JPEG status="+std::to_string(status));params[j].output_format=rgb?ROCJPEG_OUTPUT_RGB:ROCJPEG_OUTPUT_YUV_PLANAR;for(size_t c=0;c<pic.planes.size();++c){dest[j].channel[c]=pic.planes[c]->p;dest[j].pitch[c]=pic.pitch[c];}}
++ auto status=rocJpegDecodeBatched(handle,handles.data(),handles.size(),params.data(),dest.data());if(status)throw ImageError10(3,"rocJPEG decode status="+std::to_string(status));MB_CHECK(hipDeviceSynchronize());for(auto h:handles)rocJpegStreamDestroy(h);rocJpegDestroy(handle);
++#else
++ nvjpegHandle_t handle;nvjpegJpegState_t state;MB_CHECK(nvjpegCreateSimple(&handle));MB_CHECK(nvjpegJpegStateCreate(handle,&state));for(int i:native){auto&pic=pics[i];nvjpegImage_t dst{};for(size_t c=0;c<pic.planes.size();++c){dst.channel[c]=pic.planes[c]->p;dst.pitch[c]=pic.pitch[c];}MB_CHECK(nvjpegDecode(handle,state,streams[i].data(),streams[i].size(),rgb?NVJPEG_OUTPUT_RGBI:NVJPEG_OUTPUT_YUV,&dst,0));}MB_CHECK(cudaDeviceSynchronize());nvjpegJpegStateDestroy(state);nvjpegDestroy(handle);
++#endif
++ for(int i:native){auto&pic=pics[i];for(size_t c=0;c<pic.planes.size();++c){int width=rgb?pic.h.w*3:c?pic.h.cw:pic.h.w,height=c?pic.h.ch:pic.h.h;std::unique_ptr<Buffer<unsigned char>>out(new Buffer<unsigned char>(size_t(width)*height));compact_pitch10<<<(out->n+255)/256,256>>>(pic.planes[c]->p,out->p,width,height,pic.pitch[c]);MB_CHECK(MB_RT(DeviceSynchronize)());pic.planes[c]=std::move(out);}}return pics;}
++__device__ int min10(int a,int b){return a<b?a:b;}
++__device__ int max10(int a,int b){return a>b?a:b;}
++__device__ int floor10(float x){int v=int(x);return float(v)>x?v-1:v;}
++__device__ float sin10(float x){
++#ifdef __HIP_PLATFORM_AMD__
++return __builtin_sinf(x);
++#else
++return sinf(x);
++#endif
++}
++__device__ float sinc10(float x){return (x<0?-x:x)<1e-7f?1:sin10(3.14159265358979323846f*x)/(3.14159265358979323846f*x);}
++__global__ void lanczos10(const unsigned char*in,unsigned char*out,int sw,int sh,int dw,int dh){int t=blockIdx.x*blockDim.x+threadIdx.x;if(t>=dw*dh*3)return;int ch=t%3,x=t/3%dw,y=t/(3*dw);float sx=(x+.5f)*sw/dw-.5f,sy=(y+.5f)*sh/dh-.5f,sum=0,weight=0;int bx=floor10(sx),by=floor10(sy);for(int j=by-2;j<=by+3;++j)for(int i=bx-2;i<=bx+3;++i){float dx=sx-i,dy=sy-j,w=sinc10(dx)*sinc10(dx/3)*sinc10(dy)*sinc10(dy/3);int xx=max10(0,min10(sw-1,i)),yy=max10(0,min10(sh-1,j));sum+=w*in[(yy*sw+xx)*3+ch];weight+=w;}out[t]=(unsigned char)max10(0,min10(255,int(floor10(sum/weight+.5f))));}
++__global__ void watermark10(unsigned char*base,const unsigned char*wm,int count,int alpha){int t=blockIdx.x*blockDim.x+threadIdx.x;if(t<count)base[t]=min10(255,int(base[t])+int(wm[t])*alpha/255);}
++__global__ void plane_scale10(const unsigned char*src,unsigned char*dst,int w,int h,int scale,int channels){int dw=(w+scale-1)/scale,dh=(h+scale-1)/scale,t=blockIdx.x*blockDim.x+threadIdx.x;if(t>=dw*dh*channels)return;int c=t%channels,x=t/channels%dw,y=t/(channels*dw),sum=0,count=0;for(int j=0;j<scale&&y*scale+j<h;++j)for(int i=0;i<scale&&x*scale+i<w;++i){sum+=src[((y*scale+j)*w+x*scale+i)*channels+c];++count;}dst[t]=(sum+count/2)/count;}
++__global__ void crop_rgb10(const unsigned char*src,unsigned char*dst,int width,int x,int y,int rw,int rh){int t=blockIdx.x*blockDim.x+threadIdx.x;if(t<rw*rh*3){int c=t%3,px=t/3%rw,py=t/(rw*3);dst[t]=src[((py+y)*width+px+x)*3+c];}}
++__global__ void rgb_layout10(const unsigned char*src,unsigned char*dst,int pixels,bool planar,bool bgr){int t=blockIdx.x*blockDim.x+threadIdx.x;if(t>=pixels*3)return;int p=t/3,c=t%3;dst[planar?c*pixels+p:t]=src[p*3+(bgr?2-c:c)];}
++__global__ void yuv_pack10(const unsigned char*y,const unsigned char*u,const unsigned char*v,unsigned char*out,int w,int h,int cw,int ch,bool yuy2){int t=blockIdx.x*blockDim.x+threadIdx.x;int total=yuy2?4*cw*h:w*h+2*cw*ch;if(t>=total)return;if(!yuy2){if(t<w*h)out[t]=y[t];else{int k=t-w*h;out[t]=(k%2?v:u)[k/2];}}else{int row=t/(4*cw),p=t%(4*cw),x=p/4,component=p%4;if(component==1)out[t]=u[row*cw+x];else if(component==3)out[t]=v[row*cw+x];else{int xx=x*2+(component==2);out[t]=xx<w?y[row*w+xx]:0;}}}
++inline void bmp10(const fs::path&p,const std::vector<unsigned char>&rgb,int w,int h){int stride=(w*3+3)&~3;std::vector<unsigned char>v(54+size_t(stride)*h,0);auto put=[&](int at,uint32_t n){for(int j=0;j<4;++j)v[at+j]=n>>(8*j);};v[0]='B';v[1]='M';put(2,v.size());put(10,54);put(14,40);put(18,w);put(22,h);v[26]=1;v[28]=24;for(int y=0;y<h;++y)for(int x=0;x<w;++x)for(int c=0;c<3;++c)v[54+(h-1-y)*stride+x*3+c]=rgb[(y*w+x)*3+2-c];std::ofstream f(p,std::ios::binary);f.write((char*)v.data(),v.size());if(!f)throw ImageError10(1,"BMP output write");}
++inline void encode10(const fs::path&p,const std::vector<unsigned char>&rgb,int w,int h,int quality){FILE*f=fopen(p.c_str(),"wb");if(!f)throw ImageError10(1,"JPEG output open");jpeg_compress_struct j{};jpeg_error_mgr e;j.err=jpeg_std_error(&e);e.error_exit=jpeg_error10;jpeg_create_compress(&j);jpeg_stdio_dest(&j,f);j.image_width=w;j.image_height=h;j.input_components=3;j.in_color_space=JCS_RGB;jpeg_set_defaults(&j);jpeg_set_quality(&j,quality,TRUE);jpeg_start_compress(&j,TRUE);while(j.next_scanline<j.image_height){JSAMPROW row=const_cast<unsigned char*>(rgb.data()+size_t(j.next_scanline)*w*3);jpeg_write_scanlines(&j,&row,1);}jpeg_finish_compress(&j);jpeg_destroy_compress(&j);fclose(f);}
++struct Options10{std::string input,output,reference,format="rgbi",backend="default",watermark;int scale=1,total=-1,batch=1,warmup=0,threads=1,rw=0,rh=0,quality=85,alpha=50;std::array<int,4>roi{0,0,0,0};bool raw=false,pipeline=false;};
++inline int number10(const std::string&s,int minimum,int maximum){size_t p=0;long long v;try{v=std::stoll(s,&p);}catch(...){throw ImageError10(2,"invalid numeric argument");}if(p!=s.size()||v<minimum||v>maximum)throw ImageError10(2,"numeric argument out of range");return v;}
++inline std::vector<fs::path>files10(const fs::path&p){std::vector<fs::path>v;if(fs::is_regular_file(p))v.push_back(p);else if(fs::is_directory(p)){for(auto&e:fs::recursive_directory_iterator(p)){auto ext=e.path().extension().string();std::transform(ext.begin(),ext.end(),ext.begin(),::tolower);if(e.is_regular_file()&&(ext==".jpg"||ext==".jpeg"))v.push_back(e.path());}}else throw ImageError10(1,"input does not exist");std::sort(v.begin(),v.end());if(v.empty())throw ImageError10(1,"input has no JPEG images");return v;}
++inline int image10_main(const std::string&kind,int argc,const char**argv){try{Options10 o;bool post=kind=="Image-Resize"||kind=="Image-Resize-WaterMark";for(int i=1;i<argc;++i){std::string key=argv[i];if(key=="-h"||key=="--help"){std::cout<<"Usage: decoder -i PATH [-backend default|hardware] [-fmt rgb|rgbi|bgr|bgri|yuv|y|unchanged|nv12|yuy2] [-scale 1|2|4|8] [-b N] [-t N] [-w N] [-o PATH] [-raw] [-reference PATH] [-roi x,y,w,h] [-rw W -rh H] [-j instances]"<<std::endl;return 0;}if(key=="-raw"){o.raw=true;continue;}if(key=="-pipelined")throw ImageError10(3,"decoupled decoder pipeline is outside this adapter");if(key=="-batched"){o.pipeline=true;continue;}if(i+1>=argc)throw ImageError10(2,"missing argument");std::string value=argv[++i];if(key=="-i")o.input=value;else if(key=="-o")o.output=value;else if(key=="-reference")o.reference=value;else if(key=="-fmt"){o.format=value;o.raw=true;}else if(key=="-backend"){o.backend=value=="0"?"default":value=="1"?"hybrid":value=="2"?"gpu-hybrid":value;}else if(key=="-scale")o.scale=number10(value,1,8);else if(key=="-t")o.total=number10(value,1,100000000);else if(key=="-b")o.batch=number10(value,1,1024);else if(key=="-w")o.warmup=number10(value,0,10000);else if(key=="-device"){if(number10(value,0,100)!=0)throw ImageError10(2,"only selected logical device0 is exposed");}else if(key=="-j"||key=="-threads")o.threads=number10(value,1,16);else if(key=="-rw")o.rw=number10(value,1,16384);else if(key=="-rh")o.rh=number10(value,1,16384);else if(key=="-q")o.quality=number10(value,1,100);else if(key=="-alpha")o.alpha=number10(value,0,255);else if(key=="-watermark")o.watermark=value;else if(key=="-roi"){for(char&c:value)if(c==','||c=='['||c==']')c=' ';std::istringstream s(value);for(int&v:o.roi)if(!(s>>v))throw ImageError10(2,"ROI requires x,y,width,height");}else throw ImageError10(2,"unknown argument "+key);}
++ if(o.backend=="hybrid"||o.backend=="gpu-hybrid")throw ImageError10(3,"requested native hybrid backend is unavailable in this adapter");if(o.input.empty()||!(o.scale==1||o.scale==2||o.scale==4||o.scale==8)||!(o.backend=="hardware"||o.backend=="default"||o.backend=="hybrid"))throw ImageError10(2,"invalid CLI configuration");std::vector<std::string>formats={"rgb","rgbi","bgr","bgri","yuv","y","unchanged","nv12","yuy2"};if(std::find(formats.begin(),formats.end(),o.format)==formats.end())throw ImageError10(2,"unknown format");if((o.roi[2]||o.roi[3])&&!post&&!(o.format=="rgb"||o.format=="rgbi"||o.format=="bgr"||o.format=="bgri"))throw ImageError10(3,"ROI currently requires RGB/BGR output");auto files=files10(o.input);int total=o.total<0?files.size():o.total;if(!o.output.empty())fs::create_directories(o.output);std::atomic<int>cpu_count{0},hardware_count{0},software_gpu_count{0},decoded_count{0};int batch_calls=0;std::mutex output_lock;auto process=[&](const std::vector<fs::path>&paths,bool warmup){MB_CHECK(MB_RT(SetDevice)(0));auto pics=decode_batch10(paths,post?"rgbi":o.format,o.backend);
++  for(size_t item=0;item<pics.size();++item){auto&pic=pics[item];auto h=pic.h;int w=(h.w+o.scale-1)/o.scale,he=(h.h+o.scale-1)/o.scale,cw=(h.cw+o.scale-1)/o.scale,ch=(h.ch+o.scale-1)/o.scale;std::vector<std::unique_ptr<Buffer<unsigned char>>>scaled;
++   for(size_t c=0;c<pic.planes.size();++c){int sw=c?h.cw:h.w,sh=c?h.ch:h.h,channels=pic.rgb?3:1;scaled.emplace_back(new Buffer<unsigned char>(size_t((sw+o.scale-1)/o.scale)*((sh+o.scale-1)/o.scale)*channels));plane_scale10<<<(scaled.back()->n+255)/256,256>>>(pic.planes[c]->p,scaled.back()->p,sw,sh,o.scale,channels);}
++   std::vector<unsigned char>data,preprocess,watermark_pixels;int pre_w=0,pre_h=0,wm_w=0,wm_h=0;std::unique_ptr<Buffer<unsigned char>>final;
++   if(pic.rgb){int x=o.roi[0],y=o.roi[1],rw=o.roi[2],rh=o.roi[3];if(rw||rh){if(x<0||y<0||rw<=0||rh<=0||x+rw>w||y+rh>he)throw ImageError10(2,"ROI outside image");std::unique_ptr<Buffer<unsigned char>>crop(new Buffer<unsigned char>(size_t(rw)*rh*3));crop_rgb10<<<(crop->n+255)/256,256>>>(scaled[0]->p,crop->p,w,x,y,rw,rh);MB_CHECK(MB_RT(DeviceSynchronize)());scaled[0]=std::move(crop);w=rw;he=rh;}
++    if(post){if(!warmup&&!o.output.empty()){preprocess=scaled[0]->get();pre_w=w;pre_h=he;}int dw=o.rw?o.rw:std::max(1,w/2),dh=o.rh?o.rh:std::max(1,he/2);final.reset(new Buffer<unsigned char>(size_t(dw)*dh*3));lanczos10<<<(final->n+255)/256,256>>>(scaled[0]->p,final->p,w,he,dw,dh);w=dw;he=dh;if(kind=="Image-Resize-WaterMark"){auto wm=o.watermark.empty()?fs::path("nvJPEG/Image-Resize-WaterMark/NVLogo.jpg"):fs::path(o.watermark);auto water=decode_batch10({wm},"rgbi",o.backend);if(!warmup&&!o.output.empty()){watermark_pixels=water[0].planes[0]->get();wm_w=water[0].h.w;wm_h=water[0].h.h;}Buffer<unsigned char>resized(size_t(w)*he*3);lanczos10<<<(resized.n+255)/256,256>>>(water[0].planes[0]->p,resized.p,water[0].h.w,water[0].h.h,w,he);watermark10<<<(final->n+255)/256,256>>>(final->p,resized.p,final->n,o.alpha);MB_CHECK(MB_RT(DeviceSynchronize)());}}
++    else{final.reset(new Buffer<unsigned char>(size_t(w)*he*3));rgb_layout10<<<(final->n+255)/256,256>>>(scaled[0]->p,final->p,w*he,o.format=="rgb"||o.format=="bgr",o.format=="bgr"||o.format=="bgri");}data=final->get();
++   }else if(o.format=="nv12"||o.format=="yuy2"){size_t n=o.format=="nv12"?size_t(w)*he+2*size_t(cw)*ch:4*size_t(cw)*he;final.reset(new Buffer<unsigned char>(n));yuv_pack10<<<(n+255)/256,256>>>(scaled[0]->p,scaled[1]->p,scaled[2]->p,final->p,w,he,cw,ch,o.format=="yuy2");data=final->get();}else{for(size_t c=0;c<scaled.size();++c){if(c&&o.format=="y")break;auto plane=scaled[c]->get();data.insert(data.end(),plane.begin(),plane.end());}}
++   MB_CHECK(MB_RT(GetLastError)());MB_CHECK(MB_RT(DeviceSynchronize)());if(warmup)continue;std::lock_guard<std::mutex>lock(output_lock);fs::path relative=fs::is_directory(o.input)?fs::relative(paths[item],o.input):paths[item].filename();std::string name=relative.string()+"."+o.format+".s"+std::to_string(o.scale)+".raw";
++   if(!o.reference.empty()){auto file=fs::path(o.reference)/name;if(!fs::is_regular_file(file))throw ImageError10(1,"missing golden");auto golden=read10(file);if(golden!=data){size_t at=0;while(at<std::min(golden.size(),data.size())&&golden[at]==data[at])++at;throw ImageError10(4,"golden pixel mismatch at="+std::to_string(at)+" expected="+std::to_string(at<golden.size()?golden[at]:-1)+" actual="+std::to_string(at<data.size()?data[at]:-1)+" expected_bytes="+std::to_string(golden.size())+" actual_bytes="+std::to_string(data.size()));}}
++   if(!o.output.empty()){auto raw=fs::path(o.output)/name;fs::create_directories(raw.parent_path());if(o.raw||post){std::ofstream f(raw,std::ios::binary);f.write((char*)data.data(),data.size());if(!f)throw ImageError10(1,"raw output write");}if(post){auto file=fs::path(o.output)/relative;file.replace_extension(".jpg");encode10(file,data,w,he,o.quality);}else if(!o.raw){auto file=fs::path(o.output)/relative;file.replace_extension(".bmp");bmp10(file,data,w,he);}if(post){std::ofstream input(raw.string()+".pre.bin",std::ios::binary);input.write((char*)preprocess.data(),preprocess.size());if(!watermark_pixels.empty()){std::ofstream wm(raw.string()+".watermark.bin",std::ios::binary);wm.write((char*)watermark_pixels.data(),watermark_pixels.size());}}auto meta=raw;meta+=".json";std::ofstream f(meta);f<<"{\"source\":\""<<paths[item].string()<<"\",\"width\":"<<w<<",\"height\":"<<he<<",\"chroma_width\":"<<cw<<",\"chroma_height\":"<<ch<<",\"components\":"<<h.components<<",\"format\":\""<<o.format<<"\",\"scale\":"<<o.scale<<",\"cpu_fallback\":"<<pic.cpu<<",\"gpu_software_decode\":"<<pic.gpu_software<<",\"postprocess\":"<<post<<",\"watermark\":"<<(kind=="Image-Resize-WaterMark")<<",\"alpha\":"<<o.alpha<<",\"pre_width\":"<<pre_w<<",\"pre_height\":"<<pre_h<<",\"watermark_width\":"<<wm_w<<",\"watermark_height\":"<<wm_h<<"}";}
++   if(pic.cpu)++cpu_count;else if(pic.gpu_software)++software_gpu_count;else ++hardware_count;++decoded_count;
++  }
++ };
++ for(int warm=0;warm<o.warmup;++warm){std::vector<fs::path>paths;for(int i=0;i<o.batch;++i)paths.push_back(files[i%files.size()]);process(paths,true);}
++ // Independent decoder handles run in distinct host threads for multi-instance mode.
++ for(int first=0;first<total;first+=o.batch*o.threads){std::vector<std::future<void>>jobs;for(int thread=0;thread<o.threads&&first+thread*o.batch<total;++thread){int begin=first+thread*o.batch;std::vector<fs::path>paths;for(int i=begin;i<std::min(total,begin+o.batch);++i)paths.push_back(files[i%files.size()]);++batch_calls;if(o.threads>1)jobs.push_back(std::async(std::launch::async,[&,paths]{process(paths,false);}));else process(paths,false);}for(auto&job:jobs)job.get();}
++ std::cout<<"RESULT status=PASS decoded="<<decoded_count<<" hardware="<<hardware_count<<" gpu_software="<<software_gpu_count<<" cpu_fallback="<<cpu_count<<" batch_calls="<<batch_calls<<" instances="<<o.threads<<std::endl;return 0;
++ }catch(const ImageError10&e){std::cerr<<"RESULT status=FAIL reason="<<e.what()<<std::endl;return e.code;}catch(const std::exception&e){std::cerr<<"RESULT status=FAIL reason="<<e.what()<<std::endl;return 1;}}
++}
+diff --git a/rocm/common/image/progressive_jpeg.hpp b/rocm/common/image/progressive_jpeg.hpp
+new file mode 100644
+index 000000000..76cebfaa7
+--- /dev/null
++++ b/rocm/common/image/progressive_jpeg.hpp
+@@ -0,0 +1,217 @@
++// SPDX-License-Identifier: Apache-2.0
++// CPU progressive entropy/coefficient assembly, AMD GPU pixel synthesis.
++#pragma once
++#include <hip/hip_runtime.h>
++#include <jpeglib.h>
++#include <algorithm>
++#include <cmath>
++#include <cstdint>
++#include <fstream>
++#include <iostream>
++#include <iterator>
++#include <stdexcept>
++#include <string>
++#include <vector>
++
++static void checked(hipError_t result, const char* operation) {
++  if (result != hipSuccess)
++    throw std::runtime_error(std::string(operation) + ": " + hipGetErrorString(result));
++}
++static std::vector<unsigned char> read_file(const char* path) {
++  std::ifstream stream(path, std::ios::binary);
++  if (!stream) throw std::runtime_error(std::string("cannot open ") + path);
++  return {std::istreambuf_iterator<char>(stream), {}};
++}
++static void write_file(const char* path, const std::vector<unsigned char>& bytes) {
++  std::ofstream stream(path, std::ios::binary);
++  stream.write(reinterpret_cast<const char*>(bytes.data()), bytes.size());
++  if (!stream) throw std::runtime_error(std::string("cannot write ") + path);
++}
++
++struct Coefficients {
++  int width = 0, height = 0, blocks_x = 0, h_factor = 0, v_factor = 0;
++  std::vector<int16_t> data;
++  std::vector<uint16_t> quant;
++};
++struct Picture {
++  int width = 0, height = 0, max_h = 0, max_v = 0;
++  std::vector<Coefficients> components;
++};
++
++static Picture extract(const std::vector<unsigned char>& input) {
++  jpeg_decompress_struct decoder{};
++  jpeg_error_mgr errors{};
++  decoder.err = jpeg_std_error(&errors);
++  jpeg_create_decompress(&decoder);
++  jpeg_mem_src(&decoder, input.data(), input.size());
++  jpeg_read_header(&decoder, TRUE);
++  if (!decoder.progressive_mode || decoder.num_components != 3 ||
++      decoder.jpeg_color_space != JCS_YCbCr)
++    throw std::runtime_error("expected progressive three-component YCbCr JPEG");
++  Picture picture;
++  picture.width = decoder.image_width;
++  picture.height = decoder.image_height;
++  picture.max_h = decoder.max_h_samp_factor;
++  picture.max_v = decoder.max_v_samp_factor;
++  jvirt_barray_ptr* arrays = jpeg_read_coefficients(&decoder);
++  for (int component = 0; component < 3; ++component) {
++    jpeg_component_info& info = decoder.comp_info[component];
++    Coefficients current;
++    current.width = info.downsampled_width;
++    current.height = info.downsampled_height;
++    current.blocks_x = info.width_in_blocks;
++    current.h_factor = info.h_samp_factor;
++    current.v_factor = info.v_samp_factor;
++    current.data.resize(size_t(info.width_in_blocks) * info.height_in_blocks * 64);
++    for (JDIMENSION row = 0; row < info.height_in_blocks; ++row) {
++      JBLOCKARRAY blocks = decoder.mem->access_virt_barray(
++          reinterpret_cast<j_common_ptr>(&decoder), arrays[component], row, 1, FALSE);
++      for (JDIMENSION column = 0; column < info.width_in_blocks; ++column) {
++        std::copy_n(blocks[0][column], 64,
++                    current.data.begin() + (size_t(row) * info.width_in_blocks + column) * 64);
++      }
++    }
++    auto* quant = decoder.quant_tbl_ptrs[info.quant_tbl_no];
++    if (!quant) throw std::runtime_error("missing quantization table");
++    current.quant.assign(quant->quantval, quant->quantval + 64);
++    picture.components.push_back(std::move(current));
++  }
++  jpeg_finish_decompress(&decoder);
++  jpeg_destroy_decompress(&decoder);
++  return picture;
++}
++
++static std::vector<unsigned char> cpu_reference(const std::vector<unsigned char>& input,
++                                                  int width, int height) {
++  jpeg_decompress_struct decoder{};
++  jpeg_error_mgr errors{};
++  decoder.err = jpeg_std_error(&errors);
++  jpeg_create_decompress(&decoder);
++  jpeg_mem_src(&decoder, input.data(), input.size());
++  jpeg_read_header(&decoder, TRUE);
++  decoder.out_color_space = JCS_RGB;
++  decoder.do_fancy_upsampling = FALSE;
++  decoder.dct_method = JDCT_ISLOW;
++  jpeg_start_decompress(&decoder);
++  if (int(decoder.output_width) != width || int(decoder.output_height) != height ||
++      decoder.output_components != 3)
++    throw std::runtime_error("CPU reference dimensions differ");
++  std::vector<unsigned char> output(size_t(width) * height * 3);
++  while (decoder.output_scanline < decoder.output_height) {
++    JSAMPROW row = output.data() + size_t(decoder.output_scanline) * width * 3;
++    jpeg_read_scanlines(&decoder, &row, 1);
++  }
++  jpeg_finish_decompress(&decoder);
++  jpeg_destroy_decompress(&decoder);
++  return output;
++}
++
++__device__ static uint8_t clamp_byte(float value) {
++  int rounded = __float2int_rn(value);
++  return static_cast<uint8_t>(rounded < 0 ? 0 : rounded > 255 ? 255 : rounded);
++}
++__global__ static void inverse_dct(const int16_t* coefficients, const uint16_t* quant,
++                                   const float* cosine, uint8_t* pixels,
++                                   int width, int height, int blocks_x) {
++  int index = blockIdx.x * blockDim.x + threadIdx.x;
++  if (index >= width * height) return;
++  int x = index % width, y = index / width;
++  const int16_t* block = coefficients + (size_t(y / 8) * blocks_x + x / 8) * 64;
++  int local_x = x & 7, local_y = y & 7;
++  float sum = 0.0f;
++  for (int v = 0; v < 8; ++v) {
++    float cv = v ? 1.0f : 0.7071067811865475f;
++    float row_sum = 0.0f;
++    for (int u = 0; u < 8; ++u) {
++      float cu = u ? 1.0f : 0.7071067811865475f;
++      int k = v * 8 + u;
++      row_sum += cu * float(block[k]) * float(quant[k]) * cosine[local_x * 8 + u];
++    }
++    sum += cv * row_sum * cosine[local_y * 8 + v];
++  }
++  pixels[index] = clamp_byte(sum * 0.25f + 128.0f);
++}
++__global__ static void convert_rgb(const uint8_t* y_plane, const uint8_t* cb_plane,
++                                   const uint8_t* cr_plane, uint8_t* rgb,
++                                   int width, int height, int chroma_width, int chroma_height,
++                                   int chroma_h_factor, int chroma_v_factor,
++                                   int max_h, int max_v) {
++  int index = blockIdx.x * blockDim.x + threadIdx.x;
++  if (index >= width * height) return;
++  int x = index % width, y = index / width;
++  int cx = x * chroma_h_factor / max_h;
++  int cy = y * chroma_v_factor / max_v;
++  if (cx >= chroma_width) cx = chroma_width - 1;
++  if (cy >= chroma_height) cy = chroma_height - 1;
++  int chroma_index = cy * chroma_width + cx;
++  float luma = y_plane[index];
++  float cb = float(cb_plane[chroma_index]) - 128.0f;
++  float cr = float(cr_plane[chroma_index]) - 128.0f;
++  rgb[3 * index] = clamp_byte(luma + 1.40200f * cr);
++  rgb[3 * index + 1] = clamp_byte(luma - 0.344136f * cb - 0.714136f * cr);
++  rgb[3 * index + 2] = clamp_byte(luma + 1.77200f * cb);
++}
++
++struct ProgressiveGpuResult {
++  Picture picture;
++  std::vector<std::vector<unsigned char>> pixels;
++};
++
++static ProgressiveGpuResult progressive_gpu_decode(const std::vector<unsigned char>& input,
++                                                    bool rgb_output) {
++  ProgressiveGpuResult result;
++  result.picture = extract(input);
++  auto& picture = result.picture;
++  std::vector<void*> allocations;
++  auto allocate = [&](size_t bytes) {
++    void* pointer = nullptr;
++    checked(hipMalloc(&pointer, bytes), "allocate progressive GPU buffer");
++    allocations.push_back(pointer);
++    return pointer;
++  };
++  float cosine[64];
++  for (int x = 0; x < 8; ++x)
++    for (int u = 0; u < 8; ++u)
++      cosine[x * 8 + u] = std::cos(float((2 * x + 1) * u) * 3.14159265358979323846f / 16.0f);
++  auto* device_cos = static_cast<float*>(allocate(sizeof(cosine)));
++  checked(hipMemcpy(device_cos, cosine, sizeof(cosine), hipMemcpyHostToDevice), "copy cosine");
++  uint8_t* planes[3];
++  for (int channel = 0; channel < 3; ++channel) {
++    auto& component = picture.components[channel];
++    auto* coefficients = static_cast<int16_t*>(allocate(component.data.size() * sizeof(int16_t)));
++    auto* quantization = static_cast<uint16_t*>(allocate(64 * sizeof(uint16_t)));
++    size_t pixels = size_t(component.width) * component.height;
++    planes[channel] = static_cast<uint8_t*>(allocate(pixels));
++    checked(hipMemcpy(coefficients, component.data.data(),
++      component.data.size() * sizeof(int16_t), hipMemcpyHostToDevice), "copy coefficients");
++    checked(hipMemcpy(quantization, component.quant.data(),
++      64 * sizeof(uint16_t), hipMemcpyHostToDevice), "copy quantization");
++    inverse_dct<<<(pixels + 255) / 256, 256>>>(coefficients, quantization,
++      device_cos, planes[channel], component.width, component.height, component.blocks_x);
++    checked(hipGetLastError(), "launch progressive GPU IDCT");
++  }
++  if (rgb_output) {
++    int pixels = picture.width * picture.height;
++    auto* packed = static_cast<uint8_t*>(allocate(size_t(pixels) * 3));
++    auto& cb = picture.components[1];
++    convert_rgb<<<(pixels + 255) / 256, 256>>>(planes[0], planes[1], planes[2], packed,
++      picture.width, picture.height, cb.width, cb.height,
++      cb.h_factor, cb.v_factor, picture.max_h, picture.max_v);
++    checked(hipGetLastError(), "launch progressive GPU RGB");
++    checked(hipDeviceSynchronize(), "synchronize progressive GPU RGB");
++    result.pixels.emplace_back(size_t(pixels) * 3);
++    checked(hipMemcpy(result.pixels.back().data(), packed, result.pixels.back().size(),
++                      hipMemcpyDeviceToHost), "copy progressive RGB pixels");
++  } else {
++    checked(hipDeviceSynchronize(), "synchronize progressive GPU YUV");
++    for (int channel = 0; channel < 3; ++channel) {
++      size_t pixels = size_t(picture.components[channel].width) *
++                      picture.components[channel].height;
++      result.pixels.emplace_back(pixels);
++      checked(hipMemcpy(result.pixels.back().data(), planes[channel], pixels,
++                        hipMemcpyDeviceToHost), "copy progressive component pixels");
++    }
++  }
++  for (auto* pointer : allocations) checked(hipFree(pointer), "release progressive GPU buffer");
++  return result;
++}
+diff --git a/rocm/common/image/watershed.h b/rocm/common/image/watershed.h
+new file mode 100644
+index 000000000..62bd70699
+--- /dev/null
++++ b/rocm/common/image/watershed.h
+@@ -0,0 +1,16 @@
++// SPDX-License-Identifier: Apache-2.0
++#pragma once
++#include <hip/hip_runtime_api.h>
++#include <stdint.h>
++#ifdef __cplusplus
++extern "C" {
++#endif
++// All image pointers refer to contiguous width*height device storage.
++// Null optional outputs skip that product. At least segments and labels are required.
++// This call synchronizes stream before releasing its private GPU workspace.
++hipError_t rocm_image_watershed8(const uint8_t*input,uint8_t*segments,
++    uint32_t*labels,uint32_t*compact,uint8_t*boundaries,uint8_t*contrast,
++    int width,int height,hipStream_t stream);
++#ifdef __cplusplus
++}
++#endif
+diff --git a/rocm/common/image/watershed.hip b/rocm/common/image/watershed.hip
+new file mode 100644
+index 000000000..20b4ce1db
+--- /dev/null
++++ b/rocm/common/image/watershed.hip
+@@ -0,0 +1,90 @@
++// SPDX-License-Identifier: Apache-2.0
++#include "watershed.h"
++#include <hip/hip_runtime.h>
++#include <limits.h>
++
++namespace {
++constexpr int B=256;
++__global__ void select_parent(const uint8_t*image,uint32_t*parent,int w,int h){
++ int i=blockIdx.x*blockDim.x+threadIdx.x,n=w*h;if(i>=n)return;
++ int x=i%w,y=i/w;unsigned char value=image[i];uint32_t best=i;
++ for(int dy=-1;dy<=1;++dy){int yy=y+dy;if(yy<0||yy>=h)continue;
++  for(int dx=-1;dx<=1;++dx){int xx=x+dx;if(xx<0||xx>=w)continue;
++   int j=yy*w+xx;unsigned char v=image[j];
++   if(v<value||(v==value&&uint32_t(j)<best)){value=v;best=j;}
++  }
++ }
++ parent[i]=best;
++}
++__global__ void jump(const uint32_t*parent,uint32_t*next,int n){
++ int i=blockIdx.x*blockDim.x+threadIdx.x;if(i<n)next[i]=parent[parent[i]];
++}
++__global__ void render(const uint8_t*image,const uint32_t*roots,uint8_t*segments,
++ uint32_t*labels,uint8_t*boundaries,uint8_t*contrast,int w,int h){
++ int i=blockIdx.x*blockDim.x+threadIdx.x,n=w*h;if(i>=n)return;
++ uint32_t root=roots[i];uint8_t value=image[root];segments[i]=value;labels[i]=root;
++ if(!boundaries&&!contrast)return;
++ int x=i%w,y=i/w;bool edge=false;
++ for(int dy=-1;dy<=1&&!edge;++dy){int yy=y+dy;if(yy<0||yy>=h)continue;
++  for(int dx=-1;dx<=1;++dx){int xx=x+dx;if(xx<0||xx>=w)continue;
++   if(roots[yy*w+xx]!=root){edge=true;break;}
++  }
++ }
++ if(boundaries)boundaries[i]=edge?0:255;
++ if(contrast)contrast[i]=edge?255:value;
++}
++__global__ void mark_roots(const uint32_t*roots,uint32_t*flags,int n){
++ int i=blockIdx.x*blockDim.x+threadIdx.x;if(i<n)flags[i]=roots[i]==uint32_t(i);
++}
++__global__ void block_scan(const uint32_t*flags,uint32_t*prefix,uint32_t*sums,int n){
++ __shared__ uint32_t values[B];int t=threadIdx.x,i=blockIdx.x*B+t;
++ values[t]=i<n?flags[i]:0;__syncthreads();
++ for(int delta=1;delta<B;delta*=2){uint32_t add=t>=delta?values[t-delta]:0;
++  __syncthreads();values[t]+=add;__syncthreads();}
++ if(i<n)prefix[i]=values[t];if(t==B-1)sums[blockIdx.x]=values[t];
++}
++__global__ void scan_sums(uint32_t*sums,int blocks){
++ if(blockIdx.x||threadIdx.x)return;uint32_t offset=0;
++ for(int i=0;i<blocks;++i){uint32_t v=sums[i];sums[i]=offset;offset+=v;}
++}
++__global__ void compact_roots(const uint32_t*roots,const uint32_t*prefix,
++ const uint32_t*offsets,uint32_t*compact,int n){
++ int i=blockIdx.x*blockDim.x+threadIdx.x;if(i>=n)return;
++ uint32_t root=roots[i];compact[i]=offsets[root/B]+prefix[root]-1;
++}
++}
++
++extern "C" hipError_t rocm_image_watershed8(const uint8_t*input,uint8_t*segments,
++ uint32_t*labels,uint32_t*compact,uint8_t*boundaries,uint8_t*contrast,
++ int width,int height,hipStream_t stream){
++ if(!input||!segments||!labels||width<=0||height<=0||
++    width>INT_MAX/height)return hipErrorInvalidValue;
++ const int n=width*height,blocks=(n+B-1)/B;
++ uint32_t *a=nullptr,*b=nullptr,*flags=nullptr,*prefix=nullptr,*sums=nullptr;
++ auto release=[&](){hipFree(a);hipFree(b);hipFree(flags);hipFree(prefix);hipFree(sums);};
++ hipError_t err=hipMalloc((void**)&a,size_t(n)*4);
++ if(err==hipSuccess)err=hipMalloc((void**)&b,size_t(n)*4);
++ if(err==hipSuccess&&compact)err=hipMalloc((void**)&flags,size_t(n)*4);
++ if(err==hipSuccess&&compact)err=hipMalloc((void**)&prefix,size_t(n)*4);
++ if(err==hipSuccess&&compact)err=hipMalloc((void**)&sums,size_t(blocks)*4);
++ if(err!=hipSuccess){release();return err;}
++ hipGetLastError();
++ select_parent<<<blocks,B,0,stream>>>(input,a,width,height);
++ err=hipGetLastError();
++ if(err==hipSuccess){
++  for(unsigned span=1;span<unsigned(n);span*=2){
++   jump<<<blocks,B,0,stream>>>(a,b,n);err=hipGetLastError();if(err!=hipSuccess)break;
++   uint32_t*tmp=a;a=b;b=tmp;
++  }
++ }
++ if(err==hipSuccess){render<<<blocks,B,0,stream>>>(input,a,segments,labels,boundaries,contrast,width,height);
++  err=hipGetLastError();}
++ if(err==hipSuccess&&compact){
++  mark_roots<<<blocks,B,0,stream>>>(a,flags,n);err=hipGetLastError();
++  if(err==hipSuccess){block_scan<<<blocks,B,0,stream>>>(flags,prefix,sums,n);err=hipGetLastError();}
++  if(err==hipSuccess){scan_sums<<<1,1,0,stream>>>(sums,blocks);err=hipGetLastError();}
++  if(err==hipSuccess){compact_roots<<<blocks,B,0,stream>>>(a,prefix,sums,compact,n);err=hipGetLastError();}
++ }
++ if(err==hipSuccess)err=hipStreamSynchronize(stream);
++ release();return err;
++}
+diff --git a/rocm/common/image/watershed_sample.hpp b/rocm/common/image/watershed_sample.hpp
+new file mode 100644
+index 000000000..e136c4e15
+--- /dev/null
++++ b/rocm/common/image/watershed_sample.hpp
+@@ -0,0 +1,87 @@
++// SPDX-License-Identifier: Apache-2.0
++#pragma once
++#include "watershed.h"
++#include <hip/hip_runtime.h>
++#include <array>
++#include <cstdio>
++#include <iostream>
++#include <string>
++#include <vector>
++
++namespace rocm_watershed_sample {
++struct Image {const char*input;int width,height;const char*prefix;};
++constexpr std::array<Image,5> npp_images{{
++ {"Lena_512x512_8u_Gray.raw",512,512,"Lena"},
++ {"CT_skull_512x512_8u_Gray.raw",512,512,"CT_skull"},
++ {"Rocks_512x512_8u_Gray.raw",512,512,"Rocks"},
++ {"coins_500x383_8u_Gray.raw",500,383,"coins"},
++ {"coins_overlay_500x569_8u_Gray.raw",500,569,"coins_overlay"}}};
++constexpr std::array<Image,3> plus_images{{
++ {"CT_skull_512x512_8u_Gray.raw",512,512,"CT_skull"},
++ {"Rocks_512x512_8u_Gray.raw",512,512,"Rocks"},
++ {"Corn_614x461_8u_Gray.raw",614,461,"Corn"}}};
++struct Device {
++ uint8_t *input=nullptr,*segments=nullptr,*boundaries=nullptr,*contrast=nullptr;
++ uint32_t *labels=nullptr,*compact=nullptr;
++ ~Device(){hipFree(input);hipFree(segments);hipFree(boundaries);hipFree(contrast);
++   hipFree(labels);hipFree(compact);}
++};
++inline bool save(const std::string&path,const void*data,size_t bytes){
++ FILE*f=std::fopen(path.c_str(),"wb");if(!f)return false;
++ bool ok=std::fwrite(data,1,bytes,f)==bytes;ok=std::fclose(f)==0&&ok;return ok;
++}
++inline bool load(const std::string&path,void*data,size_t bytes){
++ FILE*f=std::fopen(path.c_str(),"rb");if(!f)return false;
++ bool ok=std::fread(data,1,bytes,f)==bytes;std::fclose(f);return ok;
++}
++inline bool check(hipError_t code,const char*phase){
++ if(code==hipSuccess)return true;
++ std::cerr<<phase<<": "<<hipGetErrorString(code)<<"\n";return false;
++}
++inline bool process(const Image&image,bool plus,hipStream_t stream){
++ const std::string base="../images/";size_t n=size_t(image.width)*image.height;
++ std::vector<uint8_t> input(n),segments(n),boundaries(plus?n:0),contrast(plus?n:0);
++ std::vector<uint32_t> labels(n),compact(plus?n:0);
++ if(!load(base+image.input,input.data(),n)){
++  std::cerr<<"Failed to load "<<image.input<<"\n";return false;
++ }
++ Device d;
++ if(!check(hipMalloc((void**)&d.input,n),"allocate input")||
++    !check(hipMalloc((void**)&d.segments,n),"allocate segments")||
++    !check(hipMalloc((void**)&d.labels,4*n),"allocate labels"))return false;
++ if(plus&&(!check(hipMalloc((void**)&d.compact,4*n),"allocate compact")||
++    !check(hipMalloc((void**)&d.boundaries,n),"allocate boundaries")||
++    !check(hipMalloc((void**)&d.contrast,n),"allocate contrast")))return false;
++ if(!check(hipMemcpyAsync(d.input,input.data(),n,hipMemcpyHostToDevice,stream),"copy input")||
++    !check(rocm_image_watershed8(d.input,d.segments,d.labels,d.compact,
++      d.boundaries,d.contrast,image.width,image.height,stream),"watershed GPU"))return false;
++ if(!check(hipMemcpyAsync(segments.data(),d.segments,n,hipMemcpyDeviceToHost,stream),"copy segments")||
++    !check(hipMemcpyAsync(labels.data(),d.labels,4*n,hipMemcpyDeviceToHost,stream),"copy labels"))return false;
++ if(plus&&(!check(hipMemcpyAsync(compact.data(),d.compact,4*n,hipMemcpyDeviceToHost,stream),"copy compact")||
++    !check(hipMemcpyAsync(boundaries.data(),d.boundaries,n,hipMemcpyDeviceToHost,stream),"copy boundaries")||
++    !check(hipMemcpyAsync(contrast.data(),d.contrast,n,hipMemcpyDeviceToHost,stream),"copy contrast")))return false;
++ if(!check(hipStreamSynchronize(stream),"readback synchronize"))return false;
++ if(plus){
++  std::string suffix="_8Way_"+std::to_string(image.width)+"x"+std::to_string(image.height);
++  if(!save(base+image.prefix+"_Segments"+suffix+"_8u.raw",segments.data(),n)||
++     !save(base+image.prefix+"_CompressedSegmentLabels"+suffix+"_32u.raw",compact.data(),4*n)||
++     !save(base+image.prefix+"_SegmentBoundaries"+suffix+"_8u.raw",boundaries.data(),n)||
++     !save(base+image.prefix+"_SegmentsWithContrastingBoundaries"+suffix+"_8u.raw",contrast.data(),n)){
++    std::cerr<<"Failed to save products for "<<image.input<<"\n";return false;
++  }
++ }else if(!save(base+"Segmented_"+image.input,segments.data(),n)||
++           !save(base+"Labels_"+image.input,labels.data(),4*n)){
++  std::cerr<<"Failed to save products for "<<image.input<<"\n";return false;
++ }
++ std::cout<<"Processed "<<image.input<<"\n";return true;
++}
++inline int run(bool plus){
++ hipStream_t stream=nullptr;
++ if(!check(hipStreamCreate(&stream),"create stream"))return 1;
++ bool okay=true;
++ if(plus){for(const auto&image:plus_images)if(!process(image,true,stream)){okay=false;break;}}
++ else {for(const auto&image:npp_images)if(!process(image,false,stream)){okay=false;break;}}
++ if(!check(hipStreamDestroy(stream),"destroy stream"))okay=false;
++ return okay?0:1;
++}
++}
+diff --git a/rocm/ported/NPP+/watershedSegmentation/watershedSegmentationNPPPlus.cpp b/rocm/ported/NPP+/watershedSegmentation/watershedSegmentationNPPPlus.cpp
+index 0afb83312..d510b140f 100644
+--- a/rocm/ported/NPP+/watershedSegmentation/watershedSegmentationNPPPlus.cpp
++++ b/rocm/ported/NPP+/watershedSegmentation/watershedSegmentationNPPPlus.cpp
+@@ -1,510 +1,3 @@
+-/*
+- * SPDX-FileCopyrightText: Copyright (c) 2020-2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+- * SPDX-License-Identifier: Apache-2.0
+- *
+- * Licensed under the Apache License, Version 2.0 (the "License");
+- * you may not use this file except in compliance with the License.
+- * You may obtain a copy of the License at
+- *
+- * http://www.apache.org/licenses/LICENSE-2.0
+- *
+- * Unless required by applicable law or agreed to in writing, software
+- * distributed under the License is distributed on an "AS IS" BASIS,
+- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+- * See the License for the specific language governing permissions and
+- * limitations under the License.
+- */
+-
+-
+-#include "hip/hip_runtime.h"
+-#include "watershedSegmentationNPPPlus.h"
+-
+-// Note:  If you want to view these images we HIGHLY recommend using imagej which is free on the internet and works on most platforms 
+-//        because it is one of the few image viewing apps that can display 32 bit integer image data.  While it normalizes the data
+-//        to floating point values for viewing it still provides a good representation of the relative brightness of each label value.  
+-//
+-//        The files read and written by this sample app use RAW image format, that is, only the image data itself exists in the files
+-//        with no image format information.   When viewing RAW files with imagej just enter the image size and bit depth values that
+-//        are part of the file name when requested by imagej.
+-//
+-
+-#define NUMBER_OF_IMAGES 3
+-
+-    Npp8u  * pInputImageDev[NUMBER_OF_IMAGES];
+-    Npp8u  * pInputImageHost[NUMBER_OF_IMAGES];
+-    Npp8u  * pSegmentationScratchBufferDev[NUMBER_OF_IMAGES];
+-    Npp8u  * pSegmentsDev[NUMBER_OF_IMAGES];
+-    Npp8u  * pSegmentsHost[NUMBER_OF_IMAGES];
+-    Npp32u * pSegmentLabelsOutputBufferDev[NUMBER_OF_IMAGES];
+-    Npp32u * pSegmentLabelsOutputBufferHost[NUMBER_OF_IMAGES];
+-
+-void tearDown() // Clean up and tear down
+-{
+-    for (int j = 0; j < NUMBER_OF_IMAGES; j++)
+-    {
+-        if (pSegmentLabelsOutputBufferDev[j] != 0)
+-            hipFree(pSegmentLabelsOutputBufferDev[j]);
+-        if (pSegmentationScratchBufferDev[j] != 0)
+-            hipFree(pSegmentationScratchBufferDev[j]);
+-        if (pSegmentsDev[j] != 0)
+-            hipFree(pSegmentsDev[j]);
+-        if (pInputImageDev[j] != 0)
+-            hipFree(pInputImageDev[j]);
+-        if (pSegmentLabelsOutputBufferHost[j] != 0)
+-            free(pSegmentLabelsOutputBufferHost[j]);
+-        if (pSegmentsHost[j] != 0)
+-            free(pSegmentsHost[j]);
+-        if (pInputImageHost[j] != 0)
+-            free(pInputImageHost[j]);
+-    }
+-}
+-
+-const std::string & Path = std::string("../images/");
+-
+-const std::string & InputFile0 = Path + std::string("CT_skull_512x512_8u_Gray.raw");
+-const std::string & InputFile1 = Path + std::string("Rocks_512x512_8u_Gray.raw");
+-const std::string & InputFile2 = Path + std::string("Corn_614x461_8u_Gray.raw");
+-
+-const std::string & SegmentsOutputFile0 = Path + std::string("CT_skull_Segments_8Way_512x512_8u.raw");
+-const std::string & SegmentsOutputFile1 = Path + std::string("Rocks_Segments_8Way_512x512_8u.raw");
+-const std::string & SegmentsOutputFile2 = Path + std::string("Corn_Segments_8Way_614x461_8u.raw");
+-
+-const std::string & SegmentBoundariesOutputFile0 = Path + std::string("CT_skull_SegmentBoundaries_8Way_512x512_8u.raw");
+-const std::string & SegmentBoundariesOutputFile1 = Path + std::string("Rocks_SegmentBoundaries_8Way_512x512_8u.raw");
+-const std::string & SegmentBoundariesOutputFile2 = Path + std::string("Corn_SegmentBoundaries_8Way_614x461_8u.raw");
+-
+-const std::string & SegmentsWithContrastingBoundariesOutputFile0 = Path + std::string("CT_skull_SegmentsWithContrastingBoundaries_8Way_512x512_8u.raw");
+-const std::string & SegmentsWithContrastingBoundariesOutputFile1 = Path + std::string("Rocks_SegmentsWithContrastingBoundaries_8Way_512x512_8u.raw");
+-const std::string & SegmentsWithContrastingBoundariesOutputFile2 = Path + std::string("Corn_SegmentsWithContrastingBoundaries_8Way_614x461_8u.raw");
+-
+-const std::string & CompressedSegmentLabelsOutputFile0 = Path + std::string("CT_skull_CompressedSegmentLabels_8Way_512x512_32u.raw");
+-const std::string & CompressedSegmentLabelsOutputFile1 = Path + std::string("Rocks_CompressedSegmentLabels_8Way_512x512_32u.raw");
+-const std::string & CompressedSegmentLabelsOutputFile2 = Path + std::string("Corn_CompressedSegmentLabels_8Way_614x461_32u.raw");
+-
+-int 
+-loadRaw8BitImage(Npp8u * pImage, int nWidth, int nHeight, int nImage)
+-{
+-    FILE * bmpFile;
+-    size_t nSize;
+-
+-    if (nImage == 0)
+-    {
+-        if (nWidth != 512 || nHeight != 512) 
+-            return -1;
+-        fopen_s(&bmpFile, InputFile0.c_str(), "rb");
+-    }
+-    else if (nImage == 1)
+-    {
+-        if (nWidth != 512 || nHeight != 512) 
+-            return -1;
+-        fopen_s(&bmpFile, InputFile1.c_str(), "rb");
+-    }
+-    else if (nImage == 2)
+-    {
+-        if (nWidth != 614 || nHeight != 461) 
+-            return -1;
+-        fopen_s(&bmpFile, InputFile2.c_str(), "rb");
+-    }
+-    else
+-    {
+-        printf ("Input file load failed.\n");
+-        return -1;
+-    }
+-
+-    if (bmpFile == NULL)
+-    {
+-        printf ("Input file load failed.\n");
+-        return -1;
+-    }
+-    nSize = fread(pImage, 1, nWidth * nHeight, bmpFile);
+-    if (nSize < nWidth * nHeight)
+-    {
+-        printf ("Input file load failed.\n");
+-        fclose(bmpFile);        
+-        return -1;
+-    }
+-    fclose(bmpFile);
+-
+-    printf ("Input file load succeeded.\n");
+-
+-    return 0;
+-}
+-
+-int 
+-main( int argc, char** argv )
+-{
+-
+-    size_t   aSegmentationScratchBufferSize[NUMBER_OF_IMAGES];
+-    int      aSegmentLabelsOutputBufferSize[NUMBER_OF_IMAGES];
+-
+-    hipError_t hipError_t;
+-    NppStatus nppStatus;
+-    NppStreamContext nppStreamCtx = {}; // zero-initialize: unused fields must not hold garbage
+-	FILE * bmpFile;
+-    NppiNorm eNorm = nppiNormInf; // default to 8 way neighbor search
+-
+-    for (int j = 0; j < NUMBER_OF_IMAGES; j++)
+-    {
+-        pInputImageDev[j] = 0;
+-        pInputImageHost[j] = 0;
+-        pSegmentationScratchBufferDev[j] = 0;
+-        pSegmentLabelsOutputBufferDev[j] = 0;
+-        pSegmentLabelsOutputBufferHost[j] = 0;
+-        pSegmentsDev[j] = 0;
+-        pSegmentsHost[j] = 0;
+-    }
+-
+-    nppStreamCtx.hStream = 0; // The NULL stream by default, set this to whatever your stream ID is if not the NULL stream.
+-
+-    hipError_t = hipGetDevice(&nppStreamCtx.nCudaDeviceId);
+-    if (hipError_t != hipSuccess)
+-    {
+-        printf("CUDA error: no devices supporting CUDA.\n");
+-        return NPP_NOT_SUFFICIENT_COMPUTE_CAPABILITY;
+-    }
+-
+-    const NppLibraryVersion *libVer   = nppGetLibVersion();
+-
+-    printf("NPP Library Version %d.%d.%d\n", libVer->major, libVer->minor, libVer->build);
+-
+-    int driverVersion, runtimeVersion;
+-    hipDriverGetVersion(&driverVersion);
+-    hipRuntimeGetVersion(&runtimeVersion);
+-
+-    printf("CUDA Driver  Version: %d.%d\n", driverVersion/1000, (driverVersion%100)/10);
+-    printf("CUDA Runtime Version: %d.%d\n\n", runtimeVersion/1000, (runtimeVersion%100)/10);
+-
+-    hipError_t = hipDeviceGetAttribute(&nppStreamCtx.nCudaDevAttrComputeCapabilityMajor, 
+-                                       hipDeviceAttributeComputeCapabilityMajor, 
+-                                       nppStreamCtx.nCudaDeviceId);
+-    if (hipError_t != hipSuccess)
+-        return NPP_NOT_SUFFICIENT_COMPUTE_CAPABILITY;
+-
+-    hipError_t = hipDeviceGetAttribute(&nppStreamCtx.nCudaDevAttrComputeCapabilityMinor, 
+-                                       hipDeviceAttributeComputeCapabilityMinor, 
+-                                       nppStreamCtx.nCudaDeviceId);
+-    if (hipError_t != hipSuccess)
+-        return NPP_NOT_SUFFICIENT_COMPUTE_CAPABILITY;
+-
+-    hipError_t = hipStreamGetFlags(nppStreamCtx.hStream, &nppStreamCtx.nStreamFlags);
+-
+-    hipDeviceProp_t oDeviceProperties;
+-
+-    hipError_t = hipGetDeviceProperties(&oDeviceProperties, nppStreamCtx.nCudaDeviceId);
+-
+-    nppStreamCtx.nMultiProcessorCount = oDeviceProperties.multiProcessorCount;
+-    nppStreamCtx.nMaxThreadsPerMultiProcessor = oDeviceProperties.maxThreadsPerMultiProcessor;
+-    nppStreamCtx.nMaxThreadsPerBlock = oDeviceProperties.maxThreadsPerBlock;
+-    nppStreamCtx.nSharedMemPerBlock = oDeviceProperties.sharedMemPerBlock;
+-
+-    NppiSize oSizeROI[NUMBER_OF_IMAGES];
+-
+-    for (int nImage = 0; nImage < NUMBER_OF_IMAGES; nImage++)
+-    {
+-        if (nImage == 0)
+-        {
+-            oSizeROI[nImage].width = 512;
+-            oSizeROI[nImage].height = 512;
+-        }
+-        else if (nImage == 1)
+-        {
+-            oSizeROI[nImage].width = 512;
+-            oSizeROI[nImage].height = 512;
+-        }
+-        else if (nImage == 2)
+-        {
+-            oSizeROI[nImage].width = 614;
+-            oSizeROI[nImage].height = 461;
+-        }
+-
+-        // cudaMallocPitch OR cudaMalloc can be used here, in this sample case width == pitch.
+-
+-        hipError_t = hipMalloc ((void**)&pInputImageDev[nImage], oSizeROI[nImage].width * sizeof(Npp8u) * oSizeROI[nImage].height);
+-        if (hipError_t != hipSuccess)
+-            return NPP_MEMORY_ALLOCATION_ERR;
+-
+-        hipError_t = hipMalloc ((void**)&pSegmentsDev[nImage], oSizeROI[nImage].width * sizeof(Npp32u) * oSizeROI[nImage].height);
+-        if (hipError_t != hipSuccess)
+-            return NPP_MEMORY_ALLOCATION_ERR;
+-
+-        pInputImageHost[nImage] = reinterpret_cast<Npp8u *>(malloc(oSizeROI[nImage].width * sizeof(Npp8u) * oSizeROI[nImage].height));
+-        pSegmentsHost[nImage] = reinterpret_cast<Npp8u *>(malloc(oSizeROI[nImage].width * sizeof(Npp32u) * oSizeROI[nImage].height));
+-
+-        nppStatus = nppiSegmentWatershedGetBufferSize_8u_C1R(oSizeROI[nImage], &aSegmentationScratchBufferSize[nImage]);
+-
+-        hipError_t = hipMalloc ((void **)&pSegmentationScratchBufferDev[nImage], aSegmentationScratchBufferSize[nImage]);
+-        if (hipError_t != hipSuccess)
+-            return NPP_MEMORY_ALLOCATION_ERR;
+-
+-        // Output label marker buffers are only needed if you want to same the generated segmentation labels, they ARE compatible with NPP UF generated labels.
+-        // Requesting segmentation output may slightly decrease segmentation function performance.  Regardless of the pitch of the segmentation image
+-        // the segment labels output buffer will have a pitch of oSizeROI[nImage].width * sizeof(Npp32u).
+-
+-        aSegmentLabelsOutputBufferSize[nImage] = oSizeROI[nImage].width * sizeof(Npp32u) * oSizeROI[nImage].height;
+-        
+-        hipError_t = hipMalloc ((void **)&pSegmentLabelsOutputBufferDev[nImage], aSegmentLabelsOutputBufferSize[nImage]);
+-        if (hipError_t != hipSuccess)
+-            return NPP_MEMORY_ALLOCATION_ERR;
+-
+-        pSegmentLabelsOutputBufferHost[nImage] = reinterpret_cast<Npp32u *>(malloc(oSizeROI[nImage].width * sizeof(Npp32u) * oSizeROI[nImage].height));
+-
+-        if (loadRaw8BitImage(pInputImageHost[nImage], oSizeROI[nImage].width * sizeof(Npp8u), oSizeROI[nImage].height, nImage) == 0)
+-        {
+-            hipError_t = hipMemcpy2DAsync(pInputImageDev[nImage], oSizeROI[nImage].width * sizeof(Npp8u), pInputImageHost[nImage], 
+-                                          oSizeROI[nImage].width * sizeof(Npp8u), oSizeROI[nImage].width * sizeof(Npp8u), oSizeROI[nImage].height, 
+-                                          hipMemcpyHostToDevice, nppStreamCtx.hStream);
+-
+-            // Make a second copy of the unaltered input image since this function works in place and we want to reuse the input image multiple times.
+-            hipError_t = hipMemcpy2DAsync(pSegmentsDev[nImage], oSizeROI[nImage].width * sizeof(Npp8u), pInputImageHost[nImage], 
+-                                          oSizeROI[nImage].width * sizeof(Npp8u), oSizeROI[nImage].width * sizeof(Npp8u), oSizeROI[nImage].height, 
+-                                          hipMemcpyHostToDevice, nppStreamCtx.hStream);
+-
+-            nppStatus = nppPlusV::nppiSegmentWatershed_8u_C1IR_Ctx(pSegmentsDev[nImage], oSizeROI[nImage].width * sizeof(Npp8u), 
+-                                                                   pSegmentLabelsOutputBufferDev[nImage], oSizeROI[nImage].width * sizeof(Npp32u), eNorm, 
+-                                                                   NPP_WATERSHED_SEGMENT_BOUNDARIES_NONE, oSizeROI[nImage], pSegmentationScratchBufferDev[nImage], nppStreamCtx);
+-
+-            if (nppStatus != NPP_SUCCESS)  
+-            {
+-                if (nImage == 0)
+-                    printf("CT skull segments 8Way 512x512 8u failed.\n");
+-                else if (nImage == 1)
+-                    printf("Rocks segments 8Way 512x512 8u failed.\n");
+-                else if (nImage == 2)
+-                    printf("Corn segments 8Way 614x461 8u failed.\n");
+-                tearDown();
+-                return -1;
+-            }
+-
+-            // Now compress the label markers output to make them easier to view.
+-            int nCompressedLabelsScratchBufferSize;
+-            Npp8u * pCompressedLabelsScratchBufferDev;
+-
+-            nppStatus = nppPlusV::nppiCompressMarkerLabelsGetBufferSize_32u_C1R(oSizeROI[nImage].width * oSizeROI[nImage].height, &nCompressedLabelsScratchBufferSize);
+-
+-            if (nppStatus != NPP_NO_ERROR)
+-                return nppStatus;
+-
+-            hipError_t = hipMalloc ((void **)&pCompressedLabelsScratchBufferDev, nCompressedLabelsScratchBufferSize);
+-            if (hipError_t != hipSuccess)
+-                return NPP_MEMORY_ALLOCATION_ERR;
+-
+-            int nCompressedLabelCount = 0;
+-
+-            nppStatus = nppPlusV::nppiCompressMarkerLabelsUF_32u_C1IR_Ctx(pSegmentLabelsOutputBufferDev[nImage], oSizeROI[nImage].width * sizeof(Npp32u), oSizeROI[nImage], 
+-                                                                          oSizeROI[nImage].width * oSizeROI[nImage].height, &nCompressedLabelCount, 
+-                                                                          pCompressedLabelsScratchBufferDev, nppStreamCtx);
+-            if (nppStatus != NPP_SUCCESS)  
+-            {
+-                if (nImage == 0)
+-                    printf("CT_Skull_CompressedLabelMarkersUF_8Way_512x512_32u failed.\n");
+-                else if (nImage == 1)
+-                    printf("Rocks_CompressedLabelMarkersUF_8Way_512x512_32u failed.\n");
+-                else if (nImage == 2)
+-                    printf("Corn_CompressedLabelMarkersUF_8Way_614x461_32u failed.\n");
+-                tearDown();
+-                return -1;
+-            }
+-
+-            // Copy segmented image to host
+-            hipError_t = hipMemcpy2DAsync(pSegmentsHost[nImage], oSizeROI[nImage].width * sizeof(Npp8u), 
+-                                          pSegmentsDev[nImage], oSizeROI[nImage].width * sizeof(Npp8u), oSizeROI[nImage].width * sizeof(Npp8u), oSizeROI[nImage].height,
+-                                          hipMemcpyDeviceToHost, nppStreamCtx.hStream);
+-
+-            // Copy segment labels image to host
+-            hipError_t = hipMemcpy2DAsync(pSegmentLabelsOutputBufferHost[nImage], oSizeROI[nImage].width * sizeof(Npp32u), 
+-                                          pSegmentLabelsOutputBufferDev[nImage], oSizeROI[nImage].width * sizeof(Npp32u), oSizeROI[nImage].width * sizeof(Npp32u), oSizeROI[nImage].height,
+-                                          hipMemcpyDeviceToHost, nppStreamCtx.hStream);
+-
+-            // Wait host image read backs to complete, not necessary if no need to synchronize
+-            if ((hipError_t = hipStreamSynchronize(nppStreamCtx.hStream)) != hipSuccess) 
+-            {
+-                printf ("Post segmentation hipStreamSynchronize failed\n");
+-                tearDown();
+-                return -1;
+-            }
+-
+-            // Free single image scratch buffer
+-            hipFree(pCompressedLabelsScratchBufferDev);
+-
+-            // Save default segments file.
+-            if (nImage == 0)
+-                fopen_s(&bmpFile, SegmentsOutputFile0.c_str(), "wb");
+-            else if (nImage == 1)
+-                fopen_s(&bmpFile, SegmentsOutputFile1.c_str(), "wb");
+-            else if (nImage == 2)
+-                fopen_s(&bmpFile, SegmentsOutputFile2.c_str(), "wb");
+-
+-            if (bmpFile == NULL) 
+-                return -1;
+-            size_t nSize = 0;
+-            for (int j = 0; j < oSizeROI[nImage].height; j++)
+-            {
+-                nSize += fwrite(&pSegmentsHost[nImage][j * oSizeROI[nImage].width], sizeof(Npp8u), oSizeROI[nImage].width, bmpFile);
+-            }
+-            fclose(bmpFile);
+-
+-            if (nImage == 0)
+-                printf("CT_Skull_Segments_8Way_512x512_8u succeeded.\n");
+-            else if (nImage == 1)
+-                printf("Rocks_Segments_8Way_512x512_8u succeeded.\n");
+-            else if (nImage == 2)
+-                printf("Corn_Segments_8Way_614x461_8u succeeded.\n");
+-
+-            // Save segment labels file.
+-            if (nImage == 0)
+-                fopen_s(&bmpFile, CompressedSegmentLabelsOutputFile0.c_str(), "wb");
+-            else if (nImage == 1)
+-                fopen_s(&bmpFile, CompressedSegmentLabelsOutputFile1.c_str(), "wb");
+-            else if (nImage == 2)
+-                fopen_s(&bmpFile, CompressedSegmentLabelsOutputFile2.c_str(), "wb");
+-
+-            if (bmpFile == NULL) 
+-                return -1;
+-            nSize = 0;
+-            for (int j = 0; j < oSizeROI[nImage].height; j++)
+-            {
+-                nSize += fwrite(&pSegmentLabelsOutputBufferHost[nImage][j * oSizeROI[nImage].width], sizeof(Npp32u), oSizeROI[nImage].width, bmpFile);
+-            }
+-            fclose(bmpFile);
+-
+-            if (nImage == 0)
+-                printf("CT_Skull_CompressedSegmentLabels_8Way_512x512_32u succeeded.\n");
+-            else if (nImage == 1)
+-                printf("Rocks_CompressedSegmentLabels_8Way_512x512_32u succeeded.\n");
+-            else if (nImage == 2)
+-                printf("Corn_CompressedSegmentLabels_8Way_614x461_32u succeeded.\n");
+-
+-            // Now generate a segment boundaries only output image
+-
+-            // Make a second copy of the unaltered input image since this function works in place and we want to reuse the input image multiple times.
+-            hipError_t = hipMemcpy2DAsync(pSegmentsDev[nImage], oSizeROI[nImage].width * sizeof(Npp8u), pInputImageHost[nImage], 
+-                                          oSizeROI[nImage].width * sizeof(Npp8u), oSizeROI[nImage].width * sizeof(Npp8u), oSizeROI[nImage].height, 
+-                                          hipMemcpyHostToDevice, nppStreamCtx.hStream);
+-
+-            // We already generated segment labels images to skip that this time
+-            nppStatus = nppPlusV::nppiSegmentWatershed_8u_C1IR_Ctx(pSegmentsDev[nImage], oSizeROI[nImage].width * sizeof(Npp8u), 
+-                                                                   0, 0, eNorm, 
+-                                                                   NPP_WATERSHED_SEGMENT_BOUNDARIES_ONLY, oSizeROI[nImage], pSegmentationScratchBufferDev[nImage], nppStreamCtx);
+-
+-            if (nppStatus != NPP_SUCCESS)  
+-            {
+-                if (nImage == 0)
+-                    printf("CT skull segment boundaries 8Way 512x512 8u failed.\n");
+-                else if (nImage == 1)
+-                    printf("Rocks segment boundaries 8Way 512x512 8u failed.\n");
+-                else if (nImage == 2)
+-                    printf("Corn segment boundaries 8Way 614x461 8u failed.\n");
+-                tearDown();
+-                return -1;
+-            }
+-
+-            // Copy segment boundaries image to host
+-            hipError_t = hipMemcpy2DAsync(pSegmentsHost[nImage], oSizeROI[nImage].width * sizeof(Npp8u), 
+-                                          pSegmentsDev[nImage], oSizeROI[nImage].width * sizeof(Npp8u), oSizeROI[nImage].width * sizeof(Npp8u), oSizeROI[nImage].height,
+-                                          hipMemcpyDeviceToHost, nppStreamCtx.hStream);
+-
+-            // Wait host image read backs to complete, not necessary if no need to synchronize
+-            if ((hipError_t = hipStreamSynchronize(nppStreamCtx.hStream)) != hipSuccess) 
+-            {
+-                printf ("Post segmentation hipStreamSynchronize failed\n");
+-                tearDown();
+-                return -1;
+-            }
+-
+-            if (nImage == 0)
+-                fopen_s(&bmpFile, SegmentBoundariesOutputFile0.c_str(), "wb");
+-            else if (nImage == 1)
+-                fopen_s(&bmpFile, SegmentBoundariesOutputFile1.c_str(), "wb");
+-            else if (nImage == 2)
+-                fopen_s(&bmpFile, SegmentBoundariesOutputFile2.c_str(), "wb");
+-
+-            if (bmpFile == NULL) 
+-                return -1;
+-            nSize = 0;
+-            for (int j = 0; j < oSizeROI[nImage].height; j++)
+-            {
+-                nSize += fwrite(&pSegmentsHost[nImage][j * oSizeROI[nImage].width], sizeof(Npp8u), oSizeROI[nImage].width, bmpFile);
+-            }
+-            fclose(bmpFile);
+-
+-            if (nImage == 0)
+-                printf("CT_Skull_SegmentBoundaries_8Way_512x512_8u succeeded.\n");
+-            else if (nImage == 1)
+-                printf("Rocks_SegmentBoundaries_8Way_512x512_8u succeeded.\n");
+-            else if (nImage == 2)
+-                printf("Corn_SegmentBoundaries_8Way_614x461_8u succeeded.\n");
+-
+-            // Now generate a segmented with contrasting boundaries output image
+-
+-            // Make a second copy of the unaltered input image since this function works in place and we want to reuse the input image multiple times.
+-            hipError_t = hipMemcpy2DAsync(pSegmentsDev[nImage], oSizeROI[nImage].width * sizeof(Npp8u), pInputImageHost[nImage], 
+-                                          oSizeROI[nImage].width * sizeof(Npp8u), oSizeROI[nImage].width * sizeof(Npp8u), oSizeROI[nImage].height, 
+-                                          hipMemcpyHostToDevice, nppStreamCtx.hStream);
+-
+-            // We already generated segment labels images to skip that this time
+-            nppStatus = nppPlusV::nppiSegmentWatershed_8u_C1IR_Ctx(pSegmentsDev[nImage], oSizeROI[nImage].width * sizeof(Npp8u), 
+-                                                                   0, 0, eNorm, 
+-                                                                   NPP_WATERSHED_SEGMENT_BOUNDARIES_CONTRAST, oSizeROI[nImage], pSegmentationScratchBufferDev[nImage], nppStreamCtx);
+-
+-            if (nppStatus != NPP_SUCCESS)  
+-            {
+-                if (nImage == 0)
+-                    printf("CT skull segments with contrasting boundaries 8Way 512x512 8u failed.\n");
+-                else if (nImage == 1)
+-                    printf("Rocks segments with contrasting boundaries 8Way 512x512 8u failed.\n");
+-                else if (nImage == 2)
+-                    printf("Corn segments with contrasting boundaries 8Way 614x461 8u failed.\n");
+-                tearDown();
+-                return -1;
+-            }
+-
+-            // Copy segment boundaries image to host
+-            hipError_t = hipMemcpy2DAsync(pSegmentsHost[nImage], oSizeROI[nImage].width * sizeof(Npp8u), 
+-                                          pSegmentsDev[nImage], oSizeROI[nImage].width * sizeof(Npp8u), oSizeROI[nImage].width * sizeof(Npp8u), oSizeROI[nImage].height,
+-                                          hipMemcpyDeviceToHost, nppStreamCtx.hStream);
+-
+-            // Wait host image read backs to complete, not necessary if no need to synchronize
+-            if ((hipError_t = hipStreamSynchronize(nppStreamCtx.hStream)) != hipSuccess) 
+-            {
+-                printf ("Post segmentation hipStreamSynchronize failed\n");
+-                tearDown();
+-                return -1;
+-            }
+-
+-            if (nImage == 0)
+-                fopen_s(&bmpFile, SegmentsWithContrastingBoundariesOutputFile0.c_str(), "wb");
+-            else if (nImage == 1)
+-                fopen_s(&bmpFile, SegmentsWithContrastingBoundariesOutputFile1.c_str(), "wb");
+-            else if (nImage == 2)
+-                fopen_s(&bmpFile, SegmentsWithContrastingBoundariesOutputFile2.c_str(), "wb");
+-
+-            if (bmpFile == NULL) 
+-                return -1;
+-            nSize = 0;
+-            for (int j = 0; j < oSizeROI[nImage].height; j++)
+-            {
+-                nSize += fwrite(&pSegmentsHost[nImage][j * oSizeROI[nImage].width], sizeof(Npp8u), oSizeROI[nImage].width, bmpFile);
+-            }
+-            fclose(bmpFile);
+-
+-            if (nImage == 0)
+-                printf("CT_Skull_SegmentsWithContrastingBoundaries_8Way_512x512_8u succeeded.\n");
+-            else if (nImage == 1)
+-                printf("Rocks_SegmentsWithContrastingBoundaries_8Way_512x512_8u succeeded.\n");
+-            else if (nImage == 2)
+-                printf("Corn_SegmentsWithContrastingBoundaries_8Way_614x461_8u succeeded.\n");
+-        }
+-        else
+-        {
+-            printf("Failed to load the input image, check the images directory.\n");
+-            tearDown();
+-            return -1;
+-        }
+-    }
+-
+-    tearDown();
+-
+-    return 0;
+-}
+-
+-
++// SPDX-License-Identifier: Apache-2.0
++#include "watershed_sample.hpp"
++int main(int,char**){return rocm_watershed_sample::run(true);}
+diff --git a/rocm/ported/NPP/watershedSegmentation/watershedSegmentation.cpp b/rocm/ported/NPP/watershedSegmentation/watershedSegmentation.cpp
+index 07b922753..ec9bcba0b 100644
+--- a/rocm/ported/NPP/watershedSegmentation/watershedSegmentation.cpp
++++ b/rocm/ported/NPP/watershedSegmentation/watershedSegmentation.cpp
+@@ -1,150 +1,3 @@
+-/*
+- * SPDX-FileCopyrightText: Copyright (c) 2020-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+- * SPDX-License-Identifier: Apache-2.0
+- *
+- * Licensed under the Apache License, Version 2.0 (the "License");
+- * you may not use this file except in compliance with the License.
+- * You may obtain a copy of the License at
+- *
+- * http://www.apache.org/licenses/LICENSE-2.0
+- *
+- * Unless required by applicable law or agreed to in writing, software
+- * distributed under the License is distributed on an "AS IS" BASIS,
+- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+- * See the License for the specific language governing permissions and
+- * limitations under the License.
+- */
+-
+-
+-#include "watershedSegmentation.h"
+-#include <npp.h>
+-#if __has_include(<nppworkspace.h>)
+-#include <nppworkspace.h>
+-#define NPP_HAS_WORKSPACE 1 // NPP 13.2.0.58 (CTK 13.4 and later)
+-#else
+-#define NPP_HAS_WORKSPACE 0 // older NPP: the application allocates the scratch buffers
+-#endif
+-#include <hip/hip_runtime.h>
+-#include <iostream>
+-#include <fstream>
+-#include <string>
+-#include <cstdlib>
+-
+-#define NUM_IMAGES 5
+-
+-Npp8u *d_input[NUM_IMAGES], *h_input[NUM_IMAGES];
+-Npp8u *d_segments[NUM_IMAGES], *h_segments[NUM_IMAGES];
+-Npp32u *d_labels[NUM_IMAGES], *h_labels[NUM_IMAGES];
+-
+-const std::string base_path = "../images/";
+-const std::string input_files[] = {
+-    "Lena_512x512_8u_Gray.raw",
+-    "CT_skull_512x512_8u_Gray.raw",
+-    "Rocks_512x512_8u_Gray.raw",
+-    "coins_500x383_8u_Gray.raw",
+-    "coins_overlay_500x569_8u_Gray.raw"
+-};
+-
+-void cleanup() {
+-    for (int i = 0; i < NUM_IMAGES; ++i) {
+-        hipFree(d_input[i]);
+-        hipFree(d_segments[i]);
+-        hipFree(d_labels[i]);
+-        free(h_input[i]);
+-        free(h_segments[i]);
+-        free(h_labels[i]);
+-    }
+-}
+-
+-bool loadRaw(const std::string &file, Npp8u *buffer, int width, int height) {
+-    FILE *fp = fopen((base_path + file).c_str(), "rb");
+-    if (!fp) return false;
+-    size_t size = fread(buffer, 1, width * height, fp);
+-    fclose(fp);
+-    return size == width * height;
+-}
+-
+-int main(int argc, char **argv) {
+-    NppStreamContext ctx = {};
+-    hipGetDevice(&ctx.nCudaDeviceId);
+-    hipStreamCreate(&ctx.hStream);
+-
+-    // Attach an NPP workspace: one high-water-mark scratch buffer shared by every image below.  It grows only when an
+-    // image needs more scratch than any previous one, so there is no per-image GetBufferSize/cudaMalloc/cudaFree.
+-#if NPP_HAS_WORKSPACE
+-    if (nppiWorkspaceCreate(&ctx) != NPP_SUCCESS) {
+-        std::cerr << "nppiWorkspaceCreate failed\n";
+-        return -1;
+-    }
+-#endif
+-
+-    NppiSize rois[NUM_IMAGES] = {{512,512}, {512,512}, {512,512}, {500,383}, {500,569}};
+-
+-    for (int i = 0; i < NUM_IMAGES; ++i) {
+-        int size = rois[i].width * rois[i].height;
+-
+-        hipMalloc(&d_input[i], size);
+-        hipMalloc(&d_segments[i], size);
+-        hipMalloc(&d_labels[i], size * sizeof(Npp32u));
+-
+-        h_input[i] = (Npp8u*)malloc(size);
+-        h_segments[i] = (Npp8u*)malloc(size);
+-        h_labels[i] = (Npp32u*)malloc(size * sizeof(Npp32u));
+-
+-        if (!loadRaw(input_files[i], h_input[i], rois[i].width, rois[i].height)) {
+-            std::cerr << "Failed to load " << input_files[i] << "\n";
+-            cleanup();
+-            return -1;
+-        }
+-
+-        hipMemcpy2D(d_input[i], rois[i].width, h_input[i], rois[i].width,
+-                     rois[i].width, rois[i].height, hipMemcpyHostToDevice);
+-        hipMemcpy(d_segments[i], d_input[i], size, hipMemcpyDeviceToDevice);
+-
+-        // Without an NPP workspace the scratch buffer is allocated here for each image.
+-        Npp8u *d_scratch = NULL;
+-#if !NPP_HAS_WORKSPACE
+-        size_t scratch_size = 0;
+-        NppStatus bufStatus = nppiSegmentWatershedGetBufferSize_8u_C1R(rois[i], &scratch_size);
+-        if (bufStatus != NPP_SUCCESS) {
+-            std::cerr << "nppiSegmentWatershedGetBufferSize_8u_C1R failed: " << (int)bufStatus << "\n";
+-            cleanup();
+-            hipStreamDestroy(ctx.hStream);
+-            return -1;
+-        }
+-        hipError_t mallocStatus = hipMalloc(&d_scratch, scratch_size > 0 ? scratch_size : 1);
+-        if (mallocStatus != hipSuccess) {
+-            std::cerr << "hipMalloc of the scratch buffer failed: " << hipGetErrorString(mallocStatus) << "\n";
+-            cleanup();
+-            hipStreamDestroy(ctx.hStream);
+-            return -1;
+-        }
+-#endif
+-
+-        nppiSegmentWatershed_8u_C1IR_Ctx(d_segments[i], rois[i].width,
+-                                         d_labels[i], rois[i].width * sizeof(Npp32u),
+-                                         nppiNormInf, NPP_WATERSHED_SEGMENT_BOUNDARIES_NONE,
+-                                         rois[i], d_scratch /* NULL: scratch from workspace */, ctx);
+-        hipFree(d_scratch);
+-
+-        hipMemcpy(h_segments[i], d_segments[i], size, hipMemcpyDeviceToHost);
+-        hipMemcpy(h_labels[i], d_labels[i], size * sizeof(Npp32u), hipMemcpyDeviceToHost);
+-
+-        std::string out_seg = base_path + "Segmented_" + input_files[i];
+-        FILE *fseg = fopen(out_seg.c_str(), "wb");
+-        fwrite(h_segments[i], 1, size, fseg); fclose(fseg);
+-
+-        std::string out_label = base_path + "Labels_" + input_files[i];
+-        FILE *flab = fopen(out_label.c_str(), "wb");
+-        fwrite(h_labels[i], sizeof(Npp32u), size, flab); fclose(flab);
+-
+-        std::cout << "Processed " << input_files[i] << "\n";
+-    }
+-
+-    cleanup();
+-#if NPP_HAS_WORKSPACE
+-    nppiWorkspaceDestroy(&ctx);
+-#endif
+-    hipStreamDestroy(ctx.hStream);
+-    return 0;
+-}
+\ No newline at end of file
++// SPDX-License-Identifier: Apache-2.0
++#include "watershed_sample.hpp"
++int main(int,char**){return rocm_watershed_sample::run(false);}
+diff --git a/rocm/ported/nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp b/rocm/ported/nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp
+index e5662d969..79985dd37 100644
+--- a/rocm/ported/nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp
++++ b/rocm/ported/nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp
+@@ -18,5 +18,5 @@
+   
+ 
+ // MIGRATION_BATCH10: rocJPEG hardware / explicit CPU fallback, GPU layout and postprocess.
+-#include "batch10_jpeg.hpp"
++#include "image/jpeg_decoder_v2.hpp"
+ int main(int argc,const char**argv){return migration_batch::image10_main("Image-Resize-WaterMark",argc,argv);}
+diff --git a/rocm/ported/nvJPEG/Image-Resize/imageResize.cpp b/rocm/ported/nvJPEG/Image-Resize/imageResize.cpp
+index 89d01bdfa..ef5acc403 100644
+--- a/rocm/ported/nvJPEG/Image-Resize/imageResize.cpp
++++ b/rocm/ported/nvJPEG/Image-Resize/imageResize.cpp
+@@ -18,5 +18,5 @@
+   
+ 
+ // MIGRATION_BATCH10: rocJPEG hardware / explicit CPU fallback, GPU layout and postprocess.
+-#include "batch10_jpeg.hpp"
++#include "image/jpeg_decoder_v2.hpp"
+ int main(int argc,const char**argv){return migration_batch::image10_main("Image-Resize",argc,argv);}
+diff --git a/rocm/ported/nvJPEG/nvJPEG-Decoder-Backend-ROI/nvJPEGROIDecode.cpp b/rocm/ported/nvJPEG/nvJPEG-Decoder-Backend-ROI/nvJPEGROIDecode.cpp
+index e44a6d2c1..da96be1b3 100644
+--- a/rocm/ported/nvJPEG/nvJPEG-Decoder-Backend-ROI/nvJPEGROIDecode.cpp
++++ b/rocm/ported/nvJPEG/nvJPEG-Decoder-Backend-ROI/nvJPEGROIDecode.cpp
+@@ -17,5 +17,5 @@
+ 
+   
+ // MIGRATION_BATCH10: rocJPEG hardware / explicit CPU fallback, GPU layout and postprocess.
+-#include "batch10_jpeg.hpp"
++#include "image/jpeg_decoder_v2.hpp"
+ int main(int argc,const char**argv){return migration_batch::image10_main("nvJPEG-Decoder-Backend-ROI",argc,argv);}
+diff --git a/rocm/ported/nvJPEG/nvJPEG-Decoder-MultipleInstances/nvJPEGDecMultipleInstances.cpp b/rocm/ported/nvJPEG/nvJPEG-Decoder-MultipleInstances/nvJPEGDecMultipleInstances.cpp
+index 39b385df3..400db5585 100644
+--- a/rocm/ported/nvJPEG/nvJPEG-Decoder-MultipleInstances/nvJPEGDecMultipleInstances.cpp
++++ b/rocm/ported/nvJPEG/nvJPEG-Decoder-MultipleInstances/nvJPEGDecMultipleInstances.cpp
+@@ -16,5 +16,5 @@
+  */
+ 
+ // MIGRATION_BATCH10: rocJPEG hardware / explicit CPU fallback, GPU layout and postprocess.
+-#include "batch10_jpeg.hpp"
++#include "image/jpeg_decoder_v2.hpp"
+ int main(int argc,const char**argv){return migration_batch::image10_main("nvJPEG-Decoder-MultipleInstances",argc,argv);}
+diff --git a/rocm/ported/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp b/rocm/ported/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp
+index db132f24c..75434ee6e 100644
+--- a/rocm/ported/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp
++++ b/rocm/ported/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp
+@@ -18,5 +18,5 @@
+   
+ 
+ // MIGRATION_BATCH10: rocJPEG hardware / explicit CPU fallback, GPU layout and postprocess.
+-#include "batch10_jpeg.hpp"
++#include "image/jpeg_decoder_v2.hpp"
+ int main(int argc,const char**argv){return migration_batch::image10_main("nvJPEG-Decoder",argc,argv);}
+diff --git a/rocm/probes/image/jpeg_progressive_gpu.hip b/rocm/probes/image/jpeg_progressive_gpu.hip
+new file mode 100644
+index 000000000..0ade6c04c
+--- /dev/null
++++ b/rocm/probes/image/jpeg_progressive_gpu.hip
+@@ -0,0 +1,59 @@
++// SPDX-License-Identifier: Apache-2.0
++#include "progressive_jpeg.hpp"
++int main(int argc, char** argv) {
++  try {
++    if (argc != 4) throw std::runtime_error("usage: input.jpg gpu.rgb cpu.rgb");
++    auto input = read_file(argv[1]);
++    auto picture = extract(input);
++    auto cpu = cpu_reference(input, picture.width, picture.height);
++    checked(hipSetDevice(0), "select AMD GPU");
++    std::vector<void*> allocations;
++    auto allocate = [&](size_t bytes) {
++      void* pointer = nullptr;
++      checked(hipMalloc(&pointer, bytes), "allocate GPU buffer");
++      allocations.push_back(pointer);
++      return pointer;
++    };
++    float cosine[64];
++    for (int x = 0; x < 8; ++x)
++      for (int u = 0; u < 8; ++u)
++        cosine[x * 8 + u] = std::cos(float((2 * x + 1) * u) * 3.14159265358979323846f / 16.0f);
++    auto* device_cos = static_cast<float*>(allocate(sizeof(cosine)));
++    checked(hipMemcpy(device_cos, cosine, sizeof(cosine), hipMemcpyHostToDevice), "copy cosine");
++    uint8_t* planes[3];
++    for (int channel = 0; channel < 3; ++channel) {
++      auto& component = picture.components[channel];
++      auto* device_coeff = static_cast<int16_t*>(allocate(component.data.size() * sizeof(int16_t)));
++      auto* device_quant = static_cast<uint16_t*>(allocate(64 * sizeof(uint16_t)));
++      planes[channel] = static_cast<uint8_t*>(allocate(size_t(component.width) * component.height));
++      checked(hipMemcpy(device_coeff, component.data.data(), component.data.size() * sizeof(int16_t),
++                        hipMemcpyHostToDevice), "copy coefficients");
++      checked(hipMemcpy(device_quant, component.quant.data(), 64 * sizeof(uint16_t),
++                        hipMemcpyHostToDevice), "copy quantization");
++      int pixels = component.width * component.height;
++      inverse_dct<<<(pixels + 255) / 256, 256>>>(device_coeff, device_quant, device_cos,
++        planes[channel], component.width, component.height, component.blocks_x);
++      checked(hipGetLastError(), "launch GPU IDCT");
++    }
++    int total = picture.width * picture.height;
++    auto* gpu_rgb = static_cast<uint8_t*>(allocate(size_t(total) * 3));
++    auto& cb = picture.components[1];
++    convert_rgb<<<(total + 255) / 256, 256>>>(planes[0], planes[1], planes[2], gpu_rgb,
++      picture.width, picture.height, cb.width, cb.height,
++      cb.h_factor, cb.v_factor, picture.max_h, picture.max_v);
++    checked(hipGetLastError(), "launch GPU RGB conversion");
++    checked(hipDeviceSynchronize(), "synchronize GPU pixel synthesis");
++    std::vector<unsigned char> gpu(size_t(total) * 3);
++    checked(hipMemcpy(gpu.data(), gpu_rgb, gpu.size(), hipMemcpyDeviceToHost), "copy GPU pixels");
++    for (auto* pointer : allocations) checked(hipFree(pointer), "free GPU buffer");
++    write_file(argv[2], gpu);
++    write_file(argv[3], cpu);
++    std::cout << "{\"width\":" << picture.width << ",\"height\":" << picture.height
++              << ",\"components\":3,\"progressive\":true,\"cpu_entropy\":true,"
++              << "\"gpu_idct\":true,\"gpu_chroma_rgb\":true,\"cpu_pixel_fallback\":false}\n";
++    return 0;
++  } catch (const std::exception& error) {
++    std::cerr << error.what() << '\n';
++    return 1;
++  }
++}
+diff --git a/tools/migration/final_validate.py b/tools/migration/final_validate.py
+index e6abff6e6..678370aa4 100644
+--- a/tools/migration/final_validate.py
++++ b/tools/migration/final_validate.py
+@@ -129,7 +129,8 @@ def main():
+   require(r['validation_source_sha256']==digest(ROOT/'tools/migration/batches9_11_validate.py') and (superseded(r['source']) or withdrawn(r['source']) or sealed_hash(r['implementation'])==r['implementation_sha256']),'B9-B11 qualifier/implementation stale '+r['source'])
+   require(manifest['files'].get('build/cuda-observed/'+r['source'],{}).get('sha256')==r['cuda_implementation_sha256'],'B9-B11 CUDA observation stale '+r['source'])
+   for name,sha in dict(r['dependencies'],**r['cuda_dependencies']).items():require(sealed_hash(name)==sha,'B9-B11 helper/oracle stale '+name)
+-  require(r['environment']['rocm_release']=='10.1.0' and r['environment']['image_id']=='sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03' and all(d['physical_id']==0 for d in r['environment']['devices']),'B9-B11 environment/device identity changed '+r['source'])
++  allowed_pci={int(d['gpu']):d['bdf'].lower() for d in json.loads((ROOT/'migration/environments/physical-device-map.json').read_text()) if int(d['gpu']) in {0,1}}
++  require(r['environment']['rocm_release']=='10.1.0' and r['environment']['image_id']=='sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03' and len(allowed_pci)==2 and len(r['environment']['devices'])==1 and all(d['physical_id'] in allowed_pci and d['pci_bdf'].lower()==allowed_pci[d['physical_id']] for d in r['environment']['devices']),'B9-B11 environment/device identity changed '+r['source'])
+   for c in r['cases']+[c['cuda_cpu_checks'] for c in r['cuda_cases']]:
+    m=c['output_manifest'];require((ROOT/m['path']).exists() and digest(ROOT/m['path'])==m['sha256'] and m['files']>0,'B9-B11 output manifest missing '+r['source']+' '+c.get('case','CUDA'))
+    if (ROOT/m['path']).exists():
+diff --git a/tools/moat/image_progressive_build.py b/tools/moat/image_progressive_build.py
+new file mode 100644
+index 000000000..71ee4d3c4
+--- /dev/null
++++ b/tools/moat/image_progressive_build.py
+@@ -0,0 +1,56 @@
++#!/usr/bin/env python3
++"""Build the frozen I4 progressive JPEG GPU pixel-synthesis prototype."""
++import json
++from pathlib import Path
++
++from experiment import ROOT, Experiment, digest, write
++from image_progress import record
++from snapshot import capture
++
++SOURCE = ROOT / 'rocm/probes/image/jpeg_progressive_gpu.hip'
++HEADER = ROOT / 'rocm/common/image/progressive_jpeg.hpp'
++PROFILE = ROOT / 'migration/rewrite/image-progressive-gpu-profile.json'
++REPORT = ROOT / 'migration/reports/image-progressive-build.json'
++
++
++def main():
++    profile = json.loads(PROFILE.read_text())
++    if profile['status'] != 'FROZEN':
++        raise ValueError('frozen progressive profile required')
++    e = Experiment('I4', 'progressive-JPEG-HIP-IDCT-and-color-prototype',
++                   'rocm-build', sources=[__file__, SOURCE, HEADER, PROFILE],
++                   parent=Path(profile['evidence']).name)
++    write(e.path / 'backend.observed.json', capture())
++    core = Path('/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core')
++    overlay = ROOT / 'build/rocm-sdk-overlay'
++    jpeg = ROOT / 'build/cpu-codecs'
++    jpeg_library = jpeg / 'lib/libjpeg.so.62.4.0'
++    if not (jpeg / 'include/jpeglib.h').is_file() or not jpeg_library.is_file():
++        raise ValueError('pinned private libjpeg-turbo dependency missing')
++    binary = e.path / 'progressive_gpu'
++    rc = e.command(['hipcc', '--rocm-path=' + str(overlay),
++        '--hip-path=' + str(overlay),
++        '--rocm-device-lib-path=' + str(core / 'lib/llvm/amdgcn/bitcode'),
++        '--offload-arch=gfx1201', '-std=c++17', '-O2', '-D__HIP_PLATFORM_AMD__',
++        '-I' + str(jpeg / 'include'), '-I' + str(HEADER.parent),
++        '-x', 'hip', str(SOURCE), '-L' + str(core / 'lib'),
++        '-L' + str(jpeg / 'lib'), '-Wl,-rpath,' + str(core / 'lib'),
++        '-Wl,-rpath,' + str(jpeg / 'lib'), '-lamdhip64', '-ljpeg',
++        '-o', str(binary)], 'build-progressive-GPU-IDCT', timeout=300)
++    result = dict(status='BUILT' if rc == 0 else 'BUILD_ERROR', return_code=rc,
++                  experiment_id=e.id, binary=str(binary.relative_to(ROOT)) if rc == 0 else None,
++                  binary_sha256=digest(binary) if rc == 0 else None,
++                  dependencies={str(p.relative_to(ROOT)): digest(p) for p in
++                                [SOURCE, HEADER, PROFILE, jpeg / 'include/jpeglib.h', jpeg_library]})
++    write(e.path / 'build.json', result)
++    result['evidence'] = e.finish('EXECUTED' if rc == 0 else 'BUILD_ERROR',
++        dict(status=result['status'], checks=[dict(check='HIP-prototype-build', passed=rc == 0)]))
++    write(REPORT, result)
++    record('I4', 'progressive JPEG CPU 熵解码 + HIP IDCT/色彩原型编译：' +
++           result['status'] + '；数值和 GPU trace 待验。', [result['evidence']])
++    print(result['status'], result['evidence'])
++    return int(rc != 0)
++
++
++if __name__ == '__main__':
++    raise SystemExit(main())
+diff --git a/tools/moat/image_progressive_contracts.py b/tools/moat/image_progressive_contracts.py
+new file mode 100644
+index 000000000..2eb9b0ab9
+--- /dev/null
++++ b/tools/moat/image_progressive_contracts.py
+@@ -0,0 +1,41 @@
++#!/usr/bin/env python3
++"""Freeze I4 progressive JPEG GPU pixel-synthesis prototype inputs and gates."""
++import json
++
++from experiment import ROOT, Experiment, digest, write
++from image_progress import record
++
++INPUTS = ROOT / 'nvJPEG/nvJPEG-Decoder/input_images'
++FILES = ('cat.jpg', 'img9.jpg')
++PROFILE = ROOT / 'migration/rewrite/image-progressive-gpu-profile.json'
++
++
++def main():
++    if PROFILE.exists():
++        raise ValueError('progressive prototype contract already frozen')
++    paths = [INPUTS / name for name in FILES]
++    e = Experiment('I4', 'two-original-progressive-JPEG-bitstreams',
++                   'CPU-contract', sources=[__file__, *paths,
++                   ROOT / 'rocm/ported/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp'])
++    profile = dict(status='FROZEN', phase='I4', scope='Experimental GPU pixel synthesis; no sample qualification',
++        inputs=[dict(path=str(p.relative_to(ROOT)), bytes=p.stat().st_size,
++                     sha256=digest(p)) for p in paths],
++        algorithm='libjpeg-turbo progressive entropy and coefficient assembly on CPU; project HIP dequantization, 8x8 IDCT, chroma sampling and RGB conversion on AMD GPU',
++        reference='separate libjpeg-turbo RGB decompression with do_fancy_upsampling=FALSE and JDCT_ISLOW',
++        gates=dict(all_original_progressive_inputs=2, GPU_kernel_trace_required=True,
++                   GPU_pixel_synthesis_required=True, CPU_pixel_fallback_forbidden=True,
++                   output_bytes_exact_dimensions=True, max_abs_per_channel=4,
++                   min_rgb_psnr_db=50.0, abnormal_or_empty_output_rejected=True),
++        limitations='Entropy remains on CPU as in hybrid JPEG pipelines; this profile alone does not close native backend, ROI, multi-instance or sample CLI contracts.')
++    write(e.path / 'profile.json', profile)
++    profile['evidence'] = e.finish('OBSERVED', dict(status='FROZEN',
++        checks=[dict(check='two-original-SOF2-progressive-inputs-hash-frozen', passed=True)]))
++    write(PROFILE, profile)
++    record('I4', '两张原始 SOF2 progressive JPEG 输入与 GPU IDCT/色彩路径固定；'
++           '独立 libjpeg-turbo 非平滑 RGB 参考门槛 maxAbs≤4、PSNR≥50 dB，'
++           'CPU 熵解码可用但 CPU 像素回退不计 GPU 支持。', [profile['evidence']])
++    print(profile['evidence'])
++
++
++if __name__ == '__main__':
++    main()
+diff --git a/tools/moat/image_progressive_integration.py b/tools/moat/image_progressive_integration.py
+new file mode 100644
+index 000000000..8af46c7db
+--- /dev/null
++++ b/tools/moat/image_progressive_integration.py
+@@ -0,0 +1,57 @@
++#!/usr/bin/env python3
++"""Build and execute the actual nvJPEG decoder with the progressive HIP path."""
++import json
++from pathlib import Path
++
++from experiment import ROOT, Experiment, digest, write
++from image_progress import record
++from snapshot import capture
++
++SOURCE = ROOT / 'rocm/ported/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp'
++COMMON = ROOT / 'rocm/common/image/jpeg_decoder_v2.hpp'
++PROGRESSIVE = ROOT / 'rocm/common/image/progressive_jpeg.hpp'
++PROFILE = ROOT / 'migration/rewrite/image-progressive-gpu-profile.json'
++REPORT = ROOT / 'migration/reports/image-progressive-integration.json'
++
++
++def main():
++    core = Path('/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core')
++    native = Path('/opt/rocm/core-10.1')
++    jpeg = ROOT / 'build/cpu-codecs'
++    overlay = ROOT / 'build/rocm-sdk-overlay'
++    dependencies = [SOURCE, COMMON, PROGRESSIVE, PROFILE,
++                    ROOT / 'rocm/common/batches_runtime.hpp',
++                    jpeg / 'include/jpeglib.h', jpeg / 'lib/libjpeg.so.62.4.0']
++    e = Experiment('I4', 'actual-nvJPEG-decoder-progressive-GPU-integration',
++                   'rocm-build', sources=[__file__, *dependencies])
++    write(e.path / 'backend.observed.json', capture())
++    binary = e.path / 'decoder'
++    cmd = ['hipcc', '--rocm-path=' + str(overlay), '--hip-path=' + str(overlay),
++           '--rocm-device-lib-path=' + str(core / 'lib/llvm/amdgcn/bitcode'),
++           '--offload-arch=gfx1201', '-std=c++17', '-O2', '-D__HIP_PLATFORM_AMD__',
++           '-x', 'hip', str(SOURCE), '-o', str(binary),
++           '-I' + str(ROOT / 'rocm/common'), '-I' + str(jpeg / 'include'),
++           '-I' + str(core / 'include'), '-I' + str(native / 'include'),
++           *['-I' + str(native / 'include' / name) for name in
++             ['hipblas', 'hipsolver', 'hipsparse', 'rocblas', 'rocsolver', 'rocsparse']],
++           '-L' + str(jpeg / 'lib'), '-L' + str(core / 'lib'),
++           '-Wl,-rpath,' + str(jpeg / 'lib'), '-Wl,-rpath,' + str(core / 'lib'),
++           '-lamdhip64', '-lrocjpeg', '-ljpeg']
++    rc = e.command(cmd, 'build-actual-decoder-original-entry', timeout=300)
++    build = dict(status='BUILT' if rc == 0 else 'BUILD_ERROR', return_code=rc,
++                 binary=str(binary.relative_to(ROOT)) if rc == 0 else None,
++                 binary_sha256=digest(binary) if rc == 0 else None,
++                 dependencies={str(p.relative_to(ROOT)): digest(p) for p in dependencies},
++                 experiment_id=e.id)
++    write(e.path / 'build.json', build)
++    build['evidence'] = e.finish('EXECUTED' if rc == 0 else 'BUILD_ERROR',
++        dict(status=build['status'], checks=[dict(check='original-entry-HIP-build', passed=rc == 0)]))
++    write(REPORT, build)
++    record('I4', 'nvJPEG-Decoder 完整 C++ 入口接入 progressive GPU 路径编译：' +
++           build['status'] + '；12原图运行和CPU/CUDA验收待完成。', [build['evidence']])
++    print(build['status'], build['evidence'], flush=True)
++    return int(rc != 0)
++
++
++if __name__ == '__main__':
++    raise SystemExit(main())
+diff --git a/tools/moat/image_progressive_original_corpus.py b/tools/moat/image_progressive_original_corpus.py
+new file mode 100644
+index 000000000..052e22c56
+--- /dev/null
++++ b/tools/moat/image_progressive_original_corpus.py
+@@ -0,0 +1,74 @@
++#!/usr/bin/env python3
++"""Exercise all twelve original JPEG files through the actual decoder entrypoint."""
++import json
++from pathlib import Path
++
++from experiment import ROOT, Experiment, digest, write
++from image_progress import record
++from snapshot import capture
++
++CORPUS = ROOT / 'nvJPEG/nvJPEG-Decoder/input_images'
++BUILD = ROOT / 'migration/reports/image-progressive-integration.json'
++PROFILE = ROOT / 'migration/rewrite/image-progressive-gpu-profile.json'
++REPORT = ROOT / 'migration/reports/image-progressive-original-corpus.json'
++
++
++def main():
++    build = json.loads(BUILD.read_text())
++    if build['status'] != 'BUILT' or any(
++            digest(ROOT / name) != sha for name, sha in build['dependencies'].items()):
++        raise ValueError('current integrated decoder build required')
++    profile = json.loads(PROFILE.read_text())
++    prototypes = {r['input']: r for r in json.loads(
++        (ROOT / 'migration/reports/image-progressive-runs.json').read_text())}
++    files = sorted(p for p in CORPUS.iterdir() if p.is_file())
++    e = Experiment('I4', 'actual-nvJPEG-decoder-twelve-original-JPEG-files',
++                   'rocm-original', sources=[__file__, BUILD, PROFILE, *files,
++                   ROOT / 'rocm/common/image/jpeg_decoder_v2.hpp',
++                   ROOT / 'rocm/common/image/progressive_jpeg.hpp'],
++                   parent=build['experiment_id'])
++    write(e.path / 'backend.observed.json', capture())
++    output = e.path / 'outputs'; output.mkdir()
++    rc = e.command([str(ROOT / build['binary']), '-i', str(CORPUS),
++                    '-fmt', 'rgbi', '-b', '3', '-o', str(output)],
++                   'all-twelve-original-JPEG-files', timeout=300)
++    names = {p.name for p in files}
++    products = {}
++    for name in sorted(names):
++        raw = output / (name + '.rgbi.s1.raw')
++        meta = Path(str(raw) + '.json')
++        if raw.is_file() and meta.is_file():
++            products[name] = dict(bytes=raw.stat().st_size, sha256=digest(raw),
++                                  metadata=json.loads(meta.read_text()))
++    checks = [dict(check='original-entry-exit-zero', passed=rc == 0),
++              dict(check='all-twelve-original-JPEG-products',
++                   passed=len(files) == len(products) == 12),
++              dict(check='all-progressive-pixels-from-GPU-no-CPU-fallback',
++                   passed=all(name in products and
++                              products[name]['metadata'].get('gpu_software_decode') == 1 and
++                              products[name]['metadata'].get('cpu_fallback') == 0
++                              for name in prototypes)),
++              dict(check='both-progressive-pixels-equal-standalone-HIP-prototype',
++                   passed=all(name in products and
++                              products[name]['sha256'] == proto['gpu_sha256']
++                              for name, proto in prototypes.items())),
++              dict(check='all-baseline-decoded-by-rocJPEG-hardware',
++                   passed=all(products.get(name, {}).get('metadata', {}).get('gpu_software_decode') == 0 and
++                              products.get(name, {}).get('metadata', {}).get('cpu_fallback') == 0
++                              for name in names - set(prototypes)))]
++    status = 'PASSED' if all(c['passed'] for c in checks) else 'FAILED'
++    result = dict(status=status, return_code=rc, products=products,
++                  checks=checks, experiment_id=e.id, build_evidence=build['evidence'])
++    write(e.path / 'corpus.json', result)
++    result['evidence'] = e.finish('PASSED' if status == 'PASSED' else 'RUNTIME_ERROR',
++                                   dict(status=status, checks=checks))
++    write(REPORT, result)
++    record('I4', f'nvJPEG-Decoder 原始12图完整C++入口：{len(products)}/12产品，'
++           f'2 progressive GPU像素/10 rocJPEG硬件分路检查 {status}；'
++           '原例全部CLI/backend与独立CPU/CUDA整例资格待验。', [result['evidence']])
++    print(status, len(products), '/', len(files))
++    return int(status != 'PASSED')
++
++
++if __name__ == '__main__':
++    raise SystemExit(main())
+diff --git a/tools/moat/image_progressive_run.py b/tools/moat/image_progressive_run.py
+new file mode 100644
+index 000000000..f8030c548
+--- /dev/null
++++ b/tools/moat/image_progressive_run.py
+@@ -0,0 +1,85 @@
++#!/usr/bin/env python3
++"""Run the I4 GPU progressive JPEG prototype against pinned CPU pixels."""
++import json
++import math
++
++import numpy as np
++
++from experiment import ROOT, Experiment, digest, write
++from image_progress import record
++from snapshot import capture
++
++PROFILE = ROOT / 'migration/rewrite/image-progressive-gpu-profile.json'
++BUILD = ROOT / 'migration/reports/image-progressive-build.json'
++REPORT = ROOT / 'migration/reports/image-progressive-runs.json'
++
++
++def main():
++    profile = json.loads(PROFILE.read_text())
++    build = json.loads(BUILD.read_text())
++    if build['status'] != 'BUILT' or any(
++            digest(ROOT / name) != sha for name, sha in build['dependencies'].items()):
++        raise ValueError('current HIP progressive build required')
++    binary = ROOT / build['binary']
++    if digest(binary) != build['binary_sha256']:
++        raise ValueError('binary changed')
++    rows = []
++    for item in profile['inputs']:
++        if digest(ROOT / item['path']) != item['sha256']:
++            raise ValueError('input changed: ' + item['path'])
++        name = item['path'].split('/')[-1]
++        e = Experiment('I4', 'progressive-JPEG-GPU-pixel-synthesis',
++                       'rocm-prototype', case=name,
++                       sources=[__file__, PROFILE, BUILD, ROOT / item['path'],
++                                ROOT / 'rocm/probes/image/jpeg_progressive_gpu.hip'],
++                       parent=build['experiment_id'])
++        write(e.path / 'backend.observed.json', capture())
++        gpu = e.path / 'gpu.rgb'; cpu = e.path / 'cpu.rgb'
++        rc = e.command([str(binary), str(ROOT / item['path']), str(gpu), str(cpu)],
++                       'actual-progressive-GPU-IDCT-and-RGB', timeout=300)
++        stdout = (e.path / 'logs/0001-actual-progressive-GPU-IDCT-and-RGB.stdout.log').read_text()
++        metadata = json.loads(stdout.splitlines()[-1]) if rc == 0 else {}
++        valid_size = (rc == 0 and gpu.is_file() and cpu.is_file() and
++            gpu.stat().st_size == cpu.stat().st_size ==
++            metadata.get('width', 0) * metadata.get('height', 0) * 3)
++        max_abs = None; psnr = None; mismatched = None
++        if valid_size:
++            a = np.fromfile(gpu, np.uint8).astype(np.int16)
++            b = np.fromfile(cpu, np.uint8).astype(np.int16)
++            delta = np.abs(a - b)
++            max_abs = int(delta.max())
++            mse = float(np.mean((a - b).astype(np.float64) ** 2))
++            psnr = float('inf') if mse == 0 else 10 * math.log10(255 * 255 / mse)
++            mismatched = int(np.count_nonzero(delta))
++        gates = profile['gates']
++        checks = [dict(check='actual-HIP-command-exit-zero', passed=rc == 0),
++                  dict(check='full-expected-RGB-byte-count', passed=valid_size),
++                  dict(check='declared-GPU-IDCT-and-color-no-CPU-pixel-fallback',
++                       passed=metadata.get('gpu_idct') is True and
++                              metadata.get('gpu_chroma_rgb') is True and
++                              metadata.get('cpu_pixel_fallback') is False),
++                  dict(check='fixed-maxAbs-RGB', passed=valid_size and max_abs <= gates['max_abs_per_channel'],
++                       measured=max_abs, limit=gates['max_abs_per_channel']),
++                  dict(check='fixed-min-PSNR-RGB', passed=valid_size and psnr >= gates['min_rgb_psnr_db'],
++                       measured=psnr, limit=gates['min_rgb_psnr_db'])]
++        status = 'PASSED' if all(c['passed'] for c in checks) else 'NUMERIC_MISMATCH'
++        row = dict(input=name, status=status, return_code=rc, metadata=metadata,
++                   max_abs=max_abs, psnr_db=psnr, mismatched_channels=mismatched,
++                   gpu_sha256=digest(gpu) if gpu.is_file() else None,
++                   cpu_sha256=digest(cpu) if cpu.is_file() else None,
++                   gpu_bytes=gpu.stat().st_size if gpu.is_file() else None,
++                   cpu_bytes=cpu.stat().st_size if cpu.is_file() else None,
++                   checks=checks, experiment_id=e.id)
++        write(e.path / 'run.json', row)
++        row['evidence'] = e.finish(status if rc == 0 else 'RUNTIME_ERROR',
++                                    dict(status=status, checks=checks))
++        rows.append(row); write(REPORT, rows)
++        record('I4', f'原始 progressive {name} GPU IDCT/色彩 vs libjpeg-turbo 非平滑参考：'
++               f'maxAbs={max_abs}、PSNR={psnr} dB，{status}；GPU trace 和完整入口待验。',
++               [row['evidence']])
++        print(name, status, max_abs, psnr, flush=True)
++    return int(any(row['status'] != 'PASSED' for row in rows))
++
++
++if __name__ == '__main__':
++    raise SystemExit(main())
+diff --git a/tools/moat/image_progressive_trace.py b/tools/moat/image_progressive_trace.py
+new file mode 100644
+index 000000000..e88fb6d73
+--- /dev/null
++++ b/tools/moat/image_progressive_trace.py
+@@ -0,0 +1,71 @@
++#!/usr/bin/env python3
++"""Verify progressive JPEG IDCT and RGB kernels on the selected physical GPU."""
++import collections
++import csv
++import json
++
++from experiment import ROOT, Experiment, digest, write
++from image_progress import record
++from snapshot import capture
++
++
++def main():
++    build = json.loads((ROOT / 'migration/reports/image-progressive-build.json').read_text())
++    runs = json.loads((ROOT / 'migration/reports/image-progressive-runs.json').read_text())
++    profile = json.loads((ROOT / 'migration/rewrite/image-progressive-gpu-profile.json').read_text())
++    original = next(r for r in runs if r['input'] == 'cat.jpg')
++    item = next(r for r in profile['inputs'] if r['path'].endswith('/cat.jpg'))
++    e = Experiment('I4', 'progressive-JPEG-real-GPU-IDCT-and-color-trace',
++                   'rocm-trace', sources=[__file__,
++                   ROOT / 'rocm/probes/image/jpeg_progressive_gpu.hip',
++                   ROOT / 'migration/rewrite/image-progressive-gpu-profile.json',
++                   ROOT / item['path']], parent=original['experiment_id'])
++    write(e.path / 'backend.observed.json', capture())
++    gpu = e.path / 'gpu.rgb'; cpu = e.path / 'cpu.rgb'
++    rc = e.command(['rocprofv3', '--kernel-trace', '--output-format', 'csv',
++                    '--output-directory', str(e.path / 'trace'), '--',
++                    str(ROOT / build['binary']), str(ROOT / item['path']), str(gpu), str(cpu)],
++                   'trace-actual-progressive-pixel-kernels', timeout=300)
++    traces = list((e.path / 'trace').rglob('*kernel_trace.csv'))
++    agents = list((e.path / 'trace').rglob('*agent_info.csv'))
++    checks = [dict(check='trace-command-exit-zero', passed=rc == 0),
++              dict(check='one-kernel-trace-and-agent-map', passed=len(traces) == len(agents) == 1),
++              dict(check='traced-GPU-pixels-identical',
++                   passed=gpu.is_file() and digest(gpu) == original['gpu_sha256'])]
++    counts = collections.Counter()
++    if len(traces) == len(agents) == 1:
++        lookup = {r['Node_Id']: r for r in csv.DictReader(agents[0].open())}
++        allowed = {d['pci_bdf'] for d in json.loads(
++            (e.path / 'backend.observed.json').read_text())['devices']
++            if d['physical_id'] == 1}
++        for row in csv.DictReader(traces[0].open()):
++            name = row['Kernel_Name']
++            stage = next((k for k in ['inverse_dct', 'convert_rgb'] if k in name), None)
++            if not stage:
++                continue
++            counts[stage] += 1
++            agent = lookup[row['Agent_Id'].split()[-1]]
++            location = int(agent['Location_Id'])
++            pci = f"{int(agent['Domain']):04x}:{location >> 8:02x}:{(location >> 3) & 31:02x}.{location & 7}"
++            checks.append(dict(check=f'{stage}-actual-GPU-{counts[stage]}',
++                passed=pci in allowed and
++                       int(row['End_Timestamp']) > int(row['Start_Timestamp']) and
++                       int(row['Grid_Size_X']) > 0, pci_bdf=pci))
++        checks.append(dict(check='three-IDCT-plus-one-color-dispatch',
++            passed=counts['inverse_dct'] == 3 and counts['convert_rgb'] == 1,
++            counts=dict(counts)))
++    status = 'PASSED' if all(c['passed'] for c in checks) else 'PROFILER_FAILED'
++    result = dict(status=status, return_code=rc, checks=checks,
++                  kernel_counts=dict(counts), original_run=original['evidence'])
++    write(e.path / 'trace-result.json', result)
++    result['evidence'] = e.finish(status, dict(status=status, checks=checks))
++    write(ROOT / 'migration/reports/image-progressive-trace.json', result)
++    record('I4', '原始 progressive cat.jpg 真实 AMD GPU trace 检查 3 个 IDCT + 1 个色彩 kernel、'
++           '物理 GPU 与未 profile 全像素 SHA：' + status + '；完整入口待接入。',
++           [result['evidence']])
++    print(status, dict(counts))
++    return int(status != 'PASSED')
++
++
++if __name__ == '__main__':
++    raise SystemExit(main())
+diff --git a/tools/moat/image_reconcile_plan.py b/tools/moat/image_reconcile_plan.py
+new file mode 100644
+index 000000000..f6795ae3d
+--- /dev/null
++++ b/tools/moat/image_reconcile_plan.py
+@@ -0,0 +1,68 @@
++#!/usr/bin/env python3
++"""Synchronize the image plan's live snapshot and per-entry statuses with the catalog."""
++import collections
++import datetime as dt
++import json
++import re
++from pathlib import Path
++from zoneinfo import ZoneInfo
++
++from experiment import ROOT
++
++START = re.compile(r'^截至 20\d\d-\d\d-\d\d，本计划四模块 .*$', re.M)
++ROW = re.compile(r'^(\| \[([^\]]+)\]\([^)]*\) \| )([A-Z_]+)( \| [^|]+ \| )([^|]*)( \|)$', re.M)
++WATERSHED = ('NPP/watershedSegmentation/', 'NPP+/watershedSegmentation/')
++
++
++def main():
++    catalog = json.loads((ROOT / 'migration/samples.yaml').read_text())
++    planned = json.loads((ROOT / 'migration/rewrite/image-libraries-plan.json').read_text())
++    ids = {item['sample_id'] for item in planned['samples']}
++    samples = [s for s in catalog['samples'] if s['id'] in ids]
++    by_source = {s['source']: s for s in samples}
++    if len(samples) != 26 or len(by_source) != 26:
++        raise ValueError('all 26 stable image entrypoints required')
++    counts = collections.Counter(s['status'] for s in samples)
++    project = collections.Counter(s['status'] for s in catalog['samples'])
++    module_counts = {m: collections.Counter(s['status'] for s in samples if s['id'].startswith(m + '/'))
++                     for m in ['NPP', 'NPP+', 'nvJPEG', 'nvJPEG2000']}
++    today = dt.datetime.now(ZoneInfo('Asia/Shanghai')).date().isoformat()
++    snapshot = (f'截至 {today}，本计划四模块 **{counts["PASSED"]}/26 整例通过、'
++                f'{counts["PARTIAL"]} PARTIAL、{counts["FAILED"]} FAILED**：' +
++                '、'.join(f'{m} {module_counts[m]["PASSED"]}/{sum(module_counts[m].values())}'
++                         for m in module_counts) +
++                '。I3 两个 watershed 已有完整 HIP 文件入口及独立 CPU 逐字节结果，'
++                '但原生分割/边界语义差异显著，保持 PARTIAL；I4–I8 JPEG/JPEG2000 整例目标仍未完成。'
++                f'全项目为 {project["PASSED"]} PASSED、{project["PARTIAL"]} PARTIAL、'
++                f'{project["FAILED"]} FAILED。详细资格及失败原因见项目的 '
++                '`migration/reports/image-libraries-progress.md` 和 '
++                '`migration/reports/support-log-index.md`。')
++    path = ROOT.parent / 'doc/cuda_samples_on_rocm_image_libraries_plan.md'
++    body = path.read_text()
++    body, n = START.subn(snapshot, body, count=1)
++    if n != 1:
++        raise ValueError('plan snapshot not found')
++    touched = set()
++    def replace(match):
++        prefix, source, _, middle, description, suffix = match.groups()
++        if source not in by_source:
++            return match.group(0)
++        touched.add(source)
++        sample = by_source[source]
++        if source.startswith(WATERSHED):
++            description = ('项目 HIP 八邻域下降/标签与边界输出；原图与独立 CPU 逐字节通过，'
++                           '原生 NPP 分割/平台区和边界差异待修正；'
++                           '[实测与日志](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/reports/image-watershed.md)')
++        elif sample['status'] == 'PASSED' and sample.get('actual_library'):
++            description = sample['actual_library']
++        return prefix + sample['status'] + middle + description + suffix
++    body = ROW.sub(replace, body)
++    if touched != set(by_source):
++        raise ValueError('plan did not contain all 26 image entrypoints')
++    path.write_text(body)
++    (ROOT / 'migration/image-libraries-plan.md').write_text(body)
++    print('Synced 26 image statuses:', dict(counts), 'project:', dict(project))
++
++
++if __name__ == '__main__':
++    main()
+diff --git a/tools/moat/image_watershed_build.py b/tools/moat/image_watershed_build.py
+new file mode 100644
+index 000000000..03b22657a
+--- /dev/null
++++ b/tools/moat/image_watershed_build.py
+@@ -0,0 +1,48 @@
++#!/usr/bin/env python3
++"""Compile both original-format watershed entrypoints against one project HIP core."""
++import json
++from pathlib import Path
++from experiment import ROOT,Experiment,write,digest
++from snapshot import capture
++from image_progress import record
++
++PORTS={
++ 'NPP':'rocm/ported/NPP/watershedSegmentation/watershedSegmentation.cpp',
++ 'NPP+':'rocm/ported/NPP+/watershedSegmentation/watershedSegmentationNPPPlus.cpp',
++}
++CORE=ROOT/'rocm/common/image'
++def dependencies():return [ROOT/'migration/rewrite/image-watershed-profile.json',
++ CORE/'watershed.h',CORE/'watershed.hip',CORE/'watershed_sample.hpp',
++ *[ROOT/path for path in PORTS.values()]]
++
++def main():
++ e=Experiment('I3','two-original-watershed-entrypoints-HIP-build','rocm-build',
++   sources=[__file__,*dependencies()])
++ write(e.path/'backend.observed.json',capture())
++ profile=json.loads((ROOT/'migration/rewrite/image-watershed-profile.json').read_text())
++ core=Path('/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core')
++ overlay=ROOT/'build/rocm-sdk-overlay'
++ flags=['hipcc','--rocm-path='+str(overlay),'--hip-path='+str(overlay),
++  '--rocm-device-lib-path='+str(core/'lib/llvm/amdgcn/bitcode'),
++  '--offload-arch=gfx1201','-std=c++17','-O2','-D__HIP_PLATFORM_AMD__',
++  '-I'+str(CORE),'-x','hip']
++ binaries={};rc=0
++ if profile['status']!='FROZEN':rc=1
++ for family,path in PORTS.items():
++  if rc:break
++  output=e.path/('watershedNPPPlus' if family=='NPP+' else 'watershedNPP')
++  rc=e.command([*flags,str(ROOT/path),str(CORE/'watershed.hip'),
++   '-L'+str(core/'lib'),'-Wl,-rpath,'+str(core/'lib'),'-lamdhip64',
++   '-o',str(output)],'build-'+family+'-original-entry',timeout=300)
++  if not rc:binaries[family]=dict(path=str(output.relative_to(ROOT)),sha256=digest(output))
++ result=dict(status='BUILT' if not rc and len(binaries)==2 else 'BUILD_ERROR',
++  return_code=rc,experiment_id=e.id,binaries=binaries,
++  dependencies={str(p.relative_to(ROOT)):digest(p) for p in dependencies()})
++ write(e.path/'build.json',result)
++ result['evidence']=e.finish('EXECUTED' if result['status']=='BUILT' else 'BUILD_ERROR',
++   dict(status=result['status'],checks=[dict(check='both-fully-compiled-HIP-entries',passed=result['status']=='BUILT')]))
++ write(ROOT/'migration/reports/image-watershed-build.json',result)
++ record('I3','NPP/NPP+两个完整文件入口共享项目HIP八邻域分水岭核构建：'+result['status']+'；尚未签发数值资格。',[result['evidence']])
++ print(result['status'],result['evidence'])
++ return int(result['status']!='BUILT')
++if __name__=='__main__':raise SystemExit(main())
+diff --git a/tools/moat/image_watershed_contracts.py b/tools/moat/image_watershed_contracts.py
+new file mode 100644
+index 000000000..0e2eb488d
+--- /dev/null
++++ b/tools/moat/image_watershed_contracts.py
+@@ -0,0 +1,58 @@
++#!/usr/bin/env python3
++"""Freeze both complete original watershed entrypoints before the HIP rewrite."""
++import json
++from pathlib import Path
++from experiment import ROOT,Experiment,write,digest
++from image_progress import record
++from image_watershed_research import NATIVE,SIZES
++
++SOURCES={
++ 'NPP':'NPP/watershedSegmentation/watershedSegmentation.cpp',
++ 'NPP+':'NPP+/watershedSegmentation/watershedSegmentationNPPPlus.cpp',
++}
++INPUTS={
++ 'NPP':['Lena_512x512_8u_Gray.raw','CT_skull_512x512_8u_Gray.raw',
++  'Rocks_512x512_8u_Gray.raw','coins_500x383_8u_Gray.raw','coins_overlay_500x569_8u_Gray.raw'],
++ 'NPP+':['CT_skull_512x512_8u_Gray.raw','Rocks_512x512_8u_Gray.raw','Corn_614x461_8u_Gray.raw'],
++}
++
++def main():
++ sources=[Path(__file__),ROOT/'tools/moat/image_watershed_research.py']
++ for family in SOURCES:
++  sources += [ROOT/SOURCES[family],ROOT/NATIVE[family]/'run.json']
++  sources += [ROOT/family/'watershedSegmentation/images'/name for name in INPUTS[family]]
++ e=Experiment('I3','two-original-watershed-entrypoints-and-six-images','CPU-contract',sources=sources)
++ samples=[]
++ for family in SOURCES:
++  native=json.loads((ROOT/NATIVE[family]/'run.json').read_text())
++  images=[]
++  for name in INPUTS[family]:
++   path=ROOT/family/'watershedSegmentation/images'/name;w,h=SIZES[name]
++   images.append(dict(name=name,width=w,height=h,bytes=w*h,sha256=digest(path)))
++  products={name.removeprefix('images/'):meta for name,meta in native['files'].items()
++            if name.startswith('images/') and name.removeprefix('images/') not in INPUTS[family]}
++  if len(products)!=(10 if family=='NPP' else 12):raise ValueError('complete original output inventory')
++  samples.append(dict(sample_id=family+'/watershedSegmentation::'+Path(SOURCES[family]).name,
++    original_source=SOURCES[family],source_sha256=digest(ROOT/SOURCES[family]),
++    native_evidence=NATIVE[family],native_status=native['status'],
++    inputs=images,products=products,default_cli=[],invalid_cases=['missing-input'],
++    output_modes=['segments','labels'] if family=='NPP' else
++      ['segments','compressed-labels','boundaries-only','contrasting-boundaries']))
++ profile=dict(status='FROZEN',stage='I3',samples=samples,
++  project_algorithm=dict(connectivity=8,rule='each pixel selects minimum (intensity, row-major index) in its 3x3 neighborhood; repeated pointer doubling reaches a fixed root',
++    segments='unsigned 8-bit intensity at final root',labels='unsigned 32-bit zero-based root index',
++    compact_labels='roots ordered by row-major index and replaced with consecutive zero-based IDs',
++    boundaries_only='0 if any in-bounds eight-neighbor has a different root, otherwise 255',
++    contrasting_boundaries='255 at project boundary, otherwise root intensity'),
++  acceptance=dict(project_CPU_vs_HIP='EXACT for every output byte and product name/size',
++    native_comparison='ALGORITHM_VARIANT: report pixel agreement and label partition metrics for all original images; no NVIDIA pixel-exact claim',
++    GPU_execution='actual gfx1201 kernels and independent output/hash/stream checks required',
++    failure='missing original image returns nonzero with diagnostic; no silent fallback'))
++ write(e.path/'profile.json',profile)
++ ref=e.finish('OBSERVED',dict(status='FROZEN',checks=[dict(check='two-original-entrypoints-eight-input-uses-and-22-products',passed=True)]))
++ profile['evidence']=ref
++ write(ROOT/'migration/rewrite/image-watershed-profile.json',profile)
++ record('I3','NPP 5图10产品、NPP+ 3图12产品及5090原始SHA/完整输出模式冻结；项目八邻域下降算法只按CPU精确验收，跨vendor差异明确记ALGORITHM_VARIANT，不升级资格。',[ref])
++ print('FROZEN',len(samples),sum(len(s['products']) for s in samples),ref)
++
++if __name__=='__main__':main()
+diff --git a/tools/moat/image_watershed_native_compare.py b/tools/moat/image_watershed_native_compare.py
+new file mode 100644
+index 000000000..19e73fd59
+--- /dev/null
++++ b/tools/moat/image_watershed_native_compare.py
+@@ -0,0 +1,60 @@
++#!/usr/bin/env python3
++"""Report every original NPP output difference without silently tolerating it."""
++import json
++
++import numpy as np
++
++from experiment import ROOT, Experiment, write
++from image_progress import record
++from image_watershed_reference import boundary, native_output_dir
++
++PROFILE = ROOT / 'migration/rewrite/image-watershed-profile.json'
++RUNS = ROOT / 'migration/reports/image-watershed-runs.json'
++REPORT = ROOT / 'migration/reports/image-watershed-native-comparison.json'
++
++
++def main():
++    profile = json.loads(PROFILE.read_text())
++    runs = json.loads(RUNS.read_text())
++    e = Experiment('I3', 'both-watershed-full-native-product-comparison',
++                   'CPU-native-comparison',
++                   sources=[__file__, PROFILE, RUNS,
++                            ROOT / 'tools/moat/image_watershed_reference.py'])
++    rows = []
++    for sample, run in zip(profile['samples'], runs):
++        family = run['family']
++        native_dir = native_output_dir(family)
++        output_dir = ROOT / run['output_dir']
++        for name, info in sample['products'].items():
++            width = next(x['width'] for x in sample['inputs']
++                         if str(x['width']) + 'x' + str(x['height']) in name or
++                         name.endswith(x['name']))
++            height = info['bytes'] // width // (4 if 'Labels' in name else 1)
++            dtype = np.uint32 if 'Labels' in name else np.uint8
++            project = np.fromfile(output_dir / name, dtype).reshape(height, width)
++            native = np.fromfile(native_dir / name, dtype).reshape(height, width)
++            delta = (project.astype(np.int64) - native.astype(np.int64))
++            row = dict(family=family, product=name, pixels=width * height,
++                exact_pixels=int(np.count_nonzero(delta == 0)),
++                equal_fraction=float(np.mean(delta == 0)),
++                mean_absolute_difference=float(np.mean(np.abs(delta))),
++                max_absolute_difference=int(np.max(np.abs(delta))),
++                output_kind='label-id' if dtype == np.uint32 else 'image')
++            if dtype == np.uint32:
++                row['label_partition_neighbor_agreement_fraction'] = float(np.mean(
++                    boundary(project) == boundary(native)))
++            rows.append(row)
++    result = dict(status='OBSERVED_ALGORITHM_VARIANT', rows=rows,
++        disclaimer='Original NPP output and project gradient-descent watershed differ; equality to the independent project CPU model alone is insufficient for original-vendor equivalence.')
++    write(e.path / 'comparison.json', result)
++    result['evidence'] = e.finish('OBSERVED', dict(status=result['status'],
++        checks=[dict(check='all-22-original-products-compared', passed=len(rows) == 22)]))
++    write(REPORT, result)
++    record('I3', 'NPP/NPP+ watershed 22 个原生输出与 HIP 全像素比较：ALGORITHM_VARIANT；'
++           '尤其 CT 分割原生一致率约 71.7%，不得据项目 CPU 自洽性声称完整 NPP 等价。',
++           [result['evidence']])
++    print(result['status'], len(rows))
++
++
++if __name__ == '__main__':
++    main()
+diff --git a/tools/moat/image_watershed_negative.py b/tools/moat/image_watershed_negative.py
+new file mode 100644
+index 000000000..59f47ee61
+--- /dev/null
++++ b/tools/moat/image_watershed_negative.py
+@@ -0,0 +1,58 @@
++#!/usr/bin/env python3
++"""Reject missing original image without producing watershed products."""
++import json
++import shutil
++
++from experiment import ROOT, Experiment, digest, write
++from image_progress import record
++from image_watershed_build import dependencies
++
++PROFILE = ROOT / 'migration/rewrite/image-watershed-profile.json'
++BUILD = ROOT / 'migration/reports/image-watershed-build.json'
++REPORT = ROOT / 'migration/reports/image-watershed-negative.json'
++
++
++def main():
++    profile = json.loads(PROFILE.read_text())
++    build = json.loads(BUILD.read_text())
++    rows = []
++    for sample in profile['samples']:
++        family = sample['sample_id'].split('/')[0]
++        binary = ROOT / build['binaries'][family]['path']
++        if digest(binary) != build['binaries'][family]['sha256']:
++            raise ValueError('binary identity mismatch')
++        e = Experiment('I3', sample['sample_id'], 'rocm-missing-input',
++                       sources=[__file__, PROFILE, BUILD, *dependencies()],
++                       parent=build['experiment_id'])
++        images = e.path / 'images'; images.mkdir()
++        work = e.path / 'work'; work.mkdir()
++        missing = sample['inputs'][-1]['name']
++        for image in sample['inputs'][:-1]:
++            source = ROOT / family / 'watershedSegmentation/images' / image['name']
++            shutil.copyfile(source, images / image['name'])
++        rc = e.command([str(binary)], 'missing-last-original-image', cwd=work, timeout=120)
++        error_log = (e.path / 'logs/0001-missing-last-original-image.stderr.log').read_text()
++        all_products = set(sample['products'])
++        produced = {p.name for p in images.iterdir() if p.name in all_products}
++        expected_previous = {p for p in all_products if not p.endswith(missing)} if family == 'NPP' else {
++            p for p in all_products if not p.startswith('Corn_')}
++        checks = [dict(check='nonzero-exit-on-missing-input', passed=rc != 0),
++                  dict(check='missing-file-diagnostic', passed=missing in error_log),
++                  dict(check='no-product-for-missing-image',
++                       passed=produced == expected_previous,
++                       expected=sorted(expected_previous), observed=sorted(produced))]
++        status = 'PASSED' if all(c['passed'] for c in checks) else 'FAILED'
++        row = dict(family=family, status=status, return_code=rc,
++                   missing=missing, products=sorted(produced), checks=checks)
++        write(e.path / 'negative.json', row)
++        row['evidence'] = e.finish('EXPECTED_REJECTION' if status == 'PASSED' else 'COMMAND_FAILED',
++                                    dict(status=status, checks=checks))
++        rows.append(row); write(REPORT, rows)
++        record('I3', f'{family} watershed 缺失最后一张原图负向执行：'
++               f'rc={rc}，诊断与无缺图产品检查 {status}。', [row['evidence']])
++        print(family, status, flush=True)
++    return int(any(r['status'] != 'PASSED' for r in rows))
++
++
++if __name__ == '__main__':
++    raise SystemExit(main())
+diff --git a/tools/moat/image_watershed_reference.py b/tools/moat/image_watershed_reference.py
+new file mode 100644
+index 000000000..0df873c00
+--- /dev/null
++++ b/tools/moat/image_watershed_reference.py
+@@ -0,0 +1,151 @@
++#!/usr/bin/env python3
++"""Independent NumPy reference for every original watershed output product."""
++import json
++from pathlib import Path
++
++import numpy as np
++
++from experiment import ROOT, Experiment, digest, write
++from image_progress import record
++from image_watershed_research import descent, NATIVE
++
++PROFILE = ROOT / 'migration/rewrite/image-watershed-profile.json'
++RUNS = ROOT / 'migration/reports/image-watershed-runs.json'
++REPORT = ROOT / 'migration/reports/image-watershed-reference.json'
++
++
++def boundary(roots):
++    h, w = roots.shape
++    result = np.zeros((h, w), dtype=bool)
++    for dy in (-1, 0, 1):
++        for dx in (-1, 0, 1):
++            if not (dy or dx):
++                continue
++            y0, y1 = max(0, -dy), min(h, h - dy)
++            x0, x1 = max(0, -dx), min(w, w - dx)
++            result[y0:y1, x0:x1] |= (
++                roots[y0:y1, x0:x1] !=
++                roots[y0 + dy:y1 + dy, x0 + dx:x1 + dx])
++    return result
++
++
++def native_output_dir(family):
++    archive = ROOT / NATIVE[family]
++    manifest = json.loads((archive / 'manifest.json').read_text())
++    return ROOT / manifest['raw_artifact_dir'] / 'outputs/images'
++
++
++def validate_sample(sample, run):
++    family = run['family']
++    e = Experiment('I3', sample['sample_id'], 'independent-CPU-reference',
++                   sources=[__file__, ROOT / 'tools/moat/image_watershed_research.py',
++                            PROFILE, RUNS, ROOT / NATIVE[family] / 'run.json',
++                            *[ROOT / family / 'watershedSegmentation/images' / image['name']
++                              for image in sample['inputs']]],
++                   parent=run['experiment_id'])
++    output_dir = ROOT / run['output_dir']
++    native_dir = native_output_dir(family)
++    products = {}
++    image_metrics = []
++    for item in sample['inputs']:
++        name, w, h = item['name'], item['width'], item['height']
++        source = ROOT / family / 'watershedSegmentation/images' / name
++        if digest(source) != item['sha256']:
++            raise ValueError('original source hash changed: ' + name)
++        image = np.fromfile(source, np.uint8).reshape(h, w)
++        roots, segments, steps = descent(image)
++        roots_flat = roots.reshape(-1)
++        fixed = bool(np.all(roots_flat[roots_flat] == roots_flat))
++        parent_values = image.reshape(-1)[roots_flat]
++        monotone = bool(np.all(parent_values <= image.reshape(-1)))
++        expected = {}
++        if family == 'NPP':
++            expected['Segmented_' + name] = segments.tobytes()
++            expected['Labels_' + name] = roots.astype('<u4').tobytes()
++            native_segment_name = 'Segmented_' + name
++            native_label_name = 'Labels_' + name
++        else:
++            prefix = name.split('_')[0]
++            if name.startswith('CT_skull'):
++                prefix = 'CT_skull'
++            elif name.startswith('Corn'):
++                prefix = 'Corn'
++            suffix = f'_8Way_{w}x{h}'
++            root_flags = np.zeros(w * h, dtype=np.uint32)
++            root_flags[np.unique(roots_flat)] = 1
++            root_ranks = np.cumsum(root_flags, dtype=np.uint32) - 1
++            compact = root_ranks[roots_flat].reshape(h, w)
++            edge = boundary(roots)
++            boundaries = np.where(edge, 0, 255).astype(np.uint8)
++            contrast = np.where(edge, 255, segments).astype(np.uint8)
++            expected[prefix + '_Segments' + suffix + '_8u.raw'] = segments.tobytes()
++            expected[prefix + '_CompressedSegmentLabels' + suffix + '_32u.raw'] = compact.astype('<u4').tobytes()
++            expected[prefix + '_SegmentBoundaries' + suffix + '_8u.raw'] = boundaries.tobytes()
++            expected[prefix + '_SegmentsWithContrastingBoundaries' + suffix + '_8u.raw'] = contrast.tobytes()
++            native_segment_name = prefix + '_Segments' + suffix + '_8u.raw'
++            native_label_name = prefix + '_CompressedSegmentLabels' + suffix + '_32u.raw'
++        native_segments = np.fromfile(native_dir / native_segment_name, np.uint8).reshape(h, w)
++        native_labels = np.fromfile(native_dir / native_label_name, np.uint32).reshape(h, w)
++        project_edges = boundary(roots)
++        native_edges = boundary(native_labels)
++        image_metrics.append(dict(input=name, pixels=w * h, descent_steps=steps,
++            root_fixed=fixed, root_intensity_monotone=monotone,
++            roots=int(np.unique(roots_flat).size),
++            native_segments_equal_fraction=float(np.mean(segments == native_segments)),
++            native_segments_mean_absolute_difference=float(np.mean(
++                np.abs(segments.astype(np.int16) - native_segments.astype(np.int16)))),
++            native_label_boundary_agreement_fraction=float(np.mean(project_edges == native_edges)),
++            native_unique_label_count=int(np.unique(native_labels).size)))
++        for product_name, expected_bytes in expected.items():
++            actual_path = output_dir / product_name
++            actual = actual_path.read_bytes() if actual_path.is_file() else b''
++            equal = actual == expected_bytes
++            first_difference = next((i for i, (a, b) in enumerate(zip(actual, expected_bytes))
++                                     if a != b), None) if not equal else None
++            products[product_name] = dict(exact=equal, expected_bytes=len(expected_bytes),
++                actual_bytes=len(actual), expected_sha256=__import__('hashlib').sha256(expected_bytes).hexdigest(),
++                actual_sha256=digest(actual_path) if actual_path.is_file() else None,
++                first_difference=first_difference)
++    checks = [dict(check='all-22-or-10-original-product-bytes',
++                   passed=len(products) == len(sample['products']) and
++                   set(products) == set(sample['products']) and
++                   all(p['exact'] for p in products.values())),
++              dict(check='all-descent-roots-fixed',
++                   passed=all(m['root_fixed'] for m in image_metrics)),
++              dict(check='all-root-intensities-monotone',
++                   passed=all(m['root_intensity_monotone'] for m in image_metrics)),
++              dict(check='native-algorithm-variant-measured',
++                   passed=all(0 <= m['native_segments_equal_fraction'] <= 1 and
++                              0 <= m['native_label_boundary_agreement_fraction'] <= 1
++                              for m in image_metrics))]
++    status = 'PASSED' if all(c['passed'] for c in checks) else 'NUMERIC_MISMATCH'
++    report = dict(sample_id=sample['sample_id'], family=family, status=status,
++                  experiment_id=e.id, run_evidence=run['evidence'],
++                  algorithm_variant='NVIDIA NPP uses different basin/label rules; pixel exactness is qualified against independent project CPU reference only',
++                  products=products, image_metrics=image_metrics, checks=checks)
++    write(e.path / 'reference.json', report)
++    report['evidence'] = e.finish(status, dict(status=status, checks=checks),
++                                  metrics=dict(images=image_metrics))
++    record('I3', f'{family} watershed 独立 NumPy 参考验收：'
++           f'{sum(p["exact"] for p in products.values())}/{len(products)} 输出逐字节一致，'
++           f'状态 {status}；原生 NPP 差异按 ALGORITHM_VARIANT 记录。', [report['evidence']])
++    print(family, status, sum(p['exact'] for p in products.values()), '/', len(products), flush=True)
++    return report
++
++
++def main():
++    profile = json.loads(PROFILE.read_text())
++    runs = json.loads(RUNS.read_text())
++    if len(runs) != 2 or any(r['status'] != 'EXECUTED' for r in runs):
++        raise ValueError('complete original-entry HIP executions required')
++    rows = []
++    for sample, run in zip(profile['samples'], runs):
++        if sample['sample_id'] != run['sample_id']:
++            raise ValueError('sample/run order mismatch')
++        rows.append(validate_sample(sample, run))
++        write(REPORT, rows)
++    return int(any(row['status'] != 'PASSED' for row in rows))
++
++
++if __name__ == '__main__':
++    raise SystemExit(main())
+diff --git a/tools/moat/image_watershed_research.py b/tools/moat/image_watershed_research.py
+new file mode 100644
+index 000000000..c0f11a1b7
+--- /dev/null
++++ b/tools/moat/image_watershed_research.py
+@@ -0,0 +1,69 @@
++#!/usr/bin/env python3
++"""Measure a deterministic eight-neighbor descent candidate against original NPP output."""
++import json
++from pathlib import Path
++import numpy as np
++from experiment import ROOT,Experiment,write,digest
++from image_progress import record
++
++NATIVE={
++ 'NPP':'migration/reports/evidence/rewrite/I3/NPP__watershedSegmentation_watershedSegmentation.cpp/20261111T181142.872291Z-I3-cuda-original-577dee227e',
++ 'NPP+':'migration/reports/evidence/rewrite/I3/NPP___watershedSegmentation_watershedSegmentationNPPPlus.cpp/20261111T181148.490829Z-I3-cuda-original-65de308faa',
++}
++SIZES={'CT_skull_512x512_8u_Gray.raw':(512,512),'Rocks_512x512_8u_Gray.raw':(512,512),
++ 'Lena_512x512_8u_Gray.raw':(512,512),'coins_500x383_8u_Gray.raw':(500,383),
++ 'coins_overlay_500x569_8u_Gray.raw':(500,569),'Corn_614x461_8u_Gray.raw':(614,461)}
++
++def descent(image):
++ h,w=image.shape;indices=np.arange(h*w,dtype=np.int32).reshape(h,w)
++ best_value=image.copy();parent=indices.copy()
++ for dy in (-1,0,1):
++  for dx in (-1,0,1):
++   if not (dx or dy):continue
++   y0=max(0,-dy);y1=min(h,h-dy);x0=max(0,-dx);x1=min(w,w-dx)
++   target=(slice(y0,y1),slice(x0,x1));neighbor=(slice(y0+dy,y1+dy),slice(x0+dx,x1+dx))
++   v=image[neighbor];i=indices[neighbor];old=best_value[target];old_i=parent[target]
++   change=(v<old)|((v==old)&(i<old_i));old[change]=v[change];old_i[change]=i[change]
++ roots=parent.reshape(-1).copy()
++ for steps in range(64):
++  next_roots=roots[roots]
++  if np.array_equal(roots,next_roots):break
++  roots=next_roots
++ else:raise ValueError('descent root did not converge')
++ return roots.reshape(h,w),image.reshape(-1)[roots].reshape(h,w),steps+1
++
++def main():
++ sources=[Path(__file__),ROOT/'NPP/watershedSegmentation/watershedSegmentation.cpp',
++   ROOT/'NPP+/watershedSegmentation/watershedSegmentationNPPPlus.cpp']
++ for family,ref in NATIVE.items():
++  sources.append(ROOT/ref/'run.json')
++ e=Experiment('I3','watershed-eight-neighbor-descent-vs-original-NPP','CPU-research',sources=sources)
++ rows=[]
++ for name,(w,h) in SIZES.items():
++  source=ROOT/'NPP/watershedSegmentation/images'/name
++  if not source.is_file():source=ROOT/'NPP+/watershedSegmentation/images'/name
++  image=np.fromfile(source,np.uint8).reshape(h,w)
++  roots,segments,steps=descent(image)
++  native_ref=NATIVE['NPP'] if (ROOT/NATIVE['NPP']/'run.json').is_file() and name!='Corn_614x461_8u_Gray.raw' else NATIVE['NPP+']
++  native=json.loads((ROOT/native_ref/'run.json').read_text())
++  raw=ROOT/json.loads((ROOT/native_ref/'manifest.json').read_text())['raw_artifact_dir']
++  if name.startswith('Corn_'):seg='Corn_Segments_8Way_614x461_8u.raw';label='Corn_CompressedSegmentLabels_8Way_614x461_32u.raw'
++  else:seg='Segmented_'+name;label='Labels_'+name
++  native_seg=np.fromfile(raw/'outputs/images'/seg,np.uint8).reshape(h,w)
++  native_label=np.fromfile(raw/'outputs/images'/label,np.uint32).reshape(h,w)
++  row=dict(image=name,width=w,height=h,input_sha256=digest(source),native_evidence=native_ref,
++    native_segment_sha256=native['files']['images/'+seg]['sha256'],
++    native_label_sha256=native['files']['images/'+label]['sha256'],
++    descent_steps=steps,project_unique_roots=int(np.unique(roots).size),
++    native_unique_labels=int(np.unique(native_label).size),
++    direct_root_match_fraction=float(np.mean(roots==native_label)),
++    segment_match_fraction=float(np.mean(segments==native_seg)),
++    segment_mean_abs=float(np.mean(np.abs(segments.astype(np.int16)-native_seg.astype(np.int16)))))
++  rows.append(row)
++ write(e.path/'research.json',dict(status='OBSERVED',rows=rows,algorithm='eight-neighbor local minimum, ties by lowest linear index, pointer jumping'))
++ ref=e.finish('OBSERVED',dict(status='OBSERVED',metrics={'images':len(rows)}))
++ write(ROOT/'migration/reports/image-watershed-research.json',dict(status='OBSERVED',rows=rows,evidence=ref))
++ record('I3','watershed六原图八邻域最陡下降CPU候选与5090原生segmentation/label逐像素比较：OBSERVED，仅研究，不新增资格。',[ref])
++ print(json.dumps(rows,ensure_ascii=False,indent=2))
++
++if __name__=='__main__':main()
+diff --git a/tools/moat/image_watershed_run.py b/tools/moat/image_watershed_run.py
+new file mode 100644
+index 000000000..c3f497a0b
+--- /dev/null
++++ b/tools/moat/image_watershed_run.py
+@@ -0,0 +1,74 @@
++#!/usr/bin/env python3
++"""Run both complete watershed entrypoints on their original image sets."""
++import json
++import shutil
++
++from experiment import ROOT, Experiment, digest, write
++from image_progress import record
++from image_watershed_build import dependencies
++from snapshot import capture
++
++PROFILE = ROOT / 'migration/rewrite/image-watershed-profile.json'
++BUILD = ROOT / 'migration/reports/image-watershed-build.json'
++REPORT = ROOT / 'migration/reports/image-watershed-runs.json'
++
++
++def main():
++    profile = json.loads(PROFILE.read_text())
++    build = json.loads(BUILD.read_text())
++    if profile['status'] != 'FROZEN' or build['status'] != 'BUILT':
++        raise ValueError('a frozen contract and complete HIP build are required')
++    if any(digest(ROOT / name) != sha for name, sha in build['dependencies'].items()):
++        raise ValueError('build dependency changed; rebuild before execution')
++    rows = []
++    for sample in profile['samples']:
++        family = sample['sample_id'].split('/')[0]
++        binary = build['binaries'][family]
++        if digest(ROOT / binary['path']) != binary['sha256']:
++            raise ValueError('HIP binary hash changed')
++        e = Experiment('I3', sample['sample_id'], 'rocm-original-full-images',
++            sources=[__file__, PROFILE, BUILD, *dependencies(),
++                     *[ROOT / family / 'watershedSegmentation/images' / image['name']
++                       for image in sample['inputs']]], parent=build['experiment_id'])
++        write(e.path / 'backend.observed.json', capture())
++        images = e.path / 'images'
++        images.mkdir()
++        for image in sample['inputs']:
++            source = ROOT / family / 'watershedSegmentation/images' / image['name']
++            if digest(source) != image['sha256'] or source.stat().st_size != image['bytes']:
++                raise ValueError('frozen original input changed: ' + str(source))
++            shutil.copyfile(source, images / image['name'])
++        work = e.path / 'work'
++        work.mkdir()
++        rc = e.command([str(ROOT / binary['path'])], 'full-original-entrypoint',
++                       cwd=work, timeout=300)
++        observed = {p.name: {'sha256': digest(p), 'bytes': p.stat().st_size}
++                    for p in images.iterdir() if p.name not in
++                    {image['name'] for image in sample['inputs']}}
++        expected = sample['products']
++        checks = [dict(check='entrypoint-exit-zero', passed=rc == 0),
++                  dict(check='all-original-product-names',
++                       passed=set(observed) == set(expected),
++                       expected=sorted(expected), observed=sorted(observed)),
++                  dict(check='all-original-product-sizes',
++                       passed=set(observed) == set(expected) and
++                       all(observed[name]['bytes'] == expected[name]['bytes']
++                           for name in expected))]
++        status = 'EXECUTED' if all(c['passed'] for c in checks) else 'RUNTIME_ERROR'
++        row = dict(sample_id=sample['sample_id'], family=family,
++                   status=status, return_code=rc, experiment_id=e.id,
++                   build_evidence=build['evidence'], outputs=observed,
++                   output_dir=str(images.relative_to(ROOT)), checks=checks)
++        write(e.path / 'run.json', row)
++        row['evidence'] = e.finish(status, dict(status=status, checks=checks))
++        rows.append(row)
++        write(REPORT, rows)
++        record('I3', f'{family} watershed 原始完整入口在 AMD GPU 上运行：'
++               f'{len(observed)}/{len(expected)} 产品，rc={rc}，状态 {status}；'
++               '逐字节 CPU 数值验收待完成。', [row['evidence']])
++        print(family, status, len(observed), '/', len(expected), flush=True)
++    return int(any(row['status'] != 'EXECUTED' for row in rows))
++
++
++if __name__ == '__main__':
++    raise SystemExit(main())
+diff --git a/tools/moat/image_watershed_trace.py b/tools/moat/image_watershed_trace.py
+new file mode 100644
+index 000000000..5e71650a5
+--- /dev/null
++++ b/tools/moat/image_watershed_trace.py
+@@ -0,0 +1,85 @@
++#!/usr/bin/env python3
++"""Trace real HIP watershed stages and bind the traced products to validation."""
++import collections
++import csv
++import json
++import shutil
++
++from experiment import ROOT, Experiment, digest, write
++from image_progress import record
++from image_watershed_build import dependencies
++from snapshot import capture
++
++KERNELS = ('select_parent', 'jump', 'render', 'mark_roots',
++           'block_scan', 'scan_sums', 'compact_roots')
++PROFILE = ROOT / 'migration/rewrite/image-watershed-profile.json'
++BUILD = ROOT / 'migration/reports/image-watershed-build.json'
++RUNS = ROOT / 'migration/reports/image-watershed-runs.json'
++REPORT = ROOT / 'migration/reports/image-watershed-trace.json'
++
++
++def main():
++    sample = json.loads(PROFILE.read_text())['samples'][1]
++    build = json.loads(BUILD.read_text())
++    run = json.loads(RUNS.read_text())[1]
++    binary = ROOT / build['binaries']['NPP+']['path']
++    if digest(binary) != build['binaries']['NPP+']['sha256']:
++        raise ValueError('binary identity mismatch')
++    e = Experiment('I3', sample['sample_id'], 'rocm-real-kernel-trace',
++                   sources=[__file__, PROFILE, BUILD, RUNS, *dependencies()],
++                   parent=run['experiment_id'])
++    write(e.path / 'backend.observed.json', capture())
++    images = e.path / 'images'; images.mkdir()
++    for item in sample['inputs']:
++        shutil.copyfile(ROOT / 'NPP+/watershedSegmentation/images' / item['name'],
++                        images / item['name'])
++    work = e.path / 'work'; work.mkdir()
++    rc = e.command(['rocprofv3', '--kernel-trace', '--output-format', 'csv',
++                    '--output-directory', str(e.path / 'trace'), '--', str(binary)],
++                   'actual-original-watershed-kernels', cwd=work, timeout=300)
++    traced = list((e.path / 'trace').rglob('*kernel_trace.csv'))
++    agents = list((e.path / 'trace').rglob('*agent_info.csv'))
++    checks = [dict(check='profiled-original-entry-exit-zero', passed=rc == 0),
++              dict(check='one-kernel-and-agent-trace',
++                   passed=len(traced) == len(agents) == 1),
++              dict(check='all-12-traced-products-identical-to-unprofiled',
++                   passed=all((images / name).is_file() and
++                              digest(images / name) == info['sha256']
++                              for name, info in run['outputs'].items()))]
++    counts = collections.Counter()
++    if len(traced) == len(agents) == 1:
++        agent_rows = {r['Node_Id']: r for r in csv.DictReader(agents[0].open())}
++        allowed = {d['pci_bdf'] for d in json.loads(
++            (e.path / 'backend.observed.json').read_text())['devices']
++            if d['physical_id'] == 1}
++        for row in csv.DictReader(traced[0].open()):
++            name = row['Kernel_Name']
++            stage = next((key for key in KERNELS if key in name), None)
++            if stage is None:
++                continue
++            counts[stage] += 1
++            agent = agent_rows[row['Agent_Id'].split()[-1]]
++            loc = int(agent['Location_Id'])
++            pci = f"{int(agent['Domain']):04x}:{loc >> 8:02x}:{(loc >> 3) & 31:02x}.{loc & 7}"
++            checks.append(dict(check=f'actual-{stage}-dispatch-{counts[stage]}',
++                passed=pci in allowed and
++                       int(row['End_Timestamp']) > int(row['Start_Timestamp']) and
++                       int(row['Grid_Size_X']) > 0,
++                pci_bdf=pci))
++        checks.append(dict(check='all-seven-HIP-stages-dispatched',
++                           passed=all(counts[key] > 0 for key in KERNELS),
++                           counts=dict(counts)))
++    status = 'PASSED' if all(c['passed'] for c in checks) else 'PROFILER_FAILED'
++    result = dict(status=status, return_code=rc, checks=checks,
++                  kernel_counts=dict(counts), run_evidence=run['evidence'])
++    write(e.path / 'trace-result.json', result)
++    result['evidence'] = e.finish(status, dict(status=status, checks=checks))
++    write(REPORT, result)
++    record('I3', 'NPP+ watershed 真实 AMD GPU kernel trace/物理卡/7阶段/12产品哈希：'
++           + status + '；算法语义差异仍待修正。', [result['evidence']])
++    print(status, dict(counts))
++    return int(status != 'PASSED')
++
++
++if __name__ == '__main__':
++    raise SystemExit(main())
+diff --git a/tools/moat/publish_image_watershed_partial.py b/tools/moat/publish_image_watershed_partial.py
+new file mode 100644
+index 000000000..4832dce81
+--- /dev/null
++++ b/tools/moat/publish_image_watershed_partial.py
+@@ -0,0 +1,117 @@
++#!/usr/bin/env python3
++"""Publish measured watershed implementation gaps without claiming full support."""
++import json
++
++from audit import check as audit_check
++from experiment import ROOT, digest, write
++from image_progress import record
++
++
++def load(name):
++    return json.loads((ROOT / 'migration/reports' / name).read_text())
++
++
++def seal(reference):
++    directory = ROOT / reference
++    if not directory.is_dir() or audit_check(directory):
++        raise ValueError('unsealed watershed evidence: ' + reference)
++
++
++def main():
++    profile = json.loads((ROOT / 'migration/rewrite/image-watershed-profile.json').read_text())
++    build = load('image-watershed-build.json')
++    runs = load('image-watershed-runs.json')
++    cpu = load('image-watershed-reference.json')
++    native = load('image-watershed-native-comparison.json')
++    negative = load('image-watershed-negative.json')
++    trace = load('image-watershed-trace.json')
++    if (len(profile['samples']) != 2 or build['status'] != 'BUILT' or
++        any(digest(ROOT / p) != sha for p, sha in build['dependencies'].items())):
++        raise ValueError('current fully built watershed sources required')
++    if not (len(runs) == len(cpu) == len(negative) == 2):
++        raise ValueError('complete watershed report rows required')
++    for row in runs + cpu + negative:
++        seal(row['evidence'])
++    for row in [build, native, trace]:
++        seal(row['evidence'])
++    if (any(r['status'] != 'EXECUTED' for r in runs) or
++        any(r['status'] != 'PASSED' for r in cpu + negative) or
++        native['status'] != 'OBSERVED_ALGORITHM_VARIANT' or len(native['rows']) != 22 or
++        trace['status'] != 'PASSED' or
++        not all(c['passed'] for c in trace['checks'])):
++        raise ValueError('watershed project result or native gap not fully evidenced')
++    catalog = json.loads((ROOT / 'migration/samples.yaml').read_text())
++    for sample in profile['samples']:
++        sample_id = sample['sample_id']
++        family = sample_id.split('/')[0]
++        run = next(r for r in runs if r['sample_id'] == sample_id)
++        ref = next(r for r in cpu if r['sample_id'] == sample_id)
++        neg = next(r for r in negative if r['family'] == family)
++        native_rows = [r for r in native['rows'] if r['family'] == family]
++        seg = [r for r in native_rows if r['product'].startswith('Segmented_') or
++               '_Segments_8Way_' in r['product']]
++        lowest = min(r['equal_fraction'] for r in seg)
++        record_row = next(r for r in catalog['samples'] if r['id'] == sample_id)
++        required = ['original-products-and-names', 'independent-project-CPU-all-output-bytes',
++                    'missing-input-rejection', 'real-HIP-kernel-trace',
++                    'NPP-native-algorithm-parity', 'fixed-commit-cold-and-independent-review']
++        passed = required[:3] + (required[3:4] if family == 'NPP+' else [])
++        record_row.update(status='PARTIAL', level='L3', reason_code='SEMANTIC_GAP',
++            actual_library='Project HIP eight-neighbor gradient descent and root-label compression',
++            backend_library='project HIP image watershed',
++            equivalence='ALGORITHM_VARIANT',
++            reason=f'完整原始入口及 {len(sample["inputs"])} 张图/{len(sample["products"])} 件产品已在 AMD GPU 执行，'
++                   f'独立 NumPy 模型逐字节一致，缺图拒绝通过；原生 NPP 最低分割像素一致率 {lowest:.4f}，'
++                   '平台区归属和边界语义未达到原例等价，当前只能算部分实现。',
++            required_cases=required, passed_cases=passed,
++            cuda_baseline='PASSED', cuda_comparison='OBSERVED_ALGORITHM_VARIANT',
++            cuda_comparison_mode='ALGORITHM_VARIANT',
++            cuda_comparison_reason='原始5090完整输入/产品与HIP逐像素对照见 image-watershed-native-comparison.json；'
++                                   '标签ID与分割边界均有显著差异。',
++            active_batch='I3',
++            retry_condition='重写分桶浸没、平台区、压紧标签和边界模式；预登记原生分区/边界/像素阈值后重新独立验收及冷检出。',
++            next_step='I3 原生语义收口；I4–I8 JPEG/JPEG2000 完整入口。',
++            reproduce='python3 tools/moat/image_watershed_contracts.py\n'
++                      'python3 tools/moat/image_watershed_build.py\n'
++                      'python3 tools/moat/image_watershed_run.py\n'
++                      'python3 tools/moat/image_watershed_reference.py\n'
++                      'python3 tools/moat/image_watershed_native_compare.py\n'
++                      'python3 tools/moat/image_watershed_negative.py\n'
++                      'python3 tools/moat/image_watershed_trace.py')
++        record_row.pop('selected_validation', None)
++        for evidence in [build['evidence'], run['evidence'], ref['evidence'],
++                         neg['evidence'], native['evidence'], trace['evidence'],
++                         'migration/reports/image-watershed.md']:
++            if evidence not in record_row['evidence']:
++                record_row['evidence'].append(evidence)
++    write(ROOT / 'migration/samples.yaml', catalog)
++    lines = ['# Watershed：HIP 实验与未收口语义', '',
++        '两个原始入口已运行所有原图，22 件输出与独立项目 CPU 模型逐字节一致。'
++        '这只证明项目八邻域下降算法正确执行；NPP 的浸没/平台区与边界语义仍有明显差异，'
++        '因此两项保持 **PARTIAL**，不列入整例通过数。', '',
++        '| 模块 | 原图/产品 | 项目 CPU | 原生分割最小一致率 | 当前状态 |',
++        '| --- | ---: | --- | ---: | --- |']
++    for sample in profile['samples']:
++        family = sample['sample_id'].split('/')[0]
++        rows = [r for r in native['rows'] if r['family'] == family and
++                (r['product'].startswith('Segmented_') or '_Segments_8Way_' in r['product'])]
++        lines.append(f'| {family} | {len(sample["inputs"])}/{len(sample["products"])} | '
++                     f'全部逐字节一致 | {min(r["equal_fraction"] for r in rows):.2%} | PARTIAL |')
++    lines += ['', 'NPP+ 原生边界模式的最低逐像素一致率为 '
++              f'{min(r["equal_fraction"] for r in native["rows"] if r["family"] == "NPP+" and "Boundaries" in r["product"]):.2%}。'
++              '原生标签 ID 不能直接比较，邻域分区一致率见完整 JSON。', '',
++              '证据： [合同](../rewrite/image-watershed-profile.json)、'
++              '[AMD 执行](image-watershed-runs.json)、[独立 CPU](image-watershed-reference.json)、'
++              '[22 产品原生比较](image-watershed-native-comparison.json)、'
++              '[缺图拒绝](image-watershed-negative.json)、[真实 GPU trace](image-watershed-trace.json)。', '',
++              '下一步：实现分桶浸没/平台区分配，对 5090 原例预固定可接受的分割、'
++              '边界和标签分区阈值后重做完整资格。']
++    (ROOT / 'migration/reports/image-watershed.md').write_text('\n'.join(lines) + '\n')
++    record('I3', '两个 watershed 完整 HIP 文件流程已实现并验证，但原生分割/边界差异较大，'
++           '主表和算子支持表改为 PARTIAL；待浸没与平台区算法重写，不计入整例通过。',
++           ['migration/reports/image-watershed.md', native['evidence']])
++    print('Published watershed PARTIAL 2/2')
++
++
++if __name__ == '__main__':
++    main()
+diff --git a/tools/moat/qualify_image_progressive_subset.py b/tools/moat/qualify_image_progressive_subset.py
+new file mode 100644
+index 000000000..f76c000b6
+--- /dev/null
++++ b/tools/moat/qualify_image_progressive_subset.py
+@@ -0,0 +1,115 @@
++#!/usr/bin/env python3
++"""Seal I4 GPU progressive JPEG subset evidence for all six existing adapters."""
++import json
++from pathlib import Path
++
++from audit import check as audit_check
++from experiment import ROOT, Experiment, digest, git, write
++from image_progress import record
++
++REPORT = ROOT / 'migration/reports/image-progressive-subset-qualifications.json'
++
++
++def latest(sample):
++    directory = ROOT / 'migration/reports/evidence/rewrite/I4' / sample
++    children = sorted(p for p in directory.iterdir() if p.is_dir())
++    if not children:
++        raise ValueError('missing completed regression: ' + sample)
++    return str(children[-1].relative_to(ROOT))
++
++
++def main():
++    runs = {r['source']: r for r in json.loads(
++        (ROOT / 'migration/reports/batches9_11-rocm.json').read_text()) if r['batch'] == 'b10'}
++    validations = {r['source']: r for r in json.loads(
++        (ROOT / 'migration/reports/batches9_11-validation.json').read_text()) if r['batch'] == 'b10'}
++    profile = json.loads((ROOT / 'migration/rewrite/image-progressive-gpu-profile.json').read_text())
++    prototype = json.loads((ROOT / 'migration/reports/image-progressive-runs.json').read_text())
++    trace = json.loads((ROOT / 'migration/reports/image-progressive-trace.json').read_text())
++    corpus = json.loads((ROOT / 'migration/reports/image-progressive-original-corpus.json').read_text())
++    refs = [latest('nvJPEG-isolated-backend-six-entry-regression'),
++            latest('nvJPEG-isolated-backend-six-entry-CPU-CUDA'),
++            trace['evidence'], corpus['evidence']]
++    refs += [r['evidence'] for r in prototype]
++    if any(audit_check(ROOT / ref) for ref in refs):
++        raise ValueError('a referenced MOAT evidence seal is invalid')
++    if not (len(runs) == len(validations) == 6 and len(prototype) == 2 and
++            all(r['status'] == 'PASSED' for r in prototype) and
++            trace['status'] == corpus['status'] == 'PASSED'):
++        raise ValueError('all six adapters and both original progressive inputs required')
++    qualifications = []
++    for source, run in runs.items():
++        validation = validations[source]
++        original = next(r for r in run['runs'] if r['case'] == 'original-corpus')
++        case = json.loads((ROOT / original['evidence'] / 'case.json').read_text())
++        product = {item['raw'].split('/')[-1].removesuffix('.rgbi.s1.raw'): item
++                   for item in case['outputs']}
++        progressive_names = {'cat.jpg', 'img9.jpg'}
++        other_names = set(product) - progressive_names
++        checks = [dict(check='all-seven-original-B10-cases-current-source',
++                       passed=run['build_return_code'] == 0 and
++                              validation['status'] == 'PASSED' and
++                              validation['current_source_proof'] is True and
++                              len(validation['cases']) == 7 and
++                              all(c['status'] == 'PASSED' for c in validation['cases'])),
++                  dict(check='all-seven-same-input-CUDA-math-comparisons',
++                       passed=validation['cuda_comparison'] == 'PASSED' and
++                              all(c['status'] == 'PASSED' for c in validation['cuda_cases'])),
++                  dict(check='all-12-original-corpus-images', passed=len(product) == 12),
++                  dict(check='two-progressive-GPU-pixels-and-no-CPU-pixel-fallback',
++                       passed=all(product.get(name, {}).get('metadata', {}).get('gpu_software_decode') == 1 and
++                                  product[name]['metadata'].get('cpu_fallback') == 0
++                                  for name in progressive_names)),
++                  dict(check='ten-baseline-rocJPEG-hardware-pixels',
++                       passed=len(other_names) == 10 and
++                              all(product[name]['metadata'].get('gpu_software_decode') == 0 and
++                                  product[name]['metadata'].get('cpu_fallback') == 0 for name in other_names)),
++                  dict(check='fixed-progressive-CPU-RGB-gates',
++                       passed=all(r['max_abs'] <= profile['gates']['max_abs_per_channel'] and
++                                  r['psnr_db'] >= profile['gates']['min_rgb_psnr_db'] for r in prototype)),
++                  dict(check='actual-physical-GPU-IDCT-and-RGB-trace',
++                       passed=trace['status'] == 'PASSED' and
++                              trace['kernel_counts'].get('inverse_dct') == 3 and
++                              trace['kernel_counts'].get('convert_rgb') == 1)]
++        if not all(c['passed'] for c in checks):
++            raise ValueError('progressive subset gate failed: ' + source)
++        implementation = run['implementation']
++        dependencies = dict(validation['dependencies'])
++        dependencies[implementation] = digest(ROOT / implementation)
++        dependencies['migration/rewrite/image-progressive-gpu-profile.json'] = digest(
++            ROOT / 'migration/rewrite/image-progressive-gpu-profile.json')
++        e = Experiment('I4', source, 'composite-subset-qualification',
++            sources=[__file__, ROOT / implementation,
++                     ROOT / 'migration/reports/batches9_11-rocm.json',
++                     ROOT / 'migration/reports/batches9_11-validation.json',
++                     ROOT / 'migration/reports/image-progressive-runs.json',
++                     ROOT / 'migration/reports/image-progressive-trace.json',
++                     ROOT / 'migration/reports/image-progressive-original-corpus.json',
++                     ROOT / 'migration/rewrite/image-progressive-gpu-profile.json'])
++        q = dict(kind='image-progressive-GPU-subset', status='PASSED',
++                 contract_status='PARTIAL', sample_id=source.rsplit('/', 1)[0] +
++                 '::' + source.rsplit('/', 1)[1], implementation=implementation,
++                 implementation_sha256=digest(ROOT / implementation),
++                 source_commit=git('rev-parse', 'HEAD').strip(),
++                 case_count=8, case_ids=['batches9_11/' + r['case'] for r in run['runs']] +
++                 ['I4/progressive-GPU-pixel-synthesis'],
++                 checks=checks, dependencies=dependencies,
++                 evidence_references=refs,
++                 rocm_evidence=original['evidence'],
++                 cuda_evidence=validation['cuda_evidence'],
++                 comparison_mode='GPU_PROGRESSIVE_PROJECT_ALGORITHM',
++                 remaining='native backend enum/pipeline or automatic scheduling, CPU JPEG encoding, and fixed-commit cold review vary by entrypoint')
++        q['qualification_id'] = e.id
++        write(e.path / 'qualification.json', {k: v for k, v in q.items()
++                                                if k not in {'qualification_id', 'evidence'}})
++        q['evidence'] = e.finish('PASSED', dict(status='PASSED', checks=checks))
++        qualifications.append(q)
++        write(REPORT, qualifications)
++        record('I4', f'{source} 七组历史合同+两原始 progressive GPU像素/trace/current source '
++               '复合子集证据封存；整例仍 PARTIAL，待剩余语义/冷检出复审。', [q['evidence']])
++        print(source, 'SUBSET_PASSED', flush=True)
++    return 0
++
++
++if __name__ == '__main__':
++    raise SystemExit(main())

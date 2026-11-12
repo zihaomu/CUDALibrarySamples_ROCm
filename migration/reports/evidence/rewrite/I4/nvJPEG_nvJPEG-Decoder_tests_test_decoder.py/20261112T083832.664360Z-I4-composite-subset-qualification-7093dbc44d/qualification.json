@@ -1,0 +1,77 @@
+{
+  "kind": "image-progressive-GPU-subset",
+  "status": "PASSED",
+  "contract_status": "PARTIAL",
+  "sample_id": "nvJPEG/nvJPEG-Decoder/tests::test_decoder.py",
+  "implementation": "rocm/ported/nvJPEG/nvJPEG-Decoder/tests/test_decoder.py",
+  "implementation_sha256": "8b90de66b1d2422b7cd524e1f636e1fe03fab77296bac1b59424d260caae76b9",
+  "source_commit": "bc40ed63e338a75f3bcab489561a294408e04f2e",
+  "case_count": 8,
+  "case_ids": [
+    "batches9_11/original-corpus",
+    "batches9_11/formats-scale",
+    "batches9_11/roi-boundary",
+    "batches9_11/batch-multi-instance",
+    "batches9_11/invalid-cli",
+    "batches9_11/postprocess",
+    "batches9_11/python-integration",
+    "I4/progressive-GPU-pixel-synthesis"
+  ],
+  "checks": [
+    {
+      "check": "all-seven-original-B10-cases-current-source",
+      "passed": true
+    },
+    {
+      "check": "all-seven-same-input-CUDA-math-comparisons",
+      "passed": true
+    },
+    {
+      "check": "all-12-original-corpus-images",
+      "passed": true
+    },
+    {
+      "check": "two-progressive-GPU-pixels-and-no-CPU-pixel-fallback",
+      "passed": true
+    },
+    {
+      "check": "ten-baseline-rocJPEG-hardware-pixels",
+      "passed": true
+    },
+    {
+      "check": "fixed-progressive-CPU-RGB-gates",
+      "passed": true
+    },
+    {
+      "check": "actual-physical-GPU-IDCT-and-RGB-trace",
+      "passed": true
+    }
+  ],
+  "dependencies": {
+    "rocm/common/image/jpeg_decoder_v2.hpp": "662ba8fd337ebd46c815fccb0919e70b5855fbd4f9e0b739192a144851208df4",
+    "rocm/common/batches_runtime.hpp": "04dc008dae2ade89ea3ef3e349d4a2dd0a842601737c77f0c7f076187b34f26f",
+    "rocm/common/image/progressive_jpeg.hpp": "346edd6bcb48cdc0ce8ebe9932ba861e3a008c3960d3ad30f985e989451081ce",
+    "rocm/common/observe.hpp": "3bd452d352dfce533bfb51a6e32ea308d9ca5d85a3a22afeca109d1cae743410",
+    "rocm/common/binary_observe.hpp": "c932e3d979f33ea8c62b38e687be1a083dfec0481d5e9ffbb04ffe6865899e73",
+    "rocm/ported/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp": "df2bb9a0892629ed3a092ed893388b434579f3d49140439734cdaa9289365d74",
+    "tools/migration/batch10_reference.py": "33966ddd0e942bfbbca079c41db1ac08cb13c4714acd680a614453053cea2741",
+    "tools/migration/batches9_11_spec.py": "4f6199d3c85b06462d1ef07657992a72e8fe343f7e91a66d1eabbc3d53e27946",
+    "tools/migration/batches9_11_run.py": "5a3a4f5c1ca54f242593d64ff9f5bdeea873bb7694a802f3070594f40f2499be",
+    "tools/migration/batch10_case.py": "08a095cd396e89ae24337d49e39db6ddedb76bd995917cf58ce02d00dc5e9ad4",
+    "nvJPEG/nvJPEG-Decoder/tests/test_decoder.py": "b430c3b46f5698b0e54aa4b23ed80c165371f4fdc02d132c6d75a7701264ca33",
+    "rocm/ported/nvJPEG/nvJPEG-Decoder/tests/test_decoder.py": "8b90de66b1d2422b7cd524e1f636e1fe03fab77296bac1b59424d260caae76b9",
+    "migration/rewrite/image-progressive-gpu-profile.json": "0ae61cf2f12d005c0a4617d965d373f7a58317a3bb683c74c97266392be1d79b"
+  },
+  "evidence_references": [
+    "migration/reports/evidence/rewrite/I4/nvJPEG-isolated-backend-six-entry-regression/20261112T083353.875440Z-I4-rocm-regression-7882d7a0c7",
+    "migration/reports/evidence/rewrite/I4/nvJPEG-isolated-backend-six-entry-CPU-CUDA/20261112T083556.427749Z-I4-CPU-reference-f396387749",
+    "migration/reports/evidence/rewrite/I4/progressive-JPEG-real-GPU-IDCT-and-color-trace/20261112T082958.015655Z-I4-rocm-trace-885067dc96",
+    "migration/reports/evidence/rewrite/I4/actual-nvJPEG-decoder-twelve-original-JPEG-files/20261112T083341.131943Z-I4-rocm-original-91580a100e",
+    "migration/reports/evidence/rewrite/I4/progressive-JPEG-GPU-pixel-synthesis/20261112T082945.685588Z-I4-rocm-prototype-54cdda0dfb",
+    "migration/reports/evidence/rewrite/I4/progressive-JPEG-GPU-pixel-synthesis/20261112T082948.253357Z-I4-rocm-prototype-8e08de1b5e"
+  ],
+  "rocm_evidence": "artifacts/20261112T083354.869562Z/batches9_11-rocm/nvJPEG_nvJPEG-Decoder_tests_test_decoder.py/original-corpus",
+  "cuda_evidence": "migration/reports/evidence/20261110T043816.470698Z/batches9_11-cuda/nvJPEG_nvJPEG-Decoder_tests_test_decoder.py",
+  "comparison_mode": "GPU_PROGRESSIVE_PROJECT_ALGORITHM",
+  "remaining": "native backend enum/pipeline or automatic scheduling, CPU JPEG encoding, and fixed-commit cold review vary by entrypoint"
+}

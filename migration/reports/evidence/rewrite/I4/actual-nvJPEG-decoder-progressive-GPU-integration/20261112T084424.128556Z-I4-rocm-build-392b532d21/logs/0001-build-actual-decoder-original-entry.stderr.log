@@ -1,0 +1,31 @@
+Warning: HIP version file: "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/share/hip/version" not found.  Cannot give HIP version information.
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp:21:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/image/jpeg_decoder_v2.hpp:8:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:96:1: note: expanded from here
+   96 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/image/jpeg_decoder_v2.hpp:86:612: note: in instantiation of member function 'migration_batch::Buffer<unsigned char>::~Buffer' requested here
+   86 |     if(post){if(!warmup&&!o.output.empty()){preprocess=scaled[0]->get();pre_w=w;pre_h=he;}int dw=o.rw?o.rw:std::max(1,w/2),dh=o.rh?o.rh:std::max(1,he/2);final.reset(new Buffer<unsigned char>(size_t(dw)*dh*3));lanczos10<<<(final->n+255)/256,256>>>(scaled[0]->p,final->p,w,he,dw,dh);w=dw;he=dh;if(kind=="Image-Resize-WaterMark"){auto wm=o.watermark.empty()?fs::path("nvJPEG/Image-Resize-WaterMark/NVLogo.jpg"):fs::path(o.watermark);auto water=decode_batch10({wm},"rgbi",o.backend);if(!warmup&&!o.output.empty()){watermark_pixels=water[0].planes[0]->get();wm_w=water[0].h.w;wm_h=water[0].h.h;}Buffer<unsigned char>resized(size_t(w)*he*3);lanczos10<<<(resized.n+255)/256,256>>>(water[0].planes[0]->p,resized.p,water[0].h.w,water[0].h.h,w,he);watermark10<<<(final->n+255)/256,256>>>(final->p,resized.p,final->n,o.alpha);MB_CHECK(MB_RT(DeviceSynchronize)());}}
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ^
+1 warning generated when compiling for gfx1201.
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp:21:
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/image/jpeg_decoder_v2.hpp:8:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:41:17: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   41 |  ~Buffer(){if(p)MB_RT(Free)(p);}
+      |                 ^~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/batches_runtime.hpp:17:18: note: expanded from macro 'MB_RT'
+   17 | #define MB_RT(x) hip##x
+      |                  ^
+<scratch space>:96:1: note: expanded from here
+   96 | hipFree
+      | ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common/image/jpeg_decoder_v2.hpp:86:612: note: in instantiation of member function 'migration_batch::Buffer<unsigned char>::~Buffer' requested here
+   86 |     if(post){if(!warmup&&!o.output.empty()){preprocess=scaled[0]->get();pre_w=w;pre_h=he;}int dw=o.rw?o.rw:std::max(1,w/2),dh=o.rh?o.rh:std::max(1,he/2);final.reset(new Buffer<unsigned char>(size_t(dw)*dh*3));lanczos10<<<(final->n+255)/256,256>>>(scaled[0]->p,final->p,w,he,dw,dh);w=dw;he=dh;if(kind=="Image-Resize-WaterMark"){auto wm=o.watermark.empty()?fs::path("nvJPEG/Image-Resize-WaterMark/NVLogo.jpg"):fs::path(o.watermark);auto water=decode_batch10({wm},"rgbi",o.backend);if(!warmup&&!o.output.empty()){watermark_pixels=water[0].planes[0]->get();wm_w=water[0].h.w;wm_h=water[0].h.h;}Buffer<unsigned char>resized(size_t(w)*he*3);lanczos10<<<(resized.n+255)/256,256>>>(water[0].planes[0]->p,resized.p,water[0].h.w,water[0].h.h,w,he);watermark10<<<(final->n+255)/256,256>>>(final->p,resized.p,final->n,o.alpha);MB_CHECK(MB_RT(DeviceSynchronize)());}}
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ^
+1 warning generated when compiling for host.

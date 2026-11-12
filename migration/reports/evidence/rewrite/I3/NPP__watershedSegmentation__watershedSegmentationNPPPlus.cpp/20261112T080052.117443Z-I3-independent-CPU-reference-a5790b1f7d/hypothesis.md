@@ -1,0 +1,1 @@
+Test independent-CPU-reference for NPP+/watershedSegmentation::watershedSegmentationNPPPlus.cpp, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T075927.527937Z-I3-rocm-original-full-images-4cd77331fc.

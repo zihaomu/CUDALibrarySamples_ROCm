@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-12T07:45:45.718765+00:00。26入口当前13通过/6部分/7失败。
+更新时间：2026-11-12T08:48:58.001924+00:00。26入口当前13通过/8部分/5失败。
 
-I3：计划首页同步当前四图像模块13/26整例、6 PARTIAL、7 FAILED；I3仍有NPP/NPP+两个watershed，I4–I8 JPEG/JPEG2000整例目标尚未完成。项目最终验证与4385条封存尝试审计PASSED。
+I4：最终源码SHA重建与六入口42组回归/CPU-CUDA对照重新通过；source-tree 1622文件已更新，final_validate暂存空行失败修正后PASSED。六子集资格仍只表示部分支持。
 
-证据：`migration/reports/rewrite-evidence-audit.json`
+证据：`migration/reports/final-validation.json`；`migration/reports/image-progressive-subset-qualifications.json`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

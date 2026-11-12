@@ -1,0 +1,1 @@
+Test rocm-build for progressive-JPEG-HIP-IDCT-and-color-prototype, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T081115.958599Z-I4-CPU-contract-47ea38f38f.

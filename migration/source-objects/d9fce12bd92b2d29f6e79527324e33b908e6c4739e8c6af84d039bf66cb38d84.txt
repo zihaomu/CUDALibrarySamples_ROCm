@@ -1,0 +1,69 @@
+#!/usr/bin/env python3
+"""Measure a deterministic eight-neighbor descent candidate against original NPP output."""
+import json
+from pathlib import Path
+import numpy as np
+from experiment import ROOT,Experiment,write,digest
+from image_progress import record
+
+NATIVE={
+ 'NPP':'migration/reports/evidence/rewrite/I3/NPP__watershedSegmentation_watershedSegmentation.cpp/20261111T181142.872291Z-I3-cuda-original-577dee227e',
+ 'NPP+':'migration/reports/evidence/rewrite/I3/NPP___watershedSegmentation_watershedSegmentationNPPPlus.cpp/20261111T181148.490829Z-I3-cuda-original-65de308faa',
+}
+SIZES={'CT_skull_512x512_8u_Gray.raw':(512,512),'Rocks_512x512_8u_Gray.raw':(512,512),
+ 'Lena_512x512_8u_Gray.raw':(512,512),'coins_500x383_8u_Gray.raw':(500,383),
+ 'coins_overlay_500x569_8u_Gray.raw':(500,569),'Corn_614x461_8u_Gray.raw':(614,461)}
+
+def descent(image):
+ h,w=image.shape;indices=np.arange(h*w,dtype=np.int32).reshape(h,w)
+ best_value=image.copy();parent=indices.copy()
+ for dy in (-1,0,1):
+  for dx in (-1,0,1):
+   if not (dx or dy):continue
+   y0=max(0,-dy);y1=min(h,h-dy);x0=max(0,-dx);x1=min(w,w-dx)
+   target=(slice(y0,y1),slice(x0,x1));neighbor=(slice(y0+dy,y1+dy),slice(x0+dx,x1+dx))
+   v=image[neighbor];i=indices[neighbor];old=best_value[target];old_i=parent[target]
+   change=(v<old)|((v==old)&(i<old_i));old[change]=v[change];old_i[change]=i[change]
+ roots=parent.reshape(-1).copy()
+ for steps in range(64):
+  next_roots=roots[roots]
+  if np.array_equal(roots,next_roots):break
+  roots=next_roots
+ else:raise ValueError('descent root did not converge')
+ return roots.reshape(h,w),image.reshape(-1)[roots].reshape(h,w),steps+1
+
+def main():
+ sources=[Path(__file__),ROOT/'NPP/watershedSegmentation/watershedSegmentation.cpp',
+   ROOT/'NPP+/watershedSegmentation/watershedSegmentationNPPPlus.cpp']
+ for family,ref in NATIVE.items():
+  sources.append(ROOT/ref/'run.json')
+ e=Experiment('I3','watershed-eight-neighbor-descent-vs-original-NPP','CPU-research',sources=sources)
+ rows=[]
+ for name,(w,h) in SIZES.items():
+  source=ROOT/'NPP/watershedSegmentation/images'/name
+  if not source.is_file():source=ROOT/'NPP+/watershedSegmentation/images'/name
+  image=np.fromfile(source,np.uint8).reshape(h,w)
+  roots,segments,steps=descent(image)
+  native_ref=NATIVE['NPP'] if (ROOT/NATIVE['NPP']/'run.json').is_file() and name!='Corn_614x461_8u_Gray.raw' else NATIVE['NPP+']
+  native=json.loads((ROOT/native_ref/'run.json').read_text())
+  raw=ROOT/json.loads((ROOT/native_ref/'manifest.json').read_text())['raw_artifact_dir']
+  if name.startswith('Corn_'):seg='Corn_Segments_8Way_614x461_8u.raw';label='Corn_CompressedSegmentLabels_8Way_614x461_32u.raw'
+  else:seg='Segmented_'+name;label='Labels_'+name
+  native_seg=np.fromfile(raw/'outputs/images'/seg,np.uint8).reshape(h,w)
+  native_label=np.fromfile(raw/'outputs/images'/label,np.uint32).reshape(h,w)
+  row=dict(image=name,width=w,height=h,input_sha256=digest(source),native_evidence=native_ref,
+    native_segment_sha256=native['files']['images/'+seg]['sha256'],
+    native_label_sha256=native['files']['images/'+label]['sha256'],
+    descent_steps=steps,project_unique_roots=int(np.unique(roots).size),
+    native_unique_labels=int(np.unique(native_label).size),
+    direct_root_match_fraction=float(np.mean(roots==native_label)),
+    segment_match_fraction=float(np.mean(segments==native_seg)),
+    segment_mean_abs=float(np.mean(np.abs(segments.astype(np.int16)-native_seg.astype(np.int16)))))
+  rows.append(row)
+ write(e.path/'research.json',dict(status='OBSERVED',rows=rows,algorithm='eight-neighbor local minimum, ties by lowest linear index, pointer jumping'))
+ ref=e.finish('OBSERVED',dict(status='OBSERVED',metrics={'images':len(rows)}))
+ write(ROOT/'migration/reports/image-watershed-research.json',dict(status='OBSERVED',rows=rows,evidence=ref))
+ record('I3','watershed六原图八邻域最陡下降CPU候选与5090原生segmentation/label逐像素比较：OBSERVED，仅研究，不新增资格。',[ref])
+ print(json.dumps(rows,ensure_ascii=False,indent=2))
+
+if __name__=='__main__':main()

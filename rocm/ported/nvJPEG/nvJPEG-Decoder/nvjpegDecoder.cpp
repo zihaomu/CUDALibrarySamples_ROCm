@@ -18,5 +18,5 @@
   
 
 // MIGRATION_BATCH10: rocJPEG hardware / explicit CPU fallback, GPU layout and postprocess.
-#include "batch10_jpeg.hpp"
+#include "image/jpeg_decoder_v2.hpp"
 int main(int argc,const char**argv){return migration_batch::image10_main("nvJPEG-Decoder",argc,argv);}

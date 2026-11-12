@@ -1,0 +1,1 @@
+Test composite-subset-qualification for nvJPEG/nvJPEG-Decoder-Backend-ROI/nvJPEGROIDecode.cpp, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: none.
