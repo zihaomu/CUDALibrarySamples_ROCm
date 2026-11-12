@@ -280,7 +280,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-12T03:35:04.789587+00:00。26入口当前10通过/7部分/9失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-12T03:40:43.896880+00:00。26入口当前10通过/7部分/9失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -1406,5 +1406,8 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-12T03:34:06.832675+00:00 | I3 | Flood资格发布门15项归档/编译/旧反例/原生执行负向检查合同固定。 | `migration/reports/evidence/rewrite/I3/FloodFill-qualification-check-contract/20261112T033405.894474Z-I3-CPU-contract-dca5588b9b` |
 | 2026-11-12T03:34:16.650010+00:00 | I3 | Flood资格门15项真实历史padding/源命令/重复子记录/摘要/像素和配对hash反例：PASSED | `migration/reports/evidence/rewrite/I3/FloodFill-qualification-and-cold-archive-validator-checks/20261112T033407.202650Z-I3-CPU-validator-test-fb88b66561` |
 | 2026-11-12T03:35:04.789587+00:00 | I3 | Flood独立复审指出的四类资格门缺口已修复：冷36子唯一/实际封存及五CPU重算，旧padding真实失败/新库同代码拒绝，HIP编译完整argv/产物绑定，原生CUDA实际执行收据代码绑定。新冷检出PASSED、15组资格门正反向PASSED；最终固定源码复审前仍PARTIAL。 | `migration/reports/evidence/rewrite/I3/FloodFill-clean-checkout-complete-RGB-runtime-CLI-trace/20261112T032927.151752Z-I3-host-cold-replay-f21d7ab95b`；`migration/reports/evidence/rewrite/I3/FloodFill-qualification-and-cold-archive-validator-checks/20261112T033407.202650Z-I3-CPU-validator-test-fb88b66561`；`migration/reports/evidence/rewrite/I3/FloodFill-full-native-CPU-HIP-and-metadata-comparison/20261112T032629.115960Z-I3-CPU-reference-67e9160223`；`migration/reports/evidence/rewrite/I3/FloodFill-fixed-exact-last-row-padding-counterexample/20261111T185159.117890Z-I3-rocm-contract-probe-354c9ab01a` |
+| 2026-11-12T03:39:57.132044+00:00 | I3 | Flood资格发布门16项归档/编译/旧反例/原生执行及子合同负向检查合同固定。 | `migration/reports/evidence/rewrite/I3/FloodFill-qualification-check-contract-v2/20261112T033956.097540Z-I3-CPU-contract-efb2a2af2e` |
+| 2026-11-12T03:40:07.131772+00:00 | I3 | Flood资格门16项真实历史padding/源命令/重复子记录/摘要/像素和配对hash反例：PASSED | `migration/reports/evidence/rewrite/I3/FloodFill-qualification-and-cold-archive-validator-checks/20261112T033957.495517Z-I3-CPU-validator-test-43a8ab1c6f` |
+| 2026-11-12T03:40:43.896880+00:00 | I3 | 复审发现冷重放四份子profile.json没有逐字绑定冻结合同；现逐份核对完整profile/status/count，增加同步改写子封印仍必须拒绝的第16项反例。16/16资格门正反向通过；资格dry-run仅独立复审未满足，支持表维持PARTIAL。 | `migration/reports/evidence/rewrite/I3/FloodFill-qualification-and-cold-archive-validator-checks/20261112T033957.495517Z-I3-CPU-validator-test-43a8ab1c6f` |
 
 <!-- IMAGE_EXECUTION:END -->

@@ -115,6 +115,14 @@ def cold_verify(r, build, source_deps, raw_override=None):
             return False
         if name in {'contracts','original-contracts','runtime-contracts','cli-contracts'}:
             if report['status']!='FROZEN' or manifest['experiment_outcome']!='OBSERVED' or commands:return False
+            contract={'contracts':('image-flood-profile.json',29),
+                      'original-contracts':('image-flood-original-contract.json',4),
+                      'runtime-contracts':('image-flood-runtime-contract.json',72),
+                      'cli-contracts':('image-flood-cli-contract.json',18)}[name]
+            profile=json.loads((path/'profile.json').read_text())
+            if (profile!=json.loads((ROOT/'migration/rewrite'/contract[0]).read_text())
+                or profile['status']!='FROZEN'
+                or report.get('case_count',report.get('workflows'))!=contract[1]):return False
         elif name in {'build','frontend-build','all','runtime','trace','originals','cli'}:
             rc=report.get('return_code',0)
             if len(commands)!=1 or commands[0]['return_code']!=rc or manifest['experiment_outcome']!=('EXPECTED_REJECTION' if rc else 'EXECUTED'):return False
@@ -386,12 +394,12 @@ def collect(review=None):
     gate('thirty-six-sealed-child-clean-checkout',cold)
     def publication_mutations():
         r=load('qualification-checks')
-        names=json.loads((ROOT/'migration/rewrite/image-flood-qualification-validator-cases.json').read_text())
+        names=json.loads((ROOT/'migration/rewrite/image-flood-qualification-validator-cases-v2.json').read_text())
         return (report(r,'checks.json','CPU-validator-test') and r['status']=='PASSED'
-                and r['case_count']==len(r['checks'])==len(names)==15
+                and r['case_count']==len(r['checks'])==len(names)==16
                 and [c['check'] for c in r['checks']]==names
                 and all(c['passed'] for c in r['checks']))
-    gate('fifteen-archive-provenance-and-publication-reader-checks',publication_mutations)
+    gate('sixteen-archive-provenance-and-publication-reader-checks',publication_mutations)
     sources.update({'tools/moat/qualify_image_flood.py', 'tools/moat/publish_image_flood.py',
                     'tools/moat/qualify_canny_plus.py', 'tools/moat/qualify_first.py',
                     'tools/moat/selected_proofs.py', 'tools/moat/audit.py',

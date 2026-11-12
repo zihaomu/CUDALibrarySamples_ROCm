@@ -14,7 +14,8 @@ NAMES=['actual-cold-inventory-pass','actual-cold-full-archive-and-CPU-pass',
        'runtime-report-return-code-changed','CPU-result-status-changed',
        'cold-build-dependency-changed','compiler-output-option-changed',
        'native-execution-recipe-changed','historical-padding-result-changed',
-       'cold-output-pixel-with-coupled-hashes-changed']
+       'cold-output-pixel-with-coupled-hashes-changed',
+       'cold-child-contract-profile-with-matching-seal-changed']
 
 def run_checks():
  r=q.load('cold');b=q.load('build');checks=[]
@@ -64,13 +65,22 @@ def run_checks():
    members['files'][file]=dict(bytes=(target/file).stat().st_size,sha256=digest(target/file))
   write(seal,members)
   check(NAMES[14],lambda:q.cold_verify(r,b,set(),raw_override=root),False)
+ contract=next(c for c in r['children'] if c['name']=='contracts')
+ with tempfile.TemporaryDirectory(prefix='flood-cold-contract-validator-') as temporary:
+  root=Path(temporary);target=root/contract['relative'];target.parent.mkdir(parents=True)
+  for group in {c['name'] for c in r['children']}:
+   if group!='contracts':(root/'child-evidence'/group).symlink_to(source/'child-evidence'/group,target_is_directory=True)
+  shutil.copytree(source/contract['relative'],target)
+  profile=target/'profile.json';data=json.loads(profile.read_text());data['status']='BROKEN';write(profile,data)
+  seal=target/'child-seal.json';members=json.loads(seal.read_text());members['files']['profile.json']=dict(bytes=profile.stat().st_size,sha256=digest(profile));write(seal,members)
+  check(NAMES[15],lambda:q.cold_verify(r,b,set(),raw_override=root),False)
  if len(checks)!=len(NAMES) or [c['check'] for c in checks]!=NAMES:raise ValueError('all fixed Flood Fill qualification checks')
  return dict(status='PASSED' if all(c['passed'] for c in checks) else 'FAILED',case_count=len(checks),checks=checks)
 
 def main():
- path=ROOT/'migration/rewrite/image-flood-qualification-validator-cases.json'
+ path=ROOT/'migration/rewrite/image-flood-qualification-validator-cases-v2.json'
  if not path.exists():
-  e=Experiment('I3','FloodFill-qualification-check-contract','CPU-contract',sources=[__file__,ROOT/'migration/rewrite/image-flood-profile.json']);write(path,NAMES);write(e.path/'cases.json',NAMES);v=dict(status='FROZEN',case_count=len(NAMES));write(e.path/'contracts.json',v);v['evidence']=e.finish('OBSERVED');write(ROOT/'migration/reports/image-flood-qualification-check-contracts.json',v);record('I3','Flood资格发布门'+str(len(NAMES))+'项归档/编译/旧反例/原生执行负向检查合同固定。',[v['evidence']])
+  e=Experiment('I3','FloodFill-qualification-check-contract-v2','CPU-contract',sources=[__file__,ROOT/'migration/rewrite/image-flood-profile.json']);write(path,NAMES);write(e.path/'cases.json',NAMES);v=dict(status='FROZEN',case_count=len(NAMES));write(e.path/'contracts.json',v);v['evidence']=e.finish('OBSERVED');write(ROOT/'migration/reports/image-flood-qualification-check-contracts-v2.json',v);record('I3','Flood资格发布门'+str(len(NAMES))+'项归档/编译/旧反例/原生执行及子合同负向检查合同固定。',[v['evidence']])
  if json.loads(path.read_text())!=NAMES:raise ValueError('fixed qualification check list')
  e=Experiment('I3','FloodFill-qualification-and-cold-archive-validator-checks','CPU-validator-test',sources=[__file__,path,ROOT/'tools/moat/qualify_image_flood.py',ROOT/'tools/moat/image_flood_native_reference.py',ROOT/'migration/rewrite/image-flood-profile.json'])
  try:v=run_checks()

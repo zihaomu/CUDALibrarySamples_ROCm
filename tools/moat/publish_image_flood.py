@@ -47,6 +47,7 @@ def main():
         'image-flood/full-real-GPU-trace',
         'image-flood/independent-CPU-and-native-comparison',
         'image-flood/sixty-acceptance-reader-checks',
+        'image-flood/sixteen-archive-provenance-and-publication-reader-checks',
         'image-flood/exact-padding-counterexample-fixed',
         'image-flood/thirty-six-child-cold-checkout',
         'image-flood/independent-review']
@@ -55,7 +56,7 @@ def main():
                   required_cases=required,passed_cases=required,
                   actual_library='Project HIP fixed-seed RGB flood fill and shared GPU connectivity',
                   backend_library='project HIP image flood fill',equivalence=COMPARISON,
-                  reason='完整五模式/两原图/五RGB产品C++入口；29全量输入、4流程20RGB、72运行合同、18CLI、60验收器检查、真实GPU trace、36子记录冷检出及独立复审通过。项目固定seed八连通/内边界与原生NPP+的分区和元数据差异单列；项目GPU对独立CPU逐字节精确。',
+                  reason='完整五模式/两原图/五RGB产品C++入口；29全量输入、4流程20RGB、72运行合同、18CLI、60基础验收器与16资格门反例、真实GPU trace、36子记录冷检出及独立复审通过。项目固定seed八连通/内边界与原生NPP+的分区和元数据差异单列；项目GPU对独立CPU逐字节精确。',
                   cuda_baseline='PASSED',
                   cuda_baseline_reason='5090上未修改NPP+原始源码和两输入五产品完整执行；实际二进制、库与GPU收据封存。',
                   cuda_comparison='OBSERVED',
