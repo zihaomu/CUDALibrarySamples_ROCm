@@ -1,0 +1,244 @@
+diff --git a/rocm/common/image/jpeg_encoder_instances.hpp b/rocm/common/image/jpeg_encoder_instances.hpp
+index 2424a1d53..69c706ec0 100644
+--- a/rocm/common/image/jpeg_encoder_instances.hpp
++++ b/rocm/common/image/jpeg_encoder_instances.hpp
+@@ -1,8 +1,9 @@
+ // SPDX-License-Identifier: Apache-2.0
+-// I5 multi-instance adapter: HIP baseline JPEG; optimized DHT still uses libjpeg.
++// I5 multi-instance adapter: HIP baseline JPEG with optional optimized DHT.
+ #pragma once
+ #include "jpeg_encoder_gpu.hpp"
+ #include "jpeg_full_gpu.hpp"
++#include "jpeg_opt_full_gpu.hpp"
+ #include <atomic>
+ #include <chrono>
+ #include <filesystem>
+@@ -83,14 +84,10 @@ inline int run(int argc,const char*argv[]){
+     fs::path out=a.write?a.output/(std::to_string(i)+".jpg"):
+       fs::temp_directory_path()/("rocm-jpeg-"+std::to_string(rep)+"-"+std::to_string(tid)+"-"+std::to_string(i)+".jpg");
+     auto stream=streams[slot%streams.size()];
+-    if(a.optimize){
+-     image_jpeg_encoder::encode(pic.rgb,pic.w,pic.h,a.quality,a.sampling420?2:1,
+-       out.c_str(),true,stream);
+-    }else{
+-     auto jpeg=image_jpeg_full::encode(pic.rgb,pic.w,pic.h,a.quality,
+-       a.sampling420?2:1,stream);
+-     image_jpeg_encoder::write_binary(out.c_str(),jpeg.data(),jpeg.size());
+-    }
++    auto jpeg=a.optimize?
++      image_jpeg_opt::encode_optimized(pic.rgb,pic.w,pic.h,a.quality,a.sampling420?2:1,stream):
++      image_jpeg_full::encode(pic.rgb,pic.w,pic.h,a.quality,a.sampling420?2:1,stream);
++    image_jpeg_encoder::write_binary(out.c_str(),jpeg.data(),jpeg.size());
+     if(!a.write)fs::remove(out);++completed;}
+    for(auto stream:streams)image_jpeg_encoder::check(hipStreamDestroy(stream),"destroy state stream");
+   }catch(const std::exception&e){std::lock_guard<std::mutex>guard(lock);if(failure.empty())failure=e.what();}});
+@@ -103,7 +100,8 @@ inline int run(int argc,const char*argv[]){
+  <<"\nOptimized Huffman: "<<(a.optimize?"on":"off")<<"\nQuality: "<<a.quality
+  <<"\nThroughput: "<<best<<" images/s\nLatency: "<<latency<<" ms\nPercentage: 100, 0 %\nNum threads: "
+  <<a.threads<<"\nNum states: "<<a.states<<"\nNum runs: "<<a.runs
+- <<"\nRESULT status=PASS encoded="<<a.images<<" cpu_entropy="<<(a.optimize?1:0)
+- <<" gpu_full_encode="<<(a.optimize?0:1)<<" gpu_fdct=1 hardware_encoder=0\n";return 0;
++ <<"\nRESULT status=PASS encoded="<<a.images<<" cpu_entropy=0"
++ <<" gpu_full_encode=1 gpu_fdct=1 gpu_huffman_histogram="<<(a.optimize?1:0)
++ <<" cpu_huffman_table="<<(a.optimize?1:0)<<" hardware_encoder=0\n";return 0;
+  }catch(const std::exception&e){std::cerr<<"RESULT status=FAIL reason="<<e.what()<<'\n';return 1;}}
+ } // namespace image_jpeg_instances
+diff --git a/tools/moat/image_encoder_instances_build.py b/tools/moat/image_encoder_instances_build.py
+index c0fd1ec07..526172aae 100644
+--- a/tools/moat/image_encoder_instances_build.py
++++ b/tools/moat/image_encoder_instances_build.py
+@@ -12,7 +12,8 @@ def main():
+  if json.loads(profile.read_text())['status']!='FROZEN':raise ValueError('frozen profile required')
+  src=ROOT/'rocm/ported/nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp'
+  headers=[ROOT/'rocm/common/image/jpeg_encoder_instances.hpp',ROOT/'rocm/common/image/jpeg_encoder_gpu.hpp',
+-          ROOT/'rocm/common/image/jpeg_full_gpu.hpp',ROOT/'rocm/common/image/jpeg_entropy_gpu.hpp']
++          ROOT/'rocm/common/image/jpeg_full_gpu.hpp',ROOT/'rocm/common/image/jpeg_entropy_gpu.hpp',
++          ROOT/'rocm/common/image/jpeg_opt_full_gpu.hpp',ROOT/'rocm/common/image/jpeg_optimal_huffman.hpp']
+  jpeg=ROOT/'build/cpu-codecs';core=Path('/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core');overlay=ROOT/'build/rocm-sdk-overlay'
+  deps=[src,*headers,profile,ROOT/'migration/rewrite/image-jpeg-encoder-instances-full-gpu-profile.json',
+        jpeg/'include/jpeglib.h',jpeg/'lib/libjpeg.so.62.4.0']
+diff --git a/tools/moat/image_encoder_instances_full_compare.py b/tools/moat/image_encoder_instances_full_compare.py
+index 7b3f4e129..c17bbee44 100644
+--- a/tools/moat/image_encoder_instances_full_compare.py
++++ b/tools/moat/image_encoder_instances_full_compare.py
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""Compare the frozen 16 prior JPEG products with the current full GPU path."""
++"""Compare 13 old baseline products exactly and document 3 CPU-to-GPU opt changes."""
+ import json
+ import numpy as np
+ from PIL import Image, JpegImagePlugin
+@@ -7,17 +7,19 @@ from experiment import ROOT, Experiment, digest, write
+ from image_progress import record
+ 
+ PROFILE = ROOT / 'migration/rewrite/image-jpeg-encoder-instances-full-gpu-profile.json'
++OPT_PROFILE = ROOT / 'migration/rewrite/image-jpeg-encoder-instances-opt-profile.json'
+ RUNS = ROOT / 'migration/reports/image-jpeg-encoder-instances-runs.json'
+ REPORT = ROOT / 'migration/reports/image-jpeg-encoder-instances-full-comparison.json'
+ 
+ 
+ def main():
+     profile = json.loads(PROFILE.read_text())
++    opt_profile = json.loads(OPT_PROFILE.read_text())
+     runs = {r['case']: r for r in json.loads(RUNS.read_text())}
+-    if profile['status'] != 'FROZEN' or not all(r['status'] == 'PASSED' for r in runs.values()):
++    if profile['status'] != 'FROZEN' or opt_profile['status'] != 'FROZEN' or not all(r['status'] == 'PASSED' for r in runs.values()):
+         raise ValueError('frozen contract and successful current runs required')
+     e = Experiment('I5', 'multi-instance-sixteen-JPEG-prior-vs-full-GPU-decode',
+-                   'CPU-reference', sources=[__file__, PROFILE, RUNS],
++                   'CPU-reference', sources=[__file__, PROFILE, OPT_PROFILE, RUNS],
+                    parent=profile['evidence'].split('/')[-1])
+     rows = []
+     for old in profile['prior_products']:
+@@ -37,11 +39,17 @@ def main():
+         rows.append(dict(case=old['case'], file=old['file'],
+                          previous_sha256=old['sha256'], current_sha256=digest(current),
+                          exact_decoded_rgb=a.shape == b.shape and np.array_equal(a, b),
++                         mean_absolute_rgb_delta=float(np.mean(np.abs(a.astype(np.int16)-b.astype(np.int16)))),
+                          header_sampling_quant_match=same_header,
+                          decoded_rgb_bytes=int(a.size)))
+     checks = [dict(check='all-sixteen-frozen-products', passed=len(rows) == 16),
+-              dict(check='independent-decoded-RGB-exact',
+-                   passed=all(r['exact_decoded_rgb'] for r in rows)),
++              dict(check='thirteen-baseline-independent-decoded-RGB-exact',
++                   passed=sum(r['case']!='optimized-444' for r in rows)==13 and
++                   all(r['exact_decoded_rgb'] for r in rows if r['case']!='optimized-444')),
++              dict(check='three-optimized-products-validated-against-same-GPU-FDCT-plain',
++                   passed=sum(r['case']=='optimized-444' for r in rows)==3 and
++                   all(any(c['check']=='optimized-RGB-exact-vs-same-GPU-FDCT-plain-'+str(i) and c['passed']
++                           for c in runs['optimized-444']['checks']) for i in range(3))),
+               dict(check='geometry-sampling-quantization-exact',
+                    passed=all(r['header_sampling_quant_match'] for r in rows))]
+     status = 'PASSED' if all(c['passed'] for c in checks) else 'NUMERIC_MISMATCH'
+@@ -51,8 +59,7 @@ def main():
+     write(e.path / 'comparison.json', result)
+     result['evidence'] = e.finish(status, dict(status=status, checks=checks))
+     write(REPORT, result)
+-    record('I5', '原始多实例编码新旧16件 JPEG 独立解码 RGB/尺寸/采样/量化表：' + status +
+-           '；逐产品 SHA 与结果单独封存。', [result['evidence']])
++    record('I5', '原始多实例编码16件 JPEG 独立解码：13 baseline 旧 RGB 精确，3 优化输出按同源GPU FDCT plain精确；旧CPU优化结果差值逐件记录，尺寸/采样/量化均核对：' + status + '。', [result['evidence']])
+     print(status, len(rows), result['total_decoded_rgb_bytes'])
+     return int(status != 'PASSED')
+ 
+diff --git a/tools/moat/image_encoder_instances_run.py b/tools/moat/image_encoder_instances_run.py
+index 13a0b4768..38d511c4e 100644
+--- a/tools/moat/image_encoder_instances_run.py
++++ b/tools/moat/image_encoder_instances_run.py
+@@ -40,7 +40,8 @@ def main():
+   e=Experiment('I5','nvJPEG-Encoder-MultipleInstances-original-CLI','rocm-original-entry',case=name,
+    sources=[__file__,PROFILE,BUILD,*inputs,ROOT/'rocm/common/image/jpeg_encoder_instances.hpp',
+             ROOT/'rocm/common/image/jpeg_encoder_gpu.hpp',ROOT/'rocm/common/image/jpeg_full_gpu.hpp',
+-            ROOT/'rocm/common/image/jpeg_entropy_gpu.hpp'],parent=build['experiment_id'])
++            ROOT/'rocm/common/image/jpeg_entropy_gpu.hpp',
++            ROOT/'rocm/common/image/jpeg_opt_full_gpu.hpp',ROOT/'rocm/common/image/jpeg_optimal_huffman.hpp'],parent=build['experiment_id'])
+   write(e.path/'backend.observed.json',capture());out=e.path/'outputs';out.mkdir()
+   directory=e.path/'missing' if name=='missing-input' else inputs[0].parent
+   argv=[str(ROOT/build['binary']),'-i',str(directory),'-o',str(out),*args]
+@@ -52,8 +53,10 @@ def main():
+   metrics=[]
+   if count and rc==0:
+    log=(e.path/f'logs/0001-original-multi-instance-{name}.stdout.log').read_text()
+-   checks.append(dict(check='baseline-GPU-entropy-or-explicit-optimized-CPU-path',passed=
+-      ('cpu_entropy=1 gpu_full_encode=0' if optimize else 'cpu_entropy=0 gpu_full_encode=1') in log))
++   checks.append(dict(check='full-GPU-entropy-with-CPU-DHT-only-if-optimized',passed=
++      'cpu_entropy=0 gpu_full_encode=1' in log and
++      ('gpu_huffman_histogram=1 cpu_huffman_table=1' if optimize else
++       'gpu_huffman_histogram=0 cpu_huffman_table=0') in log))
+    for i,path in enumerate(products):
+     source=inputs[i%len(inputs)]
+     with Image.open(source) as src:rgb=np.asarray(src.convert('RGB'))
+@@ -85,6 +88,12 @@ def main():
+     changed=plain_rc==0 and all(huffman_segments(out/(str(i)+'.jpg'))!=
+       huffman_segments(plain/(str(i)+'.jpg')) for i in range(3))
+     checks.append(dict(check='optimized-Huffman-actually-changes-DHT-tables',passed=changed))
++    for i in range(3):
++     with Image.open(out/(str(i)+'.jpg')) as optimized, Image.open(plain/(str(i)+'.jpg')) as baseline:
++      optimized.load();baseline.load()
++      same=np.array_equal(np.asarray(optimized.convert('RGB')),
++                          np.asarray(baseline.convert('RGB')))
++     checks.append(dict(check='optimized-RGB-exact-vs-same-GPU-FDCT-plain-'+str(i),passed=same))
+   else:
+    stderr=(e.path/f'logs/0001-original-multi-instance-{name}.stderr.log').read_text()
+    checks.append(dict(check='failure-reported-without-false-PASS',passed=
+@@ -98,7 +107,7 @@ def main():
+                           dict(status=status,checks=checks))
+   rows.append(row);write(REPORT,rows)
+   record('I5','原始多实例编码器 '+name+'：'+status+'，产品 '+str(len(products))+' 件；'+
+-         ('优化 Huffman 使用 CPU entropy。' if optimize else 'baseline 全 GPU entropy。'),[row['evidence']])
++         ('优化 Huffman GPU entropy、CPU DHT 表设计。' if optimize else 'baseline 全 GPU entropy。'),[row['evidence']])
+   print(name,status,len(products),flush=True)
+  return int(any(x['status']!='PASSED' for x in rows))
+ if __name__=='__main__':raise SystemExit(main())
+diff --git a/tools/moat/image_encoder_instances_trace.py b/tools/moat/image_encoder_instances_trace.py
+index 04997b2cf..3a11571d1 100644
+--- a/tools/moat/image_encoder_instances_trace.py
++++ b/tools/moat/image_encoder_instances_trace.py
+@@ -17,7 +17,8 @@ def main():
+  e=Experiment('I5','original-JPEG-encoder-concurrent-HIP-streams-and-changed-input','rocm-trace',
+   sources=[__file__,PROFILE,BUILD,*[ROOT/x['path'] for x in profile['inputs']],
+    ROOT/'rocm/common/image/jpeg_encoder_instances.hpp',ROOT/'rocm/common/image/jpeg_encoder_gpu.hpp',
+-   ROOT/'rocm/common/image/jpeg_full_gpu.hpp',ROOT/'rocm/common/image/jpeg_entropy_gpu.hpp'],
++   ROOT/'rocm/common/image/jpeg_full_gpu.hpp',ROOT/'rocm/common/image/jpeg_entropy_gpu.hpp',
++   ROOT/'rocm/common/image/jpeg_opt_full_gpu.hpp',ROOT/'rocm/common/image/jpeg_optimal_huffman.hpp'],
+   parent=original['experiment_id'])
+  observed=capture();write(e.path/'backend.observed.json',observed)
+  output=e.path/'outputs';output.mkdir()
+@@ -56,6 +57,45 @@ def main():
+    passed=stage_counts==expected,counts=stage_counts,expected=expected))
+   checks.append(dict(check='at-least-two-actual-HIP-streams',passed=len(streams)>=2,
+    stream_ids=sorted(streams)))
++ opt_output=e.path/'optimized-output';opt_output.mkdir()
++ opt_cmd=['rocprofv3','--kernel-trace','--output-format','csv','--output-directory',str(e.path/'optimized-trace'),
++  '--',str(ROOT/build['binary']),'-i',str(folder),'-j','2','-s','2',
++  '-o',str(opt_output),'-b','gpu','-q','90','-p','-f']
++ opt_rc=e.command(opt_cmd,'optimized-real-GPU-JPEG-encode',timeout=300)
++ opt_log=(e.path/'logs/0002-optimized-real-GPU-JPEG-encode.stdout.log').read_text()
++ opt_original=next(x for x in runs if x['case']=='optimized-444')
++ checks.append(dict(check='optimized-original-CLI-and-GPU-entropy-claimed',passed=opt_rc==0 and
++  'cpu_entropy=0 gpu_full_encode=1' in opt_log and
++  'gpu_huffman_histogram=1 cpu_huffman_table=1' in opt_log))
++ checks.append(dict(check='three-optimized-traced-products-exactly-match-nonprofiled',passed=all(
++  (opt_output/(str(i)+'.jpg')).is_file() and digest(opt_output/(str(i)+'.jpg'))==
++  next(p['sha256'] for p in opt_original['products'] if p['product']==str(i)+'.jpg') for i in range(3))))
++ opt_traces=list((e.path/'optimized-trace').rglob('*kernel_trace.csv'))
++ opt_agents=list((e.path/'optimized-trace').rglob('*agent_info.csv'))
++ opt_counts={};opt_streams=set();opt_pci=set()
++ checks.append(dict(check='optimized-GPU-trace-and-agent-map',passed=len(opt_traces)==len(opt_agents)==1))
++ if len(opt_traces)==len(opt_agents)==1:
++  lookup={r['Node_Id']:r for r in csv.DictReader(opt_agents[0].open())}
++  allowed={d['pci_bdf'] for d in observed['devices'] if d['physical_id']==1}
++  for row in csv.DictReader(opt_traces[0].open()):
++   stage=next((x for x in ('rgb_to_plane','forward_dct_quantize','gather_mcu_coefficients',
++      'histogram','encode_blocks','prefix_bits','pack_bytes','prefix_stuff','scatter_stuff')
++      if x in row['Kernel_Name']),None)
++   if not stage:continue
++   opt_counts[stage]=opt_counts.get(stage,0)+1;opt_streams.add(row['Stream_Id'])
++   agent=lookup[row['Agent_Id'].split()[-1]];loc=int(agent['Location_Id'])
++   location=f"{int(agent['Domain']):04x}:{loc>>8:02x}:{(loc>>3)&31:02x}.{loc&7}"
++   opt_pci.add(location)
++   checks.append(dict(check='optimized-'+stage+'-physical-GPU1-'+str(opt_counts[stage]),
++    passed=location in allowed and int(row['End_Timestamp'])>int(row['Start_Timestamp'])
++    and int(row['Grid_Size_X'])>0,pci_bdf=location,stream_id=row['Stream_Id']))
++  opt_expected={'rgb_to_plane':9,'forward_dct_quantize':9,**{x:3 for x in
++      ('gather_mcu_coefficients','histogram','encode_blocks','prefix_bits','pack_bytes',
++       'prefix_stuff','scatter_stuff')}}
++  checks.append(dict(check='three-optimized-images-all-39-HIP-kernels',
++   passed=opt_counts==opt_expected,counts=opt_counts,expected=opt_expected))
++  checks.append(dict(check='optimized-at-least-two-actual-HIP-streams',passed=len(opt_streams)>=2,
++   stream_ids=sorted(opt_streams)))
+  changed=e.path/'changed-input';shutil.copytree(folder,changed)
+  name=Path(profile['inputs'][0]['path']).name;altered=changed/name
+  payload=bytearray(altered.read_bytes());payload[54]^=0xff;altered.write_bytes(payload)
+@@ -72,9 +112,11 @@ def main():
+   all(digest(changed_output/(str(i)+'.jpg'))==digest(output/(str(i)+'.jpg')) for i in (1,2))))
+  status='PASSED' if all(x['passed'] for x in checks) else 'PROFILER_FAILED'
+  result=dict(status=status,checks=checks,return_code=rc,mutation_return_code=mutation_rc,
++  optimized_return_code=opt_rc,optimized_kernel_counts=opt_counts,
++  optimized_stream_ids=sorted(opt_streams),optimized_pci_bdfs=sorted(opt_pci),
+   kernel_counts=stage_counts,stream_ids=sorted(streams),pci_bdfs=sorted(pci),experiment_id=e.id)
+  write(e.path/'trace-result.json',result)
+  result['evidence']=e.finish(status,dict(status=status,checks=checks));write(REPORT,result)
+- record('I5','原始多实例 JPEG 编码器 7 图/84 kernel、多 HIP stream、物理 GPU1、改输入重放：'+status+'。',
++ record('I5','原始多实例 JPEG 编码器 baseline 7 图/84 kernel、优化 -f 3 图/39 kernel，多 HIP stream、物理 GPU1、改输入重放：'+status+'。',
+   [result['evidence']]);print(status,stage_counts,sorted(streams));return int(status!='PASSED')
+ if __name__=='__main__':raise SystemExit(main())

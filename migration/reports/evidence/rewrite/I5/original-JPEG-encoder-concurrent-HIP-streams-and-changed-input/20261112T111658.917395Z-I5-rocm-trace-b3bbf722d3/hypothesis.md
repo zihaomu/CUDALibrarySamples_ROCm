@@ -1,0 +1,1 @@
+Test rocm-trace for original-JPEG-encoder-concurrent-HIP-streams-and-changed-input, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T111539.159311Z-I5-rocm-original-entry-3f07e53615.

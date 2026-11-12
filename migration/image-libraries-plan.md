@@ -282,7 +282,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-12T11:10:53.758891+00:00。26入口当前13通过/9部分/4失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-12T11:18:14.668366+00:00。26入口当前13通过/9部分/4失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -2021,5 +2021,17 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-12T11:08:58.296708+00:00 | I5 | 优化JPEG Huffman独立原型：四组GPU符号直方图+GPU熵编码的合法JPEG跨解码、RGB与旧GPU FDCT基线精确、DHT变化；一截断拒绝，物理GPU1 trace通过；尚未接入原始-f，多实例入口保持PARTIAL。 | `migration/reports/image-jpeg-opt-huffman.md`；`migration/reports/image-jpeg-opt-huffman-runs.json`；`migration/reports/image-jpeg-opt-huffman-trace.json` |
 | 2026-11-12T11:09:52.705685+00:00 | I5 | 优化 JPEG DHT 单符号/全256符号/长尾/稀疏/极端偏斜边界：FAILED；仅CPU表生成合法性检查。 | `migration/reports/evidence/rewrite/I5/optimized-Huffman-length-limit-and-prefix-edge-gates/20261112T110949.676027Z-I5-CPU-table-boundary-4c2a811062` |
 | 2026-11-12T11:10:53.758891+00:00 | I5 | 优化 JPEG DHT 单符号/全256符号/长尾/稀疏/极端偏斜边界：PASSED；仅CPU表生成合法性检查。 | `migration/reports/evidence/rewrite/I5/optimized-Huffman-length-limit-and-prefix-edge-gates/20261112T111050.603804Z-I5-CPU-table-boundary-84069729e7` |
+| 2026-11-12T11:14:49.507131+00:00 | I5 | 原始多实例 -f GPU 优化 Huffman 接入验收合同已冻结：16 产品独立解码、13 baseline 旧 RGB 精确、3 优化产品与同源 GPU FDCT plain RGB 精确；GPU 直方图/熵编码 trace 必须通过。 | `migration/reports/evidence/rewrite/I5/optimized-Huffman-original-multi-instance-integration-contract/20261112T111448.492381Z-I5-CPU-contract-6bda989c2c`；`migration/rewrite/image-jpeg-encoder-instances-opt-profile.json` |
+| 2026-11-12T11:15:29.458512+00:00 | I5 | nvJPEG 多实例原始 C++ 入口接入 HIP encoder 编译：BUILT；七组原生 CLI 合同待跑。 | `migration/reports/evidence/rewrite/I5/original-nvJPEG-Encoder-MultipleInstances-GPU-build/20261112T111525.053331Z-I5-rocm-build-ce5df2053d` |
+| 2026-11-12T11:15:38.817981+00:00 | I5 | 原始多实例编码器 natural-three：PASSED，产品 3 件；baseline 全 GPU entropy。 | `migration/reports/evidence/rewrite/I5/nvJPEG-Encoder-MultipleInstances-original-CLI/20261112T111536.440689Z-I5-rocm-original-entry-af27d99e5f` |
+| 2026-11-12T11:15:41.096496+00:00 | I5 | 原始多实例编码器 repeat-seven：PASSED，产品 7 件；baseline 全 GPU entropy。 | `migration/reports/evidence/rewrite/I5/nvJPEG-Encoder-MultipleInstances-original-CLI/20261112T111539.159311Z-I5-rocm-original-entry-3f07e53615` |
+| 2026-11-12T11:15:43.555326+00:00 | I5 | 原始多实例编码器 optimized-444：PASSED，产品 3 件；优化 Huffman GPU entropy、CPU DHT 表设计。 | `migration/reports/evidence/rewrite/I5/nvJPEG-Encoder-MultipleInstances-original-CLI/20261112T111541.435252Z-I5-rocm-original-entry-6fe4fe1d10` |
+| 2026-11-12T11:15:45.827161+00:00 | I5 | 原始多实例编码器 default-backend：PASSED，产品 3 件；baseline 全 GPU entropy。 | `migration/reports/evidence/rewrite/I5/nvJPEG-Encoder-MultipleInstances-original-CLI/20261112T111543.891818Z-I5-rocm-original-entry-b465598e69` |
+| 2026-11-12T11:15:47.863560+00:00 | I5 | 原始多实例编码器 hardware-unavailable：PASSED，产品 0 件；baseline 全 GPU entropy。 | `migration/reports/evidence/rewrite/I5/nvJPEG-Encoder-MultipleInstances-original-CLI/20261112T111546.163253Z-I5-rocm-original-entry-1de472236f` |
+| 2026-11-12T11:15:50.008048+00:00 | I5 | 原始多实例编码器 missing-input：PASSED，产品 0 件；baseline 全 GPU entropy。 | `migration/reports/evidence/rewrite/I5/nvJPEG-Encoder-MultipleInstances-original-CLI/20261112T111548.179067Z-I5-rocm-original-entry-56e26dbf60` |
+| 2026-11-12T11:15:52.000137+00:00 | I5 | 原始多实例编码器 invalid-quality：PASSED，产品 0 件；baseline 全 GPU entropy。 | `migration/reports/evidence/rewrite/I5/nvJPEG-Encoder-MultipleInstances-original-CLI/20261112T111550.344320Z-I5-rocm-original-entry-931beac8f8` |
+| 2026-11-12T11:17:02.074513+00:00 | I5 | 原始多实例 JPEG 编码器 baseline 7 图/84 kernel、优化 -f 3 图/39 kernel，多 HIP stream、物理 GPU1、改输入重放：PASSED。 | `migration/reports/evidence/rewrite/I5/original-JPEG-encoder-concurrent-HIP-streams-and-changed-input/20261112T111658.917395Z-I5-rocm-trace-b3bbf722d3` |
+| 2026-11-12T11:17:08.835520+00:00 | I5 | 原始多实例编码16件 JPEG 独立解码：13 baseline 旧 RGB 精确，3 优化输出按同源GPU FDCT plain精确；旧CPU优化结果差值逐件记录，尺寸/采样/量化均核对：PASSED。 | `migration/reports/evidence/rewrite/I5/multi-instance-sixteen-JPEG-prior-vs-full-GPU-decode/20261112T111707.847444Z-I5-CPU-reference-a0998d3121` |
+| 2026-11-12T11:18:14.668366+00:00 | I5 | 原始 nvJPEG 多实例编码器7 CLI、16产品与 baseline 84/优化39 GPU kernel、双stream封存；CPU仅设计优化DHT表，其余调度缺口保留PARTIAL。 | `migration/reports/evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261112T111813.647313Z-I5-composite-subset-qualification-f5bc6c8843` |
 
 <!-- IMAGE_EXECUTION:END -->

@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-12T11:10:53.758891+00:00。26入口当前13通过/9部分/4失败。
+更新时间：2026-11-12T11:18:14.668366+00:00。26入口当前13通过/9部分/4失败。
 
-I5：优化 JPEG DHT 单符号/全256符号/长尾/稀疏/极端偏斜边界：PASSED；仅CPU表生成合法性检查。
+I5：原始 nvJPEG 多实例编码器7 CLI、16产品与 baseline 84/优化39 GPU kernel、双stream封存；CPU仅设计优化DHT表，其余调度缺口保留PARTIAL。
 
-证据：`migration/reports/evidence/rewrite/I5/optimized-Huffman-length-limit-and-prefix-edge-gates/20261112T111050.603804Z-I5-CPU-table-boundary-84069729e7`
+证据：`migration/reports/evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261112T111813.647313Z-I5-composite-subset-qualification-f5bc6c8843`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

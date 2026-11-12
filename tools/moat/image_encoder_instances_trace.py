@@ -17,7 +17,8 @@ def main():
  e=Experiment('I5','original-JPEG-encoder-concurrent-HIP-streams-and-changed-input','rocm-trace',
   sources=[__file__,PROFILE,BUILD,*[ROOT/x['path'] for x in profile['inputs']],
    ROOT/'rocm/common/image/jpeg_encoder_instances.hpp',ROOT/'rocm/common/image/jpeg_encoder_gpu.hpp',
-   ROOT/'rocm/common/image/jpeg_full_gpu.hpp',ROOT/'rocm/common/image/jpeg_entropy_gpu.hpp'],
+   ROOT/'rocm/common/image/jpeg_full_gpu.hpp',ROOT/'rocm/common/image/jpeg_entropy_gpu.hpp',
+   ROOT/'rocm/common/image/jpeg_opt_full_gpu.hpp',ROOT/'rocm/common/image/jpeg_optimal_huffman.hpp'],
   parent=original['experiment_id'])
  observed=capture();write(e.path/'backend.observed.json',observed)
  output=e.path/'outputs';output.mkdir()
@@ -56,6 +57,45 @@ def main():
    passed=stage_counts==expected,counts=stage_counts,expected=expected))
   checks.append(dict(check='at-least-two-actual-HIP-streams',passed=len(streams)>=2,
    stream_ids=sorted(streams)))
+ opt_output=e.path/'optimized-output';opt_output.mkdir()
+ opt_cmd=['rocprofv3','--kernel-trace','--output-format','csv','--output-directory',str(e.path/'optimized-trace'),
+  '--',str(ROOT/build['binary']),'-i',str(folder),'-j','2','-s','2',
+  '-o',str(opt_output),'-b','gpu','-q','90','-p','-f']
+ opt_rc=e.command(opt_cmd,'optimized-real-GPU-JPEG-encode',timeout=300)
+ opt_log=(e.path/'logs/0002-optimized-real-GPU-JPEG-encode.stdout.log').read_text()
+ opt_original=next(x for x in runs if x['case']=='optimized-444')
+ checks.append(dict(check='optimized-original-CLI-and-GPU-entropy-claimed',passed=opt_rc==0 and
+  'cpu_entropy=0 gpu_full_encode=1' in opt_log and
+  'gpu_huffman_histogram=1 cpu_huffman_table=1' in opt_log))
+ checks.append(dict(check='three-optimized-traced-products-exactly-match-nonprofiled',passed=all(
+  (opt_output/(str(i)+'.jpg')).is_file() and digest(opt_output/(str(i)+'.jpg'))==
+  next(p['sha256'] for p in opt_original['products'] if p['product']==str(i)+'.jpg') for i in range(3))))
+ opt_traces=list((e.path/'optimized-trace').rglob('*kernel_trace.csv'))
+ opt_agents=list((e.path/'optimized-trace').rglob('*agent_info.csv'))
+ opt_counts={};opt_streams=set();opt_pci=set()
+ checks.append(dict(check='optimized-GPU-trace-and-agent-map',passed=len(opt_traces)==len(opt_agents)==1))
+ if len(opt_traces)==len(opt_agents)==1:
+  lookup={r['Node_Id']:r for r in csv.DictReader(opt_agents[0].open())}
+  allowed={d['pci_bdf'] for d in observed['devices'] if d['physical_id']==1}
+  for row in csv.DictReader(opt_traces[0].open()):
+   stage=next((x for x in ('rgb_to_plane','forward_dct_quantize','gather_mcu_coefficients',
+      'histogram','encode_blocks','prefix_bits','pack_bytes','prefix_stuff','scatter_stuff')
+      if x in row['Kernel_Name']),None)
+   if not stage:continue
+   opt_counts[stage]=opt_counts.get(stage,0)+1;opt_streams.add(row['Stream_Id'])
+   agent=lookup[row['Agent_Id'].split()[-1]];loc=int(agent['Location_Id'])
+   location=f"{int(agent['Domain']):04x}:{loc>>8:02x}:{(loc>>3)&31:02x}.{loc&7}"
+   opt_pci.add(location)
+   checks.append(dict(check='optimized-'+stage+'-physical-GPU1-'+str(opt_counts[stage]),
+    passed=location in allowed and int(row['End_Timestamp'])>int(row['Start_Timestamp'])
+    and int(row['Grid_Size_X'])>0,pci_bdf=location,stream_id=row['Stream_Id']))
+  opt_expected={'rgb_to_plane':9,'forward_dct_quantize':9,**{x:3 for x in
+      ('gather_mcu_coefficients','histogram','encode_blocks','prefix_bits','pack_bytes',
+       'prefix_stuff','scatter_stuff')}}
+  checks.append(dict(check='three-optimized-images-all-39-HIP-kernels',
+   passed=opt_counts==opt_expected,counts=opt_counts,expected=opt_expected))
+  checks.append(dict(check='optimized-at-least-two-actual-HIP-streams',passed=len(opt_streams)>=2,
+   stream_ids=sorted(opt_streams)))
  changed=e.path/'changed-input';shutil.copytree(folder,changed)
  name=Path(profile['inputs'][0]['path']).name;altered=changed/name
  payload=bytearray(altered.read_bytes());payload[54]^=0xff;altered.write_bytes(payload)
@@ -72,9 +112,11 @@ def main():
   all(digest(changed_output/(str(i)+'.jpg'))==digest(output/(str(i)+'.jpg')) for i in (1,2))))
  status='PASSED' if all(x['passed'] for x in checks) else 'PROFILER_FAILED'
  result=dict(status=status,checks=checks,return_code=rc,mutation_return_code=mutation_rc,
+  optimized_return_code=opt_rc,optimized_kernel_counts=opt_counts,
+  optimized_stream_ids=sorted(opt_streams),optimized_pci_bdfs=sorted(opt_pci),
   kernel_counts=stage_counts,stream_ids=sorted(streams),pci_bdfs=sorted(pci),experiment_id=e.id)
  write(e.path/'trace-result.json',result)
  result['evidence']=e.finish(status,dict(status=status,checks=checks));write(REPORT,result)
- record('I5','原始多实例 JPEG 编码器 7 图/84 kernel、多 HIP stream、物理 GPU1、改输入重放：'+status+'。',
+ record('I5','原始多实例 JPEG 编码器 baseline 7 图/84 kernel、优化 -f 3 图/39 kernel，多 HIP stream、物理 GPU1、改输入重放：'+status+'。',
   [result['evidence']]);print(status,stage_counts,sorted(streams));return int(status!='PASSED')
 if __name__=='__main__':raise SystemExit(main())

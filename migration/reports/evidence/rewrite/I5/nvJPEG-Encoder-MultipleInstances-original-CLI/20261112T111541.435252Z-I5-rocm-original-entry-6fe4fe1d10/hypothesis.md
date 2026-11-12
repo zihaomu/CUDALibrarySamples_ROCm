@@ -1,0 +1,1 @@
+Test rocm-original-entry for nvJPEG-Encoder-MultipleInstances-original-CLI, case optimized-444. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T111525.053331Z-I5-rocm-build-ce5df2053d.

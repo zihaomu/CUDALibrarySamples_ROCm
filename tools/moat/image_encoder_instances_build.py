@@ -12,7 +12,8 @@ def main():
  if json.loads(profile.read_text())['status']!='FROZEN':raise ValueError('frozen profile required')
  src=ROOT/'rocm/ported/nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp'
  headers=[ROOT/'rocm/common/image/jpeg_encoder_instances.hpp',ROOT/'rocm/common/image/jpeg_encoder_gpu.hpp',
-          ROOT/'rocm/common/image/jpeg_full_gpu.hpp',ROOT/'rocm/common/image/jpeg_entropy_gpu.hpp']
+          ROOT/'rocm/common/image/jpeg_full_gpu.hpp',ROOT/'rocm/common/image/jpeg_entropy_gpu.hpp',
+          ROOT/'rocm/common/image/jpeg_opt_full_gpu.hpp',ROOT/'rocm/common/image/jpeg_optimal_huffman.hpp']
  jpeg=ROOT/'build/cpu-codecs';core=Path('/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core');overlay=ROOT/'build/rocm-sdk-overlay'
  deps=[src,*headers,profile,ROOT/'migration/rewrite/image-jpeg-encoder-instances-full-gpu-profile.json',
        jpeg/'include/jpeglib.h',jpeg/'lib/libjpeg.so.62.4.0']
