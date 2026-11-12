@@ -1,0 +1,1 @@
+Test rocm-original for NPP+/floodFill::floodFillVariousRegionTypesNPPPlus.cpp, case changed-full-size. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261112T030315.940285Z-I3-rocm-build-76d776e1ed.

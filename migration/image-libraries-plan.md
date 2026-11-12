@@ -280,7 +280,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-12T02:57:49.744559+00:00。26入口当前10通过/7部分/9失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-12T03:04:35.618709+00:00。26入口当前10通过/7部分/9失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -1372,5 +1372,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-12T02:57:15.644687+00:00 | I3 | flood运行时/CLI/原例30项验收器反例合同固定。 | `migration/reports/evidence/rewrite/I3/FloodFill-runtime-reader-mutation-contract/20261112T025714.721306Z-I3-CPU-contract-59d82cd134` |
 | 2026-11-12T02:57:19.561855+00:00 | I3 | flood30项72运行/18CLI/4原例真实验收器变异：PASSED | `migration/reports/evidence/rewrite/I3/FloodFill-runtime-CLI-original-validator-mutations/20261112T025716.010685Z-I3-CPU-validator-test-86a8d1de27` |
 | 2026-11-12T02:57:49.744559+00:00 | I3 | flood末行pitch×height边界已修复，旧实际1×1反例保留；29完整输入、4原例20RGB、72运行、18CLI、30+30验收器变异及GPU trace均通过。仍待冷检出、独立复审及资格发布。 | `migration/reports/evidence/rewrite/I3/FloodFill-fixed-exact-last-row-padding-counterexample/20261111T185159.117890Z-I3-rocm-contract-probe-354c9ab01a`；`migration/reports/evidence/rewrite/I3/FloodFill-runtime-CLI-original-validator-mutations/20261112T025716.010685Z-I3-CPU-validator-test-86a8d1de27`；`migration/reports/evidence/rewrite/I3/FloodFill-real-core-validator-mutations/20261111T184924.859738Z-I3-CPU-validator-test-3ff03081b8`；`migration/reports/evidence/rewrite/I3/FloodFill-complete-CLI-independent-CPU/20261111T184826.888295Z-I3-CPU-reference-0a59e22bf1`；`migration/reports/evidence/rewrite/I3/FloodFill-real-dispatch-and-full-pixels-independent-CPU/20261111T184835.298528Z-I3-CPU-reference-f4132aeba3` |
+| 2026-11-12T03:01:08.121220+00:00 | I3 | flood固定Git检出重建四合同、HIP/C++、29完整RGB、四原例、72运行、18CLI、GPU trace及五CPU验收与36封存子记录：FAILED | `migration/reports/evidence/rewrite/I3/FloodFill-clean-checkout-complete-RGB-runtime-CLI-trace/20261112T030049.468405Z-I3-host-cold-replay-20102b2933` |
+| 2026-11-12T03:04:35.618709+00:00 | I3 | flood固定Git检出重建四合同、HIP/C++、29完整RGB、四原例、72运行、18CLI、GPU trace及五CPU验收与36封存子记录：PASSED | `migration/reports/evidence/rewrite/I3/FloodFill-clean-checkout-complete-RGB-runtime-CLI-trace/20261112T030223.110738Z-I3-host-cold-replay-c47fb30c0a` |
 
 <!-- IMAGE_EXECUTION:END -->

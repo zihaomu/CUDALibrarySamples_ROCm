@@ -23,6 +23,7 @@ C ABI1，descriptor160字节，支持byte pitch、相同pitch的精确原地alia
 | 末行padding反例 | [旧库实际错误](image-flood-legacy-padding-failure.json) · [新库同一反例](image-flood-padding-fix-validation.json)：旧库在1×1、pitch4、mask=input+3时改写输入末行padding197→255；新库rc1且全部缓冲保持。旧失败证据独立归档，不用作新库通过证明 |
 | CLI/追踪 | [18项CLI与畸形文件独立检查](image-flood-cli-validation.json) · [真实GPU trace](image-flood-trace-validation.json)：五种GPU阶段均有实际dispatch，全部RGB/mask/metadata仍由CPU核对 |
 | 验收器反例 | [30项核心读取器检查](image-flood-checks.json) · [30项运行时/CLI/原例读取器检查](image-flood-runtime-checks.json)：均含完整归档重定位正例；拒绝伪造输出、配对hash、buffer/stream/命令及原例产品 |
+| 干净检出 | [固定提交重放](image-flood-cold.json)：无预建库的新克隆重建四合同、HIP和C++，29全图、4原例、72运行、18CLI、trace及五独立CPU检查全部通过，36份完整子实验封存；第一次外层容器重入失败另存原始日志 |
 | 当前原生NPP+ | [未改五原例执行](image-I3-native-originals.json) · [flood完整比较](image-flood-native-validation.json)：源码/输入/binary/实际SDK/GPU receipt及两输入五完整产品验证；数值差异单列 |
 | 历史捆绑文件 | [CPU研究](image-I3-flood-bundled-research.json)，仅为旧vendor文件观察，和新的实际native记录分开 |
 
@@ -34,7 +35,7 @@ C ABI1，descriptor160字节，支持byte pitch、相同pitch的精确原地alia
 
 GPU图像计算均在物理GPU1；物理GPU0只创建/查询空的外设备stream，未存储图像或运行图像kernel。两实例并发验证使用实际不同流、独立全部地址范围和重叠的API+自身流同步区间。
 
-尚需干净检出重放、固定源码独立复审和固定资格发布。完成全部门槛后才把该入口从PARTIAL升级。
+尚需固定源码独立复审和固定资格发布。完成全部门槛后才把该入口从PARTIAL升级。
 
 ## 复现
 
