@@ -1,0 +1,94 @@
+{
+  "status": "FROZEN",
+  "sample_id": "NPP/opencvBenchmark::opencvBenchmark.cpp",
+  "source": "NPP/opencvBenchmark/opencvBenchmark.cpp",
+  "source_sha256": "0332d73b327bbf76726b6eb13e38bbf68110baff7f923f328dbaabbca54fb30e",
+  "image": "NPP/opencvBenchmark/images/CircuitBoard_2048x1024_8u.raw",
+  "image_sha256": "4fdc3295d8f6dde8bc9ec0850bc8d29c8a80e991ce8461dab08056e172ab89ec",
+  "image_bytes": 2097152,
+  "case_count": 6,
+  "cases": [
+    {
+      "case": "small",
+      "arguments": [
+        "-w",
+        "128",
+        "-h",
+        "96",
+        "-n",
+        "1"
+      ],
+      "width": 128,
+      "height": 96,
+      "iterations": 1,
+      "expected_return_code": 0,
+      "products": {
+        "gauss.raw": 12288,
+        "canny.raw": 12288,
+        "resize.raw": 3072,
+        "color.raw": 12288
+      }
+    },
+    {
+      "case": "odd-half",
+      "arguments": [
+        "-w",
+        "129",
+        "-h",
+        "97",
+        "-n",
+        "1"
+      ],
+      "width": 129,
+      "height": 97,
+      "iterations": 1,
+      "expected_return_code": 0,
+      "products": {
+        "gauss.raw": 12513,
+        "canny.raw": 12513,
+        "resize.raw": 3072,
+        "color.raw": 12513
+      }
+    },
+    {
+      "case": "original-default",
+      "arguments": [],
+      "width": 4096,
+      "height": 2048,
+      "iterations": 20,
+      "expected_return_code": 0,
+      "products": {
+        "gauss.raw": 8388608,
+        "canny.raw": 8388608,
+        "resize.raw": 2097152,
+        "color.raw": 8388608
+      }
+    },
+    {
+      "case": "invalid-dimensions",
+      "arguments": [
+        "-w",
+        "15"
+      ],
+      "expected_return_code": 1,
+      "products": {}
+    },
+    {
+      "case": "missing-input",
+      "arguments": [
+        "-i",
+        "/definitely/missing/benchmark.raw"
+      ],
+      "expected_return_code": 1,
+      "products": {}
+    },
+    {
+      "case": "unknown-option",
+      "arguments": [
+        "--unknown"
+      ],
+      "expected_return_code": 1,
+      "products": {}
+    }
+  ]
+}

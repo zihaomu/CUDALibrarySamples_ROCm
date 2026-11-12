@@ -73735,25 +73735,50 @@
         "RPP HIP",
         "rocPRIM"
       ],
-      "actual_library": null,
-      "backend_library": null,
+      "actual_library": "Project HIP Gaussian/Canny/resize/RGB gray plus pinned OpenCV 4.12 CPU benchmark",
+      "backend_library": "project HIP image benchmark",
       "implementation": "rocm/ported/NPP/opencvBenchmark/opencvBenchmark.cpp",
-      "status": "FAILED",
-      "level": "L1",
+      "status": "PARTIAL",
+      "level": "L3",
       "required_cases": [
-        "original-functional-contract",
-        "independent-numerical-or-semantic-reference"
+        "image-benchmark/frozen-six-CLI",
+        "image-benchmark/matched-OpenCV4.12-and-four-HIP-build",
+        "image-benchmark/six-real-GPU-CLI",
+        "image-benchmark/all-four-independent-CPU",
+        "image-benchmark/original-CUDA-observed-semantics",
+        "image-benchmark/eighteen-device-contracts",
+        "image-benchmark/real-four-operation-trace",
+        "image-benchmark/fixed-commit-cold-replay",
+        "image-benchmark/independent-review",
+        "image-benchmark/composite-qualification-and-Git-anchor"
       ],
-      "passed_cases": [],
-      "reason_code": "BUILD_ERROR",
-      "reason": "build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/NPP/opencvBenchmark/opencvBenchmark.cpp:34:10: fatal error: 'npp.h' file not found；failed to execute:/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib/llvm/bin/clang++  --offload-arch=gfx1201 --driver-mode=g++ --hip-link  -std=c++17 -O2 -D__HIP_PLATFORM_AMD__ --rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALib",
-      "cuda_baseline": "BLOCKED",
-      "cuda_comparison": "BLOCKED",
-      "benchmark": "NOT_RUN",
+      "passed_cases": [
+        "image-benchmark/frozen-six-CLI",
+        "image-benchmark/matched-OpenCV4.12-and-four-HIP-build",
+        "image-benchmark/six-real-GPU-CLI",
+        "image-benchmark/all-four-independent-CPU",
+        "image-benchmark/original-CUDA-observed-semantics",
+        "image-benchmark/eighteen-device-contracts",
+        "image-benchmark/real-four-operation-trace"
+      ],
+      "reason_code": "QUALIFICATION_PENDING",
+      "reason": "原始四算子C++流程、6组真实GPU CLI、独立CPU全量输出、5090原生同输入同版OpenCV对照、18运行合同和真实GPU trace通过；原生NPP未输出像素，Canny/ Gaussian算法差异记录。待固定提交冷检出、独立复审和签发资格，当前不计整例通过或新增功能族。",
+      "cuda_baseline": "PASSED",
+      "cuda_comparison": "OBSERVED",
+      "benchmark": "OBSERVED_NOT_QUALIFIED",
       "evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/NPP_opencvBenchmark_opencvBenchmark.cpp",
         "migration/reports/evidence/20261109T084256.329631Z/original-rocm/NPP_opencvBenchmark_opencvBenchmark.cpp",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP_opencvBenchmark_opencvBenchmark.cpp"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP_opencvBenchmark_opencvBenchmark.cpp",
+        "migration/reports/image-benchmark.md",
+        "migration/reports/image-benchmark-contracts.json",
+        "migration/reports/image-I3-rocm-OpenCV.json",
+        "migration/reports/image-benchmark-build.json",
+        "migration/reports/image-benchmark-runs.json",
+        "migration/reports/image-benchmark-validation.json",
+        "migration/reports/image-benchmark-native-comparison.json",
+        "migration/reports/image-benchmark-runtime.json",
+        "migration/reports/image-benchmark-trace.json"
       ],
       "attempts": [
         {
@@ -73844,15 +73869,15 @@
         "qualified_physical_devices": true
       },
       "original_implementation": "rocm/ported/NPP/opencvBenchmark/opencvBenchmark.cpp",
-      "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
+      "retry_condition": "重建和原例/CPU/运行/trace任一改变须重新资格；NPP逐像素等价需原生输出采集。",
       "original_semantics": {
         "contract_source": "NPP/opencvBenchmark/opencvBenchmark.cpp",
         "source_sha256": "0332d73b327bbf76726b6eb13e38bbf68110baff7f923f328dbaabbca54fb30e",
         "api_tokens": [],
         "review_scope": "Original source is the authoritative dtype/layout/batch/API contract; qualified subset and deviations are explicit in reason and required_cases."
       },
-      "equivalence": "API_PORT",
-      "next_step": "按当前逐例错误和 retry_condition 改写/补齐，再运行原始 profile 与独立参考。",
+      "equivalence": "DOCUMENTED_IMAGE_ALGORITHM_VARIANTS",
+      "next_step": "固定Git提交冷检出、独立复审、组合资格和发布。",
       "original_cuda": {
         "sample_id": "NPP/opencvBenchmark::opencvBenchmark.cpp",
         "scope": "original_profile",
@@ -73877,7 +73902,10 @@
       },
       "cuda_baseline_scope": "Original source with observation-only output where present; build/run qualification, separate from independent correctness comparison.",
       "cuda_baseline_reason": "Missing optional CUDA SDK/input or skipped compute",
-      "cuda_comparison_reason": "CUDA 原始 SDK、绑定或输入前置条件未满足，见该例 CUDA 基线证据。"
+      "cuda_comparison_reason": "同4096×2048/20×5、同OpenCV4.12、同输入；NPP原例只输出统计与计时，不输出像素，故不声称NPP逐像素相等；性能未资格。",
+      "cuda_comparison_mode": "ORIGINAL_NATIVE_STATISTICAL_OBSERVATION",
+      "active_batch": "I3",
+      "reproduce": "python3 tools/moat/image_benchmark_contracts.py\npython3 tools/moat/image_benchmark_deps.py\npython3 tools/moat/image_benchmark_build.py\npython3 tools/moat/image_benchmark_run.py\nbuild/image-cpu-venv/bin/python tools/moat/image_benchmark_reference.py\npython3 tools/moat/image_benchmark_runtime.py\npython3 tools/moat/image_benchmark_trace.py"
     },
     {
       "id": "NPP/templateMatching::templateMatching.cpp",

@@ -107,11 +107,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-12T05:34:37.782316+00:00。26入口当前12通过/6部分/8失败。
+更新时间：2026-11-12T05:57:19.619618+00:00。26入口当前12通过/7部分/7失败。
 
-I3：算子统计校正：operator-support.json实际为128个按模块去重的已验收功能族；上一事件的127?仅为未核实占位，当前以128为准。Hough项目变体新增1族。
+I3：OpenCV benchmark当前7/10资格面通过，样例从旧构建失败更新为PARTIAL/L3；固定提交冷检出、复审、组合资格欠项不伪记PASSED。
 
-证据：`migration/reports/operator-support.json`
+证据：`migration/reports/image-benchmark.md`；`migration/reports/image-benchmark-trace.json`；`migration/reports/image-benchmark-runtime.json`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

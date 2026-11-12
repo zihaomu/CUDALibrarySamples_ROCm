@@ -2,7 +2,7 @@
 
 [返回项目首页](../../README.md) · [构建与复现](../usage.md) · [机器可读记录](support-log-index.json)
 
-覆盖 **639 个样例入口**：251 PASSED、21 PARTIAL、367 FAILED、0 UNSUPPORTED、0 BLOCKED。全部 30 个模块逐项列出实现方式、范围/原因、AMD 日志、CUDA 日志与验收报告。数据直接来自 [逐例清单](../samples.yaml)，[JSON 索引](support-log-index.json) 另含全部历史证据路径、源码 SHA256、已通过/必需用例及恢复条件。
+覆盖 **639 个样例入口**：251 PASSED、22 PARTIAL、366 FAILED、0 UNSUPPORTED、0 BLOCKED。全部 30 个模块逐项列出实现方式、范围/原因、AMD 日志、CUDA 日志与验收报告。数据直接来自 [逐例清单](../samples.yaml)，[JSON 索引](support-log-index.json) 另含全部历史证据路径、源码 SHA256、已通过/必需用例及恢复条件。
 
 **查阅方式：** 先看状态和“支持范围/失败原因”，再看实际库与实现源码。AMD 栏优先链接与当前源码 hash 匹配的选定验收日志；未通过项链接实际尝试。`build.log` 是编译/链接记录，`run.log` 是程序输出，`<case>/run.log` 是对应输入的输出。命令与环境位于同目录的 `commands.json` 和 `*.environment.json`，从“证据目录”进入。缺少运行日志时会明确标注，不将编译/import 成功视作 GPU 通过。
 
@@ -57,8 +57,9 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 | 当前结论 | 原因编码 | 入口数 | 说明 |
 | --- | --- | ---: | --- |
 | FAILED | `BINDING_OR_FRONTEND_MIGRATION_REQUIRED` | 57 | 原始语言前端或 vendor 绑定尚未完成迁移。 |
-| FAILED | `BUILD_ERROR` | 310 | 当前移植稿的 API、类型、链接或算法实现未完成，实际构建失败。 |
+| FAILED | `BUILD_ERROR` | 309 | 当前移植稿的 API、类型、链接或算法实现未完成，实际构建失败。 |
 | PARTIAL | `INDEPENDENT_VALIDATION_PENDING` | 3 | 尚未完成对应独立数值及实际执行路径验收。 |
+| PARTIAL | `QUALIFICATION_PENDING` | 1 | 按该入口的失败日志和恢复条件处理。 |
 | PARTIAL | `VALIDATED_B12_B15_SUBSET` | 8 | 已有验收子集，原始 descriptor、低精度通信、序列或像素语义仍有缺口。 |
 | PARTIAL | `VALIDATED_B9_B11_SUBSET` | 9 | 已有验收子集，原例框架、调度或配置/查询语义仍有缺口。 |
 | PARTIAL | `VENDOR_PERMUTATION_POLICY_DIFFERS` | 1 | 置换/排序策略未满足原始 vendor 合同。 |
@@ -809,7 +810,7 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 | [nppCanny/npp_canny_simple.cpp](../sample-reports/NPP/nppCanny/npp_canny_simple.cpp.md) | PASSED / 30/30 | HIP C3 Sobel/NMS/GPU union-find hysteresis + OpenCV file IO/CPU comparisons / project HIP classical C3 Canny；ALGORITHM_VARIANT_C3_CLASSICAL_HYSTERESIS | [日志、范围、源码](support-log-index/NPP.md#sample-3348e80044c5) |
 | [nppCanny/npp_canny_simple.py](../sample-reports/NPP/nppCanny/npp_canny_simple.py.md) | PASSED / 30/30 | HIP C3 Sobel/NMS/GPU union-find hysteresis + OpenCV file IO/CPU comparisons + ROCm Torch / project HIP classical C3 Canny；ALGORITHM_VARIANT_C3_CLASSICAL_HYSTERESIS | [日志、范围、源码](support-log-index/NPP.md#sample-46f944149acb) |
 | [templateMatching/templateMatching.cpp](../sample-reports/NPP/templateMatching/templateMatching.cpp.md) | PASSED / 9/9 | HIP NCC/full original CLI/RAW input/PGM annotation/HIP-event timing / project HIP kernels；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/NPP.md#sample-7ecae8272f98) |
-| [opencvBenchmark/opencvBenchmark.cpp](../sample-reports/NPP/opencvBenchmark/opencvBenchmark.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/NPP.md#sample-d17ea2c018b5) |
+| [opencvBenchmark/opencvBenchmark.cpp](../sample-reports/NPP/opencvBenchmark/opencvBenchmark.cpp.md) | PARTIAL / 7/10 | Project HIP Gaussian/Canny/resize/RGB gray plus pinned OpenCV 4.12 CPU benchmark / project HIP image benchmark；DOCUMENTED_IMAGE_ALGORITHM_VARIANTS | [日志、范围、源码](support-log-index/NPP.md#sample-d17ea2c018b5) |
 | [watershedSegmentation/watershedSegmentation.cpp](../sample-reports/NPP/watershedSegmentation/watershedSegmentation.cpp.md) | FAILED / 0/2 | 尚无已验证使用库；库 API 迁移 | [日志、范围、源码](support-log-index/NPP.md#sample-eb94340a73f3) |
 
 <a id="module-24"></a>

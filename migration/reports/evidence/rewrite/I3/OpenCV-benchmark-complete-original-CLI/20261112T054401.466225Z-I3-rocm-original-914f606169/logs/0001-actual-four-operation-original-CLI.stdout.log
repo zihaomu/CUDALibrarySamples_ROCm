@@ -1,0 +1,10 @@
+Image 129x97, 1 iterations per timing, median of 5
+GPU: AMD Radeon AI PRO R9700 | OpenCV 4.12.0, 128 CPU threads
+
+Canny edge pixels: ROCm 760, OpenCV 430 (algorithm variant; counts may differ)
+
+operation              ROCm kernel    ROCm e2e    CV 1 thr    CV N thr |    kernel       e2e       e2e | mean abs
+Gaussian 5x5                 0.014       0.045       0.008      12.036 |      0.6x      0.2x    269.4x | 0.06
+Canny 3x3 L2                 0.020       0.049       0.037       6.001 |      1.8x      0.8x    122.4x | 6.73
+Resize 1/2 bilinear          0.012       0.042       0.004       0.004 |      0.4x      0.1x      0.1x | 0.00
+RGB to gray                  0.009       0.048       0.003       0.003 |      0.4x      0.1x      0.1x | 0.00

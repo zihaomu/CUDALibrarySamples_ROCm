@@ -2,8 +2,8 @@
   "scope": "All 639 entrypoints, including failures. PASSED is limited to registered cases. Logs point to current-source qualification where available, otherwise the recorded attempt; compilation/import logs are not GPU correctness proof.",
   "counts": {
     "PASSED": 251,
-    "FAILED": 367,
-    "PARTIAL": 21
+    "FAILED": 366,
+    "PARTIAL": 22
   },
   "implementation_methods": {
     "API_PORT": "库 API 迁移",
@@ -8987,43 +8987,77 @@
       "id": "NPP/opencvBenchmark::opencvBenchmark.cpp",
       "family": "NPP",
       "source": "NPP/opencvBenchmark/opencvBenchmark.cpp",
-      "status": "FAILED",
-      "level": "L1",
-      "actual_library": null,
-      "backend_library": null,
-      "implementation_method": "API_PORT",
+      "status": "PARTIAL",
+      "level": "L3",
+      "actual_library": "Project HIP Gaussian/Canny/resize/RGB gray plus pinned OpenCV 4.12 CPU benchmark",
+      "backend_library": "project HIP image benchmark",
+      "implementation_method": "DOCUMENTED_IMAGE_ALGORITHM_VARIANTS",
       "implementation": "rocm/ported/NPP/opencvBenchmark/opencvBenchmark.cpp",
-      "implementation_sha256": "b13ac23af0be4505194eacf6a2e4d3d4511cdfdc5726de2f4a2663fc8222c45e",
-      "passed_cases": [],
-      "required_cases": [
-        "original-functional-contract",
-        "independent-numerical-or-semantic-reference"
+      "implementation_sha256": "afdb9093d89b28a6963840989bf23446a3fc866b9a79832dcd4b090e395c04da",
+      "passed_cases": [
+        "image-benchmark/frozen-six-CLI",
+        "image-benchmark/matched-OpenCV4.12-and-four-HIP-build",
+        "image-benchmark/six-real-GPU-CLI",
+        "image-benchmark/all-four-independent-CPU",
+        "image-benchmark/original-CUDA-observed-semantics",
+        "image-benchmark/eighteen-device-contracts",
+        "image-benchmark/real-four-operation-trace"
       ],
-      "scope_and_reason": "build 失败：/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/ported/NPP/opencvBenchmark/opencvBenchmark.cpp:34:10: fatal error: 'npp.h' file not found；failed to execute:/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay/lib/llvm/bin/clang++  --offload-arch=gfx1201 --driver-mode=g++ --hip-link  -std=c++17 -O2 -D__HIP_PLATFORM_AMD__ --rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay --hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALib",
-      "retry_condition": "实现并审查上列缺失的 AMD API/算法，保留原始 dtype/layout/execution model；使用原始 profile 与独立参考重新验收。",
+      "required_cases": [
+        "image-benchmark/frozen-six-CLI",
+        "image-benchmark/matched-OpenCV4.12-and-four-HIP-build",
+        "image-benchmark/six-real-GPU-CLI",
+        "image-benchmark/all-four-independent-CPU",
+        "image-benchmark/original-CUDA-observed-semantics",
+        "image-benchmark/eighteen-device-contracts",
+        "image-benchmark/real-four-operation-trace",
+        "image-benchmark/fixed-commit-cold-replay",
+        "image-benchmark/independent-review",
+        "image-benchmark/composite-qualification-and-Git-anchor"
+      ],
+      "scope_and_reason": "原始四算子C++流程、6组真实GPU CLI、独立CPU全量输出、5090原生同输入同版OpenCV对照、18运行合同和真实GPU trace通过；原生NPP未输出像素，Canny/ Gaussian算法差异记录。待固定提交冷检出、独立复审和签发资格，当前不计整例通过或新增功能族。",
+      "retry_condition": "重建和原例/CPU/运行/trace任一改变须重新资格；NPP逐像素等价需原生输出采集。",
       "detail": "migration/sample-reports/NPP/opencvBenchmark/opencvBenchmark.cpp.md",
-      "record_field": "attempts/1",
+      "record_field": "original_port",
       "amd_evidence": "migration/reports/evidence/20261109T084256.329631Z/original-rocm/NPP_opencvBenchmark_opencvBenchmark.cpp",
       "amd_logs": [
         "migration/reports/evidence/20261109T084256.329631Z/original-rocm/NPP_opencvBenchmark_opencvBenchmark.cpp/build.log"
       ],
-      "cuda_comparison": "BLOCKED",
+      "cuda_comparison": "OBSERVED",
       "cuda_evidence": "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP_opencvBenchmark_opencvBenchmark.cpp",
-      "cuda_baseline": "BLOCKED",
+      "cuda_baseline": "PASSED",
       "cuda_baseline_reason": "Missing optional CUDA SDK/input or skipped compute",
-      "cuda_comparison_reason": "CUDA 原始 SDK、绑定或输入前置条件未满足，见该例 CUDA 基线证据。",
-      "benchmark": "NOT_RUN",
+      "cuda_comparison_reason": "同4096×2048/20×5、同OpenCV4.12、同输入；NPP原例只输出统计与计时，不输出像素，故不声称NPP逐像素相等；性能未资格。",
+      "benchmark": "OBSERVED_NOT_QUALIFIED",
       "qualification_evidence": null,
-      "reason_code": "BUILD_ERROR",
+      "reason_code": "QUALIFICATION_PENDING",
       "cuda_evidence_basis": "原始 CUDA 尝试",
       "cuda_logs": [
         "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP_opencvBenchmark_opencvBenchmark.cpp/build.log"
       ],
-      "validation_reports": [],
+      "validation_reports": [
+        "migration/reports/image-benchmark-contracts.json",
+        "migration/reports/image-I3-rocm-OpenCV.json",
+        "migration/reports/image-benchmark-build.json",
+        "migration/reports/image-benchmark-runs.json",
+        "migration/reports/image-benchmark-validation.json",
+        "migration/reports/image-benchmark-native-comparison.json",
+        "migration/reports/image-benchmark-runtime.json",
+        "migration/reports/image-benchmark-trace.json"
+      ],
       "all_evidence": [
         "migration/reports/evidence/20261109T083217.050455Z/original-rocm/NPP_opencvBenchmark_opencvBenchmark.cpp",
         "migration/reports/evidence/20261109T084256.329631Z/original-rocm/NPP_opencvBenchmark_opencvBenchmark.cpp",
-        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP_opencvBenchmark_opencvBenchmark.cpp"
+        "migration/reports/evidence/20261109T084857.451692Z/original-cuda/NPP_opencvBenchmark_opencvBenchmark.cpp",
+        "migration/reports/image-benchmark.md",
+        "migration/reports/image-benchmark-contracts.json",
+        "migration/reports/image-I3-rocm-OpenCV.json",
+        "migration/reports/image-benchmark-build.json",
+        "migration/reports/image-benchmark-runs.json",
+        "migration/reports/image-benchmark-validation.json",
+        "migration/reports/image-benchmark-native-comparison.json",
+        "migration/reports/image-benchmark-runtime.json",
+        "migration/reports/image-benchmark-trace.json"
       ]
     },
     {

@@ -11013,9 +11013,307 @@
       "evidence": [
         "migration/reports/operator-support.json"
       ]
+    },
+    {
+      "time": "2026-11-12T05:36:42.262903+00:00",
+      "phase": "I3",
+      "message": "开始剩余I3 OpenCV benchmark：原生5090完整默认流程已封存；ROCm10容器缺C++ OpenCV，评估宿主私有4.6 core/imgproc库与头的只读复制及真实GPU四算子实现，不新增支持数。",
+      "evidence": [
+        "migration/reports/image-I3-benchmark-native.json"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:39:20.822773+00:00",
+      "phase": "I3",
+      "message": "ROCm10镜像使用与5090原生benchmark相同OpenCV 4.12私有构建；200文件SHA/大小及实际容器动态加载：READY。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/benchmark-matched-private-OpenCV-4.12/20261112T053915.485374Z-I3-rocm-setup-e90ec6f01d"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:42:22.275863+00:00",
+      "phase": "I3",
+      "message": "原始OpenCV benchmark四GPU算子+同版本CPU OpenCV C++完整入口构建：BUILT；尚未数值验收，不增资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-four-HIP-operations-and-original-C__-CLI-build/20261112T054214.919753Z-I3-rocm-build-17f2ad7277"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:42:56.253103+00:00",
+      "phase": "I3",
+      "message": "OpenCV benchmark四算子原例冻结：默认4096×2048/20次、128×96与奇数尺寸、3个错误CLI；仅合同不增资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-original-CLI-contract/20261112T054255.292748Z-I3-CPU-contract-7089332e89"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:44:01.130236+00:00",
+      "phase": "I3",
+      "message": "OpenCV benchmark原例CLI small：EXECUTED；四算子产品/原始计时分别保存，速度比暂不资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T054358.802809Z-I3-rocm-original-60f01e53bf"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:44:03.522260+00:00",
+      "phase": "I3",
+      "message": "OpenCV benchmark原例CLI odd-half：EXECUTED；四算子产品/原始计时分别保存，速度比暂不资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T054401.466225Z-I3-rocm-original-914f606169"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:44:08.995358+00:00",
+      "phase": "I3",
+      "message": "OpenCV benchmark原例CLI original-default：EXECUTED；四算子产品/原始计时分别保存，速度比暂不资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T054403.868761Z-I3-rocm-original-2c87516d70"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:44:10.938322+00:00",
+      "phase": "I3",
+      "message": "OpenCV benchmark原例CLI invalid-dimensions：EXECUTED；四算子产品/原始计时分别保存，速度比暂不资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T054409.319548Z-I3-rocm-original-a6dc3f6818"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:44:12.881962+00:00",
+      "phase": "I3",
+      "message": "OpenCV benchmark原例CLI missing-input：EXECUTED；四算子产品/原始计时分别保存，速度比暂不资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T054411.252670Z-I3-rocm-original-ffe2c4f77e"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:44:14.838113+00:00",
+      "phase": "I3",
+      "message": "OpenCV benchmark原例CLI unknown-option：EXECUTED；四算子产品/原始计时分别保存，速度比暂不资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T054413.197649Z-I3-rocm-original-44bf96dc5c"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:45:55.191104+00:00",
+      "phase": "I3",
+      "message": "OpenCV benchmark small 全输出独立CPU/OpenCV验证：PASSED；原始计时不作速度资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T054554.205032Z-I3-CPU-reference-314b62fc95"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:46:02.585117+00:00",
+      "phase": "I3",
+      "message": "OpenCV benchmark odd-half 全输出独立CPU/OpenCV验证：PASSED；原始计时不作速度资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T054601.579979Z-I3-CPU-reference-9032ebf311"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:46:11.756129+00:00",
+      "phase": "I3",
+      "message": "OpenCV benchmark original-default 全输出独立CPU/OpenCV验证：FAILED；原始计时不作速度资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T054609.461044Z-I3-CPU-reference-da65a67ea3"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:47:18.549900+00:00",
+      "phase": "I3",
+      "message": "OpenCV benchmark original-default 全输出独立CPU/OpenCV验证：PASSED；原始计时不作速度资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T054716.008902Z-I3-CPU-reference-2e1bf06b95"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:47:31.778650+00:00",
+      "phase": "I3",
+      "message": "OpenCV benchmark invalid-dimensions 全输出独立CPU/OpenCV验证：PASSED；原始计时不作速度资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T054730.816134Z-I3-CPU-reference-17fd6a4c7e"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:47:33.235403+00:00",
+      "phase": "I3",
+      "message": "OpenCV benchmark missing-input 全输出独立CPU/OpenCV验证：PASSED；原始计时不作速度资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T054732.255523Z-I3-CPU-reference-647d1b1b02"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:47:34.687080+00:00",
+      "phase": "I3",
+      "message": "OpenCV benchmark unknown-option 全输出独立CPU/OpenCV验证：PASSED；原始计时不作速度资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T054733.724460Z-I3-CPU-reference-35162f01a7"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:51:42.198393+00:00",
+      "phase": "I3",
+      "message": "benchmark封存5090原例与AMD原规模四算子/同版OpenCV/输入/边缘计数重算：PASSED；计时仅观察。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-original-CUDA-and-HIP-sealed-semantics/20261112T055141.253153Z-I3-CPU-comparison-74b0548705"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:52:50.341381+00:00",
+      "phase": "I3",
+      "message": "benchmark三新增GPU核18项实际设备/流/输入变化/物理长度/别名与拒绝保持检查：FAILED。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-three-kernel-device-and-stream-contracts/20261112T055246.857473Z-I3-rocm-runtime-86b3b5d7fd"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:53:23.863610+00:00",
+      "phase": "I3",
+      "message": "benchmark真实设备合同首轮发现：错误流被拒后下一算子的首个成功launch报告了残留HIP last error；已在三个wrapper每次合法launch前清理线程局部旧错误，保留失败证据并重建重验。",
+      "evidence": [
+        "migration/reports/image-benchmark-runtime.json"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:53:38.094723+00:00",
+      "phase": "I3",
+      "message": "原始OpenCV benchmark四GPU算子+同版本CPU OpenCV C++完整入口构建：BUILT；尚未数值验收，不增资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-four-HIP-operations-and-original-C__-CLI-build/20261112T055330.746382Z-I3-rocm-build-0a17eb1b88"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:53:50.906688+00:00",
+      "phase": "I3",
+      "message": "benchmark三新增GPU核18项实际设备/流/输入变化/物理长度/别名与拒绝保持检查：PASSED。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-three-kernel-device-and-stream-contracts/20261112T055347.465540Z-I3-rocm-runtime-6ffa82bd40"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:54:01.708368+00:00",
+      "phase": "I3",
+      "message": "OpenCV benchmark原例CLI small：EXECUTED；四算子产品/原始计时分别保存，速度比暂不资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T055359.402907Z-I3-rocm-original-103be93459"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:54:04.069597+00:00",
+      "phase": "I3",
+      "message": "OpenCV benchmark原例CLI odd-half：EXECUTED；四算子产品/原始计时分别保存，速度比暂不资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T055402.037242Z-I3-rocm-original-2d7c5bce31"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:54:08.214047+00:00",
+      "phase": "I3",
+      "message": "OpenCV benchmark原例CLI original-default：EXECUTED；四算子产品/原始计时分别保存，速度比暂不资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T055404.414427Z-I3-rocm-original-a34b4c2e04"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:54:10.151518+00:00",
+      "phase": "I3",
+      "message": "OpenCV benchmark原例CLI invalid-dimensions：EXECUTED；四算子产品/原始计时分别保存，速度比暂不资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T055408.537297Z-I3-rocm-original-ec8dda773a"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:54:12.106896+00:00",
+      "phase": "I3",
+      "message": "OpenCV benchmark原例CLI missing-input：EXECUTED；四算子产品/原始计时分别保存，速度比暂不资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T055410.464580Z-I3-rocm-original-7deef19d1f"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:54:14.061003+00:00",
+      "phase": "I3",
+      "message": "OpenCV benchmark原例CLI unknown-option：EXECUTED；四算子产品/原始计时分别保存，速度比暂不资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-complete-original-CLI/20261112T055412.426815Z-I3-rocm-original-b6ab5ea982"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:54:23.198113+00:00",
+      "phase": "I3",
+      "message": "OpenCV benchmark small 全输出独立CPU/OpenCV验证：PASSED；原始计时不作速度资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T055422.202733Z-I3-CPU-reference-59518ddb44"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:54:24.568305+00:00",
+      "phase": "I3",
+      "message": "OpenCV benchmark odd-half 全输出独立CPU/OpenCV验证：PASSED；原始计时不作速度资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T055423.592255Z-I3-CPU-reference-d8bf31ec0a"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:54:27.771447+00:00",
+      "phase": "I3",
+      "message": "OpenCV benchmark original-default 全输出独立CPU/OpenCV验证：PASSED；原始计时不作速度资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T055424.944440Z-I3-CPU-reference-0a7e6ff0aa"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:54:29.076010+00:00",
+      "phase": "I3",
+      "message": "OpenCV benchmark invalid-dimensions 全输出独立CPU/OpenCV验证：PASSED；原始计时不作速度资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T055428.127229Z-I3-CPU-reference-2a0f131388"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:54:30.372875+00:00",
+      "phase": "I3",
+      "message": "OpenCV benchmark missing-input 全输出独立CPU/OpenCV验证：PASSED；原始计时不作速度资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T055429.417521Z-I3-CPU-reference-407b3e66b8"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:54:31.714073+00:00",
+      "phase": "I3",
+      "message": "OpenCV benchmark unknown-option 全输出独立CPU/OpenCV验证：PASSED；原始计时不作速度资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-independent-four-operation-CPU/20261112T055430.770664Z-I3-CPU-reference-27a9cd61da"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:54:43.084067+00:00",
+      "phase": "I3",
+      "message": "benchmark封存5090原例与AMD原规模四算子/同版OpenCV/输入/边缘计数重算：PASSED；计时仅观察。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-original-CUDA-and-HIP-sealed-semantics/20261112T055442.135418Z-I3-CPU-comparison-b7b12a27e8"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:55:25.153203+00:00",
+      "phase": "I3",
+      "message": "benchmark四GPU算子含Canny各阶段实际rocprof内核/PCI/产品重放：PASSED。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/OpenCV-benchmark-all-four-actual-GPU-kernel-traces/20261112T055522.615463Z-I3-rocm-trace-4515e5232c"
+      ]
+    },
+    {
+      "time": "2026-11-12T05:57:19.619618+00:00",
+      "phase": "I3",
+      "message": "OpenCV benchmark当前7/10资格面通过，样例从旧构建失败更新为PARTIAL/L3；固定提交冷检出、复审、组合资格欠项不伪记PASSED。",
+      "evidence": [
+        "migration/reports/image-benchmark.md",
+        "migration/reports/image-benchmark-trace.json",
+        "migration/reports/image-benchmark-runtime.json"
+      ]
     }
   ],
-  "updated_at": "2026-11-12T05:34:37.782316+00:00",
+  "updated_at": "2026-11-12T05:57:19.619618+00:00",
   "acceptance_policy": "migration/rewrite/image-acceptance-policy.json",
   "execution_plan": "migration/image-equivalence-execution.md"
 }
