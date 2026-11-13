@@ -2,7 +2,7 @@
 
 **PARTIAL / L4**
 
-原始C++入口15组CLI、33件JPEG同输入逐字节回归、3组真实多线程trace与首图变化重放通过；pinned/device工作区复用、checked并行prefix、事件推进及设备模式仅回传元数据已验证。质量/n/r夹取与原始合同一致；自动线程标定为有界搜索变体。完整保留集、j0/大尺寸/错误组合、64位transform索引、预分配计时/性能和冷构建仍待完成，保持PARTIAL。
+原20项子集及新增16组线程/状态/混合尺寸/错误合同通过；3组单图预分配trace证实每slot每run仅一次RGB上传、稳态零扩容及全部请求实际GPU编码，26件产品逐字节回归。固定输入所有权和重新准备通过，准备/编码/端到端计时分开记录。完整保留集、最大尺寸64位索引、无profiler性能分布/峰值内存、prefix路径阈值和冷构建待完成，保持PARTIAL。
 
 | 字段 | 当前记录 |
 | --- | --- |
@@ -10,18 +10,18 @@
 | 实际库 / 后端 | Project HIP baseline/optimized JPEG color, FDCT, Huffman, checked parallel prefix, pinned buffers and event-driven slots; CPU markers/DHT design / HIP async full baseline/optimized JPEG + CPU libjpeg-turbo DHT/header design |
 | 候选路线 | rocJPEG (decode only), RPP |
 | 代码 | [rocm/ported/nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp](../../../../rocm/ported/nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp) |
-| required cases | 20/25 |
+| required cases | 40/45 |
 | CUDA baseline / comparison | PASSED / BLOCKED |
 | 性能 | NOT_RUN |
 | 原始源码 SHA256 | `f417be2a36bed75baea893712db616416ea748157406dc489ffdf323b9fe8d7e` |
 
 编译/运行返回 0 仅对应 L3；通过独立参考检查后才记 L4。失败的候选库不列为已使用库。
 
-必需用例：`IMG-01/natural-three`, `IMG-01/repeat-seven`, `IMG-01/optimized-444`, `IMG-01/quality-clamp-low`, `IMG-01/quality-clamp-high`, `IMG-01/download-no-write`, `IMG-01/device-only`, `IMG-01/truncate-before-state-expansion`, `IMG-01/negative-n-zero-r-clamps`, `IMG-01/single-input-repeats`, `IMG-01/auto-calibration`, `IMG-01/help-anywhere`, `IMG-01/hardware-unavailable`, `IMG-01/negative-states`, `IMG-01/missing-input`, `IMG-01/all33-JPEG-byte-exact`, `IMG-01/trace-repeat-seven`, `IMG-01/trace-optimized-444`, `IMG-01/trace-device-only`, `IMG-01/changed-input-replay`, `IMG-01/held-out-native-CPU-equivalence`, `IMG-01/j0-large-mixed-error-contracts`, `IMG-01/64bit-transform-indices`, `IMG-01/preallocation-and-performance`, `IMG-10/committed-cold-rebuild-final-review`。
+必需用例：`IMG-01/natural-three`, `IMG-01/repeat-seven`, `IMG-01/optimized-444`, `IMG-01/quality-clamp-low`, `IMG-01/quality-clamp-high`, `IMG-01/download-no-write`, `IMG-01/device-only`, `IMG-01/truncate-before-state-expansion`, `IMG-01/negative-n-zero-r-clamps`, `IMG-01/single-input-repeats`, `IMG-01/auto-calibration`, `IMG-01/help-anywhere`, `IMG-01/hardware-unavailable`, `IMG-01/negative-states`, `IMG-01/missing-input`, `IMG-01/all33-JPEG-byte-exact`, `IMG-01/trace-repeat-seven`, `IMG-01/trace-optimized-444`, `IMG-01/trace-device-only`, `IMG-01/changed-input-replay`, `IMG-01/runtime-n0-s0-j1`, `IMG-01/runtime-threads-exceed-states`, `IMG-01/runtime-states-exceed-threads`, `IMG-01/runtime-three-runs`, `IMG-01/runtime-j0-hardware-concurrency`, `IMG-01/runtime-gpu-and-unavailable-hardware`, `IMG-01/runtime-mixed-size-slot-growth-reuse`, `IMG-01/runtime-single-large-repeated`, `IMG-01/runtime-truncated-BMP`, `IMG-01/runtime-DIB-length-beyond-file`, `IMG-01/runtime-zero-width-BMP`, `IMG-01/runtime-invalid-numeric-CLI`, `IMG-01/runtime-empty-directory`, `IMG-01/runtime-output-path-is-file`, `IMG-01/runtime-write-failure-after-GPU`, `IMG-01/runtime-truncated-last-mixed-input`, `IMG-01/prepared-standard`, `IMG-01/prepared-optimized-repeated`, `IMG-01/prepared-device-only`, `IMG-01/prepared-input-lifecycle`, `IMG-01/held-out-native-CPU-equivalence`, `IMG-01/64bit-transform-indices`, `IMG-01/performance-distributions-peak-memory`, `IMG-01/prefix-dispatch-measurements`, `IMG-10/committed-cold-rebuild-final-review`。
 
 实现方式：`GPU_ASYNC_JPEG_WITH_BOUNDED_CPU_THREAD_CALIBRATION`。
 
-恢复/扩展条件：Full held-out native/CPU pixel equivalence; j0/large mixed/error contracts; 64-bit transform indices; original preallocation and timing/performance; committed cold rebuild and final review.
+恢复/扩展条件：Full held-out native/CPU pixel equivalence; maximum-dimension/64-bit transform indices; nonprofiled latency/throughput distributions and peak memory; prefix dispatch measurements; committed cold rebuild and final review.
 
 CUDA 对照限制：原始CUDA构建和七组运行已恢复；AMD新路径的完整保留集CPU/native像素等价门槛尚未签发，不把原生观察当作完整三方验收。
 
@@ -72,3 +72,5 @@ HIP_VISIBLE_DEVICES=2 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh env ROCR_
 - [migration/reports/image-completion-IMG-01.md](../../../reports/image-completion-IMG-01.md)
 - [migration/reports/image-encoder-instances-v2-runs.json](../../../reports/image-encoder-instances-v2-runs.json)
 - [migration/reports/image-encoder-instances-v2-comparison.json](../../../reports/image-encoder-instances-v2-comparison.json)
+- [migration/reports/evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261113T034424.399537Z-I5-composite-subset-qualification-ff819aa0cd](../../../reports/evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261113T034424.399537Z-I5-composite-subset-qualification-ff819aa0cd)
+- [migration/reports/evidence/rewrite/I5/async-original-entry-multithread-trace/20261113T033948.008552Z-I5-rocm-trace-178ac12203](../../../reports/evidence/rewrite/I5/async-original-entry-multithread-trace/20261113T033948.008552Z-I5-rocm-trace-178ac12203)

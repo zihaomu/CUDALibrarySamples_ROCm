@@ -284,7 +284,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-13T03:44:25.477109+00:00。26入口当前13通过/9部分/4失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-13T03:45:35.970236+00:00。26入口当前13通过/9部分/4失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -2358,5 +2358,6 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-13T03:43:56.781446+00:00 | I5 | IMG-01：固定输入slot所有权/占用拒绝/普通提交失效/重新准备：PASSED；修改原CPU向量不污染已准备device输入。 | `migration/reports/evidence/rewrite/I5/JPEG-prepared-input-ownership/20261113T034352.516881Z-I5-rocm-probe-424030ce0e` |
 | 2026-11-13T03:44:09.202552+00:00 | I5 | IMG-01：完整冻结ID/逐case产品集合绑定扩展到运行与预分配：17项删减/重复反向检查 PASSED。 | `migration/reports/evidence/rewrite/I5/async-encoder-qualification-coverage-negatives/20261113T034408.082260Z-I5-CPU-negative-68694cab6e` |
 | 2026-11-13T03:44:25.477109+00:00 | I5 | IMG-01：正式入口40项子集资格封存：原20项加16组线程/混合尺寸/错误合同、3预分配trace和固定输入生命周期；完整保留集/大索引/性能/冷构建未完成，保持PARTIAL。 | `migration/reports/evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261113T034424.399537Z-I5-composite-subset-qualification-ff819aa0cd` |
+| 2026-11-13T03:45:35.970236+00:00 | I5 | IMG-01：已将异步编码器40项当前子集资格发布到主表；线程/混合尺寸/错误合同和单图预分配证据补齐，图像整例计数仍13/26。 | `migration/reports/evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261113T034424.399537Z-I5-composite-subset-qualification-ff819aa0cd`；`migration/reports/image-encoder-instances-v2-publication.json` |
 
 <!-- IMAGE_EXECUTION:END -->

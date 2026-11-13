@@ -1,0 +1,113 @@
+#!/usr/bin/env python3
+"""Frozen single-input preparation, transfer and measurement contract."""
+import argparse,json,re,shutil,csv
+from pathlib import Path
+from experiment import ROOT,Experiment,digest,write
+from image_completion_progress import record
+
+PROFILE=ROOT/'migration/rewrite/image-encoder-preallocation-profile.json'
+REPORT=ROOT/'migration/reports/image-encoder-preallocation-runs.json'
+
+def freeze():
+    if PROFILE.exists():raise ValueError('preallocation contract already frozen')
+    runtime=json.loads((ROOT/'migration/rewrite/image-encoder-runtime-profile.json').read_text())
+    cases=[dict(id='prepared-standard',jobs=19,runs=1,quality=80,sampling=2,optimized=False,download=True),
+           dict(id='prepared-optimized-repeated',jobs=7,runs=2,quality=90,sampling=1,optimized=True,download=True),
+           dict(id='prepared-device-only',jobs=19,runs=1,quality=80,sampling=2,optimized=False,download=False)]
+    e=Experiment('I5','JPEG-single-input-preallocation-contract','CPU-contract',sources=[__file__,ROOT/'migration/rewrite/image-encoder-runtime-profile.json'])
+    value=dict(status='FROZEN',input=runtime['mixed_inputs'][1],cases=cases,
+        gates=['Two slots prepared before measured encode interval; preparation and complete end-to-end time reported separately.',
+               'Each slot uploads immutable RGB once per run; every requested job still executes the full GPU transform and entropy chain.',
+               'Zero workspace growth in measured interval for identical prepared input.',
+               'Exact output set and JPEG bytes versus the separate serial core process; independent Pillow BMP read.',
+               'Device-only mode returns no entropy payload, including preparation.',
+               'Trace on physical GPU1, all preparation plus measured image kernels accounted for.'],
+        scope='Single-input preallocation, not full IMG-01 qualification or native throughput parity.')
+    write(e.path/'profile.json',value);value['evidence']=e.finish('OBSERVED');write(PROFILE,value)
+    record('IMG-01','冻结单图预分配合同：标准/优化重复/设备模式3组，计时区间分离、每slot一次RGB上传、稳态零扩容、全部GPU作业和独立产品核对。',[str(PROFILE.relative_to(ROOT)),value['evidence']])
+
+def run():
+    from snapshot import capture
+    from PIL import Image
+    p=json.loads(PROFILE.read_text());b=json.loads((ROOT/'migration/reports/image-encoder-instances-v2-build.json').read_text())
+    reference=json.loads((ROOT/'migration/reports/image-encoder-pipeline-build.json').read_text())
+    reports=[ROOT/'migration/reports/image-encoder-instances-v2-build.json',ROOT/'migration/reports/image-encoder-pipeline-build.json']
+    binaries=[dict(binary=build['binary'],sha256=build['binary_sha256'],build_report=str(path.relative_to(ROOT)),build_report_sha256=digest(path)) for build,path in zip((b,reference),reports)]
+    for build in (b,reference):
+        if build['status']!='BUILT' or digest(ROOT/build['binary'])!=build['binary_sha256'] or any(digest(ROOT/n)!=h for n,h in build['dependencies'].items()):raise ValueError('stale build')
+    prior=json.loads((ROOT/'migration/reports/image-encoder-pipeline-trace.json').read_text())[0]
+    deps=json.loads((ROOT/prior['evidence']/'source.json').read_text())['dependencies']
+    audit_name=next(n for n in deps if n.endswith('/copy_audit.so'));audit=ROOT/audit_name
+    if digest(audit)!=deps[audit_name] or digest(ROOT/p['input']['path'])!=p['input']['sha256']:raise ValueError('observer/input drift')
+    rows=[]
+    for case in p['cases']:
+        e=Experiment('I5','JPEG-single-input-preallocation','rocm-trace',case=case['id'],sources=[__file__,PROFILE,*reports,audit,ROOT/p['input']['path'],*[ROOT/n for n in b['dependencies']],*[ROOT/n for n in reference['dependencies']]],parent=b['experiment_id'])
+        observed=capture();write(e.path/'backend.observed.json',observed);folder=e.path/'input';folder.mkdir();shutil.copyfile(ROOT/p['input']['path'],folder/'image.bmp');out=e.path/'products';out.mkdir()
+        args=[str(ROOT/b['binary']),'-i',str(folder),'-j','1','-s','1','-n',str(case['jobs']),'-r',str(case['runs']),'-q',str(case['quality'])]
+        if case['optimized']:args+=['-f']
+        if case['sampling']==1:args+=['-p']
+        if case['download']:args+=['-o',str(out)]
+        rc=e.command(['rocprofv3','--kernel-trace','--hip-trace','--output-format','csv','--output-directory',str(e.path/'trace'),'--','env','LD_PRELOAD='+str(audit),*args],'prepared-original-entry',timeout=300)
+        checks=[dict(check='profile-command',passed=rc==0)];metrics={};products=[]
+        try:
+            stdout=(e.path/'logs/0001-prepared-original-entry.stdout.log').read_text();stderr=(e.path/'logs/0001-prepared-original-entry.stderr.log').read_text()
+            fields=re.search(r'TIMING (.+)',stdout)
+            if not fields:raise ValueError('missing separate timing receipt')
+            metrics={k:float(v) for k,v in re.findall(r'(\w+)=([\d.eE+-]+)',fields[1])}
+            checks.append(dict(check='preparation-outside-measured-interval-and-no-steady-allocation',passed=metrics['prepared_slots']==2 and metrics['steady_workspace_growths']==0 and metrics['preparation_ms']>0 and metrics['measured_ms']>0 and metrics['end_to_end_ms']>=metrics['preparation_ms']+metrics['measured_ms']))
+            copies=[dict(kind=int(k),bytes=int(n),stream=s,rc=int(r)) for k,n,s,r in re.findall(r'JPEG_COPY_AUDIT kind=(\d+) bytes=(\d+) stream=(\S+) rc=(\d+)',stderr)]
+            rgb_uploads=[c for c in copies if c['kind']==1 and c['bytes']==p['input']['width']*p['input']['height']*3]
+            checks.append(dict(check='one-RGB-upload-per-prepared-slot-per-run',passed=len(rgb_uploads)==2*case['runs'] and len({c['stream'] for c in rgb_uploads})>=2 and all(c['rc']==0 for c in copies)))
+            if not case['download']:checks.append(dict(check='device-only-metadata-without-entropy-payload',passed=[c['bytes'] for c in copies if c['kind']==2]==[8]*2*(case['jobs']+2)*case['runs']))
+            traces=list((e.path/'trace').rglob('*kernel_trace.csv'));agents=list((e.path/'trace').rglob('*agent_info.csv'))
+            if len(traces)!=len(agents) or len(traces)!=1:raise ValueError('missing exact kernel/agent tables')
+            kernels=list(csv.DictReader(traces[0].open()));app=[r for r in kernels if not r['Kernel_Name'].startswith('__amd_rocclr_')]
+            expected=(17 if case['optimized'] else 16)*(case['jobs']+2)*case['runs']
+            checks.append(dict(check='all-preparation-and-requested-images-computed-on-GPU',passed=len(app)==expected,actual=len(app),expected=expected))
+            lookup={r['Node_Id']:r for r in csv.DictReader(agents[0].open())};allowed={d['pci_bdf'] for d in observed['devices'] if d['physical_id']==1};pci=set();valid=True
+            for row in kernels:
+                agent=lookup[row['Agent_Id'].split()[-1]];loc=int(agent['Location_Id']);address=f"{int(agent['Domain']):04x}:{loc>>8:02x}:{(loc>>3)&31:02x}.{loc&7}"
+                pci.add(address);valid &= address in allowed and int(row['End_Timestamp'])>int(row['Start_Timestamp']) and int(row['Grid_Size_X'])>0
+            checks.append(dict(check='nonempty-real-kernels-only-on-GPU1',passed=bool(kernels) and valid,pci=sorted(pci)))
+            expected_files={str(i)+'.jpg' for i in range(case['jobs'])} if case['download'] else set()
+            checks.append(dict(check='exact-output-set',passed={x.name for x in out.iterdir()}==expected_files))
+            if case['download']:
+                raw=e.path/'reference.rgb'
+                with Image.open(ROOT/p['input']['path']) as image:raw.write_bytes(image.convert('RGB').tobytes())
+                dest=e.path/'reference';rr=e.command([str(ROOT/reference['binary']),str(raw),str(p['input']['width']),str(p['input']['height']),str(case['quality']),str(case['sampling']),str(int(case['optimized'])),'0','1',str(dest)],'independent-BMP-serial-core')
+                checks.append(dict(check='separate-reference-command',passed=rr==0));oracle=dest/'serial-reference.jpg'
+                for path in sorted(out.iterdir()):
+                    checks.append(dict(check='exact-prepared-JPEG-'+path.name,passed=path.read_bytes()==oracle.read_bytes()));products.append(dict(name=path.name,sha256=digest(path),bytes=path.stat().st_size))
+            metrics['rgb_uploads']=rgb_uploads;metrics['copies']=copies;metrics['kernel_count']=len(app)
+        except Exception as error:checks.append(dict(check='validation-exception',passed=False,error=repr(error)))
+        command=e.commands[0]['argv']
+        checks.append(dict(check='commands-use-bound-candidate-and-reference-binaries',passed=command[command.index('--')+3]==str(ROOT/b['binary']) and all(c['argv'][0]==str(ROOT/reference['binary']) for c in e.commands[1:])))
+        status='PASSED' if all(c['passed'] for c in checks) else 'FAILED';row=dict(case=case['id'],status=status,checks=checks,metrics=metrics,products=products,binaries=binaries,experiment_id=e.id)
+        write(e.path/'result.json',row);row['evidence']=e.finish('PASSED' if status=='PASSED' else 'NUMERIC_MISMATCH',dict(status=status,checks=checks));rows.append(row);write(REPORT,rows)
+        record('IMG-01','单图预分配 '+case['id']+'：'+status+'；准备/稳态/端到端计时和实际传输、kernel逐项保存。',[row['evidence']]);print(case['id'],status,flush=True)
+    return int(any(r['status']!='PASSED' for r in rows))
+
+def lifecycle():
+    from snapshot import capture
+    from image_completion_inventory import closure
+    source=ROOT/'rocm/probes/image/jpeg_prepared_slot.hip';deps,missing=closure(source)
+    if missing:raise ValueError(missing)
+    core=Path('/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core');overlay=ROOT/'build/rocm-sdk-overlay';jpeg=ROOT/'build/cpu-codecs'
+    e=Experiment('I5','JPEG-prepared-input-ownership','rocm-probe',sources=[__file__,PROFILE,*[ROOT/n for n in deps],jpeg/'include/jpeglib.h',jpeg/'lib/libjpeg.so.62.4.0'])
+    write(e.path/'backend.observed.json',capture());binary=e.path/'probe'
+    rc=e.command(['hipcc','--rocm-path='+str(overlay),'--hip-path='+str(overlay),
+        '--rocm-device-lib-path='+str(core/'lib/llvm/amdgcn/bitcode'),'--offload-arch=gfx1201','-std=c++17','-O2',
+        '-D__HIP_PLATFORM_AMD__','-I'+str(ROOT/'rocm/common'),'-I'+str(jpeg/'include'),'-x','hip',str(source),'-o',str(binary),
+        '-L'+str(core/'lib'),'-L'+str(jpeg/'lib'),'-Wl,-rpath,'+str(core/'lib'),'-Wl,-rpath,'+str(jpeg/'lib'),'-lamdhip64','-ljpeg'],'build-prepared-lifecycle')
+    rc=rc or e.command([str(binary)],'prepared-owner-invalidation-and-reuse')
+    checks=[dict(check='commands-success',passed=rc==0)]
+    try:
+        observed=json.loads((e.path/'logs/0002-prepared-owner-invalidation-and-reuse.stdout.log').read_text())
+        checks.append(dict(check='all-four-explicit-lifecycle-guards',passed=observed==dict(resident_ownership=True,occupied_rejected=True,normal_invalidates=True,reprepare=True)))
+    except Exception as error:checks.append(dict(check='validation-exception',passed=False,error=repr(error)))
+    status='PASSED' if all(c['passed'] for c in checks) else 'FAILED';row=dict(status=status,checks=checks,experiment_id=e.id)
+    write(e.path/'result.json',row);row['evidence']=e.finish('PASSED' if status=='PASSED' else 'RUNTIME_ERROR',dict(status=status,checks=checks));write(ROOT/'migration/reports/image-encoder-prepared-lifecycle.json',row)
+    record('IMG-01','固定输入slot所有权/占用拒绝/普通提交失效/重新准备：'+status+'；修改原CPU向量不污染已准备device输入。',[row['evidence']]);print(status);return int(status!='PASSED')
+
+if __name__=='__main__':
+    parser=argparse.ArgumentParser();parser.add_argument('action',choices=['freeze','run','lifecycle']);args=parser.parse_args();raise SystemExit(globals()[args.action]())
