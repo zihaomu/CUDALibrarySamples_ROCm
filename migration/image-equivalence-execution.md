@@ -2,7 +2,9 @@
 
 日期：2026-11-11。状态：**IN_PROGRESS**。逐步实施中；仅封存资格会增加支持数。
 
-本方案落实用户“合理差异可以接受”的要求，是[完整图像库计划](image-libraries-plan.md)的执行细化。[生效验收政策](rewrite/image-acceptance-policy.json)和[差异复评](reports/image-difference-acceptance.md)作为依据。目标仍为原定 26 个入口：方案起点为 2 通过、8 部分、16 失败，新增目标为 24 个；完整模式和输入分支不删减。当前已发布 9 通过、7 部分、10 失败。
+2026-11-13 已依据最新源码和资格制定[剩余图像模块完整实现计划](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/image-completion-plan.md)，细化后续13个欠项和26入口最终验收。本页保留早期方案，实时数量以文末检查点和支持主表为准。
+
+本方案落实用户“合理差异可以接受”的要求，是[完整图像库计划](image-libraries-plan.md)的执行细化。[生效验收政策](rewrite/image-acceptance-policy.json)和[差异复评](reports/image-difference-acceptance.md)作为依据。目标仍为原定 26 个入口：方案起点为 2 通过、8 部分、16 失败，新增目标为 24 个；完整模式和输入分支不删减。此处历史检查点曾发布 9 通过、7 部分、10 失败，不作为当前数量。
 
 ## 1. 执行原则与前置工作
 
@@ -100,18 +102,18 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 容差内的扰动是正向检查，超预算数值偏差和错通道/ROI/模式/丢 batch 是反向检查；不要求所有 1 LSB 扰动都被判错。无损数据、位深/通道/尺寸、ROI/padding、错误行为和 GPU 实际执行仍有硬约束。水印、tile/ROI、连通结构等另作局部/语义检查，不能只用全图 SSIM 判断。
 
-首页仍只展示当前支持情况；批次过程与完整日志保留在[逐步记录](reports/image-libraries-progress.md)和[支持日志总表](reports/support-log-index.md)。当前已发布项目 248/22/369、图像 9/7/10；新增数只来自已经签发并先提交 Git 的完整入口资格。
+首页仍只展示当前支持情况；批次过程与完整日志保留在[逐步记录](reports/image-libraries-progress.md)和[支持日志总表](reports/support-log-index.md)。历史检查点曾发布项目 248/22/369、图像 9/7/10；当前数量见文末实时检查点，新增数只来自已经签发并先提交 Git 的完整入口资格。
 
 
 <!-- IMAGE_EXECUTION:START -->
 
 ## 当前实施检查点
 
-更新时间：2026-11-12T11:31:49.139157+00:00。26入口当前13通过/9部分/4失败。
+更新时间：2026-11-13T01:27:14.937571+00:00。26入口当前13通过/9部分/4失败。
 
-I5：JPEG bits/stuff prefix隔离GPU性能对照6/6先经CPU数值门槛；65536元素bits 1.357940→0.059839ms、stuff 6.431180→0.059038ms，256 bits 0.014520→0.015039ms。仅单阶段事件中位数，整JPEG与规模切换仍待验。
+I0：IMG-00–IMG-10 后续完整图像计划已制定：以672f17cc9为基线，覆盖13欠项和26入口回归；明确progressive GPU entropy、JPEG2000完整码块链、合理差异和最终资格门槛。本次仅文档设计，不新增支持数。
 
-证据：`migration/reports/image-jpeg-prefix.md`
+证据：`migration/image-completion-plan.md`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

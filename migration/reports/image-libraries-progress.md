@@ -1,6 +1,6 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-12T11:31:49.139157+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-13T01:27:14.937571+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
 26入口当前：13 PASSED / 9 PARTIAL / 4 FAILED。
 
@@ -1807,3 +1807,4 @@
 | 2026-11-12T11:31:09.990948+00:00 | I5 | JPEG prefix stuff-65536 GPU event对照：PASSED；旧单线程6.43118ms，并行0.059038ms。 | [20261112T113107.930520Z-I5-rocm-GPU-benchmark-83d9a4d150](evidence/rewrite/I5/serial-vs-parallel-JPEG-prefix-event-timing/20261112T113107.930520Z-I5-rocm-GPU-benchmark-83d9a4d150) |
 | 2026-11-12T11:31:14.682779+00:00 | I5 | JPEG prefix stuff-1048576 GPU event对照：PASSED；旧单线程98.5994ms，并行0.382472ms。 | [20261112T113110.313047Z-I5-rocm-GPU-benchmark-dd1a837ed4](evidence/rewrite/I5/serial-vs-parallel-JPEG-prefix-event-timing/20261112T113110.313047Z-I5-rocm-GPU-benchmark-dd1a837ed4) |
 | 2026-11-12T11:31:49.139157+00:00 | I5 | JPEG bits/stuff prefix隔离GPU性能对照6/6先经CPU数值门槛；65536元素bits 1.357940→0.059839ms、stuff 6.431180→0.059038ms，256 bits 0.014520→0.015039ms。仅单阶段事件中位数，整JPEG与规模切换仍待验。 | [image-jpeg-prefix.md](image-jpeg-prefix.md) |
+| 2026-11-13T01:27:14.937571+00:00 | I0 | IMG-00–IMG-10 后续完整图像计划已制定：以672f17cc9为基线，覆盖13欠项和26入口回归；明确progressive GPU entropy、JPEG2000完整码块链、合理差异和最终资格门槛。本次仅文档设计，不新增支持数。 | `migration/image-completion-plan.md` |

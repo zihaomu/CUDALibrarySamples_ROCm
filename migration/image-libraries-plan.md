@@ -2,6 +2,8 @@
 
 日期：2026-11-11。状态：**IN_PROGRESS**。已开始按计划实施；原设计与基线保留，当前实验和阶段状态见下方执行记录。
 
+2026-11-13 后续设计：[剩余图像模块完整实现计划](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/image-completion-plan.md)依据当前 13/26 整例通过状态，将剩余工作细化为 IMG-00–IMG-10，列出13欠项、验收门槛和共享代码回归要求。该文档为后续计划，不新增支持数；下方启动基线和历史执行记录保留。
+
 截至 2026-11-12，本计划四模块 **13/26 整例通过、9 PARTIAL、4 FAILED**：NPP 8/9、NPP+ 5/6、nvJPEG 0/7、nvJPEG2000 0/4。I3 两个 watershed 已有完整 HIP 文件入口及独立 CPU 逐字节结果，但原生分割/边界语义差异显著，保持 PARTIAL；I4–I8 JPEG/JPEG2000 整例目标仍未完成。全项目为 252 PASSED、24 PARTIAL、363 FAILED。详细资格及失败原因见项目的 `migration/reports/image-libraries-progress.md` 和 `migration/reports/support-log-index.md`。
 
 ## 1. 目标和“完整支持”的含义
@@ -10,7 +12,7 @@
 
 验收单位是原始样例及它实际调用的 API/模式，不把原程序缩成几个小图片或数值演示。NPP/NPP+ 整套商业 SDK 的全部 API、所有平台和未出现在本仓库的格式属于额外产品范围，需另列清单；本计划不声称覆盖它们。
 
-| 模块 | 当前通过 | 部分 | 失败 | 本计划目标 |
+| 模块（计划启动基线） | 启动时通过 | 部分 | 失败 | 本计划目标 |
 | --- | ---: | ---: | ---: | ---: |
 | NPP | 2/9 | 1 | 6 | 9/9 |
 | NPP+ | 0/6 | 1 | 5 | 6/6 |
@@ -282,7 +284,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-12T11:31:49.139157+00:00。26入口当前13通过/9部分/4失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-13T01:27:14.937571+00:00。26入口当前13通过/9部分/4失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -2072,5 +2074,6 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-12T11:31:09.990948+00:00 | I5 | JPEG prefix stuff-65536 GPU event对照：PASSED；旧单线程6.43118ms，并行0.059038ms。 | `migration/reports/evidence/rewrite/I5/serial-vs-parallel-JPEG-prefix-event-timing/20261112T113107.930520Z-I5-rocm-GPU-benchmark-83d9a4d150` |
 | 2026-11-12T11:31:14.682779+00:00 | I5 | JPEG prefix stuff-1048576 GPU event对照：PASSED；旧单线程98.5994ms，并行0.382472ms。 | `migration/reports/evidence/rewrite/I5/serial-vs-parallel-JPEG-prefix-event-timing/20261112T113110.313047Z-I5-rocm-GPU-benchmark-dd1a837ed4` |
 | 2026-11-12T11:31:49.139157+00:00 | I5 | JPEG bits/stuff prefix隔离GPU性能对照6/6先经CPU数值门槛；65536元素bits 1.357940→0.059839ms、stuff 6.431180→0.059038ms，256 bits 0.014520→0.015039ms。仅单阶段事件中位数，整JPEG与规模切换仍待验。 | `migration/reports/image-jpeg-prefix.md` |
+| 2026-11-13T01:27:14.937571+00:00 | I0 | IMG-00–IMG-10 后续完整图像计划已制定：以672f17cc9为基线，覆盖13欠项和26入口回归；明确progressive GPU entropy、JPEG2000完整码块链、合理差异和最终资格门槛。本次仅文档设计，不新增支持数。 | `migration/image-completion-plan.md` |
 
 <!-- IMAGE_EXECUTION:END -->
