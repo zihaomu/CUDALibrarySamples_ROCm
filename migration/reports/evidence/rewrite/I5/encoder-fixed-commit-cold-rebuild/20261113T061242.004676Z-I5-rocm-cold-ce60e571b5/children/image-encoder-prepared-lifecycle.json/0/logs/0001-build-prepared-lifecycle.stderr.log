@@ -1,0 +1,383 @@
+Warning: HIP version file: "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/build/rocm-sdk-overlay/share/hip/version" not found.  Cannot give HIP version information.
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/probes/image/jpeg_prepared_slot.hip:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:120:31: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  120 |         if(code!=hipSuccess) {hipStreamDestroy(stream_);stream_=nullptr;check(code,"create JPEG slot event");}
+      |                               ^~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:125:20: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  125 |         if(stream_)hipStreamSynchronize(stream_);
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:127:19: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  127 |         if(event_)hipEventDestroy(event_);
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:128:20: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  128 |         if(stream_)hipStreamDestroy(stream_);
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:148:22: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  148 |         }catch(...) {hipStreamSynchronize(stream_);phase_=Phase::Failed;prepared_=false;throw;}
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:211:13: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  211 |             hipStreamSynchronize(stream_);phase_=Phase::Failed;prepared_=false;throw;
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:217:21: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  217 |         catch(...) {hipStreamSynchronize(stream_);phase_=Phase::Failed;prepared_=false;throw;}
+      |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:42:45: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   42 |         if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); }
+      |                                             ^~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:96:21: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<Code, true>::ensure' requested here
+   96 |         host_codes_.ensure(6*256);dc_.ensure(3*256);ac_.ensure(3*256);
+      |                     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:42:73: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   42 |         if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); }
+      |                                                                         ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:96:39: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<Code>::ensure' requested here
+   96 |         host_codes_.ensure(6*256);dc_.ensure(3*256);ac_.ensure(3*256);
+      |                                       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:42:73: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   42 |         if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); }
+      |                                                                         ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:106:15: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<unsigned char>::ensure' requested here
+  106 |         bits_.ensure(size_t(blocks_)*(MAX_BITS/8));lengths_.ensure(blocks_);offsets_.ensure(blocks_);
+      |               ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:42:73: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   42 |         if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); }
+      |                                                                         ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:106:61: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<unsigned short>::ensure' requested here
+  106 |         bits_.ensure(size_t(blocks_)*(MAX_BITS/8));lengths_.ensure(blocks_);offsets_.ensure(blocks_);
+      |                                                             ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:42:73: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   42 |         if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); }
+      |                                                                         ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:106:86: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<unsigned int>::ensure' requested here
+  106 |         bits_.ensure(size_t(blocks_)*(MAX_BITS/8));lengths_.ensure(blocks_);offsets_.ensure(blocks_);
+      |                                                                                      ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:29:81: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   29 |     ~Buffer() { if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); } }
+      |                                                                                 ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:116:5: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<unsigned char>::~Buffer' requested here
+  116 |     Slot() {
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:29:81: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   29 |     ~Buffer() { if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); } }
+      |                                                                                 ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:116:5: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<short>::~Buffer' requested here
+  116 |     Slot() {
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:29:81: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   29 |     ~Buffer() { if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); } }
+      |                                                                                 ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:116:5: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<unsigned short>::~Buffer' requested here
+  116 |     Slot() {
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:29:81: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   29 |     ~Buffer() { if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); } }
+      |                                                                                 ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:116:5: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<float>::~Buffer' requested here
+  116 |     Slot() {
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:29:81: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   29 |     ~Buffer() { if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); } }
+      |                                                                                 ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:116:5: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<int>::~Buffer' requested here
+  116 |     Slot() {
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:29:81: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   29 |     ~Buffer() { if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); } }
+      |                                                                                 ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:116:5: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<Code>::~Buffer' requested here
+  116 |     Slot() {
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:29:81: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   29 |     ~Buffer() { if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); } }
+      |                                                                                 ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:116:5: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<unsigned int>::~Buffer' requested here
+  116 |     Slot() {
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:29:81: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   29 |     ~Buffer() { if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); } }
+      |                                                                                 ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:116:5: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<image_jpeg_checked_prefix::Result>::~Buffer' requested here
+  116 |     Slot() {
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:29:53: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   29 |     ~Buffer() { if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); } }
+      |                                                     ^~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:116:5: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<unsigned char, true>::~Buffer' requested here
+  116 |     Slot() {
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:29:53: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   29 |     ~Buffer() { if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); } }
+      |                                                     ^~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:116:5: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<unsigned short, true>::~Buffer' requested here
+  116 |     Slot() {
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:29:53: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   29 |     ~Buffer() { if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); } }
+      |                                                     ^~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:116:5: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<float, true>::~Buffer' requested here
+  116 |     Slot() {
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:29:53: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   29 |     ~Buffer() { if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); } }
+      |                                                     ^~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:116:5: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<Code, true>::~Buffer' requested here
+  116 |     Slot() {
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:29:53: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   29 |     ~Buffer() { if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); } }
+      |                                                     ^~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:116:5: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<unsigned int, true>::~Buffer' requested here
+  116 |     Slot() {
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:29:53: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   29 |     ~Buffer() { if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); } }
+      |                                                     ^~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:116:5: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<image_jpeg_checked_prefix::Result, true>::~Buffer' requested here
+  116 |     Slot() {
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:42:45: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   42 |         if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); }
+      |                                             ^~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:176:48: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<unsigned char, true>::ensure' requested here
+  176 |             rgb_.ensure(rgb->size());host_rgb_.ensure(rgb->size());
+      |                                                ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:42:45: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   42 |         if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); }
+      |                                             ^~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:180:22: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<float, true>::ensure' requested here
+  180 |         host_cosine_.ensure(64);cosine_.ensure(64);host_quant_.ensure(3*64);
+      |                      ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:42:73: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   42 |         if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); }
+      |                                                                         ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:180:41: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<float>::ensure' requested here
+  180 |         host_cosine_.ensure(64);cosine_.ensure(64);host_quant_.ensure(3*64);
+      |                                         ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:42:45: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   42 |         if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); }
+      |                                             ^~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:180:64: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<unsigned short, true>::ensure' requested here
+  180 |         host_cosine_.ensure(64);cosine_.ensure(64);host_quant_.ensure(3*64);
+      |                                                                ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:42:45: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   42 |         if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); }
+      |                                             ^~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:181:22: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<image_jpeg_checked_prefix::Result, true>::ensure' requested here
+  181 |         host_result_.ensure(1);result_.ensure(1);
+      |                      ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:42:73: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   42 |         if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); }
+      |                                                                         ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:181:40: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<image_jpeg_checked_prefix::Result>::ensure' requested here
+  181 |         host_result_.ensure(1);result_.ensure(1);
+      |                                        ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:42:73: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   42 |         if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); }
+      |                                                                         ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:189:56: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<short>::ensure' requested here
+  189 |             planes_[c].ensure(pixels);coefficients_[c].ensure(terms);quant_[c].ensure(64);
+      |                                                        ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:42:73: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   42 |         if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); }
+      |                                                                         ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:197:43: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<int>::ensure' requested here
+  197 |         scan_.ensure(blocks*64);previous_.ensure(blocks);components_.ensure(blocks);
+      |                                           ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:42:45: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   42 |         if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); }
+      |                                             ^~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:201:73: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<unsigned int, true>::ensure' requested here
+  201 |             histogram_.ensure(4*256);invalid_.ensure(1);host_histogram_.ensure(4*256+1);
+      |                                                                         ^
+35 warnings generated when compiling for gfx1201.
+In file included from /home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/probes/image/jpeg_prepared_slot.hip:3:
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:120:31: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  120 |         if(code!=hipSuccess) {hipStreamDestroy(stream_);stream_=nullptr;check(code,"create JPEG slot event");}
+      |                               ^~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:125:20: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  125 |         if(stream_)hipStreamSynchronize(stream_);
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:127:19: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  127 |         if(event_)hipEventDestroy(event_);
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:128:20: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  128 |         if(stream_)hipStreamDestroy(stream_);
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:148:22: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  148 |         }catch(...) {hipStreamSynchronize(stream_);phase_=Phase::Failed;prepared_=false;throw;}
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:211:13: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  211 |             hipStreamSynchronize(stream_);phase_=Phase::Failed;prepared_=false;throw;
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:217:21: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  217 |         catch(...) {hipStreamSynchronize(stream_);phase_=Phase::Failed;prepared_=false;throw;}
+      |                     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:42:45: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   42 |         if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); }
+      |                                             ^~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:96:21: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<Code, true>::ensure' requested here
+   96 |         host_codes_.ensure(6*256);dc_.ensure(3*256);ac_.ensure(3*256);
+      |                     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:42:73: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   42 |         if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); }
+      |                                                                         ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:96:39: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<Code>::ensure' requested here
+   96 |         host_codes_.ensure(6*256);dc_.ensure(3*256);ac_.ensure(3*256);
+      |                                       ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:42:73: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   42 |         if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); }
+      |                                                                         ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:106:15: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<unsigned char>::ensure' requested here
+  106 |         bits_.ensure(size_t(blocks_)*(MAX_BITS/8));lengths_.ensure(blocks_);offsets_.ensure(blocks_);
+      |               ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:42:73: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   42 |         if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); }
+      |                                                                         ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:106:61: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<unsigned short>::ensure' requested here
+  106 |         bits_.ensure(size_t(blocks_)*(MAX_BITS/8));lengths_.ensure(blocks_);offsets_.ensure(blocks_);
+      |                                                             ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:42:73: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   42 |         if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); }
+      |                                                                         ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:106:86: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<unsigned int>::ensure' requested here
+  106 |         bits_.ensure(size_t(blocks_)*(MAX_BITS/8));lengths_.ensure(blocks_);offsets_.ensure(blocks_);
+      |                                                                                      ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:29:81: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   29 |     ~Buffer() { if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); } }
+      |                                                                                 ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:116:5: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<unsigned char>::~Buffer' requested here
+  116 |     Slot() {
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:29:81: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   29 |     ~Buffer() { if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); } }
+      |                                                                                 ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:116:5: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<short>::~Buffer' requested here
+  116 |     Slot() {
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:29:81: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   29 |     ~Buffer() { if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); } }
+      |                                                                                 ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:116:5: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<unsigned short>::~Buffer' requested here
+  116 |     Slot() {
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:29:81: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   29 |     ~Buffer() { if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); } }
+      |                                                                                 ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:116:5: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<float>::~Buffer' requested here
+  116 |     Slot() {
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:29:81: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   29 |     ~Buffer() { if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); } }
+      |                                                                                 ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:116:5: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<int>::~Buffer' requested here
+  116 |     Slot() {
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:29:81: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   29 |     ~Buffer() { if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); } }
+      |                                                                                 ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:116:5: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<Code>::~Buffer' requested here
+  116 |     Slot() {
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:29:81: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   29 |     ~Buffer() { if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); } }
+      |                                                                                 ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:116:5: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<unsigned int>::~Buffer' requested here
+  116 |     Slot() {
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:29:81: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   29 |     ~Buffer() { if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); } }
+      |                                                                                 ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:116:5: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<image_jpeg_checked_prefix::Result>::~Buffer' requested here
+  116 |     Slot() {
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:29:53: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   29 |     ~Buffer() { if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); } }
+      |                                                     ^~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:116:5: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<unsigned char, true>::~Buffer' requested here
+  116 |     Slot() {
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:29:53: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   29 |     ~Buffer() { if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); } }
+      |                                                     ^~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:116:5: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<unsigned short, true>::~Buffer' requested here
+  116 |     Slot() {
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:29:53: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   29 |     ~Buffer() { if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); } }
+      |                                                     ^~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:116:5: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<float, true>::~Buffer' requested here
+  116 |     Slot() {
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:29:53: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   29 |     ~Buffer() { if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); } }
+      |                                                     ^~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:116:5: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<Code, true>::~Buffer' requested here
+  116 |     Slot() {
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:29:53: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   29 |     ~Buffer() { if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); } }
+      |                                                     ^~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:116:5: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<unsigned int, true>::~Buffer' requested here
+  116 |     Slot() {
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:29:53: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   29 |     ~Buffer() { if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); } }
+      |                                                     ^~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:116:5: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<image_jpeg_checked_prefix::Result, true>::~Buffer' requested here
+  116 |     Slot() {
+      |     ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:42:45: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   42 |         if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); }
+      |                                             ^~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:176:48: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<unsigned char, true>::ensure' requested here
+  176 |             rgb_.ensure(rgb->size());host_rgb_.ensure(rgb->size());
+      |                                                ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:42:45: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   42 |         if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); }
+      |                                             ^~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:180:22: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<float, true>::ensure' requested here
+  180 |         host_cosine_.ensure(64);cosine_.ensure(64);host_quant_.ensure(3*64);
+      |                      ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:42:73: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   42 |         if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); }
+      |                                                                         ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:180:41: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<float>::ensure' requested here
+  180 |         host_cosine_.ensure(64);cosine_.ensure(64);host_quant_.ensure(3*64);
+      |                                         ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:42:45: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   42 |         if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); }
+      |                                             ^~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:180:64: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<unsigned short, true>::ensure' requested here
+  180 |         host_cosine_.ensure(64);cosine_.ensure(64);host_quant_.ensure(3*64);
+      |                                                                ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:42:45: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   42 |         if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); }
+      |                                             ^~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:181:22: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<image_jpeg_checked_prefix::Result, true>::ensure' requested here
+  181 |         host_result_.ensure(1);result_.ensure(1);
+      |                      ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:42:73: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   42 |         if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); }
+      |                                                                         ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:181:40: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<image_jpeg_checked_prefix::Result>::ensure' requested here
+  181 |         host_result_.ensure(1);result_.ensure(1);
+      |                                        ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:42:73: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   42 |         if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); }
+      |                                                                         ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:189:56: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<short>::ensure' requested here
+  189 |             planes_[c].ensure(pixels);coefficients_[c].ensure(terms);quant_[c].ensure(64);
+      |                                                        ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:42:73: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   42 |         if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); }
+      |                                                                         ^~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:197:43: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<int>::ensure' requested here
+  197 |         scan_.ensure(blocks*64);previous_.ensure(blocks);components_.ensure(blocks);
+      |                                           ^
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:42:45: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+   42 |         if(pointer_) { if constexpr(Pinned) hipHostFree(pointer_); else hipFree(pointer_); }
+      |                                             ^~~~~~~~~~~~~~~~~~~~~
+/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-u3iansur/src/rocm/common/image/jpeg_encoder_pipeline.hpp:201:73: note: in instantiation of member function 'image_jpeg_pipeline::Buffer<unsigned int, true>::ensure' requested here
+  201 |             histogram_.ensure(4*256);invalid_.ensure(1);host_histogram_.ensure(4*256+1);
+      |                                                                         ^
+35 warnings generated when compiling for host.

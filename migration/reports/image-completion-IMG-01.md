@@ -1,6 +1,6 @@
 # IMG-01：多实例 JPEG 编码器实施记录
 
-状态：**IN_PROGRESS**。宽索引、自适应prefix与显存预检已接入正式入口并重建重验；当前48项PARTIAL子集已绑定提交`48885a7e`的封存证据并发布到主表，传递源码和显式PARTIAL资格检查通过。完整入口尚有下列欠项，图像当前仍为 **13 PASSED、9 PARTIAL、4 FAILED**。[资格摘要](image-encoder-instances-v2-qualification.json)与[发布记录](image-encoder-instances-v2-publication.json)保留各自源码身份和发布状态。
+状态：**IN_PROGRESS**。已发布检查点的48项PARTIAL子集绑定提交`48885a7e`，其历史证明保留。工作区刚接入新的有理数颜色/精确DC修正，新80项独立数学验收通过；共享核心与原入口的当前源码证明正在刷新，因此不能把旧48项证明当作新源码的验收。完整入口尚有下列欠项，图像当前仍为 **13 PASSED、9 PARTIAL、4 FAILED**。[资格摘要](image-encoder-instances-v2-qualification.json)与[发布记录](image-encoder-instances-v2-publication.json)保留各自源码身份和发布状态。
 
 | 工作 | 当前结果 | 完整证据 |
 | --- | --- | --- |
@@ -67,14 +67,23 @@ libjpeg-turbo 在4:2:0下仅当降采样宽度大于2时启用精细上采样；
 
 ## 新编码质量保留集
 
-[冻结80项矩阵](../rewrite/image-encoder-quality-profile.json)覆盖4输入、Q1/50/80/95/100、两采样及标准/优化Huffman。AMD与5090原入口80/80均运行并生成文件；数值验收78/80通过，仅Q1/420渐变局部失败（两Huffman模式）；Huffman/质量控制/验证器正反检查88/88通过。独立GPU平面和CPU系数诊断确认DC归一化的float sqrt乘积为0.1249999925，使精确0.5/2.5变为0.49999997/2.49999976；仅ties-away的首候选未修复两项失败，失败证据保留。下一候选将使用DC精确1/8，生产实现及48项子集资格仍保持原样。Pillow参考优化444缓冲不足的三项历史错误保留，增大目的buffer后重验；baseline增加明确SOF0/8bit和反向检查，未调整质量门槛。详见[三方数值记录](image-encoder-quality-cpu.json)、[系数诊断](image-encoder-Q1-diagnosis.json)。
+[冻结80项矩阵](../rewrite/image-encoder-quality-profile.json)的正式实现数值结果为78/80。独立候选改用精确DC归一化1/8及半整数远离零后，开发矩阵80/80、90组DC整数边界通过；进一步冻结的新80项保留矩阵仅74/80通过，失败为Q1/420的梯度、色块、自然图各两种Huffman模式。该候选的失败保留；后续明确数学变体已通过新80项三方验收并接入工作区，原48项及共享入口证明正在刷新。Pillow目的buffer与SOF0检查修复及此前失败均保留。
 
-## 尚未完成的入口验收
+[参考互比](image-encoder-reference-crosscheck.json)确认现有每32×32局部源MSE门槛也会拒绝独立CPU/native编码器之间的部分结果：开发集CPU对native有2项、新保留集两个方向分别4项和2项。该观察不自动豁免AMD失败；现有合同和失败结果不改写。
 
-- 正式C++入口整合、48项当前子集资格、多线程trace和输入变化重放已完成；仍需最终完整资格。
-- 扩展16组mixed尺寸、j0/状态、损坏BMP和IO错误已通过；线程创建失败采用取消/join路径并经代码复审，仍需资源失败的完整边界审计。
-- 宽索引、容量预检已接入正式入口，14组slot、5故障/4trace、全部运行合同与8组大图重验通过。坐标验收不代表65535×65535整图可装入设备。
-- 单图预分配与计时边界已通过；prefix分派阈值测量和保留边界已通过；无profiler的端到端性能分布、峰值内存尚未完成，不能与vendor直接比较。
-- 新80项保留编码质量矩阵已冻结并开始AMD/native原入口运行，涵盖4输入×5档Q×2采样×2Huffman；逐图三方数值验收、冷检出重建和最终复审仍待完成。
+[真实GPU颜色平面诊断](image-encoder-color-diagnosis.json)发现浮点颜色转换在半整数附近偏离精确十进制权重模型：梯度425个Y像素、色块429个Cb像素、自然图各7个Cb/Cr像素相差1。已冻结[数学变体合同及依据](image-encoder-math-variant.md)，以独立整数颜色、float64/80位Decimal参考和严格全MCU解码检查全部像素/系数；新80项通过，历史160项已通过，正式整合入口240项字节桥接也全部通过，旧失败完整保留。不能把这些实验写成JPEG正式符合性认证。
+
+详见[第二候选开发比较](image-encoder-rounding-candidate-comparison.json)、[90组DC边界](image-encoder-DC-boundaries.json)、[新保留三方比较](image-encoder-quality-heldout-cpu.json)、[模式/负向检查](image-encoder-quality-heldout-groups.json)。
+
+## 当前剩余的入口验收
+
+- 正式入口48项功能子集、240项CPU/native数学变体验收、两平台各6项无profiler性能与12组分配峰值已完成。
+- 两个受共享算术影响的resize入口68件产品已重跑独立数学、严格熵解码和CPU质量；生产seal身份及4项替换/缺失反向检查通过。
+- 固定提交冷检出正在重建应用、pipeline probe和copy observer，复跑CLI、运行/预分配/输入变化trace、240产品和8组大图。初始化/文档依赖遗漏的失败单独封存。
+- 冷检出与最终复审全部通过前，不签发整例资格。线程创建失败依照取消/join路径代码审查；资源失败覆盖5项已执行slot故障，未注入的OS线程创建故障不能称为实测。
 
 IMG-00的26入口语义审计及IMG-02–IMG-10仍未完成。阶段状态和每次实验见[完整计划](../image-completion-plan.md)及[实时实验记录](image-libraries-progress.md)。
+
+## 当前生产整合后的补充验证
+
+240 个编码数学用例已在正式入口逐字节复现；两个 resize 入口 68 个产品已完成独立严格熵解码、系数数学和 CPU 质量比较，产品 seal 身份增强后重签通过。12 个性能场景（两平台各6项）与12组分配峰值重建完成，见 [性能及内存范围](image-encoder-performance.md)。CPU RSS 修复及旧测量限制已单列。当前等待固定提交冷检出与最终资格；主表计数尚未升级。

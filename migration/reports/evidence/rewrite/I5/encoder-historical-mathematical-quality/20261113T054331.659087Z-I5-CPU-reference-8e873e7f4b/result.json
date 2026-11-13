@@ -1,0 +1,870 @@
+{
+  "case": "color-edges-q50-s1-opt1",
+  "status": "PASSED",
+  "acceptance": "ALGORITHM_VARIANT",
+  "checks": [
+    {
+      "check": "actual-CPU-reference-identity",
+      "passed": true
+    },
+    {
+      "check": "complete-frozen-source-identity",
+      "passed": true
+    },
+    {
+      "check": "geometry-sampling-DQT-baseline-exact",
+      "passed": true
+    },
+    {
+      "check": "cpu-source-channel-MSE",
+      "passed": true
+    },
+    {
+      "check": "cpu-source-channel-global-SSIM",
+      "passed": true
+    },
+    {
+      "check": "native-source-channel-MSE",
+      "passed": true
+    },
+    {
+      "check": "native-source-channel-global-SSIM",
+      "passed": true
+    },
+    {
+      "check": "independent-full-coefficient-read-zero-warnings",
+      "passed": true
+    },
+    {
+      "check": "actual-loaded-libjpeg-matches-bound-path-and-SHA",
+      "passed": true,
+      "observed": [
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/cpu-codecs/lib/libjpeg.so.62"
+      ],
+      "expected_path": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/cpu-codecs/lib/libjpeg.so.62.4.0",
+      "expected_sha256": "d3dee37946d3b526cd19c49b1d535047b20e2c19d0edd3cf6782e257680b7466"
+    },
+    {
+      "check": "strict-frame-dimensions",
+      "passed": true
+    },
+    {
+      "check": "all-color-pixels-exact-0",
+      "passed": true,
+      "pixels": 4095
+    },
+    {
+      "check": "complete-JPEG-valid-coefficients-exact-GPU-0",
+      "passed": true,
+      "coefficients": 4608
+    },
+    {
+      "check": "every-coefficient-independent-mathematics-0",
+      "passed": true
+    },
+    {
+      "check": "independent-parser-DQT-0",
+      "passed": true
+    },
+    {
+      "check": "all-color-pixels-exact-1",
+      "passed": true,
+      "pixels": 4095
+    },
+    {
+      "check": "complete-JPEG-valid-coefficients-exact-GPU-1",
+      "passed": true,
+      "coefficients": 4608
+    },
+    {
+      "check": "every-coefficient-independent-mathematics-1",
+      "passed": true
+    },
+    {
+      "check": "independent-parser-DQT-1",
+      "passed": true
+    },
+    {
+      "check": "all-color-pixels-exact-2",
+      "passed": true,
+      "pixels": 4095
+    },
+    {
+      "check": "complete-JPEG-valid-coefficients-exact-GPU-2",
+      "passed": true,
+      "coefficients": 4608
+    },
+    {
+      "check": "every-coefficient-independent-mathematics-2",
+      "passed": true
+    },
+    {
+      "check": "independent-parser-DQT-2",
+      "passed": true
+    },
+    {
+      "check": "complete-MCU-positions-and-zero-padding-coefficients",
+      "passed": true,
+      "blocks": 216,
+      "dummy_blocks": 0
+    }
+  ],
+  "tile_diagnostics": [
+    {
+      "check": "cpu-source-every-tile-MSE",
+      "passed": true
+    },
+    {
+      "check": "native-source-every-tile-MSE",
+      "passed": true
+    }
+  ],
+  "metrics": {
+    "cpu": {
+      "pairwise": {
+        "channel_mse": [
+          0.4415140415140415,
+          0.11330891330891331,
+          0.0
+        ],
+        "channel_psnr": [
+          51.68135840825003,
+          57.58816286409467,
+          null
+        ],
+        "channel_global_ssim": [
+          0.9999856922127618,
+          0.9999964189226436,
+          1.0
+        ],
+        "max_abs": 10,
+        "channel_p99_abs": [
+          3.0,
+          1.0,
+          0.0
+        ]
+      },
+      "candidate_tile_mse": [
+        [
+          53.96875,
+          19.890625,
+          66.828125
+        ],
+        [
+          50.390625,
+          12.84375,
+          76.21875
+        ],
+        [
+          40.375,
+          12.46875,
+          60.875
+        ],
+        [
+          42.36290322580645,
+          14.016129032258064,
+          69.29838709677419
+        ],
+        [
+          45.193548387096776,
+          13.629032258064516,
+          65.4274193548387
+        ],
+        [
+          41.61290322580645,
+          12.419354838709678,
+          53.41935483870968
+        ]
+      ],
+      "reference_tile_mse": [
+        [
+          53.96875,
+          19.890625,
+          66.828125
+        ],
+        [
+          51.203125,
+          12.8671875,
+          76.21875
+        ],
+        [
+          40.375,
+          12.46875,
+          60.875
+        ],
+        [
+          43.00806451612903,
+          13.798387096774194,
+          69.29838709677419
+        ],
+        [
+          45.193548387096776,
+          13.629032258064516,
+          65.4274193548387
+        ],
+        [
+          41.61290322580645,
+          12.419354838709678,
+          53.41935483870968
+        ]
+      ]
+    },
+    "native": {
+      "pairwise": {
+        "channel_mse": [
+          0.07032967032967033,
+          0.06056166056166056,
+          0.06056166056166056
+        ],
+        "channel_psnr": [
+          59.659417792051165,
+          60.30882586138131,
+          60.30882586138131
+        ],
+        "channel_global_ssim": [
+          0.9999977201404066,
+          0.9999980856836875,
+          0.9999980186010909
+        ],
+        "max_abs": 2,
+        "channel_p99_abs": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "candidate_tile_mse": [
+        [
+          53.96875,
+          19.890625,
+          66.828125
+        ],
+        [
+          50.390625,
+          12.84375,
+          76.21875
+        ],
+        [
+          40.375,
+          12.46875,
+          60.875
+        ],
+        [
+          42.36290322580645,
+          14.016129032258064,
+          69.29838709677419
+        ],
+        [
+          45.193548387096776,
+          13.629032258064516,
+          65.4274193548387
+        ],
+        [
+          41.61290322580645,
+          12.419354838709678,
+          53.41935483870968
+        ]
+      ],
+      "reference_tile_mse": [
+        [
+          54.03125,
+          19.953125,
+          66.890625
+        ],
+        [
+          50.390625,
+          12.84375,
+          76.21875
+        ],
+        [
+          40.375,
+          12.46875,
+          60.875
+        ],
+        [
+          42.41935483870968,
+          14.07258064516129,
+          69.35483870967742
+        ],
+        [
+          44.99193548387097,
+          13.629032258064516,
+          66.65322580645162
+        ],
+        [
+          41.61290322580645,
+          12.419354838709678,
+          53.41935483870968
+        ]
+      ]
+    },
+    "mathematics": {
+      "components": [
+        {
+          "channel": 0,
+          "passed": true,
+          "coefficients": 4608,
+          "DC_exact": true,
+          "worst_excess": -0.009999999999999787,
+          "max_unquantized_residual": 34.27512714629228,
+          "failing_frequencies": 0,
+          "first_failures": []
+        },
+        {
+          "channel": 1,
+          "passed": true,
+          "coefficients": 4608,
+          "DC_exact": true,
+          "worst_excess": -0.23843527816269194,
+          "max_unquantized_residual": 48.48702949745628,
+          "failing_frequencies": 0,
+          "first_failures": []
+        },
+        {
+          "channel": 2,
+          "passed": true,
+          "coefficients": 4608,
+          "DC_exact": true,
+          "worst_excess": -0.015587562942283029,
+          "max_unquantized_residual": 49.000000000000085,
+          "failing_frequencies": 0,
+          "first_failures": []
+        }
+      ],
+      "strict_entropy": {
+        "bytes": 987,
+        "pad_bits": 0,
+        "MCU_blocks": 216,
+        "dummy_blocks": 0,
+        "first_differences": []
+      }
+    },
+    "structures": {
+      "amd": {
+        "size": [
+          65,
+          63
+        ],
+        "sampling": 0,
+        "quant": {
+          "0": [
+            16,
+            11,
+            10,
+            16,
+            24,
+            40,
+            51,
+            61,
+            12,
+            12,
+            14,
+            19,
+            26,
+            58,
+            60,
+            55,
+            14,
+            13,
+            16,
+            24,
+            40,
+            57,
+            69,
+            56,
+            14,
+            17,
+            22,
+            29,
+            51,
+            87,
+            80,
+            62,
+            18,
+            22,
+            37,
+            56,
+            68,
+            109,
+            103,
+            77,
+            24,
+            35,
+            55,
+            64,
+            81,
+            104,
+            113,
+            92,
+            49,
+            64,
+            78,
+            87,
+            103,
+            121,
+            120,
+            101,
+            72,
+            92,
+            95,
+            98,
+            112,
+            100,
+            103,
+            99
+          ],
+          "1": [
+            17,
+            18,
+            24,
+            47,
+            99,
+            99,
+            99,
+            99,
+            18,
+            21,
+            26,
+            66,
+            99,
+            99,
+            99,
+            99,
+            24,
+            26,
+            56,
+            99,
+            99,
+            99,
+            99,
+            99,
+            47,
+            66,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99
+          ]
+        },
+        "progressive": false,
+        "frame": {
+          "sof": 192,
+          "precision": 8,
+          "components": 3
+        }
+      },
+      "native": {
+        "size": [
+          65,
+          63
+        ],
+        "sampling": 0,
+        "quant": {
+          "0": [
+            16,
+            11,
+            10,
+            16,
+            24,
+            40,
+            51,
+            61,
+            12,
+            12,
+            14,
+            19,
+            26,
+            58,
+            60,
+            55,
+            14,
+            13,
+            16,
+            24,
+            40,
+            57,
+            69,
+            56,
+            14,
+            17,
+            22,
+            29,
+            51,
+            87,
+            80,
+            62,
+            18,
+            22,
+            37,
+            56,
+            68,
+            109,
+            103,
+            77,
+            24,
+            35,
+            55,
+            64,
+            81,
+            104,
+            113,
+            92,
+            49,
+            64,
+            78,
+            87,
+            103,
+            121,
+            120,
+            101,
+            72,
+            92,
+            95,
+            98,
+            112,
+            100,
+            103,
+            99
+          ],
+          "1": [
+            17,
+            18,
+            24,
+            47,
+            99,
+            99,
+            99,
+            99,
+            18,
+            21,
+            26,
+            66,
+            99,
+            99,
+            99,
+            99,
+            24,
+            26,
+            56,
+            99,
+            99,
+            99,
+            99,
+            99,
+            47,
+            66,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99
+          ]
+        },
+        "progressive": false,
+        "frame": {
+          "sof": 192,
+          "precision": 8,
+          "components": 3
+        }
+      },
+      "cpu": {
+        "size": [
+          65,
+          63
+        ],
+        "sampling": 0,
+        "quant": {
+          "0": [
+            16,
+            11,
+            10,
+            16,
+            24,
+            40,
+            51,
+            61,
+            12,
+            12,
+            14,
+            19,
+            26,
+            58,
+            60,
+            55,
+            14,
+            13,
+            16,
+            24,
+            40,
+            57,
+            69,
+            56,
+            14,
+            17,
+            22,
+            29,
+            51,
+            87,
+            80,
+            62,
+            18,
+            22,
+            37,
+            56,
+            68,
+            109,
+            103,
+            77,
+            24,
+            35,
+            55,
+            64,
+            81,
+            104,
+            113,
+            92,
+            49,
+            64,
+            78,
+            87,
+            103,
+            121,
+            120,
+            101,
+            72,
+            92,
+            95,
+            98,
+            112,
+            100,
+            103,
+            99
+          ],
+          "1": [
+            17,
+            18,
+            24,
+            47,
+            99,
+            99,
+            99,
+            99,
+            18,
+            21,
+            26,
+            66,
+            99,
+            99,
+            99,
+            99,
+            24,
+            26,
+            56,
+            99,
+            99,
+            99,
+            99,
+            99,
+            47,
+            66,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99,
+            99
+          ]
+        },
+        "progressive": false,
+        "frame": {
+          "sof": 192,
+          "precision": 8,
+          "components": 3
+        }
+      }
+    },
+    "source_metrics": {
+      "amd": {
+        "channel_mse": [
+          47.93699633699634,
+          15.073992673992674,
+          69.28742368742368
+        ],
+        "channel_psnr": [
+          31.324095425831953,
+          36.34852061000557,
+          29.724259475953602
+        ],
+        "channel_global_ssim": [
+          0.9984883620784732,
+          0.9995304886683994,
+          0.9978053426761352
+        ],
+        "max_abs": 37,
+        "channel_p99_abs": [
+          25.0,
+          16.0,
+          35.0
+        ]
+      },
+      "native": {
+        "channel_mse": [
+          47.91746031746032,
+          15.103296703296703,
+          69.61367521367521
+        ],
+        "channel_psnr": [
+          31.325865690021317,
+          36.34008606701837,
+          29.703857981761498
+        ],
+        "channel_global_ssim": [
+          0.9984886915833509,
+          0.9995294668158299,
+          0.9977942314307503
+        ],
+        "max_abs": 37,
+        "channel_p99_abs": [
+          25.0,
+          16.0,
+          35.0
+        ]
+      },
+      "cpu": {
+        "channel_mse": [
+          48.296459096459095,
+          15.027106227106227,
+          69.28742368742368
+        ],
+        "channel_psnr": [
+          31.29165069686582,
+          36.362050044059615,
+          29.724259475953602
+        ],
+        "channel_global_ssim": [
+          0.9984772832722804,
+          0.9995319484712346,
+          0.9978053426761352
+        ],
+        "max_abs": 37,
+        "channel_p99_abs": [
+          25.0,
+          16.0,
+          35.0
+        ]
+      }
+    }
+  },
+  "decoded_sha256": {
+    "amd": "c26d688baaaef5ff9f7d65f14383b572ceef1102abc826a959a8b5d213479ec2",
+    "native": "6ebc61aaf9471b89c82d7f6ac85b9d1b888069beed22fbcdbaab84aaaa3f06e4",
+    "cpu": "b8e3b1171ab859e36d8b1b8b0bf2523cf860c6c22b271eda39d8fd192c71e00d"
+  },
+  "experiment_id": "20261113T054331.659087Z-I5-CPU-reference-8e873e7f4b",
+  "evidence_references": [
+    "migration/reports/evidence/rewrite/I5/encoder-math-history-original-entry/20261113T053855.906286Z-I5-amd-original-403449a60b",
+    "migration/reports/evidence/rewrite/I5/encoder-heldout-quality-original-entry/20261113T044807.225727Z-I5-native-original-0303e1a533",
+    "migration/reports/evidence/rewrite/I5/encoder-historical-mathematical-arrays/20261113T054112.206832Z-I5-rocm-probe-6389ee6f47",
+    "migration/reports/evidence/rewrite/I5/encoder-math-strict-CPU-reference/20261113T053551.701486Z-I5-CPU-build-d8b83edf97",
+    "migration/reports/evidence/rewrite/I5/encoder-mathematical-variant-build/20261113T052811.117925Z-I5-rocm-build-21543e989e"
+  ]
+}

@@ -1,0 +1,1 @@
+Test rocm-trace for async-original-entry-multithread-trace, case device-only. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261113T061317.560705Z-I5-rocm-original-candidate-208971318a.

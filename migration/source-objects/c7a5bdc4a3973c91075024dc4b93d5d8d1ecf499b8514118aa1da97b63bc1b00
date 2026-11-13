@@ -1,0 +1,93 @@
+// SPDX-License-Identifier: Apache-2.0
+// Candidate wide indexing for JPEG transforms; numerical operations unchanged.
+#pragma once
+#include "jpeg_encoder_gpu.hpp"
+
+namespace image_jpeg_wide {
+struct PixelIndex {size_t x=0,y=0;bool valid=false;};
+struct DctIndex {size_t x=0,y=0;unsigned u=0,v=0;bool valid=false;};
+struct ScanIndex {
+    size_t block=0,source=0;int previous=-1;unsigned frequency=0,channel=0;
+    bool valid=false,source_valid=false;
+};
+__host__ __device__ inline PixelIndex pixel_index(size_t index,int width,int height) {
+    if(index>=size_t(width)*height)return {};
+    return {index%width,index/width,true};
+}
+__host__ __device__ inline DctIndex dct_index(size_t index,int bx,int by) {
+    if(index>=size_t(bx)*by*64)return {};
+    return {(index/64)%bx,(index/64)/bx,unsigned(index%8),unsigned(index%64)/8,true};
+}
+__host__ __device__ inline ScanIndex scan_index(size_t index,int bx_y,int by_y,
+    int bx_c,int by_c,int mx,int my,int sampling) {
+    const unsigned per_mcu=sampling==2?6:3;
+    if(index>=size_t(mx)*my*per_mcu*64)return {};
+    const size_t block=index/64,mcu=block/per_mcu;
+    const unsigned slot=block%per_mcu;
+    size_t bx=mcu%mx,by=mcu/mx;unsigned channel=0;
+    if(sampling==2) {
+        if(slot<4) {bx=bx*2+(slot&1);by=by*2+(slot>>1);}
+        else channel=slot-3;
+    }else channel=slot;
+    const int width=channel?bx_c:bx_y,height=channel?by_c:by_y;
+    const bool source_valid=bx<size_t(width)&&by<size_t(height);
+    // 16-bit JPEG dimensions imply <202M blocks, so the predecessor ID fits int.
+    const int previous=sampling==2?(slot==0?(mcu?int(block)-3:-1):
+        (slot<4?int(block)-1:(mcu?int(block)-6:-1))):(mcu?int(block)-3:-1);
+    return {block,source_valid?(by*width+bx)*64+index%64:0,previous,
+            unsigned(index%64),channel,true,source_valid};
+}
+
+__global__ void rgb_to_plane(const unsigned char* rgb,unsigned char* plane,
+    int width,int height,int pw,int ph,int channel,int sampling) {
+    const size_t index=size_t(blockIdx.x)*blockDim.x+threadIdx.x;
+    const auto position=pixel_index(index,pw,ph);
+    if(!position.valid)return;
+    const int x=int(position.x),y=int(position.y),scale=channel==0?1:sampling;
+    float total=0.0f;
+    for(int dy=0;dy<scale;++dy)for(int dx=0;dx<scale;++dx) {
+        const int sx=x*scale+dx<width?x*scale+dx:width-1;
+        const int sy=y*scale+dy<height?y*scale+dy:height-1;
+        const auto* color=rgb+(size_t(sy)*width+sx)*3;
+        const float r=color[0],g=color[1],b=color[2];
+        total+=channel==0?0.299f*r+0.587f*g+0.114f*b:
+               channel==1?128.0f-0.168736f*r-0.331264f*g+0.5f*b:
+                          128.0f+0.5f*r-0.418688f*g-0.081312f*b;
+    }
+    plane[index]=image_jpeg_encoder::byte(total/float(scale*scale));
+}
+
+__global__ void forward_dct_quantize(const unsigned char* plane,const unsigned short* quant,
+    const float* cosine,short* coefficients,int width,int height,int bx,int by) {
+    const size_t index=size_t(blockIdx.x)*blockDim.x+threadIdx.x;
+    const auto position=dct_index(index,bx,by);
+    if(!position.valid)return;
+    const int block_x=int(position.x),block_y=int(position.y),u=position.u,v=position.v;
+    float sum=0.0f;
+    for(int y=0;y<8;++y) {
+        const int sy=block_y*8+y<height?block_y*8+y:height-1;
+        for(int x=0;x<8;++x) {
+            const int sx=block_x*8+x<width?block_x*8+x:width-1;
+            sum+=(float(plane[size_t(sy)*width+sx])-128.0f)*cosine[x*8+u]*cosine[y*8+v];
+        }
+    }
+    const float normalizer=(!u&&!v)?0.125f:(u?1.0f:0.7071067811865475f)*(v?1.0f:0.7071067811865475f)*0.25f;
+    const float scaled=sum*normalizer/quant[index%64];
+    const int whole=__float2int_rz(scaled);const float fraction=scaled-float(whole);
+    coefficients[index]=static_cast<short>(whole+(fraction>=0.5f?1:(fraction<=-0.5f?-1:0)));
+}
+
+__global__ void gather_mcu_coefficients(const short* y,const short* cb,const short* cr,
+    short* scan,int* previous,unsigned char* component,int bx_y,int by_y,int bx_c,int by_c,
+    int mx,int my,int sampling) {
+    const size_t index=size_t(blockIdx.x)*blockDim.x+threadIdx.x;
+    const auto position=scan_index(index,bx_y,by_y,bx_c,by_c,mx,my,sampling);
+    if(!position.valid)return;
+    const short* source=position.channel==0?y:position.channel==1?cb:cr;
+    scan[index]=position.source_valid?source[position.source]:0;
+    if(!position.frequency) {
+        previous[position.block]=position.previous;
+        component[position.block]=position.channel;
+    }
+}
+} // namespace image_jpeg_wide

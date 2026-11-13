@@ -1,0 +1,2252 @@
+[
+  {
+    "case": "511x509-standard",
+    "status": "PASSED",
+    "checks": [
+      {
+        "check": "profiler-success",
+        "passed": true
+      },
+      {
+        "check": "one-kernel-agent-and-optional-DMA-copy-table",
+        "passed": true
+      },
+      {
+        "check": "six-images-two-streams-all-pipeline-kernels-on-GPU1",
+        "passed": true,
+        "kernel_count": 96,
+        "expected": 96
+      },
+      {
+        "check": "actual-D2H-is-exact-metadata-plus-only-requested-payload",
+        "passed": true,
+        "observed_sizes": [
+          8,
+          8,
+          8,
+          8,
+          632991,
+          632991,
+          8,
+          8,
+          8,
+          8,
+          632991,
+          632991,
+          8,
+          8,
+          8,
+          8,
+          632991,
+          632991
+        ],
+        "expected_sizes": [
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          632991,
+          632991,
+          632991,
+          632991,
+          632991,
+          632991
+        ]
+      },
+      {
+        "check": "exact-traced-product-set",
+        "passed": true
+      },
+      {
+        "check": "traced-product-exact-0.jpg",
+        "passed": true
+      },
+      {
+        "check": "traced-product-exact-1.jpg",
+        "passed": true
+      },
+      {
+        "check": "traced-product-exact-2.jpg",
+        "passed": true
+      },
+      {
+        "check": "traced-product-exact-3.jpg",
+        "passed": true
+      },
+      {
+        "check": "traced-product-exact-4.jpg",
+        "passed": true
+      },
+      {
+        "check": "traced-product-exact-5.jpg",
+        "passed": true
+      }
+    ],
+    "observed": {
+      "streams": [
+        "1",
+        "2"
+      ],
+      "pci": [
+        "0000:23:00.0"
+      ],
+      "kernel_count": 96,
+      "runtime_kernel_count": 66,
+      "overlapping_kernel_pairs": 25,
+      "kernels": {
+        "__amd_rocclr_copyBuffer": 48,
+        "image_jpeg_wide::rgb_to_plane(unsigned char const*, unsigned char*, int, int, int, int, int, int)": 18,
+        "image_jpeg_wide::forward_dct_quantize(unsigned char const*, unsigned short const*, float const*, short*, int, int, int, int)": 18,
+        "image_jpeg_wide::gather_mcu_coefficients(short const*, short const*, short const*, short*, int*, unsigned char*, int, int, int, int, int, int, int)": 6,
+        "__amd_rocclr_fillBufferUnAligned": 18,
+        "void image_jpeg_checked_prefix::finish<false>(unsigned int*, unsigned int const*, image_jpeg_checked_prefix::Result const*, unsigned int)": 6,
+        "void image_jpeg_checked_prefix::bases<false>(unsigned int const*, unsigned int*, image_jpeg_checked_prefix::Result*, unsigned int, unsigned int)": 6,
+        "void image_jpeg_checked_prefix::tiles<unsigned short, false>(unsigned short const*, unsigned int*, unsigned int*, image_jpeg_checked_prefix::Result*, unsigned int)": 6,
+        "encode_blocks(short const*, int const*, unsigned char const*, Code const*, Code const*, unsigned char*, unsigned short*, int)": 6,
+        "pack_bytes(unsigned char const*, unsigned int const*, unsigned char*, int, unsigned int, unsigned int)": 6,
+        "void image_jpeg_checked_prefix::tiles<unsigned char, true>(unsigned char const*, unsigned int*, unsigned int*, image_jpeg_checked_prefix::Result*, unsigned int)": 6,
+        "void image_jpeg_checked_prefix::bases<true>(unsigned int const*, unsigned int*, image_jpeg_checked_prefix::Result*, unsigned int, unsigned int)": 6,
+        "void image_jpeg_checked_prefix::finish<true>(unsigned int*, unsigned int const*, image_jpeg_checked_prefix::Result const*, unsigned int)": 6,
+        "scatter_stuff(unsigned char const*, unsigned int const*, unsigned char*, unsigned int)": 6
+      },
+      "memory_copy_columns": [
+        "Kind",
+        "Direction",
+        "Stream_Id",
+        "Source_Agent_Id",
+        "Destination_Agent_Id",
+        "Correlation_Id",
+        "Start_Timestamp",
+        "End_Timestamp"
+      ],
+      "memory_copy_rows": [
+        {
+          "Kind": "MEMORY_COPY",
+          "Direction": "MEMORY_COPY_HOST_TO_DEVICE",
+          "Stream_Id": "1",
+          "Source_Agent_Id": "Agent 2",
+          "Destination_Agent_Id": "Agent 11",
+          "Correlation_Id": "31",
+          "Start_Timestamp": "507401843528665",
+          "End_Timestamp": "507401843558025"
+        },
+        {
+          "Kind": "MEMORY_COPY",
+          "Direction": "MEMORY_COPY_HOST_TO_DEVICE",
+          "Stream_Id": "2",
+          "Source_Agent_Id": "Agent 2",
+          "Destination_Agent_Id": "Agent 11",
+          "Correlation_Id": "114",
+          "Start_Timestamp": "507401855356541",
+          "End_Timestamp": "507401855384900"
+        },
+        {
+          "Kind": "MEMORY_COPY",
+          "Direction": "MEMORY_COPY_DEVICE_TO_HOST",
+          "Stream_Id": "1",
+          "Source_Agent_Id": "Agent 11",
+          "Destination_Agent_Id": "Agent 2",
+          "Correlation_Id": "253",
+          "Start_Timestamp": "507401857706809",
+          "End_Timestamp": "507401857730408"
+        },
+        {
+          "Kind": "MEMORY_COPY",
+          "Direction": "MEMORY_COPY_DEVICE_TO_HOST",
+          "Stream_Id": "2",
+          "Source_Agent_Id": "Agent 11",
+          "Destination_Agent_Id": "Agent 2",
+          "Correlation_Id": "262",
+          "Start_Timestamp": "507401858244399",
+          "End_Timestamp": "507401858267998"
+        },
+        {
+          "Kind": "MEMORY_COPY",
+          "Direction": "MEMORY_COPY_HOST_TO_DEVICE",
+          "Stream_Id": "1",
+          "Source_Agent_Id": "Agent 2",
+          "Destination_Agent_Id": "Agent 11",
+          "Correlation_Id": "267",
+          "Start_Timestamp": "507401859490496",
+          "End_Timestamp": "507401859517536"
+        },
+        {
+          "Kind": "MEMORY_COPY",
+          "Direction": "MEMORY_COPY_HOST_TO_DEVICE",
+          "Stream_Id": "2",
+          "Source_Agent_Id": "Agent 2",
+          "Destination_Agent_Id": "Agent 11",
+          "Correlation_Id": "323",
+          "Start_Timestamp": "507401859735852",
+          "End_Timestamp": "507401859763931"
+        },
+        {
+          "Kind": "MEMORY_COPY",
+          "Direction": "MEMORY_COPY_DEVICE_TO_HOST",
+          "Stream_Id": "1",
+          "Source_Agent_Id": "Agent 11",
+          "Destination_Agent_Id": "Agent 2",
+          "Correlation_Id": "727",
+          "Start_Timestamp": "507401863949052",
+          "End_Timestamp": "507401863972211"
+        },
+        {
+          "Kind": "MEMORY_COPY",
+          "Direction": "MEMORY_COPY_DEVICE_TO_HOST",
+          "Stream_Id": "2",
+          "Source_Agent_Id": "Agent 11",
+          "Destination_Agent_Id": "Agent 2",
+          "Correlation_Id": "816",
+          "Start_Timestamp": "507401864337782",
+          "End_Timestamp": "507401864368782"
+        },
+        {
+          "Kind": "MEMORY_COPY",
+          "Direction": "MEMORY_COPY_HOST_TO_DEVICE",
+          "Stream_Id": "1",
+          "Source_Agent_Id": "Agent 2",
+          "Destination_Agent_Id": "Agent 11",
+          "Correlation_Id": "819",
+          "Start_Timestamp": "507401864415741",
+          "End_Timestamp": "507401864442380"
+        },
+        {
+          "Kind": "MEMORY_COPY",
+          "Direction": "MEMORY_COPY_HOST_TO_DEVICE",
+          "Stream_Id": "2",
+          "Source_Agent_Id": "Agent 2",
+          "Destination_Agent_Id": "Agent 11",
+          "Correlation_Id": "877",
+          "Start_Timestamp": "507401864920059",
+          "End_Timestamp": "507401864946459"
+        },
+        {
+          "Kind": "MEMORY_COPY",
+          "Direction": "MEMORY_COPY_DEVICE_TO_HOST",
+          "Stream_Id": "1",
+          "Source_Agent_Id": "Agent 11",
+          "Destination_Agent_Id": "Agent 2",
+          "Correlation_Id": "1255",
+          "Start_Timestamp": "507401865711681",
+          "End_Timestamp": "507401865733081"
+        },
+        {
+          "Kind": "MEMORY_COPY",
+          "Direction": "MEMORY_COPY_DEVICE_TO_HOST",
+          "Stream_Id": "2",
+          "Source_Agent_Id": "Agent 11",
+          "Destination_Agent_Id": "Agent 2",
+          "Correlation_Id": "1308",
+          "Start_Timestamp": "507401866075953",
+          "End_Timestamp": "507401866096953"
+        }
+      ],
+      "copy_argument_receipts": [
+        {
+          "kind": 1,
+          "bytes": 780297,
+          "stream": "0x566567a12a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 256,
+          "stream": "0x566567a12a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x566567a12a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x566567a12a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x566567a12a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x566567a12a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x566567a12a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x566567a12a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 780297,
+          "stream": "0x566567b45350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 256,
+          "stream": "0x566567b45350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x566567b45350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x566567b45350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x566567b45350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x566567b45350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x566567b45350",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x566567b45350",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x566567a12a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x566567b45350",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 632991,
+          "stream": "0x566567a12a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 632991,
+          "stream": "0x566567b45350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 780297,
+          "stream": "0x566567a12a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 256,
+          "stream": "0x566567a12a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x566567a12a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x566567a12a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x566567a12a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x566567a12a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x566567a12a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x566567a12a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 780297,
+          "stream": "0x566567b45350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 256,
+          "stream": "0x566567b45350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x566567b45350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x566567b45350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x566567b45350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x566567b45350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x566567b45350",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x566567b45350",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x566567a12a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x566567b45350",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 632991,
+          "stream": "0x566567a12a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 632991,
+          "stream": "0x566567b45350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 780297,
+          "stream": "0x566567a12a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 256,
+          "stream": "0x566567a12a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x566567a12a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x566567a12a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x566567a12a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x566567a12a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x566567a12a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x566567a12a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 780297,
+          "stream": "0x566567b45350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 256,
+          "stream": "0x566567b45350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x566567b45350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x566567b45350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x566567b45350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x566567b45350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x566567b45350",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x566567b45350",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x566567a12a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x566567b45350",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 632991,
+          "stream": "0x566567a12a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 632991,
+          "stream": "0x566567b45350",
+          "rc": 0
+        }
+      ]
+    },
+    "scope": "Component trace; overlap measured. Device-only copy rows retained for exact metadata-versus-payload analysis.",
+    "experiment_id": "20261113T054729.831556Z-I5-rocm-trace-017f7579d2",
+    "evidence": "migration/reports/evidence/rewrite/I5/async-JPEG-slot-trace/20261113T054729.831556Z-I5-rocm-trace-017f7579d2"
+  },
+  {
+    "case": "511x509-optimized",
+    "status": "PASSED",
+    "checks": [
+      {
+        "check": "profiler-success",
+        "passed": true
+      },
+      {
+        "check": "one-kernel-agent-and-optional-DMA-copy-table",
+        "passed": true
+      },
+      {
+        "check": "six-images-two-streams-all-pipeline-kernels-on-GPU1",
+        "passed": true,
+        "kernel_count": 102,
+        "expected": 102
+      },
+      {
+        "check": "actual-D2H-is-exact-metadata-plus-only-requested-payload",
+        "passed": true,
+        "observed_sizes": [
+          4096,
+          4,
+          4096,
+          4,
+          8,
+          8,
+          8,
+          8,
+          528644,
+          528644,
+          4096,
+          4,
+          4096,
+          4,
+          8,
+          8,
+          8,
+          8,
+          528644,
+          528644,
+          4096,
+          4,
+          4096,
+          4,
+          8,
+          8,
+          8,
+          8,
+          528644,
+          528644
+        ],
+        "expected_sizes": [
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          4096,
+          4,
+          4096,
+          4,
+          4096,
+          4,
+          4096,
+          4,
+          4096,
+          4,
+          4096,
+          4,
+          528644,
+          528644,
+          528644,
+          528644,
+          528644,
+          528644
+        ]
+      },
+      {
+        "check": "exact-traced-product-set",
+        "passed": true
+      },
+      {
+        "check": "traced-product-exact-0.jpg",
+        "passed": true
+      },
+      {
+        "check": "traced-product-exact-1.jpg",
+        "passed": true
+      },
+      {
+        "check": "traced-product-exact-2.jpg",
+        "passed": true
+      },
+      {
+        "check": "traced-product-exact-3.jpg",
+        "passed": true
+      },
+      {
+        "check": "traced-product-exact-4.jpg",
+        "passed": true
+      },
+      {
+        "check": "traced-product-exact-5.jpg",
+        "passed": true
+      }
+    ],
+    "observed": {
+      "streams": [
+        "1",
+        "2"
+      ],
+      "pci": [
+        "0000:23:00.0"
+      ],
+      "kernel_count": 102,
+      "runtime_kernel_count": 90,
+      "overlapping_kernel_pairs": 36,
+      "kernels": {
+        "__amd_rocclr_copyBuffer": 60,
+        "image_jpeg_wide::rgb_to_plane(unsigned char const*, unsigned char*, int, int, int, int, int, int)": 18,
+        "image_jpeg_wide::forward_dct_quantize(unsigned char const*, unsigned short const*, float const*, short*, int, int, int, int)": 18,
+        "__amd_rocclr_fillBufferUnAligned": 30,
+        "image_jpeg_wide::gather_mcu_coefficients(short const*, short const*, short const*, short*, int*, unsigned char*, int, int, int, int, int, int, int)": 6,
+        "image_jpeg_opt::histogram(short const*, int const*, unsigned char const*, unsigned int*, unsigned int*, int)": 6,
+        "void image_jpeg_checked_prefix::bases<false>(unsigned int const*, unsigned int*, image_jpeg_checked_prefix::Result*, unsigned int, unsigned int)": 6,
+        "void image_jpeg_checked_prefix::finish<false>(unsigned int*, unsigned int const*, image_jpeg_checked_prefix::Result const*, unsigned int)": 6,
+        "void image_jpeg_checked_prefix::tiles<unsigned short, false>(unsigned short const*, unsigned int*, unsigned int*, image_jpeg_checked_prefix::Result*, unsigned int)": 6,
+        "encode_blocks(short const*, int const*, unsigned char const*, Code const*, Code const*, unsigned char*, unsigned short*, int)": 6,
+        "pack_bytes(unsigned char const*, unsigned int const*, unsigned char*, int, unsigned int, unsigned int)": 6,
+        "void image_jpeg_checked_prefix::tiles<unsigned char, true>(unsigned char const*, unsigned int*, unsigned int*, image_jpeg_checked_prefix::Result*, unsigned int)": 6,
+        "void image_jpeg_checked_prefix::bases<true>(unsigned int const*, unsigned int*, image_jpeg_checked_prefix::Result*, unsigned int, unsigned int)": 6,
+        "void image_jpeg_checked_prefix::finish<true>(unsigned int*, unsigned int const*, image_jpeg_checked_prefix::Result const*, unsigned int)": 6,
+        "scatter_stuff(unsigned char const*, unsigned int const*, unsigned char*, unsigned int)": 6
+      },
+      "memory_copy_columns": [
+        "Kind",
+        "Direction",
+        "Stream_Id",
+        "Source_Agent_Id",
+        "Destination_Agent_Id",
+        "Correlation_Id",
+        "Start_Timestamp",
+        "End_Timestamp"
+      ],
+      "memory_copy_rows": [
+        {
+          "Kind": "MEMORY_COPY",
+          "Direction": "MEMORY_COPY_HOST_TO_DEVICE",
+          "Stream_Id": "1",
+          "Source_Agent_Id": "Agent 2",
+          "Destination_Agent_Id": "Agent 11",
+          "Correlation_Id": "31",
+          "Start_Timestamp": "507404830476480",
+          "End_Timestamp": "507404830505359"
+        },
+        {
+          "Kind": "MEMORY_COPY",
+          "Direction": "MEMORY_COPY_HOST_TO_DEVICE",
+          "Stream_Id": "2",
+          "Source_Agent_Id": "Agent 2",
+          "Destination_Agent_Id": "Agent 11",
+          "Correlation_Id": "96",
+          "Start_Timestamp": "507404841002534",
+          "End_Timestamp": "507404841031173"
+        },
+        {
+          "Kind": "MEMORY_COPY",
+          "Direction": "MEMORY_COPY_DEVICE_TO_HOST",
+          "Stream_Id": "1",
+          "Source_Agent_Id": "Agent 11",
+          "Destination_Agent_Id": "Agent 2",
+          "Correlation_Id": "279",
+          "Start_Timestamp": "507404843238659",
+          "End_Timestamp": "507404843262499"
+        },
+        {
+          "Kind": "MEMORY_COPY",
+          "Direction": "MEMORY_COPY_DEVICE_TO_HOST",
+          "Stream_Id": "2",
+          "Source_Agent_Id": "Agent 11",
+          "Destination_Agent_Id": "Agent 2",
+          "Correlation_Id": "288",
+          "Start_Timestamp": "507404843700068",
+          "End_Timestamp": "507404843723708"
+        },
+        {
+          "Kind": "MEMORY_COPY",
+          "Direction": "MEMORY_COPY_HOST_TO_DEVICE",
+          "Stream_Id": "1",
+          "Source_Agent_Id": "Agent 2",
+          "Destination_Agent_Id": "Agent 11",
+          "Correlation_Id": "293",
+          "Start_Timestamp": "507404844731163",
+          "End_Timestamp": "507404844759602"
+        },
+        {
+          "Kind": "MEMORY_COPY",
+          "Direction": "MEMORY_COPY_HOST_TO_DEVICE",
+          "Stream_Id": "2",
+          "Source_Agent_Id": "Agent 2",
+          "Destination_Agent_Id": "Agent 11",
+          "Correlation_Id": "336",
+          "Start_Timestamp": "507404844906399",
+          "End_Timestamp": "507404844935598"
+        },
+        {
+          "Kind": "MEMORY_COPY",
+          "Direction": "MEMORY_COPY_DEVICE_TO_HOST",
+          "Stream_Id": "1",
+          "Source_Agent_Id": "Agent 11",
+          "Destination_Agent_Id": "Agent 2",
+          "Correlation_Id": "1115",
+          "Start_Timestamp": "507404848645831",
+          "End_Timestamp": "507404848663831"
+        },
+        {
+          "Kind": "MEMORY_COPY",
+          "Direction": "MEMORY_COPY_DEVICE_TO_HOST",
+          "Stream_Id": "2",
+          "Source_Agent_Id": "Agent 11",
+          "Destination_Agent_Id": "Agent 2",
+          "Correlation_Id": "1122",
+          "Start_Timestamp": "507404848696949",
+          "End_Timestamp": "507404848718509"
+        },
+        {
+          "Kind": "MEMORY_COPY",
+          "Direction": "MEMORY_COPY_HOST_TO_DEVICE",
+          "Stream_Id": "1",
+          "Source_Agent_Id": "Agent 2",
+          "Destination_Agent_Id": "Agent 11",
+          "Correlation_Id": "1131",
+          "Start_Timestamp": "507404849241116",
+          "End_Timestamp": "507404849269316"
+        },
+        {
+          "Kind": "MEMORY_COPY",
+          "Direction": "MEMORY_COPY_HOST_TO_DEVICE",
+          "Stream_Id": "2",
+          "Source_Agent_Id": "Agent 2",
+          "Destination_Agent_Id": "Agent 11",
+          "Correlation_Id": "1174",
+          "Start_Timestamp": "507404849387553",
+          "End_Timestamp": "507404849416232"
+        },
+        {
+          "Kind": "MEMORY_COPY",
+          "Direction": "MEMORY_COPY_DEVICE_TO_HOST",
+          "Stream_Id": "1",
+          "Source_Agent_Id": "Agent 11",
+          "Destination_Agent_Id": "Agent 2",
+          "Correlation_Id": "2001",
+          "Start_Timestamp": "507404850519127",
+          "End_Timestamp": "507404850537086"
+        },
+        {
+          "Kind": "MEMORY_COPY",
+          "Direction": "MEMORY_COPY_DEVICE_TO_HOST",
+          "Stream_Id": "2",
+          "Source_Agent_Id": "Agent 11",
+          "Destination_Agent_Id": "Agent 2",
+          "Correlation_Id": "2092",
+          "Start_Timestamp": "507404850832859",
+          "End_Timestamp": "507404850850579"
+        }
+      ],
+      "copy_argument_receipts": [
+        {
+          "kind": 1,
+          "bytes": 780297,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 256,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 4096,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 4,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 780297,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 256,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 4096,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 4,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 528644,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 528644,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 780297,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 256,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 4096,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 4,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 780297,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 256,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 4096,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 4,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 528644,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 528644,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 780297,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 256,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 4096,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 4,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 780297,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 256,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 4096,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 4,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 528644,
+          "stream": "0x635a26db7a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 528644,
+          "stream": "0x635a26eea350",
+          "rc": 0
+        }
+      ]
+    },
+    "scope": "Component trace; overlap measured. Device-only copy rows retained for exact metadata-versus-payload analysis.",
+    "experiment_id": "20261113T054732.806779Z-I5-rocm-trace-4981023f3c",
+    "evidence": "migration/reports/evidence/rewrite/I5/async-JPEG-slot-trace/20261113T054732.806779Z-I5-rocm-trace-4981023f3c"
+  },
+  {
+    "case": "device-only-0",
+    "status": "PASSED",
+    "checks": [
+      {
+        "check": "profiler-success",
+        "passed": true
+      },
+      {
+        "check": "one-kernel-agent-and-optional-DMA-copy-table",
+        "passed": true
+      },
+      {
+        "check": "six-images-two-streams-all-pipeline-kernels-on-GPU1",
+        "passed": true,
+        "kernel_count": 84,
+        "expected": 84
+      },
+      {
+        "check": "actual-D2H-is-exact-metadata-plus-only-requested-payload",
+        "passed": true,
+        "observed_sizes": [
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8
+        ],
+        "expected_sizes": [
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8
+        ]
+      },
+      {
+        "check": "exact-traced-product-set",
+        "passed": true
+      }
+    ],
+    "observed": {
+      "streams": [
+        "1",
+        "2"
+      ],
+      "pci": [
+        "0000:23:00.0"
+      ],
+      "kernel_count": 84,
+      "runtime_kernel_count": 66,
+      "overlapping_kernel_pairs": 25,
+      "kernels": {
+        "__amd_rocclr_copyBuffer": 54,
+        "image_jpeg_wide::rgb_to_plane(unsigned char const*, unsigned char*, int, int, int, int, int, int)": 18,
+        "image_jpeg_wide::forward_dct_quantize(unsigned char const*, unsigned short const*, float const*, short*, int, int, int, int)": 18,
+        "__amd_rocclr_fillBufferUnAligned": 12,
+        "image_jpeg_wide::gather_mcu_coefficients(short const*, short const*, short const*, short*, int*, unsigned char*, int, int, int, int, int, int, int)": 6,
+        "encode_blocks(short const*, int const*, unsigned char const*, Code const*, Code const*, unsigned char*, unsigned short*, int)": 6,
+        "void image_jpeg_serial_prefix::serial<unsigned short, false>(unsigned short const*, unsigned int*, image_jpeg_checked_prefix::Result*, unsigned int)": 6,
+        "pack_bytes(unsigned char const*, unsigned int const*, unsigned char*, int, unsigned int, unsigned int)": 6,
+        "void image_jpeg_checked_prefix::finish<true>(unsigned int*, unsigned int const*, image_jpeg_checked_prefix::Result const*, unsigned int)": 6,
+        "void image_jpeg_checked_prefix::bases<true>(unsigned int const*, unsigned int*, image_jpeg_checked_prefix::Result*, unsigned int, unsigned int)": 6,
+        "void image_jpeg_checked_prefix::tiles<unsigned char, true>(unsigned char const*, unsigned int*, unsigned int*, image_jpeg_checked_prefix::Result*, unsigned int)": 6,
+        "scatter_stuff(unsigned char const*, unsigned int const*, unsigned char*, unsigned int)": 6
+      },
+      "copy_argument_receipts": [
+        {
+          "kind": 1,
+          "bytes": 969,
+          "stream": "0x5dcfc0b9aa20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 256,
+          "stream": "0x5dcfc0b9aa20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5dcfc0b9aa20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5dcfc0b9aa20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5dcfc0b9aa20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x5dcfc0b9aa20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x5dcfc0b9aa20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x5dcfc0b9aa20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 969,
+          "stream": "0x5dcfc0ccd990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 256,
+          "stream": "0x5dcfc0ccd990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5dcfc0ccd990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5dcfc0ccd990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5dcfc0ccd990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x5dcfc0ccd990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x5dcfc0ccd990",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x5dcfc0ccd990",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x5dcfc0b9aa20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x5dcfc0ccd990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 969,
+          "stream": "0x5dcfc0b9aa20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 256,
+          "stream": "0x5dcfc0b9aa20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5dcfc0b9aa20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5dcfc0b9aa20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5dcfc0b9aa20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x5dcfc0b9aa20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x5dcfc0b9aa20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x5dcfc0b9aa20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 969,
+          "stream": "0x5dcfc0ccd990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 256,
+          "stream": "0x5dcfc0ccd990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5dcfc0ccd990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5dcfc0ccd990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5dcfc0ccd990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x5dcfc0ccd990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x5dcfc0ccd990",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x5dcfc0ccd990",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x5dcfc0b9aa20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 969,
+          "stream": "0x5dcfc0b9aa20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 256,
+          "stream": "0x5dcfc0b9aa20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5dcfc0b9aa20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5dcfc0b9aa20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5dcfc0b9aa20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x5dcfc0b9aa20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x5dcfc0b9aa20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x5dcfc0b9aa20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x5dcfc0ccd990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 969,
+          "stream": "0x5dcfc0ccd990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 256,
+          "stream": "0x5dcfc0ccd990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5dcfc0ccd990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5dcfc0ccd990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5dcfc0ccd990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x5dcfc0ccd990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x5dcfc0ccd990",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x5dcfc0ccd990",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x5dcfc0b9aa20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x5dcfc0ccd990",
+          "rc": 0
+        }
+      ]
+    },
+    "scope": "Component trace; overlap measured. Device-only copy rows retained for exact metadata-versus-payload analysis.",
+    "experiment_id": "20261113T054735.845185Z-I5-rocm-trace-a92ff9f13d",
+    "evidence": "migration/reports/evidence/rewrite/I5/async-JPEG-slot-trace/20261113T054735.845185Z-I5-rocm-trace-a92ff9f13d"
+  },
+  {
+    "case": "device-only-1",
+    "status": "PASSED",
+    "checks": [
+      {
+        "check": "profiler-success",
+        "passed": true
+      },
+      {
+        "check": "one-kernel-agent-and-optional-DMA-copy-table",
+        "passed": true
+      },
+      {
+        "check": "six-images-two-streams-all-pipeline-kernels-on-GPU1",
+        "passed": true,
+        "kernel_count": 90,
+        "expected": 90
+      },
+      {
+        "check": "actual-D2H-is-exact-metadata-plus-only-requested-payload",
+        "passed": true,
+        "observed_sizes": [
+          4096,
+          4,
+          4096,
+          4,
+          8,
+          8,
+          8,
+          8,
+          4096,
+          4,
+          4096,
+          4,
+          8,
+          8,
+          8,
+          8,
+          4096,
+          4,
+          4096,
+          4,
+          8,
+          8,
+          8,
+          8
+        ],
+        "expected_sizes": [
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          4096,
+          4,
+          4096,
+          4,
+          4096,
+          4,
+          4096,
+          4,
+          4096,
+          4,
+          4096,
+          4
+        ]
+      },
+      {
+        "check": "exact-traced-product-set",
+        "passed": true
+      }
+    ],
+    "observed": {
+      "streams": [
+        "1",
+        "2"
+      ],
+      "pci": [
+        "0000:23:00.0"
+      ],
+      "kernel_count": 90,
+      "runtime_kernel_count": 90,
+      "overlapping_kernel_pairs": 8,
+      "kernels": {
+        "__amd_rocclr_copyBuffer": 66,
+        "image_jpeg_wide::rgb_to_plane(unsigned char const*, unsigned char*, int, int, int, int, int, int)": 18,
+        "image_jpeg_wide::forward_dct_quantize(unsigned char const*, unsigned short const*, float const*, short*, int, int, int, int)": 18,
+        "image_jpeg_wide::gather_mcu_coefficients(short const*, short const*, short const*, short*, int*, unsigned char*, int, int, int, int, int, int, int)": 6,
+        "__amd_rocclr_fillBufferUnAligned": 24,
+        "image_jpeg_opt::histogram(short const*, int const*, unsigned char const*, unsigned int*, unsigned int*, int)": 6,
+        "encode_blocks(short const*, int const*, unsigned char const*, Code const*, Code const*, unsigned char*, unsigned short*, int)": 6,
+        "void image_jpeg_serial_prefix::serial<unsigned short, false>(unsigned short const*, unsigned int*, image_jpeg_checked_prefix::Result*, unsigned int)": 6,
+        "pack_bytes(unsigned char const*, unsigned int const*, unsigned char*, int, unsigned int, unsigned int)": 6,
+        "void image_jpeg_checked_prefix::finish<true>(unsigned int*, unsigned int const*, image_jpeg_checked_prefix::Result const*, unsigned int)": 6,
+        "void image_jpeg_checked_prefix::bases<true>(unsigned int const*, unsigned int*, image_jpeg_checked_prefix::Result*, unsigned int, unsigned int)": 6,
+        "void image_jpeg_checked_prefix::tiles<unsigned char, true>(unsigned char const*, unsigned int*, unsigned int*, image_jpeg_checked_prefix::Result*, unsigned int)": 6,
+        "scatter_stuff(unsigned char const*, unsigned int const*, unsigned char*, unsigned int)": 6
+      },
+      "copy_argument_receipts": [
+        {
+          "kind": 1,
+          "bytes": 969,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 256,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 4096,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 4,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 969,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 256,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 4096,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 4,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 969,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 256,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 4096,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 4,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 969,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 256,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 4096,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 4,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 969,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 256,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 4096,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 4,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 969,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 256,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 128,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 4096,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 4,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 1,
+          "bytes": 3072,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x5fb5d3b98a20",
+          "rc": 0
+        },
+        {
+          "kind": 2,
+          "bytes": 8,
+          "stream": "0x5fb5d3ccb990",
+          "rc": 0
+        }
+      ]
+    },
+    "scope": "Component trace; overlap measured. Device-only copy rows retained for exact metadata-versus-payload analysis.",
+    "experiment_id": "20261113T054738.893521Z-I5-rocm-trace-657ad1e2c3",
+    "evidence": "migration/reports/evidence/rewrite/I5/async-JPEG-slot-trace/20261113T054738.893521Z-I5-rocm-trace-657ad1e2c3"
+  }
+]

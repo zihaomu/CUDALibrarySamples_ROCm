@@ -1,0 +1,1 @@
+Test native-original for encoder-math-quality-original-entry, case math-natural-img5-q50-s2-opt0. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: none.

@@ -1,0 +1,1 @@
+Test rocm-probe for encoder-mathematical-transform-arrays, case math-gradient-q100-s2-opt0. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: none.

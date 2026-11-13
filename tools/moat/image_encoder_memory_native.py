@@ -24,7 +24,7 @@ result=dict(tables=tables,files={p.name:dict(path=str(p),bytes=p.stat().st_size,
 
 def main():
     profile=ROOT/'migration/rewrite/image-encoder-performance-profile.json';p=json.loads(profile.read_text())
-    report=ROOT/'migration/reports/image-encoder-performance-native.json';timings=json.loads(report.read_text())
+    report=ROOT/'migration/reports/image-encoder-performance-v2-native.json';timings=json.loads(report.read_text())
     if [r['case'] for r in timings]!=[c['id'] for c in p['cases']]:raise ValueError('complete native timing set required')
     rows=[]
     for case,timing in zip(p['cases'],timings):

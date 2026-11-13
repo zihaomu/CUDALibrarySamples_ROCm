@@ -1,0 +1,56 @@
+[
+  {
+    "command_id": 1,
+    "phase": "prepare-native-inputs",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "mkdir -p /tmp/image-quality-20261113T052808.667158Z-I5-cuda-prepare-752c04fb05"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-13T05:28:09.507785+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0001-prepare-native-inputs.stdout.log",
+    "stderr": "logs/0001-prepare-native-inputs.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-13T05:28:09.823405+00:00",
+    "seconds": 0.3150049690157175
+  },
+  {
+    "command_id": 2,
+    "phase": "upload-frozen-BMPs",
+    "argv": [
+      "scp",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/encoder-math-native-inputs/20261113T052808.667158Z-I5-cuda-prepare-752c04fb05/inputs.tar",
+      "nvidia-5090x2:/tmp/image-quality-20261113T052808.667158Z-I5-cuda-prepare-752c04fb05/inputs.tar"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-13T05:28:09.824865+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0002-upload-frozen-BMPs.stdout.log",
+    "stderr": "logs/0002-upload-frozen-BMPs.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-13T05:28:10.141209+00:00",
+    "seconds": 0.31561412499286234
+  },
+  {
+    "command_id": 3,
+    "phase": "extract-frozen-BMPs",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "tar xf /tmp/image-quality-20261113T052808.667158Z-I5-cuda-prepare-752c04fb05/inputs.tar -C /tmp/image-quality-20261113T052808.667158Z-I5-cuda-prepare-752c04fb05"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-13T05:28:10.142855+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0003-extract-frozen-BMPs.stdout.log",
+    "stderr": "logs/0003-extract-frozen-BMPs.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-13T05:28:10.459384+00:00",
+    "seconds": 0.3155922559672035
+  }
+]

@@ -1,0 +1,149 @@
+{
+  "case": "medium-device-standard",
+  "status": "OBSERVED",
+  "checks": [
+    {
+      "check": "actual-ROCm-profile",
+      "passed": true
+    },
+    {
+      "check": "allocation-events-present",
+      "passed": true
+    },
+    {
+      "check": "actual-kernels-on-physical-GPU1",
+      "passed": true
+    }
+  ],
+  "tables": {
+    "351_agent_info.csv": {
+      "rows": 16,
+      "columns": [
+        "Node_Id",
+        "Logical_Node_Id",
+        "Agent_Type",
+        "Cpu_Cores_Count",
+        "Simd_Count",
+        "Cpu_Core_Id_Base",
+        "Simd_Id_Base",
+        "Max_Waves_Per_Simd",
+        "Lds_Size_In_Kb",
+        "Gds_Size_In_Kb",
+        "Num_Gws",
+        "Wave_Front_Size",
+        "Num_Xcc",
+        "Cu_Count",
+        "Array_Count",
+        "Num_Shader_Banks",
+        "Simd_Arrays_Per_Engine",
+        "Cu_Per_Simd_Array",
+        "Simd_Per_Cu",
+        "Max_Slots_Scratch_Cu",
+        "Gfx_Target_Version",
+        "Vendor_Id",
+        "Device_Id",
+        "Location_Id",
+        "Domain",
+        "Drm_Render_Minor",
+        "Num_Sdma_Engines",
+        "Num_Sdma_Xgmi_Engines",
+        "Num_Sdma_Queues_Per_Engine",
+        "Num_Cp_Queues",
+        "Max_Engine_Clk_Ccompute",
+        "Max_Engine_Clk_Fcompute",
+        "Sdma_Fw_Version",
+        "Fw_Version",
+        "Capability",
+        "Cu_Per_Engine",
+        "Max_Waves_Per_Cu",
+        "Family_Id",
+        "Workgroup_Max_Size",
+        "Grid_Max_Size",
+        "Local_Mem_Size",
+        "Hive_Id",
+        "Gpu_Id",
+        "Workgroup_Max_Dim_X",
+        "Workgroup_Max_Dim_Y",
+        "Workgroup_Max_Dim_Z",
+        "Grid_Max_Dim_X",
+        "Grid_Max_Dim_Y",
+        "Grid_Max_Dim_Z",
+        "Name",
+        "Vendor_Name",
+        "Product_Name",
+        "Model_Name"
+      ]
+    },
+    "351_hip_api_trace.csv": {
+      "rows": 15477,
+      "columns": [
+        "Domain",
+        "Function",
+        "Process_Id",
+        "Thread_Id",
+        "Correlation_Id",
+        "Start_Timestamp",
+        "End_Timestamp"
+      ]
+    },
+    "351_kernel_trace.csv": {
+      "rows": 1836,
+      "columns": [
+        "Kind",
+        "Agent_Id",
+        "Queue_Id",
+        "Stream_Id",
+        "Thread_Id",
+        "Dispatch_Id",
+        "Kernel_Id",
+        "Kernel_Name",
+        "Correlation_Id",
+        "Start_Timestamp",
+        "End_Timestamp",
+        "LDS_Block_Size",
+        "Scratch_Size",
+        "VGPR_Count",
+        "Accum_VGPR_Count",
+        "SGPR_Count",
+        "Workgroup_Size_X",
+        "Workgroup_Size_Y",
+        "Workgroup_Size_Z",
+        "Grid_Size_X",
+        "Grid_Size_Y",
+        "Grid_Size_Z"
+      ]
+    },
+    "351_memory_allocation_trace.csv": {
+      "rows": 274,
+      "columns": [
+        "Kind",
+        "Operation",
+        "Agent_Id",
+        "Allocation_Size",
+        "Address",
+        "Correlation_Id",
+        "Start_Timestamp",
+        "End_Timestamp"
+      ]
+    },
+    "351_memory_copy_trace.csv": {
+      "rows": 4,
+      "columns": [
+        "Kind",
+        "Direction",
+        "Stream_Id",
+        "Source_Agent_Id",
+        "Destination_Agent_Id",
+        "Correlation_Id",
+        "Start_Timestamp",
+        "End_Timestamp"
+      ]
+    }
+  },
+  "binary_sha256": "b9bf0c86844dca981dfa3d5f4f7a1d08a2544afc4bf92f6302413e3f56af2d42",
+  "evidence_references": [
+    "migration/reports/evidence/rewrite/I5/encoder-unprofiled-end-to-end/20261113T055228.189883Z-I5-amd-original-2744a0daa5",
+    "migration/reports/evidence/rewrite/I5/async-original-encoder-candidate-build/20261113T054512.724819Z-I5-rocm-build-fa5f269177"
+  ],
+  "scope": "Allocation events and actual device identity; peak reconstruction separate, no profiled throughput used."
+}

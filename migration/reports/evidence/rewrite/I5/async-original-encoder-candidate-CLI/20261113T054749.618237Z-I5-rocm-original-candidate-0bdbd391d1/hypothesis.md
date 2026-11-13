@@ -1,0 +1,1 @@
+Test rocm-original-candidate for async-original-encoder-candidate-CLI, case quality-clamp-low. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261113T054512.724819Z-I5-rocm-build-fa5f269177.

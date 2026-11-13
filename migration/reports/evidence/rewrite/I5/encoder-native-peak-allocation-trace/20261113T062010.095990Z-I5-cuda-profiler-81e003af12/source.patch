@@ -1,0 +1,26 @@
+diff --git a/tools/moat/image_encoder_memory_amd.py b/tools/moat/image_encoder_memory_amd.py
+index 52203ce6f..fd7e00e33 100644
+--- a/tools/moat/image_encoder_memory_amd.py
++++ b/tools/moat/image_encoder_memory_amd.py
+@@ -8,7 +8,7 @@ from image_encoder_math_binding import sealed
+ def main():
+     from snapshot import capture
+     profile=ROOT/'migration/rewrite/image-encoder-performance-profile.json';p=json.loads(profile.read_text())
+-    report=ROOT/'migration/reports/image-encoder-performance-amd.json';timings=json.loads(report.read_text())
++    report=ROOT/'migration/reports/image-encoder-performance-v2-amd.json';timings=json.loads(report.read_text())
+     bp=ROOT/'migration/reports/image-encoder-instances-v2-build.json';build=json.loads(bp.read_text());sealed(build,'build.json')
+     if [r['case'] for r in timings]!=[c['id'] for c in p['cases']] or any(digest(ROOT/n)!=h for n,h in build['dependencies'].items()):raise ValueError('current complete timing/build required')
+     rows=[]
+diff --git a/tools/moat/image_encoder_memory_native.py b/tools/moat/image_encoder_memory_native.py
+index 20dff3683..b0a67b2da 100644
+--- a/tools/moat/image_encoder_memory_native.py
++++ b/tools/moat/image_encoder_memory_native.py
+@@ -24,7 +24,7 @@ result=dict(tables=tables,files={p.name:dict(path=str(p),bytes=p.stat().st_size,
+ 
+ def main():
+     profile=ROOT/'migration/rewrite/image-encoder-performance-profile.json';p=json.loads(profile.read_text())
+-    report=ROOT/'migration/reports/image-encoder-performance-native.json';timings=json.loads(report.read_text())
++    report=ROOT/'migration/reports/image-encoder-performance-v2-native.json';timings=json.loads(report.read_text())
+     if [r['case'] for r in timings]!=[c['id'] for c in p['cases']]:raise ValueError('complete native timing set required')
+     rows=[]
+     for case,timing in zip(p['cases'],timings):

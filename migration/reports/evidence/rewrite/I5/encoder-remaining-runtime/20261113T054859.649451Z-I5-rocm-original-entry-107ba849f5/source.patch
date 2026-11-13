@@ -1,0 +1,183 @@
+diff --git a/rocm/common/image/jpeg_encoder_gpu.hpp b/rocm/common/image/jpeg_encoder_gpu.hpp
+index 30f4d9134..6fb65f404 100644
+--- a/rocm/common/image/jpeg_encoder_gpu.hpp
++++ b/rocm/common/image/jpeg_encoder_gpu.hpp
+@@ -39,26 +39,28 @@ __device__ inline unsigned char byte(float value) {
+   return static_cast<unsigned char>(integer < 0 ? 0 : integer > 255 ? 255 : integer);
+ }
+ 
+-__global__ void rgb_to_plane(const unsigned char* rgb, unsigned char* plane,
+-                             int image_width, int image_height, int plane_width,
+-                             int plane_height, int channel, int sampling) {
+-  int index = blockIdx.x * blockDim.x + threadIdx.x;
+-  if (index >= plane_width * plane_height) return;
+-  int x = index % plane_width, y = index / plane_width;
+-  int scale = channel == 0 ? 1 : sampling;
+-  float total = 0.0f;
+-  for (int dy = 0; dy < scale; ++dy) {
+-    for (int dx = 0; dx < scale; ++dx) {
+-      int sx = x * scale + dx < image_width ? x * scale + dx : image_width - 1;
+-      int sy = y * scale + dy < image_height ? y * scale + dy : image_height - 1;
+-      const unsigned char* color = rgb + (size_t(sy) * image_width + sx) * 3;
+-      float r = color[0], g = color[1], b = color[2];
+-      total += channel == 0 ? 0.299f*r + 0.587f*g + 0.114f*b :
+-               channel == 1 ? 128.0f - 0.168736f*r - 0.331264f*g + 0.5f*b :
+-                              128.0f + 0.5f*r - 0.418688f*g - 0.081312f*b;
++__global__ void rgb_to_plane(const unsigned char* rgb,unsigned char* plane,
++    int width,int height,int pw,int ph,int channel,int sampling) {
++    const size_t index=size_t(blockIdx.x)*blockDim.x+threadIdx.x;
++    if(index>=size_t(pw)*ph)return;
++    const int x=int(index%pw),y=int(index/pw),scale=channel==0?1:sampling;
++    // The largest numerator is 255.5 * 1,000,000 * 4, below INT_MAX.
++    // Exact decimal weights prevent compiler FMA from moving half-integer ties.
++    int total=0;
++    for(int dy=0;dy<scale;++dy)for(int dx=0;dx<scale;++dx) {
++        const int sx=x*scale+dx<width?x*scale+dx:width-1;
++        const int sy=y*scale+dy<height?y*scale+dy:height-1;
++        const auto* color=rgb+(size_t(sy)*width+sx)*3;
++        const int r=color[0],g=color[1],b=color[2];
++        total+=channel==0?299000*r+587000*g+114000*b:
++               channel==1?128000000-168736*r-331264*g+500000*b:
++                          128000000+500000*r-418688*g-81312*b;
+     }
+-  }
+-  plane[index] = byte(total / float(scale * scale));
++    const int denominator=1000000*scale*scale;
++    int rounded=total/denominator;
++    const int twice_remainder=2*(total%denominator);
++    rounded+=twice_remainder>denominator || (twice_remainder==denominator && (rounded&1));
++    plane[index]=static_cast<unsigned char>(rounded<0?0:rounded>255?255:rounded);
+ }
+ 
+ __global__ void forward_dct_quantize(const unsigned char* plane, const unsigned short* quant,
+@@ -79,9 +81,12 @@ __global__ void forward_dct_quantize(const unsigned char* plane, const unsigned
+              cosine[x * 8 + u] * cosine[y * 8 + v];
+     }
+   }
+-  float normalizer = (u ? 1.0f : 0.7071067811865475f) *
+-                     (v ? 1.0f : 0.7071067811865475f) * 0.25f;
+-  coefficients[index] = static_cast<short>(__float2int_rn(sum * normalizer / quant[frequency]));
++  const float normalizer = (!u && !v) ? 0.125f :
++      (u ? 1.0f : 0.7071067811865475f) * (v ? 1.0f : 0.7071067811865475f) * 0.25f;
++  const float scaled = sum * normalizer / quant[frequency];
++  const int whole = __float2int_rz(scaled);
++  const float fraction = scaled - float(whole);
++  coefficients[index] = static_cast<short>(whole + (fraction >= 0.5f ? 1 : (fraction <= -0.5f ? -1 : 0)));
+ }
+ 
+ inline void encode(const std::vector<unsigned char>& rgb, int width, int height,
+diff --git a/rocm/common/image/jpeg_wide_transform.hpp b/rocm/common/image/jpeg_wide_transform.hpp
+index d1353704e..d1d1c7469 100644
+--- a/rocm/common/image/jpeg_wide_transform.hpp
++++ b/rocm/common/image/jpeg_wide_transform.hpp
+@@ -44,17 +44,23 @@ __global__ void rgb_to_plane(const unsigned char* rgb,unsigned char* plane,
+     const auto position=pixel_index(index,pw,ph);
+     if(!position.valid)return;
+     const int x=int(position.x),y=int(position.y),scale=channel==0?1:sampling;
+-    float total=0.0f;
++    // The largest numerator is 255.5 * 1,000,000 * 4, below INT_MAX.
++    // Exact decimal weights prevent compiler FMA from moving half-integer ties.
++    int total=0;
+     for(int dy=0;dy<scale;++dy)for(int dx=0;dx<scale;++dx) {
+         const int sx=x*scale+dx<width?x*scale+dx:width-1;
+         const int sy=y*scale+dy<height?y*scale+dy:height-1;
+         const auto* color=rgb+(size_t(sy)*width+sx)*3;
+-        const float r=color[0],g=color[1],b=color[2];
+-        total+=channel==0?0.299f*r+0.587f*g+0.114f*b:
+-               channel==1?128.0f-0.168736f*r-0.331264f*g+0.5f*b:
+-                          128.0f+0.5f*r-0.418688f*g-0.081312f*b;
++        const int r=color[0],g=color[1],b=color[2];
++        total+=channel==0?299000*r+587000*g+114000*b:
++               channel==1?128000000-168736*r-331264*g+500000*b:
++                          128000000+500000*r-418688*g-81312*b;
+     }
+-    plane[index]=image_jpeg_encoder::byte(total/float(scale*scale));
++    const int denominator=1000000*scale*scale;
++    int rounded=total/denominator;
++    const int twice_remainder=2*(total%denominator);
++    rounded+=twice_remainder>denominator || (twice_remainder==denominator && (rounded&1));
++    plane[index]=static_cast<unsigned char>(rounded<0?0:rounded>255?255:rounded);
+ }
+ 
+ __global__ void forward_dct_quantize(const unsigned char* plane,const unsigned short* quant,
+@@ -71,8 +77,10 @@ __global__ void forward_dct_quantize(const unsigned char* plane,const unsigned s
+             sum+=(float(plane[size_t(sy)*width+sx])-128.0f)*cosine[x*8+u]*cosine[y*8+v];
+         }
+     }
+-    const float normalizer=(u?1.0f:0.7071067811865475f)*(v?1.0f:0.7071067811865475f)*0.25f;
+-    coefficients[index]=static_cast<short>(__float2int_rn(sum*normalizer/quant[index%64]));
++    const float normalizer=(!u&&!v)?0.125f:(u?1.0f:0.7071067811865475f)*(v?1.0f:0.7071067811865475f)*0.25f;
++    const float scaled=sum*normalizer/quant[index%64];
++    const int whole=__float2int_rz(scaled);const float fraction=scaled-float(whole);
++    coefficients[index]=static_cast<short>(whole+(fraction>=0.5f?1:(fraction<=-0.5f?-1:0)));
+ }
+ 
+ __global__ void gather_mcu_coefficients(const short* y,const short* cb,const short* cr,
+diff --git a/tools/moat/image_encoder_rounding_candidate.py b/tools/moat/image_encoder_rounding_candidate.py
+index e4814e5d0..1ec721ebf 100644
+--- a/tools/moat/image_encoder_rounding_candidate.py
++++ b/tools/moat/image_encoder_rounding_candidate.py
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""Build an isolated ties-away FDCT candidate without changing published code."""
++"""Build an isolated exact-DC/ties-away candidate without changing published code."""
+ import argparse,json,shutil
+ from pathlib import Path
+ from experiment import ROOT,Experiment,digest,write
+@@ -12,7 +12,7 @@ def build():
+     from snapshot import capture
+     base=ROOT/'migration/reports/image-encoder-instances-v2-build.json';b=json.loads(base.read_text())
+     if any(digest(ROOT/n)!=h for n,h in b['dependencies'].items()):raise ValueError('current production sources required')
+-    folder=ROOT/'build/image-encoder-rounding-candidate';folder.mkdir(parents=True,exist_ok=True);copies=[]
++    folder=ROOT/'build/image-encoder-exact-DC-rounding-candidate';folder.mkdir(parents=True,exist_ok=True);copies=[]
+     for name in b['dependencies']:
+         if name.startswith('rocm/common/'):
+             source=ROOT/name;dest=folder/'common'/Path(name).relative_to('rocm/common');dest.parent.mkdir(parents=True,exist_ok=True)
+@@ -24,6 +24,9 @@ def build():
+     const int whole=__float2int_rz(scaled);const float fraction=scaled-float(whole);
+     coefficients[index]=static_cast<short>(whole+(fraction>=0.5f?1:(fraction<=-0.5f?-1:0)));'''
+                 data=data.replace(old,replacement)
++                normalizer='const float normalizer=(u?1.0f:0.7071067811865475f)*(v?1.0f:0.7071067811865475f)*0.25f;'
++                if data.count(normalizer)!=1:raise ValueError('unexpected DC normalizer')
++                data=data.replace(normalizer,'const float normalizer=(!u&&!v)?0.125f:(u?1.0f:0.7071067811865475f)*(v?1.0f:0.7071067811865475f)*0.25f;')
+             if dest.exists() and dest.read_text()!=data:raise ValueError('candidate source already exists with other contents')
+             dest.write_text(data);copies.append(dest)
+     source=ROOT/'rocm/ported/nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp'
+@@ -35,9 +38,9 @@ def build():
+         '--offload-arch=gfx1201','-std=c++17','-O2','-D__HIP_PLATFORM_AMD__','-I'+str(folder/'common'),'-I'+str(jpeg/'include'),'-x','hip',str(source),'-o',str(binary),
+         '-L'+str(core/'lib'),'-L'+str(jpeg/'lib'),'-Wl,-rpath,'+str(core/'lib'),'-Wl,-rpath,'+str(jpeg/'lib'),'-lamdhip64','-ljpeg'],'build-isolated-rounding-candidate')
+     row=dict(status='BUILT' if rc==0 else 'BUILD_ERROR',binary=str(binary.relative_to(ROOT)),binary_sha256=digest(binary) if binary.exists() else None,dependencies=deps,
+-        experiment_id=e.id,scope='Only FDCT quantization changes exact .5 ties from nearest-even to away-from-zero; truncation plus fractional comparison avoids adding 0.5 rounding near ties. Production tree unchanged.')
++        experiment_id=e.id,scope='DC normalizer is exact 1/8; FDCT quantization rounds exact .5 ties away from zero. Truncation plus fractional comparison avoids adding 0.5 rounding near ties. Other-frequency normalization and production tree unchanged.')
+     write(e.path/'build.json',row);row['evidence']=e.finish('EXECUTED' if rc==0 else 'BUILD_ERROR');write(BUILD,row)
+-    record('IMG-01','独立FDCT舍入候选构建：'+row['status']+'；仅量化半整数ties改为远离零，当前正式实现保持不变，先验证已冻结矩阵。',[row['evidence']]);print(row['status']);return int(rc!=0)
++    record('IMG-01','第二独立FDCT候选构建：'+row['status']+'；DC使用精确1/8、半整数ties远离零，当前正式实现保持不变，先验证已冻结矩阵和DC边界。',[row['evidence']]);print(row['status']);return int(rc!=0)
+ 
+ def run():
+     from snapshot import capture
+diff --git a/tools/moat/image_encoder_rounding_compare.py b/tools/moat/image_encoder_rounding_compare.py
+index 0bc8f43bb..4e4d6d211 100644
+--- a/tools/moat/image_encoder_rounding_compare.py
++++ b/tools/moat/image_encoder_rounding_compare.py
+@@ -13,8 +13,10 @@ def main(selected=None):
+     reports=[ROOT/'migration/reports'/n for n in names];candidate,cpu,native=[json.loads(p.read_text()) for p in reports]
+     p=json.loads(PROFILE.read_text());lock=json.loads(LOCK.read_text());expected={k:v for k,v in lock.items() if k!='evidence'}
+     if identity()!=expected:raise ValueError('CPU identity drift')
+-    for group in [candidate,cpu,native]:
+-        if [r['case'] for r in group]!=[c['id'] for c in p['cases']] or len(group)!=80:raise ValueError('full matrix required')
++    if selected and (len(selected)!=len(set(selected)) or not set(selected)<={r['case'] for r in candidate}):raise ValueError('selected cases must be unique and present')
++    for number,group in enumerate([candidate,cpu,native]):
++        count=len(group) if selected and number==0 else 80
++        if not 0<count<=80 or len(group)!=count or [r['case'] for r in group]!=[c['id'] for c in p['cases'][:count]]:raise ValueError('complete matrix or explicitly selected frozen prefix required')
+         for row in group:
+             directory=ROOT/row['evidence']
+             if audit_check(directory) or json.loads((directory/'result.json').read_text())!={k:v for k,v in row.items() if k!='evidence'}:raise ValueError('report not sealed')
+@@ -42,7 +44,7 @@ def main(selected=None):
+         status='PASSED' if checks and all(c['passed'] for c in checks) else 'FAILED';row=dict(case=case['id'],status=status,checks=checks,metrics=data,decoded_sha256=decoded,evidence_references=[r['evidence'] for r in [a,c,n]],experiment_id=e.id)
+         write(e.path/'result.json',row);row['evidence']=e.finish('PASSED' if status=='PASSED' else 'NUMERIC_MISMATCH',dict(status=status,checks=checks));results.append(row);write(ROOT/'migration/reports/image-encoder-rounding-candidate-comparison.json',results)
+         record('IMG-01','独立舍入候选三方比较 '+case['id']+'：'+status+'；使用原冻结质量预算和既有CPU/native产品，未签发生产资格。',[row['evidence']]);print(case['id'],status,flush=True)
+-    return int(any(r['status']!='PASSED' for r in results))
++    return int(not results or any(r['status']!='PASSED' for r in results))
+ 
+ if __name__=='__main__':
+     parser=argparse.ArgumentParser();parser.add_argument('--case',action='append');args=parser.parse_args();raise SystemExit(main(args.case))

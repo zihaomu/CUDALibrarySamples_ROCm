@@ -1,0 +1,1 @@
+Test CPU-reference for encoder-historical-mathematical-quality, case heldout-gradient-q80-s1-opt1. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: none.

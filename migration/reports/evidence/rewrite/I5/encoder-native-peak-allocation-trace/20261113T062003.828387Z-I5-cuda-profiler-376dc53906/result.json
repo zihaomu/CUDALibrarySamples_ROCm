@@ -1,0 +1,64 @@
+{
+  "case": "medium-write-optimized",
+  "status": "OBSERVED",
+  "checks": [
+    {
+      "check": "profile-and-export",
+      "passed": true
+    },
+    {
+      "check": "actual-GPU1-and-event-file",
+      "passed": true
+    },
+    {
+      "check": "allocation-events-present",
+      "passed": true
+    }
+  ],
+  "tables": {
+    "CUDA_GPU_MEMORY_USAGE_EVENTS": {
+      "rows": 84,
+      "schema": "CREATE TABLE CUDA_GPU_MEMORY_USAGE_EVENTS (\n    start                       INTEGER   NOT NULL,                    -- Event start timestamp (ns).\n    globalPid                   INTEGER   NOT NULL,                    -- Serialized GlobalId.\n    deviceId                    INTEGER   NOT NULL,                    -- Device ID.\n    contextId                   INTEGER   NOT NULL,                    -- Context ID.\n    address                     INTEGER   NOT NULL,                    -- Virtual address of the allocation/deallocation.\n    pc                          INTEGER   NOT NULL,                    -- Program counter of the allocation/deallocation.\n    bytes                       INTEGER   NOT NULL,                    -- Number of bytes allocated/deallocated (B).\n    memKind                     INTEGER   NOT NULL,                    -- REFERENCES ENUM_CUDA_MEM_KIND(id)\n    memoryOperationType         INTEGER   NOT NULL,                    -- REFERENCES ENUM_CUDA_DEV_MEM_EVENT_OPER(id)\n    name                        TEXT,                                  -- Variable name, if available.\n    correlationId               INTEGER,                               -- REFERENCES CUPTI_ACTIVITY_KIND_RUNTIME(correlationId)\n    streamId                    INTEGER,                               -- Stream ID.\n    localMemoryPoolAddress      INTEGER,                               -- Base address of the local memory pool used\n    localMemoryPoolReleaseThreshold   INTEGER,                         -- Release threshold of the local memory pool used\n    localMemoryPoolSize         INTEGER,                               -- Size of the local memory pool used\n    localMemoryPoolUtilizedSize   INTEGER,                             -- Utilized size of the local memory pool used\n    importedMemoryPoolAddress   INTEGER,                               -- Base address of the imported memory pool used\n    importedMemoryPoolProcessId   INTEGER                              -- Process ID of the imported memory pool used\n)"
+    },
+    "CUDA_GPU_MEMORY_POOL_EVENTS": {
+      "rows": 1,
+      "schema": "CREATE TABLE CUDA_GPU_MEMORY_POOL_EVENTS (\n    start                       INTEGER   NOT NULL,                    -- Event start timestamp (ns).\n    globalPid                   INTEGER   NOT NULL,                    -- Serialized GlobalId.\n    deviceId                    INTEGER   NOT NULL,                    -- Device ID.\n    address                     INTEGER   NOT NULL,                    -- The base virtual address of the memory pool.\n    operationType               INTEGER   NOT NULL,                    -- REFERENCES ENUM_CUDA_MEMPOOL_OPER(id)\n    poolType                    INTEGER   NOT NULL,                    -- REFERENCES ENUM_CUDA_MEMPOOL_TYPE(id)\n    correlationId               INTEGER,                               -- REFERENCES CUPTI_ACTIVITY_KIND_RUNTIME(correlationId)\n    minBytesToKeep              INTEGER,                               -- Minimum number of bytes to keep of the memory pool.\n    localMemoryPoolReleaseThreshold   INTEGER,                         -- Release threshold of the local memory pool used\n    localMemoryPoolSize         INTEGER,                               -- Size of the local memory pool used\n    localMemoryPoolUtilizedSize   INTEGER                              -- Utilized size of the local memory pool used\n)"
+    },
+    "ENUM_CUDA_MEMCPY_OPER": {
+      "rows": 14,
+      "schema": "CREATE TABLE ENUM_CUDA_MEMCPY_OPER (\n    -- CUDA memcpy operation labels\n\n    id                          INTEGER   NOT NULL   PRIMARY KEY,      -- Enum numerical value.\n    name                        TEXT,                                  -- Enum symbol name.\n    label                       TEXT                                   -- Enum human name.\n)"
+    },
+    "ENUM_CUDA_MEM_KIND": {
+      "rows": 8,
+      "schema": "CREATE TABLE ENUM_CUDA_MEM_KIND (\n    -- CUDA memory kind labels\n\n    id                          INTEGER   NOT NULL   PRIMARY KEY,      -- Enum numerical value.\n    name                        TEXT,                                  -- Enum symbol name.\n    label                       TEXT                                   -- Enum human name.\n)"
+    },
+    "ENUM_CUDA_MEMPOOL_TYPE": {
+      "rows": 3,
+      "schema": "CREATE TABLE ENUM_CUDA_MEMPOOL_TYPE (\n    -- CUDA mempool type labels\n\n    id                          INTEGER   NOT NULL   PRIMARY KEY,      -- Enum numerical value.\n    name                        TEXT,                                  -- Enum symbol name.\n    label                       TEXT                                   -- Enum human name.\n)"
+    },
+    "ENUM_CUDA_MEMPOOL_OPER": {
+      "rows": 4,
+      "schema": "CREATE TABLE ENUM_CUDA_MEMPOOL_OPER (\n    -- CUDA mempool operation labels\n\n    id                          INTEGER   NOT NULL   PRIMARY KEY,      -- Enum numerical value.\n    name                        TEXT,                                  -- Enum symbol name.\n    label                       TEXT                                   -- Enum human name.\n)"
+    },
+    "ENUM_CUDA_DEV_MEM_EVENT_OPER": {
+      "rows": 2,
+      "schema": "CREATE TABLE ENUM_CUDA_DEV_MEM_EVENT_OPER (\n    -- CUDA device mem event operation labels\n\n    id                          INTEGER   NOT NULL   PRIMARY KEY,      -- Enum numerical value.\n    name                        TEXT,                                  -- Enum symbol name.\n    label                       TEXT                                   -- Enum human name.\n)"
+    },
+    "ENUM_CUDA_SHARED_MEM_LIMIT_CONFIG": {
+      "rows": 2,
+      "schema": "CREATE TABLE ENUM_CUDA_SHARED_MEM_LIMIT_CONFIG (\n    -- CUDA shared memory limit config labels\n\n    id                          INTEGER   NOT NULL   PRIMARY KEY,      -- Enum numerical value.\n    name                        TEXT,                                  -- Enum symbol name.\n    label                       TEXT                                   -- Enum human name.\n)"
+    },
+    "ENUM_CUDA_UNIF_MEM_MIGRATION": {
+      "rows": 6,
+      "schema": "CREATE TABLE ENUM_CUDA_UNIF_MEM_MIGRATION (\n    -- CUDA unified memory migration cause labels\n\n    id                          INTEGER   NOT NULL   PRIMARY KEY,      -- Enum numerical value.\n    name                        TEXT,                                  -- Enum symbol name.\n    label                       TEXT                                   -- Enum human name.\n)"
+    },
+    "ENUM_CUDA_UNIF_MEM_ACCESS_TYPE": {
+      "rows": 5,
+      "schema": "CREATE TABLE ENUM_CUDA_UNIF_MEM_ACCESS_TYPE (\n    -- CUDA unified memory access type labels\n\n    id                          INTEGER   NOT NULL   PRIMARY KEY,      -- Enum numerical value.\n    name                        TEXT,                                  -- Enum symbol name.\n    label                       TEXT                                   -- Enum human name.\n)"
+    }
+  },
+  "evidence_references": [
+    "migration/reports/evidence/rewrite/I5/encoder-unprofiled-end-to-end/20261113T060410.530417Z-I5-cuda-original-9c748c1b4c"
+  ],
+  "scope": "Raw Nsight allocation evidence. Peak reconstruction and coverage validation separate; no profiled throughput used."
+}

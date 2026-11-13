@@ -1,0 +1,870 @@
+{
+  "case": "color-edges-q100-s2-opt1",
+  "status": "PASSED",
+  "acceptance": "ALGORITHM_VARIANT",
+  "checks": [
+    {
+      "check": "actual-CPU-reference-identity",
+      "passed": true
+    },
+    {
+      "check": "complete-frozen-source-identity",
+      "passed": true
+    },
+    {
+      "check": "geometry-sampling-DQT-baseline-exact",
+      "passed": true
+    },
+    {
+      "check": "cpu-source-channel-MSE",
+      "passed": true
+    },
+    {
+      "check": "cpu-source-channel-global-SSIM",
+      "passed": true
+    },
+    {
+      "check": "native-source-channel-MSE",
+      "passed": true
+    },
+    {
+      "check": "native-source-channel-global-SSIM",
+      "passed": true
+    },
+    {
+      "check": "independent-full-coefficient-read-zero-warnings",
+      "passed": true
+    },
+    {
+      "check": "actual-loaded-libjpeg-matches-bound-path-and-SHA",
+      "passed": true,
+      "observed": [
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/cpu-codecs/lib/libjpeg.so.62"
+      ],
+      "expected_path": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/cpu-codecs/lib/libjpeg.so.62.4.0",
+      "expected_sha256": "d3dee37946d3b526cd19c49b1d535047b20e2c19d0edd3cf6782e257680b7466"
+    },
+    {
+      "check": "strict-frame-dimensions",
+      "passed": true
+    },
+    {
+      "check": "all-color-pixels-exact-0",
+      "passed": true,
+      "pixels": 4095
+    },
+    {
+      "check": "complete-JPEG-valid-coefficients-exact-GPU-0",
+      "passed": true,
+      "coefficients": 4608
+    },
+    {
+      "check": "every-coefficient-independent-mathematics-0",
+      "passed": true
+    },
+    {
+      "check": "independent-parser-DQT-0",
+      "passed": true
+    },
+    {
+      "check": "all-color-pixels-exact-1",
+      "passed": true,
+      "pixels": 1056
+    },
+    {
+      "check": "complete-JPEG-valid-coefficients-exact-GPU-1",
+      "passed": true,
+      "coefficients": 1280
+    },
+    {
+      "check": "every-coefficient-independent-mathematics-1",
+      "passed": true
+    },
+    {
+      "check": "independent-parser-DQT-1",
+      "passed": true
+    },
+    {
+      "check": "all-color-pixels-exact-2",
+      "passed": true,
+      "pixels": 1056
+    },
+    {
+      "check": "complete-JPEG-valid-coefficients-exact-GPU-2",
+      "passed": true,
+      "coefficients": 1280
+    },
+    {
+      "check": "every-coefficient-independent-mathematics-2",
+      "passed": true
+    },
+    {
+      "check": "independent-parser-DQT-2",
+      "passed": true
+    },
+    {
+      "check": "complete-MCU-positions-and-zero-padding-coefficients",
+      "passed": true,
+      "blocks": 120,
+      "dummy_blocks": 8
+    }
+  ],
+  "tile_diagnostics": [
+    {
+      "check": "cpu-source-every-tile-MSE",
+      "passed": true
+    },
+    {
+      "check": "native-source-every-tile-MSE",
+      "passed": true
+    }
+  ],
+  "metrics": {
+    "cpu": {
+      "pairwise": {
+        "channel_mse": [
+          0.08351648351648351,
+          0.045177045177045176,
+          0.19267399267399268
+        ],
+        "channel_psnr": [
+          58.91308160908213,
+          61.58162538561334,
+          55.28257263754927
+        ],
+        "channel_global_ssim": [
+          0.9999967452212974,
+          0.9999983797155241,
+          0.9999924184465996
+        ],
+        "max_abs": 3,
+        "channel_p99_abs": [
+          2.0,
+          1.0,
+          2.0
+        ]
+      },
+      "candidate_tile_mse": [
+        [
+          1397.740234375,
+          537.681640625,
+          2909.083984375
+        ],
+        [
+          1617.8974609375,
+          433.177734375,
+          1751.03515625
+        ],
+        [
+          3370.78125,
+          823.375,
+          580.0
+        ],
+        [
+          1395.4979838709678,
+          370.09475806451616,
+          2142.9133064516127
+        ],
+        [
+          1231.508064516129,
+          464.38709677419354,
+          1660.7459677419354
+        ],
+        [
+          2007.8709677419354,
+          804.6129032258065,
+          11410.709677419354
+        ]
+      ],
+      "reference_tile_mse": [
+        [
+          1398.642578125,
+          537.2958984375,
+          2908.76953125
+        ],
+        [
+          1614.9921875,
+          432.228515625,
+          1753.4658203125
+        ],
+        [
+          3370.78125,
+          823.375,
+          586.34375
+        ],
+        [
+          1394.7852822580646,
+          369.4233870967742,
+          2142.732862903226
+        ],
+        [
+          1232.163306451613,
+          464.695564516129,
+          1660.7016129032259
+        ],
+        [
+          2007.8709677419354,
+          804.6129032258065,
+          11434.709677419354
+        ]
+      ]
+    },
+    "native": {
+      "pairwise": {
+        "channel_mse": [
+          0.053235653235653234,
+          0.029792429792429794,
+          0.1054945054945055
+        ],
+        "channel_psnr": [
+          60.868777733597426,
+          63.389744362895996,
+          57.89850520149436
+        ],
+        "channel_global_ssim": [
+          0.9999979252154141,
+          0.9999989313643759,
+          0.9999958580347674
+        ],
+        "max_abs": 4,
+        "channel_p99_abs": [
+          1.0,
+          1.0,
+          2.0
+        ]
+      },
+      "candidate_tile_mse": [
+        [
+          1397.740234375,
+          537.681640625,
+          2909.083984375
+        ],
+        [
+          1617.8974609375,
+          433.177734375,
+          1751.03515625
+        ],
+        [
+          3370.78125,
+          823.375,
+          580.0
+        ],
+        [
+          1395.4979838709678,
+          370.09475806451616,
+          2142.9133064516127
+        ],
+        [
+          1231.508064516129,
+          464.38709677419354,
+          1660.7459677419354
+        ],
+        [
+          2007.8709677419354,
+          804.6129032258065,
+          11410.709677419354
+        ]
+      ],
+      "reference_tile_mse": [
+        [
+          1398.1552734375,
+          537.7998046875,
+          2912.8505859375
+        ],
+        [
+          1617.7724609375,
+          432.607421875,
+          1750.9501953125
+        ],
+        [
+          3370.78125,
+          823.375,
+          589.96875
+        ],
+        [
+          1396.0342741935483,
+          369.7096774193548,
+          2142.9173387096776
+        ],
+        [
+          1231.4344758064517,
+          464.55745967741933,
+          1663.3840725806451
+        ],
+        [
+          2007.8709677419354,
+          804.6129032258065,
+          11410.709677419354
+        ]
+      ]
+    },
+    "mathematics": {
+      "components": [
+        {
+          "channel": 0,
+          "passed": true,
+          "coefficients": 4608,
+          "DC_exact": true,
+          "worst_excess": -0.010478366806596862,
+          "max_unquantized_residual": 0.49952163319340315,
+          "failing_frequencies": 0,
+          "first_failures": []
+        },
+        {
+          "channel": 1,
+          "passed": true,
+          "coefficients": 1280,
+          "DC_exact": true,
+          "worst_excess": -0.009999999999900533,
+          "max_unquantized_residual": 0.5000000000000995,
+          "failing_frequencies": 0,
+          "first_failures": []
+        },
+        {
+          "channel": 2,
+          "passed": true,
+          "coefficients": 1280,
+          "DC_exact": true,
+          "worst_excess": -0.00999999999993606,
+          "max_unquantized_residual": 0.500000000000064,
+          "failing_frequencies": 0,
+          "first_failures": []
+        }
+      ],
+      "strict_entropy": {
+        "bytes": 2161,
+        "pad_bits": 2,
+        "MCU_blocks": 120,
+        "dummy_blocks": 8,
+        "first_differences": []
+      }
+    },
+    "structures": {
+      "amd": {
+        "size": [
+          65,
+          63
+        ],
+        "sampling": 2,
+        "quant": {
+          "0": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "1": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "progressive": false,
+        "frame": {
+          "sof": 192,
+          "precision": 8,
+          "components": 3
+        }
+      },
+      "native": {
+        "size": [
+          65,
+          63
+        ],
+        "sampling": 2,
+        "quant": {
+          "0": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "1": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "progressive": false,
+        "frame": {
+          "sof": 192,
+          "precision": 8,
+          "components": 3
+        }
+      },
+      "cpu": {
+        "size": [
+          65,
+          63
+        ],
+        "sampling": 2,
+        "quant": {
+          "0": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "1": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "progressive": false,
+        "frame": {
+          "sof": 192,
+          "precision": 8,
+          "components": 3
+        }
+      }
+    },
+    "source_metrics": {
+      "amd": {
+        "channel_mse": [
+          1432.0175824175824,
+          457.44981684981684,
+          2177.6517704517705
+        ],
+        "channel_psnr": [
+          16.571320105636318,
+          21.52736902816487,
+          14.750919281766016
+        ],
+        "channel_global_ssim": [
+          0.950812104956014,
+          0.9848634541148984,
+          0.9248620147103329
+        ],
+        "max_abs": 212,
+        "channel_p99_abs": [
+          124.0,
+          68.0,
+          169.0
+        ]
+      },
+      "native": {
+        "channel_mse": [
+          1432.2021978021978,
+          457.2847374847375,
+          2179.290354090354
+        ],
+        "channel_psnr": [
+          16.570760250254562,
+          21.528936544287845,
+          14.747652642707784
+        ],
+        "channel_global_ssim": [
+          0.9508062624206197,
+          0.9848684999241398,
+          0.9247994087311496
+        ],
+        "max_abs": 212,
+        "channel_p99_abs": [
+          124.0,
+          68.0,
+          169.0
+        ]
+      },
+      "cpu": {
+        "channel_mse": [
+          1431.5028083028083,
+          457.028083028083,
+          2178.357753357753
+        ],
+        "channel_psnr": [
+          16.572881565164288,
+          21.531374738628074,
+          14.749511550761783
+        ],
+        "channel_global_ssim": [
+          0.9508323125931191,
+          0.9848790011122268,
+          0.9248289788942017
+        ],
+        "max_abs": 212,
+        "channel_p99_abs": [
+          124.0,
+          68.0,
+          169.0
+        ]
+      }
+    }
+  },
+  "decoded_sha256": {
+    "amd": "ef4c701972ac9edb00086bd8716fc3ab00ab94ab7849d3e87f2e2d5159c416e0",
+    "native": "7e9fcf8659cde7fd36fdfdfe81157915b0823b6109a9e10aa293e4bc71be6541",
+    "cpu": "4decfb018ee8f73eb105916ceb0ef5e7b2b82dac6a153f77c24ea9bc89bc8722"
+  },
+  "experiment_id": "20261113T054354.657993Z-I5-CPU-reference-3eac486951",
+  "evidence_references": [
+    "migration/reports/evidence/rewrite/I5/encoder-math-history-original-entry/20261113T053928.764701Z-I5-amd-original-ad26746ce9",
+    "migration/reports/evidence/rewrite/I5/encoder-heldout-quality-original-entry/20261113T044843.338784Z-I5-native-original-69218509b4",
+    "migration/reports/evidence/rewrite/I5/encoder-historical-mathematical-arrays/20261113T054128.928050Z-I5-rocm-probe-7b310682d9",
+    "migration/reports/evidence/rewrite/I5/encoder-math-strict-CPU-reference/20261113T053551.701486Z-I5-CPU-build-d8b83edf97",
+    "migration/reports/evidence/rewrite/I5/encoder-mathematical-variant-build/20261113T052811.117925Z-I5-rocm-build-21543e989e"
+  ]
+}

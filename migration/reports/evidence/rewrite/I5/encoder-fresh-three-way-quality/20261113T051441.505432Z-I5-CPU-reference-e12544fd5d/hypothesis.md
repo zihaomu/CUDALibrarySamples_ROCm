@@ -1,0 +1,1 @@
+Test CPU-reference for encoder-fresh-three-way-quality, case heldout-color-edges-q100-s2-opt0. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: none.

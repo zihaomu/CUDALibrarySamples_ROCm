@@ -8,7 +8,7 @@ from image_encoder_math_binding import sealed
 def main():
     from snapshot import capture
     profile=ROOT/'migration/rewrite/image-encoder-performance-profile.json';p=json.loads(profile.read_text())
-    report=ROOT/'migration/reports/image-encoder-performance-amd.json';timings=json.loads(report.read_text())
+    report=ROOT/'migration/reports/image-encoder-performance-v2-amd.json';timings=json.loads(report.read_text())
     bp=ROOT/'migration/reports/image-encoder-instances-v2-build.json';build=json.loads(bp.read_text());sealed(build,'build.json')
     if [r['case'] for r in timings]!=[c['id'] for c in p['cases']] or any(digest(ROOT/n)!=h for n,h in build['dependencies'].items()):raise ValueError('current complete timing/build required')
     rows=[]

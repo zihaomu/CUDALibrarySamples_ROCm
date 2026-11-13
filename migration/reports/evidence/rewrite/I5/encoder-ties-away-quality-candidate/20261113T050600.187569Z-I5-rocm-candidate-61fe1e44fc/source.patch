@@ -1,0 +1,42 @@
+diff --git a/tools/moat/image_encoder_rounding_candidate.py b/tools/moat/image_encoder_rounding_candidate.py
+index e4814e5d0..1ec721ebf 100644
+--- a/tools/moat/image_encoder_rounding_candidate.py
++++ b/tools/moat/image_encoder_rounding_candidate.py
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""Build an isolated ties-away FDCT candidate without changing published code."""
++"""Build an isolated exact-DC/ties-away candidate without changing published code."""
+ import argparse,json,shutil
+ from pathlib import Path
+ from experiment import ROOT,Experiment,digest,write
+@@ -12,7 +12,7 @@ def build():
+     from snapshot import capture
+     base=ROOT/'migration/reports/image-encoder-instances-v2-build.json';b=json.loads(base.read_text())
+     if any(digest(ROOT/n)!=h for n,h in b['dependencies'].items()):raise ValueError('current production sources required')
+-    folder=ROOT/'build/image-encoder-rounding-candidate';folder.mkdir(parents=True,exist_ok=True);copies=[]
++    folder=ROOT/'build/image-encoder-exact-DC-rounding-candidate';folder.mkdir(parents=True,exist_ok=True);copies=[]
+     for name in b['dependencies']:
+         if name.startswith('rocm/common/'):
+             source=ROOT/name;dest=folder/'common'/Path(name).relative_to('rocm/common');dest.parent.mkdir(parents=True,exist_ok=True)
+@@ -24,6 +24,9 @@ def build():
+     const int whole=__float2int_rz(scaled);const float fraction=scaled-float(whole);
+     coefficients[index]=static_cast<short>(whole+(fraction>=0.5f?1:(fraction<=-0.5f?-1:0)));'''
+                 data=data.replace(old,replacement)
++                normalizer='const float normalizer=(u?1.0f:0.7071067811865475f)*(v?1.0f:0.7071067811865475f)*0.25f;'
++                if data.count(normalizer)!=1:raise ValueError('unexpected DC normalizer')
++                data=data.replace(normalizer,'const float normalizer=(!u&&!v)?0.125f:(u?1.0f:0.7071067811865475f)*(v?1.0f:0.7071067811865475f)*0.25f;')
+             if dest.exists() and dest.read_text()!=data:raise ValueError('candidate source already exists with other contents')
+             dest.write_text(data);copies.append(dest)
+     source=ROOT/'rocm/ported/nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp'
+@@ -35,9 +38,9 @@ def build():
+         '--offload-arch=gfx1201','-std=c++17','-O2','-D__HIP_PLATFORM_AMD__','-I'+str(folder/'common'),'-I'+str(jpeg/'include'),'-x','hip',str(source),'-o',str(binary),
+         '-L'+str(core/'lib'),'-L'+str(jpeg/'lib'),'-Wl,-rpath,'+str(core/'lib'),'-Wl,-rpath,'+str(jpeg/'lib'),'-lamdhip64','-ljpeg'],'build-isolated-rounding-candidate')
+     row=dict(status='BUILT' if rc==0 else 'BUILD_ERROR',binary=str(binary.relative_to(ROOT)),binary_sha256=digest(binary) if binary.exists() else None,dependencies=deps,
+-        experiment_id=e.id,scope='Only FDCT quantization changes exact .5 ties from nearest-even to away-from-zero; truncation plus fractional comparison avoids adding 0.5 rounding near ties. Production tree unchanged.')
++        experiment_id=e.id,scope='DC normalizer is exact 1/8; FDCT quantization rounds exact .5 ties away from zero. Truncation plus fractional comparison avoids adding 0.5 rounding near ties. Other-frequency normalization and production tree unchanged.')
+     write(e.path/'build.json',row);row['evidence']=e.finish('EXECUTED' if rc==0 else 'BUILD_ERROR');write(BUILD,row)
+-    record('IMG-01','独立FDCT舍入候选构建：'+row['status']+'；仅量化半整数ties改为远离零，当前正式实现保持不变，先验证已冻结矩阵。',[row['evidence']]);print(row['status']);return int(rc!=0)
++    record('IMG-01','第二独立FDCT候选构建：'+row['status']+'；DC使用精确1/8、半整数ties远离零，当前正式实现保持不变，先验证已冻结矩阵和DC边界。',[row['evidence']]);print(row['status']);return int(rc!=0)
+ 
+ def run():
+     from snapshot import capture

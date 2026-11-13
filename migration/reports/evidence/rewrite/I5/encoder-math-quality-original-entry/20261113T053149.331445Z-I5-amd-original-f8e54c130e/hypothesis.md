@@ -1,0 +1,1 @@
+Test amd-original for encoder-math-quality-original-entry, case math-noise-q95-s1-opt1. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: none.

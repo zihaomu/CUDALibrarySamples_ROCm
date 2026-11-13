@@ -1,0 +1,1 @@
+Test rocm-probe for encoder-GPU-color-rational-diagnosis, case heldout-color-edges. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: none.

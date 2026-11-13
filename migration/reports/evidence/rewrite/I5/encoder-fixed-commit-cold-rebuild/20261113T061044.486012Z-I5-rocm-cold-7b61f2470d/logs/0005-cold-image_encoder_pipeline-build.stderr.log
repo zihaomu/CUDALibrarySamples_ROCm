@@ -1,0 +1,26 @@
+Traceback (most recent call last):
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-_pdfepev/src/tools/moat/image_encoder_pipeline.py", line 123, in <module>
+    raise SystemExit(globals()[args.action]())
+                     ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-_pdfepev/src/tools/moat/image_encoder_pipeline.py", line 55, in build
+    record('IMG-01','异步JPEG slot候选构建：'+value['status']+'。',[value['evidence']]);print(value['status']);return int(bool(rc))
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-_pdfepev/src/tools/moat/image_completion_progress.py", line 41, in record
+    legacy_record(PHASES[stage],stage+'：'+message,evidence)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-_pdfepev/src/tools/moat/image_progress.py", line 43, in record
+    data['updated_at']=now();data['events'].append(dict(time=data['updated_at'],phase=phase,message=message,evidence=list(evidence)));write(REPORT,data);render(data)
+                                                                                                                                                         ~~~~~~^^^^^^
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-_pdfepev/src/tools/moat/image_progress.py", line 12, in render
+    plan=json.loads((ROOT/'migration/rewrite/image-libraries-plan.json').read_text());catalog=json.loads((ROOT/'migration/samples.yaml').read_text());ids={r['sample_id'] for r in plan['samples']};samples=[s for s in catalog['samples'] if s['id'] in ids];counts=collections.Counter(s['status'] for s in samples)
+                                                                                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/opt/python/cpython-3.13.13-linux-x86_64-gnu/lib/python3.13/pathlib/_local.py", line 546, in read_text
+    return PathBase.read_text(self, encoding, errors, newline)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/python/cpython-3.13.13-linux-x86_64-gnu/lib/python3.13/pathlib/_abc.py", line 632, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/python/cpython-3.13.13-linux-x86_64-gnu/lib/python3.13/pathlib/_local.py", line 537, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-encoder-cold-_pdfepev/src/migration/samples.yaml'

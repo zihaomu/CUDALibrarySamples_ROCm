@@ -1,0 +1,1 @@
+Test amd-original for encoder-unprofiled-end-to-end, case small-download-optimized. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: none.

@@ -1,0 +1,232 @@
+{
+  "commands": [
+    {
+      "command_id": 1,
+      "phase": "unprofiled-0",
+      "argv": [
+        "/opt/venv/bin/python",
+        "-c",
+        "import hashlib,json,os,pathlib,resource,subprocess,sys,time\nc=json.loads(sys.argv[1]);sha=lambda p:hashlib.file_digest(pathlib.Path(p).open('rb'),'sha256').hexdigest()\nfor p,h in c['identities'].items():assert sha(p)==h,(p,'identity drift')\nldd=subprocess.check_output(['ldd',c['args'][0]],text=True);libs={}\nfor line in ldd.splitlines():\n w=line.split()\n if '=>' in w and len(w)>2 and w[2].startswith('/'):\n  p=pathlib.Path(w[2]).resolve();libs[str(p)]=sha(p)\nidentity=dict(config=c,libraries=libs,ldd=ldd,CUDA_VISIBLE_DEVICES=os.environ.get('CUDA_VISIBLE_DEVICES'),HIP_VISIBLE_DEVICES=os.environ.get('HIP_VISIBLE_DEVICES'))\nif c['side']=='native':identity['gpu']=subprocess.check_output(['nvidia-smi','--id=1','--query-gpu=name,uuid,pci.bus_id,driver_version','--format=csv,noheader'],text=True).strip()\nif c['output']:pathlib.Path(c['output']).mkdir(parents=True)\nprint('TIMED_IDENTITY '+json.dumps(identity),flush=True)\nstart=time.perf_counter_ns();p=subprocess.run(c['args'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True);elapsed=(time.perf_counter_ns()-start)/1e6\nsys.stdout.write(p.stdout);sys.stderr.write(p.stderr)\nproducts={x.name:dict(sha256=sha(x),bytes=x.stat().st_size) for x in pathlib.Path(c['output']).iterdir()} if c['output'] else {}\nprint('TIMED_RESULT '+json.dumps(dict(return_code=p.returncode,process_elapsed_ms=elapsed,child_max_RSS_KiB=resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss,products=products)),flush=True)\nsys.exit(p.returncode)\n",
+        "{\"side\":\"amd\",\"args\":[\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/async-original-encoder-candidate-build/20261113T054512.724819Z-I5-rocm-build-fa5f269177/sample\",\"-i\",\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-encoder-performance-inputs/small\",\"-n\",\"512\",\"-j\",\"2\",\"-s\",\"2\",\"-r\",\"1\",\"-b\",\"gpu\",\"-q\",\"80\",\"-p\",\"-f\",\"-d\"],\"output\":null,\"identities\":{\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/async-original-encoder-candidate-build/20261113T054512.724819Z-I5-rocm-build-fa5f269177/sample\":\"b9bf0c86844dca981dfa3d5f4f7a1d08a2544afc4bf92f6302413e3f56af2d42\",\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-encoder-performance-inputs/small/image.bmp\":\"05466780a90de0a433f4d13fcbed23e6f42b6fcaebd612331df7e760d713fb65\"}}"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-13T05:52:21.865345+00:00",
+      "timeout_seconds": 600,
+      "environment": {
+        "HIP_VISIBLE_DEVICES": "0",
+        "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "DEEPINFER_ROCM_RELEASE": "10.1.0",
+        "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+        "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+      },
+      "stdout": "logs/0001-unprofiled-0.stdout.log",
+      "stderr": "logs/0001-unprofiled-0.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-13T05:52:22.481962+00:00",
+      "seconds": 0.6156724140164442
+    },
+    {
+      "command_id": 2,
+      "phase": "unprofiled-1",
+      "argv": [
+        "/opt/venv/bin/python",
+        "-c",
+        "import hashlib,json,os,pathlib,resource,subprocess,sys,time\nc=json.loads(sys.argv[1]);sha=lambda p:hashlib.file_digest(pathlib.Path(p).open('rb'),'sha256').hexdigest()\nfor p,h in c['identities'].items():assert sha(p)==h,(p,'identity drift')\nldd=subprocess.check_output(['ldd',c['args'][0]],text=True);libs={}\nfor line in ldd.splitlines():\n w=line.split()\n if '=>' in w and len(w)>2 and w[2].startswith('/'):\n  p=pathlib.Path(w[2]).resolve();libs[str(p)]=sha(p)\nidentity=dict(config=c,libraries=libs,ldd=ldd,CUDA_VISIBLE_DEVICES=os.environ.get('CUDA_VISIBLE_DEVICES'),HIP_VISIBLE_DEVICES=os.environ.get('HIP_VISIBLE_DEVICES'))\nif c['side']=='native':identity['gpu']=subprocess.check_output(['nvidia-smi','--id=1','--query-gpu=name,uuid,pci.bus_id,driver_version','--format=csv,noheader'],text=True).strip()\nif c['output']:pathlib.Path(c['output']).mkdir(parents=True)\nprint('TIMED_IDENTITY '+json.dumps(identity),flush=True)\nstart=time.perf_counter_ns();p=subprocess.run(c['args'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True);elapsed=(time.perf_counter_ns()-start)/1e6\nsys.stdout.write(p.stdout);sys.stderr.write(p.stderr)\nproducts={x.name:dict(sha256=sha(x),bytes=x.stat().st_size) for x in pathlib.Path(c['output']).iterdir()} if c['output'] else {}\nprint('TIMED_RESULT '+json.dumps(dict(return_code=p.returncode,process_elapsed_ms=elapsed,child_max_RSS_KiB=resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss,products=products)),flush=True)\nsys.exit(p.returncode)\n",
+        "{\"side\":\"amd\",\"args\":[\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/async-original-encoder-candidate-build/20261113T054512.724819Z-I5-rocm-build-fa5f269177/sample\",\"-i\",\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-encoder-performance-inputs/small\",\"-n\",\"512\",\"-j\",\"2\",\"-s\",\"2\",\"-r\",\"1\",\"-b\",\"gpu\",\"-q\",\"80\",\"-p\",\"-f\",\"-d\"],\"output\":null,\"identities\":{\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/async-original-encoder-candidate-build/20261113T054512.724819Z-I5-rocm-build-fa5f269177/sample\":\"b9bf0c86844dca981dfa3d5f4f7a1d08a2544afc4bf92f6302413e3f56af2d42\",\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-encoder-performance-inputs/small/image.bmp\":\"05466780a90de0a433f4d13fcbed23e6f42b6fcaebd612331df7e760d713fb65\"}}"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-13T05:52:22.483569+00:00",
+      "timeout_seconds": 600,
+      "environment": {
+        "HIP_VISIBLE_DEVICES": "0",
+        "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "DEEPINFER_ROCM_RELEASE": "10.1.0",
+        "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+        "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+      },
+      "stdout": "logs/0002-unprofiled-1.stdout.log",
+      "stderr": "logs/0002-unprofiled-1.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-13T05:52:23.100100+00:00",
+      "seconds": 0.6156865840312093
+    },
+    {
+      "command_id": 3,
+      "phase": "unprofiled-2",
+      "argv": [
+        "/opt/venv/bin/python",
+        "-c",
+        "import hashlib,json,os,pathlib,resource,subprocess,sys,time\nc=json.loads(sys.argv[1]);sha=lambda p:hashlib.file_digest(pathlib.Path(p).open('rb'),'sha256').hexdigest()\nfor p,h in c['identities'].items():assert sha(p)==h,(p,'identity drift')\nldd=subprocess.check_output(['ldd',c['args'][0]],text=True);libs={}\nfor line in ldd.splitlines():\n w=line.split()\n if '=>' in w and len(w)>2 and w[2].startswith('/'):\n  p=pathlib.Path(w[2]).resolve();libs[str(p)]=sha(p)\nidentity=dict(config=c,libraries=libs,ldd=ldd,CUDA_VISIBLE_DEVICES=os.environ.get('CUDA_VISIBLE_DEVICES'),HIP_VISIBLE_DEVICES=os.environ.get('HIP_VISIBLE_DEVICES'))\nif c['side']=='native':identity['gpu']=subprocess.check_output(['nvidia-smi','--id=1','--query-gpu=name,uuid,pci.bus_id,driver_version','--format=csv,noheader'],text=True).strip()\nif c['output']:pathlib.Path(c['output']).mkdir(parents=True)\nprint('TIMED_IDENTITY '+json.dumps(identity),flush=True)\nstart=time.perf_counter_ns();p=subprocess.run(c['args'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True);elapsed=(time.perf_counter_ns()-start)/1e6\nsys.stdout.write(p.stdout);sys.stderr.write(p.stderr)\nproducts={x.name:dict(sha256=sha(x),bytes=x.stat().st_size) for x in pathlib.Path(c['output']).iterdir()} if c['output'] else {}\nprint('TIMED_RESULT '+json.dumps(dict(return_code=p.returncode,process_elapsed_ms=elapsed,child_max_RSS_KiB=resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss,products=products)),flush=True)\nsys.exit(p.returncode)\n",
+        "{\"side\":\"amd\",\"args\":[\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/async-original-encoder-candidate-build/20261113T054512.724819Z-I5-rocm-build-fa5f269177/sample\",\"-i\",\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-encoder-performance-inputs/small\",\"-n\",\"512\",\"-j\",\"2\",\"-s\",\"2\",\"-r\",\"1\",\"-b\",\"gpu\",\"-q\",\"80\",\"-p\",\"-f\",\"-d\"],\"output\":null,\"identities\":{\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/async-original-encoder-candidate-build/20261113T054512.724819Z-I5-rocm-build-fa5f269177/sample\":\"b9bf0c86844dca981dfa3d5f4f7a1d08a2544afc4bf92f6302413e3f56af2d42\",\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-encoder-performance-inputs/small/image.bmp\":\"05466780a90de0a433f4d13fcbed23e6f42b6fcaebd612331df7e760d713fb65\"}}"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-13T05:52:23.101469+00:00",
+      "timeout_seconds": 600,
+      "environment": {
+        "HIP_VISIBLE_DEVICES": "0",
+        "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "DEEPINFER_ROCM_RELEASE": "10.1.0",
+        "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+        "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+      },
+      "stdout": "logs/0003-unprofiled-2.stdout.log",
+      "stderr": "logs/0003-unprofiled-2.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-13T05:52:23.717447+00:00",
+      "seconds": 0.6154466649750248
+    },
+    {
+      "command_id": 4,
+      "phase": "unprofiled-3",
+      "argv": [
+        "/opt/venv/bin/python",
+        "-c",
+        "import hashlib,json,os,pathlib,resource,subprocess,sys,time\nc=json.loads(sys.argv[1]);sha=lambda p:hashlib.file_digest(pathlib.Path(p).open('rb'),'sha256').hexdigest()\nfor p,h in c['identities'].items():assert sha(p)==h,(p,'identity drift')\nldd=subprocess.check_output(['ldd',c['args'][0]],text=True);libs={}\nfor line in ldd.splitlines():\n w=line.split()\n if '=>' in w and len(w)>2 and w[2].startswith('/'):\n  p=pathlib.Path(w[2]).resolve();libs[str(p)]=sha(p)\nidentity=dict(config=c,libraries=libs,ldd=ldd,CUDA_VISIBLE_DEVICES=os.environ.get('CUDA_VISIBLE_DEVICES'),HIP_VISIBLE_DEVICES=os.environ.get('HIP_VISIBLE_DEVICES'))\nif c['side']=='native':identity['gpu']=subprocess.check_output(['nvidia-smi','--id=1','--query-gpu=name,uuid,pci.bus_id,driver_version','--format=csv,noheader'],text=True).strip()\nif c['output']:pathlib.Path(c['output']).mkdir(parents=True)\nprint('TIMED_IDENTITY '+json.dumps(identity),flush=True)\nstart=time.perf_counter_ns();p=subprocess.run(c['args'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True);elapsed=(time.perf_counter_ns()-start)/1e6\nsys.stdout.write(p.stdout);sys.stderr.write(p.stderr)\nproducts={x.name:dict(sha256=sha(x),bytes=x.stat().st_size) for x in pathlib.Path(c['output']).iterdir()} if c['output'] else {}\nprint('TIMED_RESULT '+json.dumps(dict(return_code=p.returncode,process_elapsed_ms=elapsed,child_max_RSS_KiB=resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss,products=products)),flush=True)\nsys.exit(p.returncode)\n",
+        "{\"side\":\"amd\",\"args\":[\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/async-original-encoder-candidate-build/20261113T054512.724819Z-I5-rocm-build-fa5f269177/sample\",\"-i\",\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-encoder-performance-inputs/small\",\"-n\",\"512\",\"-j\",\"2\",\"-s\",\"2\",\"-r\",\"1\",\"-b\",\"gpu\",\"-q\",\"80\",\"-p\",\"-f\",\"-d\"],\"output\":null,\"identities\":{\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/async-original-encoder-candidate-build/20261113T054512.724819Z-I5-rocm-build-fa5f269177/sample\":\"b9bf0c86844dca981dfa3d5f4f7a1d08a2544afc4bf92f6302413e3f56af2d42\",\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-encoder-performance-inputs/small/image.bmp\":\"05466780a90de0a433f4d13fcbed23e6f42b6fcaebd612331df7e760d713fb65\"}}"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-13T05:52:23.719650+00:00",
+      "timeout_seconds": 600,
+      "environment": {
+        "HIP_VISIBLE_DEVICES": "0",
+        "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "DEEPINFER_ROCM_RELEASE": "10.1.0",
+        "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+        "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+      },
+      "stdout": "logs/0004-unprofiled-3.stdout.log",
+      "stderr": "logs/0004-unprofiled-3.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-13T05:52:24.336361+00:00",
+      "seconds": 0.6158427619957365
+    },
+    {
+      "command_id": 5,
+      "phase": "unprofiled-4",
+      "argv": [
+        "/opt/venv/bin/python",
+        "-c",
+        "import hashlib,json,os,pathlib,resource,subprocess,sys,time\nc=json.loads(sys.argv[1]);sha=lambda p:hashlib.file_digest(pathlib.Path(p).open('rb'),'sha256').hexdigest()\nfor p,h in c['identities'].items():assert sha(p)==h,(p,'identity drift')\nldd=subprocess.check_output(['ldd',c['args'][0]],text=True);libs={}\nfor line in ldd.splitlines():\n w=line.split()\n if '=>' in w and len(w)>2 and w[2].startswith('/'):\n  p=pathlib.Path(w[2]).resolve();libs[str(p)]=sha(p)\nidentity=dict(config=c,libraries=libs,ldd=ldd,CUDA_VISIBLE_DEVICES=os.environ.get('CUDA_VISIBLE_DEVICES'),HIP_VISIBLE_DEVICES=os.environ.get('HIP_VISIBLE_DEVICES'))\nif c['side']=='native':identity['gpu']=subprocess.check_output(['nvidia-smi','--id=1','--query-gpu=name,uuid,pci.bus_id,driver_version','--format=csv,noheader'],text=True).strip()\nif c['output']:pathlib.Path(c['output']).mkdir(parents=True)\nprint('TIMED_IDENTITY '+json.dumps(identity),flush=True)\nstart=time.perf_counter_ns();p=subprocess.run(c['args'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True);elapsed=(time.perf_counter_ns()-start)/1e6\nsys.stdout.write(p.stdout);sys.stderr.write(p.stderr)\nproducts={x.name:dict(sha256=sha(x),bytes=x.stat().st_size) for x in pathlib.Path(c['output']).iterdir()} if c['output'] else {}\nprint('TIMED_RESULT '+json.dumps(dict(return_code=p.returncode,process_elapsed_ms=elapsed,child_max_RSS_KiB=resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss,products=products)),flush=True)\nsys.exit(p.returncode)\n",
+        "{\"side\":\"amd\",\"args\":[\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/async-original-encoder-candidate-build/20261113T054512.724819Z-I5-rocm-build-fa5f269177/sample\",\"-i\",\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-encoder-performance-inputs/small\",\"-n\",\"512\",\"-j\",\"2\",\"-s\",\"2\",\"-r\",\"1\",\"-b\",\"gpu\",\"-q\",\"80\",\"-p\",\"-f\",\"-d\"],\"output\":null,\"identities\":{\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/async-original-encoder-candidate-build/20261113T054512.724819Z-I5-rocm-build-fa5f269177/sample\":\"b9bf0c86844dca981dfa3d5f4f7a1d08a2544afc4bf92f6302413e3f56af2d42\",\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-encoder-performance-inputs/small/image.bmp\":\"05466780a90de0a433f4d13fcbed23e6f42b6fcaebd612331df7e760d713fb65\"}}"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-13T05:52:24.338594+00:00",
+      "timeout_seconds": 600,
+      "environment": {
+        "HIP_VISIBLE_DEVICES": "0",
+        "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "DEEPINFER_ROCM_RELEASE": "10.1.0",
+        "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+        "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+      },
+      "stdout": "logs/0005-unprofiled-4.stdout.log",
+      "stderr": "logs/0005-unprofiled-4.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-13T05:52:24.955522+00:00",
+      "seconds": 0.6160086419549771
+    },
+    {
+      "command_id": 6,
+      "phase": "unprofiled-5",
+      "argv": [
+        "/opt/venv/bin/python",
+        "-c",
+        "import hashlib,json,os,pathlib,resource,subprocess,sys,time\nc=json.loads(sys.argv[1]);sha=lambda p:hashlib.file_digest(pathlib.Path(p).open('rb'),'sha256').hexdigest()\nfor p,h in c['identities'].items():assert sha(p)==h,(p,'identity drift')\nldd=subprocess.check_output(['ldd',c['args'][0]],text=True);libs={}\nfor line in ldd.splitlines():\n w=line.split()\n if '=>' in w and len(w)>2 and w[2].startswith('/'):\n  p=pathlib.Path(w[2]).resolve();libs[str(p)]=sha(p)\nidentity=dict(config=c,libraries=libs,ldd=ldd,CUDA_VISIBLE_DEVICES=os.environ.get('CUDA_VISIBLE_DEVICES'),HIP_VISIBLE_DEVICES=os.environ.get('HIP_VISIBLE_DEVICES'))\nif c['side']=='native':identity['gpu']=subprocess.check_output(['nvidia-smi','--id=1','--query-gpu=name,uuid,pci.bus_id,driver_version','--format=csv,noheader'],text=True).strip()\nif c['output']:pathlib.Path(c['output']).mkdir(parents=True)\nprint('TIMED_IDENTITY '+json.dumps(identity),flush=True)\nstart=time.perf_counter_ns();p=subprocess.run(c['args'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True);elapsed=(time.perf_counter_ns()-start)/1e6\nsys.stdout.write(p.stdout);sys.stderr.write(p.stderr)\nproducts={x.name:dict(sha256=sha(x),bytes=x.stat().st_size) for x in pathlib.Path(c['output']).iterdir()} if c['output'] else {}\nprint('TIMED_RESULT '+json.dumps(dict(return_code=p.returncode,process_elapsed_ms=elapsed,child_max_RSS_KiB=resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss,products=products)),flush=True)\nsys.exit(p.returncode)\n",
+        "{\"side\":\"amd\",\"args\":[\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/async-original-encoder-candidate-build/20261113T054512.724819Z-I5-rocm-build-fa5f269177/sample\",\"-i\",\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-encoder-performance-inputs/small\",\"-n\",\"512\",\"-j\",\"2\",\"-s\",\"2\",\"-r\",\"1\",\"-b\",\"gpu\",\"-q\",\"80\",\"-p\",\"-f\",\"-d\"],\"output\":null,\"identities\":{\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/async-original-encoder-candidate-build/20261113T054512.724819Z-I5-rocm-build-fa5f269177/sample\":\"b9bf0c86844dca981dfa3d5f4f7a1d08a2544afc4bf92f6302413e3f56af2d42\",\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-encoder-performance-inputs/small/image.bmp\":\"05466780a90de0a433f4d13fcbed23e6f42b6fcaebd612331df7e760d713fb65\"}}"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-13T05:52:24.958228+00:00",
+      "timeout_seconds": 600,
+      "environment": {
+        "HIP_VISIBLE_DEVICES": "0",
+        "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "DEEPINFER_ROCM_RELEASE": "10.1.0",
+        "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+        "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+      },
+      "stdout": "logs/0006-unprofiled-5.stdout.log",
+      "stderr": "logs/0006-unprofiled-5.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-13T05:52:25.574911+00:00",
+      "seconds": 0.6159248320036568
+    },
+    {
+      "command_id": 7,
+      "phase": "unprofiled-6",
+      "argv": [
+        "/opt/venv/bin/python",
+        "-c",
+        "import hashlib,json,os,pathlib,resource,subprocess,sys,time\nc=json.loads(sys.argv[1]);sha=lambda p:hashlib.file_digest(pathlib.Path(p).open('rb'),'sha256').hexdigest()\nfor p,h in c['identities'].items():assert sha(p)==h,(p,'identity drift')\nldd=subprocess.check_output(['ldd',c['args'][0]],text=True);libs={}\nfor line in ldd.splitlines():\n w=line.split()\n if '=>' in w and len(w)>2 and w[2].startswith('/'):\n  p=pathlib.Path(w[2]).resolve();libs[str(p)]=sha(p)\nidentity=dict(config=c,libraries=libs,ldd=ldd,CUDA_VISIBLE_DEVICES=os.environ.get('CUDA_VISIBLE_DEVICES'),HIP_VISIBLE_DEVICES=os.environ.get('HIP_VISIBLE_DEVICES'))\nif c['side']=='native':identity['gpu']=subprocess.check_output(['nvidia-smi','--id=1','--query-gpu=name,uuid,pci.bus_id,driver_version','--format=csv,noheader'],text=True).strip()\nif c['output']:pathlib.Path(c['output']).mkdir(parents=True)\nprint('TIMED_IDENTITY '+json.dumps(identity),flush=True)\nstart=time.perf_counter_ns();p=subprocess.run(c['args'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True);elapsed=(time.perf_counter_ns()-start)/1e6\nsys.stdout.write(p.stdout);sys.stderr.write(p.stderr)\nproducts={x.name:dict(sha256=sha(x),bytes=x.stat().st_size) for x in pathlib.Path(c['output']).iterdir()} if c['output'] else {}\nprint('TIMED_RESULT '+json.dumps(dict(return_code=p.returncode,process_elapsed_ms=elapsed,child_max_RSS_KiB=resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss,products=products)),flush=True)\nsys.exit(p.returncode)\n",
+        "{\"side\":\"amd\",\"args\":[\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/async-original-encoder-candidate-build/20261113T054512.724819Z-I5-rocm-build-fa5f269177/sample\",\"-i\",\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-encoder-performance-inputs/small\",\"-n\",\"512\",\"-j\",\"2\",\"-s\",\"2\",\"-r\",\"1\",\"-b\",\"gpu\",\"-q\",\"80\",\"-p\",\"-f\",\"-d\"],\"output\":null,\"identities\":{\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/async-original-encoder-candidate-build/20261113T054512.724819Z-I5-rocm-build-fa5f269177/sample\":\"b9bf0c86844dca981dfa3d5f4f7a1d08a2544afc4bf92f6302413e3f56af2d42\",\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-encoder-performance-inputs/small/image.bmp\":\"05466780a90de0a433f4d13fcbed23e6f42b6fcaebd612331df7e760d713fb65\"}}"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-13T05:52:25.577031+00:00",
+      "timeout_seconds": 600,
+      "environment": {
+        "HIP_VISIBLE_DEVICES": "0",
+        "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "DEEPINFER_ROCM_RELEASE": "10.1.0",
+        "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+        "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+      },
+      "stdout": "logs/0007-unprofiled-6.stdout.log",
+      "stderr": "logs/0007-unprofiled-6.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-13T05:52:26.193372+00:00",
+      "seconds": 0.6154554749955423
+    },
+    {
+      "command_id": 8,
+      "phase": "unprofiled-7",
+      "argv": [
+        "/opt/venv/bin/python",
+        "-c",
+        "import hashlib,json,os,pathlib,resource,subprocess,sys,time\nc=json.loads(sys.argv[1]);sha=lambda p:hashlib.file_digest(pathlib.Path(p).open('rb'),'sha256').hexdigest()\nfor p,h in c['identities'].items():assert sha(p)==h,(p,'identity drift')\nldd=subprocess.check_output(['ldd',c['args'][0]],text=True);libs={}\nfor line in ldd.splitlines():\n w=line.split()\n if '=>' in w and len(w)>2 and w[2].startswith('/'):\n  p=pathlib.Path(w[2]).resolve();libs[str(p)]=sha(p)\nidentity=dict(config=c,libraries=libs,ldd=ldd,CUDA_VISIBLE_DEVICES=os.environ.get('CUDA_VISIBLE_DEVICES'),HIP_VISIBLE_DEVICES=os.environ.get('HIP_VISIBLE_DEVICES'))\nif c['side']=='native':identity['gpu']=subprocess.check_output(['nvidia-smi','--id=1','--query-gpu=name,uuid,pci.bus_id,driver_version','--format=csv,noheader'],text=True).strip()\nif c['output']:pathlib.Path(c['output']).mkdir(parents=True)\nprint('TIMED_IDENTITY '+json.dumps(identity),flush=True)\nstart=time.perf_counter_ns();p=subprocess.run(c['args'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True);elapsed=(time.perf_counter_ns()-start)/1e6\nsys.stdout.write(p.stdout);sys.stderr.write(p.stderr)\nproducts={x.name:dict(sha256=sha(x),bytes=x.stat().st_size) for x in pathlib.Path(c['output']).iterdir()} if c['output'] else {}\nprint('TIMED_RESULT '+json.dumps(dict(return_code=p.returncode,process_elapsed_ms=elapsed,child_max_RSS_KiB=resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss,products=products)),flush=True)\nsys.exit(p.returncode)\n",
+        "{\"side\":\"amd\",\"args\":[\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/async-original-encoder-candidate-build/20261113T054512.724819Z-I5-rocm-build-fa5f269177/sample\",\"-i\",\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-encoder-performance-inputs/small\",\"-n\",\"512\",\"-j\",\"2\",\"-s\",\"2\",\"-r\",\"1\",\"-b\",\"gpu\",\"-q\",\"80\",\"-p\",\"-f\",\"-d\"],\"output\":null,\"identities\":{\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/async-original-encoder-candidate-build/20261113T054512.724819Z-I5-rocm-build-fa5f269177/sample\":\"b9bf0c86844dca981dfa3d5f4f7a1d08a2544afc4bf92f6302413e3f56af2d42\",\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-encoder-performance-inputs/small/image.bmp\":\"05466780a90de0a433f4d13fcbed23e6f42b6fcaebd612331df7e760d713fb65\"}}"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-13T05:52:26.195541+00:00",
+      "timeout_seconds": 600,
+      "environment": {
+        "HIP_VISIBLE_DEVICES": "0",
+        "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "DEEPINFER_ROCM_RELEASE": "10.1.0",
+        "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+        "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+      },
+      "stdout": "logs/0008-unprofiled-7.stdout.log",
+      "stderr": "logs/0008-unprofiled-7.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-13T05:52:26.812033+00:00",
+      "seconds": 0.6155443339957856
+    },
+    {
+      "command_id": 9,
+      "phase": "unprofiled-8",
+      "argv": [
+        "/opt/venv/bin/python",
+        "-c",
+        "import hashlib,json,os,pathlib,resource,subprocess,sys,time\nc=json.loads(sys.argv[1]);sha=lambda p:hashlib.file_digest(pathlib.Path(p).open('rb'),'sha256').hexdigest()\nfor p,h in c['identities'].items():assert sha(p)==h,(p,'identity drift')\nldd=subprocess.check_output(['ldd',c['args'][0]],text=True);libs={}\nfor line in ldd.splitlines():\n w=line.split()\n if '=>' in w and len(w)>2 and w[2].startswith('/'):\n  p=pathlib.Path(w[2]).resolve();libs[str(p)]=sha(p)\nidentity=dict(config=c,libraries=libs,ldd=ldd,CUDA_VISIBLE_DEVICES=os.environ.get('CUDA_VISIBLE_DEVICES'),HIP_VISIBLE_DEVICES=os.environ.get('HIP_VISIBLE_DEVICES'))\nif c['side']=='native':identity['gpu']=subprocess.check_output(['nvidia-smi','--id=1','--query-gpu=name,uuid,pci.bus_id,driver_version','--format=csv,noheader'],text=True).strip()\nif c['output']:pathlib.Path(c['output']).mkdir(parents=True)\nprint('TIMED_IDENTITY '+json.dumps(identity),flush=True)\nstart=time.perf_counter_ns();p=subprocess.run(c['args'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True);elapsed=(time.perf_counter_ns()-start)/1e6\nsys.stdout.write(p.stdout);sys.stderr.write(p.stderr)\nproducts={x.name:dict(sha256=sha(x),bytes=x.stat().st_size) for x in pathlib.Path(c['output']).iterdir()} if c['output'] else {}\nprint('TIMED_RESULT '+json.dumps(dict(return_code=p.returncode,process_elapsed_ms=elapsed,child_max_RSS_KiB=resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss,products=products)),flush=True)\nsys.exit(p.returncode)\n",
+        "{\"side\":\"amd\",\"args\":[\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/async-original-encoder-candidate-build/20261113T054512.724819Z-I5-rocm-build-fa5f269177/sample\",\"-i\",\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-encoder-performance-inputs/small\",\"-n\",\"512\",\"-j\",\"2\",\"-s\",\"2\",\"-r\",\"1\",\"-b\",\"gpu\",\"-q\",\"80\",\"-p\",\"-f\",\"-d\"],\"output\":null,\"identities\":{\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/async-original-encoder-candidate-build/20261113T054512.724819Z-I5-rocm-build-fa5f269177/sample\":\"b9bf0c86844dca981dfa3d5f4f7a1d08a2544afc4bf92f6302413e3f56af2d42\",\"/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/image-encoder-performance-inputs/small/image.bmp\":\"05466780a90de0a433f4d13fcbed23e6f42b6fcaebd612331df7e760d713fb65\"}}"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-13T05:52:26.813390+00:00",
+      "timeout_seconds": 600,
+      "environment": {
+        "HIP_VISIBLE_DEVICES": "0",
+        "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "DEEPINFER_ROCM_RELEASE": "10.1.0",
+        "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+        "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+      },
+      "stdout": "logs/0009-unprofiled-8.stdout.log",
+      "stderr": "logs/0009-unprofiled-8.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-13T05:52:27.429531+00:00",
+      "seconds": 0.6156915330211632
+    }
+  ],
+  "source": "source.json",
+  "inputs": "inputs/manifest.json",
+  "expected_environment": "environment.expected.json"
+}

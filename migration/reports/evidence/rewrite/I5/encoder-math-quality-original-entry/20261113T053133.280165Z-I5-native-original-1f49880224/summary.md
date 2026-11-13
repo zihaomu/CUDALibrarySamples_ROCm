@@ -1,0 +1,7 @@
+# 20261113T053133.280165Z-I5-native-original-1f49880224
+
+Sample: `encoder-math-quality-original-entry`
+
+Outcome: **PASSED**
+
+See validation.json for individual checks.

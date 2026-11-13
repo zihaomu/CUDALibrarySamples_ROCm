@@ -1,0 +1,114 @@
+#!/usr/bin/env python3
+"""Publish the complete baseline encoder and refresh affected resize subsets."""
+import argparse,hashlib,json,subprocess
+from experiment import ROOT,Experiment,digest,git,write
+from image_completion_progress import record
+from image_completion_inventory import closure
+from image_encoder_math_binding import sealed
+from selected_proofs import inspect
+
+REPORT=ROOT/'migration/reports/image-encoder-completion-qualifications.json'
+SAMPLE='nvJPEG/nvJPEG-Encoder-MultipleInstances::nvJPEGEncMultipleInstances.cpp'
+
+def read(name):return json.loads((ROOT/'migration/reports'/name).read_text())
+def passed(row):return row.get('status')=='PASSED' and bool(row.get('checks')) and all(c['passed'] for c in row['checks'])
+
+def publication_shapes(rows):
+    expected={SAMPLE:('image-JPEG-full-GPU-async-original-entry','COMPLETE'),
+        'nvJPEG/Image-Resize::imageResize.cpp':('image-JPEG-mathematical-baseline-resize-subset','PARTIAL'),
+        'nvJPEG/Image-Resize-WaterMark::imageResizeWatermark.cpp':('image-JPEG-mathematical-baseline-resize-subset','PARTIAL')}
+    return len(rows)==3 and {r['sample_id'] for r in rows}==set(expected) and all((r['kind'],r['contract_status'])==expected[r['sample_id']] for r in rows)
+
+def performance_valid(perf,ids,binaries):
+    return set(perf)=={'amd','native'} and all([r['case'] for r in rows]==ids and all(passed(r) and len(r['repetitions'])==9 and r['side']==side and r['binary_sha256']==binaries[side] for r in rows) for side,rows in perf.items())
+
+def references(rows):
+    refs=set()
+    for row in rows:
+        member='qualification.json' if 'qualification_id' in row else 'result.json'
+        if member=='qualification.json':
+            expected={k:v for k,v in row.items() if k not in ['qualification_id','evidence']}
+            if json.loads((ROOT/row['evidence']/member).read_text())!=expected:raise ValueError('qualification identity')
+        else:sealed(row,'result.json' if (ROOT/row['evidence']/'result.json').exists() else 'trace-result.json')
+        refs.add(row['evidence']);refs.update(row.get('evidence_references',[]))
+    pending=list(refs);visited=set()
+    while pending:
+        ref=pending.pop()
+        if ref in visited:continue
+        visited.add(ref)
+        for member in ['result.json','trace-result.json','qualification.json','selection.json','reference.json','build.json']:
+            path=ROOT/ref/member
+            if path.exists():
+                value=json.loads(path.read_text())
+                if isinstance(value,dict):pending.extend(value.get('evidence_references',[]))
+    refs=visited
+    for ref in refs:
+        from audit import check
+        if check(ROOT/ref):raise ValueError('invalid seal '+ref)
+        for n,h in json.loads((ROOT/ref/'source.json').read_text())['dependencies'].items():
+            if not (ROOT/n).is_file() or digest(ROOT/n)!=h:raise ValueError('stale proof '+ref+': '+n)
+    return sorted(refs)
+
+def qualify():
+    base=read('image-encoder-instances-v2-qualification.json');cold=read('image-encoder-completion-cold.json')
+    math=[read('image-encoder-math-production-'+m+'.json') for m in ['fresh','development','heldout']]
+    perf={s:read('image-encoder-performance-v2-'+s+'.json') for s in ['amd','native']};memory=read('image-encoder-memory-summary.json')
+    groups=read('image-encoder-math-groups.json');controls=read('image-encoder-math-controls.json');rss=read('image-encoder-performance-controls.json');review=read('image-encoder-completion-review.json');publication_controls=read('image-encoder-completion-controls.json')
+    quality_profiles=[json.loads((ROOT/'migration/rewrite'/n).read_text()) for n in ['image-encoder-math-variant-v2-profile.json','image-encoder-quality-profile.json','image-encoder-quality-holdout-v2-profile.json']]
+    perf_ids=[c['id'] for c in json.loads((ROOT/'migration/rewrite/image-encoder-performance-profile.json').read_text())['cases']]
+    native=read('image-completion-encoder-native.json');proof=ROOT/native['cases'][0]['evidence'];commands=json.loads((proof/'commands.json').read_text());receipt=json.loads((proof/commands[0]['stdout']).read_text().splitlines()[0])
+    binaries={'amd':read('image-encoder-instances-v2-build.json')['binary_sha256'],'native':receipt['binary_sha256']}
+    checks=[dict(check='full-original-entry-runtime-and-large-subset',passed=passed(base) and base['case_count']==48),
+        dict(check='three-independent-complete-80-case-production-matrices',passed=all(passed(r) and len(r['cases'])==80 and [c['case'] for c in r['cases']]==[c['id'] for c in p['cases']] for r,p in zip(math,quality_profiles))),
+        dict(check='mathematical-entropy-structure-and-parameter-controls',passed=passed(groups) and passed(controls)),
+        dict(check='six-two-platform-unprofiled-performance-distributions',passed=performance_valid(perf,perf_ids,binaries)),
+        dict(check='twelve-complete-allocation-lifetimes-and-four-negatives',passed=passed(memory) and len(memory['cases'])==12 and {(r['side'],r['case']) for r in memory['cases']}=={(s,c) for s in perf for c in perf_ids}),
+        dict(check='CPU-RSS-target-process-isolation',passed=passed(rss)),
+        dict(check='independent-final-review-findings-closed',passed=passed(review)),
+        dict(check='publication-shapes-platform-binary-negative-controls',passed=passed(publication_controls) and len(publication_controls['checks'])==9),
+        dict(check='committed-cold-rebuild-full-regression-and-248-byte-reproductions',passed=passed(cold) and len(cold['outputs'])==248)]
+    if not all(c['passed'] for c in checks):raise ValueError([c for c in checks if not c['passed']])
+    refs=references([base,cold,*math,*perf['amd'],*perf['native'],memory,groups,controls,rss,review,publication_controls])
+    source=ROOT/base['implementation'];deps=base['dependencies']
+    ids=base['case_ids']+[f'IMG-01/math-{m}/{r["case"]}' for m,group in zip(['fresh','development','heldout'],math) for r in group['cases']]
+    ids += ['IMG-01/performance-'+side+'/'+r['case'] for side,rows in perf.items() for r in rows]
+    ids += ['IMG-01/memory-'+r['side']+'/'+r['case'] for r in memory['cases']]+['IMG-01/mathematics-controls','IMG-01/committed-cold-rebuild']
+    e=Experiment('I5',SAMPLE,'complete-original-encoder-qualification',sources=[__file__,*[ROOT/n for n in deps],ROOT/'migration/rewrite/image-encoder-math-variant-v2-profile.json',ROOT/'migration/rewrite/image-encoder-performance-profile.json'])
+    q=dict(kind='image-JPEG-full-GPU-async-original-entry',status='PASSED',contract_status='COMPLETE',sample_id=SAMPLE,implementation=base['implementation'],implementation_sha256=digest(source),source_commit=cold['source_commit'],case_count=len(ids),case_ids=ids,checks=checks,devices=base['devices'],dependencies=deps,evidence_references=refs,rocm_evidence=base['rocm_evidence'],cuda_evidence=base['cuda_evidence'],comparison_mode='ALGORITHM_VARIANT_WITH_EXACT_LOCAL_MATHEMATICS_AND_CPU_NATIVE_GLOBAL_QUALITY',limitations=['Linux/gfx1201/ROCm10.1 only; NVIDIA-only forced hardware backend is an explicit capability error, AUTO/GPU use AMD GPU.', 'Bounded measured automatic thread search; no claim of identical NVIDIA tuning or speed.', 'Baseline 8-bit 4:2:0/4:4:4 and optimized/standard Huffman are the original entry scope; progressive re-encoding belongs to separate resize entries.', 'Maximum square dimensions have checked indexing/capacity rejection, not a successful full-device allocation claim.', 'CPU BMP parsing, standard markers and optimized DHT table design are host orchestration; image transform and entropy remain GPU.'])
+    write(e.path/'qualification.json',q);q['qualification_id']=e.id;q['evidence']=e.finish('PASSED',dict(status='PASSED',checks=checks));result=[q];write(REPORT,result)
+    integration=read('image-jpeg-encoder-full-gpu-integration.json');traces=read('image-jpeg-encoder-full-gpu-frontend-trace.json');products=read('image-encoder-resize-math.json');negative=read('image-encoder-resize-math-negatives.json')
+    for run in integration:
+        trace=next(r for r in traces if r['source']==run['source']);proof=sealed(run,'integration.json');sealed(trace,'trace-result.json');source=ROOT/'rocm/ported'/run['source'];deps,missing=closure(source)
+        src=json.loads((proof/'source.json').read_text());patch=(proof/'source.patch').read_text()
+        for n,h in deps.items():
+            if n in run['dependencies']:
+                if run['dependencies'][n]!=h:raise ValueError('compiled resize source changed')
+            elif ('diff --git a/'+n+' b/'+n) in patch or hashlib.sha256(subprocess.check_output(['git','show',src['commit']+':'+n],cwd=ROOT)).hexdigest()!=h:
+                raise ValueError('unbound resize compilation dependency '+n)
+        if missing:raise ValueError('unresolved local includes')
+        checks=[dict(check='seven-original-CLI-postprocess-and-file-oracles',passed=run['status']=='PASSED_SUBSET' and len(run['cases'])==7 and all(c['passed'] for c in run['checks'])),dict(check='68-complete-current-JPEG-mathematical-products',passed=passed(products) and len(products['products'])==68),dict(check='product-seal-and-negative-controls',passed=passed(negative) and len(negative['checks'])==6),dict(check='actual-original-entry-GPU-entropy-trace',passed=passed(trace))]
+        if not all(c['passed'] for c in checks):raise ValueError('resize subset incomplete')
+        refs=references([products,negative,trace]);refs.append(run['evidence'])
+        sid=run['source'].rsplit('/',1)[0]+'::'+source.name;ids=['IMG-01/resize/'+c['case'] for c in run['cases']]+['IMG-01/resize/current-JPEG-mathematics','IMG-01/resize/actual-entry-GPU-trace']
+        e=Experiment('I5',sid,'current-resize-mathematical-subset',sources=[__file__,*[ROOT/n for n in deps],ROOT/'migration/rewrite/image-encoder-resize-math-profile.json'])
+        q=dict(kind='image-JPEG-mathematical-baseline-resize-subset',status='PASSED',contract_status='PARTIAL',sample_id=sid,implementation=str(source.relative_to(ROOT)),implementation_sha256=digest(source),source_commit=git('rev-parse','HEAD').strip(),case_count=len(ids),case_ids=ids,checks=checks,devices=json.loads((ROOT/trace['evidence']/'backend.observed.json').read_text())['devices'],dependencies=deps,evidence_references=sorted(set(refs)),rocm_evidence=run['evidence'],comparison_mode='ALGORITHM_VARIANT_FULL_LOCAL_MATHEMATICS_AND_INDEPENDENT_CPU_QUALITY',remaining='Progressive decode entropy still CPU; source progressive output, source quantization tables and APP/COM metadata inheritance; full entry cold/native qualification under IMG-03–05.')
+        write(e.path/'qualification.json',q);q['qualification_id']=e.id;q['evidence']=e.finish('PASSED',dict(status='PASSED',checks=checks));result.append(q);write(REPORT,result)
+    record('IMG-01','完整多实例encoder资格及两个受影响resize当前子集资格已生成，等待Git封存发布；resize仍PARTIAL，未省略progressive解码/重编码和metadata缺口。',[q['evidence'] for q in result]);print([(q['sample_id'],q['contract_status'],q['case_count']) for q in result])
+
+def publish():
+    qualifiers=json.loads(REPORT.read_text());catalog=ROOT/'migration/samples.yaml';data=json.loads(catalog.read_text())
+    if not publication_shapes(qualifiers):raise ValueError('exact three unique sample IDs and COMPLETE/PARTIAL kinds required')
+    for q in qualifiers:
+        sample=next(s for s in data['samples'] if s['id']==q['sample_id']);result=inspect(dict(sample,selected_validation=q))
+        if result['status']!='PASSED':raise ValueError(result['errors'])
+        complete=q['sample_id']==SAMPLE
+        missing=[] if complete else ['IMG-03/full-GPU-progressive-entropy','IMG-05/progressive-output-source-DQT-APP-COM','IMG-10/full-entry-cold-native-review']
+        sample.update(status='PASSED' if complete else 'PARTIAL',level='L4',reason_code='VALIDATED_MOAT_REWRITE' if complete else 'VALIDATED_I5_MATHEMATICAL_RESIZE_SUBSET',selected_validation=q,required_cases=q['case_ids']+missing,passed_cases=q['case_ids'],equivalence='ALGORITHM_VARIANT',active_batch='IMG-01',actual_library='Project HIP full baseline JPEG encoder, checked adaptive prefix, asynchronous pinned/device slots; CPU markers and optimized DHT design' if complete else 'rocJPEG + project HIP progressive pixels/resize/watermark + full HIP baseline JPEG encoder; CPU progressive decode entropy remains',backend_library='Project HIP + libjpeg-turbo host DHT orchestration' if complete else 'rocJPEG + project HIP + libjpeg-turbo progressive entropy',reason='完整多实例入口通过：48项功能/运行子集、240数学用例CPU/native对照、两平台性能/分配峰值与固定提交冷构建；baseline 420/444及标准/优化Huffman GPU全链，CPU只做允许的标记/DHT编排。显式数学变体与NVIDIA专用硬件差异见资格限制。' if complete else '七组原CLI、当前68产品独立数学/严格全MCU解码及CPU质量通过，生产GPU编码trace及产品seal反向检查通过；progressive解码仍有CPU熵阶段，源progressive输出/DQT/APP/COM继承及完整冷检出未完成，保留PARTIAL。',retry_condition='Requalify when compiled code, oracle or required platform contract changes.' if complete else q['remaining'],next_step='继续IMG-02–IMG-10其余图像模块。' if complete else 'IMG-03完整GPU解码后完成IMG-05模式/表/metadata继承。',benchmark='MEASURED' if complete else sample.get('benchmark','NOT_RUN'),cuda_comparison='PASSED' if complete else 'BLOCKED',cuda_comparison_mode=q['comparison_mode'],cuda_comparison_reason='240个质量/数学产品CPU与原始native对照通过；CPU/native局部比值旧失败保留并以明确数学变体重新验收。' if complete else '既有CUDA数学对照保留历史；当前新JPEG算术按CPU数学变体验收，完整新入口native复核随IMG-05完成。')
+        sample['attempts'].append(q)
+        for ref in [q['evidence'],'migration/reports/image-encoder-math-variant.md','migration/reports/image-encoder-performance.md','migration/reports/image-completion-IMG-01.md']:
+            if ref not in sample['evidence']:sample['evidence'].append(ref)
+    write(catalog,data);write(ROOT/'migration/reports/image-encoder-completion-publication.json',dict(status='PUBLISHED',complete=1,partial=2,qualifications=[q['evidence'] for q in qualifiers]))
+    record('IMG-01','完整多实例JPEG编码入口已按当前Git资格发布；两个resize子集同步刷新并保留PARTIAL。图像整例14/26，全部项目253 PASSED/23 PARTIAL/363 FAILED；其余IMG阶段继续实施。',[str(REPORT.relative_to(ROOT))],state='COMPLETED');print('PUBLISHED 1 COMPLETE, 2 PARTIAL')
+
+if __name__=='__main__':
+    p=argparse.ArgumentParser();p.add_argument('action',choices=['qualify','publish']);a=p.parse_args();globals()[a.action]()
