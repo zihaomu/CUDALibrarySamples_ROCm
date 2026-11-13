@@ -44,17 +44,23 @@ __global__ void rgb_to_plane(const unsigned char* rgb,unsigned char* plane,
     const auto position=pixel_index(index,pw,ph);
     if(!position.valid)return;
     const int x=int(position.x),y=int(position.y),scale=channel==0?1:sampling;
-    float total=0.0f;
+    // The largest numerator is 255.5 * 1,000,000 * 4, below INT_MAX.
+    // Exact decimal weights prevent compiler FMA from moving half-integer ties.
+    int total=0;
     for(int dy=0;dy<scale;++dy)for(int dx=0;dx<scale;++dx) {
         const int sx=x*scale+dx<width?x*scale+dx:width-1;
         const int sy=y*scale+dy<height?y*scale+dy:height-1;
         const auto* color=rgb+(size_t(sy)*width+sx)*3;
-        const float r=color[0],g=color[1],b=color[2];
-        total+=channel==0?0.299f*r+0.587f*g+0.114f*b:
-               channel==1?128.0f-0.168736f*r-0.331264f*g+0.5f*b:
-                          128.0f+0.5f*r-0.418688f*g-0.081312f*b;
+        const int r=color[0],g=color[1],b=color[2];
+        total+=channel==0?299000*r+587000*g+114000*b:
+               channel==1?128000000-168736*r-331264*g+500000*b:
+                          128000000+500000*r-418688*g-81312*b;
     }
-    plane[index]=image_jpeg_encoder::byte(total/float(scale*scale));
+    const int denominator=1000000*scale*scale;
+    int rounded=total/denominator;
+    const int twice_remainder=2*(total%denominator);
+    rounded+=twice_remainder>denominator || (twice_remainder==denominator && (rounded&1));
+    plane[index]=static_cast<unsigned char>(rounded<0?0:rounded>255?255:rounded);
 }
 
 __global__ void forward_dct_quantize(const unsigned char* plane,const unsigned short* quant,
@@ -71,8 +77,10 @@ __global__ void forward_dct_quantize(const unsigned char* plane,const unsigned s
             sum+=(float(plane[size_t(sy)*width+sx])-128.0f)*cosine[x*8+u]*cosine[y*8+v];
         }
     }
-    const float normalizer=(u?1.0f:0.7071067811865475f)*(v?1.0f:0.7071067811865475f)*0.25f;
-    coefficients[index]=static_cast<short>(__float2int_rn(sum*normalizer/quant[index%64]));
+    const float normalizer=(!u&&!v)?0.125f:(u?1.0f:0.7071067811865475f)*(v?1.0f:0.7071067811865475f)*0.25f;
+    const float scaled=sum*normalizer/quant[index%64];
+    const int whole=__float2int_rz(scaled);const float fraction=scaled-float(whole);
+    coefficients[index]=static_cast<short>(whole+(fraction>=0.5f?1:(fraction<=-0.5f?-1:0)));
 }
 
 __global__ void gather_mcu_coefficients(const short* y,const short* cb,const short* cr,

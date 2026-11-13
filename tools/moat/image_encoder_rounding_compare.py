@@ -13,8 +13,10 @@ def main(selected=None):
     reports=[ROOT/'migration/reports'/n for n in names];candidate,cpu,native=[json.loads(p.read_text()) for p in reports]
     p=json.loads(PROFILE.read_text());lock=json.loads(LOCK.read_text());expected={k:v for k,v in lock.items() if k!='evidence'}
     if identity()!=expected:raise ValueError('CPU identity drift')
-    for group in [candidate,cpu,native]:
-        if [r['case'] for r in group]!=[c['id'] for c in p['cases']] or len(group)!=80:raise ValueError('full matrix required')
+    if selected and (len(selected)!=len(set(selected)) or not set(selected)<={r['case'] for r in candidate}):raise ValueError('selected cases must be unique and present')
+    for number,group in enumerate([candidate,cpu,native]):
+        count=len(group) if selected and number==0 else 80
+        if not 0<count<=80 or len(group)!=count or [r['case'] for r in group]!=[c['id'] for c in p['cases'][:count]]:raise ValueError('complete matrix or explicitly selected frozen prefix required')
         for row in group:
             directory=ROOT/row['evidence']
             if audit_check(directory) or json.loads((directory/'result.json').read_text())!={k:v for k,v in row.items() if k!='evidence'}:raise ValueError('report not sealed')
@@ -42,7 +44,7 @@ def main(selected=None):
         status='PASSED' if checks and all(c['passed'] for c in checks) else 'FAILED';row=dict(case=case['id'],status=status,checks=checks,metrics=data,decoded_sha256=decoded,evidence_references=[r['evidence'] for r in [a,c,n]],experiment_id=e.id)
         write(e.path/'result.json',row);row['evidence']=e.finish('PASSED' if status=='PASSED' else 'NUMERIC_MISMATCH',dict(status=status,checks=checks));results.append(row);write(ROOT/'migration/reports/image-encoder-rounding-candidate-comparison.json',results)
         record('IMG-01','独立舍入候选三方比较 '+case['id']+'：'+status+'；使用原冻结质量预算和既有CPU/native产品，未签发生产资格。',[row['evidence']]);print(case['id'],status,flush=True)
-    return int(any(r['status']!='PASSED' for r in results))
+    return int(not results or any(r['status']!='PASSED' for r in results))
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser();parser.add_argument('--case',action='append');args=parser.parse_args();raise SystemExit(main(args.case))

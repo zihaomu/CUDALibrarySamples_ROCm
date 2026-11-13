@@ -1,0 +1,143 @@
+{
+  "status": "FROZEN",
+  "cases": [
+    {
+      "id": "small-device-standard",
+      "input": "small",
+      "jobs": 1024,
+      "sampling": 2,
+      "optimized": false,
+      "mode": "device",
+      "quality": 80,
+      "threads": 2,
+      "states": 2,
+      "runs": 1
+    },
+    {
+      "id": "small-download-optimized",
+      "input": "small",
+      "jobs": 512,
+      "sampling": 1,
+      "optimized": true,
+      "mode": "download",
+      "quality": 80,
+      "threads": 2,
+      "states": 2,
+      "runs": 1
+    },
+    {
+      "id": "medium-device-standard",
+      "input": "natural",
+      "jobs": 64,
+      "sampling": 2,
+      "optimized": false,
+      "mode": "device",
+      "quality": 80,
+      "threads": 2,
+      "states": 2,
+      "runs": 1
+    },
+    {
+      "id": "medium-download-optimized",
+      "input": "noise",
+      "jobs": 64,
+      "sampling": 1,
+      "optimized": true,
+      "mode": "download",
+      "quality": 80,
+      "threads": 2,
+      "states": 2,
+      "runs": 1
+    },
+    {
+      "id": "medium-write-optimized",
+      "input": "natural",
+      "jobs": 16,
+      "sampling": 2,
+      "optimized": true,
+      "mode": "write",
+      "quality": 80,
+      "threads": 2,
+      "states": 2,
+      "runs": 1
+    },
+    {
+      "id": "large-download-standard",
+      "input": "large",
+      "jobs": 4,
+      "sampling": 2,
+      "optimized": false,
+      "mode": "download",
+      "quality": 80,
+      "threads": 2,
+      "states": 2,
+      "runs": 1
+    }
+  ],
+  "inputs": {
+    "small": {
+      "id": "natural-cat",
+      "path": "migration/fixtures/image-encoder-quality/natural-cat.bmp",
+      "sha256": "05466780a90de0a433f4d13fcbed23e6f42b6fcaebd612331df7e760d713fb65",
+      "bytes": 12342,
+      "width": 64,
+      "height": 64,
+      "rgb_sha256": "a13ae104b3ba8b8503d96ff3ab02009c79b809f79e824002f1972a21c6a0861e"
+    },
+    "natural": {
+      "id": "math-natural-img5",
+      "path": "migration/fixtures/image-encoder-math-variant/math-natural-img5.bmp",
+      "sha256": "925741b882c9c15294625b20f976365a64c5272bc7d57f4c2b8a067965771400",
+      "bytes": 921654,
+      "width": 640,
+      "height": 480,
+      "rgb_sha256": "cd41068c9fc72e8494cc0592b8dc164115a351e3d9c62b94e2df3113e96e220e"
+    },
+    "noise": {
+      "id": "math-noise",
+      "path": "migration/fixtures/image-encoder-math-variant/math-noise.bmp",
+      "sha256": "cbdb4f9f534c59eb90ee5779ba99ce49828b768d79b9424db5f73c4943afb00f",
+      "bytes": 323590,
+      "width": 389,
+      "height": 277,
+      "rgb_sha256": "f7b5342d080cab7dcf8e0e1169a440463d2960bf8fbafd4ced155c1fb3ee4a35"
+    },
+    "large": {
+      "generator": "tools/moat/image_encoder_large.py",
+      "profile": "migration/rewrite/image-encoder-large-profile.json",
+      "case": {
+        "id": "entry-4097x4095-s2",
+        "width": 4097,
+        "height": 4095,
+        "sampling": 2,
+        "quality": 80,
+        "seed": 17303,
+        "bytes": 50331645,
+        "sha256": "6f1beaf1169d9d31ec29eb8895f1520520fbdcbe4053609f3afbddc5853e1a31",
+        "pattern": "random",
+        "optimized": false,
+        "jobs": 3,
+        "exact_source_pixels": false,
+        "bmp_bytes": 50335794,
+        "bmp_sha256": "e4be3511de358bf3c039a929445abdaa0b5b05a864bdfa0e469f574f11f1215e"
+      }
+    }
+  },
+  "warmups": 2,
+  "repetitions": 7,
+  "timing": "Separate unprofiled process per repetition, monotonic timer immediately around subprocess on each local host; includes process startup, preparation, encode, transfer/write and teardown, excludes SSH and input staging. Same frozen BMP bytes and original CLI n/j/s/r/q/p/f/d/o modes on AMD/native.",
+  "statistics": [
+    "all raw repetitions",
+    "min",
+    "median",
+    "max",
+    "p95",
+    "median absolute deviation",
+    "images / process wall seconds"
+  ],
+  "internal_metrics": "Preserve vendor Throughput and Latency plus AMD preparation/measured/end-to-end fields with exact source boundaries; they are not interchangeable. Native throughput uses integer milliseconds and latency is GPU event aggregate. Do not call AMD batch wall/images a native GPU latency comparison.",
+  "memory": "One separate profiled execution per case/side, outside timing distribution. Reconstruct live device and pinned allocations from actual allocation/free trace events with address, size, device and timestamp. Report peak traced allocation bytes and coverage limitations, separately from CPU max RSS. Never equate visible free-memory delta or workspace lower bound with peak allocation.",
+  "profiler": "rocprofv3 allocation/copy/HIP/kernel trace on AMD; nsys CUDA memory usage and trace on native. Profiler outputs cannot supply unprofiled throughput.",
+  "scope": "Observational performance comparison, no minimum speedup requirement. Only current independently accepted candidate/current production identity may be used for final report. All nonzero exits, absent products, nonfinite timings or missing allocation coverage remain explicit failures, not performance successes.",
+  "evidence": "migration/reports/evidence/rewrite/I5/encoder-end-to-end-performance-contract/20261113T053451.156304Z-I5-CPU-contract-799aad61af"
+}

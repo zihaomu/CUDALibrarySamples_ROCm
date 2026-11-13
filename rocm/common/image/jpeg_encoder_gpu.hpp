@@ -39,26 +39,28 @@ __device__ inline unsigned char byte(float value) {
   return static_cast<unsigned char>(integer < 0 ? 0 : integer > 255 ? 255 : integer);
 }
 
-__global__ void rgb_to_plane(const unsigned char* rgb, unsigned char* plane,
-                             int image_width, int image_height, int plane_width,
-                             int plane_height, int channel, int sampling) {
-  int index = blockIdx.x * blockDim.x + threadIdx.x;
-  if (index >= plane_width * plane_height) return;
-  int x = index % plane_width, y = index / plane_width;
-  int scale = channel == 0 ? 1 : sampling;
-  float total = 0.0f;
-  for (int dy = 0; dy < scale; ++dy) {
-    for (int dx = 0; dx < scale; ++dx) {
-      int sx = x * scale + dx < image_width ? x * scale + dx : image_width - 1;
-      int sy = y * scale + dy < image_height ? y * scale + dy : image_height - 1;
-      const unsigned char* color = rgb + (size_t(sy) * image_width + sx) * 3;
-      float r = color[0], g = color[1], b = color[2];
-      total += channel == 0 ? 0.299f*r + 0.587f*g + 0.114f*b :
-               channel == 1 ? 128.0f - 0.168736f*r - 0.331264f*g + 0.5f*b :
-                              128.0f + 0.5f*r - 0.418688f*g - 0.081312f*b;
+__global__ void rgb_to_plane(const unsigned char* rgb,unsigned char* plane,
+    int width,int height,int pw,int ph,int channel,int sampling) {
+    const size_t index=size_t(blockIdx.x)*blockDim.x+threadIdx.x;
+    if(index>=size_t(pw)*ph)return;
+    const int x=int(index%pw),y=int(index/pw),scale=channel==0?1:sampling;
+    // The largest numerator is 255.5 * 1,000,000 * 4, below INT_MAX.
+    // Exact decimal weights prevent compiler FMA from moving half-integer ties.
+    int total=0;
+    for(int dy=0;dy<scale;++dy)for(int dx=0;dx<scale;++dx) {
+        const int sx=x*scale+dx<width?x*scale+dx:width-1;
+        const int sy=y*scale+dy<height?y*scale+dy:height-1;
+        const auto* color=rgb+(size_t(sy)*width+sx)*3;
+        const int r=color[0],g=color[1],b=color[2];
+        total+=channel==0?299000*r+587000*g+114000*b:
+               channel==1?128000000-168736*r-331264*g+500000*b:
+                          128000000+500000*r-418688*g-81312*b;
     }
-  }
-  plane[index] = byte(total / float(scale * scale));
+    const int denominator=1000000*scale*scale;
+    int rounded=total/denominator;
+    const int twice_remainder=2*(total%denominator);
+    rounded+=twice_remainder>denominator || (twice_remainder==denominator && (rounded&1));
+    plane[index]=static_cast<unsigned char>(rounded<0?0:rounded>255?255:rounded);
 }
 
 __global__ void forward_dct_quantize(const unsigned char* plane, const unsigned short* quant,
@@ -79,9 +81,12 @@ __global__ void forward_dct_quantize(const unsigned char* plane, const unsigned 
              cosine[x * 8 + u] * cosine[y * 8 + v];
     }
   }
-  float normalizer = (u ? 1.0f : 0.7071067811865475f) *
-                     (v ? 1.0f : 0.7071067811865475f) * 0.25f;
-  coefficients[index] = static_cast<short>(__float2int_rn(sum * normalizer / quant[frequency]));
+  const float normalizer = (!u && !v) ? 0.125f :
+      (u ? 1.0f : 0.7071067811865475f) * (v ? 1.0f : 0.7071067811865475f) * 0.25f;
+  const float scaled = sum * normalizer / quant[frequency];
+  const int whole = __float2int_rz(scaled);
+  const float fraction = scaled - float(whole);
+  coefficients[index] = static_cast<short>(whole + (fraction >= 0.5f ? 1 : (fraction <= -0.5f ? -1 : 0)));
 }
 
 inline void encode(const std::vector<unsigned char>& rgb, int width, int height,
