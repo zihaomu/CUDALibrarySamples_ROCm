@@ -14,6 +14,8 @@ CUDA 栏注明“当前验收记录”“专项对照记录”或“原始/历�
 
 图像库后续重写的逐步实验见 [图像库执行记录](image-libraries-progress.md)；候选阶段检查与原生能力调查不增加本表的整例通过数。
 
+图像当前缺口与依赖见 [26入口账本](image-completion-IMG-00.md)，编码器候选实现与完整证据见 [IMG-01实施报告](image-completion-IMG-01.md)；阶段状态与实验同步到 [完整实施计划](../image-completion-plan.md)。
+
 JPEG2000 的已验 HIP MQ 算术解码与可逆变换组件、原图 CPU/CUDA 跨解码，以及仍缺的真实码块和完整码流阶段见 [I6 组件与缺口报告](image-jpeg2000-I6.md)。组件成功不增加原始入口通过数。
 
 ## 已验收算子与验证范围
@@ -65,8 +67,8 @@ JPEG2000 的已验 HIP MQ 算术解码与可逆变换组件、原图 CPU/CUDA �
 | PARTIAL | `VALIDATED_B12_B15_SUBSET` | 8 | 已有验收子集，原始 descriptor、低精度通信、序列或像素语义仍有缺口。 |
 | PARTIAL | `VALIDATED_B9_B11_SUBSET` | 3 | 已有验收子集，原例框架、调度或配置/查询语义仍有缺口。 |
 | PARTIAL | `VALIDATED_I4_PROGRESSIVE_SUBSET` | 4 | 按该入口的失败日志和恢复条件处理。 |
+| PARTIAL | `VALIDATED_I5_ASYNC_GPU_JPEG_INSTANCES_SUBSET` | 1 | 按该入口的失败日志和恢复条件处理。 |
 | PARTIAL | `VALIDATED_I5_FULL_GPU_JPEG_BASELINE_SUBSET` | 2 | 按该入口的失败日志和恢复条件处理。 |
-| PARTIAL | `VALIDATED_I5_OPTIMIZED_GPU_JPEG_INSTANCES_SUBSET` | 1 | 按该入口的失败日志和恢复条件处理。 |
 | PARTIAL | `VENDOR_PERMUTATION_POLICY_DIFFERS` | 1 | 置换/排序策略未满足原始 vendor 合同。 |
 
 ## 逐入口实现、结果与日志
@@ -843,7 +845,7 @@ JPEG2000 的已验 HIP MQ 算术解码与可逆变换组件、原图 CPU/CUDA �
 | [nvJPEG-Decoder-MultipleInstances/nvJPEGDecMultipleInstances.cpp](../sample-reports/nvJPEG/nvJPEG-Decoder-MultipleInstances/nvJPEGDecMultipleInstances.cpp.md) | PARTIAL / 8/10 | rocJPEG hardware baseline + project HIP progressive IDCT/chroma/RGB; libjpeg-turbo CPU entropy assembly / rocJPEG + project HIP image decoder + libjpeg-turbo entropy；GPU 实现 + 明确标注的 CPU 阶段 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-f846e59c86c3) |
 | [nvJPEG-Decoder/nvjpegDecoder.cpp](../sample-reports/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp.md) | PARTIAL / 8/9 | rocJPEG hardware baseline + project HIP progressive IDCT/chroma/RGB; libjpeg-turbo CPU entropy assembly / rocJPEG + project HIP image decoder + libjpeg-turbo entropy；GPU 实现 + 明确标注的 CPU 阶段 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-340e3057571d) |
 | [nvJPEG-Decoder/tests/test_decoder.py](../sample-reports/nvJPEG/nvJPEG-Decoder/tests/test_decoder.py.md) | PARTIAL / 8/9 | rocJPEG hardware baseline + project HIP progressive IDCT/chroma/RGB; libjpeg-turbo CPU entropy assembly / rocJPEG + project HIP image decoder + libjpeg-turbo entropy；GPU 实现 + 明确标注的 CPU 阶段 | [日志、范围、源码](support-log-index/nvJPEG.md#sample-682072b0c8fa) |
-| [nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp](../sample-reports/nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp.md) | PARTIAL / 10/14 | Project HIP multi-stream baseline and optimized JPEG color/downsample/FDCT/quant/Huffman/pack/stuff; CPU libjpeg-turbo standard markers and optimized DHT design / project HIP full baseline/optimized JPEG encoder + CPU libjpeg-turbo DHT/header design；GPU_BASELINE_AND_OPTIMIZED_HUFFMAN_WITH_CPU_DHT_DESIGN | [日志、范围、源码](support-log-index/nvJPEG.md#sample-1745f35191ec) |
+| [nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp](../sample-reports/nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp.md) | PARTIAL / 20/25 | Project HIP baseline/optimized JPEG color, FDCT, Huffman, checked parallel prefix, pinned buffers and event-driven slots; CPU markers/DHT design / HIP async full baseline/optimized JPEG + CPU libjpeg-turbo DHT/header design；GPU_ASYNC_JPEG_WITH_BOUNDED_CPU_THREAD_CALIBRATION | [日志、范围、源码](support-log-index/nvJPEG.md#sample-1745f35191ec) |
 
 <a id="module-26"></a>
 

@@ -4,7 +4,7 @@
 
 2026-11-13 后续设计：[剩余图像模块完整实现计划](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/image-completion-plan.md)依据当前 13/26 整例通过状态，将剩余工作细化为 IMG-00–IMG-10，列出13欠项、验收门槛和共享代码回归要求。该文档为后续计划，不新增支持数；下方启动基线和历史执行记录保留。
 
-截至 2026-11-12，本计划四模块 **13/26 整例通过、9 PARTIAL、4 FAILED**：NPP 8/9、NPP+ 5/6、nvJPEG 0/7、nvJPEG2000 0/4。I3 两个 watershed 已有完整 HIP 文件入口及独立 CPU 逐字节结果，但原生分割/边界语义差异显著，保持 PARTIAL；I4–I8 JPEG/JPEG2000 整例目标仍未完成。全项目为 252 PASSED、24 PARTIAL、363 FAILED。详细资格及失败原因见项目的 `migration/reports/image-libraries-progress.md` 和 `migration/reports/support-log-index.md`。
+截至 2026-11-13，本计划四模块 **13/26 整例通过、9 PARTIAL、4 FAILED**：NPP 8/9、NPP+ 5/6、nvJPEG 0/7、nvJPEG2000 0/4。I3 两个 watershed 已有完整 HIP 文件入口及独立 CPU 逐字节结果，但原生分割/边界语义差异显著，保持 PARTIAL；I4–I8 JPEG/JPEG2000 整例目标仍未完成。全项目为 252 PASSED、24 PARTIAL、363 FAILED。详细资格及失败原因见项目的 `migration/reports/image-libraries-progress.md` 和 `migration/reports/support-log-index.md`。
 
 ## 1. 目标和“完整支持”的含义
 
@@ -284,7 +284,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-13T03:16:58.302685+00:00。26入口当前13通过/9部分/4失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-13T03:22:49.505768+00:00。26入口当前13通过/9部分/4失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -2224,5 +2224,9 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-13T03:13:20.052473+00:00 | I5 | IMG-01：正式入口20项子集资格封存：15 CLI、33产品、3真实多线程trace、变化输入及组件故障/传输证明；完整保留集/大索引/性能/冷构建未完成，保持PARTIAL。 | `migration/reports/evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261113T031319.007294Z-I5-composite-subset-qualification-b306444164` |
 | 2026-11-13T03:16:43.678898+00:00 | I5 | IMG-01：复审发现的重复已封存case覆盖漏洞已修复：完整冻结ID/逐case产品集合绑定；11项删减/重复反向检查 PASSED。 | `migration/reports/evidence/rewrite/I5/async-encoder-qualification-coverage-negatives/20261113T031642.620876Z-I5-CPU-negative-e309436a78` |
 | 2026-11-13T03:16:58.302685+00:00 | I5 | IMG-01：正式入口20项子集资格封存：15 CLI、33产品、3真实多线程trace、变化输入及组件故障/传输证明；完整保留集/大索引/性能/冷构建未完成，保持PARTIAL。 | `migration/reports/evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261113T031657.268240Z-I5-composite-subset-qualification-fd52687b9f` |
+| 2026-11-13T03:19:18.141709+00:00 | I5 | IMG-01：已将新异步编码器20项当前子集资格发布到主表；原始CUDA基线恢复，完整等价/性能等欠项明示，图像整例计数仍13/26。 | `migration/reports/evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261113T031657.268240Z-I5-composite-subset-qualification-fd52687b9f`；`migration/reports/image-encoder-instances-v2-publication.json` |
+| 2026-11-13T03:19:37.769819+00:00 | I0 | IMG-00：建立26入口当前资格、源码SHA、本地include反向依赖与算法欠项账本；确认13 PASSED/9 PARTIAL/4 FAILED。完整语义矩阵和保留验收集仍未完成，阶段保持IN_PROGRESS。 | `migration/reports/image-completion-inventory.json`；`migration/reports/image-completion-IMG-00.md`；`migration/reports/evidence/rewrite/I0/image-completion-26-source-dependency-gap-ledger/20261113T031936.668243Z-I0-CPU-contract-0d8048f7fb` |
+| 2026-11-13T03:20:01.182565+00:00 | I0 | IMG-00：建立26入口当前资格、源码SHA、本地include反向依赖与算法欠项账本；确认13 PASSED/9 PARTIAL/4 FAILED。完整语义矩阵和保留验收集仍未完成，阶段保持IN_PROGRESS。 | `migration/reports/image-completion-inventory.json`；`migration/reports/image-completion-IMG-00.md`；`migration/reports/evidence/rewrite/I0/image-completion-26-source-dependency-gap-ledger/20261113T032000.052970Z-I0-CPU-contract-bbaad78034` |
+| 2026-11-13T03:22:49.505768+00:00 | I5 | IMG-01：当前正式入口子集已发布；全项目一致性、4836条封存实验、42项既有完整重写资格及新增JPEG子集传递证明均通过，无未封存/遗留RUNNING。整例仍13/26；本次源码/证据检查点准备推送fork。 | `migration/reports/final-validation.json`；`migration/reports/rewrite-evidence-audit.json`；`migration/reports/rewrite-selected-proof-audit.json`；`migration/reports/image-encoder-instances-v2-selected-proof.json` |
 
 <!-- IMAGE_EXECUTION:END -->

@@ -109,11 +109,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-13T03:16:58.302685+00:00。26入口当前13通过/9部分/4失败。
+更新时间：2026-11-13T03:22:49.505768+00:00。26入口当前13通过/9部分/4失败。
 
-I5：IMG-01：正式入口20项子集资格封存：15 CLI、33产品、3真实多线程trace、变化输入及组件故障/传输证明；完整保留集/大索引/性能/冷构建未完成，保持PARTIAL。
+I5：IMG-01：当前正式入口子集已发布；全项目一致性、4836条封存实验、42项既有完整重写资格及新增JPEG子集传递证明均通过，无未封存/遗留RUNNING。整例仍13/26；本次源码/证据检查点准备推送fork。
 
-证据：`migration/reports/evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261113T031657.268240Z-I5-composite-subset-qualification-fd52687b9f`
+证据：`migration/reports/final-validation.json`；`migration/reports/rewrite-evidence-audit.json`；`migration/reports/rewrite-selected-proof-audit.json`；`migration/reports/image-encoder-instances-v2-selected-proof.json`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

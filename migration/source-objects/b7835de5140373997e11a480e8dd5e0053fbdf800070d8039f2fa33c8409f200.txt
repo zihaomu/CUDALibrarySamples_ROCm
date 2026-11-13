@@ -1,0 +1,99 @@
+#!/usr/bin/env python3
+"""Exercise the next multi-instance adapter before replacing its selected entrypoint."""
+import argparse,io,json,re,shutil
+from pathlib import Path
+from PIL import Image,JpegImagePlugin
+from experiment import ROOT,Experiment,digest,write
+from image_completion_inventory import closure
+from image_completion_progress import record
+
+PROFILE=ROOT/'migration/rewrite/image-encoder-instances-v2-profile.json'
+BUILD=ROOT/'migration/reports/image-encoder-instances-v2-build.json'
+SOURCE=ROOT/'rocm/ported/nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp'
+
+def freeze():
+    if PROFILE.exists():raise ValueError('profile already frozen')
+    native=json.loads((ROOT/'migration/rewrite/image-completion-encoder-contract.json').read_text())
+    cases=[dict(c,rc=0,source_count=3) for c in native['native_probe_cases']]
+    cases += [dict(id='truncate-before-state-expansion',args=['-j','2','-s','4','-n','1'],count=4,quality=80,sampling=2,output=True,rc=0,source_count=1),
+        dict(id='negative-n-zero-r-clamps',args=['-j','2','-n','-1','-r','0','-q','-8'],count=3,quality=1,sampling=2,output=True,rc=0,source_count=3),
+        dict(id='single-input-repeats',args=['-j','2','-s','2','-n','7'],count=7,quality=80,sampling=2,output=True,rc=0,source_count=1,single=True),
+        dict(id='auto-calibration',args=[],count=None,quality=80,sampling=2,output=False,rc=0,source_count=3),
+        dict(id='help-anywhere',args=['-h','-q','17'],count=0,output=False,rc=0,source_count=3),
+        dict(id='hardware-unavailable',args=['-j','2','-b','hardware'],count=0,output=False,rc=1,source_count=3),
+        dict(id='negative-states',args=['-j','2','-s','-1'],count=0,output=False,rc=1,source_count=3),
+        dict(id='missing-input',args=['-j','2'],count=0,output=False,rc=1,source_count=3,missing=True)]
+    e=Experiment('I5','async-original-encoder-CLI-contract','CPU-contract',sources=[__file__,ROOT/'migration/rewrite/image-completion-encoder-contract.json'])
+    value=dict(status='FROZEN',inputs=native['inputs'],cases=cases,
+        scope='Candidate adapter development contract. Original entrypoint remains on prior selected implementation until integration qualification.',
+        differences=['AMD software GPU backend; hardware-only rejected.','Automatic tuning searches powers of two up to available CPU threads, stopping after two declines; actual runs/choice reported. This is a bounded functional variant, not vendor timing parity.',
+                     'Two independent stream/slot resources per declared state; final image count still at least declared states.',
+                     'Single-input BMP is cached; excluding all preallocation from measured time remains owed.',
+                     'Large transform-index capacity is explicitly rejected before unsafe dispatch; 64-bit production transforms still owed.'])
+    write(e.path/'profile.json',value);value['evidence']=e.finish('OBSERVED');write(PROFILE,value)
+    record('IMG-01','冻结v2候选15组原始CLI/扩展合同：质量和n/r夹取、先截断输入再扩展states、单图重复、实际自动标定、help位置和错误返回；标定搜索及双slot映射差异明确登记。',[str(PROFILE.relative_to(ROOT)),value['evidence']])
+
+def build():
+    from snapshot import capture
+    deps,missing=closure(SOURCE)
+    if missing:raise ValueError(missing)
+    jpeg=ROOT/'build/cpu-codecs';core=Path('/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core');overlay=ROOT/'build/rocm-sdk-overlay'
+    for p in [PROFILE,jpeg/'include/jpeglib.h',jpeg/'lib/libjpeg.so.62.4.0']:deps[str(p.relative_to(ROOT))]=digest(p)
+    e=Experiment('I5','async-original-encoder-candidate-build','rocm-build',sources=[__file__,*[ROOT/n for n in deps]])
+    write(e.path/'backend.observed.json',capture());binary=e.path/'sample'
+    rc=e.command(['hipcc','--rocm-path='+str(overlay),'--hip-path='+str(overlay),
+        '--rocm-device-lib-path='+str(core/'lib/llvm/amdgcn/bitcode'),'--offload-arch=gfx1201','-std=c++17','-O2',
+        '-D__HIP_PLATFORM_AMD__','-I'+str(ROOT/'rocm/common'),'-I'+str(jpeg/'include'),'-x','hip',str(SOURCE),'-o',str(binary),
+        '-L'+str(core/'lib'),'-L'+str(jpeg/'lib'),'-Wl,-rpath,'+str(core/'lib'),'-Wl,-rpath,'+str(jpeg/'lib'),'-lamdhip64','-ljpeg'],'build-async-original-encoder-candidate')
+    result=dict(status='BUILT' if rc==0 else 'BUILD_ERROR',binary=str(binary.relative_to(ROOT)),binary_sha256=digest(binary) if rc==0 else None,dependencies=deps,experiment_id=e.id)
+    write(e.path/'build.json',result);result['evidence']=e.finish('EXECUTED' if rc==0 else 'BUILD_ERROR');write(BUILD,result)
+    record('IMG-01','v2接入原始C++路径后的构建：'+result['status']+'；等待当前源码整合验收与资格发布。',[result['evidence']]);print(result['status']);return int(rc!=0)
+
+def run():
+    from snapshot import capture
+    profile=json.loads(PROFILE.read_text());build=json.loads(BUILD.read_text())
+    if build['status']!='BUILT' or digest(ROOT/build['binary'])!=build['binary_sha256'] or any(digest(ROOT/n)!=h for n,h in build['dependencies'].items()):raise ValueError('stale candidate')
+    inputs=[ROOT/x['path'] for x in profile['inputs']]
+    if any(digest(ROOT/x['path'])!=x['sha256'] for x in profile['inputs']):raise ValueError('input SHA drift')
+    results=[]
+    for case in profile['cases']:
+        e=Experiment('I5','async-original-encoder-candidate-CLI','rocm-original-candidate',case=case['id'],sources=[__file__,PROFILE,BUILD,*inputs,*[ROOT/n for n in build['dependencies']]],parent=build['experiment_id'])
+        write(e.path/'backend.observed.json',capture());out=e.path/'products';out.mkdir();directory=inputs[0].parent
+        if case.get('single'):
+            directory=e.path/'single';directory.mkdir();shutil.copyfile(inputs[0],directory/inputs[0].name)
+        if case.get('missing'):directory=e.path/'missing'
+        cmd=[str(ROOT/build['binary']),'-i',str(directory),*case['args']]
+        if case['output']:cmd+=['-o',str(out)]
+        rc=e.command(cmd,'original-CLI-candidate',timeout=180)
+        checks=[dict(check='expected-return-code',passed=rc==case['rc'])];products=[];encoded=None
+        try:
+            log=(e.path/'logs/0001-original-CLI-candidate.stdout.log').read_text();errors=(e.path/'logs/0001-original-CLI-candidate.stderr.log').read_text()
+            match=re.search(r'RESULT status=PASS encoded=(\d+)',log)
+            if case['id']=='help-anywhere':checks.append(dict(check='help-recognized-anywhere',passed='Usage:' in log and match is None))
+            elif case['rc']:
+                checks.append(dict(check='error-never-reported-as-success',passed='RESULT status=FAIL' in errors and match is None))
+            else:
+                encoded=int(match[1]) if match else -1
+                checks.append(dict(check='all-expected-jobs-and-GPU-entropy',passed=(encoded==case['count'] if case['count'] is not None else encoded>=3) and 'cpu_entropy=0 gpu_full_encode=1' in log))
+                if case['id']=='auto-calibration':
+                    trials=re.search(r'calibration_trials=(\d+)',log);checks.append(dict(check='automatic-choice-measured',passed=trials is not None and int(trials[1])>1))
+            expected={str(i)+'.jpg' for i in range(case['count'])} if case['output'] else set()
+            checks.append(dict(check='exact-output-set',passed={x.name for x in out.iterdir()}==expected))
+            for path in sorted(out.glob('*.jpg')):
+                index=int(path.stem);source=inputs[index%case['source_count']]
+                with Image.open(source) as image:rgb=image.convert('RGB');shape=rgb.size;buffer=io.BytesIO();rgb.save(buffer,format='JPEG',quality=case['quality'],subsampling=case['sampling'])
+                buffer.seek(0)
+                with Image.open(buffer) as cpu:quant=cpu.quantization
+                with Image.open(path) as jpeg:
+                    jpeg.load();good=jpeg.size==shape and JpegImagePlugin.get_sampling(jpeg)==case['sampling'] and jpeg.quantization==quant
+                checks.append(dict(check='independent-geometry-sampling-quant-'+path.name,passed=good))
+                products.append(dict(name=path.name,source=source.name,sha256=digest(path),bytes=path.stat().st_size))
+        except Exception as error:checks.append(dict(check='validation-exception',passed=False,error=repr(error)))
+        status='PASSED' if all(c['passed'] for c in checks) else 'FAILED';row=dict(case=case['id'],status=status,checks=checks,encoded=encoded,products=products,experiment_id=e.id)
+        write(e.path/'result.json',row);row['evidence']=e.finish('EXPECTED_REJECTION' if status=='PASSED' and rc else 'PASSED' if status=='PASSED' else 'NUMERIC_MISMATCH',dict(status=status,checks=checks))
+        results.append(row);write(ROOT/'migration/reports/image-encoder-instances-v2-runs.json',results)
+        record('IMG-01','v2候选CLI '+case['id']+'：'+status+'，产品 '+str(len(products))+'；仍待正式入口整合验收。',[row['evidence']]);print(case['id'],status,flush=True)
+    return int(any(r['status']!='PASSED' for r in results))
+
+if __name__=='__main__':
+    parser=argparse.ArgumentParser();parser.add_argument('action',choices=['freeze','build','run']);args=parser.parse_args();raise SystemExit(globals()[args.action]())

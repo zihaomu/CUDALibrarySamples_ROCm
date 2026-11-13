@@ -24,6 +24,8 @@ def closure(path):
 def gaps(s):
     src=s['source']
     if 'Encoder-MultipleInstances' in src:
+        if s.get('reason_code')=='VALIDATED_I5_ASYNC_GPU_JPEG_INSTANCES_SUBSET':
+            return ['IMG-01'],['完整保留集的native/独立CPU像素等价门槛','j0/大尺寸混合输入/IO与线程异常组合','64位transform索引、单图预分配与性能计时合同','当前提交冷检出和最终复审；并行prefix/异步slot/15 CLI/33产品已验']
         return ['IMG-01'],['生产并行 prefix/溢出检查','pinned buffer、可复用 workspace、双缓冲与事件重叠','下载开关、质量夹取、原始自动线程标定','原生 CUDA 和保留输入复合验收']
     if 'watershedSegmentation' in src:
         return ['IMG-02'],['当前分区/边界与 native 大幅差异尚未解释','平台区、相同高度、4/8 邻域和区域拓扑','完整原图产品及局部边界验收']

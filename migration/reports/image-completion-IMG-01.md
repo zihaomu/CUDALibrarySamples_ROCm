@@ -1,6 +1,6 @@
 # IMG-01：多实例 JPEG 编码器实施记录
 
-状态：**IN_PROGRESS**。组件和候选验证不等于原始入口整例资格；图像当前仍为 **13 PASSED、9 PARTIAL、4 FAILED**。
+状态：**IN_PROGRESS**。新异步实现已接入正式C++入口，20项子集资格已发布为PARTIAL；完整入口尚有下列欠项，图像当前仍为 **13 PASSED、9 PARTIAL、4 FAILED**。当前[资格](image-encoder-instances-v2-qualification.json)与[发布记录](image-encoder-instances-v2-publication.json)均绑定已提交证据。
 
 | 工作 | 当前结果 | 完整证据 |
 | --- | --- | --- |
@@ -34,7 +34,7 @@
 
 ## 尚未完成的入口验收
 
-- 正式C++入口整合、当前提交资格重签、原入口多线程trace和输入变化重放。
+- 正式C++入口整合、20项当前子集资格、多线程trace和输入变化重放已完成；仍需最终完整资格。
 - mixed尺寸工作区增长/复用、j0与状态交互、损坏BMP及IO/线程异常。
 - 最大尺寸的生产64位索引；当前明确拒绝超出旧transform索引容量的输入。
 - 单图全部预分配与计时边界、端到端性能分布；当前吞吐包含资源初始化，不能与vendor直接比较。
