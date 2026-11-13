@@ -6,6 +6,7 @@ from experiment import ROOT,Experiment,digest,git,write
 from image_completion_progress import record
 from image_encoder_math_binding import sealed
 from image_watershed_completion_entries import BUILD,INVENTORY,CONTRACT,dependencies
+from image_watershed_cold_binding import validate as bind_cold
 
 def main():
     from snapshot import capture
@@ -14,7 +15,7 @@ def main():
     names=['image-watershed-completion-entries-runs.json','image-watershed-completion-entry-trace.json','image-watershed-completion-entry-replay.json','image-watershed-completion-entry-negative.json','image-watershed-v2-controls.json']+[f'image-watershed-completion-AMD-{m}.json' for m in modes]
     old={n:json.loads((ROOT/'migration/reports'/n).read_text()) for n in names}
     scripts=['image_watershed_completion_entries.py','image_watershed_entry_runtime.py','image_watershed_v2.py','image_watershed_completion.py','image_watershed_v2_controls.py']
-    sources=[Path(__file__),BUILD,INVENTORY,CONTRACT,*dependencies(),*[ROOT/'rocm/probes/image'/n for n in ['watershed_v2_probe.cpp','watershed_v2_controls.cpp']],*[ROOT/'tools/moat'/n for n in scripts],*[ROOT/'migration/reports'/n for n in names]]
+    sources=[Path(__file__),ROOT/'tools/moat/image_watershed_cold_binding.py',BUILD,INVENTORY,CONTRACT,*dependencies(),*[ROOT/'rocm/probes/image'/n for n in ['watershed_v2_probe.cpp','watershed_v2_controls.cpp']],*[ROOT/'tools/moat'/n for n in scripts],*[ROOT/'migration/reports'/n for n in names]]
     e=Experiment('I3','watershed-fixed-commit-complete-cold-rebuild','rocm-cold',sources=sources);write(e.path/'backend.observed.json',capture());clone=Path(tempfile.mkdtemp(prefix='image-watershed-cold-',dir=ROOT.parent))/'src';checks=[];children=[];refs=set();products=0
     try:
         if e.command(['git','clone','--quiet','--shared','--no-checkout',str(ROOT),str(clone)],'cold-clone',timeout=300):raise ValueError('clone failed')
@@ -30,6 +31,8 @@ def main():
         for script,args in jobs:
             if e.command([sys.executable,str(clone/script),*args],'cold-'+Path(script).stem+'-'+('-'.join(args) or 'main'),cwd=clone,timeout=900):raise ValueError('cold child '+script+' '+str(args))
             record('IMG-02','固定提交冷构建步骤完成：'+Path(script).stem+' '+' '.join(args)+'；完整产品回归及子证据仍待汇总。')
+        bound=bind_cold(clone,commit);write(e.path/'cold-binding.json',bound)
+        checks.append(dict(check='every-selected-result-bound-to-actual-cold-seal-command-build-output-and-unique-child-set',passed=bound['status']=='PASSED' and bound['children']==21))
         for name in names:
             fresh=json.loads((clone/'migration/reports'/name).read_text());gold=old[name];rows=fresh if isinstance(fresh,list) else [fresh];gold_rows=gold if isinstance(gold,list) else [gold]
             checks.append(dict(check='complete-report-'+name,passed=len(rows)==len(gold_rows)))
