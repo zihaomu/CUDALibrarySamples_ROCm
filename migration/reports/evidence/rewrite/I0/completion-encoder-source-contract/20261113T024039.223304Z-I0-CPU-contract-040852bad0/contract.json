@@ -1,0 +1,224 @@
+{
+  "status": "FROZEN",
+  "scope": "Full source obligations plus first seven bounded native probes; NOT a full qualification matrix.",
+  "source": "nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp",
+  "source_sha256": "f417be2a36bed75baea893712db616416ea748157406dc489ffdf323b9fe8d7e",
+  "cmake_sha256": "11cbd7ac2a9218242738ad09f12c56cb36096a00815756bfb2e6a25a4e102240",
+  "original_lines": "parse/main 850-1030; state/worker/autocalibration reviewed in full source",
+  "input_profile": "migration/rewrite/image-jpeg-encoder-instances-profile.json",
+  "inputs": [
+    {
+      "path": "migration/fixtures/image-jpeg-encoder-instances/img1.bmp",
+      "sha256": "a2bd2bf9b84787cb5c84d75064efdb8010593152a124d198e686ae1f924d8894",
+      "width": 17,
+      "height": 19,
+      "source_rgb_sha256": "f52c456b38d60e7b59164b4a5226716c6907ba9ee7227b8df6ed14989440b386"
+    },
+    {
+      "path": "migration/fixtures/image-jpeg-encoder-instances/img2.bmp",
+      "sha256": "4c698078e2feaa76c4d9c1840deb49483cb977d758b3729b135fa06b8e7d51e8",
+      "width": 32,
+      "height": 24,
+      "source_rgb_sha256": "3dadf49dab9589c4e45b469d21cbf57052c03cba1c0364a49dc1ccd1a8747f80"
+    },
+    {
+      "path": "migration/fixtures/image-jpeg-encoder-instances/img10.bmp",
+      "sha256": "155f9b0c6f9d55991a7aa8a7f6e4f9daa7a1f683db27812c202a37e49eeb5f79",
+      "width": 63,
+      "height": 47,
+      "source_rgb_sha256": "75f1066dacafbe9bd6724d444976e2e52b1120ffd62ac5fa6ea431c7f483d038"
+    }
+  ],
+  "native_probe_cases": [
+    {
+      "id": "natural-three",
+      "args": [
+        "-j",
+        "2",
+        "-s",
+        "2",
+        "-b",
+        "gpu",
+        "-q",
+        "75"
+      ],
+      "count": 3,
+      "quality": 75,
+      "sampling": 2,
+      "output": true
+    },
+    {
+      "id": "repeat-seven",
+      "args": [
+        "-n",
+        "7",
+        "-j",
+        "2",
+        "-s",
+        "4",
+        "-b",
+        "gpu",
+        "-q",
+        "75"
+      ],
+      "count": 7,
+      "quality": 75,
+      "sampling": 2,
+      "output": true
+    },
+    {
+      "id": "optimized-444",
+      "args": [
+        "-j",
+        "2",
+        "-s",
+        "2",
+        "-b",
+        "gpu",
+        "-q",
+        "90",
+        "-p",
+        "-f"
+      ],
+      "count": 3,
+      "quality": 90,
+      "sampling": 0,
+      "output": true
+    },
+    {
+      "id": "quality-clamp-low",
+      "args": [
+        "-j",
+        "2",
+        "-s",
+        "2",
+        "-b",
+        "gpu",
+        "-q",
+        "0"
+      ],
+      "count": 3,
+      "quality": 1,
+      "sampling": 2,
+      "output": true
+    },
+    {
+      "id": "quality-clamp-high",
+      "args": [
+        "-j",
+        "2",
+        "-s",
+        "2",
+        "-b",
+        "gpu",
+        "-q",
+        "101"
+      ],
+      "count": 3,
+      "quality": 100,
+      "sampling": 2,
+      "output": true
+    },
+    {
+      "id": "download-no-write",
+      "args": [
+        "-j",
+        "2",
+        "-s",
+        "2",
+        "-b",
+        "gpu",
+        "-d"
+      ],
+      "count": 3,
+      "quality": 80,
+      "sampling": 2,
+      "output": false
+    },
+    {
+      "id": "device-only",
+      "args": [
+        "-j",
+        "2",
+        "-s",
+        "2",
+        "-b",
+        "gpu"
+      ],
+      "count": 3,
+      "quality": 80,
+      "sampling": 2,
+      "output": false
+    }
+  ],
+  "obligations": [
+    {
+      "feature": "input",
+      "original": "Required recursive BMP/BMP directory, natural order; n>0 truncates file list before cycling.",
+      "current_gap": "Adapter does not truncate source list before state-driven image-count increase."
+    },
+    {
+      "feature": "quality",
+      "original": "atoi then clamp to [1,100], default80.",
+      "current_gap": "Adapter rejects q0/q101; historical invalid-quality case is a subset mismatch, not native parity."
+    },
+    {
+      "feature": "download",
+      "original": "-d downloads; -o implies download+write; neither keeps encoded payload on device.",
+      "current_gap": "Adapter always downloads and creates/removes a temporary file."
+    },
+    {
+      "feature": "auto-threads",
+      "original": "Absent -j calibrates throughput; -j0 hardware_concurrency; user -j positive is fixed.",
+      "current_gap": "Adapter uses min(2,image count), with no calibration."
+    },
+    {
+      "feature": "states-and-repeats",
+      "original": "n clamped >=0, r>=1, s>=0; auto states=max(1,engines*2,threads); images>=states.",
+      "current_gap": "Adapter rejects negative n/r and imposes undocumented fixed caps. Lifecycle still per-call."
+    },
+    {
+      "feature": "backend",
+      "original": "AUTO enables available GPU/hardware; -b gpu,hardware or both. Report actual engines.",
+      "current_gap": "AMD software GPU mapped; forced NVIDIA-only hardware capability remains unavailable and must be explicit."
+    },
+    {
+      "feature": "resource-pipeline",
+      "original": "State-local streams and two image buffers; overlapping transfer and encode; single-input preallocation.",
+      "current_gap": "Adapter has rotating streams but synchronous encode, per-image allocation and pageable host buffers."
+    },
+    {
+      "feature": "optimized",
+      "original": "-f optimized Huffman; -p 4:4:4; default 4:2:0.",
+      "current_gap": "Pixel chain/entropy implemented; lifetime, large-scale guards and production prefix still owed."
+    },
+    {
+      "feature": "help-errors",
+      "original": "No args or -h anywhere prints usage. Missing input and negative states fail.",
+      "current_gap": "Adapter only handles standalone -h; corrupt BMP and allocation-failure cleanup need complete verification."
+    }
+  ],
+  "acceptance": {
+    "original_immutable": true,
+    "all_products_decodable": true,
+    "geometry_sampling_quality_exact": true,
+    "gpu_entropy_required": true,
+    "device_only_no_payload_download": true,
+    "async_overlap_trace_required": true,
+    "byte_equality_to_native_required": false,
+    "pixel_tolerance": "Not frozen yet: native pilot is observation only; freeze independent retained set before final candidate qualification."
+  },
+  "outstanding_matrix": [
+    "automatic-calibration",
+    "j0 and state-count interplay",
+    "n-lower-than-input-count",
+    "r0/n-negative clamps",
+    "help anywhere",
+    "backend hardware-only behavior",
+    "large/mixed inputs",
+    "corrupt BMP",
+    "allocation/worker failure cleanup",
+    "held-out fixtures",
+    "performance distributions"
+  ]
+}

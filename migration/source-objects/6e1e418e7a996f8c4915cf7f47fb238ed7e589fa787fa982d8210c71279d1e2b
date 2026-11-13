@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+"""Independently decode native pilot products; no post-hoc pixel pass threshold."""
+import hashlib,io,json,math
+import numpy as np
+from PIL import Image,JpegImagePlugin
+from experiment import ROOT,Experiment,digest,write
+from image_completion_progress import record
+from audit import check as audit_check
+from pathlib import Path
+
+def main():
+    profile=ROOT/'migration/rewrite/image-completion-encoder-contract.json'
+    report=ROOT/'migration/reports/image-completion-encoder-native.json'
+    p=json.loads(profile.read_text());native=json.loads(report.read_text())
+    e=Experiment('I0','native-encoder-nineteen-products-independent-decode','CPU-reference',sources=[__file__,profile,report,*[ROOT/x['path'] for x in p['inputs']]])
+    checks=[dict(check='all-seven-native-probe-cases-present',passed=[x['case'] for x in native['cases']]==[x['id'] for x in p['native_probe_cases']])]
+    checks.append(dict(check='current-input-bytes-match-frozen-profile',passed=all(digest(ROOT/x['path'])==x['sha256'] for x in p['inputs'])))
+    checks.append(dict(check='native-build-evidence-sealed',passed=not audit_check(ROOT/native['build_evidence'])))
+    rows=[]
+    for spec,row in zip(p['native_probe_cases'],native['cases']):
+        try:
+            proof=ROOT/row['evidence'];sealed=json.loads((proof/'result.json').read_text())
+            commands=json.loads((proof/'commands.json').read_text());receipt=json.loads((proof/commands[0]['stdout']).read_text().splitlines()[0])
+            expected_inputs={Path(x['path']).name:x['sha256'] for x in p['inputs']}
+            checks.append(dict(check='sealed-native-result-receipt-and-frozen-inputs-'+spec['id'],passed=
+                not audit_check(proof) and sealed=={k:v for k,v in row.items() if k!='evidence'} and
+                receipt['source_sha256']==p['source_sha256'] and receipt['inputs']==expected_inputs and
+                receipt['physical_device_index']==1 and receipt['CUDA_VISIBLE_DEVICES']=='1' and '5090' in receipt['gpu'] and
+                receipt['command']==row['config']['args']))
+            checks.append(dict(check='native-success-'+spec['id'],passed=row['status']=='OBSERVED' and row['return_code']==row['collection_return_code']==0))
+            directory=ROOT/row['outputs']
+            expected={str(i)+'.jpg' for i in range(spec['count'])} if spec['output'] else set()
+            checks.append(dict(check='exact-native-file-set-'+spec['id'],passed={x.name for x in directory.iterdir()}==set(row['products'])==expected))
+            for name,identity in row['products'].items():
+                path=directory/name;source=ROOT/p['inputs'][int(path.stem)%len(p['inputs'])]['path']
+                with Image.open(source) as image:rgb=np.asarray(image.convert('RGB'))
+                with Image.open(path) as image:
+                    image.load();decoded=np.asarray(image.convert('RGB'));quant=image.quantization;sampling=JpegImagePlugin.get_sampling(image)
+                buffer=io.BytesIO();Image.fromarray(rgb).save(buffer,format='JPEG',quality=spec['quality'],subsampling=spec['sampling']);buffer.seek(0)
+                with Image.open(buffer) as image:
+                    image.load();cpu=np.asarray(image.convert('RGB'));cpu_quant=image.quantization
+                same_shape=decoded.shape==rgb.shape
+                checks.append(dict(check='SHA-size-geometry-quant-sampling-'+spec['id']+'/'+name,
+                                   passed=digest(path)==identity['sha256'] and path.stat().st_size==identity['bytes'] and same_shape and quant==cpu_quant and sampling==spec['sampling']))
+                delta=decoded.astype(np.float64)-rgb;diff=decoded.astype(np.int16)-cpu.astype(np.int16)
+                mse=float(np.mean(delta*delta));rows.append(dict(case=spec['id'],product=name,source=str(source.relative_to(ROOT)),
+                    decoded_rgb_sha256=hashlib.sha256(decoded.tobytes()).hexdigest(),psnr_source_db=10*math.log10(255*255/mse) if mse else None,
+                    native_vs_CPU_max_abs=int(np.abs(diff).max()),native_vs_CPU_mae=float(np.abs(diff).mean()),
+                    width=decoded.shape[1],height=decoded.shape[0],quality=spec['quality'],sampling=sampling))
+        except Exception as error:
+            checks.append(dict(check='native-validation-exception-'+spec['id'],passed=False,error=repr(error)))
+    checks.append(dict(check='nineteen-independent-decodes',passed=len(rows)==19))
+    status='PASSED' if all(x['passed'] for x in checks) else 'FAILED'
+    result=dict(status=status,scope='Native pilot structure/quality and observed numeric differences only. This does not qualify AMD or establish final retained numeric limits.',
+                case_count=7,product_count=len(rows),checks=checks,products=rows)
+    write(e.path/'reference.json',result)
+    result['evidence']=e.finish('PASSED' if status=='PASSED' else 'NUMERIC_MISMATCH',dict(status=status,checks=checks))
+    write(ROOT/'migration/reports/image-completion-encoder-native-reference.json',result)
+    record('IMG-00','19件原生 CUDA JPEG 的独立解码、文件SHA/长度、尺寸/采样/质量量化检查：'+status+'；native与CPU像素差异仅实测留档，未据此事后放宽验收阈值。',[result['evidence'],'migration/reports/image-completion-encoder-native-reference.json'])
+    print(status,[x for x in checks if not x['passed']]);return int(status!='PASSED')
+
+if __name__=='__main__':raise SystemExit(main())

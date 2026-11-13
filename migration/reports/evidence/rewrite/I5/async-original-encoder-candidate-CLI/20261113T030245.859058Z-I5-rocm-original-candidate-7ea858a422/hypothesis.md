@@ -1,0 +1,1 @@
+Test rocm-original-candidate for async-original-encoder-candidate-CLI, case single-input-repeats. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261113T030151.464018Z-I5-rocm-build-48abdbf04b.

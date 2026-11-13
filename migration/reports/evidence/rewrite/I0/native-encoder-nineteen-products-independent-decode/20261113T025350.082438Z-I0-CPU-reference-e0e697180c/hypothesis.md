@@ -1,0 +1,1 @@
+Test CPU-reference for native-encoder-nineteen-products-independent-decode, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: none.

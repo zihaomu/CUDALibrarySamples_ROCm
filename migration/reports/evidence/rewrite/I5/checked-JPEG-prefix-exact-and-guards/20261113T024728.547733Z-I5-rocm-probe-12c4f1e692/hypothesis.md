@@ -1,0 +1,1 @@
+Test rocm-probe for checked-JPEG-prefix-exact-and-guards, case bits-256. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261113T024513.305912Z-I5-rocm-build-71bb082fc7.

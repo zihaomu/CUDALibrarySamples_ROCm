@@ -1,0 +1,97 @@
+{
+  "commands": [
+    {
+      "command_id": 1,
+      "phase": "prepare-native",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "mkdir -p /tmp/image-completion-20261113T024052.431041Z-I0-cuda-build-361fbe3168"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-13T02:40:53.224384+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0001-prepare-native.stdout.log",
+      "stderr": "logs/0001-prepare-native.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-13T02:40:53.541685+00:00",
+      "seconds": 0.31610734295099974
+    },
+    {
+      "command_id": 2,
+      "phase": "upload-unchanged-source-and-inputs",
+      "argv": [
+        "scp",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I0/completion-encoder-original-CMake-CXX20/20261113T024052.431041Z-I0-cuda-build-361fbe3168/sources.tar",
+        "nvidia-5090x2:/tmp/image-completion-20261113T024052.431041Z-I0-cuda-build-361fbe3168/sources.tar"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-13T02:40:53.543328+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0002-upload-unchanged-source-and-inputs.stdout.log",
+      "stderr": "logs/0002-upload-unchanged-source-and-inputs.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-13T02:40:53.860365+00:00",
+      "seconds": 0.3161137130227871
+    },
+    {
+      "command_id": 3,
+      "phase": "extract-native",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "tar xf /tmp/image-completion-20261113T024052.431041Z-I0-cuda-build-361fbe3168/sources.tar -C /tmp/image-completion-20261113T024052.431041Z-I0-cuda-build-361fbe3168"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-13T02:40:53.862274+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0003-extract-native.stdout.log",
+      "stderr": "logs/0003-extract-native.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-13T02:40:54.179250+00:00",
+      "seconds": 0.3160036829649471
+    },
+    {
+      "command_id": 4,
+      "phase": "original-CMake-configure",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "cmake -S /tmp/image-completion-20261113T024052.431041Z-I0-cuda-build-361fbe3168/source -B /tmp/image-completion-20261113T024052.431041Z-I0-cuda-build-361fbe3168/build -DCMAKE_CUDA_COMPILER=/usr/local/cuda-13.4/bin/nvcc -DCUDAToolkit_ROOT=/usr/local/cuda-13.4 -DCMAKE_CUDA_ARCHITECTURES=120 -DCMAKE_BUILD_TYPE=Release"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-13T02:40:54.180773+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0004-original-CMake-configure.stdout.log",
+      "stderr": "logs/0004-original-CMake-configure.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-13T02:40:57.303697+00:00",
+      "seconds": 3.1220042789936997
+    },
+    {
+      "command_id": 5,
+      "phase": "original-CXX20-build",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "cmake --build /tmp/image-completion-20261113T024052.431041Z-I0-cuda-build-361fbe3168/build --parallel 2"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-13T02:40:57.304986+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0005-original-CXX20-build.stdout.log",
+      "stderr": "logs/0005-original-CXX20-build.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-13T02:40:59.926199+00:00",
+      "seconds": 2.6206802999950014
+    }
+  ],
+  "source": "source.json",
+  "inputs": "inputs/manifest.json",
+  "expected_environment": "environment.expected.json"
+}

@@ -1,0 +1,109 @@
+{
+  "status": "FROZEN",
+  "cases": [
+    {
+      "id": "bits-1",
+      "mode": "bits",
+      "count": 1,
+      "error": 0
+    },
+    {
+      "id": "bits-255",
+      "mode": "bits",
+      "count": 255,
+      "error": 0
+    },
+    {
+      "id": "bits-256",
+      "mode": "bits",
+      "count": 256,
+      "error": 0
+    },
+    {
+      "id": "bits-257",
+      "mode": "bits",
+      "count": 257,
+      "error": 0
+    },
+    {
+      "id": "bits-4096",
+      "mode": "bits",
+      "count": 4096,
+      "error": 0
+    },
+    {
+      "id": "bits-65536",
+      "mode": "bits",
+      "count": 65536,
+      "error": 0
+    },
+    {
+      "id": "stuff-1",
+      "mode": "stuff",
+      "count": 1,
+      "error": 0
+    },
+    {
+      "id": "stuff-255",
+      "mode": "stuff",
+      "count": 255,
+      "error": 0
+    },
+    {
+      "id": "stuff-256",
+      "mode": "stuff",
+      "count": 256,
+      "error": 0
+    },
+    {
+      "id": "stuff-257",
+      "mode": "stuff",
+      "count": 257,
+      "error": 0
+    },
+    {
+      "id": "stuff-4096",
+      "mode": "stuff",
+      "count": 4096,
+      "error": 0
+    },
+    {
+      "id": "stuff-65536",
+      "mode": "stuff",
+      "count": 65536,
+      "error": 0
+    },
+    {
+      "id": "empty-rejected",
+      "mode": "empty",
+      "count": 0,
+      "error": 0
+    },
+    {
+      "id": "zero-length-rejected",
+      "mode": "bits",
+      "count": 257,
+      "error": 1,
+      "replace": 0
+    },
+    {
+      "id": "4097-length-rejected",
+      "mode": "bits",
+      "count": 257,
+      "error": 1,
+      "replace": 4097
+    },
+    {
+      "id": "uint32-bit-total-overflow",
+      "mode": "bits",
+      "count": 1048576,
+      "error": 2,
+      "constant": 4096
+    }
+  ],
+  "seed": 713,
+  "exact_offsets_and_total": true,
+  "rejection": "Error bits must be checked before pack; any zero or >4096 block length is invalid. Accumulate sums in uint64; reject totals above UINT32_MAX-7. Empty input returns hipErrorInvalidValue.",
+  "scope": "New component only; final encoder pipeline and all affected entrypoint qualification still required.",
+  "evidence": "migration/reports/evidence/rewrite/I5/checked-JPEG-prefix-exact-and-error-contract/20261113T024458.474774Z-I5-CPU-contract-3ef142d023"
+}

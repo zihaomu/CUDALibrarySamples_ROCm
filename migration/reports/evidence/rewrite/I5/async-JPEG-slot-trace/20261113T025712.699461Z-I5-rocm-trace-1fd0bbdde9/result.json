@@ -1,0 +1,210 @@
+{
+  "case": "511x509-optimized",
+  "status": "FAILED",
+  "checks": [
+    {
+      "check": "profiler-success",
+      "passed": true
+    },
+    {
+      "check": "one-kernel-agent-and-copy-table",
+      "passed": true
+    },
+    {
+      "check": "six-images-two-streams-all-pipeline-kernels-on-GPU1",
+      "passed": false,
+      "kernel_count": 192,
+      "expected": 102
+    },
+    {
+      "check": "exact-traced-product-set",
+      "passed": true
+    },
+    {
+      "check": "traced-product-exact-0.jpg",
+      "passed": true
+    },
+    {
+      "check": "traced-product-exact-1.jpg",
+      "passed": true
+    },
+    {
+      "check": "traced-product-exact-2.jpg",
+      "passed": true
+    },
+    {
+      "check": "traced-product-exact-3.jpg",
+      "passed": true
+    },
+    {
+      "check": "traced-product-exact-4.jpg",
+      "passed": true
+    },
+    {
+      "check": "traced-product-exact-5.jpg",
+      "passed": true
+    }
+  ],
+  "observed": {
+    "streams": [
+      "1",
+      "2"
+    ],
+    "pci": [
+      "0000:23:00.0"
+    ],
+    "kernel_count": 192,
+    "overlapping_kernel_pairs": 85,
+    "kernels": {
+      "__amd_rocclr_copyBuffer": 60,
+      "image_jpeg_encoder::rgb_to_plane(unsigned char const*, unsigned char*, int, int, int, int, int, int)": 18,
+      "image_jpeg_encoder::forward_dct_quantize(unsigned char const*, unsigned short const*, float const*, short*, int, int, int, int)": 18,
+      "image_jpeg_full::gather_mcu_coefficients(short const*, short const*, short const*, short*, int*, unsigned char*, int, int, int, int, int, int, int)": 6,
+      "__amd_rocclr_fillBufferUnAligned": 30,
+      "image_jpeg_opt::histogram(short const*, int const*, unsigned char const*, unsigned int*, unsigned int*, int)": 6,
+      "void image_jpeg_checked_prefix::tiles<unsigned short, false>(unsigned short const*, unsigned int*, unsigned int*, image_jpeg_checked_prefix::Result*, unsigned int)": 6,
+      "encode_blocks(short const*, int const*, unsigned char const*, Code const*, Code const*, unsigned char*, unsigned short*, int)": 6,
+      "void image_jpeg_checked_prefix::bases<false>(unsigned int const*, unsigned int*, image_jpeg_checked_prefix::Result*, unsigned int, unsigned int)": 6,
+      "void image_jpeg_checked_prefix::finish<false>(unsigned int*, unsigned int const*, image_jpeg_checked_prefix::Result const*, unsigned int)": 6,
+      "pack_bytes(unsigned char const*, unsigned int const*, unsigned char*, int, unsigned int, unsigned int)": 6,
+      "void image_jpeg_checked_prefix::tiles<unsigned char, true>(unsigned char const*, unsigned int*, unsigned int*, image_jpeg_checked_prefix::Result*, unsigned int)": 6,
+      "void image_jpeg_checked_prefix::bases<true>(unsigned int const*, unsigned int*, image_jpeg_checked_prefix::Result*, unsigned int, unsigned int)": 6,
+      "void image_jpeg_checked_prefix::finish<true>(unsigned int*, unsigned int const*, image_jpeg_checked_prefix::Result const*, unsigned int)": 6,
+      "scatter_stuff(unsigned char const*, unsigned int const*, unsigned char*, unsigned int)": 6
+    },
+    "memory_copy_columns": [
+      "Kind",
+      "Direction",
+      "Stream_Id",
+      "Source_Agent_Id",
+      "Destination_Agent_Id",
+      "Correlation_Id",
+      "Start_Timestamp",
+      "End_Timestamp"
+    ],
+    "memory_copy_rows": [
+      {
+        "Kind": "MEMORY_COPY",
+        "Direction": "MEMORY_COPY_HOST_TO_DEVICE",
+        "Stream_Id": "1",
+        "Source_Agent_Id": "Agent 2",
+        "Destination_Agent_Id": "Agent 11",
+        "Correlation_Id": "30",
+        "Start_Timestamp": "497184455177877",
+        "End_Timestamp": "497184455220476"
+      },
+      {
+        "Kind": "MEMORY_COPY",
+        "Direction": "MEMORY_COPY_HOST_TO_DEVICE",
+        "Stream_Id": "2",
+        "Source_Agent_Id": "Agent 2",
+        "Destination_Agent_Id": "Agent 11",
+        "Correlation_Id": "94",
+        "Start_Timestamp": "497184465468538",
+        "End_Timestamp": "497184465510737"
+      },
+      {
+        "Kind": "MEMORY_COPY",
+        "Direction": "MEMORY_COPY_DEVICE_TO_HOST",
+        "Stream_Id": "1",
+        "Source_Agent_Id": "Agent 11",
+        "Destination_Agent_Id": "Agent 2",
+        "Correlation_Id": "644",
+        "Start_Timestamp": "497184467822734",
+        "End_Timestamp": "497184467842213"
+      },
+      {
+        "Kind": "MEMORY_COPY",
+        "Direction": "MEMORY_COPY_DEVICE_TO_HOST",
+        "Stream_Id": "2",
+        "Source_Agent_Id": "Agent 11",
+        "Destination_Agent_Id": "Agent 2",
+        "Correlation_Id": "701",
+        "Start_Timestamp": "497184468343032",
+        "End_Timestamp": "497184468364351"
+      },
+      {
+        "Kind": "MEMORY_COPY",
+        "Direction": "MEMORY_COPY_HOST_TO_DEVICE",
+        "Stream_Id": "1",
+        "Source_Agent_Id": "Agent 2",
+        "Destination_Agent_Id": "Agent 11",
+        "Correlation_Id": "705",
+        "Start_Timestamp": "497184469368008",
+        "End_Timestamp": "497184469395808"
+      },
+      {
+        "Kind": "MEMORY_COPY",
+        "Direction": "MEMORY_COPY_HOST_TO_DEVICE",
+        "Stream_Id": "2",
+        "Source_Agent_Id": "Agent 2",
+        "Destination_Agent_Id": "Agent 11",
+        "Correlation_Id": "747",
+        "Start_Timestamp": "497184469514525",
+        "End_Timestamp": "497184469541804"
+      },
+      {
+        "Kind": "MEMORY_COPY",
+        "Direction": "MEMORY_COPY_DEVICE_TO_HOST",
+        "Stream_Id": "1",
+        "Source_Agent_Id": "Agent 11",
+        "Destination_Agent_Id": "Agent 2",
+        "Correlation_Id": "2004",
+        "Start_Timestamp": "497184470721407",
+        "End_Timestamp": "497184470739967"
+      },
+      {
+        "Kind": "MEMORY_COPY",
+        "Direction": "MEMORY_COPY_DEVICE_TO_HOST",
+        "Stream_Id": "2",
+        "Source_Agent_Id": "Agent 11",
+        "Destination_Agent_Id": "Agent 2",
+        "Correlation_Id": "2129",
+        "Start_Timestamp": "497184471141517",
+        "End_Timestamp": "497184471160397"
+      },
+      {
+        "Kind": "MEMORY_COPY",
+        "Direction": "MEMORY_COPY_HOST_TO_DEVICE",
+        "Stream_Id": "1",
+        "Source_Agent_Id": "Agent 2",
+        "Destination_Agent_Id": "Agent 11",
+        "Correlation_Id": "2131",
+        "Start_Timestamp": "497184471112718",
+        "End_Timestamp": "497184471139037"
+      },
+      {
+        "Kind": "MEMORY_COPY",
+        "Direction": "MEMORY_COPY_HOST_TO_DEVICE",
+        "Stream_Id": "2",
+        "Source_Agent_Id": "Agent 2",
+        "Destination_Agent_Id": "Agent 11",
+        "Correlation_Id": "2217",
+        "Start_Timestamp": "497184471387312",
+        "End_Timestamp": "497184471417191"
+      },
+      {
+        "Kind": "MEMORY_COPY",
+        "Direction": "MEMORY_COPY_DEVICE_TO_HOST",
+        "Stream_Id": "1",
+        "Source_Agent_Id": "Agent 11",
+        "Destination_Agent_Id": "Agent 2",
+        "Correlation_Id": "3074",
+        "Start_Timestamp": "497184472305170",
+        "End_Timestamp": "497184472323010"
+      },
+      {
+        "Kind": "MEMORY_COPY",
+        "Direction": "MEMORY_COPY_DEVICE_TO_HOST",
+        "Stream_Id": "2",
+        "Source_Agent_Id": "Agent 11",
+        "Destination_Agent_Id": "Agent 2",
+        "Correlation_Id": "3167",
+        "Start_Timestamp": "497184472605503",
+        "End_Timestamp": "497184472623983"
+      }
+    ]
+  },
+  "scope": "Component trace; overlap measured. Device-only copy rows retained for exact metadata-versus-payload analysis.",
+  "experiment_id": "20261113T025712.699461Z-I5-rocm-trace-1fd0bbdde9"
+}

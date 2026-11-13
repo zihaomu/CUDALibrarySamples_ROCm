@@ -1,0 +1,1 @@
+Test rocm-trace for async-JPEG-slot-trace, case 511x509-standard. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261113T025643.225914Z-I5-rocm-probe-9f4313fd37.

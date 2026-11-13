@@ -1,0 +1,39 @@
+[
+  {
+    "command_id": 1,
+    "phase": "original-native-GPU1-with-loader-receipt",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "env CUDA_VISIBLE_DEVICES=1 python3 -c 'import hashlib,json,os,pathlib,subprocess,sys\nc=json.loads(sys.argv[1]);root=pathlib.Path(c['\"'\"'root'\"'\"']);sha=lambda p:hashlib.file_digest(pathlib.Path(p).open('\"'\"'rb'\"'\"'),'\"'\"'sha256'\"'\"').hexdigest()\nassert sha(root/'\"'\"'source/nvJPEGEncMultipleInstances.cpp'\"'\"')==c['\"'\"'source_sha256'\"'\"']\nassert {p.name:sha(p) for p in (root/'\"'\"'inputs'\"'\"').iterdir()}==c['\"'\"'inputs'\"'\"']\nbinary=root/'\"'\"'build/nvJPEGEncMultipleInstances'\"'\"';ldd=subprocess.check_output(['\"'\"'ldd'\"'\"',str(binary)],text=True)\nlibs={}\nfor line in ldd.splitlines():\n    words=line.split()\n    if '\"'\"'=>'\"'\"' in words and len(words)>2 and words[2].startswith('\"'\"'/'\"'\"'):\n        path=pathlib.Path(words[2]).resolve();libs[str(path)]=dict(sha256=sha(path),bytes=path.stat().st_size)\nreceipt=dict(source_sha256=c['\"'\"'source_sha256'\"'\"'],inputs=c['\"'\"'inputs'\"'\"'],binary_sha256=sha(binary),libraries=libs,ldd=ldd,\n    physical_device_index=1,CUDA_VISIBLE_DEVICES=os.environ.get('\"'\"'CUDA_VISIBLE_DEVICES'\"'\"'),\n    gpu=subprocess.check_output(['\"'\"'nvidia-smi'\"'\"','\"'\"'--id=1'\"'\"','\"'\"'--query-gpu=name,uuid,pci.bus_id,driver_version'\"'\"','\"'\"'--format=csv,noheader'\"'\"'],text=True).strip(),command=c['\"'\"'args'\"'\"'])\nprint(json.dumps(receipt),flush=True);pathlib.Path(c['\"'\"'output'\"'\"']).mkdir(parents=True)\nrc=subprocess.run(c['\"'\"'args'\"'\"'],cwd=root).returncode\nprint(json.dumps(dict(return_code=rc,outputs={p.name:dict(sha256=sha(p),bytes=p.stat().st_size) for p in pathlib.Path(c['\"'\"'output'\"'\"']).iterdir()})),flush=True)\nsys.exit(rc)\n' '{\"root\":\"/tmp/image-completion-20261113T024052.431041Z-I0-cuda-build-361fbe3168\",\"output\":\"/tmp/image-completion-20261113T024052.431041Z-I0-cuda-build-361fbe3168/outputs/20261113T024108.559052Z-I0-cuda-native-655d9e539f\",\"args\":[\"/tmp/image-completion-20261113T024052.431041Z-I0-cuda-build-361fbe3168/build/nvJPEGEncMultipleInstances\",\"-i\",\"/tmp/image-completion-20261113T024052.431041Z-I0-cuda-build-361fbe3168/inputs\",\"-j\",\"2\",\"-s\",\"2\",\"-b\",\"gpu\",\"-q\",\"0\",\"-o\",\"/tmp/image-completion-20261113T024052.431041Z-I0-cuda-build-361fbe3168/outputs/20261113T024108.559052Z-I0-cuda-native-655d9e539f\"],\"source_sha256\":\"f417be2a36bed75baea893712db616416ea748157406dc489ffdf323b9fe8d7e\",\"inputs\":{\"img1.bmp\":\"a2bd2bf9b84787cb5c84d75064efdb8010593152a124d198e686ae1f924d8894\",\"img2.bmp\":\"4c698078e2feaa76c4d9c1840deb49483cb977d758b3729b135fa06b8e7d51e8\",\"img10.bmp\":\"155f9b0c6f9d55991a7aa8a7f6e4f9daa7a1f683db27812c202a37e49eeb5f79\"}}'"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-13T02:41:09.320546+00:00",
+    "timeout_seconds": 180,
+    "environment": {},
+    "stdout": "logs/0001-original-native-GPU1-with-loader-receipt.stdout.log",
+    "stderr": "logs/0001-original-native-GPU1-with-loader-receipt.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-13T02:41:10.189245+00:00",
+    "seconds": 0.8674862449988723
+  },
+  {
+    "command_id": 2,
+    "phase": "collect-native-products",
+    "argv": [
+      "scp",
+      "-r",
+      "nvidia-5090x2:/tmp/image-completion-20261113T024052.431041Z-I0-cuda-build-361fbe3168/outputs/20261113T024108.559052Z-I0-cuda-native-655d9e539f",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I0/completion-encoder-original-quality-clamp-low/20261113T024108.559052Z-I0-cuda-native-655d9e539f/outputs"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-13T02:41:10.191089+00:00",
+    "timeout_seconds": 300,
+    "environment": {},
+    "stdout": "logs/0002-collect-native-products.stdout.log",
+    "stderr": "logs/0002-collect-native-products.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-13T02:41:10.508265+00:00",
+    "seconds": 0.3161072530201636
+  }
+]

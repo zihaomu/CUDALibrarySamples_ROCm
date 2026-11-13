@@ -1,0 +1,1 @@
+Test rocm-probe for async-JPEG-slot-numeric-reuse, case 256x257-optimized. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261113T024855.351683Z-I5-rocm-build-f8766400e0.

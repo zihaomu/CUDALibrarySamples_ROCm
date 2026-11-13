@@ -1,0 +1,1 @@
+Test rocm-probe for checked-JPEG-prefix-exact-and-guards, case 4097-length-rejected. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261113T030313.586034Z-I5-rocm-build-b3abb36226.

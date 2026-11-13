@@ -109,11 +109,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-13T01:27:14.937571+00:00。26入口当前13通过/9部分/4失败。
+更新时间：2026-11-13T03:16:58.302685+00:00。26入口当前13通过/9部分/4失败。
 
-I0：IMG-00–IMG-10 后续完整图像计划已制定：以672f17cc9为基线，覆盖13欠项和26入口回归；明确progressive GPU entropy、JPEG2000完整码块链、合理差异和最终资格门槛。本次仅文档设计，不新增支持数。
+I5：IMG-01：正式入口20项子集资格封存：15 CLI、33产品、3真实多线程trace、变化输入及组件故障/传输证明；完整保留集/大索引/性能/冷构建未完成，保持PARTIAL。
 
-证据：`migration/image-completion-plan.md`
+证据：`migration/reports/evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261113T031657.268240Z-I5-composite-subset-qualification-fd52687b9f`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

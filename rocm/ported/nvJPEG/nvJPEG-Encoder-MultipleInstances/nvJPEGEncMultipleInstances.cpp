@@ -15,6 +15,6 @@
  * limitations under the License.
  */
 
-// I5 project HIP GPU forward transform + explicit CPU entropy stage.
-#include "image/jpeg_encoder_instances.hpp"
-int main(int argc,const char*argv[]){return image_jpeg_instances::run(argc,argv);}
+// HIP JPEG entropy and event-driven slots; CPU handles markers and DHT design.
+#include "image/jpeg_encoder_instances_v2.hpp"
+int main(int argc,const char*argv[]){return image_jpeg_instances_v2::run(argc,argv);}

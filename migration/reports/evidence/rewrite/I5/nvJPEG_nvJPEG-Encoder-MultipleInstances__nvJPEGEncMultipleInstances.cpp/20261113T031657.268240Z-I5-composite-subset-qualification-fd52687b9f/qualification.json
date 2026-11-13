@@ -1,0 +1,181 @@
+{
+  "kind": "image-JPEG-multiple-instances-async-GPU-subset",
+  "status": "PASSED",
+  "contract_status": "PARTIAL",
+  "sample_id": "nvJPEG/nvJPEG-Encoder-MultipleInstances::nvJPEGEncMultipleInstances.cpp",
+  "implementation": "rocm/ported/nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp",
+  "implementation_sha256": "007d3f518f8c4c2b6d9b8d5506215ad1007ad0bcc9f949ec088027d3334e4037",
+  "source_commit": "9a7b12b589099d1739b8a31c5da0b7ac41b337cb",
+  "case_count": 20,
+  "case_ids": [
+    "IMG-01/natural-three",
+    "IMG-01/repeat-seven",
+    "IMG-01/optimized-444",
+    "IMG-01/quality-clamp-low",
+    "IMG-01/quality-clamp-high",
+    "IMG-01/download-no-write",
+    "IMG-01/device-only",
+    "IMG-01/truncate-before-state-expansion",
+    "IMG-01/negative-n-zero-r-clamps",
+    "IMG-01/single-input-repeats",
+    "IMG-01/auto-calibration",
+    "IMG-01/help-anywhere",
+    "IMG-01/hardware-unavailable",
+    "IMG-01/negative-states",
+    "IMG-01/missing-input",
+    "IMG-01/all33-JPEG-byte-exact",
+    "IMG-01/trace-repeat-seven",
+    "IMG-01/trace-optimized-444",
+    "IMG-01/trace-device-only",
+    "IMG-01/changed-input-replay"
+  ],
+  "checks": [
+    {
+      "check": "actual-original-entry-current-source-and-library-closure",
+      "passed": true
+    },
+    {
+      "check": "all-fifteen-frozen-CLI-cases",
+      "passed": true
+    },
+    {
+      "check": "three-actual-entry-multithread-traces",
+      "passed": true
+    },
+    {
+      "check": "all-seven-changed-input-jobs-correctly-associated",
+      "passed": true
+    },
+    {
+      "check": "actual-entry-device-only-no-payload-transfer",
+      "passed": true
+    },
+    {
+      "check": "five-inflight-faults",
+      "passed": true
+    },
+    {
+      "check": "complete-coverage-control-and11-corruptions-rejected",
+      "passed": true
+    },
+    {
+      "check": "native-original-seven-cases-and19-independent-decodes-restored",
+      "passed": true
+    },
+    {
+      "check": "all33-original-entry-JPEG-products-byte-exact-vs-serial-core-independent-BMP",
+      "passed": true
+    },
+    {
+      "check": "fourteen-slot-cases-and-actual-copy-traces",
+      "passed": true
+    },
+    {
+      "check": "sixteen-prefix-cases-and-two-oversize-files",
+      "passed": true
+    }
+  ],
+  "devices": [
+    {
+      "logical_id": 0,
+      "pci_bdf": "0000:23:00.0",
+      "physical_id": 1,
+      "uuid": "39383130336566346332326133636363"
+    }
+  ],
+  "dependencies": {
+    "rocm/common/image/jpeg_checked_prefix.hpp": "6f9f6909186abb15b7632bbf71036bb67c189559383dca9a23d18d9a8865fd8b",
+    "rocm/common/image/jpeg_encoder_gpu.hpp": "c759a9f001c5d66d628d624c37da7dcade72035f95249a0f2fe8f3f90748c048",
+    "rocm/common/image/jpeg_encoder_instances.hpp": "6bd2d3e8171d4eab8e1959544644fc83df15fa10d33fd41d8641e4f5246407c2",
+    "rocm/common/image/jpeg_encoder_instances_v2.hpp": "baf7c0e6c175842faa422ae821961749ade05826c92525daff05bc243cab7f40",
+    "rocm/common/image/jpeg_encoder_pipeline.hpp": "3ad6c1d12cb395421a9d5013747f67dd4a72c39b72da2b52e9aa9652bca592c6",
+    "rocm/common/image/jpeg_entropy_gpu.hpp": "9914991ca52810482c0e9517cb5ffc2006dbec3d2c0b1594e306f6c7f9ac6fd6",
+    "rocm/common/image/jpeg_full_gpu.hpp": "fd681979813121214e5dd9640927198b0fb7b9715573f43e9a41760cd99b3953",
+    "rocm/common/image/jpeg_opt_full_gpu.hpp": "32d5900e43452c2b4a0582fb1e1422fe9656f62dd44d71839398217f53a669ff",
+    "rocm/common/image/jpeg_optimal_huffman.hpp": "a5698eaf510d90c1975eebe3dc58e5c149650b71979965fa3aa95817f3cb265a",
+    "rocm/ported/nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp": "007d3f518f8c4c2b6d9b8d5506215ad1007ad0bcc9f949ec088027d3334e4037",
+    "migration/rewrite/image-encoder-instances-v2-profile.json": "a27b1051424377414b57237f26dd91c1069eca53434de7ac35a131ed6c8cf8d9",
+    "build/cpu-codecs/include/jpeglib.h": "dc3e8220f34b7e9f9e48620f5cb8dc070834feb3214bb12bbad78478ebb29e60",
+    "build/cpu-codecs/lib/libjpeg.so.62.4.0": "d3dee37946d3b526cd19c49b1d535047b20e2c19d0edd3cf6782e257680b7466"
+  },
+  "evidence_references": [
+    "migration/reports/evidence/rewrite/I5/async-original-encoder-candidate-build/20261113T030749.806455Z-I5-rocm-build-de99467a31",
+    "migration/reports/evidence/rewrite/I5/async-JPEG-slot-allocation-fault-recovery/20261113T025420.137678Z-I5-rocm-negative-29a13b9bae",
+    "migration/reports/evidence/rewrite/I0/native-encoder-nineteen-products-independent-decode/20261113T025615.684993Z-I0-CPU-reference-a898451bfd",
+    "migration/reports/evidence/rewrite/I5/async-encoder-qualification-coverage-negatives/20261113T031642.620876Z-I5-CPU-negative-e309436a78",
+    "migration/reports/evidence/rewrite/I0/completion-encoder-original-CMake-CXX20/20261113T024052.431041Z-I0-cuda-build-361fbe3168",
+    "migration/reports/evidence/rewrite/I5/async-original-encoder-candidate-CLI/20261113T030916.992727Z-I5-rocm-original-candidate-b86ec84d65",
+    "migration/reports/evidence/rewrite/I5/async-original-encoder-candidate-CLI/20261113T030920.018043Z-I5-rocm-original-candidate-971e5c9a1f",
+    "migration/reports/evidence/rewrite/I5/async-original-encoder-candidate-CLI/20261113T030922.495545Z-I5-rocm-original-candidate-485a837020",
+    "migration/reports/evidence/rewrite/I5/async-original-encoder-candidate-CLI/20261113T030924.954413Z-I5-rocm-original-candidate-9a80c64061",
+    "migration/reports/evidence/rewrite/I5/async-original-encoder-candidate-CLI/20261113T030927.160990Z-I5-rocm-original-candidate-24841f699e",
+    "migration/reports/evidence/rewrite/I5/async-original-encoder-candidate-CLI/20261113T030929.610735Z-I5-rocm-original-candidate-8dac097028",
+    "migration/reports/evidence/rewrite/I5/async-original-encoder-candidate-CLI/20261113T030931.909343Z-I5-rocm-original-candidate-5972ef7ac8",
+    "migration/reports/evidence/rewrite/I5/async-original-encoder-candidate-CLI/20261113T030934.207830Z-I5-rocm-original-candidate-a968234465",
+    "migration/reports/evidence/rewrite/I5/async-original-encoder-candidate-CLI/20261113T030936.804573Z-I5-rocm-original-candidate-c75f1c064f",
+    "migration/reports/evidence/rewrite/I5/async-original-encoder-candidate-CLI/20261113T030939.120672Z-I5-rocm-original-candidate-6fef0da5d3",
+    "migration/reports/evidence/rewrite/I5/async-original-encoder-candidate-CLI/20261113T030941.405021Z-I5-rocm-original-candidate-c330bf7877",
+    "migration/reports/evidence/rewrite/I5/async-original-encoder-candidate-CLI/20261113T030944.082224Z-I5-rocm-original-candidate-152bc38889",
+    "migration/reports/evidence/rewrite/I5/async-original-encoder-candidate-CLI/20261113T030946.146086Z-I5-rocm-original-candidate-535ab6127f",
+    "migration/reports/evidence/rewrite/I5/async-original-encoder-candidate-CLI/20261113T030948.322217Z-I5-rocm-original-candidate-b28856e82e",
+    "migration/reports/evidence/rewrite/I5/async-original-encoder-candidate-CLI/20261113T030950.411946Z-I5-rocm-original-candidate-4cf769e7cf",
+    "migration/reports/evidence/rewrite/I5/async-original-entry-multithread-trace/20261113T031215.898114Z-I5-rocm-trace-c01c1ac536",
+    "migration/reports/evidence/rewrite/I5/async-original-entry-multithread-trace/20261113T031219.466873Z-I5-rocm-trace-de04e1e868",
+    "migration/reports/evidence/rewrite/I5/async-original-entry-multithread-trace/20261113T031222.250720Z-I5-rocm-trace-86eecf6368",
+    "migration/reports/evidence/rewrite/I5/async-original-CLI-byte-regression/20261113T031008.822279Z-I5-rocm-reference-2c1804e273",
+    "migration/reports/evidence/rewrite/I5/async-original-CLI-byte-regression/20261113T031011.897519Z-I5-rocm-reference-42080f73c2",
+    "migration/reports/evidence/rewrite/I5/async-original-CLI-byte-regression/20261113T031014.866671Z-I5-rocm-reference-94c31db75a",
+    "migration/reports/evidence/rewrite/I5/async-original-CLI-byte-regression/20261113T031017.578671Z-I5-rocm-reference-2bd613aa4c",
+    "migration/reports/evidence/rewrite/I5/async-original-CLI-byte-regression/20261113T031020.363595Z-I5-rocm-reference-54bbe91981",
+    "migration/reports/evidence/rewrite/I5/async-original-CLI-byte-regression/20261113T031023.239272Z-I5-rocm-reference-d30f74637d",
+    "migration/reports/evidence/rewrite/I5/async-original-CLI-byte-regression/20261113T031025.482880Z-I5-rocm-reference-77c3a08448",
+    "migration/reports/evidence/rewrite/I5/async-original-CLI-byte-regression/20261113T031028.426258Z-I5-rocm-reference-243d97ef03",
+    "migration/reports/evidence/rewrite/I5/async-JPEG-slot-numeric-reuse/20261113T025618.016478Z-I5-rocm-probe-250ca4bfc6",
+    "migration/reports/evidence/rewrite/I5/async-JPEG-slot-numeric-reuse/20261113T025620.856624Z-I5-rocm-probe-346b9652c7",
+    "migration/reports/evidence/rewrite/I5/async-JPEG-slot-numeric-reuse/20261113T025623.361807Z-I5-rocm-probe-1ed7c73e6b",
+    "migration/reports/evidence/rewrite/I5/async-JPEG-slot-numeric-reuse/20261113T025625.825486Z-I5-rocm-probe-d381a8dc22",
+    "migration/reports/evidence/rewrite/I5/async-JPEG-slot-numeric-reuse/20261113T025628.317695Z-I5-rocm-probe-e262b235e2",
+    "migration/reports/evidence/rewrite/I5/async-JPEG-slot-numeric-reuse/20261113T025630.825578Z-I5-rocm-probe-ad54f4b51a",
+    "migration/reports/evidence/rewrite/I5/async-JPEG-slot-numeric-reuse/20261113T025633.358459Z-I5-rocm-probe-5076776409",
+    "migration/reports/evidence/rewrite/I5/async-JPEG-slot-numeric-reuse/20261113T025635.827411Z-I5-rocm-probe-45bca3dabc",
+    "migration/reports/evidence/rewrite/I5/async-JPEG-slot-numeric-reuse/20261113T025638.298820Z-I5-rocm-probe-c37fc68407",
+    "migration/reports/evidence/rewrite/I5/async-JPEG-slot-numeric-reuse/20261113T025640.757678Z-I5-rocm-probe-26b463b876",
+    "migration/reports/evidence/rewrite/I5/async-JPEG-slot-numeric-reuse/20261113T025643.225914Z-I5-rocm-probe-9f4313fd37",
+    "migration/reports/evidence/rewrite/I5/async-JPEG-slot-numeric-reuse/20261113T025645.795513Z-I5-rocm-probe-7446b63122",
+    "migration/reports/evidence/rewrite/I5/async-JPEG-slot-numeric-reuse/20261113T025648.417062Z-I5-rocm-probe-ab487cfd86",
+    "migration/reports/evidence/rewrite/I5/async-JPEG-slot-numeric-reuse/20261113T025650.850259Z-I5-rocm-probe-3c0bf7db07",
+    "migration/reports/evidence/rewrite/I5/async-JPEG-slot-trace/20261113T030013.865048Z-I5-rocm-trace-bcd36cd356",
+    "migration/reports/evidence/rewrite/I5/async-JPEG-slot-trace/20261113T030016.920210Z-I5-rocm-trace-3b749467f0",
+    "migration/reports/evidence/rewrite/I5/async-JPEG-slot-trace/20261113T030019.573260Z-I5-rocm-trace-efb6174192",
+    "migration/reports/evidence/rewrite/I5/async-JPEG-slot-trace/20261113T030022.172423Z-I5-rocm-trace-725993e0e0",
+    "migration/reports/evidence/rewrite/I5/checked-JPEG-prefix-exact-and-guards/20261113T030411.406001Z-I5-rocm-probe-a5e1ea144e",
+    "migration/reports/evidence/rewrite/I5/checked-JPEG-prefix-exact-and-guards/20261113T030414.030426Z-I5-rocm-probe-a5eb8bf945",
+    "migration/reports/evidence/rewrite/I5/checked-JPEG-prefix-exact-and-guards/20261113T030416.329235Z-I5-rocm-probe-13e7ed83fa",
+    "migration/reports/evidence/rewrite/I5/checked-JPEG-prefix-exact-and-guards/20261113T030418.598557Z-I5-rocm-probe-87ecdb5e80",
+    "migration/reports/evidence/rewrite/I5/checked-JPEG-prefix-exact-and-guards/20261113T030420.861133Z-I5-rocm-probe-11eea8d610",
+    "migration/reports/evidence/rewrite/I5/checked-JPEG-prefix-exact-and-guards/20261113T030423.119140Z-I5-rocm-probe-666b261bf0",
+    "migration/reports/evidence/rewrite/I5/checked-JPEG-prefix-exact-and-guards/20261113T030425.339053Z-I5-rocm-probe-2c201dc334",
+    "migration/reports/evidence/rewrite/I5/checked-JPEG-prefix-exact-and-guards/20261113T030427.611409Z-I5-rocm-probe-8312e641ba",
+    "migration/reports/evidence/rewrite/I5/checked-JPEG-prefix-exact-and-guards/20261113T030429.820268Z-I5-rocm-probe-227e1f0f48",
+    "migration/reports/evidence/rewrite/I5/checked-JPEG-prefix-exact-and-guards/20261113T030432.042006Z-I5-rocm-probe-0ff12ceea3",
+    "migration/reports/evidence/rewrite/I5/checked-JPEG-prefix-exact-and-guards/20261113T030434.239337Z-I5-rocm-probe-d9c7837834",
+    "migration/reports/evidence/rewrite/I5/checked-JPEG-prefix-exact-and-guards/20261113T030436.453575Z-I5-rocm-probe-7420f9ebe1",
+    "migration/reports/evidence/rewrite/I5/checked-JPEG-prefix-exact-and-guards/20261113T030438.670708Z-I5-rocm-probe-16c792c6e3",
+    "migration/reports/evidence/rewrite/I5/checked-JPEG-prefix-exact-and-guards/20261113T030440.833395Z-I5-rocm-probe-48b744c1a8",
+    "migration/reports/evidence/rewrite/I5/checked-JPEG-prefix-exact-and-guards/20261113T030443.048648Z-I5-rocm-probe-a2e294106a",
+    "migration/reports/evidence/rewrite/I5/checked-JPEG-prefix-exact-and-guards/20261113T030445.317613Z-I5-rocm-probe-f7f0f8e674",
+    "migration/reports/evidence/rewrite/I5/checked-prefix-oversize-file-rejection/20261113T030457.075975Z-I5-rocm-negative-0f2d993dd2",
+    "migration/reports/evidence/rewrite/I5/checked-prefix-oversize-file-rejection/20261113T030459.416869Z-I5-rocm-negative-517f24b97f",
+    "migration/reports/evidence/rewrite/I0/completion-encoder-original-natural-three/20261113T024100.571136Z-I0-cuda-native-c221dd0932",
+    "migration/reports/evidence/rewrite/I0/completion-encoder-original-repeat-seven/20261113T024103.295735Z-I0-cuda-native-216c2f78c3",
+    "migration/reports/evidence/rewrite/I0/completion-encoder-original-optimized-444/20261113T024105.977419Z-I0-cuda-native-91a248212f",
+    "migration/reports/evidence/rewrite/I0/completion-encoder-original-quality-clamp-low/20261113T024108.559052Z-I0-cuda-native-655d9e539f",
+    "migration/reports/evidence/rewrite/I0/completion-encoder-original-quality-clamp-high/20261113T024111.160256Z-I0-cuda-native-13bce6086e",
+    "migration/reports/evidence/rewrite/I0/completion-encoder-original-download-no-write/20261113T024113.731237Z-I0-cuda-native-489038f4e0",
+    "migration/reports/evidence/rewrite/I0/completion-encoder-original-device-only/20261113T024116.268380Z-I0-cuda-native-3b01b10c75"
+  ],
+  "rocm_evidence": "migration/reports/evidence/rewrite/I5/async-original-entry-multithread-trace/20261113T031215.898114Z-I5-rocm-trace-c01c1ac536",
+  "cuda_evidence": "migration/reports/evidence/rewrite/I0/completion-encoder-original-natural-three/20261113T024100.571136Z-I0-cuda-native-c221dd0932",
+  "comparison_mode": "ASYNC_GPU_JPEG_EXACT_SERIAL_REGRESSION_AND_NATIVE_BASELINE_OBSERVATION",
+  "remaining": "Full held-out native/CPU pixel equivalence; j0/large mixed/error contracts; 64-bit transform indices; original preallocation and timing/performance; committed cold rebuild and final review."
+}

@@ -1,0 +1,54 @@
+{
+  "case": "device-only-1",
+  "status": "FAILED",
+  "checks": [
+    {
+      "check": "profiler-success",
+      "passed": true
+    },
+    {
+      "check": "one-kernel-agent-and-copy-table",
+      "passed": false
+    },
+    {
+      "check": "six-images-two-streams-all-pipeline-kernels-on-GPU1",
+      "passed": false,
+      "kernel_count": 198,
+      "expected": 102
+    },
+    {
+      "check": "exact-traced-product-set",
+      "passed": true
+    }
+  ],
+  "observed": {
+    "streams": [
+      "1",
+      "2"
+    ],
+    "pci": [
+      "0000:23:00.0"
+    ],
+    "kernel_count": 198,
+    "overlapping_kernel_pairs": 51,
+    "kernels": {
+      "__amd_rocclr_copyBuffer": 66,
+      "image_jpeg_encoder::rgb_to_plane(unsigned char const*, unsigned char*, int, int, int, int, int, int)": 18,
+      "image_jpeg_full::gather_mcu_coefficients(short const*, short const*, short const*, short*, int*, unsigned char*, int, int, int, int, int, int, int)": 6,
+      "image_jpeg_encoder::forward_dct_quantize(unsigned char const*, unsigned short const*, float const*, short*, int, int, int, int)": 18,
+      "__amd_rocclr_fillBufferUnAligned": 30,
+      "image_jpeg_opt::histogram(short const*, int const*, unsigned char const*, unsigned int*, unsigned int*, int)": 6,
+      "encode_blocks(short const*, int const*, unsigned char const*, Code const*, Code const*, unsigned char*, unsigned short*, int)": 6,
+      "void image_jpeg_checked_prefix::tiles<unsigned short, false>(unsigned short const*, unsigned int*, unsigned int*, image_jpeg_checked_prefix::Result*, unsigned int)": 6,
+      "void image_jpeg_checked_prefix::finish<false>(unsigned int*, unsigned int const*, image_jpeg_checked_prefix::Result const*, unsigned int)": 6,
+      "void image_jpeg_checked_prefix::bases<false>(unsigned int const*, unsigned int*, image_jpeg_checked_prefix::Result*, unsigned int, unsigned int)": 6,
+      "pack_bytes(unsigned char const*, unsigned int const*, unsigned char*, int, unsigned int, unsigned int)": 6,
+      "void image_jpeg_checked_prefix::finish<true>(unsigned int*, unsigned int const*, image_jpeg_checked_prefix::Result const*, unsigned int)": 6,
+      "void image_jpeg_checked_prefix::bases<true>(unsigned int const*, unsigned int*, image_jpeg_checked_prefix::Result*, unsigned int, unsigned int)": 6,
+      "void image_jpeg_checked_prefix::tiles<unsigned char, true>(unsigned char const*, unsigned int*, unsigned int*, image_jpeg_checked_prefix::Result*, unsigned int)": 6,
+      "scatter_stuff(unsigned char const*, unsigned int const*, unsigned char*, unsigned int)": 6
+    }
+  },
+  "scope": "Component trace; overlap measured. Device-only copy rows retained for exact metadata-versus-payload analysis.",
+  "experiment_id": "20261113T025717.866016Z-I5-rocm-trace-6c0d64ede0"
+}

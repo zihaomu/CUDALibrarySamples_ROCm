@@ -1,0 +1,1 @@
+Test rocm-negative for checked-prefix-oversize-file-rejection, case bits. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: none.
