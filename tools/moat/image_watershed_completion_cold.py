@@ -14,7 +14,7 @@ def main():
     names=['image-watershed-completion-entries-runs.json','image-watershed-completion-entry-trace.json','image-watershed-completion-entry-replay.json','image-watershed-completion-entry-negative.json','image-watershed-v2-controls.json']+[f'image-watershed-completion-AMD-{m}.json' for m in modes]
     old={n:json.loads((ROOT/'migration/reports'/n).read_text()) for n in names}
     scripts=['image_watershed_completion_entries.py','image_watershed_entry_runtime.py','image_watershed_v2.py','image_watershed_completion.py','image_watershed_v2_controls.py']
-    sources=[__file__,BUILD,INVENTORY,CONTRACT,*dependencies(),*[ROOT/'rocm/probes/image'/n for n in ['watershed_v2_probe.cpp','watershed_v2_controls.cpp']],*[ROOT/'tools/moat'/n for n in scripts],*[ROOT/'migration/reports'/n for n in names]]
+    sources=[Path(__file__),BUILD,INVENTORY,CONTRACT,*dependencies(),*[ROOT/'rocm/probes/image'/n for n in ['watershed_v2_probe.cpp','watershed_v2_controls.cpp']],*[ROOT/'tools/moat'/n for n in scripts],*[ROOT/'migration/reports'/n for n in names]]
     e=Experiment('I3','watershed-fixed-commit-complete-cold-rebuild','rocm-cold',sources=sources);write(e.path/'backend.observed.json',capture());clone=Path(tempfile.mkdtemp(prefix='image-watershed-cold-',dir=ROOT.parent))/'src';checks=[];children=[];refs=set();products=0
     try:
         if e.command(['git','clone','--quiet','--shared','--no-checkout',str(ROOT),str(clone)],'cold-clone',timeout=300):raise ValueError('clone failed')

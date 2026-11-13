@@ -284,7 +284,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-13T07:44:32.543684+00:00。26入口当前14通过/8部分/4失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-13T07:45:42.750764+00:00。26入口当前14通过/8部分/4失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -4449,5 +4449,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-13T07:42:57.236307+00:00 | I3 | IMG-02：NPP+原入口negative/truncated-first：PASSED，完整文件集合、实际GPU和构建身份已记录。 | `migration/reports/evidence/rewrite/I3/NPP__watershedSegmentation__watershedSegmentationNPPPlus.cpp/20261113T074255.147775Z-I3-rocm-complete-entry-negative-bc5695d801` |
 | 2026-11-13T07:42:59.748079+00:00 | I3 | IMG-02：NPP+原入口negative/blocked-output：PASSED，完整文件集合、实际GPU和构建身份已记录。 | `migration/reports/evidence/rewrite/I3/NPP__watershedSegmentation__watershedSegmentationNPPPlus.cpp/20261113T074257.624884Z-I3-rocm-complete-entry-negative-f4cc494723` |
 | 2026-11-13T07:44:32.543684+00:00 | I3 | IMG-02：两原入口22产品、真实GPU trace、变化输入独立CPU重算、8次文件IO失败流程已完成；独立复审关闭严格三输入NPP+例外的验证器问题，准备固定提交冷检出。 | `migration/reports/image-watershed-completion-entry-trace.json`；`migration/reports/image-watershed-completion-replay-reference.json`；`migration/reports/image-watershed-completion-entry-negative.json` |
+| 2026-11-13T07:45:14.442996+00:00 | I3 | IMG-02：固定提交Watershed冷检出、完整构建及规定回归：SELF_TEST_FAILED，子实验与全部产品哈希保留。 | `migration/reports/evidence/rewrite/I3/watershed-fixed-commit-complete-cold-rebuild/20261113T074509.618414Z-I3-rocm-cold-cf5dc44dfe` |
+| 2026-11-13T07:45:42.750764+00:00 | I3 | IMG-02：第一次冷检出在运行GPU前遇到记录器路径类型错误：__file__字符串被当Path读取suffix；失败已完整封存。已规范为Path，保持算法/输入/门槛不变，重新固定提交执行。 | `migration/reports/image-watershed-completion-cold.json` |
 
 <!-- IMAGE_EXECUTION:END -->

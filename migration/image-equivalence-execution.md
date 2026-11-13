@@ -109,11 +109,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-13T07:44:32.543684+00:00。26入口当前14通过/8部分/4失败。
+更新时间：2026-11-13T07:45:42.750764+00:00。26入口当前14通过/8部分/4失败。
 
-I3：IMG-02：两原入口22产品、真实GPU trace、变化输入独立CPU重算、8次文件IO失败流程已完成；独立复审关闭严格三输入NPP+例外的验证器问题，准备固定提交冷检出。
+I3：IMG-02：第一次冷检出在运行GPU前遇到记录器路径类型错误：__file__字符串被当Path读取suffix；失败已完整封存。已规范为Path，保持算法/输入/门槛不变，重新固定提交执行。
 
-证据：`migration/reports/image-watershed-completion-entry-trace.json`；`migration/reports/image-watershed-completion-replay-reference.json`；`migration/reports/image-watershed-completion-entry-negative.json`
+证据：`migration/reports/image-watershed-completion-cold.json`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

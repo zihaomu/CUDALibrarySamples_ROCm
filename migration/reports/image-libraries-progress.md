@@ -1,6 +1,6 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-13T07:44:32.543684+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-13T07:45:42.750764+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
 26入口当前：14 PASSED / 8 PARTIAL / 4 FAILED。
 
@@ -4182,3 +4182,5 @@
 | 2026-11-13T07:42:57.236307+00:00 | I3 | IMG-02：NPP+原入口negative/truncated-first：PASSED，完整文件集合、实际GPU和构建身份已记录。 | [20261113T074255.147775Z-I3-rocm-complete-entry-negative-bc5695d801](evidence/rewrite/I3/NPP__watershedSegmentation__watershedSegmentationNPPPlus.cpp/20261113T074255.147775Z-I3-rocm-complete-entry-negative-bc5695d801) |
 | 2026-11-13T07:42:59.748079+00:00 | I3 | IMG-02：NPP+原入口negative/blocked-output：PASSED，完整文件集合、实际GPU和构建身份已记录。 | [20261113T074257.624884Z-I3-rocm-complete-entry-negative-f4cc494723](evidence/rewrite/I3/NPP__watershedSegmentation__watershedSegmentationNPPPlus.cpp/20261113T074257.624884Z-I3-rocm-complete-entry-negative-f4cc494723) |
 | 2026-11-13T07:44:32.543684+00:00 | I3 | IMG-02：两原入口22产品、真实GPU trace、变化输入独立CPU重算、8次文件IO失败流程已完成；独立复审关闭严格三输入NPP+例外的验证器问题，准备固定提交冷检出。 | [image-watershed-completion-entry-trace.json](image-watershed-completion-entry-trace.json)；[image-watershed-completion-replay-reference.json](image-watershed-completion-replay-reference.json)；[image-watershed-completion-entry-negative.json](image-watershed-completion-entry-negative.json) |
+| 2026-11-13T07:45:14.442996+00:00 | I3 | IMG-02：固定提交Watershed冷检出、完整构建及规定回归：SELF_TEST_FAILED，子实验与全部产品哈希保留。 | [20261113T074509.618414Z-I3-rocm-cold-cf5dc44dfe](evidence/rewrite/I3/watershed-fixed-commit-complete-cold-rebuild/20261113T074509.618414Z-I3-rocm-cold-cf5dc44dfe) |
+| 2026-11-13T07:45:42.750764+00:00 | I3 | IMG-02：第一次冷检出在运行GPU前遇到记录器路径类型错误：__file__字符串被当Path读取suffix；失败已完整封存。已规范为Path，保持算法/输入/门槛不变，重新固定提交执行。 | [image-watershed-completion-cold.json](image-watershed-completion-cold.json) |
