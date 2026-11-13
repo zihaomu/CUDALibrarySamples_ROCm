@@ -32,6 +32,7 @@ def main():
         # Fixed external library installation is shared; no application/probe
         # binary, prior object file, or generated output is copied into build.
         (clone/'build').mkdir();shutil.copytree(ROOT/'build/cpu-codecs',clone/'build/cpu-codecs',symlinks=True)
+        (clone/'migration/source-objects').mkdir(parents=True,exist_ok=True)
         write(e.path/'external-dependencies.json',dict(scope='Pinned external libjpeg and installed ROCm SDK reused; all application, reference-probe and observer binaries rebuilt in the empty checkout.',dependencies={n:h for n,h in build['dependencies'].items() if n.startswith('build/')}))
         jobs=[('tools/migration/bootstrap_sdk.py',[]),('tools/moat/image_encoder_pipeline.py',['build']),('tools/moat/image_encoder_instances_v2.py',['build']),('tools/moat/image_encoder_instances_v2.py',['run']),('tools/moat/image_encoder_pipeline_trace.py',[]),('tools/moat/image_encoder_runtime.py',['run']),('tools/moat/image_encoder_instances_v2_trace.py',[]),('tools/moat/image_encoder_preallocation.py',['run']),('tools/moat/image_encoder_preallocation.py',['lifecycle'])]
         for script,args in jobs:
