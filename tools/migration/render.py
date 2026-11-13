@@ -46,6 +46,7 @@ def render():
   p.write_bytes((prefix+'\n\n'+'\n'.join(rows)+'\n').encode())
  p=ROOT/'README.md'
  routes={
+  'nvJPEG':'项目 HIP JPEG 编码；CPU marker/DHT 编排',
   'cuBLAS':'hipBLAS / rocBLAS + HIP',
   'cuBLASLt':'hipBLASLt、hipBLAS / rocBLAS + HIP 布局转换',
   'cuBLASMp':'MPI + RCCL + HIP',

@@ -29,7 +29,8 @@ def main():
   s=next(x for x in samples if x['source']==source)
   q=s.get('selected_validation',{})
   variants={'VALIDATED_I5_GPU_JPEG_FORWARD_SUBSET':('image-JPEG-GPU-forward-transform-subset',9),
-   'VALIDATED_I5_FULL_GPU_JPEG_BASELINE_SUBSET':('image-JPEG-full-GPU-baseline-reencode-subset',10)}
+   'VALIDATED_I5_FULL_GPU_JPEG_BASELINE_SUBSET':('image-JPEG-full-GPU-baseline-reencode-subset',10),
+   'VALIDATED_I5_MATHEMATICAL_RESIZE_SUBSET':('image-JPEG-mathematical-baseline-resize-subset',9)}
   try:
    proof=ROOT/q['evidence'];sealed=json.loads((proof/'qualification.json').read_text())
    kind,count=variants[s['reason_code']]
@@ -42,7 +43,8 @@ def main():
     bool(q['dependencies']) and all(digest(ROOT/n)==h for n,h in q['dependencies'].items()) and
     all(d['physical_id']==1 for d in q['devices']) and
     anchored_seal(proof,publication(proof),qualification=True) and
-    all(anchored_seal(ROOT/ref,publication(ROOT/ref)) for ref in q['evidence_references']))
+    all(anchored_seal(ROOT/ref,publication(ROOT/ref)) for ref in q['evidence_references']) and
+    (q['kind']!='image-JPEG-mathematical-baseline-resize-subset' or inspect_selected(s)['status']=='PASSED'))
   except (KeyError,ValueError,OSError,TypeError):return False
  require(len(samples)==639 and len({s['id'] for s in samples})==639,'Expected 639 unique source entrypoints')
  require(not counts['NOT_STARTED'] and not counts['IN_PROGRESS'],'Unfinished sample states remain')

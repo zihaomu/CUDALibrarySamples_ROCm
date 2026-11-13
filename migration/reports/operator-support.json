@@ -2,9 +2,9 @@
   "schema_version": 1,
   "counting_rule": "Operator/functional families are deduplicated within each module; dtypes, sizes, language, batch, storage formats and algorithm variants do not create extra operators. At least one explicitly scoped PASSED source profile is required. Cross-module totals may include the same mathematical operation implemented through different library interfaces.",
   "qualification_rule": "A verified family proves only its linked PASSED source profiles/required cases, not every API configuration. PARTIAL examples and capability probes are excluded.",
-  "verified_operator_families": 131,
-  "modules_with_verified_operators": 19,
-  "passed_source_profiles": 252,
+  "verified_operator_families": 132,
+  "modules_with_verified_operators": 20,
+  "passed_source_profiles": 253,
   "modules": {
     "cuBLAS": {
       "verified_operator_family_count": 52,
@@ -1857,13 +1857,25 @@
       "failure_reason_counts": {}
     },
     "nvJPEG": {
-      "verified_operator_family_count": 0,
-      "verified_operators": [],
+      "verified_operator_family_count": 1,
+      "verified_operators": [
+        {
+          "name": "baseline JPEG 编码（标准/优化 Huffman、多实例）",
+          "sample_ids": [
+            "nvJPEG/nvJPEG-Encoder-MultipleInstances::nvJPEGEncMultipleInstances.cpp"
+          ],
+          "sample_reports": [
+            "migration/sample-reports/nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp.md"
+          ],
+          "source_profiles": 1
+        }
+      ],
       "sample_count": 7,
       "sample_outcomes": {
-        "PARTIAL": 7
+        "PARTIAL": 6,
+        "PASSED": 1
       },
-      "validation_scope": "尚无通过整例验收的算子族。",
+      "validation_scope": "多实例BMP→8-bit baseline JPEG：4:2:0/4:4:4、标准/优化Huffman、异步slot与预分配、原始CLI和错误语义。项目HIP完成像素变换与熵编码，CPU负责marker/DHT编排；240数学/CPU/native用例与固定提交冷构建通过。整数颜色/DC舍入为明确数学变体；AUTO/GPU映射AMD，强制NVIDIA硬件返回能力错误。其余解码/resize入口保持PARTIAL。",
       "failure_reason_counts": {}
     },
     "nvJPEG2000": {

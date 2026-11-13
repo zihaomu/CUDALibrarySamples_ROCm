@@ -85,7 +85,7 @@ OpenJPEG 参考当前固定为 v2.5.4 commit `6c4a29b00211eb0430fa0e5e890f1ce5c8
 
 ### IMG-01：把已有 GPU JPEG encoder 收口为完整入口
 
-当前已实现并回归：正式多实例入口的宽索引GPU变换、容量预检、自适应checked prefix（bits≤128/stuff≤64串行，其余分块）、异步slot与单图预分配。48项功能子集、240项CPU/native数学验收、两个resize入口68产品及两平台性能/分配峰值已完成；固定提交冷构建正在执行，最终资格尚未发布。旧局部质量门槛失败及明确数学变体修订分别保留。详见[实施记录](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/reports/image-completion-IMG-01.md)。
+当前已实现并回归：正式多实例入口的宽索引GPU变换、容量预检、自适应checked prefix（bits≤128/stuff≤64串行，其余分块）、异步slot与单图预分配。48项功能子集、240项CPU/native数学验收、两个resize入口68产品及两平台性能/分配峰值已完成；固定提交冷构建与独立复审已通过，314项完整多实例编码资格已发布；图像当前14/26、全项目253 PASSED/23 PARTIAL/363 FAILED。旧局部质量门槛失败及明确数学变体修订分别保留。详见[实施记录](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/reports/image-completion-IMG-01.md)。
 
 - [x] 在多实例生产 encoder 的标准/优化 Huffman 路径接入已验 checked serial/tiled prefix；bit/stuff 分别按实测128/64阈值选择。两个resize入口的旧 `jpeg_full_gpu.hpp` 数值回归另验，其共享实现收敛留在IMG-10，不把单阶段速度比写成整图收益。
 - [x] 处理总 bit 数、stuffed byte 数、size_t 分配乘积和超长 block 的溢出；支持合同内合法大图，超出实际能力时在分配/写文件前明确拒绝。验证恰好阈值上下、全 `0xff`、无 `0xff`、零长度错误、计数跨越边界。
@@ -287,7 +287,7 @@ tools/moat/selected_proofs.py
 | 阶段 | 当前状态 | 本阶段最新证据/接续点 |
 | --- | --- | --- |
 | IMG-00 | IN_PROGRESS | 最新步骤和证据见下方实时记录 |
-| IMG-01 | IN_PROGRESS | 最新步骤和证据见下方实时记录 |
+| IMG-01 | COMPLETED | 最新步骤和证据见下方实时记录 |
 | IMG-02 | PLANNED | 已有两入口及失败比较；下一步平台/tie/边界语义定位 |
 | IMG-03 | PLANNED | 已有GPU像素阶段；下一步GPU entropy系数链 |
 | IMG-04 | PLANNED | 等待03与原backend/pipeline/调度补齐 |
@@ -2605,5 +2605,6 @@ tools/moat/selected_proofs.py
 | 2026-11-13T06:23:37.556268+00:00 | IMG-01 | IN_PROGRESS | 完整资格发布反向检查：PASSED；旧48项PARTIAL、重复ID/错误合同、跨平台替换/错二进制/重复性能case均拒绝。 | `migration/reports/evidence/rewrite/I5/encoder-complete-publication-negative-controls/20261113T062336.497694Z-I5-CPU-negative-ecc6f1f732` |
 | 2026-11-13T06:24:31.261219+00:00 | IMG-01 | IN_PROGRESS | 完整资格首次组装在resize旧trace文件名处中止，未发布。trace-result.json读取已修正，独立复审确认无新增问题；按当前SHA重封review后重新签发。 | `migration/reports/evidence/rewrite/I5/encoder-completion-independent-final-review/20261113T062430.139412Z-I5-review-3913f56e20`；`migration/reports/image-encoder-completion-controls.json` |
 | 2026-11-13T06:24:44.116176+00:00 | IMG-01 | IN_PROGRESS | 完整多实例encoder资格及两个受影响resize当前子集资格已生成，等待Git封存发布；resize仍PARTIAL，未省略progressive解码/重编码和metadata缺口。 | `migration/reports/evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261113T062440.467905Z-I5-complete-original-encoder-qualification-ef7652d269`；`migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize__imageResize.cpp/20261113T062441.732683Z-I5-current-resize-mathematical-subset-b595840ce9`；`migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261113T062443.019215Z-I5-current-resize-mathematical-subset-0493502d8b` |
+| 2026-11-13T06:25:42.926516+00:00 | IMG-01 | COMPLETED | 完整多实例JPEG编码入口已按当前Git资格发布；两个resize子集同步刷新并保留PARTIAL。图像整例14/26，全部项目253 PASSED/23 PARTIAL/363 FAILED；其余IMG阶段继续实施。 | `migration/reports/image-encoder-completion-qualifications.json` |
 
 <!-- IMAGE_COMPLETION:END -->

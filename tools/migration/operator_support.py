@@ -13,6 +13,7 @@ def operator_name(sample):
    if normalized==kind:return kind
    kind=normalized
  if family=='nvCOMP':return 'CRC32' if 'crc32' in path.name.lower() else 'Snappy' if 'snappy' in path.name.lower() else 'LZ4'
+ if family=='nvJPEG':return {'nvJPEG-Encoder-MultipleInstances':'baseline JPEG 编码（标准/优化 Huffman、多实例）'}[path.parent.name]
  if family=='cuBLASMp':return {'geadd':'分布式 GEADD','gemr2d':'block-cyclic 重分布','gemm':'分布式 GEMM'}[path.stem]
  if family=='cuFFTMp':return '多进程 slab C2C FFT'
  if family=='cuTENSORMg':return '多 GPU 张量 contraction'
@@ -50,6 +51,7 @@ def operator_names(sample):
  return (operator_name(sample),)
 
 SCOPES={
+ 'nvJPEG':'多实例BMP→8-bit baseline JPEG：4:2:0/4:4:4、标准/优化Huffman、异步slot与预分配、原始CLI和错误语义。项目HIP完成像素变换与熵编码，CPU负责marker/DHT编排；240数学/CPU/native用例与固定提交冷构建通过。整数颜色/DC舍入为明确数学变体；AUTO/GPU映射AMD，强制NVIDIA硬件返回能力错误。其余解码/resize入口保持PARTIAL。',
  'cuBLAS':'固定教学输入与所列扩展 cases；第二批含并列/空索引、旋转 flags、batch/grouped 和正负 alpha；rotmg 极端缩放使用明确登记的 HIP 修正。其它精度/API 仍逐例管理。',
  'cuBLASLt':'3 个 profile：FP32 SGEMM、HSH FP16 input/output + FP32 compute 的 pointer-array 与 strided batch。',
  'cuDSS':'FP64 CSR：simple、异构/均匀batch、重排后完整求解及GENERAL多RHS残差；CPU符号/matching + rocSOLVER CSRRF或项目HIP CSR pivot LU。R9新增9个矩阵helper入口（按稠密/CSR两种描述符功能去重，batch与语言不另计）：项目host描述符＋真实HIP数据/指针表，非GPU求解算法；MOAT另有8个真实ISO_C_BINDING Fortran求解入口，uniform保留GPU factor并选择性重算，residual应用实际检查；原CUDA Fortran工具链仍缺。CPP重排严格METIS向量不同及get_set缺项保持PARTIAL，不把历史analysis-only计为完整求解。规模/动态pivot按逐例范围。',

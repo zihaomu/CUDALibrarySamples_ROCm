@@ -1,6 +1,6 @@
 # 多实例 JPEG 编码入口：当前功能与验收范围
 
-实现已完成冷构建、数值验证和独立复审，正在进行 Git 资格发布。当前主表状态以 samples.yaml 为准。
+完整多实例编码入口已发布为 PASSED；两个受影响的 resize 入口保持 PARTIAL。[314 项复合资格与两个 9 项子集](image-encoder-completion-qualifications.json)均绑定当前源码和不可变证据。
 
 | 功能 | 实现与验证 |
 | --- | --- |

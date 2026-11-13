@@ -75,15 +75,15 @@ libjpeg-turbo 在4:2:0下仅当降采样宽度大于2时启用精细上采样；
 
 详见[第二候选开发比较](image-encoder-rounding-candidate-comparison.json)、[90组DC边界](image-encoder-DC-boundaries.json)、[新保留三方比较](image-encoder-quality-heldout-cpu.json)、[模式/负向检查](image-encoder-quality-heldout-groups.json)。
 
-## 当前剩余的入口验收
+## 当前入口验收结果
 
 - 正式入口48项功能子集、240项CPU/native数学变体验收、两平台各6项无profiler性能与12组分配峰值已完成。
 - 两个受共享算术影响的resize入口68件产品已重跑独立数学、严格熵解码和CPU质量；生产seal身份及4项替换/缺失反向检查通过。
-- 固定提交冷检出正在重建应用、pipeline probe和copy observer，复跑CLI、运行/预分配/输入变化trace、240产品和8组大图。初始化/文档依赖遗漏的失败单独封存。
-- 冷检出与最终复审全部通过前，不签发整例资格。线程创建失败依照取消/join路径代码审查；资源失败覆盖5项已执行slot故障，未注入的OS线程创建故障不能称为实测。
+- 固定提交冷检出已重建应用、pipeline probe和copy observer，59子实验、CLI/运行/预分配/输入变化trace、240产品及8组大图全部通过。初始化/文档依赖遗漏失败单独封存。
+- 冷检出与独立复审已通过，314项完整多实例编码资格已Git封存发布。线程创建失败依照取消/join路径代码审查；资源失败覆盖5项已执行slot故障，未注入的OS线程创建故障不能称为实测。
 
 IMG-00的26入口语义审计及IMG-02–IMG-10仍未完成。阶段状态和每次实验见[完整计划](../image-completion-plan.md)及[实时实验记录](image-libraries-progress.md)。
 
 ## 当前生产整合后的补充验证
 
-240 个编码数学用例已在正式入口逐字节复现；两个 resize 入口 68 个产品已完成独立严格熵解码、系数数学和 CPU 质量比较，产品 seal 身份增强后重签通过。12 个性能场景（两平台各6项）与12组分配峰值重建完成，见 [性能及内存范围](image-encoder-performance.md)。CPU RSS 修复及旧测量限制已单列。当前等待固定提交冷检出与最终资格；主表计数尚未升级。
+240 个编码数学用例已在正式入口逐字节复现；两个 resize 入口 68 个产品已完成独立严格熵解码、系数数学和 CPU 质量比较，产品 seal 身份增强后重签通过。12 个性能场景（两平台各6项）与12组分配峰值重建完成，见 [性能及内存范围](image-encoder-performance.md)。CPU RSS 修复及旧测量限制已单列。完整资格已发布；图像14/26、全项目253 PASSED/23 PARTIAL/363 FAILED。详见[当前功能与验收范围](image-encoder-completion.md)。

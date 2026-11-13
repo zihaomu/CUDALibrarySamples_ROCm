@@ -1,8 +1,8 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-13T06:24:44.164921+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-13T06:25:42.953316+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
-26入口当前：13 PASSED / 9 PARTIAL / 4 FAILED。
+26入口当前：14 PASSED / 8 PARTIAL / 4 FAILED。
 
 | 阶段 | 执行状态 |
 | --- | --- |
@@ -4109,3 +4109,4 @@
 | 2026-11-13T06:23:37.589183+00:00 | I5 | IMG-01：完整资格发布反向检查：PASSED；旧48项PARTIAL、重复ID/错误合同、跨平台替换/错二进制/重复性能case均拒绝。 | [20261113T062336.497694Z-I5-CPU-negative-ecc6f1f732](evidence/rewrite/I5/encoder-complete-publication-negative-controls/20261113T062336.497694Z-I5-CPU-negative-ecc6f1f732) |
 | 2026-11-13T06:24:31.310976+00:00 | I5 | IMG-01：完整资格首次组装在resize旧trace文件名处中止，未发布。trace-result.json读取已修正，独立复审确认无新增问题；按当前SHA重封review后重新签发。 | [20261113T062430.139412Z-I5-review-3913f56e20](evidence/rewrite/I5/encoder-completion-independent-final-review/20261113T062430.139412Z-I5-review-3913f56e20)；[image-encoder-completion-controls.json](image-encoder-completion-controls.json) |
 | 2026-11-13T06:24:44.164921+00:00 | I5 | IMG-01：完整多实例encoder资格及两个受影响resize当前子集资格已生成，等待Git封存发布；resize仍PARTIAL，未省略progressive解码/重编码和metadata缺口。 | [20261113T062440.467905Z-I5-complete-original-encoder-qualification-ef7652d269](evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261113T062440.467905Z-I5-complete-original-encoder-qualification-ef7652d269)；[20261113T062441.732683Z-I5-current-resize-mathematical-subset-b595840ce9](evidence/rewrite/I5/nvJPEG_Image-Resize__imageResize.cpp/20261113T062441.732683Z-I5-current-resize-mathematical-subset-b595840ce9)；[20261113T062443.019215Z-I5-current-resize-mathematical-subset-0493502d8b](evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261113T062443.019215Z-I5-current-resize-mathematical-subset-0493502d8b) |
+| 2026-11-13T06:25:42.953316+00:00 | I5 | IMG-01：完整多实例JPEG编码入口已按当前Git资格发布；两个resize子集同步刷新并保留PARTIAL。图像整例14/26，全部项目253 PASSED/23 PARTIAL/363 FAILED；其余IMG阶段继续实施。 | [image-encoder-completion-qualifications.json](image-encoder-completion-qualifications.json) |

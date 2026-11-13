@@ -109,11 +109,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-13T06:24:44.164921+00:00。26入口当前13通过/9部分/4失败。
+更新时间：2026-11-13T06:25:42.953316+00:00。26入口当前14通过/8部分/4失败。
 
-I5：IMG-01：完整多实例encoder资格及两个受影响resize当前子集资格已生成，等待Git封存发布；resize仍PARTIAL，未省略progressive解码/重编码和metadata缺口。
+I5：IMG-01：完整多实例JPEG编码入口已按当前Git资格发布；两个resize子集同步刷新并保留PARTIAL。图像整例14/26，全部项目253 PASSED/23 PARTIAL/363 FAILED；其余IMG阶段继续实施。
 
-证据：`migration/reports/evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261113T062440.467905Z-I5-complete-original-encoder-qualification-ef7652d269`；`migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize__imageResize.cpp/20261113T062441.732683Z-I5-current-resize-mathematical-subset-b595840ce9`；`migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261113T062443.019215Z-I5-current-resize-mathematical-subset-0493502d8b`
+证据：`migration/reports/image-encoder-completion-qualifications.json`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

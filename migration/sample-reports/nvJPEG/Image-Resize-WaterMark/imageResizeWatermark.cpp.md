@@ -2,28 +2,28 @@
 
 **PARTIAL / L4**
 
-七组原登记 CLI/独立 CPU 与同输入 CUDA 数学流程均通过；35 件重编码 JPEG 由 AMD GPU 完成色彩/FDCT/MCU/Huffman/scan/pack/stuff，CPU 仅组装标准 baseline marker，禁 CPU 熵编码。两个入口68产品共8,191,374个 RGB 字节与旧独立数值路径完全一致，采样/量化表一致；实际 C++ 入口各12个 GPU JPEG 内核及重放 SHA 已验。源 progressive 输出模式、表及 APP/COM metadata 继承和 GPU prefix 性能尚缺，故 PARTIAL。
+七组原CLI、当前68产品独立数学/严格全MCU解码及CPU质量通过，生产GPU编码trace及产品seal反向检查通过；progressive解码仍有CPU熵阶段，源progressive输出/DQT/APP/COM继承及完整冷检出未完成，保留PARTIAL。
 
 | 字段 | 当前记录 |
 | --- | --- |
 | 原始入口 | [nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp](../../../../nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp) |
-| 实际库 / 后端 | rocJPEG baseline hardware + project HIP progressive decode + project HIP full baseline JPEG encode (GPU color/FDCT/MCU/Huffman/pack/stuff; CPU marker orchestration) / rocJPEG + project HIP JPEG decoder/encoder + libjpeg-turbo progressive entropy only |
+| 实际库 / 后端 | rocJPEG + project HIP progressive pixels/resize/watermark + full HIP baseline JPEG encoder; CPU progressive decode entropy remains / rocJPEG + project HIP + libjpeg-turbo progressive entropy |
 | 候选路线 | rocJPEG (decode only), RPP |
 | 代码 | [rocm/ported/nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp](../../../../rocm/ported/nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp) |
-| required cases | 10/14 |
-| CUDA baseline / comparison | PASSED / PASSED |
+| required cases | 9/12 |
+| CUDA baseline / comparison | PASSED / BLOCKED |
 | 性能 | NOT_RUN |
 | 原始源码 SHA256 | `e4f336ff2598fdcc5d0899d168eaf7785ed4b277fb494cd6f23960d181fe405b` |
 
 编译/运行返回 0 仅对应 L3；通过独立参考检查后才记 L4。失败的候选库不列为已使用库。
 
-必需用例：`batches9_11/original-corpus`, `batches9_11/formats-scale`, `batches9_11/roi-boundary`, `batches9_11/batch-multi-instance`, `batches9_11/invalid-cli`, `batches9_11/postprocess`, `batches9_11/python-integration`, `I4/progressive-GPU-pixel-synthesis`, `I5/full-GPU-JPEG-encode-four-fixtures`, `I5/actual-original-entry-GPU-encode-trace`, `I5/source-progressive-output-mode-and-scan-contract`, `I5/source-quantization-tables-and-APP-COM-metadata-preservation`, `I5/GPU-prefix-throughput-and-optimized-Huffman`, `I9/fixed-commit-cold-replay-and-independent-review`。
+必需用例：`IMG-01/resize/original-corpus`, `IMG-01/resize/formats-scale`, `IMG-01/resize/roi-boundary`, `IMG-01/resize/batch-multi-instance`, `IMG-01/resize/invalid-cli`, `IMG-01/resize/postprocess`, `IMG-01/resize/python-integration`, `IMG-01/resize/current-JPEG-mathematics`, `IMG-01/resize/actual-entry-GPU-trace`, `IMG-03/full-GPU-progressive-entropy`, `IMG-05/progressive-output-source-DQT-APP-COM`, `IMG-10/full-entry-cold-native-review`。
 
-实现方式：`HYBRID_CPU_GPU`。
+实现方式：`ALGORITHM_VARIANT`。
 
-恢复/扩展条件：完成 progressive 输出/量化表和 APP/COM metadata 继承、并行 GPU prefix 与优化 Huffman/吞吐检查，固定提交冷检出后重新验收。
+恢复/扩展条件：Progressive decode entropy still CPU; source progressive output, source quantization tables and APP/COM metadata inheritance; full entry cold/native qualification under IMG-03–05.
 
-CUDA 对照限制：七组既有同输入 CUDA 数学对照通过；全 GPU 编码输出还与已冻结旧 HIP FDCT+CPU entropy 参考68产品逐像素一致，不要求合法 JPEG 字节流一致。
+CUDA 对照限制：既有CUDA数学对照保留历史；当前新JPEG算术按CPU数学变体验收，完整新入口native复核随IMG-05完成。
 
 ## 原始 API 自动移植稿最近一次尝试
 
@@ -81,3 +81,7 @@ HIP_VISIBLE_DEVICES=2 /home/zihaomu/zihaomu_workspace/rocm10-launch.sh env ROCR_
 - [migration/reports/image-jpeg-encoder-full-gpu-products-comparison.json](../../../reports/image-jpeg-encoder-full-gpu-products-comparison.json)
 - [migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261112T101034.778214Z-I5-full-GPU-JPEG-original-entry-subset-qualification-d1c172995a](../../../reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261112T101034.778214Z-I5-full-GPU-JPEG-original-entry-subset-qualification-d1c172995a)
 - [migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp/20261112T100832.671105Z-I5-rocm-full-GPU-JPEG-original-entry-integration-03ae7858c2](../../../reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark_imageResizeWatermark.cpp/20261112T100832.671105Z-I5-rocm-full-GPU-JPEG-original-entry-integration-03ae7858c2)
+- [migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261113T062443.019215Z-I5-current-resize-mathematical-subset-0493502d8b](../../../reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261113T062443.019215Z-I5-current-resize-mathematical-subset-0493502d8b)
+- [migration/reports/image-encoder-math-variant.md](../../../reports/image-encoder-math-variant.md)
+- [migration/reports/image-encoder-performance.md](../../../reports/image-encoder-performance.md)
+- [migration/reports/image-completion-IMG-01.md](../../../reports/image-completion-IMG-01.md)
