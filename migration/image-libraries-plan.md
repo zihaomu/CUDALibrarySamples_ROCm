@@ -284,7 +284,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-13T06:25:42.953316+00:00。26入口当前14通过/8部分/4失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-13T06:31:03.285983+00:00。26入口当前14通过/8部分/4失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -4377,5 +4377,6 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-13T06:24:31.310976+00:00 | I5 | IMG-01：完整资格首次组装在resize旧trace文件名处中止，未发布。trace-result.json读取已修正，独立复审确认无新增问题；按当前SHA重封review后重新签发。 | `migration/reports/evidence/rewrite/I5/encoder-completion-independent-final-review/20261113T062430.139412Z-I5-review-3913f56e20`；`migration/reports/image-encoder-completion-controls.json` |
 | 2026-11-13T06:24:44.164921+00:00 | I5 | IMG-01：完整多实例encoder资格及两个受影响resize当前子集资格已生成，等待Git封存发布；resize仍PARTIAL，未省略progressive解码/重编码和metadata缺口。 | `migration/reports/evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261113T062440.467905Z-I5-complete-original-encoder-qualification-ef7652d269`；`migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize__imageResize.cpp/20261113T062441.732683Z-I5-current-resize-mathematical-subset-b595840ce9`；`migration/reports/evidence/rewrite/I5/nvJPEG_Image-Resize-WaterMark__imageResizeWatermark.cpp/20261113T062443.019215Z-I5-current-resize-mathematical-subset-0493502d8b` |
 | 2026-11-13T06:25:42.953316+00:00 | I5 | IMG-01：完整多实例JPEG编码入口已按当前Git资格发布；两个resize子集同步刷新并保留PARTIAL。图像整例14/26，全部项目253 PASSED/23 PARTIAL/363 FAILED；其余IMG阶段继续实施。 | `migration/reports/image-encoder-completion-qualifications.json` |
+| 2026-11-13T06:31:03.285983+00:00 | I5 | IMG-01：最终发布检查通过：866原始源码/477构建保持、43个整例重写当前证明和2个resize PARTIAL证明通过、6966实验封存审计无未结束项；首页253/23/363、132功能族、图像14/26。下一步IMG-02。 | `migration/reports/image-completion-IMG-01-checkpoint.json` |
 
 <!-- IMAGE_EXECUTION:END -->

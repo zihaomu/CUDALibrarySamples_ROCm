@@ -109,11 +109,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-13T06:25:42.953316+00:00。26入口当前14通过/8部分/4失败。
+更新时间：2026-11-13T06:31:03.285983+00:00。26入口当前14通过/8部分/4失败。
 
-I5：IMG-01：完整多实例JPEG编码入口已按当前Git资格发布；两个resize子集同步刷新并保留PARTIAL。图像整例14/26，全部项目253 PASSED/23 PARTIAL/363 FAILED；其余IMG阶段继续实施。
+I5：IMG-01：最终发布检查通过：866原始源码/477构建保持、43个整例重写当前证明和2个resize PARTIAL证明通过、6966实验封存审计无未结束项；首页253/23/363、132功能族、图像14/26。下一步IMG-02。
 
-证据：`migration/reports/image-encoder-completion-qualifications.json`
+证据：`migration/reports/image-completion-IMG-01-checkpoint.json`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 
