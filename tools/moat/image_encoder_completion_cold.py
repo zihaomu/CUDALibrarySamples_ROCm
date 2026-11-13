@@ -13,16 +13,16 @@ def main():
     commit=git('rev-parse','HEAD').strip();bp=ROOT/'migration/reports/image-encoder-instances-v2-build.json';build=json.loads(bp.read_text());sealed(build,'build.json')
     numerical={m:ROOT/f'migration/reports/image-encoder-math-production-{m}.json' for m in ['fresh','development','heldout']}
     profiles={m:ROOT/'migration/rewrite'/n for m,n in [('fresh','image-encoder-math-variant-v2-profile.json'),('development','image-encoder-quality-profile.json'),('heldout','image-encoder-quality-holdout-v2-profile.json')]}
-    largep=ROOT/'migration/rewrite/image-encoder-large-profile.json';larger=ROOT/'migration/reports/image-encoder-large-runs.json'
+    largep=ROOT/'migration/rewrite/image-encoder-large-profile.json';larger=ROOT/'migration/reports/image-encoder-large-runs.json';amended=ROOT/'migration/reports/image-jpeg-reference-amendment.json'
     scripts=['image_encoder_pipeline.py','image_encoder_instances_v2.py','image_encoder_pipeline_trace.py','image_encoder_runtime.py','image_encoder_instances_v2_trace.py','image_encoder_preallocation.py','image_encoder_quality_run.py','image_encoder_large.py']
-    sources=[__file__,bp,largep,larger,*numerical.values(),*profiles.values(),*[ROOT/'tools/moat'/n for n in scripts],*[ROOT/n for n in build['dependencies']]]
+    sources=[__file__,bp,largep,larger,amended,*numerical.values(),*profiles.values(),*[ROOT/'tools/moat'/n for n in scripts],*[ROOT/n for n in build['dependencies']]]
     e=Experiment('I5','encoder-fixed-commit-cold-rebuild','rocm-cold',sources=sources)
     write(e.path/'backend.observed.json',capture());clone=Path(tempfile.mkdtemp(prefix='image-encoder-cold-',dir=ROOT.parent))/'src'
     checks=[];children=[];outputs=[];refs=[]
     try:
         rc=e.command(['git','clone','--quiet','--shared','--no-checkout',str(ROOT),str(clone)],'cold-clone',timeout=300)
         if rc:raise ValueError('clone failed')
-        paths=['/rocm/','/tools/','/nvJPEG/','/migration/rewrite/','/migration/fixtures/','/migration/environments/','/migration/moat/','/migration/*.md','/migration/reports/image-completion-progress.json','/migration/reports/image-libraries-progress.json','/migration/reports/image-libraries-progress.md','/.gitignore']
+        paths=['/rocm/','/tools/','/nvJPEG/','/migration/rewrite/','/migration/fixtures/','/migration/environments/','/migration/moat/','/migration/*.md','/migration/samples.yaml','/migration/reports/image-completion-progress.json','/migration/reports/image-libraries-progress.json','/migration/reports/image-libraries-progress.md','/.gitignore']
         if e.command(['git','sparse-checkout','set','--no-cone',*paths],'cold-source-surface',cwd=clone):raise ValueError('sparse checkout')
         if e.command(['git','checkout','--quiet',commit],'cold-fixed-commit',cwd=clone):raise ValueError('checkout')
         checks.append(dict(check='clean-fixed-checkout-no-application-cache',passed=not (clone/'build').exists() and not (clone/'artifacts').exists() and subprocess.check_output(['git','rev-parse','HEAD'],cwd=clone,text=True).strip()==commit))
@@ -34,11 +34,11 @@ def main():
         (clone/'build').mkdir();shutil.copytree(ROOT/'build/cpu-codecs',clone/'build/cpu-codecs',symlinks=True)
         (clone/'migration/source-objects').mkdir(parents=True,exist_ok=True)
         write(e.path/'external-dependencies.json',dict(scope='Pinned external libjpeg and installed ROCm SDK reused; all application, reference-probe and observer binaries rebuilt in the empty checkout.',dependencies={n:h for n,h in build['dependencies'].items() if n.startswith('build/')}))
-        jobs=[('tools/migration/bootstrap_sdk.py',[]),('tools/moat/image_encoder_pipeline.py',['build']),('tools/moat/image_encoder_instances_v2.py',['build']),('tools/moat/image_encoder_instances_v2.py',['run']),('tools/moat/image_encoder_pipeline_trace.py',[]),('tools/moat/image_encoder_runtime.py',['run']),('tools/moat/image_encoder_instances_v2_trace.py',[]),('tools/moat/image_encoder_preallocation.py',['run']),('tools/moat/image_encoder_preallocation.py',['lifecycle'])]
+        jobs=[('tools/migration/bootstrap_sdk.py',[]),('tools/moat/image_encoder_pipeline.py',['build']),('tools/moat/image_encoder_instances_v2.py',['build']),('tools/moat/image_encoder_instances_v2.py',['run']),('tools/moat/image_encoder_pipeline.py',['run']),('tools/moat/image_encoder_pipeline_trace.py',[]),('tools/moat/image_encoder_runtime.py',['run']),('tools/moat/image_encoder_instances_v2_trace.py',[]),('tools/moat/image_encoder_preallocation.py',['run']),('tools/moat/image_encoder_preallocation.py',['lifecycle'])]
         for script,args in jobs:
             if e.command([sys.executable,str(clone/script),*args],'cold-'+Path(script).stem+'-'+('-'.join(args) or 'main'),cwd=clone,timeout=1200):raise ValueError('cold child '+script)
             record('IMG-01','固定提交冷构建步骤完成：'+script+' '+' '.join(args)+'；子实验保留在独立检出，等待完整资格。')
-        names={'image-encoder-instances-v2-build.json':1,'image-encoder-pipeline-build.json':1,'image-encoder-instances-v2-runs.json':15,'image-encoder-pipeline-trace.json':4,'image-encoder-runtime-runs.json':16,'image-encoder-instances-v2-trace.json':3,'image-encoder-preallocation-runs.json':3,'image-encoder-prepared-lifecycle.json':1}
+        names={'image-encoder-instances-v2-build.json':1,'image-encoder-pipeline-build.json':1,'image-encoder-instances-v2-runs.json':15,'image-encoder-pipeline-runs.json':14,'image-encoder-pipeline-trace.json':4,'image-encoder-runtime-runs.json':16,'image-encoder-instances-v2-trace.json':3,'image-encoder-preallocation-runs.json':3,'image-encoder-prepared-lifecycle.json':1}
         for name,count in names.items():
             group=json.loads((clone/'migration/reports'/name).read_text());rows=group if isinstance(group,list) else [group]
             checks.append(dict(check='complete-cold-'+name,passed=len(rows)==count and all(r['status'] in ['PASSED','BUILT'] and (r['status']=='BUILT' or r['checks'] and all(c['passed'] for c in r['checks'])) for r in rows)))
@@ -51,6 +51,15 @@ def main():
                         if digest(dest)!=digest(source):raise ValueError('source object collision')
                     else:shutil.copyfile(source,dest)
                 children.append(dict(report=name,index=index,path=str(target.relative_to(e.path)),result=row))
+        copied={r['result']['evidence'] for r in children}
+        for manifest in (clone/'artifacts/rewrite').rglob('manifest.json'):
+            raw=manifest.parent;proof='migration/reports/evidence/'+str(raw.relative_to(clone/'artifacts'))
+            if proof in copied:continue
+            if not (raw/'sealed.json').exists():raise ValueError('unfinished cold child')
+            target=e.path/'children/additional'/raw.name;target.parent.mkdir(parents=True,exist_ok=True);shutil.copytree(raw,target);(target/'sealed.json').rename(target/'child-seal.json')
+            for name in json.loads((target/'source.json').read_text())['source_objects'].values():
+                if not (ROOT/name).exists():shutil.copyfile(clone/name,ROOT/name)
+            children.append(dict(report='additional',path=str(target.relative_to(e.path)),manifest=json.loads(manifest.read_text())))
         cb=json.loads((clone/'migration/reports/image-encoder-instances-v2-build.json').read_text());binary=clone/cb['binary']
         checks.append(dict(check='new-application-binary-current-source-closure',passed=digest(binary)==cb['binary_sha256'] and cb['dependencies']==build['dependencies'] and str(binary)!=str(ROOT/build['binary'])))
         for matrix,pp in profiles.items():
@@ -68,8 +77,11 @@ def main():
                 if not passed:raise ValueError('cold numerical mismatch')
             record('IMG-01','固定提交新编译入口 '+matrix+' 80/80独立已验JPEG完整字节复现；不复用先前应用二进制。')
         largeprofile=json.loads(largep.read_text());large=json.loads(larger.read_text())
+        amendment=json.loads(amended.read_text());sealed(amendment)
+        if amendment['status']!='PASSED' or not all(c['passed'] for c in amendment['checks']):raise ValueError('large reference amendment failed')
+        refs.append(amendment['evidence'])
         for case,golden in zip(largeprofile['cases'],large):
-            sealed(golden)
+            sealed(golden);refs.append(golden['evidence'])
             if golden['case']!=case['id'] or len(golden['products'])!=3:raise ValueError('large output contract')
             rgb,bmp=fixture(case)
             if hashlib.sha256(bmp).hexdigest()!=case['bmp_sha256'] or hashlib.sha256(rgb.tobytes()).hexdigest()!=case['sha256']:raise ValueError('cold large seed reconstruction')
@@ -79,7 +91,7 @@ def main():
             if case['optimized']:args+=['-f']
             rc=e.command(args,'cold-'+case['id'],timeout=600)
             passed=rc==0 and {f.name for f in out.iterdir()}=={p['name'] for p in golden['products']} and all(digest(out/p['name'])==p['sha256'] for p in golden['products'])
-            checks.append(dict(check='cold-'+case['id'],passed=passed));outputs.append(dict(matrix='large',case=case['id'],passed=passed))
+            checks.append(dict(check='cold-'+case['id'],passed=passed));outputs.append(dict(matrix='large',case=case['id'],passed=passed,scope='JPEG byte reproduction only; original numerical result and amended independent CPU reference remain distinct',original_status=golden['status'],original_evidence=golden['evidence'],reference_amendment=amendment['evidence']))
             if not passed:raise ValueError('cold large byte mismatch')
         checks.append(dict(check='complete-240-quality-plus-eight-large-groups',passed=len(outputs)==248))
     except Exception as error:checks.append(dict(check='cold-exception',passed=False,error=repr(error)))
