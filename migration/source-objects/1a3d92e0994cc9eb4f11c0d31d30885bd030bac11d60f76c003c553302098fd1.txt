@@ -1,0 +1,141 @@
+#!/usr/bin/env python3
+"""Freeze wide-index development inputs separately from the selected encoder."""
+import argparse,hashlib,json,csv
+from pathlib import Path
+import numpy as np
+from experiment import ROOT,Experiment,digest,write
+from image_completion_progress import record
+
+PROFILE=ROOT/'migration/rewrite/image-encoder-wide-profile.json'
+BUILD=ROOT/'migration/reports/image-encoder-wide-build.json'
+SOURCE=ROOT/'rocm/probes/image/jpeg_wide_transform.hip'
+
+def pixels(case):
+    value=np.random.default_rng(case['seed']).integers(0,256,(case['height'],case['width'],3),dtype=np.uint8).tobytes()
+    if len(value)!=case['bytes'] or hashlib.sha256(value).hexdigest()!=case['sha256']:raise ValueError('frozen generated input drift')
+    return value
+
+def build():
+    from snapshot import capture
+    from image_completion_inventory import closure
+    deps,missing=closure(SOURCE)
+    if missing:raise ValueError(missing)
+    core=Path('/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core');overlay=ROOT/'build/rocm-sdk-overlay';jpeg=ROOT/'build/cpu-codecs'
+    for path in (jpeg/'include/jpeglib.h',jpeg/'lib/libjpeg.so.62.4.0',PROFILE):deps[str(path.relative_to(ROOT))]=digest(path)
+    e=Experiment('I5','JPEG-wide-transform-build','rocm-build',sources=[__file__,*[ROOT/n for n in deps]])
+    write(e.path/'backend.observed.json',capture());binary=e.path/'probe'
+    rc=e.command(['hipcc','--rocm-path='+str(overlay),'--hip-path='+str(overlay),
+        '--rocm-device-lib-path='+str(core/'lib/llvm/amdgcn/bitcode'),'--offload-arch=gfx1201','-std=c++17','-O2',
+        '-D__HIP_PLATFORM_AMD__','-I'+str(ROOT/'rocm/common'),'-I'+str(jpeg/'include'),'-x','hip',str(SOURCE),'-o',str(binary),
+        '-L'+str(core/'lib'),'-L'+str(jpeg/'lib'),'-Wl,-rpath,'+str(core/'lib'),'-Wl,-rpath,'+str(jpeg/'lib'),'-lamdhip64','-ljpeg'],'build-wide-transform')
+    row=dict(status='BUILT' if rc==0 else 'BUILD_ERROR',binary=str(binary.relative_to(ROOT)),binary_sha256=digest(binary) if rc==0 else None,dependencies=deps,experiment_id=e.id)
+    write(e.path/'build.json',row);row['evidence']=e.finish('EXECUTED' if rc==0 else 'BUILD_ERROR');write(BUILD,row)
+    record('IMG-01','独立宽索引组件构建：'+row['status']+'。',[row['evidence']]);print(row['status']);return int(rc!=0)
+
+def current():
+    b=json.loads(BUILD.read_text())
+    if b['status']!='BUILT' or digest(ROOT/b['binary'])!=b['binary_sha256'] or any(digest(ROOT/n)!=h for n,h in b['dependencies'].items()):raise ValueError('current wide-index build required')
+    return b
+
+def run():
+    from snapshot import capture
+    b=current();p=json.loads(PROFILE.read_text());rows=[]
+    for case in p['cases']:
+        data=pixels(case)
+        e=Experiment('I5','JPEG-wide-transform-full-arrays','rocm-probe',case=case['id'],sources=[__file__,PROFILE,BUILD,*[ROOT/n for n in b['dependencies']]],parent=b['experiment_id'])
+        write(e.path/'backend.observed.json',capture());source=e.path/'input.rgb';source.write_bytes(data);del data
+        write(e.path/'inputs/manifest.json',dict(input='input.rgb',contract=case,numpy_version=np.__version__,regenerate=['build/image-cpu-venv/bin/python','tools/moat/image_encoder_wide.py','regenerate','--case',case['id'],'--output',str(source)]))
+        out=e.path/'arrays';rc=e.command([str(ROOT/b['binary']),str(source),str(case['width']),str(case['height']),str(case['sampling']),str(case['quality']),str(out)],'wide-and-original-transforms',timeout=300)
+        checks=[dict(check='GPU-command',passed=rc==0)];products=[]
+        try:
+            lengths={};w,h,s=case['width'],case['height'],case['sampling']
+            for c in range(3):
+                scale=s if c else 1;pw=(w+scale-1)//scale;ph=(h+scale-1)//scale
+                lengths['color'+str(c)]=pw*ph;lengths['coeff'+str(c)]=((pw+7)//8)*((ph+7)//8)*64*2
+            blocks=((w+s*8-1)//(s*8))*((h+s*8-1)//(s*8))*(6 if s==2 else 3)
+            lengths.update(scan=blocks*64*2,previous=blocks*4,component=blocks)
+            checks.append(dict(check='exact-nine-array-pairs',passed={x.name for x in out.iterdir()}=={name+'-'+kind+'.bin' for name in lengths for kind in ['wide','original']}))
+            for name,length in lengths.items():
+                a=out/(name+'-wide.bin');o=out/(name+'-original.bin');same=a.stat().st_size==o.stat().st_size==length and digest(a)==digest(o)
+                checks.append(dict(check='full-array-exact-'+name,passed=same,bytes=length))
+                products.append(dict(array=name,bytes=length,wide_sha256=digest(a),original_sha256=digest(o)))
+        except Exception as error:checks.append(dict(check='validation-exception',passed=False,error=repr(error)))
+        status='PASSED' if all(c['passed'] for c in checks) else 'FAILED';row=dict(case=case['id'],status=status,checks=checks,arrays=products,binary_sha256=b['binary_sha256'],experiment_id=e.id)
+        write(e.path/'result.json',row);row['evidence']=e.finish('PASSED' if status=='PASSED' else 'NUMERIC_MISMATCH',dict(status=status,checks=checks));rows.append(row);write(ROOT/'migration/reports/image-encoder-wide-runs.json',rows)
+        record('IMG-01','宽索引真实图 '+case['id']+'：'+status+'；9组完整数组逐字节对照，超4MiB输入/输出用seed与SHA重建。',[row['evidence']]);print(case['id'],status,flush=True)
+    return int(any(r['status']!='PASSED' for r in rows))
+
+def expected(c):
+    w,h,s,i=c['width'],c['height'],c['sampling'],c['index'];result=[0]*12+[(1<<64)-1]
+    if i<w*h:result[:3]=[1,i%w,i//w]
+    bx,by=(w+7)//8,(h+7)//8
+    if i<bx*by*64:result[3:8]=[1,(i//64)%bx,(i//64)//bx,i%8,(i%64)//8]
+    mx,my=(w+s*8-1)//(s*8),(h+s*8-1)//(s*8);per=6 if s==2 else 3
+    if i<mx*my*per*64:
+        block,freq=divmod(i,64);mcu,slot=divmod(block,per);x,y=mcu%mx,mcu//mx
+        if s==2 and slot<4:channel=0;x=x*2+slot%2;y=y*2+slot//2
+        else:channel=slot-3 if s==2 else slot
+        cw,ch=(((w+s-1)//s+7)//8,((h+s-1)//s+7)//8) if channel else (bx,by)
+        valid=x<cw and y<ch;source=(y*cw+x)*64+freq if valid else 0
+        if s==2:previous=(block-3 if mcu else -1) if slot==0 else block-1 if slot<4 else (block-6 if mcu else -1)
+        else:previous=block-3 if mcu else -1
+        result[8:]=[1,channel,int(valid),source,previous if previous>=0 else (1<<64)-1]
+    return result
+
+def indices():
+    from snapshot import capture
+    b=current();p=json.loads(PROFILE.read_text());cases=p['coordinate_cases']
+    e=Experiment('I5','JPEG-wide-coordinate-boundaries','rocm-trace',sources=[__file__,PROFILE,BUILD,*[ROOT/n for n in b['dependencies']]],parent=b['experiment_id'])
+    observed=capture();write(e.path/'backend.observed.json',observed);source=e.path/'coordinates.txt';dest=e.path/'actual.txt'
+    source.write_text(''.join(f"{c['width']} {c['height']} {c['sampling']} {c['index']}\n" for c in cases))
+    rc=e.command(['rocprofv3','--kernel-trace','--output-format','csv','--output-directory',str(e.path/'trace'),'--',str(ROOT/b['binary']),'coordinates',str(source),str(dest)],'wide-index-GPU-coordinate-trace',timeout=300)
+    checks=[dict(check='GPU-coordinate-command',passed=rc==0)];results=[]
+    try:
+        rows=[list(map(int,line.split())) for line in dest.read_text().splitlines()]
+        checks.append(dict(check='exact-coordinate-row-count',passed=len(rows)==len(cases)==18))
+        for c,row in zip(cases,rows):
+            reference=expected(c);checks.append(dict(check=c['id'],passed=row==reference));results.append(dict(case=c,actual=row,reference=reference))
+        traces=list((e.path/'trace').rglob('*kernel_trace.csv'));agents=list((e.path/'trace').rglob('*agent_info.csv'))
+        if len(traces)!=len(agents) or len(traces)!=1:raise ValueError('missing unique kernel/agent tables')
+        kernels=list(csv.DictReader(traces[0].open()));lookup={r['Node_Id']:r for r in csv.DictReader(agents[0].open())}
+        application=[r for r in kernels if not r['Kernel_Name'].startswith('__amd_rocclr_')]
+        valid=len(application)==1 and 'coordinates(' in application[0]['Kernel_Name']
+        allowed={d['pci_bdf'] for d in observed['devices'] if d['physical_id']==1}
+        for row in kernels:
+            agent=lookup[row['Agent_Id'].split()[-1]];loc=int(agent['Location_Id']);address=f"{int(agent['Domain']):04x}:{loc>>8:02x}:{(loc>>3)&31:02x}.{loc&7}"
+            valid &= address in allowed and int(row['End_Timestamp'])>int(row['Start_Timestamp']) and int(row['Grid_Size_X'])>0
+        checks.append(dict(check='actual-coordinate-kernel-on-GPU1',passed=valid))
+    except Exception as error:checks.append(dict(check='validation-exception',passed=False,error=repr(error)))
+    status='PASSED' if all(c['passed'] for c in checks) else 'FAILED';row=dict(status=status,checks=checks,results=results,binary_sha256=b['binary_sha256'],experiment_id=e.id)
+    write(e.path/'result.json',row);row['evidence']=e.finish('PASSED' if status=='PASSED' else 'NUMERIC_MISMATCH',dict(status=status,checks=checks));write(ROOT/'migration/reports/image-encoder-wide-indices.json',row)
+    record('IMG-01','18组最大尺寸GPU宽坐标对独立Python整数参考：'+status+'；覆盖2^31/2^32及最大MCU数组边界，不代表超大整图能装入设备。',[row['evidence']]);print(status);return int(status!='PASSED')
+
+def freeze():
+    if PROFILE.exists():raise ValueError('wide-index profile already frozen')
+    cases=[]
+    for i,(w,h) in enumerate([(65500,1),(1,65500),(4097,4095)]):
+        pixels=np.random.default_rng(17301+i).integers(0,256,(h,w,3),dtype=np.uint8)
+        for sampling in (1,2):
+            cases.append(dict(id=f'{w}x{h}-s{sampling}',width=w,height=h,sampling=sampling,quality=80,
+                seed=17301+i,bytes=pixels.nbytes,sha256=hashlib.sha256(pixels.tobytes()).hexdigest()))
+    coordinate_cases=[]
+    for sampling in (1,2):
+        width=height=65535;mx=(width+8*sampling-1)//(8*sampling);my=(height+8*sampling-1)//(8*sampling)
+        total=mx*my*(6 if sampling==2 else 3)*64
+        for index in [0,63,64,2**31-1,2**31,2**32-1,2**32,total-1,total]:
+            coordinate_cases.append(dict(id=f's{sampling}-index{index}',width=width,height=height,sampling=sampling,index=index))
+    e=Experiment('I5','JPEG-wide-index-contract','CPU-contract',sources=[__file__])
+    value=dict(status='FROZEN',cases=cases,coordinate_cases=coordinate_cases,
+        gates=['All wide color/FDCT/gather arrays byte-exact against separately launched current kernels for the six real images.',
+               'GPU production index helpers at signed32/unsigned32/max-dimension boundaries match independent Python integer formulas.',
+               'One-past coordinate rejected without reading image memory.',
+               'Inputs regenerated with frozen NumPy seed, shape, length and SHA; oversized arrays remain reconstructible artifacts.'],
+        scope='Candidate wide transform component. No claim that 65535x65535 fits device memory, nor whole original sample promotion.')
+    write(e.path/'profile.json',value);value['evidence']=e.finish('OBSERVED');write(PROFILE,value)
+    record('IMG-01','冻结宽索引组件合同：6组真实65500单行列/4097x4095图，18组最大尺寸坐标跨有符号/无符号32位边界；组件先独立验证，现有正式入口资格保留。',[str(PROFILE.relative_to(ROOT)),value['evidence']]);print(value['evidence'])
+
+if __name__=='__main__':
+    parser=argparse.ArgumentParser();parser.add_argument('action',choices=['freeze','build','run','indices','regenerate']);parser.add_argument('--case');parser.add_argument('--output');args=parser.parse_args()
+    if args.action=='regenerate':
+        case=next(c for c in json.loads(PROFILE.read_text())['cases'] if c['id']==args.case);Path(args.output).write_bytes(pixels(case))
+    else:raise SystemExit(globals()[args.action]())

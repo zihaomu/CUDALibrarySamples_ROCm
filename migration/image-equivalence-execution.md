@@ -109,11 +109,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-13T04:43:11.605974+00:00。26入口当前13通过/9部分/4失败。
+更新时间：2026-11-13T05:00:31.954481+00:00。26入口当前13通过/9部分/4失败。
 
-I5：IMG-01：复审发现的CPU实际加载库身份缺口已修复：6保留输入、3产品重跑和4项替换库正反检查通过；48项新子集资格封存，独立复审确认修复。完整80项编码质量保留矩阵已冻结待运行。
+I5：IMG-01：已确认仅ties-away候选仍不能修复Q1/420两项：GPU DC归一化sqrt乘积略小于精确1/8，0.5/2.5提前偏低；候选失败和GPU平面诊断已封存。下一候选采用精确DC常数并保留既有门槛。当前正式48项子集保持PARTIAL。
 
-证据：`migration/reports/image-jpeg-reference-loader-negative.json`；`migration/reports/image-encoder-instances-v2-qualification.json`；`migration/rewrite/image-encoder-quality-profile.json`
+证据：`migration/reports/image-encoder-rounding-candidate-comparison.json`；`migration/reports/image-encoder-DC-diagnosis.json`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

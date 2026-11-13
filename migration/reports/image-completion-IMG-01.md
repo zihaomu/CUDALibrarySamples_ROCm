@@ -1,6 +1,6 @@
 # IMG-01：多实例 JPEG 编码器实施记录
 
-状态：**IN_PROGRESS**。宽索引、自适应prefix与显存预检已接入正式入口并重建重验；当前48项PARTIAL子集已封存，待固定提交发布。完整入口尚有下列欠项，图像当前仍为 **13 PASSED、9 PARTIAL、4 FAILED**。[资格摘要](image-encoder-instances-v2-qualification.json)与[发布记录](image-encoder-instances-v2-publication.json)保留各自源码身份和发布状态。
+状态：**IN_PROGRESS**。宽索引、自适应prefix与显存预检已接入正式入口并重建重验；当前48项PARTIAL子集已绑定提交`48885a7e`的封存证据并发布到主表，传递源码和显式PARTIAL资格检查通过。完整入口尚有下列欠项，图像当前仍为 **13 PASSED、9 PARTIAL、4 FAILED**。[资格摘要](image-encoder-instances-v2-qualification.json)与[发布记录](image-encoder-instances-v2-publication.json)保留各自源码身份和发布状态。
 
 | 工作 | 当前结果 | 完整证据 |
 | --- | --- | --- |
@@ -65,12 +65,16 @@
 
 libjpeg-turbo 在4:2:0下仅当降采样宽度大于2时启用精细上采样；stb在极窄图仍做垂直三角插值。原1×65500随机图的两种默认CPU重建出现maxAbs82，完整失败保持封存。采用独立libjpeg熵解码/ISLOW IDCT输出最近邻YCbCr，再由独立Python实现明确的边缘夹取三角重建/RGB601；6个新seed输入（宽1/2/3/4/5/17、Q1/80/100）先按原门槛通过，随后才用于三个历史产品的新验收。产品字节、GPU编码和数值门槛均未改变，修订仅解决CPU参考的重建模式差异，不代替完整CPU/native编码质量对照。
 
+## 新编码质量保留集
+
+[冻结80项矩阵](../rewrite/image-encoder-quality-profile.json)覆盖4输入、Q1/50/80/95/100、两采样及标准/优化Huffman。AMD与5090原入口80/80均运行并生成文件；数值验收78/80通过，仅Q1/420渐变局部失败（两Huffman模式）；Huffman/质量控制/验证器正反检查88/88通过。独立GPU平面和CPU系数诊断确认DC归一化的float sqrt乘积为0.1249999925，使精确0.5/2.5变为0.49999997/2.49999976；仅ties-away的首候选未修复两项失败，失败证据保留。下一候选将使用DC精确1/8，生产实现及48项子集资格仍保持原样。Pillow参考优化444缓冲不足的三项历史错误保留，增大目的buffer后重验；baseline增加明确SOF0/8bit和反向检查，未调整质量门槛。详见[三方数值记录](image-encoder-quality-cpu.json)、[系数诊断](image-encoder-Q1-diagnosis.json)。
+
 ## 尚未完成的入口验收
 
 - 正式C++入口整合、48项当前子集资格、多线程trace和输入变化重放已完成；仍需最终完整资格。
 - 扩展16组mixed尺寸、j0/状态、损坏BMP和IO错误已通过；线程创建失败采用取消/join路径并经代码复审，仍需资源失败的完整边界审计。
 - 宽索引、容量预检已接入正式入口，14组slot、5故障/4trace、全部运行合同与8组大图重验通过。坐标验收不代表65535×65535整图可装入设备。
 - 单图预分配与计时边界已通过；prefix分派阈值测量和保留边界已通过；无profiler的端到端性能分布、峰值内存尚未完成，不能与vendor直接比较。
-- 保留验收集、完整CPU/native等价门槛、冷检出重建和最终复审。
+- 新80项保留编码质量矩阵已冻结并开始AMD/native原入口运行，涵盖4输入×5档Q×2采样×2Huffman；逐图三方数值验收、冷检出重建和最终复审仍待完成。
 
 IMG-00的26入口语义审计及IMG-02–IMG-10仍未完成。阶段状态和每次实验见[完整计划](../image-completion-plan.md)及[实时实验记录](image-libraries-progress.md)。

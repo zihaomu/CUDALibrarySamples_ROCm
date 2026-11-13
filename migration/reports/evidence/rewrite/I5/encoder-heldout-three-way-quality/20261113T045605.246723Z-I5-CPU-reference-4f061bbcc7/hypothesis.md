@@ -1,0 +1,1 @@
+Test CPU-reference for encoder-heldout-three-way-quality, case natural-cat-q95-s2-opt0. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: none.

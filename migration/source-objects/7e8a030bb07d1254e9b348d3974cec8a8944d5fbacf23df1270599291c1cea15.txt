@@ -1,0 +1,84 @@
+#!/usr/bin/env python3
+"""Apply the frozen CPU reconstruction amendment, retaining the old failure."""
+import json
+import numpy as np
+from experiment import ROOT, Experiment, digest, write
+from audit import check as audit_check
+from image_completion_progress import record
+from image_jpeg_reference_modes import PROFILE, current, triangle, loaded_library_check
+from image_encoder_large import compare_decoders
+
+REPORT = ROOT / 'migration/reports/image-jpeg-reference-amendment.json'
+
+def sealed(row):
+    path = ROOT / row['evidence']
+    if audit_check(path) or json.loads((path / 'result.json').read_text()) != {k:v for k,v in row.items() if k != 'evidence'}:
+        raise ValueError('invalid sealed reference ' + str(path))
+    return path
+
+def holdout_complete(rows, cases):
+    return ([r['case'] for r in rows] == [c['id'] for c in cases] and len(cases) == 6 and
+            all(r['status'] == 'PASSED' and r['checks'] and all(c['passed'] for c in r['checks']) for r in rows))
+
+def main():
+    profile = json.loads(PROFILE.read_text())
+    holdout_path = ROOT / 'migration/reports/image-jpeg-reference-modes-heldout.json'
+    large_path = ROOT / 'migration/reports/image-encoder-large-runs.json'
+    heldout = json.loads(holdout_path.read_text())
+    if not holdout_complete(heldout, profile['cases']):
+        raise ValueError('all six frozen fresh heldouts required')
+    original = next(r for r in json.loads(large_path.read_text()) if r['case'] == 'entry-1x65500-s2')
+    old = sealed(original)
+    for row in heldout: sealed(row)
+    failed = {c['check'] for c in original['checks'] if not c['passed']}
+    expected = {'independent-CPU-pixel-reference-' + str(i) for i in range(3)}
+    if original['status'] != 'FAILED' or failed != expected or [p['name'] for p in original['products']] != ['0.jpg','1.jpg','2.jpg']:
+        raise ValueError('amendment is scoped to exactly three decoder-mode comparisons')
+    reports, builds = current()
+    products = [old / 'products' / p['name'] for p in original['products']]
+    for path, p in zip(products, original['products']):
+        if digest(path) != p['sha256'] or path.stat().st_size != p['bytes']:
+            raise ValueError('historical product changed')
+    sources = [__file__, PROFILE, holdout_path, large_path, ROOT/'tools/moat/image_jpeg_reference_modes.py',
+               ROOT/'tools/moat/image_encoder_large.py', *reports, *products,
+               *[ROOT/n for b in builds for n in b['dependencies']],
+               *[ROOT/r['evidence']/'source.json' for r in [original,*heldout]]]
+    e = Experiment('I5','JPEG-CPU-reconstruction-amended-product','CPU-reference',sources=sources)
+    checks = [dict(check='six-independent-frozen-holdouts',passed=True),
+              dict(check='original-failure-limited-to-three-reconstruction-comparisons',passed=True),
+              dict(check='missing-holdout-rejected',passed=not holdout_complete(heldout[:-1],profile['cases'])),
+              dict(check='duplicate-holdout-rejected',passed=not holdout_complete(heldout[:-1]+heldout[:1],profile['cases']))]
+    rows=[]
+    try:
+        for path, product in zip(products, original['products']):
+            name=path.stem; ycc=e.path/(name+'.ycc'); stb=e.path/(name+'.rgb')
+            a=e.command([str(ROOT/builds[0]['binary']),str(path),str(ycc)],'independent-libjpeg-'+name)
+            identity=loaded_library_check(e,e.commands[-1],builds[0]);identity['check']+='-'+name;checks.append(identity)
+            b=e.command([str(ROOT/builds[1]['binary']),str(path),str(stb)],'independent-stb-'+name)
+            checks.append(dict(check='independent-commands-'+name,passed=a==b==0))
+            shape=(65500,1,3)
+            checks.append(dict(check='complete-decoded-bytes-'+name,passed=ycc.stat().st_size==stb.stat().st_size==196500))
+            reference=triangle(np.fromfile(ycc,dtype=np.uint8).reshape(shape));actual=np.fromfile(stb,dtype=np.uint8).reshape(shape)
+            reference.tofile(e.path/(name+'.normalized-reference.rgb'))
+            metrics,good=compare_decoders(actual,reference)
+            checks.append(dict(check='unchanged-frozen-pixel-gates-'+name,passed=good))
+            checks.append(dict(check='same-independent-decoder-result-'+name,passed=digest(stb)==product['decoded_rgb_sha256']))
+            corrupt=actual.copy();corrupt[:100,:,0]^=255
+            checks.append(dict(check='pixel-corruption-rejected-'+name,passed=not compare_decoders(corrupt,reference)[1]))
+            rows.append(dict(name=path.name,sha256=digest(path),bytes=path.stat().st_size,
+                             original_pillow_comparison=product['comparison'],normalized_comparison=metrics,
+                             decoded_rgb_sha256=digest(stb)))
+    except Exception as error:
+        checks.append(dict(check='validation-exception',passed=False,error=repr(error)))
+    status='PASSED' if all(c['passed'] for c in checks) else 'FAILED'
+    row=dict(status=status,case=original['case'],checks=checks,products=rows,experiment_id=e.id,
+             original_status='FAILED',amended_checks=sorted(expected),
+             evidence_references=[r['evidence'] for r in [original,*heldout]],
+             binaries=[dict(binary=b['binary'],sha256=b['binary_sha256'],build_report=str(p.relative_to(ROOT)),build_report_sha256=digest(p)) for b,p in zip(builds,reports)],
+             scope='CPU decoder reconstruction mode only; original execution and FAILED record are retained. No GPU encoder or threshold change.')
+    write(e.path/'result.json',row)
+    row['evidence']=e.finish('PASSED' if status=='PASSED' else 'NUMERIC_MISMATCH',dict(status=status,checks=checks));write(REPORT,row)
+    record('IMG-01','窄图三个历史产品按已冻结且6项新保留集通过的独立三角重建重新验收：'+status+'；原maxAbs82失败保留，新增缺/重复保留集及像素损坏拒绝检查。',[row['evidence']]);print(status)
+    return int(status!='PASSED')
+
+if __name__=='__main__':raise SystemExit(main())

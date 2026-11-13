@@ -1,0 +1,44 @@
+{
+  "commands": [
+    {
+      "command_id": 1,
+      "phase": "native-GPU1-identity-and-entry",
+      "argv": [
+        "ssh",
+        "nvidia-5090x2",
+        "env CUDA_VISIBLE_DEVICES=1 python3 -c 'import hashlib,json,os,pathlib,subprocess,sys\nc=json.loads(sys.argv[1]);sha=lambda p:hashlib.file_digest(pathlib.Path(p).open('\"'\"'rb'\"'\"'),'\"'\"'sha256'\"'\"').hexdigest()\nfor key in ['\"'\"'input'\"'\"','\"'\"'original'\"'\"','\"'\"'binary'\"'\"']:assert sha(c[key])==c[key+'\"'\"'_sha256'\"'\"']\nldd=subprocess.check_output(['\"'\"'ldd'\"'\"',c['\"'\"'binary'\"'\"']],text=True);libs={}\nfor line in ldd.splitlines():\n w=line.split()\n if '\"'\"'=>'\"'\"' in w and len(w)>2 and w[2].startswith('\"'\"'/'\"'\"'):\n  p=pathlib.Path(w[2]).resolve();libs[str(p)]=dict(sha256=sha(p),bytes=p.stat().st_size)\nprint(json.dumps(dict(config=c,libraries=libs,ldd=ldd,CUDA_VISIBLE_DEVICES=os.environ.get('\"'\"'CUDA_VISIBLE_DEVICES'\"'\"'),physical_device_index=1,gpu=subprocess.check_output(['\"'\"'nvidia-smi'\"'\"','\"'\"'--id=1'\"'\"','\"'\"'--query-gpu=name,uuid,pci.bus_id,driver_version'\"'\"','\"'\"'--format=csv,noheader'\"'\"'],text=True).strip())),flush=True)\npathlib.Path(c['\"'\"'out'\"'\"']).mkdir(parents=True);rc=subprocess.run(c['\"'\"'args'\"'\"']).returncode\nprint(json.dumps(dict(return_code=rc,outputs={p.name:dict(sha256=sha(p),bytes=p.stat().st_size) for p in pathlib.Path(c['\"'\"'out'\"'\"']).iterdir()})),flush=True);sys.exit(rc)\n' '{\"input\":\"/tmp/image-quality-20261113T044608.364523Z-I5-cuda-prepare-68353f9500/color-edges/image.bmp\",\"input_sha256\":\"1108cd4266c14b524df69fa950ad4790a1a330262c42d4b0888370e500ac03ca\",\"original\":\"/tmp/image-completion-20261113T024052.431041Z-I0-cuda-build-361fbe3168/source/nvJPEGEncMultipleInstances.cpp\",\"original_sha256\":\"f417be2a36bed75baea893712db616416ea748157406dc489ffdf323b9fe8d7e\",\"binary\":\"/tmp/image-completion-20261113T024052.431041Z-I0-cuda-build-361fbe3168/build/nvJPEGEncMultipleInstances\",\"binary_sha256\":\"037c9fe46700fb0bec5338a509de118d9fb1ea2141452a0a342e5a66c1c51aa6\",\"out\":\"/tmp/image-quality-20261113T044608.364523Z-I5-cuda-prepare-68353f9500/outputs/color-edges-q100-s2-opt0\",\"args\":[\"/tmp/image-completion-20261113T024052.431041Z-I0-cuda-build-361fbe3168/build/nvJPEGEncMultipleInstances\",\"-i\",\"/tmp/image-quality-20261113T044608.364523Z-I5-cuda-prepare-68353f9500/color-edges\",\"-o\",\"/tmp/image-quality-20261113T044608.364523Z-I5-cuda-prepare-68353f9500/outputs/color-edges-q100-s2-opt0\",\"-n\",\"1\",\"-j\",\"1\",\"-s\",\"1\",\"-b\",\"gpu\",\"-q\",\"100\"]}'"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-13T04:48:41.567341+00:00",
+      "timeout_seconds": 300,
+      "environment": {},
+      "stdout": "logs/0001-native-GPU1-identity-and-entry.stdout.log",
+      "stderr": "logs/0001-native-GPU1-identity-and-entry.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-13T04:48:42.384289+00:00",
+      "seconds": 0.8161453100037761
+    },
+    {
+      "command_id": 2,
+      "phase": "collect-native-products",
+      "argv": [
+        "scp",
+        "-r",
+        "nvidia-5090x2:/tmp/image-quality-20261113T044608.364523Z-I5-cuda-prepare-68353f9500/outputs/color-edges-q100-s2-opt0",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/encoder-heldout-quality-original-entry/20261113T044840.767193Z-I5-native-original-b6eb6b9fb8/products"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-13T04:48:42.385351+00:00",
+      "timeout_seconds": 120,
+      "environment": {},
+      "stdout": "logs/0002-collect-native-products.stdout.log",
+      "stderr": "logs/0002-collect-native-products.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-13T04:48:42.701031+00:00",
+      "seconds": 0.3150880190078169
+    }
+  ],
+  "source": "source.json",
+  "inputs": "inputs/manifest.json",
+  "expected_environment": "environment.expected.json"
+}

@@ -1,0 +1,122 @@
+{
+  "status": "OBSERVED",
+  "checks": [
+    {
+      "check": "reference-build",
+      "passed": true
+    },
+    {
+      "check": "amd-coefficient-command",
+      "passed": true
+    },
+    {
+      "check": "actual-loaded-libjpeg-matches-bound-path-and-SHA-amd",
+      "passed": true,
+      "observed": [
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/cpu-codecs/lib/libjpeg.so.62"
+      ],
+      "expected_path": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/cpu-codecs/lib/libjpeg.so.62.4.0",
+      "expected_sha256": "d3dee37946d3b526cd19c49b1d535047b20e2c19d0edd3cf6782e257680b7466"
+    },
+    {
+      "check": "native-coefficient-command",
+      "passed": true
+    },
+    {
+      "check": "actual-loaded-libjpeg-matches-bound-path-and-SHA-native",
+      "passed": true,
+      "observed": [
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/cpu-codecs/lib/libjpeg.so.62"
+      ],
+      "expected_path": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/cpu-codecs/lib/libjpeg.so.62.4.0",
+      "expected_sha256": "d3dee37946d3b526cd19c49b1d535047b20e2c19d0edd3cf6782e257680b7466"
+    },
+    {
+      "check": "cpu-coefficient-command",
+      "passed": true
+    },
+    {
+      "check": "actual-loaded-libjpeg-matches-bound-path-and-SHA-cpu",
+      "passed": true,
+      "observed": [
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/cpu-codecs/lib/libjpeg.so.62"
+      ],
+      "expected_path": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/cpu-codecs/lib/libjpeg.so.62.4.0",
+      "expected_sha256": "d3dee37946d3b526cd19c49b1d535047b20e2c19d0edd3cf6782e257680b7466"
+    }
+  ],
+  "differences": {
+    "cpu": [
+      {
+        "component": 0,
+        "different_coefficients": 1,
+        "positions": [
+          {
+            "x": 29,
+            "y": 25,
+            "frequency": 0,
+            "amd": 2,
+            "reference": 3
+          }
+        ]
+      },
+      {
+        "component": 1,
+        "different_coefficients": 0,
+        "positions": []
+      },
+      {
+        "component": 2,
+        "different_coefficients": 0,
+        "positions": []
+      }
+    ],
+    "native": [
+      {
+        "component": 0,
+        "different_coefficients": 1,
+        "positions": [
+          {
+            "x": 29,
+            "y": 25,
+            "frequency": 0,
+            "amd": 2,
+            "reference": 3
+          }
+        ]
+      },
+      {
+        "component": 1,
+        "different_coefficients": 1,
+        "positions": [
+          {
+            "x": 12,
+            "y": 0,
+            "frequency": 0,
+            "amd": 0,
+            "reference": 1
+          }
+        ]
+      },
+      {
+        "component": 2,
+        "different_coefficients": 0,
+        "positions": []
+      }
+    ]
+  },
+  "input_jpegs": {
+    "amd": {
+      "path": "migration/reports/evidence/rewrite/I5/encoder-heldout-quality-original-entry/20261113T044616.055586Z-I5-amd-original-de9fbd0261/products/0.jpg",
+      "sha256": "276bd7db31a9d37b42c49045e3986a4c4044e0c8f337918e02a24837b455e8ae"
+    },
+    "native": {
+      "path": "migration/reports/evidence/rewrite/I5/encoder-heldout-quality-original-entry/20261113T044615.651974Z-I5-native-original-f9edd83d57/products/0.jpg",
+      "sha256": "2669948235c237a1c7a3c9a876e1ccc5d436f676cb507d0306e4647824a38ac1"
+    },
+    "cpu": {
+      "path": "migration/reports/evidence/rewrite/I5/encoder-heldout-three-way-quality/20261113T044948.030229Z-I5-CPU-reference-8ad17d6ff3/cpu.jpg",
+      "sha256": "8e75e0a017795399d6b0761ac7fc8843ffe36cc0675ec797dc356f68ebfc47b2"
+    }
+  }
+}
