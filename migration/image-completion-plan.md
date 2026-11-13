@@ -2718,5 +2718,6 @@ tools/moat/selected_proofs.py
 | 2026-11-13T08:03:15.441988+00:00 | IMG-02 | COMPLETED | 两原始Watershed样例已由固定Git资格发布为整例通过；图像16/26。完整支持按声明算法变体成立，原生分区差异及三个NPP+坡度失败仍单独公开。 | `migration/reports/image-watershed-completion-qualifications.json` |
 | 2026-11-13T08:03:57.083280+00:00 | IMG-00 | IN_PROGRESS | 更新26入口当前资格、源码SHA、本地include反向依赖与算法欠项账本；当前{'PASSED': 16, 'PARTIAL': 6, 'FAILED': 4}。全部入口语义矩阵和保留验收集仍未完成，阶段保持IN_PROGRESS。 | `migration/reports/image-completion-inventory.json`；`migration/reports/image-completion-IMG-00.md`；`migration/reports/evidence/rewrite/I0/image-completion-26-source-dependency-gap-ledger/20261113T080355.771558Z-I0-CPU-contract-a22989efd1` |
 | 2026-11-13T08:05:40.401326+00:00 | IMG-02 | COMPLETED | 两整例已发布：NPP9/9、NPP+6/6，图像16/26；算子表生成器补齐此前不存在的两个Watershed分组，避免新PASSED入口导致KeyError。首页/主表/算子表已重新生成，45项完整重写选择证明审计通过；全项目源码/日志检查继续。 | `migration/reports/image-watershed-completion-qualifications.json`；`migration/reports/operator-support.md`；`migration/reports/rewrite-selected-proof-audit.json` |
+| 2026-11-13T08:07:44.697116+00:00 | IMG-02 | COMPLETED | 最终发布检查通过：866原始源码/477构建保持，1856文件源码身份一致，45整例重写及2个resize PARTIAL当前证明通过，7049实验封存审计无未结束项；全项目255/21/363、134功能族、图像16/26。下一步IMG-03。 | `migration/reports/image-completion-IMG-02-checkpoint.json` |
 
 <!-- IMAGE_COMPLETION:END -->

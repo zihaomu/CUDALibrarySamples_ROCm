@@ -109,11 +109,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-13T08:05:40.440447+00:00。26入口当前16通过/6部分/4失败。
+更新时间：2026-11-13T08:07:44.733144+00:00。26入口当前16通过/6部分/4失败。
 
-I3：IMG-02：两整例已发布：NPP9/9、NPP+6/6，图像16/26；算子表生成器补齐此前不存在的两个Watershed分组，避免新PASSED入口导致KeyError。首页/主表/算子表已重新生成，45项完整重写选择证明审计通过；全项目源码/日志检查继续。
+I3：IMG-02：最终发布检查通过：866原始源码/477构建保持，1856文件源码身份一致，45整例重写及2个resize PARTIAL当前证明通过，7049实验封存审计无未结束项；全项目255/21/363、134功能族、图像16/26。下一步IMG-03。
 
-证据：`migration/reports/image-watershed-completion-qualifications.json`；`migration/reports/operator-support.md`；`migration/reports/rewrite-selected-proof-audit.json`
+证据：`migration/reports/image-completion-IMG-02-checkpoint.json`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 
