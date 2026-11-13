@@ -1,0 +1,84 @@
+{
+  "status": "FROZEN",
+  "amends": "migration/rewrite/image-encoder-large-profile.json",
+  "cases": [
+    {
+      "id": "1x257-q80",
+      "path": "migration/fixtures/image-jpeg-reference-modes/1x257-q80.jpg",
+      "sha256": "5651e948568d611a6ec76b0023713d55e608e40254806c4a64cabca27274308a",
+      "bytes": 1486,
+      "width": 1,
+      "height": 257,
+      "quality": 80,
+      "seed": 21351,
+      "source_rgb_sha256": "b2b778da43a57b72004e092d2d318e6ab1b32af322fb1522b8fe83622896b2d3"
+    },
+    {
+      "id": "2x513-q100",
+      "path": "migration/fixtures/image-jpeg-reference-modes/2x513-q100.jpg",
+      "sha256": "b2807d4ae034e0d15432ae83418d41f0b49a33bd30c9f20c99899e1fc61960a2",
+      "bytes": 9217,
+      "width": 2,
+      "height": 513,
+      "quality": 100,
+      "seed": 21352,
+      "source_rgb_sha256": "538921eddada782b659b2b6265e276a84040c04de99470ced962fb7395763523"
+    },
+    {
+      "id": "3x31-q1",
+      "path": "migration/fixtures/image-jpeg-reference-modes/3x31-q1.jpg",
+      "sha256": "0d5e25060931f3b832b3315144ce51e61d17582f4a690f8f2330aee30a756552",
+      "bytes": 644,
+      "width": 3,
+      "height": 31,
+      "quality": 1,
+      "seed": 21353,
+      "source_rgb_sha256": "91529183f96df970f86fd1c04636dcf9d948fe88a0748fd914037698fc49cb58"
+    },
+    {
+      "id": "4x65500-q80",
+      "path": "migration/fixtures/image-jpeg-reference-modes/4x65500-q80.jpg",
+      "sha256": "8680419cf74ed0d96b2d423c2df93f17aff24fd4149234f0cd68a1d9642ed094",
+      "bytes": 388513,
+      "width": 4,
+      "height": 65500,
+      "quality": 80,
+      "seed": 21354,
+      "source_rgb_sha256": "f0587dca22ba2609db44ac7f80e03bdbf69e1ef25b7eb78cc305b89e6aa0330f"
+    },
+    {
+      "id": "5x129-q80",
+      "path": "migration/fixtures/image-jpeg-reference-modes/5x129-q80.jpg",
+      "sha256": "fc87c6364af883da68a59ed7693ac5ea8842875023bd8810f661e8265cee4cfd",
+      "bytes": 1453,
+      "width": 5,
+      "height": 129,
+      "quality": 80,
+      "seed": 21355,
+      "source_rgb_sha256": "ed0df0436463faa0c69c41524b134b65e22820c9a2be482a7ef2ef65957ac7f4"
+    },
+    {
+      "id": "17x131-q100",
+      "path": "migration/fixtures/image-jpeg-reference-modes/17x131-q100.jpg",
+      "sha256": "78660a8cc000a26e07f78930d77d6687072646f39455ab42a82bbede5a5ec751",
+      "bytes": 5765,
+      "width": 17,
+      "height": 131,
+      "quality": 100,
+      "seed": 21356,
+      "source_rgb_sha256": "b7f21a1699ef584bfb90b1aa4d76863d95c82c7df4d5421238b25f6123695c75"
+    }
+  ],
+  "diagnosis": "libjpeg-turbo h2v2 selects fancy only when downsampled_width>2; stb still applies vertical triangle when chroma width1. Original 1x65500-420 Pillow comparison failed at maxAbs82 and remains FAILED under its original protocol.",
+  "normalization": "Independent libjpeg ISLOW nearest-upsampled YCbCr -> recover chroma samples at even row/column -> explicit separable quarter-sample triangle with edge clamps -> RGB601 float64 rounding. Entropy and IDCT stay independent from stb.",
+  "scope": "Reference decoder mode only. No production encoding/output changes. This amendment does not waive numeric gates or full native encoder equivalence.",
+  "gates": {
+    "max_abs": 4,
+    "channel_rmse": 1,
+    "channel_p99_abs": 2,
+    "psnr_db": 48,
+    "channel_global_ssim": 0.995
+  },
+  "application": "After all six fresh held-out decoder inputs pass, apply the same frozen reconstruction to the historical skinny420 product and use a new scoped validation receipt. Keep original experiments/profiles immutable.",
+  "evidence": "migration/reports/evidence/rewrite/I5/JPEG-CPU-reconstruction-mode-amendment/20261113T043017.220478Z-I5-CPU-contract-1bdbb59e93"
+}

@@ -4,12 +4,17 @@ import csv,json,re,shutil
 from experiment import ROOT,Experiment,digest,write
 from snapshot import capture
 from image_completion_progress import record
+from image_prefix_trace_contract import algorithm_count,SELECTION
+from PIL import Image
 
 def main():
     p=json.loads((ROOT/'migration/rewrite/image-encoder-instances-v2-profile.json').read_text())
     b=json.loads((ROOT/'migration/reports/image-encoder-instances-v2-build.json').read_text())
+    reference=json.loads((ROOT/'migration/reports/image-encoder-pipeline-build.json').read_text())
     runs=json.loads((ROOT/'migration/reports/image-encoder-instances-v2-runs.json').read_text())
     if b['status']!='BUILT' or digest(ROOT/b['binary'])!=b['binary_sha256'] or any(digest(ROOT/n)!=h for n,h in b['dependencies'].items()):raise ValueError('stale actual-entry build')
+    if reference['status']!='BUILT' or digest(ROOT/reference['binary'])!=reference['binary_sha256'] or any(digest(ROOT/n)!=h for n,h in reference['dependencies'].items()):raise ValueError('stale separate reference build')
+    if any(digest(ROOT/c['path'])!=c['sha256'] for c in p['inputs']):raise ValueError('frozen trace input drift')
     prior=json.loads((ROOT/'migration/reports/image-encoder-pipeline-trace.json').read_text())[0]
     deps=json.loads((ROOT/prior['evidence']/'source.json').read_text())['dependencies']
     audit_name=next(n for n in deps if n.endswith('/copy_audit.so'));audit=ROOT/audit_name
@@ -17,7 +22,9 @@ def main():
     results=[];input_dir=(ROOT/p['inputs'][0]['path']).parent
     for name,count,opt,download in [('repeat-seven',7,False,True),('optimized-444',3,True,True),('device-only',3,False,False)]:
         run=next(r for r in runs if r['case']==name)
-        e=Experiment('I5','async-original-entry-multithread-trace','rocm-trace',case=name,sources=[__file__,audit,ROOT/'migration/reports/image-encoder-instances-v2-runs.json',*[ROOT/n for n in b['dependencies']]],parent=run['experiment_id'])
+        e=Experiment('I5','async-original-entry-multithread-trace','rocm-trace',case=name,sources=[__file__,ROOT/'tools/moat/image_prefix_trace_contract.py',SELECTION,audit,
+            ROOT/'migration/reports/image-encoder-instances-v2-runs.json',ROOT/'migration/reports/image-encoder-instances-v2-build.json',ROOT/'migration/reports/image-encoder-pipeline-build.json',
+            *[ROOT/c['path'] for c in p['inputs']],*[ROOT/n for n in b['dependencies']],*[ROOT/n for n in reference['dependencies']]],parent=run['experiment_id'])
         observed=capture();write(e.path/'backend.observed.json',observed);out=e.path/'outputs';out.mkdir()
         args=[str(ROOT/b['binary']),'-i',str(input_dir),'-j','2','-s','4' if count==7 else '2','-n',str(count),'-b','gpu','-q','90' if opt else '75' if count==7 else '80']
         if opt:args+=['-f','-p']
@@ -25,11 +32,20 @@ def main():
         rc=e.command(['rocprofv3','--kernel-trace','--hip-trace','--output-format','csv','--output-directory',str(e.path/'trace'),'--','env','LD_PRELOAD='+str(audit),*args],'actual-original-entry-trace',timeout=300)
         checks=[dict(check='profile-command',passed=rc==0)];info={}
         try:
+            reference_counts=[]
+            for spec in p['inputs']:
+                source=ROOT/spec['path'];raw=e.path/(source.name+'.rgb')
+                with Image.open(source) as image:raw.write_bytes(image.convert('RGB').tobytes())
+                destination=e.path/'reference'/source.name
+                rr=e.command([str(ROOT/reference['binary']),str(raw),str(spec['width']),str(spec['height']),
+                    '90' if opt else '75' if count==7 else '80','1' if opt else '2',str(int(opt)),'0','1',str(destination)],'separate-reference-'+source.name)
+                checks.append(dict(check='independent-reference-command-'+source.name,passed=rr==0))
+                reference_counts.append(algorithm_count(destination/'serial-reference.jpg',opt))
             traces=list((e.path/'trace').rglob('*kernel_trace.csv'));agents=list((e.path/'trace').rglob('*agent_info.csv'))
             if len(traces)!=1 or len(agents)!=1:raise ValueError('one trace and agent table required')
             rows=list(csv.DictReader(traces[0].open()));lookup={r['Node_Id']:r for r in csv.DictReader(agents[0].open())}
             app=[r for r in rows if not r['Kernel_Name'].startswith('__amd_rocclr_')]
-            streams={r['Stream_Id'] for r in app};expected=count*(17 if opt else 16)
+            streams={r['Stream_Id'] for r in app};expected=sum(reference_counts[i%len(reference_counts)] for i in range(count))
             checks.append(dict(check='all-image-algorithm-kernels-and-multiple-streams',passed=len(app)==expected and len(streams)>=2,actual=len(app),expected=expected,streams=sorted(streams)))
             allowed={d['pci_bdf'] for d in observed['devices'] if d['physical_id']==1};actual_pci=set();real=True
             for row in rows:

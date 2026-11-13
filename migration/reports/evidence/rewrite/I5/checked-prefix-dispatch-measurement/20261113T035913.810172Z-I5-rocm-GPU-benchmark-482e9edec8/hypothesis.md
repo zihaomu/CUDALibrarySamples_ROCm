@@ -1,0 +1,1 @@
+Test rocm-GPU-benchmark for checked-prefix-dispatch-measurement, case bits-128. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261113T035857.818807Z-I5-rocm-build-7c9d92970f.

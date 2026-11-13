@@ -1,0 +1,1 @@
+Test rocm-trace for adaptive-prefix-holdout, case bits-invalid-zero. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261113T040318.998308Z-I5-rocm-build-1db5d4b3b0.

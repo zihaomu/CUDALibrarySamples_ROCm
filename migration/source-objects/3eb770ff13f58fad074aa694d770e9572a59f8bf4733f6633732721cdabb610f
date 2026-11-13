@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+"""Freeze wide-index development inputs separately from the selected encoder."""
+import argparse,hashlib,json
+import numpy as np
+from experiment import ROOT,Experiment,digest,write
+from image_completion_progress import record
+
+PROFILE=ROOT/'migration/rewrite/image-encoder-wide-profile.json'
+
+def freeze():
+    if PROFILE.exists():raise ValueError('wide-index profile already frozen')
+    cases=[]
+    for i,(w,h) in enumerate([(65500,1),(1,65500),(4097,4095)]):
+        pixels=np.random.default_rng(17301+i).integers(0,256,(h,w,3),dtype=np.uint8)
+        for sampling in (1,2):
+            cases.append(dict(id=f'{w}x{h}-s{sampling}',width=w,height=h,sampling=sampling,quality=80,
+                seed=17301+i,bytes=pixels.nbytes,sha256=hashlib.sha256(pixels.tobytes()).hexdigest()))
+    coordinate_cases=[]
+    for sampling in (1,2):
+        width=height=65535;mx=(width+8*sampling-1)//(8*sampling);my=(height+8*sampling-1)//(8*sampling)
+        total=mx*my*(6 if sampling==2 else 3)*64
+        for index in [0,63,64,2**31-1,2**31,2**32-1,2**32,total-1,total]:
+            coordinate_cases.append(dict(id=f's{sampling}-index{index}',width=width,height=height,sampling=sampling,index=index))
+    e=Experiment('I5','JPEG-wide-index-contract','CPU-contract',sources=[__file__])
+    value=dict(status='FROZEN',cases=cases,coordinate_cases=coordinate_cases,
+        gates=['All wide color/FDCT/gather arrays byte-exact against separately launched current kernels for the six real images.',
+               'GPU production index helpers at signed32/unsigned32/max-dimension boundaries match independent Python integer formulas.',
+               'One-past coordinate rejected without reading image memory.',
+               'Inputs regenerated with frozen NumPy seed, shape, length and SHA; oversized arrays remain reconstructible artifacts.'],
+        scope='Candidate wide transform component. No claim that 65535x65535 fits device memory, nor whole original sample promotion.')
+    write(e.path/'profile.json',value);value['evidence']=e.finish('OBSERVED');write(PROFILE,value)
+    record('IMG-01','冻结宽索引组件合同：6组真实65500单行列/4097x4095图，18组最大尺寸坐标跨有符号/无符号32位边界；组件先独立验证，现有正式入口资格保留。',[str(PROFILE.relative_to(ROOT)),value['evidence']]);print(value['evidence'])
+
+if __name__=='__main__':
+    parser=argparse.ArgumentParser();parser.add_argument('action',choices=['freeze']);args=parser.parse_args();raise SystemExit(globals()[args.action]())

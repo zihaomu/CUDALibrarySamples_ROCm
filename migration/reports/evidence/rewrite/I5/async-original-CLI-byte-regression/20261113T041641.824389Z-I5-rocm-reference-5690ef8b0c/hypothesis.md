@@ -1,0 +1,1 @@
+Test rocm-reference for async-original-CLI-byte-regression, case natural-three. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261113T041605.596370Z-I5-rocm-original-candidate-e86aaaf437.

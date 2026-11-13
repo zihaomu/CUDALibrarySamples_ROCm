@@ -1,0 +1,176 @@
+{
+  "commands": [
+    {
+      "command_id": 1,
+      "phase": "large-original-entry-trace",
+      "argv": [
+        "rocprofv3",
+        "--kernel-trace",
+        "--output-format",
+        "csv",
+        "--output-directory",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/JPEG-large-original-entry/20261113T042533.230165Z-I5-rocm-trace-CPU-reference-1613f70911/trace",
+        "--",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/async-original-encoder-candidate-build/20261113T041312.673696Z-I5-rocm-build-b0ffb93404/sample",
+        "-i",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/JPEG-large-original-entry/20261113T042533.230165Z-I5-rocm-trace-CPU-reference-1613f70911/inputs",
+        "-o",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/JPEG-large-original-entry/20261113T042533.230165Z-I5-rocm-trace-CPU-reference-1613f70911/products",
+        "-j",
+        "1",
+        "-s",
+        "1",
+        "-n",
+        "3",
+        "-b",
+        "gpu",
+        "-q",
+        "100"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-13T04:25:34.601444+00:00",
+      "timeout_seconds": 600,
+      "environment": {
+        "HIP_VISIBLE_DEVICES": "0",
+        "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "DEEPINFER_ROCM_RELEASE": "10.1.0",
+        "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+        "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+      },
+      "stdout": "logs/0001-large-original-entry-trace.stdout.log",
+      "stderr": "logs/0001-large-original-entry-trace.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-13T04:25:35.017670+00:00",
+      "seconds": 0.4153361470089294
+    },
+    {
+      "command_id": 2,
+      "phase": "separate-serial-core-reference",
+      "argv": [
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/async-JPEG-slot-build/20261113T041307.489277Z-I5-rocm-build-aad056e139/probe",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/JPEG-large-original-entry/20261113T042533.230165Z-I5-rocm-trace-CPU-reference-1613f70911/source.rgb",
+        "65535",
+        "1",
+        "100",
+        "2",
+        "0",
+        "0",
+        "1",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/JPEG-large-original-entry/20261113T042533.230165Z-I5-rocm-trace-CPU-reference-1613f70911/serial-reference"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-13T04:25:35.032571+00:00",
+      "timeout_seconds": 600,
+      "environment": {
+        "HIP_VISIBLE_DEVICES": "0",
+        "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "DEEPINFER_ROCM_RELEASE": "10.1.0",
+        "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+        "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+      },
+      "stdout": "logs/0002-separate-serial-core-reference.stdout.log",
+      "stderr": "logs/0002-separate-serial-core-reference.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-13T04:25:35.247850+00:00",
+      "seconds": 0.2147075820248574
+    },
+    {
+      "command_id": 3,
+      "phase": "actual-CPU-reference-loader",
+      "argv": [
+        "ldd",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/independent-CPU-stb-reference-build/20261113T042126.539948Z-I5-CPU-build-961de726eb/stb-reference"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-13T04:25:35.250120+00:00",
+      "timeout_seconds": 300,
+      "environment": {
+        "HIP_VISIBLE_DEVICES": "0",
+        "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "DEEPINFER_ROCM_RELEASE": "10.1.0",
+        "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+        "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+      },
+      "stdout": "logs/0003-actual-CPU-reference-loader.stdout.log",
+      "stderr": "logs/0003-actual-CPU-reference-loader.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-13T04:25:35.259093+00:00",
+      "seconds": 0.008326980983838439
+    },
+    {
+      "command_id": 4,
+      "phase": "independent-CPU-decode-0",
+      "argv": [
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/independent-CPU-stb-reference-build/20261113T042126.539948Z-I5-CPU-build-961de726eb/stb-reference",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/JPEG-large-original-entry/20261113T042533.230165Z-I5-rocm-trace-CPU-reference-1613f70911/products/0.jpg",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/JPEG-large-original-entry/20261113T042533.230165Z-I5-rocm-trace-CPU-reference-1613f70911/0.cpu.rgb"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-13T04:25:35.260209+00:00",
+      "timeout_seconds": 300,
+      "environment": {
+        "HIP_VISIBLE_DEVICES": "0",
+        "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "DEEPINFER_ROCM_RELEASE": "10.1.0",
+        "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+        "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+      },
+      "stdout": "logs/0004-independent-CPU-decode-0.stdout.log",
+      "stderr": "logs/0004-independent-CPU-decode-0.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-13T04:25:35.268534+00:00",
+      "seconds": 0.007941932999528944
+    },
+    {
+      "command_id": 5,
+      "phase": "independent-CPU-decode-1",
+      "argv": [
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/independent-CPU-stb-reference-build/20261113T042126.539948Z-I5-CPU-build-961de726eb/stb-reference",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/JPEG-large-original-entry/20261113T042533.230165Z-I5-rocm-trace-CPU-reference-1613f70911/products/1.jpg",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/JPEG-large-original-entry/20261113T042533.230165Z-I5-rocm-trace-CPU-reference-1613f70911/1.cpu.rgb"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-13T04:25:35.270302+00:00",
+      "timeout_seconds": 300,
+      "environment": {
+        "HIP_VISIBLE_DEVICES": "0",
+        "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "DEEPINFER_ROCM_RELEASE": "10.1.0",
+        "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+        "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+      },
+      "stdout": "logs/0005-independent-CPU-decode-1.stdout.log",
+      "stderr": "logs/0005-independent-CPU-decode-1.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-13T04:25:35.274545+00:00",
+      "seconds": 0.0038567970041185617
+    },
+    {
+      "command_id": 6,
+      "phase": "independent-CPU-decode-2",
+      "argv": [
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/independent-CPU-stb-reference-build/20261113T042126.539948Z-I5-CPU-build-961de726eb/stb-reference",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/JPEG-large-original-entry/20261113T042533.230165Z-I5-rocm-trace-CPU-reference-1613f70911/products/2.jpg",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/JPEG-large-original-entry/20261113T042533.230165Z-I5-rocm-trace-CPU-reference-1613f70911/2.cpu.rgb"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-13T04:25:35.275619+00:00",
+      "timeout_seconds": 300,
+      "environment": {
+        "HIP_VISIBLE_DEVICES": "0",
+        "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "DEEPINFER_ROCM_RELEASE": "10.1.0",
+        "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+        "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+      },
+      "stdout": "logs/0006-independent-CPU-decode-2.stdout.log",
+      "stderr": "logs/0006-independent-CPU-decode-2.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-13T04:25:35.279827+00:00",
+      "seconds": 0.0038260879809968174
+    }
+  ],
+  "source": "source.json",
+  "inputs": "inputs/manifest.json",
+  "expected_environment": "environment.expected.json"
+}

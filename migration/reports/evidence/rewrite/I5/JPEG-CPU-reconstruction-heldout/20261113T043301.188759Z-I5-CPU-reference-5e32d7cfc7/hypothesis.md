@@ -1,0 +1,1 @@
+Test CPU-reference for JPEG-CPU-reconstruction-heldout, case 17x131-q100. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: none.

@@ -6,6 +6,7 @@ from collections import Counter
 from experiment import ROOT,Experiment,digest,write
 from snapshot import capture
 from image_completion_progress import record
+from image_prefix_trace_contract import algorithm_count,SELECTION
 
 def main():
     profile=json.loads((ROOT/'migration/rewrite/image-encoder-pipeline-profile.json').read_text())
@@ -23,7 +24,8 @@ def main():
     if audit_rc:return 1
     for case_id in ['511x509-standard','511x509-optimized','device-only-0','device-only-1']:
         case=next(c for c in profile['cases'] if c['id']==case_id);original=next(r for r in runs if r['case']==case_id)
-        e=Experiment('I5','async-JPEG-slot-trace','rocm-trace',case=case_id,sources=[__file__,audit_source,audit_library,ROOT/'migration/reports/image-encoder-pipeline-runs.json',*[ROOT/n for n in build['dependencies']]],parent=original['experiment_id'])
+        reference=ROOT/original['evidence']/'reference/serial-reference.jpg'
+        e=Experiment('I5','async-JPEG-slot-trace','rocm-trace',case=case_id,sources=[__file__,ROOT/'tools/moat/image_prefix_trace_contract.py',SELECTION,reference,audit_source,audit_library,ROOT/'migration/reports/image-encoder-pipeline-runs.json',*[ROOT/n for n in build['dependencies']]],parent=original['experiment_id'])
         observed=capture();write(e.path/'backend.observed.json',observed);out=e.path/'products'
         args=[str(ROOT/build['binary']),str(ROOT/case['path']),str(case['width']),str(case['height']),str(case['quality']),str(case['sampling']),str(int(case['optimized'])),'6',str(int(case['download'])),str(out)]
         rc=e.command(['rocprofv3','--kernel-trace','--hip-trace','--memory-copy-trace','--output-format','csv','--output-directory',str(e.path/'trace'),'--','env','LD_PRELOAD='+str(audit_library),*args],'trace-candidate-only-JPEG-slots',timeout=300)
@@ -33,7 +35,7 @@ def main():
             checks.append(dict(check='one-kernel-agent-and-optional-DMA-copy-table',passed=len(traces)==len(agents)==1 and len(copies)<=1))
             if len(traces)==len(agents)==1:
                 rows=list(csv.DictReader(traces[0].open()));lookup={r['Node_Id']:r for r in csv.DictReader(agents[0].open())}
-                streams={r['Stream_Id'] for r in rows if 'image_jpeg_checked_prefix::' in r['Kernel_Name']}
+                streams={r['Stream_Id'] for r in rows if 'image_jpeg_checked_prefix::' in r['Kernel_Name'] or 'image_jpeg_serial_prefix::' in r['Kernel_Name']}
                 active=[r for r in rows if r['Stream_Id'] in streams]
                 application=[r for r in active if not r['Kernel_Name'].startswith('__amd_rocclr_')]
                 runtime=[r for r in active if r['Kernel_Name'].startswith('__amd_rocclr_')]
@@ -41,7 +43,7 @@ def main():
                 for row in active:
                     agent=lookup[row['Agent_Id'].split()[-1]];loc=int(agent['Location_Id']);address=f"{int(agent['Domain']):04x}:{loc>>8:02x}:{(loc>>3)&31:02x}.{loc&7}"
                     pci.add(address);real &= address in allowed and int(row['End_Timestamp'])>int(row['Start_Timestamp']) and int(row['Grid_Size_X'])>0
-                expected=102 if case['optimized'] else 96
+                expected=6*algorithm_count(reference,case['optimized'])
                 checks.append(dict(check='six-images-two-streams-all-pipeline-kernels-on-GPU1',passed=len(streams)==2 and len(application)==expected and len(active)==len(rows) and real and bool(active),kernel_count=len(application),expected=expected))
                 overlap=sum(a['Stream_Id']!=b['Stream_Id'] and max(int(a['Start_Timestamp']),int(b['Start_Timestamp']))<min(int(a['End_Timestamp']),int(b['End_Timestamp'])) for i,a in enumerate(application) for b in application[i+1:])
                 info=dict(streams=sorted(streams),pci=sorted(pci),kernel_count=len(application),runtime_kernel_count=len(runtime),overlapping_kernel_pairs=overlap,kernels=dict(Counter(r['Kernel_Name'] for r in active)))

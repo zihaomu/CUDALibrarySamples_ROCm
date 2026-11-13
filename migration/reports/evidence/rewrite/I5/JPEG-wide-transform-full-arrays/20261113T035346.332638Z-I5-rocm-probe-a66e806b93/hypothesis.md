@@ -1,0 +1,1 @@
+Test rocm-probe for JPEG-wide-transform-full-arrays, case 1x65500-s1. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261113T035334.154506Z-I5-rocm-build-6b95bf0902.

@@ -109,11 +109,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-13T03:45:35.970236+00:00。26入口当前13通过/9部分/4失败。
+更新时间：2026-11-13T04:43:11.605974+00:00。26入口当前13通过/9部分/4失败。
 
-I5：IMG-01：已将异步编码器40项当前子集资格发布到主表；线程/混合尺寸/错误合同和单图预分配证据补齐，图像整例计数仍13/26。
+I5：IMG-01：复审发现的CPU实际加载库身份缺口已修复：6保留输入、3产品重跑和4项替换库正反检查通过；48项新子集资格封存，独立复审确认修复。完整80项编码质量保留矩阵已冻结待运行。
 
-证据：`migration/reports/evidence/rewrite/I5/nvJPEG_nvJPEG-Encoder-MultipleInstances__nvJPEGEncMultipleInstances.cpp/20261113T034424.399537Z-I5-composite-subset-qualification-ff819aa0cd`；`migration/reports/image-encoder-instances-v2-publication.json`
+证据：`migration/reports/image-jpeg-reference-loader-negative.json`；`migration/reports/image-encoder-instances-v2-qualification.json`；`migration/rewrite/image-encoder-quality-profile.json`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

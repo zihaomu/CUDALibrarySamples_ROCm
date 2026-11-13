@@ -1,0 +1,350 @@
+diff --git a/rocm/common/image/jpeg_encoder_pipeline.hpp b/rocm/common/image/jpeg_encoder_pipeline.hpp
+index fcfb9ce25..f78857673 100644
+--- a/rocm/common/image/jpeg_encoder_pipeline.hpp
++++ b/rocm/common/image/jpeg_encoder_pipeline.hpp
+@@ -2,7 +2,9 @@
+ // Reusable asynchronous JPEG slot. CPU handles markers and optimized DHT only.
+ #pragma once
+ #include "jpeg_optimal_huffman.hpp"
+-#include "jpeg_checked_prefix.hpp"
++#include "jpeg_adaptive_prefix.hpp"
++#include "jpeg_wide_transform.hpp"
++#include "jpeg_frame_layout.hpp"
+ #include <cstring>
+ #include <limits>
+ #include <atomic>
+@@ -10,6 +12,8 @@
+ namespace image_jpeg_pipeline {
+ using image_jpeg_encoder::check;
+ using PrefixResult = image_jpeg_checked_prefix::Result;
++static_assert(sizeof(Code)==4&&sizeof(PrefixResult)==8&&sizeof(short)==2&&sizeof(unsigned)==4,
++              "JPEG workspace geometry requires the recorded scalar ABI");
+ inline std::atomic<size_t> workspace_growths{0};
+ #ifdef IMAGE_JPEG_PIPELINE_TEST_FAULTS
+ inline int workspace_fail_after = -1;
+@@ -72,6 +76,14 @@ private:
+     Buffer<unsigned,true> host_histogram_;
+     Buffer<PrefixResult,true> host_result_;
+ 
++    size_t owned_device_bytes() const {
++        size_t bytes=rgb_.bytes()+components_.bytes()+bits_.bytes()+packed_.bytes()+stuffed_.bytes()+
++            scan_.bytes()+lengths_.bytes()+cosine_.bytes()+previous_.bytes()+dc_.bytes()+ac_.bytes()+
++            offsets_.bytes()+positions_.bytes()+sums_.bytes()+bases_.bytes()+histogram_.bytes()+invalid_.bytes()+result_.bytes();
++        for(unsigned c=0;c<3;++c)bytes+=planes_[c].bytes()+coefficients_[c].bytes()+quant_[c].bytes();
++        return bytes;
++    }
++
+     void event(Phase phase) {
+         check(hipEventRecord(event_,stream_),"record JPEG stage event");phase_=phase;
+     }
+@@ -96,7 +108,7 @@ private:
+         check(hipMemsetAsync(bits_.get(),0,size_t(blocks_)*(MAX_BITS/8),stream_),"clear JPEG entropy blocks");
+         encode_blocks<<<(blocks_+127)/128,128,0,stream_>>>(scan_.get(),previous_.get(),components_.get(),dc_.get(),ac_.get(),bits_.get(),lengths_.get(),blocks_);
+         check(hipGetLastError(),"GPU JPEG Huffman encode");
+-        check(image_jpeg_checked_prefix::launch<unsigned short,false>(lengths_.get(),offsets_.get(),sums_.get(),bases_.get(),result_.get(),blocks_,stream_),"checked JPEG bit prefix");
++        check(image_jpeg_adaptive_prefix::launch<unsigned short,false>(lengths_.get(),offsets_.get(),sums_.get(),bases_.get(),result_.get(),blocks_,stream_),"checked JPEG bit prefix");
+         header_=image_jpeg_full::header(jpeg_,width_,height_,sampling_);
+         prefix_result(Phase::Bits);
+     }
+@@ -146,11 +158,10 @@ private:
+            (sampling!=1&&sampling!=2)||(rgb&&rgb->size()!=size_t(width)*height*3))
+             throw std::runtime_error("invalid JPEG slot input");
+         const int mx=(width+sampling*8-1)/(sampling*8),my=(height+sampling*8-1)/(sampling*8);
+-        const size_t blocks=size_t(mx)*my*(sampling==2?6:3);
+-        // Current shared transform kernels use signed coefficient indices.
+-        // Reject before allocation/dispatch instead of overflowing those indices.
+-        if(blocks>size_t(std::numeric_limits<int>::max())/64)
+-            throw std::runtime_error("JPEG slot exceeds current transform index capacity");
++        const auto geometry=image_jpeg_layout::frame(width,height,sampling,optimized);
++        const size_t blocks=geometry.blocks;
++        size_t available=0,total=0;check(hipMemGetInfo(&available,&total),"query JPEG workspace capacity");
++        image_jpeg_layout::require(geometry,available,owned_device_bytes());
+         phase_=Phase::Preparing;
+         try {
+         width_=width;height_=height;sampling_=sampling;blocks_=int(blocks);quality_=quality;
+@@ -178,13 +189,13 @@ private:
+             planes_[c].ensure(pixels);coefficients_[c].ensure(terms);quant_[c].ensure(64);
+             std::copy_n(jpeg_.quant_tbl_ptrs[jpeg_.comp_info[c].quant_tbl_no]->quantval,64,host_quant_.get()+c*64);
+             check(hipMemcpyAsync(quant_[c].get(),host_quant_.get()+c*64,64*sizeof(unsigned short),hipMemcpyHostToDevice,stream_),"upload pinned quant table");
+-            image_jpeg_encoder::rgb_to_plane<<<(pixels+255)/256,256,0,stream_>>>(rgb_.get(),planes_[c].get(),width,height,pw,ph,c,sampling);
++            image_jpeg_wide::rgb_to_plane<<<(pixels+255)/256,256,0,stream_>>>(rgb_.get(),planes_[c].get(),width,height,pw,ph,c,sampling);
+             check(hipGetLastError(),"GPU JPEG color");
+-            image_jpeg_encoder::forward_dct_quantize<<<(terms+255)/256,256,0,stream_>>>(planes_[c].get(),quant_[c].get(),cosine_.get(),coefficients_[c].get(),pw,ph,bx[c],by[c]);
++            image_jpeg_wide::forward_dct_quantize<<<(terms+255)/256,256,0,stream_>>>(planes_[c].get(),quant_[c].get(),cosine_.get(),coefficients_[c].get(),pw,ph,bx[c],by[c]);
+             check(hipGetLastError(),"GPU JPEG transform");
+         }
+         scan_.ensure(blocks*64);previous_.ensure(blocks);components_.ensure(blocks);
+-        image_jpeg_full::gather_mcu_coefficients<<<(blocks*64+255)/256,256,0,stream_>>>(coefficients_[0].get(),coefficients_[1].get(),coefficients_[2].get(),scan_.get(),previous_.get(),components_.get(),bx[0],by[0],bx[1],by[1],mx,mx*my,sampling);
++        image_jpeg_wide::gather_mcu_coefficients<<<(blocks*64+255)/256,256,0,stream_>>>(coefficients_[0].get(),coefficients_[1].get(),coefficients_[2].get(),scan_.get(),previous_.get(),components_.get(),bx[0],by[0],bx[1],by[1],mx,my,sampling);
+         check(hipGetLastError(),"GPU JPEG MCU gather");
+         if(optimized_) {
+             histogram_.ensure(4*256);invalid_.ensure(1);host_histogram_.ensure(4*256+1);
+@@ -228,7 +239,7 @@ private:
+             auto tiles=image_jpeg_checked_prefix::tile_count(raw_bytes_);sums_.ensure(tiles);bases_.ensure(tiles);
+             pack_bytes<<<(raw_bytes_+255)/256,256,0,stream_>>>(bits_.get(),offsets_.get(),packed_.get(),blocks_,result.total,raw_bytes_);
+             check(hipGetLastError(),"GPU JPEG packing");
+-            check(image_jpeg_checked_prefix::launch<unsigned char,true>(packed_.get(),positions_.get(),sums_.get(),bases_.get(),result_.get(),raw_bytes_,stream_),"checked JPEG stuffing prefix");
++            check(image_jpeg_adaptive_prefix::launch<unsigned char,true>(packed_.get(),positions_.get(),sums_.get(),bases_.get(),result_.get(),raw_bytes_,stream_),"checked JPEG stuffing prefix");
+             prefix_result(Phase::Stuff);return false;
+         }
+         if(phase_==Phase::Stuff) {
+diff --git a/tools/moat/image_encoder_instances_v2_trace.py b/tools/moat/image_encoder_instances_v2_trace.py
+index f2b25fca5..13b85771c 100644
+--- a/tools/moat/image_encoder_instances_v2_trace.py
++++ b/tools/moat/image_encoder_instances_v2_trace.py
+@@ -4,12 +4,17 @@ import csv,json,re,shutil
+ from experiment import ROOT,Experiment,digest,write
+ from snapshot import capture
+ from image_completion_progress import record
++from image_prefix_trace_contract import algorithm_count,SELECTION
++from PIL import Image
+ 
+ def main():
+     p=json.loads((ROOT/'migration/rewrite/image-encoder-instances-v2-profile.json').read_text())
+     b=json.loads((ROOT/'migration/reports/image-encoder-instances-v2-build.json').read_text())
++    reference=json.loads((ROOT/'migration/reports/image-encoder-pipeline-build.json').read_text())
+     runs=json.loads((ROOT/'migration/reports/image-encoder-instances-v2-runs.json').read_text())
+     if b['status']!='BUILT' or digest(ROOT/b['binary'])!=b['binary_sha256'] or any(digest(ROOT/n)!=h for n,h in b['dependencies'].items()):raise ValueError('stale actual-entry build')
++    if reference['status']!='BUILT' or digest(ROOT/reference['binary'])!=reference['binary_sha256'] or any(digest(ROOT/n)!=h for n,h in reference['dependencies'].items()):raise ValueError('stale separate reference build')
++    if any(digest(ROOT/c['path'])!=c['sha256'] for c in p['inputs']):raise ValueError('frozen trace input drift')
+     prior=json.loads((ROOT/'migration/reports/image-encoder-pipeline-trace.json').read_text())[0]
+     deps=json.loads((ROOT/prior['evidence']/'source.json').read_text())['dependencies']
+     audit_name=next(n for n in deps if n.endswith('/copy_audit.so'));audit=ROOT/audit_name
+@@ -17,7 +22,9 @@ def main():
+     results=[];input_dir=(ROOT/p['inputs'][0]['path']).parent
+     for name,count,opt,download in [('repeat-seven',7,False,True),('optimized-444',3,True,True),('device-only',3,False,False)]:
+         run=next(r for r in runs if r['case']==name)
+-        e=Experiment('I5','async-original-entry-multithread-trace','rocm-trace',case=name,sources=[__file__,audit,ROOT/'migration/reports/image-encoder-instances-v2-runs.json',*[ROOT/n for n in b['dependencies']]],parent=run['experiment_id'])
++        e=Experiment('I5','async-original-entry-multithread-trace','rocm-trace',case=name,sources=[__file__,ROOT/'tools/moat/image_prefix_trace_contract.py',SELECTION,audit,
++            ROOT/'migration/reports/image-encoder-instances-v2-runs.json',ROOT/'migration/reports/image-encoder-instances-v2-build.json',ROOT/'migration/reports/image-encoder-pipeline-build.json',
++            *[ROOT/c['path'] for c in p['inputs']],*[ROOT/n for n in b['dependencies']],*[ROOT/n for n in reference['dependencies']]],parent=run['experiment_id'])
+         observed=capture();write(e.path/'backend.observed.json',observed);out=e.path/'outputs';out.mkdir()
+         args=[str(ROOT/b['binary']),'-i',str(input_dir),'-j','2','-s','4' if count==7 else '2','-n',str(count),'-b','gpu','-q','90' if opt else '75' if count==7 else '80']
+         if opt:args+=['-f','-p']
+@@ -25,11 +32,20 @@ def main():
+         rc=e.command(['rocprofv3','--kernel-trace','--hip-trace','--output-format','csv','--output-directory',str(e.path/'trace'),'--','env','LD_PRELOAD='+str(audit),*args],'actual-original-entry-trace',timeout=300)
+         checks=[dict(check='profile-command',passed=rc==0)];info={}
+         try:
++            reference_counts=[]
++            for spec in p['inputs']:
++                source=ROOT/spec['path'];raw=e.path/(source.name+'.rgb')
++                with Image.open(source) as image:raw.write_bytes(image.convert('RGB').tobytes())
++                destination=e.path/'reference'/source.name
++                rr=e.command([str(ROOT/reference['binary']),str(raw),str(spec['width']),str(spec['height']),
++                    '90' if opt else '75' if count==7 else '80','1' if opt else '2',str(int(opt)),'0','1',str(destination)],'separate-reference-'+source.name)
++                checks.append(dict(check='independent-reference-command-'+source.name,passed=rr==0))
++                reference_counts.append(algorithm_count(destination/'serial-reference.jpg',opt))
+             traces=list((e.path/'trace').rglob('*kernel_trace.csv'));agents=list((e.path/'trace').rglob('*agent_info.csv'))
+             if len(traces)!=1 or len(agents)!=1:raise ValueError('one trace and agent table required')
+             rows=list(csv.DictReader(traces[0].open()));lookup={r['Node_Id']:r for r in csv.DictReader(agents[0].open())}
+             app=[r for r in rows if not r['Kernel_Name'].startswith('__amd_rocclr_')]
+-            streams={r['Stream_Id'] for r in app};expected=count*(17 if opt else 16)
++            streams={r['Stream_Id'] for r in app};expected=sum(reference_counts[i%len(reference_counts)] for i in range(count))
+             checks.append(dict(check='all-image-algorithm-kernels-and-multiple-streams',passed=len(app)==expected and len(streams)>=2,actual=len(app),expected=expected,streams=sorted(streams)))
+             allowed={d['pci_bdf'] for d in observed['devices'] if d['physical_id']==1};actual_pci=set();real=True
+             for row in rows:
+diff --git a/tools/moat/image_encoder_pipeline_trace.py b/tools/moat/image_encoder_pipeline_trace.py
+index 8cf8b77b5..532da209a 100644
+--- a/tools/moat/image_encoder_pipeline_trace.py
++++ b/tools/moat/image_encoder_pipeline_trace.py
+@@ -6,6 +6,7 @@ from collections import Counter
+ from experiment import ROOT,Experiment,digest,write
+ from snapshot import capture
+ from image_completion_progress import record
++from image_prefix_trace_contract import algorithm_count,SELECTION
+ 
+ def main():
+     profile=json.loads((ROOT/'migration/rewrite/image-encoder-pipeline-profile.json').read_text())
+@@ -23,7 +24,8 @@ def main():
+     if audit_rc:return 1
+     for case_id in ['511x509-standard','511x509-optimized','device-only-0','device-only-1']:
+         case=next(c for c in profile['cases'] if c['id']==case_id);original=next(r for r in runs if r['case']==case_id)
+-        e=Experiment('I5','async-JPEG-slot-trace','rocm-trace',case=case_id,sources=[__file__,audit_source,audit_library,ROOT/'migration/reports/image-encoder-pipeline-runs.json',*[ROOT/n for n in build['dependencies']]],parent=original['experiment_id'])
++        reference=ROOT/original['evidence']/'reference/serial-reference.jpg'
++        e=Experiment('I5','async-JPEG-slot-trace','rocm-trace',case=case_id,sources=[__file__,ROOT/'tools/moat/image_prefix_trace_contract.py',SELECTION,reference,audit_source,audit_library,ROOT/'migration/reports/image-encoder-pipeline-runs.json',*[ROOT/n for n in build['dependencies']]],parent=original['experiment_id'])
+         observed=capture();write(e.path/'backend.observed.json',observed);out=e.path/'products'
+         args=[str(ROOT/build['binary']),str(ROOT/case['path']),str(case['width']),str(case['height']),str(case['quality']),str(case['sampling']),str(int(case['optimized'])),'6',str(int(case['download'])),str(out)]
+         rc=e.command(['rocprofv3','--kernel-trace','--hip-trace','--memory-copy-trace','--output-format','csv','--output-directory',str(e.path/'trace'),'--','env','LD_PRELOAD='+str(audit_library),*args],'trace-candidate-only-JPEG-slots',timeout=300)
+@@ -33,7 +35,7 @@ def main():
+             checks.append(dict(check='one-kernel-agent-and-optional-DMA-copy-table',passed=len(traces)==len(agents)==1 and len(copies)<=1))
+             if len(traces)==len(agents)==1:
+                 rows=list(csv.DictReader(traces[0].open()));lookup={r['Node_Id']:r for r in csv.DictReader(agents[0].open())}
+-                streams={r['Stream_Id'] for r in rows if 'image_jpeg_checked_prefix::' in r['Kernel_Name']}
++                streams={r['Stream_Id'] for r in rows if 'image_jpeg_checked_prefix::' in r['Kernel_Name'] or 'image_jpeg_serial_prefix::' in r['Kernel_Name']}
+                 active=[r for r in rows if r['Stream_Id'] in streams]
+                 application=[r for r in active if not r['Kernel_Name'].startswith('__amd_rocclr_')]
+                 runtime=[r for r in active if r['Kernel_Name'].startswith('__amd_rocclr_')]
+@@ -41,7 +43,7 @@ def main():
+                 for row in active:
+                     agent=lookup[row['Agent_Id'].split()[-1]];loc=int(agent['Location_Id']);address=f"{int(agent['Domain']):04x}:{loc>>8:02x}:{(loc>>3)&31:02x}.{loc&7}"
+                     pci.add(address);real &= address in allowed and int(row['End_Timestamp'])>int(row['Start_Timestamp']) and int(row['Grid_Size_X'])>0
+-                expected=102 if case['optimized'] else 96
++                expected=6*algorithm_count(reference,case['optimized'])
+                 checks.append(dict(check='six-images-two-streams-all-pipeline-kernels-on-GPU1',passed=len(streams)==2 and len(application)==expected and len(active)==len(rows) and real and bool(active),kernel_count=len(application),expected=expected))
+                 overlap=sum(a['Stream_Id']!=b['Stream_Id'] and max(int(a['Start_Timestamp']),int(b['Start_Timestamp']))<min(int(a['End_Timestamp']),int(b['End_Timestamp'])) for i,a in enumerate(application) for b in application[i+1:])
+                 info=dict(streams=sorted(streams),pci=sorted(pci),kernel_count=len(application),runtime_kernel_count=len(runtime),overlapping_kernel_pairs=overlap,kernels=dict(Counter(r['Kernel_Name'] for r in active)))
+diff --git a/tools/moat/image_encoder_preallocation.py b/tools/moat/image_encoder_preallocation.py
+index bd4455df6..a51b236c3 100644
+--- a/tools/moat/image_encoder_preallocation.py
++++ b/tools/moat/image_encoder_preallocation.py
+@@ -4,6 +4,7 @@ import argparse,json,re,shutil,csv
+ from pathlib import Path
+ from experiment import ROOT,Experiment,digest,write
+ from image_completion_progress import record
++from image_prefix_trace_contract import algorithm_count,SELECTION
+ 
+ PROFILE=ROOT/'migration/rewrite/image-encoder-preallocation-profile.json'
+ REPORT=ROOT/'migration/reports/image-encoder-preallocation-runs.json'
+@@ -41,7 +42,7 @@ def run():
+     if digest(audit)!=deps[audit_name] or digest(ROOT/p['input']['path'])!=p['input']['sha256']:raise ValueError('observer/input drift')
+     rows=[]
+     for case in p['cases']:
+-        e=Experiment('I5','JPEG-single-input-preallocation','rocm-trace',case=case['id'],sources=[__file__,PROFILE,*reports,audit,ROOT/p['input']['path'],*[ROOT/n for n in b['dependencies']],*[ROOT/n for n in reference['dependencies']]],parent=b['experiment_id'])
++        e=Experiment('I5','JPEG-single-input-preallocation','rocm-trace',case=case['id'],sources=[__file__,ROOT/'tools/moat/image_prefix_trace_contract.py',SELECTION,PROFILE,*reports,audit,ROOT/p['input']['path'],*[ROOT/n for n in b['dependencies']],*[ROOT/n for n in reference['dependencies']]],parent=b['experiment_id'])
+         observed=capture();write(e.path/'backend.observed.json',observed);folder=e.path/'input';folder.mkdir();shutil.copyfile(ROOT/p['input']['path'],folder/'image.bmp');out=e.path/'products';out.mkdir()
+         args=[str(ROOT/b['binary']),'-i',str(folder),'-j','1','-s','1','-n',str(case['jobs']),'-r',str(case['runs']),'-q',str(case['quality'])]
+         if case['optimized']:args+=['-f']
+@@ -50,6 +51,10 @@ def run():
+         rc=e.command(['rocprofv3','--kernel-trace','--hip-trace','--output-format','csv','--output-directory',str(e.path/'trace'),'--','env','LD_PRELOAD='+str(audit),*args],'prepared-original-entry',timeout=300)
+         checks=[dict(check='profile-command',passed=rc==0)];metrics={};products=[]
+         try:
++            raw=e.path/'reference.rgb'
++            with Image.open(ROOT/p['input']['path']) as image:raw.write_bytes(image.convert('RGB').tobytes())
++            dest=e.path/'reference';rr=e.command([str(ROOT/reference['binary']),str(raw),str(p['input']['width']),str(p['input']['height']),str(case['quality']),str(case['sampling']),str(int(case['optimized'])),'0','1',str(dest)],'independent-BMP-serial-core')
++            checks.append(dict(check='separate-reference-command',passed=rr==0));oracle=dest/'serial-reference.jpg'
+             stdout=(e.path/'logs/0001-prepared-original-entry.stdout.log').read_text();stderr=(e.path/'logs/0001-prepared-original-entry.stderr.log').read_text()
+             fields=re.search(r'TIMING (.+)',stdout)
+             if not fields:raise ValueError('missing separate timing receipt')
+@@ -62,7 +67,7 @@ def run():
+             traces=list((e.path/'trace').rglob('*kernel_trace.csv'));agents=list((e.path/'trace').rglob('*agent_info.csv'))
+             if len(traces)!=len(agents) or len(traces)!=1:raise ValueError('missing exact kernel/agent tables')
+             kernels=list(csv.DictReader(traces[0].open()));app=[r for r in kernels if not r['Kernel_Name'].startswith('__amd_rocclr_')]
+-            expected=(17 if case['optimized'] else 16)*(case['jobs']+2)*case['runs']
++            expected=algorithm_count(oracle,case['optimized'])*(case['jobs']+2)*case['runs']
+             checks.append(dict(check='all-preparation-and-requested-images-computed-on-GPU',passed=len(app)==expected,actual=len(app),expected=expected))
+             lookup={r['Node_Id']:r for r in csv.DictReader(agents[0].open())};allowed={d['pci_bdf'] for d in observed['devices'] if d['physical_id']==1};pci=set();valid=True
+             for row in kernels:
+@@ -72,10 +77,6 @@ def run():
+             expected_files={str(i)+'.jpg' for i in range(case['jobs'])} if case['download'] else set()
+             checks.append(dict(check='exact-output-set',passed={x.name for x in out.iterdir()}==expected_files))
+             if case['download']:
+-                raw=e.path/'reference.rgb'
+-                with Image.open(ROOT/p['input']['path']) as image:raw.write_bytes(image.convert('RGB').tobytes())
+-                dest=e.path/'reference';rr=e.command([str(ROOT/reference['binary']),str(raw),str(p['input']['width']),str(p['input']['height']),str(case['quality']),str(case['sampling']),str(int(case['optimized'])),'0','1',str(dest)],'independent-BMP-serial-core')
+-                checks.append(dict(check='separate-reference-command',passed=rr==0));oracle=dest/'serial-reference.jpg'
+                 for path in sorted(out.iterdir()):
+                     checks.append(dict(check='exact-prepared-JPEG-'+path.name,passed=path.read_bytes()==oracle.read_bytes()));products.append(dict(name=path.name,sha256=digest(path),bytes=path.stat().st_size))
+             metrics['rgb_uploads']=rgb_uploads;metrics['copies']=copies;metrics['kernel_count']=len(app)
+diff --git a/tools/moat/qualify_image_encoder_instances_v2.py b/tools/moat/qualify_image_encoder_instances_v2.py
+index f921ab163..2a9a619a5 100644
+--- a/tools/moat/qualify_image_encoder_instances_v2.py
++++ b/tools/moat/qualify_image_encoder_instances_v2.py
+@@ -5,6 +5,7 @@ from experiment import ROOT,Experiment,digest,git,write
+ from audit import check as audit_check
+ from image_completion_progress import record
+ from selected_proofs import anchored_seal,publication,inspect
++import image_encoder_extensions as extensions
+ 
+ SAMPLE='nvJPEG/nvJPEG-Encoder-MultipleInstances::nvJPEGEncMultipleInstances.cpp'
+ REPORT=ROOT/'migration/reports/image-encoder-instances-v2-qualification.json'
+@@ -58,6 +59,9 @@ def qualify():
+     native_runs=read('image-completion-encoder-native.json')
+     runtime=read('image-encoder-runtime-runs.json');preallocation=read('image-encoder-preallocation-runs.json')
+     lifecycle=read('image-encoder-prepared-lifecycle.json')
++    extended=extensions.load();extension_negatives=json.loads(extensions.NEGATIVE.read_text())
++    loader_negative=read('image-jpeg-reference-loader-negative.json')
++    selection=json.loads((ROOT/'migration/rewrite/image-prefix-dispatch-selection.json').read_text())
+     profile_path=ROOT/'migration/rewrite/image-encoder-instances-v2-profile.json';profile=json.loads(profile_path.read_text())
+     refs=[sealed(build,'build.json'),sealed(faults),sealed(native,'reference.json'),sealed(negatives),sealed(lifecycle)]
+     native_build=ROOT/native_runs['build_evidence']
+@@ -65,6 +69,12 @@ def qualify():
+     if audit_check(native_build) or native_build_result!={k:v for k,v in native_runs.items() if k not in ('build_evidence','cases')}|{'cases':[]}:
+         raise ValueError('native build evidence/report mismatch')
+     refs.append(native_runs['build_evidence'])
++    refs += [sealed(extension_negatives),sealed(selection,'selection.json'),sealed(loader_negative)]
++    for data in extended.values():
++        refs += [sealed(row) for row in (data if isinstance(data,list) else [data])]
++    component_builds={name:read(name) for name in ['image-encoder-wide-build.json','image-prefix-dispatch-build.json',
++        'image-prefix-holdout-build.json','image-stb-reference-build.json','image-jpeg-ycbcr-reference-build.json']}
++    refs += [sealed(b,'build.json') for b in component_builds.values()]
+     for group in [runs,trace,comparison,pipeline,pipeline_trace,prefix,oversize,runtime,preallocation]:refs += [sealed(row) for row in group]
+     refs += [sealed(row) for row in native_runs['cases']]
+     for ref in refs:
+@@ -83,29 +93,46 @@ def qualify():
+         dict(check='prepared-input-owner-and-invalidation',passed=lifecycle['status']=='PASSED' and len(lifecycle['checks'])==2 and all(c['passed'] for c in lifecycle['checks'])),
+         dict(check='native-original-seven-cases-and19-independent-decodes-restored',passed=native['status']=='PASSED' and native['product_count']==19 and len(native_runs['cases'])==7 and all(c['passed'] for c in native['checks']))]
+     checks+=coverage_checks(profile,comparison,pipeline,pipeline_trace,prefix,oversize,runtime,preallocation)
++    checks+=extensions.checks(extended)
++    checks.append(dict(check='actual-CPU-reference-loader-identity-and-negative-control',passed=extensions.passed(loader_negative) and len(loader_negative['checks'])==4 and
++        all(any(c['check']=='actual-loaded-libjpeg-matches-bound-path-and-SHA' and c['passed'] for c in r['checks']) for r in extended['cpu']) and
++        sum(c['check'].startswith('actual-loaded-libjpeg-matches-bound-path-and-SHA-') and c['passed'] for c in extended['amendment']['checks'])==3))
++    checks.append(dict(check='extension-coverage-control-and18-corruptions-rejected',passed=extensions.passed(extension_negatives) and len(extension_negatives['checks'])==19))
++    checks.append(dict(check='current-component-binary-and-dependency-identities',passed=all(b['status']=='BUILT' and digest(ROOT/b['binary'])==b['binary_sha256'] and all(digest(ROOT/n)==h for n,h in b['dependencies'].items()) for b in component_builds.values())))
++    checks.append(dict(check='component-executions-bind-current-builds',passed=
++        all(r['binary_sha256']==component_builds['image-encoder-wide-build.json']['binary_sha256'] for r in extended['wide']+[extended['indices']]) and
++        all(r['binary_sha256']==component_builds['image-prefix-dispatch-build.json']['binary_sha256'] for r in extended['dispatch']) and
++        all(r['binary_sha256']==component_builds['image-prefix-holdout-build.json']['binary_sha256'] for r in extended['holdout'])))
++    checks.append(dict(check='frozen-prefix-selection-and-measurement-inventory',passed=selection['thresholds']=={'bits':128,'stuff':64} and
++        selection['evidence_references']==[r['evidence'] for r in extended['dispatch']] and selection['build_evidence']==component_builds['image-prefix-dispatch-build.json']['evidence']))
+     reports=[ROOT/'migration/reports/image-encoder-instances-v2-build.json',ROOT/'migration/reports/image-encoder-pipeline-build.json']
+     binaries=[dict(binary=b['binary'],sha256=b['binary_sha256'],build_report=str(path.relative_to(ROOT)),build_report_sha256=digest(path)) for b,path in zip((build,read('image-encoder-pipeline-build.json')),reports)]
+     checks.append(dict(check='runtime-and-preallocation-bind-both-current-build-reports',passed=all(r.get('binaries')==binaries for r in runtime+preallocation)))
++    cpu_build=component_builds['image-stb-reference-build.json'];cpu_report=ROOT/'migration/reports/image-stb-reference-build.json'
++    large_binaries=binaries+[dict(binary=cpu_build['binary'],sha256=cpu_build['binary_sha256'],build_report=str(cpu_report.relative_to(ROOT)),build_report_sha256=digest(cpu_report))]
++    checks.append(dict(check='large-runs-bind-three-current-executables',passed=all(r['binaries']==large_binaries for r in extended['large'])))
+     if not all(c['passed'] for c in checks):raise ValueError([c for c in checks if not c['passed']])
+     case_ids=['IMG-01/'+r['case'] for r in runs]+['IMG-01/all33-JPEG-byte-exact']+['IMG-01/trace-'+r['case'] for r in trace]+['IMG-01/changed-input-replay']
+     case_ids+=['IMG-01/runtime-'+r['case'] for r in runtime]+['IMG-01/'+r['case'] for r in preallocation]+['IMG-01/prepared-input-lifecycle']
++    case_ids+=['IMG-01/'+r['case'] for r in extended['large']]
+     devices=json.loads((ROOT/trace[0]['evidence']/'backend.observed.json').read_text())['devices']
+     e=Experiment('I5',SAMPLE,'composite-subset-qualification',sources=[__file__,source,profile_path,
+         ROOT/'migration/rewrite/image-encoder-pipeline-profile.json',ROOT/'migration/rewrite/image-checked-prefix-profile.json',
+-        ROOT/'migration/rewrite/image-encoder-runtime-profile.json',ROOT/'migration/rewrite/image-encoder-preallocation-profile.json',*[ROOT/n for n in deps]])
++        ROOT/'migration/rewrite/image-encoder-runtime-profile.json',ROOT/'migration/rewrite/image-encoder-preallocation-profile.json',
++        ROOT/'tools/moat/image_encoder_extensions.py',*[ROOT/'migration/rewrite'/n for n in extensions.PROFILES.values()],*[ROOT/n for n in deps]])
+     q=dict(kind=KIND,status='PASSED',contract_status='PARTIAL',sample_id=SAMPLE,
+         implementation=str(source.relative_to(ROOT)),implementation_sha256=digest(source),source_commit=git('rev-parse','HEAD').strip(),
+         case_count=len(case_ids),case_ids=case_ids,checks=checks,devices=devices,dependencies=deps,
+         evidence_references=refs,rocm_evidence=trace[0]['evidence'],cuda_evidence=native_runs['cases'][0]['evidence'],
+         comparison_mode='ASYNC_GPU_JPEG_EXACT_SERIAL_REGRESSION_AND_NATIVE_BASELINE_OBSERVATION',
+-        remaining='Full held-out native/CPU pixel equivalence; maximum-dimension/64-bit transform indices; nonprofiled latency/throughput distributions and peak memory; prefix dispatch measurements; committed cold rebuild and final review.')
++        remaining='Full held-out native/CPU encoder pixel equivalence; nonprofiled latency/throughput distributions and peak memory; committed cold rebuild and final review. Maximum square geometry is capacity-preflight evidence, not a full allocation/encoding claim.')
+     write(e.path/'qualification.json',q);q['qualification_id']=e.id
+     q['evidence']=e.finish('PASSED',dict(status='PASSED',checks=checks));write(REPORT,q)
+-    record('IMG-01','正式入口40项子集资格封存：原20项加16组线程/混合尺寸/错误合同、3预分配trace和固定输入生命周期；完整保留集/大索引/性能/冷构建未完成，保持PARTIAL。',[q['evidence']]);print(q['evidence'])
++    record('IMG-01','正式入口48项子集资格封存：原40项加8组大图24产品；附大索引、prefix实测分派/独立边界、容量预检和CPU重建修订证据。完整编码质量保留集/性能/冷构建未完成，保持PARTIAL。',[q['evidence']]);print(q['evidence'])
+ 
+ def publish():
+     q=json.loads(REPORT.read_text());proof=ROOT/q['evidence'];frozen=json.loads((proof/'qualification.json').read_text())
+-    if (q['kind']!=KIND or q['contract_status']!='PARTIAL' or q['case_count']!=40 or
++    if (q['kind']!=KIND or q['contract_status']!='PARTIAL' or q['case_count']!=48 or
+         {k:v for k,v in q.items() if k not in ('evidence','qualification_id')}!=frozen or
+         not anchored_seal(proof,publication(proof),qualification=True) or
+         any(not anchored_seal(ROOT/ref,publication(ROOT/ref)) for ref in q['evidence_references']) or
+@@ -114,13 +141,13 @@ def publish():
+     proposed=dict(sample,selected_validation=q)
+     checked=inspect(proposed)
+     if checked['status']!='PASSED':raise ValueError(checked['errors'])
+-    missing=['IMG-01/held-out-native-CPU-equivalence','IMG-01/64bit-transform-indices',
+-             'IMG-01/performance-distributions-peak-memory','IMG-01/prefix-dispatch-measurements','IMG-10/committed-cold-rebuild-final-review']
++    missing=['IMG-01/held-out-native-CPU-equivalence',
++             'IMG-01/performance-distributions-peak-memory','IMG-10/committed-cold-rebuild-final-review']
+     sample.update(status='PARTIAL',level='L4',reason_code='VALIDATED_I5_ASYNC_GPU_JPEG_INSTANCES_SUBSET',selected_validation=q,
+-        actual_library='Project HIP baseline/optimized JPEG color, FDCT, Huffman, checked parallel prefix, pinned buffers and event-driven slots; CPU markers/DHT design',
++        actual_library='Project HIP wide-index baseline/optimized JPEG, measured checked serial/tiled prefix, pinned buffers and event-driven slots; CPU markers/DHT design',
+         backend_library='HIP async full baseline/optimized JPEG + CPU libjpeg-turbo DHT/header design',
+         equivalence='GPU_ASYNC_JPEG_WITH_BOUNDED_CPU_THREAD_CALIBRATION',required_cases=q['case_ids']+missing,passed_cases=q['case_ids'],
+-        reason='原20项子集及新增16组线程/状态/混合尺寸/错误合同通过；3组单图预分配trace证实每slot每run仅一次RGB上传、稳态零扩容及全部请求实际GPU编码，26件产品逐字节回归。固定输入所有权和重新准备通过，准备/编码/端到端计时分开记录。完整保留集、最大尺寸64位索引、无profiler性能分布/峰值内存、prefix路径阈值和冷构建待完成，保持PARTIAL。',
++        reason='48项入口子集通过：原40项加8组大图24产品，含65535长轴；64位索引、29组容量预检、实测prefix阈值128/64及24组边界证据齐备。窄图CPU上采样模式修订经6个新保留输入验证，原失败独立保留。完整编码质量CPU/native保留集、无profiler性能分布/峰值内存和冷构建待完成，保持PARTIAL；最大方图仅验证索引和容量拒绝，不声称实际编码。',
+         cuda_baseline='PASSED',cuda_baseline_scope='Unmodified original CMake/C++20; seven bounded native CLI cases,19 independent decoded products on physical5090 GPU1.',
+         cuda_baseline_reason='历史构建失败保留；使用原始CMake所需C++20重新构建并运行成功。',
+         cuda_comparison='BLOCKED',cuda_comparison_mode='NATIVE_BASELINE_RESTORED_FULL_EQUIVALENCE_PENDING',
+@@ -134,7 +161,7 @@ def publish():
+         if ref not in sample['evidence']:sample['evidence'].append(ref)
+     write(ROOT/'migration/samples.yaml',catalog)
+     write(ROOT/'migration/reports/image-encoder-instances-v2-publication.json',dict(status='PUBLISHED_PARTIAL',sample_id=SAMPLE,qualification=q['evidence']))
+-    record('IMG-01','已将异步编码器40项当前子集资格发布到主表；线程/混合尺寸/错误合同和单图预分配证据补齐，图像整例计数仍13/26。',[q['evidence'],'migration/reports/image-encoder-instances-v2-publication.json'])
++    record('IMG-01','已将异步编码器48项当前子集资格发布到主表；新增大索引/prefix/容量/大图证据，完整编码等价仍待验，图像整例计数仍13/26。',[q['evidence'],'migration/reports/image-encoder-instances-v2-publication.json'])
+     print('PUBLISHED_PARTIAL')
+ 
+ def negative():

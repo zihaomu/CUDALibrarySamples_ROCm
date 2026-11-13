@@ -1,0 +1,48 @@
+{
+  "case": "bits-overflow-tiled",
+  "status": "PASSED",
+  "checks": [
+    {
+      "check": "command-success",
+      "passed": true
+    },
+    {
+      "check": "frozen-dispatch-and-independent-metadata",
+      "passed": true
+    },
+    {
+      "check": "exact-product-set",
+      "passed": true
+    },
+    {
+      "check": "complete-output-length-and-CPU-reference",
+      "passed": true
+    },
+    {
+      "check": "actual-frozen-dispatch-kernels",
+      "passed": true,
+      "expected": 3,
+      "actual": [
+        "void image_jpeg_checked_prefix::tiles<unsigned short, false>(unsigned short const*, unsigned int*, unsigned int*, image_jpeg_checked_prefix::Result*, unsigned int)",
+        "void image_jpeg_checked_prefix::bases<false>(unsigned int const*, unsigned int*, image_jpeg_checked_prefix::Result*, unsigned int, unsigned int)",
+        "void image_jpeg_checked_prefix::finish<false>(unsigned int*, unsigned int const*, image_jpeg_checked_prefix::Result const*, unsigned int)"
+      ]
+    },
+    {
+      "check": "all-real-kernels-on-GPU1",
+      "passed": true
+    }
+  ],
+  "metadata": {
+    "count": 1048576,
+    "total": 0,
+    "errors": 2,
+    "serial": false
+  },
+  "products": {
+    "offsets_sha256": "402fd70476162dc6cb2a21720742826e4795616c12fd5ee4fc4dadc37da7d3db",
+    "result_sha256": "2fcd151b8295e8b3bf8ec64ede173523417960a8db6cbc569de9a25a458f9135"
+  },
+  "binary_sha256": "909965a7a8cbd4ff72286cbc90261d63fcd7444c485882ba3ec895c9b971414b",
+  "experiment_id": "20261113T040411.701511Z-I5-rocm-trace-d962f6fd85"
+}

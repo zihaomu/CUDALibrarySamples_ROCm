@@ -1,0 +1,1 @@
+Test rocm-trace-CPU-reference for JPEG-large-original-entry, case entry-1x65500-s1. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261113T041312.673696Z-I5-rocm-build-b0ffb93404.

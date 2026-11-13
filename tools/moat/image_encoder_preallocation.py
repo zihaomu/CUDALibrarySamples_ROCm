@@ -4,6 +4,7 @@ import argparse,json,re,shutil,csv
 from pathlib import Path
 from experiment import ROOT,Experiment,digest,write
 from image_completion_progress import record
+from image_prefix_trace_contract import algorithm_count,SELECTION
 
 PROFILE=ROOT/'migration/rewrite/image-encoder-preallocation-profile.json'
 REPORT=ROOT/'migration/reports/image-encoder-preallocation-runs.json'
@@ -41,7 +42,7 @@ def run():
     if digest(audit)!=deps[audit_name] or digest(ROOT/p['input']['path'])!=p['input']['sha256']:raise ValueError('observer/input drift')
     rows=[]
     for case in p['cases']:
-        e=Experiment('I5','JPEG-single-input-preallocation','rocm-trace',case=case['id'],sources=[__file__,PROFILE,*reports,audit,ROOT/p['input']['path'],*[ROOT/n for n in b['dependencies']],*[ROOT/n for n in reference['dependencies']]],parent=b['experiment_id'])
+        e=Experiment('I5','JPEG-single-input-preallocation','rocm-trace',case=case['id'],sources=[__file__,ROOT/'tools/moat/image_prefix_trace_contract.py',SELECTION,PROFILE,*reports,audit,ROOT/p['input']['path'],*[ROOT/n for n in b['dependencies']],*[ROOT/n for n in reference['dependencies']]],parent=b['experiment_id'])
         observed=capture();write(e.path/'backend.observed.json',observed);folder=e.path/'input';folder.mkdir();shutil.copyfile(ROOT/p['input']['path'],folder/'image.bmp');out=e.path/'products';out.mkdir()
         args=[str(ROOT/b['binary']),'-i',str(folder),'-j','1','-s','1','-n',str(case['jobs']),'-r',str(case['runs']),'-q',str(case['quality'])]
         if case['optimized']:args+=['-f']
@@ -50,6 +51,10 @@ def run():
         rc=e.command(['rocprofv3','--kernel-trace','--hip-trace','--output-format','csv','--output-directory',str(e.path/'trace'),'--','env','LD_PRELOAD='+str(audit),*args],'prepared-original-entry',timeout=300)
         checks=[dict(check='profile-command',passed=rc==0)];metrics={};products=[]
         try:
+            raw=e.path/'reference.rgb'
+            with Image.open(ROOT/p['input']['path']) as image:raw.write_bytes(image.convert('RGB').tobytes())
+            dest=e.path/'reference';rr=e.command([str(ROOT/reference['binary']),str(raw),str(p['input']['width']),str(p['input']['height']),str(case['quality']),str(case['sampling']),str(int(case['optimized'])),'0','1',str(dest)],'independent-BMP-serial-core')
+            checks.append(dict(check='separate-reference-command',passed=rr==0));oracle=dest/'serial-reference.jpg'
             stdout=(e.path/'logs/0001-prepared-original-entry.stdout.log').read_text();stderr=(e.path/'logs/0001-prepared-original-entry.stderr.log').read_text()
             fields=re.search(r'TIMING (.+)',stdout)
             if not fields:raise ValueError('missing separate timing receipt')
@@ -62,7 +67,7 @@ def run():
             traces=list((e.path/'trace').rglob('*kernel_trace.csv'));agents=list((e.path/'trace').rglob('*agent_info.csv'))
             if len(traces)!=len(agents) or len(traces)!=1:raise ValueError('missing exact kernel/agent tables')
             kernels=list(csv.DictReader(traces[0].open()));app=[r for r in kernels if not r['Kernel_Name'].startswith('__amd_rocclr_')]
-            expected=(17 if case['optimized'] else 16)*(case['jobs']+2)*case['runs']
+            expected=algorithm_count(oracle,case['optimized'])*(case['jobs']+2)*case['runs']
             checks.append(dict(check='all-preparation-and-requested-images-computed-on-GPU',passed=len(app)==expected,actual=len(app),expected=expected))
             lookup={r['Node_Id']:r for r in csv.DictReader(agents[0].open())};allowed={d['pci_bdf'] for d in observed['devices'] if d['physical_id']==1};pci=set();valid=True
             for row in kernels:
@@ -72,10 +77,6 @@ def run():
             expected_files={str(i)+'.jpg' for i in range(case['jobs'])} if case['download'] else set()
             checks.append(dict(check='exact-output-set',passed={x.name for x in out.iterdir()}==expected_files))
             if case['download']:
-                raw=e.path/'reference.rgb'
-                with Image.open(ROOT/p['input']['path']) as image:raw.write_bytes(image.convert('RGB').tobytes())
-                dest=e.path/'reference';rr=e.command([str(ROOT/reference['binary']),str(raw),str(p['input']['width']),str(p['input']['height']),str(case['quality']),str(case['sampling']),str(int(case['optimized'])),'0','1',str(dest)],'independent-BMP-serial-core')
-                checks.append(dict(check='separate-reference-command',passed=rr==0));oracle=dest/'serial-reference.jpg'
                 for path in sorted(out.iterdir()):
                     checks.append(dict(check='exact-prepared-JPEG-'+path.name,passed=path.read_bytes()==oracle.read_bytes()));products.append(dict(name=path.name,sha256=digest(path),bytes=path.stat().st_size))
             metrics['rgb_uploads']=rgb_uploads;metrics['copies']=copies;metrics['kernel_count']=len(app)

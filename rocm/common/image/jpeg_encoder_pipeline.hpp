@@ -2,7 +2,9 @@
 // Reusable asynchronous JPEG slot. CPU handles markers and optimized DHT only.
 #pragma once
 #include "jpeg_optimal_huffman.hpp"
-#include "jpeg_checked_prefix.hpp"
+#include "jpeg_adaptive_prefix.hpp"
+#include "jpeg_wide_transform.hpp"
+#include "jpeg_frame_layout.hpp"
 #include <cstring>
 #include <limits>
 #include <atomic>
@@ -10,6 +12,8 @@
 namespace image_jpeg_pipeline {
 using image_jpeg_encoder::check;
 using PrefixResult = image_jpeg_checked_prefix::Result;
+static_assert(sizeof(Code)==4&&sizeof(PrefixResult)==8&&sizeof(short)==2&&sizeof(unsigned)==4,
+              "JPEG workspace geometry requires the recorded scalar ABI");
 inline std::atomic<size_t> workspace_growths{0};
 #ifdef IMAGE_JPEG_PIPELINE_TEST_FAULTS
 inline int workspace_fail_after = -1;
@@ -72,6 +76,14 @@ private:
     Buffer<unsigned,true> host_histogram_;
     Buffer<PrefixResult,true> host_result_;
 
+    size_t owned_device_bytes() const {
+        size_t bytes=rgb_.bytes()+components_.bytes()+bits_.bytes()+packed_.bytes()+stuffed_.bytes()+
+            scan_.bytes()+lengths_.bytes()+cosine_.bytes()+previous_.bytes()+dc_.bytes()+ac_.bytes()+
+            offsets_.bytes()+positions_.bytes()+sums_.bytes()+bases_.bytes()+histogram_.bytes()+invalid_.bytes()+result_.bytes();
+        for(unsigned c=0;c<3;++c)bytes+=planes_[c].bytes()+coefficients_[c].bytes()+quant_[c].bytes();
+        return bytes;
+    }
+
     void event(Phase phase) {
         check(hipEventRecord(event_,stream_),"record JPEG stage event");phase_=phase;
     }
@@ -96,7 +108,7 @@ private:
         check(hipMemsetAsync(bits_.get(),0,size_t(blocks_)*(MAX_BITS/8),stream_),"clear JPEG entropy blocks");
         encode_blocks<<<(blocks_+127)/128,128,0,stream_>>>(scan_.get(),previous_.get(),components_.get(),dc_.get(),ac_.get(),bits_.get(),lengths_.get(),blocks_);
         check(hipGetLastError(),"GPU JPEG Huffman encode");
-        check(image_jpeg_checked_prefix::launch<unsigned short,false>(lengths_.get(),offsets_.get(),sums_.get(),bases_.get(),result_.get(),blocks_,stream_),"checked JPEG bit prefix");
+        check(image_jpeg_adaptive_prefix::launch<unsigned short,false>(lengths_.get(),offsets_.get(),sums_.get(),bases_.get(),result_.get(),blocks_,stream_),"checked JPEG bit prefix");
         header_=image_jpeg_full::header(jpeg_,width_,height_,sampling_);
         prefix_result(Phase::Bits);
     }
@@ -146,11 +158,10 @@ private:
            (sampling!=1&&sampling!=2)||(rgb&&rgb->size()!=size_t(width)*height*3))
             throw std::runtime_error("invalid JPEG slot input");
         const int mx=(width+sampling*8-1)/(sampling*8),my=(height+sampling*8-1)/(sampling*8);
-        const size_t blocks=size_t(mx)*my*(sampling==2?6:3);
-        // Current shared transform kernels use signed coefficient indices.
-        // Reject before allocation/dispatch instead of overflowing those indices.
-        if(blocks>size_t(std::numeric_limits<int>::max())/64)
-            throw std::runtime_error("JPEG slot exceeds current transform index capacity");
+        const auto geometry=image_jpeg_layout::frame(width,height,sampling,optimized);
+        const size_t blocks=geometry.blocks;
+        size_t available=0,total=0;check(hipMemGetInfo(&available,&total),"query JPEG workspace capacity");
+        image_jpeg_layout::require(geometry,available,owned_device_bytes());
         phase_=Phase::Preparing;
         try {
         width_=width;height_=height;sampling_=sampling;blocks_=int(blocks);quality_=quality;
@@ -178,13 +189,13 @@ private:
             planes_[c].ensure(pixels);coefficients_[c].ensure(terms);quant_[c].ensure(64);
             std::copy_n(jpeg_.quant_tbl_ptrs[jpeg_.comp_info[c].quant_tbl_no]->quantval,64,host_quant_.get()+c*64);
             check(hipMemcpyAsync(quant_[c].get(),host_quant_.get()+c*64,64*sizeof(unsigned short),hipMemcpyHostToDevice,stream_),"upload pinned quant table");
-            image_jpeg_encoder::rgb_to_plane<<<(pixels+255)/256,256,0,stream_>>>(rgb_.get(),planes_[c].get(),width,height,pw,ph,c,sampling);
+            image_jpeg_wide::rgb_to_plane<<<(pixels+255)/256,256,0,stream_>>>(rgb_.get(),planes_[c].get(),width,height,pw,ph,c,sampling);
             check(hipGetLastError(),"GPU JPEG color");
-            image_jpeg_encoder::forward_dct_quantize<<<(terms+255)/256,256,0,stream_>>>(planes_[c].get(),quant_[c].get(),cosine_.get(),coefficients_[c].get(),pw,ph,bx[c],by[c]);
+            image_jpeg_wide::forward_dct_quantize<<<(terms+255)/256,256,0,stream_>>>(planes_[c].get(),quant_[c].get(),cosine_.get(),coefficients_[c].get(),pw,ph,bx[c],by[c]);
             check(hipGetLastError(),"GPU JPEG transform");
         }
         scan_.ensure(blocks*64);previous_.ensure(blocks);components_.ensure(blocks);
-        image_jpeg_full::gather_mcu_coefficients<<<(blocks*64+255)/256,256,0,stream_>>>(coefficients_[0].get(),coefficients_[1].get(),coefficients_[2].get(),scan_.get(),previous_.get(),components_.get(),bx[0],by[0],bx[1],by[1],mx,mx*my,sampling);
+        image_jpeg_wide::gather_mcu_coefficients<<<(blocks*64+255)/256,256,0,stream_>>>(coefficients_[0].get(),coefficients_[1].get(),coefficients_[2].get(),scan_.get(),previous_.get(),components_.get(),bx[0],by[0],bx[1],by[1],mx,my,sampling);
         check(hipGetLastError(),"GPU JPEG MCU gather");
         if(optimized_) {
             histogram_.ensure(4*256);invalid_.ensure(1);host_histogram_.ensure(4*256+1);
@@ -228,7 +239,7 @@ private:
             auto tiles=image_jpeg_checked_prefix::tile_count(raw_bytes_);sums_.ensure(tiles);bases_.ensure(tiles);
             pack_bytes<<<(raw_bytes_+255)/256,256,0,stream_>>>(bits_.get(),offsets_.get(),packed_.get(),blocks_,result.total,raw_bytes_);
             check(hipGetLastError(),"GPU JPEG packing");
-            check(image_jpeg_checked_prefix::launch<unsigned char,true>(packed_.get(),positions_.get(),sums_.get(),bases_.get(),result_.get(),raw_bytes_,stream_),"checked JPEG stuffing prefix");
+            check(image_jpeg_adaptive_prefix::launch<unsigned char,true>(packed_.get(),positions_.get(),sums_.get(),bases_.get(),result_.get(),raw_bytes_,stream_),"checked JPEG stuffing prefix");
             prefix_result(Phase::Stuff);return false;
         }
         if(phase_==Phase::Stuff) {

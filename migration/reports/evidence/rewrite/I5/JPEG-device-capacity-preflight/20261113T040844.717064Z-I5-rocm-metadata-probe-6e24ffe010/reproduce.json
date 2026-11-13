@@ -1,0 +1,68 @@
+{
+  "commands": [
+    {
+      "command_id": 1,
+      "phase": "build-capacity-preflight",
+      "argv": [
+        "hipcc",
+        "--rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay",
+        "--hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/rocm-sdk-overlay",
+        "--rocm-device-lib-path=/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode",
+        "--offload-arch=gfx1201",
+        "-std=c++17",
+        "-O2",
+        "-D__HIP_PLATFORM_AMD__",
+        "-I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/common",
+        "-x",
+        "hip",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/rocm/probes/image/jpeg_frame_capacity.hip",
+        "-o",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/JPEG-device-capacity-preflight/20261113T040844.717064Z-I5-rocm-metadata-probe-6e24ffe010/probe",
+        "-L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib",
+        "-Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib",
+        "-lamdhip64"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-13T04:08:46.294611+00:00",
+      "timeout_seconds": 300,
+      "environment": {
+        "HIP_VISIBLE_DEVICES": "0",
+        "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "DEEPINFER_ROCM_RELEASE": "10.1.0",
+        "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+        "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+      },
+      "stdout": "logs/0001-build-capacity-preflight.stdout.log",
+      "stderr": "logs/0001-build-capacity-preflight.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-13T04:08:47.562011+00:00",
+      "seconds": 1.2664535689982586
+    },
+    {
+      "command_id": 2,
+      "phase": "read-capacity-and-check-geometry",
+      "argv": [
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/JPEG-device-capacity-preflight/20261113T040844.717064Z-I5-rocm-metadata-probe-6e24ffe010/probe",
+        "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I5/JPEG-device-capacity-preflight/20261113T040844.717064Z-I5-rocm-metadata-probe-6e24ffe010/geometries.txt"
+      ],
+      "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+      "started_at_utc": "2026-11-13T04:08:47.563239+00:00",
+      "timeout_seconds": 300,
+      "environment": {
+        "HIP_VISIBLE_DEVICES": "0",
+        "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+        "DEEPINFER_ROCM_RELEASE": "10.1.0",
+        "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+        "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+      },
+      "stdout": "logs/0002-read-capacity-and-check-geometry.stdout.log",
+      "stderr": "logs/0002-read-capacity-and-check-geometry.stderr.log",
+      "return_code": 0,
+      "finished_at_utc": "2026-11-13T04:08:47.728283+00:00",
+      "seconds": 0.164725297014229
+    }
+  ],
+  "source": "source.json",
+  "inputs": "inputs/manifest.json",
+  "expected_environment": "environment.expected.json"
+}

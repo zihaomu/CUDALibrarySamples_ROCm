@@ -1,0 +1,191 @@
+{
+  "case": "entry-1x65500-s2",
+  "status": "FAILED",
+  "checks": [
+    {
+      "check": "original-entry-command",
+      "passed": true
+    },
+    {
+      "check": "independent-BMP-load-exact-source",
+      "passed": true
+    },
+    {
+      "check": "serial-reference-command",
+      "passed": true
+    },
+    {
+      "check": "exact-three-products",
+      "passed": true
+    },
+    {
+      "check": "actual-CPU-reference-no-HIP-CUDA-libjpeg-link",
+      "passed": true
+    },
+    {
+      "check": "complete-JPEG-byte-exact-0",
+      "passed": true
+    },
+    {
+      "check": "CPU-decode-command-0",
+      "passed": true
+    },
+    {
+      "check": "complete-CPU-RGB-geometry-0",
+      "passed": true
+    },
+    {
+      "check": "independent-CPU-pixel-reference-0",
+      "passed": false
+    },
+    {
+      "check": "complete-JPEG-byte-exact-1",
+      "passed": true
+    },
+    {
+      "check": "CPU-decode-command-1",
+      "passed": true
+    },
+    {
+      "check": "complete-CPU-RGB-geometry-1",
+      "passed": true
+    },
+    {
+      "check": "independent-CPU-pixel-reference-1",
+      "passed": false
+    },
+    {
+      "check": "complete-JPEG-byte-exact-2",
+      "passed": true
+    },
+    {
+      "check": "CPU-decode-command-2",
+      "passed": true
+    },
+    {
+      "check": "complete-CPU-RGB-geometry-2",
+      "passed": true
+    },
+    {
+      "check": "independent-CPU-pixel-reference-2",
+      "passed": false
+    },
+    {
+      "check": "all-preparation-and-requested-GPU-images",
+      "passed": true,
+      "actual": 80,
+      "expected": 80,
+      "streams": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "check": "all-actual-kernels-on-GPU1",
+      "passed": true
+    }
+  ],
+  "products": [
+    {
+      "name": "0.jpg",
+      "bytes": 219488,
+      "sha256": "b4d339bcf4947f53918c0791332c8f365e5281e49560da73c7e03aefdbbe61ad",
+      "decoded_rgb_sha256": "ad4892035c3a7af199e5db025bd36dbfa97b7ba669b28380ae01de5248cd48f2",
+      "comparison": {
+        "max_abs": 82,
+        "channel_rmse": [
+          16.820551769548498,
+          9.633952364836507,
+          20.10391629463472
+        ],
+        "channel_p99_abs": [
+          43.0,
+          24.0,
+          51.0
+        ],
+        "psnr_db": 23.981563190428265,
+        "channel_global_ssim": [
+          0.9601417358327997,
+          0.9875364724899327,
+          0.94154096970051
+        ]
+      }
+    },
+    {
+      "name": "1.jpg",
+      "bytes": 219488,
+      "sha256": "b4d339bcf4947f53918c0791332c8f365e5281e49560da73c7e03aefdbbe61ad",
+      "decoded_rgb_sha256": "ad4892035c3a7af199e5db025bd36dbfa97b7ba669b28380ae01de5248cd48f2",
+      "comparison": {
+        "max_abs": 82,
+        "channel_rmse": [
+          16.820551769548498,
+          9.633952364836507,
+          20.10391629463472
+        ],
+        "channel_p99_abs": [
+          43.0,
+          24.0,
+          51.0
+        ],
+        "psnr_db": 23.981563190428265,
+        "channel_global_ssim": [
+          0.9601417358327997,
+          0.9875364724899327,
+          0.94154096970051
+        ]
+      }
+    },
+    {
+      "name": "2.jpg",
+      "bytes": 219488,
+      "sha256": "b4d339bcf4947f53918c0791332c8f365e5281e49560da73c7e03aefdbbe61ad",
+      "decoded_rgb_sha256": "ad4892035c3a7af199e5db025bd36dbfa97b7ba669b28380ae01de5248cd48f2",
+      "comparison": {
+        "max_abs": 82,
+        "channel_rmse": [
+          16.820551769548498,
+          9.633952364836507,
+          20.10391629463472
+        ],
+        "channel_p99_abs": [
+          43.0,
+          24.0,
+          51.0
+        ],
+        "psnr_db": 23.981563190428265,
+        "channel_global_ssim": [
+          0.9601417358327997,
+          0.9875364724899327,
+          0.94154096970051
+        ]
+      }
+    }
+  ],
+  "metrics": {
+    "kernel_count": 80,
+    "source_rgb_sha256": "7447920dce98b90f9c3d2cbe1b8cc8179fe4669140c489dacfaa468dd6c28d50",
+    "bmp_sha256": "adfd113a8cf944ef205928dd06aa13ed3936d5fea10fd4dad1b1ad9f372f4774"
+  },
+  "binaries": [
+    {
+      "binary": "artifacts/rewrite/I5/async-original-encoder-candidate-build/20261113T041312.673696Z-I5-rocm-build-b0ffb93404/sample",
+      "sha256": "d8190265bfba43a9ad7f7537cbd3fee47ae4db23cc74368dc375c844af2692a7",
+      "build_report": "migration/reports/image-encoder-instances-v2-build.json",
+      "build_report_sha256": "9040fbce240a94affeba6cb6a99063d266d27b15c5950add88a189de7e13fc7c"
+    },
+    {
+      "binary": "artifacts/rewrite/I5/async-JPEG-slot-build/20261113T041307.489277Z-I5-rocm-build-aad056e139/probe",
+      "sha256": "6b1772bbd8c7c099a08e8e735d5031f49a88b382c509e6c22907c3f10141989f",
+      "build_report": "migration/reports/image-encoder-pipeline-build.json",
+      "build_report_sha256": "1d5eb4344fabae4ff68017a9741d91af1bd65e8d810bd37d97f716fce2a86c3e"
+    },
+    {
+      "binary": "artifacts/rewrite/I5/independent-CPU-stb-reference-build/20261113T042126.539948Z-I5-CPU-build-961de726eb/stb-reference",
+      "sha256": "5b37a206c71bdf02e13966505f761163a3bca7e54cfab1ea0c86da09afc93e34",
+      "build_report": "migration/reports/image-stb-reference-build.json",
+      "build_report_sha256": "ded71b268c3b42980e362ce9acbf961277d9c47bd439ee1a73b8588d27a8f093"
+    }
+  ],
+  "experiment_id": "20261113T042455.271459Z-I5-rocm-trace-CPU-reference-d7c8926ca8"
+}

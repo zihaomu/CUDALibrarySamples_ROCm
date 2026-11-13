@@ -1,0 +1,1 @@
+Test rocm-reference for async-original-CLI-byte-regression, case truncate-before-state-expansion. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261113T041622.866196Z-I5-rocm-original-candidate-5e21f11592.

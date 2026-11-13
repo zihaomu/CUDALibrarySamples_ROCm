@@ -1,0 +1,47 @@
+{
+  "status": "PASSED",
+  "checks": [
+    {
+      "check": "positive-runs-complete-decode",
+      "passed": true
+    },
+    {
+      "check": "positive-identity-gate",
+      "passed": true
+    },
+    {
+      "check": "wrong-library-runs-complete-decode",
+      "passed": true
+    },
+    {
+      "check": "wrong-library-identity-gate",
+      "passed": true
+    }
+  ],
+  "receipts": [
+    {
+      "case": "positive",
+      "receipt": {
+        "check": "actual-loaded-libjpeg-matches-bound-path-and-SHA",
+        "passed": true,
+        "observed": [
+          "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/cpu-codecs/lib/libjpeg.so.62"
+        ],
+        "expected_path": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/cpu-codecs/lib/libjpeg.so.62.4.0",
+        "expected_sha256": "d3dee37946d3b526cd19c49b1d535047b20e2c19d0edd3cf6782e257680b7466"
+      }
+    },
+    {
+      "case": "wrong-library",
+      "receipt": {
+        "check": "actual-loaded-libjpeg-matches-bound-path-and-SHA",
+        "passed": false,
+        "observed": [
+          "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/libjpeg/libjpeg.so.62"
+        ],
+        "expected_path": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/build/cpu-codecs/lib/libjpeg.so.62.4.0",
+        "expected_sha256": "d3dee37946d3b526cd19c49b1d535047b20e2c19d0edd3cf6782e257680b7466"
+      }
+    }
+  ]
+}
