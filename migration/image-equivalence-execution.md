@@ -109,11 +109,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-13T07:58:09.082305+00:00。26入口当前14通过/8部分/4失败。
+更新时间：2026-11-13T07:59:51.693898+00:00。26入口当前14通过/8部分/4失败。
 
-I3：IMG-02：完整资格/冷检出身份反向检查：PASSED；热运行替换、越界路径、错构建/二进制/提交、缺失或重复子实验及扩大原生例外均检查。
+I3：IMG-02：最终独立MOAT复审Approve：冷绑定、五套控制身份与完整产品集合的P1/P2均关闭；允许签发两原入口完整资格，仍公开marker变体和三个NPP+原生失败。
 
-证据：`migration/reports/evidence/rewrite/I3/watershed-complete-publication-and-cold-binding-controls/20261113T075806.622959Z-I3-CPU-controls-156372fdd1`
+证据：`migration/reports/evidence/rewrite/I3/watershed-completion-independent-final-review/20261113T075950.378223Z-I3-review-89ffe19fac`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

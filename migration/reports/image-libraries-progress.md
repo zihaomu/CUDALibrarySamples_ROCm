@@ -1,6 +1,6 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-13T07:58:09.082305+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-13T07:59:51.693898+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
 26入口当前：14 PASSED / 8 PARTIAL / 4 FAILED。
 
@@ -4214,3 +4214,4 @@
 | 2026-11-13T07:54:00.796550+00:00 | I3 | IMG-02：固定提交Watershed冷检出、完整构建及规定回归：PASSED，子实验与全部产品哈希保留。 | [20261113T075245.245915Z-I3-rocm-cold-f3200f6a3d](evidence/rewrite/I3/watershed-fixed-commit-complete-cold-rebuild/20261113T075245.245915Z-I3-rocm-cold-f3200f6a3d) |
 | 2026-11-13T07:57:24.441704+00:00 | I3 | IMG-02：完整资格/冷检出身份反向检查：PASSED；热运行替换、越界路径、错构建/二进制/提交、缺失或重复子实验及扩大原生例外均检查。 | [20261113T075722.025569Z-I3-CPU-controls-36b02323ab](evidence/rewrite/I3/watershed-complete-publication-and-cold-binding-controls/20261113T075722.025569Z-I3-CPU-controls-36b02323ab) |
 | 2026-11-13T07:58:09.082305+00:00 | I3 | IMG-02：完整资格/冷检出身份反向检查：PASSED；热运行替换、越界路径、错构建/二进制/提交、缺失或重复子实验及扩大原生例外均检查。 | [20261113T075806.622959Z-I3-CPU-controls-156372fdd1](evidence/rewrite/I3/watershed-complete-publication-and-cold-binding-controls/20261113T075806.622959Z-I3-CPU-controls-156372fdd1) |
+| 2026-11-13T07:59:51.693898+00:00 | I3 | IMG-02：最终独立MOAT复审Approve：冷绑定、五套控制身份与完整产品集合的P1/P2均关闭；允许签发两原入口完整资格，仍公开marker变体和三个NPP+原生失败。 | [20261113T075950.378223Z-I3-review-89ffe19fac](evidence/rewrite/I3/watershed-completion-independent-final-review/20261113T075950.378223Z-I3-review-89ffe19fac) |
