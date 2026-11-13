@@ -69,3 +69,11 @@ NPP+ 12.4.0 在 `heldout-ramp-x`、`heldout-ramp-y`、`heldout-ramp-diagonal` �
 - 两程序各覆盖缺首图、缺末图、首图少一字节、首个输出路径为目录，共 8 次实际失败流程；非零退出、具体诊断、无错误图像伪成功产品、之前已完成产品字节均检查通过。
 
 证明见 `image-watershed-completion-entry-trace.json`、`image-watershed-completion-entry-replay.json`、`image-watershed-completion-replay-reference.json`、`image-watershed-completion-entry-negative.json`。下一步固定提交冷构建、最终复审与资格签发，当前主表尚未提升。
+
+## 固定提交复现与发布验证器
+
+当前冷构建源码提交为 `a481437db1dc0c8897c5ebc1f3ff3fbc5ad80cca`。空检出重新生成 SDK overlay，编译两个原始程序、完整语义探针和故障注入探针；21 个子实验、1,642 件产品复现通过。该数量包含四布局 1,560 件产品、原入口/trace/变化重放各 22 件及缺末图时保留的 16 件正确产品；不表示 1,642 个独立输入。
+
+冷验证器同时核对目录边界、raw/归档 seal、实际命令与二进制、源码提交和完整唯一子实验集合。先前的路径类型失败以及缺少热/冷身份绑定的中间证明均保留历史，当前资格仅选择修订后的严格冷记录。
+
+最终资格反向控制已有 40 项通过：额外拒绝真实 JPEG review 被用于 watershed、同一真实控制报告替代多个控制套件、遗漏 label/compact/boundary 检查、改名 native 模式、重复 CPU 输入或重放产品等。当前代码复审与不可变资格签发完成后才发布支持数。

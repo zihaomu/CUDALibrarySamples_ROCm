@@ -1,0 +1,80 @@
+[
+  {
+    "command_id": 1,
+    "phase": "build-NPP",
+    "argv": [
+      "hipcc",
+      "--rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-watershed-cold-9vfbl3f9/src/build/rocm-sdk-overlay",
+      "--hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-watershed-cold-9vfbl3f9/src/build/rocm-sdk-overlay",
+      "--rocm-device-lib-path=/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode",
+      "--offload-arch=gfx1201",
+      "-std=c++17",
+      "-O2",
+      "-D__HIP_PLATFORM_AMD__",
+      "-I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-watershed-cold-9vfbl3f9/src/rocm/common/image",
+      "-x",
+      "hip",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-watershed-cold-9vfbl3f9/src/rocm/ported/NPP/watershedSegmentation/watershedSegmentation.cpp",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-watershed-cold-9vfbl3f9/src/rocm/common/image/watershed.hip",
+      "-L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib",
+      "-Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib",
+      "-lamdhip64",
+      "-o",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-watershed-cold-9vfbl3f9/src/artifacts/rewrite/I3/watershed-complete-original-entry-build/20261113T075258.385813Z-I3-rocm-build-0e1d99fa46/watershedNPP"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-watershed-cold-9vfbl3f9/src",
+    "started_at_utc": "2026-11-13T07:52:59.947111+00:00",
+    "timeout_seconds": 300,
+    "environment": {
+      "HIP_VISIBLE_DEVICES": "0",
+      "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+      "DEEPINFER_ROCM_RELEASE": "10.1.0",
+      "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+      "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+    },
+    "stdout": "logs/0001-build-NPP.stdout.log",
+    "stderr": "logs/0001-build-NPP.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-13T07:53:02.468173+00:00",
+    "seconds": 2.5192554090172052
+  },
+  {
+    "command_id": 2,
+    "phase": "build-NPP+",
+    "argv": [
+      "hipcc",
+      "--rocm-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-watershed-cold-9vfbl3f9/src/build/rocm-sdk-overlay",
+      "--hip-path=/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-watershed-cold-9vfbl3f9/src/build/rocm-sdk-overlay",
+      "--rocm-device-lib-path=/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib/llvm/amdgcn/bitcode",
+      "--offload-arch=gfx1201",
+      "-std=c++17",
+      "-O2",
+      "-D__HIP_PLATFORM_AMD__",
+      "-I/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-watershed-cold-9vfbl3f9/src/rocm/common/image",
+      "-x",
+      "hip",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-watershed-cold-9vfbl3f9/src/rocm/ported/NPP+/watershedSegmentation/watershedSegmentationNPPPlus.cpp",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-watershed-cold-9vfbl3f9/src/rocm/common/image/watershed.hip",
+      "-L/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib",
+      "-Wl,-rpath,/opt/venv/lib/python3.13/site-packages/_rocm_sdk_core/lib",
+      "-lamdhip64",
+      "-o",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-watershed-cold-9vfbl3f9/src/artifacts/rewrite/I3/watershed-complete-original-entry-build/20261113T075258.385813Z-I3-rocm-build-0e1d99fa46/watershedNPPPlus"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/image-watershed-cold-9vfbl3f9/src",
+    "started_at_utc": "2026-11-13T07:53:02.469841+00:00",
+    "timeout_seconds": 300,
+    "environment": {
+      "HIP_VISIBLE_DEVICES": "0",
+      "DEEPINFER_IMAGE_ID": "sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03",
+      "DEEPINFER_ROCM_RELEASE": "10.1.0",
+      "TRITON_CACHE_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/triton",
+      "TORCH_EXTENSIONS_DIR": "/workspaces/deepinfer_workspace/artifacts/amd/rocm10/foundation-cache/sha256:a79c374ab2bc93c0e4358da6c7bda5cb84cf1308e8aff74fc99fc95c511cbd03/gfx1201/torch"
+    },
+    "stdout": "logs/0002-build-NPP+.stdout.log",
+    "stderr": "logs/0002-build-NPP+.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-13T07:53:04.889703+00:00",
+    "seconds": 2.4191325600259006
+  }
+]

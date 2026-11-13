@@ -26,13 +26,18 @@ def main():
     project = collections.Counter(s['status'] for s in catalog['samples'])
     module_counts = {m: collections.Counter(s['status'] for s in samples if s['id'].startswith(m + '/'))
                      for m in ['NPP', 'NPP+', 'nvJPEG', 'nvJPEG2000']}
+    watershed_complete = all(s['status'] == 'PASSED' for s in samples
+                             if s['source'].startswith(WATERSHED))
+    watershed_summary = ('I3 两个 watershed 已完成原入口与全GPU实现，按公开算法变体验收；'
+                         'marker分区差异及NPP+三个固定坡度的原生不一致保留详细记录。'
+                         if watershed_complete else
+                         'I3 两个 watershed 尚待完整合同资格，已有组件/文件流程证明不替代整例验收。')
     today = dt.datetime.now(ZoneInfo('Asia/Shanghai')).date().isoformat()
     snapshot = (f'截至 {today}，本计划四模块 **{counts["PASSED"]}/26 整例通过、'
                 f'{counts["PARTIAL"]} PARTIAL、{counts["FAILED"]} FAILED**：' +
                 '、'.join(f'{m} {module_counts[m]["PASSED"]}/{sum(module_counts[m].values())}'
                          for m in module_counts) +
-                '。I3 两个 watershed 已有完整 HIP 文件入口及独立 CPU 逐字节结果，'
-                '但原生分割/边界语义差异显著，保持 PARTIAL；I4–I8 JPEG/JPEG2000 整例目标仍未完成。'
+                '。' + watershed_summary + 'I4–I8 JPEG/JPEG2000 剩余整例目标仍未完成。'
                 f'全项目为 {project["PASSED"]} PASSED、{project["PARTIAL"]} PARTIAL、'
                 f'{project["FAILED"]} FAILED。详细资格及失败原因见项目的 '
                 '`migration/reports/image-libraries-progress.md` 和 '
@@ -50,9 +55,10 @@ def main():
         touched.add(source)
         sample = by_source[source]
         if source.startswith(WATERSHED):
-            description = ('项目 HIP 八邻域下降/标签与边界输出；原图与独立 CPU 逐字节通过，'
-                           '原生 NPP 分割/平台区和边界差异待修正；'
-                           '[实测与日志](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/reports/image-watershed.md)')
+            description = ('项目 HIP 严格下降/有向根图标签、GPU压紧与完整边界输出；'
+                           + ('完整原入口、60输入四布局及固定提交冷验收通过；marker算法变体与三项NPP+原生差异明确保留；'
+                              if sample['status'] == 'PASSED' else '完整资格尚待验收；')
+                           + '[实测与日志](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/reports/image-completion-IMG-02.md)')
         elif sample['status'] == 'PASSED' and sample.get('actual_library'):
             description = sample['actual_library']
         return prefix + sample['status'] + middle + description + suffix

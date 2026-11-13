@@ -109,11 +109,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-13T07:52:18.282653+00:00。26入口当前14通过/8部分/4失败。
+更新时间：2026-11-13T07:58:09.082305+00:00。26入口当前14通过/8部分/4失败。
 
-I3：IMG-02：冷构建身份问题已补充：所有fresh记录绑定冷目录内的封存raw/归档、构建/二进制/实际命令及唯一21子实验集合。24项资格/冷身份反向控制通过；热运行替换、错构建、路径越界和缺失/重复子实验均拒绝，重新固定提交执行冷回归。
+I3：IMG-02：完整资格/冷检出身份反向检查：PASSED；热运行替换、越界路径、错构建/二进制/提交、缺失或重复子实验及扩大原生例外均检查。
 
-证据：`migration/reports/image-watershed-completion-controls.json`
+证据：`migration/reports/evidence/rewrite/I3/watershed-complete-publication-and-cold-binding-controls/20261113T075806.622959Z-I3-CPU-controls-156372fdd1`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

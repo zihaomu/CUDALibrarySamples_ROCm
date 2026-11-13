@@ -1,6 +1,6 @@
 # 图像库实施与实验记录
 
-更新时间：2026-11-13T07:52:18.282653+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
+更新时间：2026-11-13T07:58:09.082305+00:00。执行中；当前支持结论仍以 samples.yaml 和已封存资格为准。
 
 26入口当前：14 PASSED / 8 PARTIAL / 4 FAILED。
 
@@ -4199,3 +4199,18 @@
 | 2026-11-13T07:47:11.729061+00:00 | I3 | IMG-02：固定提交Watershed冷检出、完整构建及规定回归：PASSED，子实验与全部产品哈希保留。 | [20261113T074558.083086Z-I3-rocm-cold-0acda8308b](evidence/rewrite/I3/watershed-fixed-commit-complete-cold-rebuild/20261113T074558.083086Z-I3-rocm-cold-0acda8308b) |
 | 2026-11-13T07:51:14.655860+00:00 | I3 | IMG-02：完整资格/冷检出身份反向检查：PASSED；热运行替换、越界路径、错构建/二进制/提交、缺失或重复子实验及扩大原生例外均检查。 | [20261113T075112.085079Z-I3-CPU-controls-e68762c1d2](evidence/rewrite/I3/watershed-complete-publication-and-cold-binding-controls/20261113T075112.085079Z-I3-CPU-controls-e68762c1d2) |
 | 2026-11-13T07:52:18.282653+00:00 | I3 | IMG-02：冷构建身份问题已补充：所有fresh记录绑定冷目录内的封存raw/归档、构建/二进制/实际命令及唯一21子实验集合。24项资格/冷身份反向控制通过；热运行替换、错构建、路径越界和缺失/重复子实验均拒绝，重新固定提交执行冷回归。 | [image-watershed-completion-controls.json](image-watershed-completion-controls.json) |
+| 2026-11-13T07:52:57.912029+00:00 | I3 | IMG-02：固定提交冷构建步骤完成：bootstrap_sdk ；完整产品回归及子证据仍待汇总。 | 静态检查/任务接入 |
+| 2026-11-13T07:53:05.831138+00:00 | I3 | IMG-02：固定提交冷构建步骤完成：image_watershed_completion_entries build；完整产品回归及子证据仍待汇总。 | 静态检查/任务接入 |
+| 2026-11-13T07:53:11.012964+00:00 | I3 | IMG-02：固定提交冷构建步骤完成：image_watershed_completion_entries run；完整产品回归及子证据仍待汇总。 | 静态检查/任务接入 |
+| 2026-11-13T07:53:16.313536+00:00 | I3 | IMG-02：固定提交冷构建步骤完成：image_watershed_entry_runtime trace；完整产品回归及子证据仍待汇总。 | 静态检查/任务接入 |
+| 2026-11-13T07:53:21.098955+00:00 | I3 | IMG-02：固定提交冷构建步骤完成：image_watershed_entry_runtime replay；完整产品回归及子证据仍待汇总。 | 静态检查/任务接入 |
+| 2026-11-13T07:53:37.554623+00:00 | I3 | IMG-02：固定提交冷构建步骤完成：image_watershed_entry_runtime negative；完整产品回归及子证据仍待汇总。 | 静态检查/任务接入 |
+| 2026-11-13T07:53:41.833990+00:00 | I3 | IMG-02：固定提交冷构建步骤完成：image_watershed_v2 build；完整产品回归及子证据仍待汇总。 | 静态检查/任务接入 |
+| 2026-11-13T07:53:46.062103+00:00 | I3 | IMG-02：固定提交冷构建步骤完成：image_watershed_v2_controls ；完整产品回归及子证据仍待汇总。 | 静态检查/任务接入 |
+| 2026-11-13T07:53:49.133889+00:00 | I3 | IMG-02：固定提交冷构建步骤完成：image_watershed_completion amd --mode padded；完整产品回归及子证据仍待汇总。 | 静态检查/任务接入 |
+| 2026-11-13T07:53:52.154929+00:00 | I3 | IMG-02：固定提交冷构建步骤完成：image_watershed_completion amd --mode compact；完整产品回归及子证据仍待汇总。 | 静态检查/任务接入 |
+| 2026-11-13T07:53:55.023141+00:00 | I3 | IMG-02：固定提交冷构建步骤完成：image_watershed_completion amd --mode inplace；完整产品回归及子证据仍待汇总。 | 静态检查/任务接入 |
+| 2026-11-13T07:53:57.796744+00:00 | I3 | IMG-02：固定提交冷构建步骤完成：image_watershed_completion amd --mode no-labels；完整产品回归及子证据仍待汇总。 | 静态检查/任务接入 |
+| 2026-11-13T07:54:00.796550+00:00 | I3 | IMG-02：固定提交Watershed冷检出、完整构建及规定回归：PASSED，子实验与全部产品哈希保留。 | [20261113T075245.245915Z-I3-rocm-cold-f3200f6a3d](evidence/rewrite/I3/watershed-fixed-commit-complete-cold-rebuild/20261113T075245.245915Z-I3-rocm-cold-f3200f6a3d) |
+| 2026-11-13T07:57:24.441704+00:00 | I3 | IMG-02：完整资格/冷检出身份反向检查：PASSED；热运行替换、越界路径、错构建/二进制/提交、缺失或重复子实验及扩大原生例外均检查。 | [20261113T075722.025569Z-I3-CPU-controls-36b02323ab](evidence/rewrite/I3/watershed-complete-publication-and-cold-binding-controls/20261113T075722.025569Z-I3-CPU-controls-36b02323ab) |
+| 2026-11-13T07:58:09.082305+00:00 | I3 | IMG-02：完整资格/冷检出身份反向检查：PASSED；热运行替换、越界路径、错构建/二进制/提交、缺失或重复子实验及扩大原生例外均检查。 | [20261113T075806.622959Z-I3-CPU-controls-156372fdd1](evidence/rewrite/I3/watershed-complete-publication-and-cold-binding-controls/20261113T075806.622959Z-I3-CPU-controls-156372fdd1) |

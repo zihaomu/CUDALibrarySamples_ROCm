@@ -23,6 +23,8 @@ def closure(path):
 
 def gaps(s):
     src=s['source']
+    if s['status']=='PASSED' and s.get('active_batch') in ('IMG-01','IMG-02'):
+        return ['IMG-10'],['当前完整资格已发布；最终26入口集中回归及依赖整理后按实际源码重验','保持资格中声明的算法/平台差异与历史失败记录']
     if 'Encoder-MultipleInstances' in src:
         if s.get('reason_code')=='VALIDATED_I5_ASYNC_GPU_JPEG_INSTANCES_SUBSET':
             return ['IMG-01'],['完整保留集的native/独立CPU像素等价门槛','j0/大尺寸混合输入/IO与线程异常组合','64位transform索引、单图预分配与性能计时合同','当前提交冷检出和最终复审；并行prefix/异步slot/15 CLI/33产品已验']
@@ -64,8 +66,8 @@ def main():
             completion_stages=stage,remaining=remaining,
             original_CLI_token_hints=prior.get('CLI_token_hints',[]),original_conditionals=prior.get('conditional_compilation',[]),
             original_literal_image_paths=prior.get('literal_image_paths',[]),
-            semantic_matrix_status='IN_PROGRESS' if 'Encoder-MultipleInstances' in s['source'] else 'NOT_YET_REAUDITED',
-            semantic_contract='migration/rewrite/image-completion-encoder-contract.json' if 'Encoder-MultipleInstances' in s['source'] else None))
+            semantic_matrix_status='VALIDATED' if s['status']=='PASSED' and s.get('active_batch') in ('IMG-01','IMG-02') else 'IN_PROGRESS' if 'Encoder-MultipleInstances' in s['source'] else 'NOT_YET_REAUDITED',
+            semantic_contract='migration/rewrite/image-completion-encoder-contract.json' if 'Encoder-MultipleInstances' in s['source'] else 'migration/rewrite/image-watershed-completion-contract.json' if 'watershedSegmentation' in s['source'] else None))
     e=Experiment('I0','image-completion-26-source-dependency-gap-ledger','CPU-contract',sources=[__file__,catalog,old,*[ROOT/n for n in deps]])
     data=dict(status='IN_PROGRESS',scope='Static dependency/gap audit, not full CLI qualification. Token hints may include false positives; Python dynamic imports and build-time defines require semantic review.',
         sample_count=26,counts=dict(Counter(s['status'] for s in samples)),samples=rows,
@@ -85,7 +87,7 @@ def main():
         '## 仍待完成的 IMG-00 工作','',*['- '+x for x in data['remaining_IMG00']],'',
         '本次证据：`'+data['evidence']+'`。当前资格以 `samples.yaml` 为准；组件实验不会自动升级样例。','']
     (ROOT/'migration/reports/image-completion-IMG-00.md').write_text('\n'.join(lines))
-    record('IMG-00','建立26入口当前资格、源码SHA、本地include反向依赖与算法欠项账本；确认13 PASSED/9 PARTIAL/4 FAILED。完整语义矩阵和保留验收集仍未完成，阶段保持IN_PROGRESS。',[str(REPORT.relative_to(ROOT)),'migration/reports/image-completion-IMG-00.md',data['evidence']])
+    record('IMG-00','更新26入口当前资格、源码SHA、本地include反向依赖与算法欠项账本；当前'+str(data['counts'])+'。全部入口语义矩阵和保留验收集仍未完成，阶段保持IN_PROGRESS。',[str(REPORT.relative_to(ROOT)),'migration/reports/image-completion-IMG-00.md',data['evidence']])
     print(data['counts'],data['evidence'])
 
 if __name__=='__main__':main()
