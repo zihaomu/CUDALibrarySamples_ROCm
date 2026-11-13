@@ -1,0 +1,111 @@
+[
+  {
+    "command_id": 1,
+    "phase": "prepare",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "mkdir -p /tmp/20261113T063253.055945Z-I3-cuda-observation-a5f0956545"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-13T06:32:54.046086+00:00",
+    "timeout_seconds": 240,
+    "environment": {},
+    "stdout": "logs/0001-prepare.stdout.log",
+    "stderr": "logs/0001-prepare.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-13T06:32:54.363054+00:00",
+    "seconds": 0.31582961400272325
+  },
+  {
+    "command_id": 2,
+    "phase": "upload",
+    "argv": [
+      "scp",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I3/watershed-small-semantics-NPP/20261113T063253.055945Z-I3-cuda-observation-a5f0956545/inputs.tar",
+      "nvidia-5090x2:/tmp/20261113T063253.055945Z-I3-cuda-observation-a5f0956545/inputs.tar"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-13T06:32:54.364538+00:00",
+    "timeout_seconds": 240,
+    "environment": {},
+    "stdout": "logs/0002-upload.stdout.log",
+    "stderr": "logs/0002-upload.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-13T06:32:54.681071+00:00",
+    "seconds": 0.3156686659785919
+  },
+  {
+    "command_id": 3,
+    "phase": "unpack",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "tar xf /tmp/20261113T063253.055945Z-I3-cuda-observation-a5f0956545/inputs.tar -C /tmp/20261113T063253.055945Z-I3-cuda-observation-a5f0956545"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-13T06:32:54.682619+00:00",
+    "timeout_seconds": 240,
+    "environment": {},
+    "stdout": "logs/0003-unpack.stdout.log",
+    "stderr": "logs/0003-unpack.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-13T06:32:54.999123+00:00",
+    "seconds": 0.31571134499972686
+  },
+  {
+    "command_id": 4,
+    "phase": "build",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "/usr/local/cuda-13.4/bin/nvcc -std=c++17 -O2 -arch=sm_120 /tmp/20261113T063253.055945Z-I3-cuda-observation-a5f0956545/probe.cpp -o /tmp/20261113T063253.055945Z-I3-cuda-observation-a5f0956545/probe -lnppif -lnppc"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-13T06:32:55.000243+00:00",
+    "timeout_seconds": 240,
+    "environment": {},
+    "stdout": "logs/0004-build.stdout.log",
+    "stderr": "logs/0004-build.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-13T06:32:56.718680+00:00",
+    "seconds": 1.7180287020164542
+  },
+  {
+    "command_id": 5,
+    "phase": "native-semantic-observations",
+    "argv": [
+      "ssh",
+      "nvidia-5090x2",
+      "env CUDA_VISIBLE_DEVICES=1 /tmp/20261113T063253.055945Z-I3-cuda-observation-a5f0956545/probe /tmp/20261113T063253.055945Z-I3-cuda-observation-a5f0956545/inputs /tmp/20261113T063253.055945Z-I3-cuda-observation-a5f0956545/outputs"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-13T06:32:56.720126+00:00",
+    "timeout_seconds": 240,
+    "environment": {},
+    "stdout": "logs/0005-native-semantic-observations.stdout.log",
+    "stderr": "logs/0005-native-semantic-observations.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-13T06:32:57.787600+00:00",
+    "seconds": 1.0667927790200338
+  },
+  {
+    "command_id": 6,
+    "phase": "collect",
+    "argv": [
+      "scp",
+      "-r",
+      "nvidia-5090x2:/tmp/20261113T063253.055945Z-I3-cuda-observation-a5f0956545/outputs",
+      "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/artifacts/rewrite/I3/watershed-small-semantics-NPP/20261113T063253.055945Z-I3-cuda-observation-a5f0956545/outputs"
+    ],
+    "cwd": "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm",
+    "started_at_utc": "2026-11-13T06:32:57.789562+00:00",
+    "timeout_seconds": 240,
+    "environment": {},
+    "stdout": "logs/0006-collect.stdout.log",
+    "stderr": "logs/0006-collect.stderr.log",
+    "return_code": 0,
+    "finished_at_utc": "2026-11-13T06:33:00.160627+00:00",
+    "seconds": 2.369959121046122
+  }
+]

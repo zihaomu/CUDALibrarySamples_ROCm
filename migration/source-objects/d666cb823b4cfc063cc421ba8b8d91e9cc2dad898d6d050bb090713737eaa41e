@@ -1,0 +1,50 @@
+// SPDX-License-Identifier: Apache-2.0
+#include "image/watershed_v2.hpp"
+#include <algorithm>
+#include <cstring>
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <stdexcept>
+#include <string>
+#include <vector>
+namespace ws=image_watershed_v2;
+static void checked(hipError_t e){if(e!=hipSuccess)throw std::runtime_error(hipGetErrorString(e));}
+struct Allocation{
+ uint8_t* p=nullptr;size_t pitch=0,row=0,offset=0,bytes=0;int height=0;
+ Allocation(size_t logical_row,int h,bool padded,bool words):row(logical_row),height(h){
+  size_t unit=words?4:1;pitch=row+(padded?11*unit:0);offset=padded?pitch+3*unit:0;
+  bytes=pitch*size_t(h+(padded?2:0));checked(hipMalloc(reinterpret_cast<void**>(&p),bytes));
+  auto code=hipMemset(p,0xa5,bytes);if(code!=hipSuccess){hipFree(p);p=nullptr;checked(code);}
+ }
+ Allocation(const Allocation&)=delete;Allocation&operator=(const Allocation&)=delete;
+ ~Allocation(){hipFree(p);}uint8_t*data(){return p+offset;}
+ std::vector<uint8_t> copy(){std::vector<uint8_t> all(bytes),result(row*size_t(height));checked(hipMemcpy(all.data(),p,bytes,hipMemcpyDeviceToHost));
+  std::vector<uint8_t> valid(bytes,0);for(int y=0;y<height;++y){std::copy_n(all.data()+offset+size_t(y)*pitch,row,result.data()+size_t(y)*row);std::fill_n(valid.data()+offset+size_t(y)*pitch,row,1);}
+  for(size_t i=0;i<bytes;++i)if(!valid[i]&&all[i]!=0xa5)throw std::runtime_error("padding or ROI sentinel changed");return result;
+ }
+ ws::ByteView byte(){return {data(),pitch};}ws::LabelView label(){return {reinterpret_cast<uint32_t*>(data()),pitch};}
+};
+static void save(const std::filesystem::path&p,const std::vector<uint8_t>&data){std::ofstream f(p,std::ios::binary);f.write(reinterpret_cast<const char*>(data.data()),data.size());if(!f)throw std::runtime_error("output write");}
+int main(int argc,char**argv){try{
+ if(argc!=4)throw std::runtime_error("usage: INPUT_DIR OUTPUT_DIR compact|padded|inplace");
+ std::string mode=argv[3];if(mode!="compact"&&mode!="padded"&&mode!="inplace")throw std::runtime_error("invalid mode");
+ checked(hipSetDevice(0));hipDeviceProp_t device{};checked(hipGetDeviceProperties(&device,0));char pci[32]{};checked(hipDeviceGetPCIBusId(pci,sizeof(pci),0));
+ std::cout<<"DEVICE "<<device.name<<" arch="<<device.gcnArchName<<" PCI="<<pci<<'\n';
+ hipStream_t stream=nullptr;checked(hipStreamCreate(&stream));
+ struct StreamGuard{hipStream_t s;~StreamGuard(){hipStreamDestroy(s);}}guard{stream};
+ std::filesystem::create_directories(argv[2]);std::ifstream cases(std::string(argv[1])+"/cases.txt");if(!cases)throw std::runtime_error("case list missing");
+ std::string name;int w,h;unsigned count=0;
+ while(cases>>name>>w>>h){
+  if(w<=0||h<=0||w>65535||h>65535||w>INT_MAX/h)throw std::runtime_error("input shape");
+  size_t n=size_t(w)*h;std::vector<uint8_t> input(n);std::ifstream f(std::filesystem::path(argv[1])/(name+".raw"),std::ios::binary);
+  f.read(reinterpret_cast<char*>(input.data()),n);if(f.gcount()!=std::streamsize(n)||f.peek()!=EOF)throw std::runtime_error("input size");
+  bool padded=mode!="compact";Allocation src(w,h,padded,false),seg(w,h,padded,false),lab(size_t(w)*4,h,padded,true),compact(size_t(w)*4,h,padded,true),boundary(w,h,padded,false),contrast(w,h,padded,false),black(w,h,padded,false),white(w,h,padded,false);
+  checked(hipMemcpy2DAsync(src.data(),src.pitch,input.data(),w,w,h,hipMemcpyHostToDevice,stream));
+  ws::Outputs outputs;outputs.segments=mode=="inplace"?src.byte():seg.byte();outputs.labels=lab.label();outputs.compact=compact.label();outputs.boundaries=boundary.byte();outputs.contrast=contrast.byte();outputs.black=black.byte();outputs.white=white.byte();
+  checked(ws::run(src.data(),src.pitch,outputs,w,h,stream));auto copied=src.copy();if(mode!="inplace"&&copied!=input)throw std::runtime_error("input modified");
+  auto folder=std::filesystem::path(argv[2]);save(folder/(name+".segments"),mode=="inplace"?copied:seg.copy());save(folder/(name+".labels"),lab.copy());save(folder/(name+".compact"),compact.copy());save(folder/(name+".boundaries"),boundary.copy());save(folder/(name+".contrast"),contrast.copy());save(folder/(name+".black"),black.copy());save(folder/(name+".white"),white.copy());
+  std::cout<<"RESULT "<<name<<" pixels="<<n<<" products=7 padding=1 mode="<<mode<<'\n';++count;
+ }
+ if(!cases.eof()||!count)throw std::runtime_error("invalid case list");return 0;
+}catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 1;}}

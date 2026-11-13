@@ -1,0 +1,263 @@
+{
+  "status": "PASSED",
+  "sample_id": "NPP+/watershedSegmentation::watershedSegmentationNPPPlus.cpp",
+  "family": "NPP+",
+  "checks": [
+    {
+      "check": "CT_skull_512x512_8u_Gray.raw-all-original-products-CPU-exact",
+      "passed": true
+    },
+    {
+      "check": "CT_skull_512x512_8u_Gray.raw-native-gray-boundary-contrast-exact",
+      "passed": true
+    },
+    {
+      "check": "Rocks_512x512_8u_Gray.raw-all-original-products-CPU-exact",
+      "passed": true
+    },
+    {
+      "check": "Rocks_512x512_8u_Gray.raw-native-gray-boundary-contrast-exact",
+      "passed": true
+    },
+    {
+      "check": "Corn_614x461_8u_Gray.raw-all-original-products-CPU-exact",
+      "passed": true
+    },
+    {
+      "check": "Corn_614x461_8u_Gray.raw-native-gray-boundary-contrast-exact",
+      "passed": true
+    }
+  ],
+  "rows": [
+    {
+      "input": "CT_skull_512x512_8u_Gray.raw",
+      "products": {
+        "CT_skull_Segments_8Way_512x512_8u.raw": true,
+        "CT_skull_CompressedSegmentLabels_8Way_512x512_32u.raw": true,
+        "CT_skull_SegmentBoundaries_8Way_512x512_8u.raw": true,
+        "CT_skull_SegmentsWithContrastingBoundaries_8Way_512x512_8u.raw": true
+      },
+      "native_images_exact": {
+        "segments": true,
+        "boundaries": true,
+        "contrast": true
+      },
+      "marker_diagnostics": {
+        "classification": "DIAGNOSTIC_ONLY_ALGORITHM_VARIANT",
+        "project_regions": 1654,
+        "native_regions": 1650,
+        "exact_partition": false,
+        "project_regions_spanning_multiple_native": 0,
+        "native_regions_spanning_multiple_project": 4,
+        "matching_rule": "Greedy descending intersection pixel count; ties by canonical project then native first-pixel ID. Each region matched at most once; unmatched IoU=0. Not optimal matching.",
+        "matched_pairs": 1650,
+        "unmatched_project": 4,
+        "unmatched_native": 0,
+        "project_IoU": {
+          "macro_IoU": 0.9972055259227424,
+          "area_weighted_IoU": 0.9997265612520443,
+          "small_regions_1_to_64_pixels": 1453,
+          "small_region_macro_IoU": 0.9970406056434963,
+          "zero_IoU_regions": 4,
+          "minimum_IoU": 0.0
+        },
+        "native_IoU": {
+          "macro_IoU": 0.9996229938643733,
+          "area_weighted_IoU": 0.9998512268066406,
+          "small_regions_1_to_64_pixels": 1449,
+          "small_region_macro_IoU": 0.9997929606625259,
+          "zero_IoU_regions": 0,
+          "minimum_IoU": 0.8189655172413793
+        },
+        "adjacency": {
+          "directions": {
+            "horizontal": {
+              "edges": 261632,
+              "agree": 261618,
+              "project_splits_native_edge": 14,
+              "project_merges_native_edge": 0
+            },
+            "vertical": {
+              "edges": 261632,
+              "agree": 261629,
+              "project_splits_native_edge": 3,
+              "project_merges_native_edge": 0
+            },
+            "diagonal-down-right": {
+              "edges": 261121,
+              "agree": 261109,
+              "project_splits_native_edge": 12,
+              "project_merges_native_edge": 0
+            },
+            "diagonal-down-left": {
+              "edges": 261121,
+              "agree": 261108,
+              "project_splits_native_edge": 13,
+              "project_merges_native_edge": 0
+            }
+          },
+          "all_edges": 1045506,
+          "agreement": 0.9999598280641144
+        },
+        "contingency_csv": "original-CT_skull_512x512_8u_Gray.contingency.csv",
+        "one_to_one_csv": "original-CT_skull_512x512_8u_Gray.one-to-one.csv"
+      }
+    },
+    {
+      "input": "Rocks_512x512_8u_Gray.raw",
+      "products": {
+        "Rocks_Segments_8Way_512x512_8u.raw": true,
+        "Rocks_CompressedSegmentLabels_8Way_512x512_32u.raw": true,
+        "Rocks_SegmentBoundaries_8Way_512x512_8u.raw": true,
+        "Rocks_SegmentsWithContrastingBoundaries_8Way_512x512_8u.raw": true
+      },
+      "native_images_exact": {
+        "segments": true,
+        "boundaries": true,
+        "contrast": true
+      },
+      "marker_diagnostics": {
+        "classification": "DIAGNOSTIC_ONLY_ALGORITHM_VARIANT",
+        "project_regions": 8917,
+        "native_regions": 8905,
+        "exact_partition": false,
+        "project_regions_spanning_multiple_native": 1,
+        "native_regions_spanning_multiple_project": 13,
+        "matching_rule": "Greedy descending intersection pixel count; ties by canonical project then native first-pixel ID. Each region matched at most once; unmatched IoU=0. Not optimal matching.",
+        "matched_pairs": 8904,
+        "unmatched_project": 13,
+        "unmatched_native": 1,
+        "project_IoU": {
+          "macro_IoU": 0.9980446456959572,
+          "area_weighted_IoU": 0.9992038862345045,
+          "small_regions_1_to_64_pixels": 8023,
+          "small_region_macro_IoU": 0.9978267612702044,
+          "zero_IoU_regions": 13,
+          "minimum_IoU": 0.0
+        },
+        "native_IoU": {
+          "macro_IoU": 0.9993895682954351,
+          "area_weighted_IoU": 0.9994193875059789,
+          "small_regions_1_to_64_pixels": 8011,
+          "small_region_macro_IoU": 0.9993214462203034,
+          "zero_IoU_regions": 1,
+          "minimum_IoU": 0.0
+        },
+        "adjacency": {
+          "directions": {
+            "horizontal": {
+              "edges": 261632,
+              "agree": 261595,
+              "project_splits_native_edge": 32,
+              "project_merges_native_edge": 5
+            },
+            "vertical": {
+              "edges": 261632,
+              "agree": 261607,
+              "project_splits_native_edge": 23,
+              "project_merges_native_edge": 2
+            },
+            "diagonal-down-right": {
+              "edges": 261121,
+              "agree": 261105,
+              "project_splits_native_edge": 12,
+              "project_merges_native_edge": 4
+            },
+            "diagonal-down-left": {
+              "edges": 261121,
+              "agree": 261066,
+              "project_splits_native_edge": 51,
+              "project_merges_native_edge": 4
+            }
+          },
+          "all_edges": 1045506,
+          "agreement": 0.9998727888696957
+        },
+        "contingency_csv": "original-Rocks_512x512_8u_Gray.contingency.csv",
+        "one_to_one_csv": "original-Rocks_512x512_8u_Gray.one-to-one.csv"
+      }
+    },
+    {
+      "input": "Corn_614x461_8u_Gray.raw",
+      "products": {
+        "Corn_Segments_8Way_614x461_8u.raw": true,
+        "Corn_CompressedSegmentLabels_8Way_614x461_32u.raw": true,
+        "Corn_SegmentBoundaries_8Way_614x461_8u.raw": true,
+        "Corn_SegmentsWithContrastingBoundaries_8Way_614x461_8u.raw": true
+      },
+      "native_images_exact": {
+        "segments": true,
+        "boundaries": true,
+        "contrast": true
+      },
+      "marker_diagnostics": {
+        "classification": "DIAGNOSTIC_ONLY_ALGORITHM_VARIANT",
+        "project_regions": 16559,
+        "native_regions": 16538,
+        "exact_partition": false,
+        "project_regions_spanning_multiple_native": 13,
+        "native_regions_spanning_multiple_project": 34,
+        "matching_rule": "Greedy descending intersection pixel count; ties by canonical project then native first-pixel ID. Each region matched at most once; unmatched IoU=0. Not optimal matching.",
+        "matched_pairs": 16526,
+        "unmatched_project": 33,
+        "unmatched_native": 12,
+        "project_IoU": {
+          "macro_IoU": 0.9971168548436027,
+          "area_weighted_IoU": 0.9980532790831327,
+          "small_regions_1_to_64_pixels": 16335,
+          "small_region_macro_IoU": 0.9970773186014826,
+          "zero_IoU_regions": 33,
+          "minimum_IoU": 0.0
+        },
+        "native_IoU": {
+          "macro_IoU": 0.9983829966958049,
+          "area_weighted_IoU": 0.9985377886532455,
+          "small_regions_1_to_64_pixels": 16313,
+          "small_region_macro_IoU": 0.998380616646553,
+          "zero_IoU_regions": 12,
+          "minimum_IoU": 0.0
+        },
+        "adjacency": {
+          "directions": {
+            "horizontal": {
+              "edges": 282593,
+              "agree": 282496,
+              "project_splits_native_edge": 75,
+              "project_merges_native_edge": 22
+            },
+            "vertical": {
+              "edges": 282440,
+              "agree": 282374,
+              "project_splits_native_edge": 53,
+              "project_merges_native_edge": 13
+            },
+            "diagonal-down-right": {
+              "edges": 281980,
+              "agree": 281931,
+              "project_splits_native_edge": 30,
+              "project_merges_native_edge": 19
+            },
+            "diagonal-down-left": {
+              "edges": 281980,
+              "agree": 281842,
+              "project_splits_native_edge": 106,
+              "project_merges_native_edge": 32
+            }
+          },
+          "all_edges": 1128993,
+          "agreement": 0.9996899892204824
+        },
+        "contingency_csv": "original-Corn_614x461_8u_Gray.contingency.csv",
+        "one_to_one_csv": "original-Corn_614x461_8u_Gray.one-to-one.csv"
+      }
+    }
+  ],
+  "evidence_references": [
+    "migration/reports/evidence/rewrite/I3/watershed-immutable-specification-binding/20261113T070530.609489Z-I3-CPU-contract-38b9febfbe",
+    "migration/reports/evidence/rewrite/I3/watershed-complete-original-entry-build/20261113T072739.781617Z-I3-rocm-build-2737303ea2",
+    "migration/reports/evidence/rewrite/I3/NPP__watershedSegmentation__watershedSegmentationNPPPlus.cpp/20261113T073042.848217Z-I3-rocm-complete-original-entry-0b68df1ab8",
+    "migration/reports/evidence/rewrite/I3/watershed-complete-native-NPP/20261113T070543.763422Z-I3-cuda-e59af1fe2d",
+    "migration/reports/evidence/rewrite/I3/watershed-complete-native-NPPPlus/20261113T070709.920949Z-I3-cuda-6e2195f30e"
+  ],
+  "scope": "Every product from the actual original-format program; CPU exact. All original images also match native image modes exactly; marker partitions use the declared graph variant."
+}

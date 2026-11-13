@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+"""Independent watershed oracle: height-ordered descent and SCC condensation DAG."""
+from collections import deque
+import numpy as np
+from scipy.sparse import coo_matrix
+from scipy.sparse.csgraph import connected_components
+
+def adjacent(shape):
+    h,w=shape
+    for dy in (-1,0,1):
+        for dx in (-1,0,1):
+            if not (dy or dx):continue
+            y0,y1=max(0,-dy),min(h,h-dy);x0,x1=max(0,-dx),min(w,w-dx)
+            yield np.s_[y0:y1,x0:x1],np.s_[y0+dy:y1+dy,x0+dx:x1+dx]
+
+def reference(image):
+    h,w=image.shape;n=h*w;indices=np.arange(n,dtype=np.int32).reshape(h,w)
+    parent=indices.copy();lowest=image.copy()
+    for dst,src in adjacent(image.shape):
+        smaller=image[src]<lowest[dst];lowest[dst][smaller]=image[src][smaller];parent[dst][smaller]=indices[src][smaller]
+    parent=parent.ravel();flat=image.ravel();roots=np.arange(n,dtype=np.int32)
+    # Parents have strictly smaller heights. Their roots are already available.
+    for value in np.unique(flat):
+        nodes=np.flatnonzero(flat==value);roots[nodes]=roots[parent[nodes]]
+    seeds=np.flatnonzero(parent==np.arange(n));seed_index=np.full(n,-1,np.int32);seed_index[seeds]=np.arange(len(seeds))
+    root_image=roots.reshape(h,w);gray=flat[roots].reshape(h,w);u=[];v=[];is_seed=(parent==np.arange(n)).reshape(h,w)
+    for dst,src in adjacent(image.shape):
+        take=is_seed[dst]&(gray[dst]==gray[src]);u.append(seed_index[indices[dst][take]]);v.append(seed_index[root_image[src][take]])
+    u=np.concatenate(u);v=np.concatenate(v);graph=coo_matrix((np.ones(len(u),np.uint8),(u,v)),shape=(len(seeds),len(seeds))).tocsr()
+    count,component=connected_components(graph,directed=True,connection='strong')
+    minimum=np.full(count,n,np.int32);np.minimum.at(minimum,component,seeds)
+    a,b=component[u],component[v];take=a!=b;arcs=np.unique(np.stack([a[take],b[take]],axis=1),axis=0)
+    outgoing=np.bincount(arcs[:,0],minlength=count);reverse=coo_matrix((np.ones(len(arcs),np.uint8),(arcs[:,1],arcs[:,0])),shape=(count,count)).tocsr()
+    queue=deque(np.flatnonzero(outgoing==0).tolist());visited=0
+    while queue:
+        c=queue.popleft();visited+=1
+        for previous in reverse.indices[reverse.indptr[c]:reverse.indptr[c+1]]:
+            minimum[previous]=min(minimum[previous],minimum[c]);outgoing[previous]-=1
+            if outgoing[previous]==0:queue.append(int(previous))
+    if visited!=count:raise ValueError('condensation graph cycle')
+    labels=minimum[component[seed_index[roots]]].reshape(h,w)
+    _,inverse=np.unique(labels,return_inverse=True);compact=inverse.reshape(h,w).astype('<u4')
+    boundary=np.zeros((h,w),bool);boundary[1:]|=gray[1:]!=gray[:-1];boundary[:,1:]|=gray[:,1:]!=gray[:,:-1]
+    outputs={'segments':gray,'labels':labels.astype('<u4'),'compact':compact,
+             'boundaries':np.where(boundary,0,255).astype(np.uint8),
+             'contrast':np.where(boundary,np.where(gray<128,255,0),gray).astype(np.uint8),
+             'black':np.where(boundary,0,gray).astype(np.uint8),'white':np.where(boundary,255,gray).astype(np.uint8)}
+    return outputs,dict(roots=root_image,seeds=seeds,seed_components=count,directed_edges=len(u))
+
+def topology(labels,gray):
+    h,w=labels.shape;n=h*w;indices=np.arange(n,dtype=np.int32).reshape(h,w);u=[];v=[]
+    for dst,src in adjacent(labels.shape):
+        same=labels[dst]==labels[src];u.append(indices[dst][same]);v.append(indices[src][same])
+    u=np.concatenate(u);v=np.concatenate(v);graph=coo_matrix((np.ones(len(u),np.uint8),(u,v)),shape=(n,n)).tocsr()
+    components,_=connected_components(graph,directed=False);values,inverse=np.unique(labels.ravel(),return_inverse=True)
+    lo=np.full(len(values),255,np.uint8);hi=np.zeros(len(values),np.uint8);np.minimum.at(lo,inverse,gray.ravel());np.maximum.at(hi,inverse,gray.ravel())
+    return dict(regions=len(values),connected_components=components,all_regions_connected=components==len(values),all_regions_constant_gray=bool(np.all(lo==hi)))

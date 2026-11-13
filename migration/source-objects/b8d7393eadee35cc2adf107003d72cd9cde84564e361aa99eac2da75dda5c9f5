@@ -1,0 +1,42 @@
+# IMG-02：Watershed 完整入口实施记录
+
+状态：IN_PROGRESS。两个原入口仍为 PARTIAL；下述新模型尚未作为生产 GPU 实现签发资格。
+
+## 已确定的图像语义
+
+原生 NPP 13.2.0 与 NPP+ 12.4.0 在 5090 物理 GPU1 上各运行 18 个小输入、4/8 两种邻域、五种边界模式、三种 scratch 初值，共各 540 次调用、1080 件产品。返回状态与 padding 均正常；重复结果及两库结果一致。该结论限定此次输入，不能推断所有尺寸/调度均确定。
+
+八邻域分割灰度可由独立严格下降森林复现：只选择比本像素严格更低的邻居；最低高度相同时按行优先，随后沿固定下降方向到终点。不让平台内部像素无条件沿等高方向流到平台出口。18 个小输入及 6 张原始大图的灰度全部逐像素一致。
+
+五种原生边界模式的图像输出也已定位：用最终灰度与上方、左方像素比较生成边界；NONE 保持灰度、BLACK/WHITE 分别置 0/255、ONLY 黑边白底、CONTRAST 在边界以灰度 `<128` 选白，否则选黑。18 个小输入及 NPP+ 三张原图的 ONLY/CONTRAST 全部逐字节复现。边界依据灰度，不能用任意八邻域标签差异代替。
+
+| 研究 | 结论/证据 |
+| --- | --- |
+| 原生重复与双库核对 | [semantic reference](image-watershed-semantics-reference.json) |
+| 严格下降 tie 顺序、原图 | [tie research](image-watershed-tie-research.json) |
+| 输出灰度连通块 | [label topology](image-watershed-label-research.json)：灰度相同不能自动合并全部 marker |
+| 无向标签等价图 | [seed graph](image-watershed-seed-graph-research.json)：会过合并，不能直接采用 |
+| 有向最小标签不动点 | [directed model](image-watershed-directed-labels-research.json) |
+| 边界规则及原图 | [gray boundary](image-watershed-gray-boundary-research.json) |
+| 编号来源/瞬态更新 | [label origin](image-watershed-label-origin-research.json)、[cell update](image-watershed-cell-labels-research.json)：仍不能宣称原生分区完全一致 |
+
+## Marker 标签的剩余差异
+
+已测原生标签并不总是一标签一灰度：六原图分别有 2、11、37、39、46、25 个 marker 同时包含不同分割灰度。只凭这一观察不能断言厂商缺陷；可能与其标签初始化、更新或复用规则有关，后续报告保留这些事实。
+
+一个不依赖厂商编号的确定性候选是：固定上述严格下降森林；终点可以接收相邻像素最终下降终点的标签，但仅当最终灰度相同；反复取自身及这些有向可达终点的最小行优先索引，再把标签传回下降森林。每个标签保持单一灰度，ID 是有意义的图论规格，不依赖 scratch 初值或线程更新顺序。
+
+此候选在六原图上的 marker 上/左差异 OR 边界掩码一致率为 99.9295%–99.9950%，按候选区域多数映射的像素一致率为 99.9530%–100%；18 个小输入中 17 个分区完全一致，量化随机输入上述 OR 掩码一致率 98.3550%、多数映射像素一致率 97.9221%。OR 掩码不是逐邻接关系：两个方向的变化可能互相掩盖。独立复审已指出此命名问题，正式统计改为分别计数水平、垂直及对角边，旧 JSON 指标保留并注明。上述均为开发测量，**不是已经冻结的通过阈值**。多数映射也不等于一一匹配，正式报告必须同时检查合并和拆分。
+
+独立合同复审确认可以采用明确的 ALGORITHM_VARIANT：图像灰度及全部边界模式与原生 EXACT，marker 采用上述公开确定性图规则，与独立 CPU 精确核对，同时检查每个区域的八连通、恒定灰度、下降/向前可达关系、逐边邻接及压紧标签双射。**marker 区域划分会变化，不仅是编号变化，不宣传厂商分区等价。** 原生 marker 的合并/拆分、完整交叉计数、一对一匹配及未匹配惩罚、逐区域 IoU、小区/宏平均/面积加权差异作为兼容性诊断，不能仅用全图相似度掩盖问题。新保留输入和必需反向检查在下一轮运行前冻结；源图/边界的 EXACT 门槛不放宽。
+
+隔离 HIP 核心已完成18开发输入的 padded/ROI 执行，独立 CPU 改用强连通分量缩点和 DAG 可达最小值求解，避免复用 GPU 迭代。首次验证工具在读取 `run.json` 时误用 `result.json` 默认值，修复前失败和恢复均保留；正式资格尚未签发。
+
+## 接续工作
+
+1. 评审并冻结候选完整合同、保留输入与反向检查；原生分区精确与算法变体必须区分。
+2. HIP 生产实现与独立图论 CPU oracle；ROI、pitch、padding、容量、资源和失败行为检查。
+3. 两个原入口全部 8 次原图使用/22 件产品、GPU trace、变化输入、冷构建和复合资格。
+4. 通过后逐项更新主表与支持日志；此前维持图像 14/26、全项目 253 PASSED。
+
+原始失败仍见 [旧 Watershed 报告](image-watershed.md)。所有实验、源快照与命令由 `Experiment` 记录，实时计划在 [image-completion-plan.md](../image-completion-plan.md)。

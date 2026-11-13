@@ -109,11 +109,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-13T06:31:03.285983+00:00。26入口当前14通过/8部分/4失败。
+更新时间：2026-11-13T07:44:32.543684+00:00。26入口当前14通过/8部分/4失败。
 
-I5：IMG-01：最终发布检查通过：866原始源码/477构建保持、43个整例重写当前证明和2个resize PARTIAL证明通过、6966实验封存审计无未结束项；首页253/23/363、132功能族、图像14/26。下一步IMG-02。
+I3：IMG-02：两原入口22产品、真实GPU trace、变化输入独立CPU重算、8次文件IO失败流程已完成；独立复审关闭严格三输入NPP+例外的验证器问题，准备固定提交冷检出。
 
-证据：`migration/reports/image-completion-IMG-01-checkpoint.json`
+证据：`migration/reports/image-watershed-completion-entry-trace.json`；`migration/reports/image-watershed-completion-replay-reference.json`；`migration/reports/image-watershed-completion-entry-negative.json`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

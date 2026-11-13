@@ -1,0 +1,169 @@
+// SPDX-License-Identifier: Apache-2.0
+// Deterministic strict descent and directed regional-minimum marker propagation.
+#pragma once
+#include <hip/hip_runtime.h>
+#include <cstdint>
+#include <cstddef>
+#include <climits>
+#include <limits>
+#include <initializer_list>
+#include <utility>
+
+namespace image_watershed_v2 {
+constexpr unsigned block_size=256;
+struct ByteView {uint8_t* data=nullptr;size_t pitch=0;};
+struct LabelView {uint32_t* data=nullptr;size_t pitch=0;};
+struct Outputs {
+  ByteView segments,boundaries,contrast,black,white;
+  LabelView labels,compact;
+};
+struct Workspace {
+  uint32_t *parent=nullptr,*roots=nullptr,*markers=nullptr,*next=nullptr;
+  uint32_t *flags=nullptr,*prefix=nullptr,*offsets=nullptr,*changed=nullptr;
+  uint8_t* gray=nullptr;
+  Workspace()=default;
+  Workspace(const Workspace&)=delete;
+  Workspace& operator=(const Workspace&)=delete;
+  ~Workspace(){hipFree(parent);hipFree(roots);hipFree(markers);hipFree(next);
+    hipFree(flags);hipFree(prefix);hipFree(offsets);hipFree(changed);hipFree(gray);}
+};
+inline bool extent(size_t pitch,size_t row,int height){
+  return pitch>=row && size_t(height-1)<=(std::numeric_limits<size_t>::max()-row)/pitch;
+}
+__device__ inline void put(ByteView view,int x,int y,uint8_t value){
+  if(view.data)view.data[size_t(y)*view.pitch+x]=value;
+}
+__device__ inline void put(LabelView view,int x,int y,uint32_t value){
+  if(view.data)*reinterpret_cast<uint32_t*>(reinterpret_cast<uint8_t*>(view.data)+size_t(y)*view.pitch+size_t(x)*4)=value;
+}
+__global__ void descend(const uint8_t* input,size_t pitch,uint32_t* parent,
+                        uint32_t* markers,int w,int h){
+  size_t i=size_t(blockIdx.x)*blockDim.x+threadIdx.x,n=size_t(w)*h;if(i>=n)return;
+  int x=int(i%w),y=int(i/w);uint8_t best=input[size_t(y)*pitch+x];uint32_t p=uint32_t(i);
+  for(int dy=-1;dy<=1;++dy)for(int dx=-1;dx<=1;++dx){
+    int xx=x+dx,yy=y+dy;if(xx<0||yy<0||xx>=w||yy>=h)continue;
+    uint8_t value=input[size_t(yy)*pitch+xx];
+    if(value<best){best=value;p=uint32_t(size_t(yy)*w+xx);}
+  }
+  parent[i]=p;markers[i]=uint32_t(i);
+}
+__global__ void root_jump(const uint32_t* parent,uint32_t* next,size_t n){
+  size_t i=size_t(blockIdx.x)*blockDim.x+threadIdx.x;if(i<n)next[i]=parent[parent[i]];
+}
+__global__ void root_gray(const uint8_t* input,size_t pitch,const uint32_t* roots,
+                          uint8_t* gray,int w,size_t n){
+  size_t i=size_t(blockIdx.x)*blockDim.x+threadIdx.x;if(i<n){uint32_t root=roots[i];
+    gray[i]=input[size_t(root/w)*pitch+root%w];}
+}
+__global__ void relax_markers(const uint32_t* roots,const uint8_t* gray,
+                              const uint32_t* markers,uint32_t* next,
+                              uint32_t* changed,int w,int h){
+  size_t i=size_t(blockIdx.x)*blockDim.x+threadIdx.x,n=size_t(w)*h;if(i>=n)return;
+  uint32_t best=markers[i];
+  if(roots[i]==i){
+    // Every tag is itself a reachable terminal minimum. Jumping its tag is safe.
+    uint32_t reachable=markers[best];if(reachable<best)best=reachable;
+    int x=int(i%w),y=int(i/w);
+    for(int dy=-1;dy<=1;++dy)for(int dx=-1;dx<=1;++dx){
+      int xx=x+dx,yy=y+dy;if(xx<0||yy<0||xx>=w||yy>=h)continue;
+      size_t j=size_t(yy)*w+xx;
+      if(gray[j]==gray[i]){uint32_t tag=markers[roots[j]];if(tag<best)best=tag;}
+    }
+  }
+  next[i]=best;if(best!=markers[i])atomicOr(changed,1u);
+}
+__global__ void mark_used(const uint32_t* roots,const uint32_t* markers,
+                          uint32_t* flags,size_t n){
+  size_t i=size_t(blockIdx.x)*blockDim.x+threadIdx.x;if(i<n)atomicOr(flags+markers[roots[i]],1u);
+}
+__global__ void scan_blocks(const uint32_t* flags,uint32_t* prefix,uint32_t* offsets,size_t n){
+  __shared__ uint32_t values[block_size];unsigned t=threadIdx.x;
+  size_t i=size_t(blockIdx.x)*block_size+t;values[t]=i<n?flags[i]:0;__syncthreads();
+  for(unsigned delta=1;delta<block_size;delta*=2){uint32_t add=t>=delta?values[t-delta]:0;
+    __syncthreads();values[t]+=add;__syncthreads();}
+  if(i<n)prefix[i]=values[t];if(t==block_size-1)offsets[blockIdx.x]=values[t];
+}
+__global__ void scan_offsets(uint32_t* offsets,unsigned count){
+  if(blockIdx.x||threadIdx.x)return;uint32_t sum=0;
+  for(unsigned i=0;i<count;++i){uint32_t v=offsets[i];offsets[i]=sum;sum+=v;}
+}
+__global__ void render(const uint32_t* roots,const uint32_t* markers,const uint8_t* gray,
+                       const uint32_t* prefix,const uint32_t* offsets,
+                       Outputs outputs,int w,int h){
+  size_t i=size_t(blockIdx.x)*blockDim.x+threadIdx.x,n=size_t(w)*h;if(i>=n)return;
+  int x=int(i%w),y=int(i/w);uint8_t value=gray[i];uint32_t tag=markers[roots[i]];
+  bool boundary=(x&&value!=gray[i-1])||(y&&value!=gray[i-w]);
+  put(outputs.segments,x,y,value);put(outputs.labels,x,y,tag);
+  if(outputs.compact.data)put(outputs.compact,x,y,offsets[tag/block_size]+prefix[tag]-1);
+  put(outputs.boundaries,x,y,boundary?0:255);
+  put(outputs.contrast,x,y,boundary?(value<128?255:0):value);
+  put(outputs.black,x,y,boundary?0:value);put(outputs.white,x,y,boundary?255:value);
+}
+
+// All non-null output views must be mutually disjoint. Input may alias segments:
+// the full source-dependent calculation finishes before the render kernel.
+inline hipError_t run(const uint8_t* input,size_t input_pitch,Outputs outputs,
+                       int width,int height,hipStream_t stream=nullptr){
+  if(!input||!outputs.segments.data||width<=0||height<=0||
+     width>INT_MAX/height||!extent(input_pitch,size_t(width),height))return hipErrorInvalidValue;
+  if(uintptr_t(input)>std::numeric_limits<uintptr_t>::max()-(size_t(height-1)*input_pitch+size_t(width)))return hipErrorInvalidValue;
+  for(ByteView view:{outputs.segments,outputs.boundaries,outputs.contrast,outputs.black,outputs.white})
+    if(view.data&&!extent(view.pitch,size_t(width),height))return hipErrorInvalidValue;
+  for(LabelView view:{outputs.labels,outputs.compact})
+    if(view.data&&(!extent(view.pitch,size_t(width)*4,height)||view.pitch%4||uintptr_t(view.data)%4))return hipErrorInvalidValue;
+  struct Range{uintptr_t first,last;};Range ranges[7];unsigned nr=0;
+  auto range=[&](void* p,size_t pitch,size_t row){
+    if(!p)return true;size_t bytes=size_t(height-1)*pitch+row;uintptr_t first=uintptr_t(p);
+    if(first>std::numeric_limits<uintptr_t>::max()-bytes)return false;
+    uintptr_t last=first+bytes;for(unsigned k=0;k<nr;++k)if(first<ranges[k].last&&ranges[k].first<last)return false;
+    ranges[nr++]={first,last};return true;
+  };
+  for(ByteView view:{outputs.segments,outputs.boundaries,outputs.contrast,outputs.black,outputs.white})
+    if(!range(view.data,view.pitch,size_t(width)))return hipErrorInvalidValue;
+  for(LabelView view:{outputs.labels,outputs.compact})
+    if(!range(view.data,view.pitch,size_t(width)*4))return hipErrorInvalidValue;
+  size_t n=size_t(width)*height;unsigned blocks=unsigned((n-1)/block_size+1);Workspace work;
+  hipError_t status=hipSuccess;
+  auto allocate=[&](auto*& pointer,size_t bytes){if(status==hipSuccess)status=hipMalloc(reinterpret_cast<void**>(&pointer),bytes);};
+  allocate(work.parent,n*4);allocate(work.roots,n*4);allocate(work.markers,n*4);
+  allocate(work.next,n*4);allocate(work.changed,4);allocate(work.gray,n);
+  if(outputs.compact.data){allocate(work.flags,n*4);allocate(work.prefix,n*4);allocate(work.offsets,size_t(blocks)*4);}
+  if(status!=hipSuccess)return status;
+  descend<<<blocks,block_size,0,stream>>>(input,input_pitch,work.parent,work.markers,width,height);
+  status=hipGetLastError();
+  // 8-bit strict descent has at most 255 edges, independent of image dimensions.
+  for(unsigned i=0;i<8&&status==hipSuccess;++i){
+    root_jump<<<blocks,block_size,0,stream>>>(work.parent,work.roots,n);
+    status=hipGetLastError();std::swap(work.parent,work.roots);
+  }
+  if(status==hipSuccess){root_gray<<<blocks,block_size,0,stream>>>(input,input_pitch,work.parent,work.gray,width,n);status=hipGetLastError();}
+  uint32_t changed=1;size_t rounds=0;
+  while(status==hipSuccess&&changed&&rounds<n){
+    status=hipMemsetAsync(work.changed,0,4,stream);
+    unsigned count=unsigned(n-rounds<8?n-rounds:8);
+    for(unsigned k=0;k<count&&status==hipSuccess;++k){
+      relax_markers<<<blocks,block_size,0,stream>>>(work.parent,work.gray,work.markers,work.next,work.changed,width,height);
+      status=hipGetLastError();std::swap(work.markers,work.next);++rounds;
+    }
+    if(status==hipSuccess)status=hipMemcpyAsync(&changed,work.changed,4,hipMemcpyDeviceToHost,stream);
+    hipError_t synced=hipStreamSynchronize(stream);if(status==hipSuccess)status=synced;
+  }
+  // A complete pass without changes is required; an exhausted bound is a failure.
+  if(status==hipSuccess&&changed){
+    status=hipMemsetAsync(work.changed,0,4,stream);
+    if(status==hipSuccess){relax_markers<<<blocks,block_size,0,stream>>>(work.parent,work.gray,work.markers,work.next,work.changed,width,height);status=hipGetLastError();}
+    if(status==hipSuccess)status=hipMemcpyAsync(&changed,work.changed,4,hipMemcpyDeviceToHost,stream);
+    hipError_t synced=hipStreamSynchronize(stream);if(status==hipSuccess)status=synced;
+    if(status==hipSuccess&&changed)status=hipErrorUnknown;
+  }
+  if(status==hipSuccess&&outputs.compact.data){
+    status=hipMemsetAsync(work.flags,0,n*4,stream);
+    if(status==hipSuccess){mark_used<<<blocks,block_size,0,stream>>>(work.parent,work.markers,work.flags,n);status=hipGetLastError();}
+    if(status==hipSuccess){scan_blocks<<<blocks,block_size,0,stream>>>(work.flags,work.prefix,work.offsets,n);status=hipGetLastError();}
+    if(status==hipSuccess){scan_offsets<<<1,1,0,stream>>>(work.offsets,blocks);status=hipGetLastError();}
+  }
+  if(status==hipSuccess){render<<<blocks,block_size,0,stream>>>(work.parent,work.markers,work.gray,work.prefix,work.offsets,outputs,width,height);status=hipGetLastError();}
+  hipError_t synced=hipStreamSynchronize(stream);if(status==hipSuccess)status=synced;
+  return status;
+}
+} // namespace image_watershed_v2

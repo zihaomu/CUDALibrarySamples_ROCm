@@ -1,0 +1,95 @@
+{
+  "status": "FROZEN_AMENDMENT",
+  "amendment_id": "NPPPlus-12.4-monotone-three-inputs-v1",
+  "base_contract_sha256": "d7738c2043e7a1161819aa4d0bf649ff78073993e57484c5d46607509568a19f",
+  "exceptions": [
+    {
+      "id": "heldout-ramp-x",
+      "width": 67,
+      "height": 65,
+      "sha256": "84ba7c36b597cbca3e72465bc89f2c9b8487a2acdb162ae6e7efba1c2ad38fd5",
+      "vendor": "NPPPlus",
+      "library_version": "12.4.0",
+      "modes": [
+        "segments",
+        "black",
+        "white",
+        "contrast",
+        "boundaries"
+      ],
+      "repeat_ids": [
+        0,
+        1
+      ],
+      "null_marker_modes": [
+        "contrast",
+        "boundaries"
+      ]
+    },
+    {
+      "id": "heldout-ramp-y",
+      "width": 67,
+      "height": 65,
+      "sha256": "f9aeee978fe5ab66021b1f5b2c806e098d319da1eb374110f024120d811c8e86",
+      "vendor": "NPPPlus",
+      "library_version": "12.4.0",
+      "modes": [
+        "segments",
+        "black",
+        "white",
+        "contrast",
+        "boundaries"
+      ],
+      "repeat_ids": [
+        0,
+        1
+      ],
+      "null_marker_modes": [
+        "contrast",
+        "boundaries"
+      ]
+    },
+    {
+      "id": "heldout-ramp-diagonal",
+      "width": 67,
+      "height": 65,
+      "sha256": "70fbeca074df400680e4ea8ff9e9bea363fd407c5f2792c785ee654a26988428",
+      "vendor": "NPPPlus",
+      "library_version": "12.4.0",
+      "modes": [
+        "segments",
+        "black",
+        "white",
+        "contrast",
+        "boundaries"
+      ],
+      "repeat_ids": [
+        0,
+        1
+      ],
+      "null_marker_modes": [
+        "contrast",
+        "boundaries"
+      ]
+    }
+  ],
+  "original_strict_evidence": "migration/reports/evidence/rewrite/I3/watershed-full-SCC-CPU-native-padded/20261113T073209.567167Z-I3-CPU-reference-5277964a92",
+  "diagnostic_evidence": "migration/reports/evidence/rewrite/I3/watershed-monotone-native-independent-reference/20261113T073020.628950Z-I3-CPU-reference-437904054d",
+  "policy": "CPU and NPP remain EXACT for every input; NPPPlus remains EXACT for the other57 inputs. The three named NPPPlus comparisons remain NATIVE_MISMATCH; no pixel tolerance or additional implicit exception.",
+  "justification": "Every nonzero pixel in each identified image has a strictly lower neighbor and all terminal minima are zero. Strict descent must terminate at zero. Independent CPU, actual HIP and NPP agree. NPPPlus has measured nonzero residuals in both pitches; repeated calls still change them. No claim about proprietary internal cause.",
+  "required_gates": [
+    "sealed original strict NUMERIC_MISMATCH retained",
+    "exact input ID/dimensions/SHA and NPPPlus12.4.0",
+    "analytic terminal-minimum-zero invariant",
+    "every CPU product exact",
+    "all12 corresponding NPP image products exact",
+    "bound24 analytic confirmation inputs, complete products, both native pitches, native call/padding success, cross-pitch identity and nonincreasing changing NPPPlus chains",
+    "reject fourth exception, same-name replacement, false analytic invariant, failed second native oracle"
+  ],
+  "review": "Independent MOAT review accepted the direction subject to these automatic gates. The24 extra inputs were frozen before diagnostic execution, not blind tests created after this amendment.",
+  "evidence_references": [
+    "migration/reports/evidence/rewrite/I3/watershed-immutable-specification-binding/20261113T070530.609489Z-I3-CPU-contract-38b9febfbe",
+    "migration/reports/evidence/rewrite/I3/watershed-full-SCC-CPU-native-padded/20261113T073209.567167Z-I3-CPU-reference-5277964a92",
+    "migration/reports/evidence/rewrite/I3/watershed-monotone-native-independent-reference/20261113T073020.628950Z-I3-CPU-reference-437904054d"
+  ]
+}

@@ -1,0 +1,20 @@
+Traceback (most recent call last):
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/tools/moat/image_watershed_v2_reference.py", line 39, in <module>
+    p=argparse.ArgumentParser();p.add_argument('--mode',default='padded');a=p.parse_args();raise SystemExit(main(a.mode))
+                                                                                                            ^^^^^^^^^^^^
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/tools/moat/image_watershed_v2_reference.py", line 19, in main
+    pp=ROOT/'migration/rewrite/image-watershed-semantics-profile.json';profile=json.loads(pp.read_text());rp=ROOT/f'migration/reports/image-watershed-v2-development-{mode}.json';run=json.loads(rp.read_text());npth=ROOT/'migration/reports/image-watershed-semantics-NPP.json';native=json.loads(npth.read_text());raw=bound(run);nr=bound(native)
+                                                                                                                                                                                                                                                                                                                          ^^^^^^^^^^
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/tools/moat/image_watershed_v2_reference.py", line 12, in bound
+    proof=sealed(row);manifest=json.loads((proof/'manifest.json').read_text());raw=ROOT/manifest['raw_artifact_dir']/'outputs';seal=json.loads((proof/'sealed.json').read_text())['files']
+          ^^^^^^^^^^^
+  File "/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/tools/moat/image_encoder_math_binding.py", line 12, in sealed
+    if audit_check(path) or json.loads((path/filename).read_text())!={k:v for k,v in row.items() if k!='evidence'}:raise ValueError('sealed record identity')
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/pathlib.py", line 1029, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/pathlib.py", line 1015, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/zihaomu/zihaomu_workspace/cuda_libraray_sample_workspace_migra/CUDALibrarySamples_ROCm/migration/reports/evidence/rewrite/I3/watershed-directed-marker-development-padded/20261113T065740.825713Z-I3-rocm-bab2c49ed4/result.json'

@@ -2,7 +2,8 @@
   "status": "IN_PROGRESS",
   "stages": {
     "IMG-00": "IN_PROGRESS",
-    "IMG-01": "COMPLETED"
+    "IMG-01": "COMPLETED",
+    "IMG-02": "IN_PROGRESS"
   },
   "events": [
     {
@@ -20718,7 +20719,648 @@
       "evidence": [
         "migration/reports/image-completion-IMG-01-checkpoint.json"
       ]
+    },
+    {
+      "time": "2026-11-13T06:32:15.175175+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "冻结18个Watershed语义输入：平台、双盆地/鞍点、等高连接、阶梯、边缘种子及单行列；先观察两种邻域/5输出模式/3scratch初始化与padding，未设AMD通过门槛。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-native-semantic-input-contract/20261113T063213.949222Z-I3-CPU-contract-54ba4945ee"
+      ]
+    },
+    {
+      "time": "2026-11-13T06:32:18.910335+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "NPP18个小输入语义观察：FAILED，原始API返回/重复scratch/padding和全部产品保留，下一步建立独立规则模型。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-small-semantics-NPP/20261113T063215.783787Z-I3-cuda-observation-509565cf81"
+      ]
+    },
+    {
+      "time": "2026-11-13T06:33:00.680070+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "NPP18个小输入语义观察：OBSERVED，原始API返回/重复scratch/padding和全部产品保留，下一步建立独立规则模型。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-small-semantics-NPP/20261113T063253.055945Z-I3-cuda-observation-a5f0956545"
+      ]
+    },
+    {
+      "time": "2026-11-13T06:33:08.529731+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "NPPPlus18个小输入语义观察：OBSERVED，原始API返回/重复scratch/padding和全部产品保留，下一步建立独立规则模型。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-small-semantics-NPPPlus/20261113T063301.291925Z-I3-cuda-observation-4d2d7f25c8"
+      ]
+    },
+    {
+      "time": "2026-11-13T06:35:18.631968+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "18个输入/两邻域语义比对完成：工作区初值重复、5边界模式标签分区及两SDK结果均逐项记录；同时定位旧局部下降模型差异，不据原生观察新增资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-native-repeatability-and-descent-diagnosis/20261113T063517.276807Z-I3-CPU-observation-669dff86fc"
+      ]
+    },
+    {
+      "time": "2026-11-13T06:37:36.144451+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "严格下降/平台连通两个CPU模型已对18输入×2邻域作72次原生比较；依据实际输出检验平台内部是否保持独立区域，不沿用旧浸没假设，也不提前签发算法变体资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-strict-descent-plateau-component-models/20261113T063734.861469Z-I3-CPU-research-8d85b06fac"
+      ]
+    },
+    {
+      "time": "2026-11-13T06:39:22.470981+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "单独核查原生输出灰度连通块与marker分区关系，避免把恒定输出灰度等同于区域标签；18×2×2组拓扑观察封存。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-native-segment-label-topology/20261113T063921.224269Z-I3-CPU-research-36f48d2a1d"
+      ]
+    },
+    {
+      "time": "2026-11-13T06:43:47.300498+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "严格下降的17种邻居tie顺序对18小输入和6原始大图逐一测量，独立统计候选盆地被原生拆分/合并，判断差异是否仅由tie或平台连通造成。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-downhill-ties-and-original-image-diagnosis/20261113T064315.335359Z-I3-CPU-research-57d023135c"
+      ]
+    },
+    {
+      "time": "2026-11-13T06:44:12.000101+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "在严格下降灰度模型外，独立检验邻域最小值图上的区域标签合并；18小输入/6原图、一次及两次邻域运算分别测量，不以研究模型预记支持。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-one-step-neighborhood-minimum-label-model/20261113T064406.879744Z-I3-CPU-research-ee3c5e1549"
+      ]
+    },
+    {
+      "time": "2026-11-13T06:45:06.816240+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "原生6大图灰度已与严格下降模型100%一致、差异仅为盆地合并；进一步冻结研究终点邻居的原值/初次最小值/最终最小值三类标签等价图并逐项比较。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-terminal-minimum-neighbor-label-graph/20261113T064502.305384Z-I3-CPU-research-13c32ade66"
+      ]
+    },
+    {
+      "time": "2026-11-13T06:46:12.529295+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "标签传播改用有向最小标签不动点模型，与先前无向连通合并分开比较；全部18小输入和6原图的灰度/分区/合并拆分及收敛轮数封存。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-directed-minimum-label-propagation/20261113T064603.508464Z-I3-CPU-research-c402941982"
+      ]
+    },
+    {
+      "time": "2026-11-13T06:47:08.615099+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "五种原生边界输出分离验证：由BLACK/WHITE模式提取真实边界，枚举8邻域方向谓词，分别核查ONLY极性和CONTRAST灰度映射。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-native-boundary-mode-predicates/20261113T064707.298474Z-I3-CPU-research-6a71c08549"
+      ]
+    },
+    {
+      "time": "2026-11-13T06:48:22.073616+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "原生边界观察显示采用分割灰度上/左比较、CONTRAST按128阈值取黑白；在18小输入及NPP+全部原图独立验证，同时统计有向标签模型的局部边界和逐盆地误差。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-gray-boundaries-and-label-consistency/20261113T064817.553405Z-I3-CPU-research-cb56a942bd"
+      ]
+    },
+    {
+      "time": "2026-11-13T06:49:57.540273+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "单行原生marker比下降根索引小1，进一步独立测试邻域左上角坐标/边缘钳位对标签编号及跨灰度别名的解释；保留原始标签差值分布。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-marker-coordinate-origin-hypothesis/20261113T064954.335130Z-I3-CPU-research-197626c8f5"
+      ]
+    },
+    {
+      "time": "2026-11-13T06:52:08.354910+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "独立同步细胞更新模型检查中间高度对marker最小编号的影响；18小输入/6原图及四种初始化分别封存，继续区分稳定灰度与瞬态标签传播。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-transient-cell-label-propagation/20261113T065053.983980Z-I3-CPU-research-1db0dc95cd"
+      ]
+    },
+    {
+      "time": "2026-11-13T06:53:02.560156+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "已汇总18小输入和6原图的严格下降/边界精确语义；marker仍有局部差异，准备独立审查确定性有向图标签变体，未冻结新阈值、未提升两入口资格。",
+      "evidence": [
+        "migration/reports/image-completion-IMG-02.md"
+      ]
+    },
+    {
+      "time": "2026-11-13T06:56:30.624507+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "隔离HIP候选核心构建：BUILT。固定严格下降、GPU有向最小marker传播、灰度边界和压紧；未替换生产入口。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-directed-marker-candidate-build/20261113T065626.880462Z-I3-rocm-build-86fc22b374"
+      ]
+    },
+    {
+      "time": "2026-11-13T06:57:43.362512+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "隔离HIP候选在18开发输入、padded布局执行：EXECUTED、126产品；ROI/padding/源图保护由实际probe检查，数值待独立验收。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-directed-marker-development-padded/20261113T065740.825713Z-I3-rocm-bab2c49ed4"
+      ]
+    },
+    {
+      "time": "2026-11-13T06:58:03.010894+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "隔离HIP候选在18开发输入、inplace布局执行：EXECUTED、126产品；ROI/padding/源图保护由实际probe检查，数值待独立验收。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-directed-marker-development-inplace/20261113T065800.441408Z-I3-rocm-32ff6acce4"
+      ]
+    },
+    {
+      "time": "2026-11-13T06:59:26.584593+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "独立SCC验证器异常已封存：ValueError('array is not broadcastable to correct shape')",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-directed-marker-independent-SCC-padded/20261113T065925.269414Z-I3-CPU-reference-82045324dc"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:00:39.130197+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "HIP开发候选padded经独立SCC凝聚DAG oracle核对126件完整产品、90件原生图像模式及逐区域连通/恒灰：PASSED；marker变体仍需合同/保留集/完整入口验收。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-directed-marker-independent-SCC-padded/20261113T070037.696053Z-I3-CPU-reference-f847f29fe4"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:02:27.864340+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "独立复审接受marker图算法变体并要求明确分区变化；现冻结36个新保留输入、18开发输入、6原图及完整合同：native五种图像模式EXACT、CPU图论marker EXACT，逐区/逐边vendor差异诊断与14类反向检查。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-complete-variant-and-heldout-contract/20261113T070226.637920Z-I3-CPU-contract-ccde7f9cd0"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:05:31.797850+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "将已冻结规范独立封存：算法/验收条款及60输入SHA完全不变，移除初次合同对可变实现头文件、进度报告的依赖。保留初次freeze，后续代码修订不改动规范；保留集尚未执行。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-immutable-specification-binding/20261113T070530.609489Z-I3-CPU-contract-38b9febfbe"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:05:50.501734+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "隔离HIP候选核心构建：BUILT。固定严格下降、GPU有向最小marker传播、灰度边界和压紧；未替换生产入口。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-directed-marker-candidate-build/20261113T070546.557596Z-I3-rocm-build-c20391af91"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:05:53.741068+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "完整Watershed合同 native-NPP 执行：EXECUTED，1320件产品；输入身份、命令、库/设备记录及原始输出封存。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-complete-native-NPP/20261113T070543.763422Z-I3-cuda-e59af1fe2d"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:07:15.073409+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "完整Watershed合同 AMD-padded 执行：EXECUTED，420件产品；输入身份、命令、库/设备记录及原始输出封存。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-complete-AMD-padded/20261113T070712.339495Z-I3-rocm-202ae7db7d"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:07:20.547921+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "完整Watershed合同 native-NPPPlus 执行：EXECUTED，1320件产品；输入身份、命令、库/设备记录及原始输出封存。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-complete-native-NPPPlus/20261113T070709.920949Z-I3-cuda-6e2195f30e"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:09:03.842437+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "完整Watershed合同 AMD-compact 执行：EXECUTED，420件产品；输入身份、命令、库/设备记录及原始输出封存。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-complete-AMD-compact/20261113T070901.094448Z-I3-rocm-9ae11e10e0"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:09:05.051733+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "60输入 padded 独立SCC参考/双原生检查：NUMERIC_MISMATCH；36保留输入完整纳入，逐区交叉表、含未匹配惩罚的一对一IoU、四方向逐边差异和null-marker模式均保留。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-full-SCC-CPU-native-padded/20261113T070857.935319Z-I3-CPU-reference-7feb3e5526"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:10:39.180398+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "完整Watershed合同 AMD-inplace 执行：EXECUTED，420件产品；输入身份、命令、库/设备记录及原始输出封存。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-complete-AMD-inplace/20261113T071036.443287Z-I3-rocm-66ac9ecb29"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:10:41.336987+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "60输入 compact 独立SCC参考/双原生检查：NUMERIC_MISMATCH；36保留输入完整纳入，逐区交叉表、含未匹配惩罚的一对一IoU、四方向逐边差异和null-marker模式均保留。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-full-SCC-CPU-native-compact/20261113T071034.152647Z-I3-CPU-reference-9dfbb07c81"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:11:37.918727+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "新保留集3条长坡度的NPP+差异已单独封存：输出值、位置、边缘行列与固定31–66步假设逐项记录。NPP/CPU/HIP结果同时绑定，暂不修订EXACT门槛或新增资格。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-native-long-ramp-disagreement/20261113T071136.125866Z-I3-CPU-diagnosis-3dac266b15"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:11:52.548279+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "完整Watershed合同 AMD-no-labels 执行：EXECUTED，300件产品；输入身份、命令、库/设备记录及原始输出封存。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-complete-AMD-no-labels/20261113T071149.855054Z-I3-rocm-e88858227b"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:13:36.987079+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "针对NPP+长坡度差异冻结24个新解析输入（17–129、四方向）、两种pitch和4次连续调用；每个非零像素都有严格更低邻居，终点灰度必为0，作为独立收敛诊断。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-native-monotone-diagnostic-contract/20261113T071335.723030Z-I3-CPU-contract-aad383f35d"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:13:54.239344+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "实际GPU边界/资源检查：PASSED，18非法视图、9逐分配故障及同进程恢复；检查拒绝前不分配/不写调用方数据、每个工作区均释放。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-view-and-allocation-controls/20261113T071350.252714Z-I3-rocm-606c254a24"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:13:54.382223+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "NPPPlus padded 的24解析坡度/4次连续调用诊断：OBSERVED；实际非零像素及各次最大值封存，区分stride和全局传播行为。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-native-monotone-NPPPlus-padded/20261113T071348.025394Z-I3-cuda-diagnosis-7391164b72"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:16:28.436925+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "Watershed真实验证函数反向检查：PASSED，覆盖冻结14类错误及实际GPU产品正控；含小区域丢失、非连通同标签、OR掩码掩盖逐边差异和seal/SHA伪造。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-validator-negative-controls/20261113T071627.070428Z-I3-CPU-controls-2bb6101fb1"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:16:31.774680+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "NPPPlus compact 的24解析坡度/4次连续调用诊断：OBSERVED；实际非零像素及各次最大值封存，区分stride和全局传播行为。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-native-monotone-NPPPlus-compact/20261113T071625.438146Z-I3-cuda-diagnosis-0a472c388c"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:17:22.312673+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "24个额外解析坡度在实际HIP上对零终点/五图像模式精确验收：PASSED；没有复制NPP+的非零传播残留。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-analytic-monotone-AMD/20261113T071719.715994Z-I3-rocm-eb386ff104"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:17:22.548257+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "NPP padded 的24解析坡度/4次连续调用诊断：OBSERVED；实际非零像素及各次最大值封存，区分stride和全局传播行为。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-native-monotone-NPP-padded/20261113T071716.073378Z-I3-cuda-diagnosis-d6b434706d"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:20:31.952168+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "NPP compact 的24解析坡度/4次连续调用诊断：OBSERVED；实际非零像素及各次最大值封存，区分stride和全局传播行为。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-native-monotone-NPP-compact/20261113T072025.402398Z-I3-cuda-diagnosis-a9b7cf19e3"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:22:02.408893+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "独立复审P1修复后的身份控制：PASSED；冻结规范、四布局、两vendor、实际命令/环境/源码/二进制均绑定，真实跨vendor/布局/旧构建替换及合同/SHA篡改分别拒绝。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-contract-platform-layout-build-binding-controls/20261113T072159.821595Z-I3-CPU-controls-ece4f3e77e"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:24:03.247523+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "24解析坡度独立参考：PASSED；NPP和HIP五模式精确，NPP+两pitch各16例不符且复调用仍改变。诊断通过不代表NPP+通过，原60输入严格门槛失败继续保留。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-monotone-native-independent-reference/20261113T072401.731238Z-I3-CPU-reference-6cb34cbf19"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:27:46.898151+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "两原始文件入口已接入严格下降/有向图共享HIP核心，完整构建：BUILT；保留原CUDA树及全部原图/文件名，资格仍待整体验收。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-complete-original-entry-build/20261113T072739.781617Z-I3-rocm-build-2737303ea2"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:30:22.111769+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "24解析坡度独立参考：PASSED；NPP和HIP五模式精确，NPP+两pitch各16例不符且复调用仍改变。诊断通过不代表NPP+通过，原60输入严格门槛失败继续保留。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-monotone-native-independent-reference/20261113T073020.628950Z-I3-CPU-reference-437904054d"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:30:42.405939+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "NPP原入口完整文件流程：EXECUTED，10件产品；独立CPU/native和trace/cold证明待补齐，不预记整例通过。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/NPP_watershedSegmentation__watershedSegmentation.cpp/20261113T073039.845259Z-I3-rocm-complete-original-entry-842fb56101"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:30:45.029640+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "NPP+原入口完整文件流程：EXECUTED，12件产品；独立CPU/native和trace/cold证明待补齐，不预记整例通过。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/NPP__watershedSegmentation__watershedSegmentationNPPPlus.cpp/20261113T073042.848217Z-I3-rocm-complete-original-entry-0b68df1ab8"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:32:17.037571+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "60输入 padded 独立SCC参考/双原生检查：NUMERIC_MISMATCH；36保留输入完整纳入，逐区交叉表、含未匹配惩罚的一对一IoU、四方向逐边差异和null-marker模式均保留。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-full-SCC-CPU-native-padded/20261113T073209.567167Z-I3-CPU-reference-5277964a92"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:33:53.072422+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "NPP原入口10件完整产品独立SCC/native验收：PASSED；源输入/实际二进制/物理GPU/封存产物均绑定，marker分区差异逐区公开。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/NPP_watershedSegmentation__watershedSegmentation.cpp/20261113T073350.417558Z-I3-CPU-complete-original-entry-reference-a472d7e7dd"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:33:55.620835+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "NPP+原入口12件完整产品独立SCC/native验收：PASSED；源输入/实际二进制/物理GPU/封存产物均绑定，marker分区差异逐区公开。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/NPP__watershedSegmentation__watershedSegmentationNPPPlus.cpp/20261113T073353.580917Z-I3-CPU-complete-original-entry-reference-a53ff0d505"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:34:15.255658+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "明确封存NPP+12.4.0三个坡度输入参考修订：锁定ID/尺寸/SHA/全部模式；原严格失败保持NUMERIC_MISMATCH、三项原生保持NATIVE_MISMATCH，CPU/NPP精确及解析/24确认门禁不可豁免，其余57项NPP+仍EXACT。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-explicit-native-reference-amendment/20261113T073414.050021Z-I3-CPU-contract-44f1fb65a7"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:34:46.213768+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "60输入 no-labels 独立SCC参考/双原生检查：PASSED；36保留输入完整纳入，逐区交叉表、含未匹配惩罚的一对一IoU、四方向逐边差异和null-marker模式均保留。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-full-SCC-CPU-native-amended-no-labels/20261113T073438.736241Z-I3-CPU-reference-ef4e3b1e7e"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:34:46.291487+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "60输入 padded 独立SCC参考/双原生检查：PASSED；36保留输入完整纳入，逐区交叉表、含未匹配惩罚的一对一IoU、四方向逐边差异和null-marker模式均保留。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-full-SCC-CPU-native-amended-padded/20261113T073438.760776Z-I3-CPU-reference-3f173e200c"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:34:46.429422+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "60输入 compact 独立SCC参考/双原生检查：PASSED；36保留输入完整纳入，逐区交叉表、含未匹配惩罚的一对一IoU、四方向逐边差异和null-marker模式均保留。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-full-SCC-CPU-native-amended-compact/20261113T073438.869969Z-I3-CPU-reference-1e59f34f0e"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:34:46.514171+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "60输入 inplace 独立SCC参考/双原生检查：PASSED；36保留输入完整纳入，逐区交叉表、含未匹配惩罚的一对一IoU、四方向逐边差异和null-marker模式均保留。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-full-SCC-CPU-native-amended-inplace/20261113T073438.847550Z-I3-CPU-reference-c76e05deeb"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:36:46.433555+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "三个NPP+参考例外的边界控制：PASSED；第四例外、同名换内容、维度/版本/模式扩张、解析条件不成立、CPU或第二原生失败及错误项目像素均拒绝。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/watershed-native-reference-amendment-controls/20261113T073645.195440Z-I3-CPU-controls-3b35e1c75c"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:41:15.891116+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "NPP原入口trace/original：PASSED，完整文件集合、实际GPU和构建身份已记录。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/NPP_watershedSegmentation__watershedSegmentation.cpp/20261113T074113.193361Z-I3-rocm-complete-entry-trace-12587e7b4d"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:41:18.632398+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "NPP+原入口trace/original：PASSED，完整文件集合、实际GPU和构建身份已记录。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/NPP__watershedSegmentation__watershedSegmentationNPPPlus.cpp/20261113T074116.348676Z-I3-rocm-complete-entry-trace-bbdd563114"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:41:29.560778+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "NPP原入口replay/invert-first：PASSED，完整文件集合、实际GPU和构建身份已记录。独立CPU重算待验证。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/NPP_watershedSegmentation__watershedSegmentation.cpp/20261113T074127.093483Z-I3-rocm-complete-entry-replay-14bf309ce2"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:41:32.175014+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "NPP+原入口replay/invert-first：PASSED，完整文件集合、实际GPU和构建身份已记录。独立CPU重算待验证。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/NPP__watershedSegmentation__watershedSegmentationNPPPlus.cpp/20261113T074130.014443Z-I3-rocm-complete-entry-replay-4b9183847e"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:42:38.861955+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "NPP原入口反转首图后全产品独立SCC参考：PASSED；逐字节核验变化输入与其余未变化图像，防止缓存重放伪成功。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/NPP_watershedSegmentation__watershedSegmentation.cpp/20261113T074237.134717Z-I3-CPU-complete-entry-changed-input-reference-52d6a96e40"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:42:40.901460+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "NPP+原入口反转首图后全产品独立SCC参考：PASSED；逐字节核验变化输入与其余未变化图像，防止缓存重放伪成功。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/NPP__watershedSegmentation__watershedSegmentationNPPPlus.cpp/20261113T074239.413289Z-I3-CPU-complete-entry-changed-input-reference-8726a81ad7"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:42:41.922318+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "NPP原入口negative/missing-first：PASSED，完整文件集合、实际GPU和构建身份已记录。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/NPP_watershedSegmentation__watershedSegmentation.cpp/20261113T074239.429034Z-I3-rocm-complete-entry-negative-5f39c30ce3"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:42:44.580643+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "NPP原入口negative/missing-last：PASSED，完整文件集合、实际GPU和构建身份已记录。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/NPP_watershedSegmentation__watershedSegmentation.cpp/20261113T074242.405497Z-I3-rocm-complete-entry-negative-8685db88e3"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:42:47.114759+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "NPP原入口negative/truncated-first：PASSED，完整文件集合、实际GPU和构建身份已记录。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/NPP_watershedSegmentation__watershedSegmentation.cpp/20261113T074245.005923Z-I3-rocm-complete-entry-negative-f6381ac09b"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:42:49.682814+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "NPP原入口negative/blocked-output：PASSED，完整文件集合、实际GPU和构建身份已记录。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/NPP_watershedSegmentation__watershedSegmentation.cpp/20261113T074247.541913Z-I3-rocm-complete-entry-negative-fe6ba54856"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:42:52.211670+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "NPP+原入口negative/missing-first：PASSED，完整文件集合、实际GPU和构建身份已记录。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/NPP__watershedSegmentation__watershedSegmentationNPPPlus.cpp/20261113T074250.114629Z-I3-rocm-complete-entry-negative-b1335f865c"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:42:54.728412+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "NPP+原入口negative/missing-last：PASSED，完整文件集合、实际GPU和构建身份已记录。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/NPP__watershedSegmentation__watershedSegmentationNPPPlus.cpp/20261113T074252.624819Z-I3-rocm-complete-entry-negative-8e02dbdc81"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:42:57.196607+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "NPP+原入口negative/truncated-first：PASSED，完整文件集合、实际GPU和构建身份已记录。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/NPP__watershedSegmentation__watershedSegmentationNPPPlus.cpp/20261113T074255.147775Z-I3-rocm-complete-entry-negative-bc5695d801"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:42:59.723152+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "NPP+原入口negative/blocked-output：PASSED，完整文件集合、实际GPU和构建身份已记录。",
+      "evidence": [
+        "migration/reports/evidence/rewrite/I3/NPP__watershedSegmentation__watershedSegmentationNPPPlus.cpp/20261113T074257.624884Z-I3-rocm-complete-entry-negative-f4cc494723"
+      ]
+    },
+    {
+      "time": "2026-11-13T07:44:32.503276+00:00",
+      "stage": "IMG-02",
+      "state": "IN_PROGRESS",
+      "message": "两原入口22产品、真实GPU trace、变化输入独立CPU重算、8次文件IO失败流程已完成；独立复审关闭严格三输入NPP+例外的验证器问题，准备固定提交冷检出。",
+      "evidence": [
+        "migration/reports/image-watershed-completion-entry-trace.json",
+        "migration/reports/image-watershed-completion-replay-reference.json",
+        "migration/reports/image-watershed-completion-entry-negative.json"
+      ]
     }
   ],
-  "updated_at": "2026-11-13T06:31:03.251892+00:00"
+  "updated_at": "2026-11-13T07:44:32.503276+00:00"
 }

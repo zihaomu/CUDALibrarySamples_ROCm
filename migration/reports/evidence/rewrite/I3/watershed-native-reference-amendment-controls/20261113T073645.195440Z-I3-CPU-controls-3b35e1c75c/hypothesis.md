@@ -1,0 +1,1 @@
+Test CPU-controls for watershed-native-reference-amendment-controls, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: none.

@@ -1,0 +1,1 @@
+Test CPU-research for watershed-downhill-ties-and-original-image-diagnosis, case all. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: none.
