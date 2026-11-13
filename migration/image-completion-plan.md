@@ -2711,5 +2711,8 @@ tools/moat/selected_proofs.py
 | 2026-11-13T07:57:24.404047+00:00 | IMG-02 | IN_PROGRESS | 完整资格/冷检出身份反向检查：PASSED；热运行替换、越界路径、错构建/二进制/提交、缺失或重复子实验及扩大原生例外均检查。 | `migration/reports/evidence/rewrite/I3/watershed-complete-publication-and-cold-binding-controls/20261113T075722.025569Z-I3-CPU-controls-36b02323ab` |
 | 2026-11-13T07:58:09.042450+00:00 | IMG-02 | IN_PROGRESS | 完整资格/冷检出身份反向检查：PASSED；热运行替换、越界路径、错构建/二进制/提交、缺失或重复子实验及扩大原生例外均检查。 | `migration/reports/evidence/rewrite/I3/watershed-complete-publication-and-cold-binding-controls/20261113T075806.622959Z-I3-CPU-controls-156372fdd1` |
 | 2026-11-13T07:59:51.643941+00:00 | IMG-02 | IN_PROGRESS | 最终独立MOAT复审Approve：冷绑定、五套控制身份与完整产品集合的P1/P2均关闭；允许签发两原入口完整资格，仍公开marker变体和三个NPP+原生失败。 | `migration/reports/evidence/rewrite/I3/watershed-completion-independent-final-review/20261113T075950.378223Z-I3-review-89ffe19fac` |
+| 2026-11-13T08:00:52.401532+00:00 | IMG-02 | IN_PROGRESS | 资格生成发现工具链包含路径漏记：扫描器未按真实编译器的rocm/common/image include目录解析watershed_sample.hpp；已封存复现，修复资格依赖绑定后重跑，无GPU数值改动。 | `migration/reports/evidence/rewrite/I3/watershed-qualification-include-search-path-failure/20261113T080049.458484Z-I3-CPU-tooling-ec07b3054b` |
+| 2026-11-13T08:01:05.902187+00:00 | IMG-02 | IN_PROGRESS | 完整资格/冷检出身份反向检查：PASSED；热运行替换、越界路径、错构建/二进制/提交、缺失或重复子实验及扩大原生例外均检查。 | `migration/reports/evidence/rewrite/I3/watershed-complete-publication-and-cold-binding-controls/20261113T080103.477954Z-I3-CPU-controls-3a20ddb4e6` |
+| 2026-11-13T08:02:24.257308+00:00 | IMG-02 | IN_PROGRESS | 包含路径修复经独立补充复审通过，维持Approve；40项控制绑定当前qualifier，6项实际编译依赖完整。重新签发资格，无需重复GPU计算。 | `migration/reports/evidence/rewrite/I3/watershed-completion-independent-final-review/20261113T080222.950631Z-I3-review-ffa56b1a43` |
 
 <!-- IMAGE_COMPLETION:END -->

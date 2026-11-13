@@ -1,0 +1,21 @@
+diff --git a/tools/moat/qualify_image_watershed_completion.py b/tools/moat/qualify_image_watershed_completion.py
+index 7c6ad0d45..b5cd9491a 100644
+--- a/tools/moat/qualify_image_watershed_completion.py
++++ b/tools/moat/qualify_image_watershed_completion.py
+@@ -121,7 +121,15 @@ def qualify():
+         local=checks+[dict(check='all-original-file-products-independent-CPU-and-native',passed=cpu_products(cp,sample) and proof_identity(cp,sid,'CPU-complete-original-entry-reference')),dict(check='actual-original-entry-kernel-trace-and-output-bytes',passed=passed(trace) and trace['action']=='trace' and trace['build_evidence']==b['evidence'] and trace['binary_sha256']==b['binaries'][family]['sha256'] and trace['outputs']==run['outputs']),dict(check='changed-input-complete-independent-CPU-products',passed=replay_products(replay,sample,rr) and proof_identity(replay,sid,'CPU-complete-entry-changed-input-reference'))]
+         if not all(c['passed'] for c in local):raise ValueError('entry gates '+sid)
+         source=ROOT/PORTS[family];deps,missing=closure(source)
+-        if missing:raise ValueError('unresolved includes')
++        # These two original wrappers are compiled with -I common/image, which
++        # the generic include scanner (common/, rocm/) does not search.
++        expected_missing=[dict(including=str(source.relative_to(ROOT)),include='watershed_sample.hpp')]
++        if missing!=expected_missing:raise ValueError('unexpected original include closure')
++        commands=json.loads((ROOT/b['evidence']/'commands.json').read_text());command=next(c for c in commands if c['phase']=='build-'+family)
++        if '-I'+str(ROOT/'rocm/common/image') not in command['argv']:raise ValueError('actual image include path missing')
++        image_deps,unresolved=closure(ROOT/'rocm/common/image/watershed_sample.hpp')
++        if unresolved:raise ValueError('unresolved image header includes')
++        deps.update(image_deps)
+         # The C ABI implementation is a separate translation unit, not a header
+         # include of the original program; include its compiled closure explicitly.
+         deps.update(b['dependencies'])
