@@ -64,8 +64,8 @@ inline image_jpeg_instances::Image bmp(const fs::path& path) {
     int64_t w=int32_t(le32(bytes,18)),signed_h=int32_t(le32(bytes,22));
     int64_t h=signed_h<0?-signed_h:signed_h;
     if(w<=0||h<=0||w>65535||h>65535)throw std::runtime_error("invalid BMP dimensions");
-    size_t offset=le32(bytes,10),stride=(size_t(w)*3+3)&~size_t(3);
-    if(offset<54||offset>bytes.size()||size_t(h)>(bytes.size()-offset)/stride)
+    size_t dib=le32(bytes,14),offset=le32(bytes,10),stride=(size_t(w)*3+3)&~size_t(3);
+    if(dib>bytes.size()-14||offset<14+dib||offset>bytes.size()||size_t(h)>(bytes.size()-offset)/stride)
         throw std::runtime_error("truncated BMP pixels");
     image_jpeg_instances::Image image{int(w),int(h),std::vector<unsigned char>(size_t(w)*h*3)};
     for(int y=0;y<h;++y)for(int x=0;x<w;++x) {
@@ -74,22 +74,32 @@ inline image_jpeg_instances::Image bmp(const fs::path& path) {
     }
     return image;
 }
-struct Result {double throughput=0,latency=0;int images=0,threads=0,states=0;size_t bytes=0;};
+struct Result {
+    double throughput=0,latency=0;int images=0,threads=0,states=0;size_t bytes=0;
+    double preparation_ms=0,measured_ms=0,end_to_end_ms=0;
+    size_t steady_workspace_growths=0,prepared_slots=0;
+};
 inline Result execute(const Args& a,const std::vector<fs::path>& input,int threads,bool write_output) {
+    auto total_start=std::chrono::steady_clock::now();
     int states=std::max({1,a.states,threads}),images=std::max(a.images,states);
     if(states>INT32_MAX/2)throw std::runtime_error("slot count overflow");
     std::shared_ptr<image_jpeg_instances::Image> cached;
     if(input.size()==1)cached=std::make_shared<image_jpeg_instances::Image>(bmp(input[0]));
     std::atomic<int64_t> next{0};std::atomic<int> done{0};std::atomic<size_t> bytes{0};std::atomic<bool> cancelled{false};
     std::mutex mutex;std::string failure;std::vector<std::thread> workers;
-    auto start=std::chrono::steady_clock::now();
+    std::vector<std::vector<std::unique_ptr<image_jpeg_pipeline::Slot>>> resources(threads);
+    std::atomic<int> ready{0};std::atomic<bool> go{false};
     auto worker=[&](int tid) {
         try {
             image_jpeg_encoder::check(hipSetDevice(0),"worker JPEG device");
-            std::vector<std::unique_ptr<image_jpeg_pipeline::Slot>> slots;
-            for(int64_t state=tid;state<states;state+=threads)for(int buffer=0;buffer<2;++buffer)
+            auto& slots=resources[tid];
+            for(int64_t state=tid;state<states&&!cancelled.load();state+=threads)for(int buffer=0;buffer<2;++buffer) {
                 slots.push_back(std::make_unique<image_jpeg_pipeline::Slot>());
+                if(cached)slots.back()->prepare(cached->rgb,cached->w,cached->h,a.quality,a.sampling420?2:1,a.optimize,a.download);
+            }
             std::vector<int> ids(slots.size(),-1);bool more=true;
+            ++ready;
+            while(!go.load()&&!cancelled.load())std::this_thread::yield();
             while(more&&!cancelled.load()) {
                 more=false;
                 for(size_t slot=0;slot<slots.size();++slot) {
@@ -97,9 +107,11 @@ inline Result execute(const Args& a,const std::vector<fs::path>& input,int threa
                         int64_t job=next.fetch_add(1);
                         if(job<images) {
                             ids[slot]=job;
-                            auto local=cached?image_jpeg_instances::Image{}:bmp(input[job%input.size()]);
-                            const auto& picture=cached?*cached:local;
-                            slots[slot]->start(picture.rgb,picture.w,picture.h,a.quality,a.sampling420?2:1,a.optimize,a.download);
+                            if(cached)slots[slot]->start_prepared();
+                            else {
+                                auto picture=bmp(input[job%input.size()]);
+                                slots[slot]->start(picture.rgb,picture.w,picture.h,a.quality,a.sampling420?2:1,a.optimize,a.download);
+                            }
                         } else ids[slot]=-2;
                     }
                     if(ids[slot]>=0) {
@@ -117,12 +129,21 @@ inline Result execute(const Args& a,const std::vector<fs::path>& input,int threa
     };
     try {for(int tid=0;tid<threads;++tid)workers.emplace_back(worker,tid);}
     catch(...) {cancelled=true;for(auto& thread:workers)thread.join();throw;}
+    while(ready.load()<threads&&!cancelled.load())std::this_thread::yield();
+    const size_t prepared_growths=image_jpeg_pipeline::workspace_growths.load();
+    auto start=std::chrono::steady_clock::now();go=true;
     for(auto& thread:workers)thread.join();
+    auto end=std::chrono::steady_clock::now();
+    const size_t steady_growths=image_jpeg_pipeline::workspace_growths.load()-prepared_growths;
+    resources.clear(); // Retire resources after the measured encode/write interval.
     if(!failure.empty())throw std::runtime_error(failure);
     if(done!=images)throw std::runtime_error("incomplete JPEG jobs");
-    double ms=std::chrono::duration<double,std::milli>(std::chrono::steady_clock::now()-start).count();
+    double ms=std::chrono::duration<double,std::milli>(end-start).count();
     if(ms<=0)throw std::runtime_error("invalid JPEG duration");
-    return {images*1000.0/ms,ms/images,images,threads,states,bytes.load()};
+    return {images*1000.0/ms,ms/images,images,threads,states,bytes.load(),
+            std::chrono::duration<double,std::milli>(start-total_start).count(),ms,
+            std::chrono::duration<double,std::milli>(std::chrono::steady_clock::now()-total_start).count(),
+            steady_growths,cached?size_t(states)*2:0};
 }
 inline int run(int argc,const char*argv[]) {
     if(argc==1||std::any_of(argv+1,argv+argc,[](const char* p){return std::string(p)=="-h";})) {
@@ -152,6 +173,9 @@ inline int run(int argc,const char*argv[]) {
         std::cout<<"Num hardware encode engines: 0\nEnabled backends: gpu\nQuality: "<<a.quality
                  <<"\nNum threads: "<<best.threads<<"\nNum states: "<<best.states
                  <<"\nThroughput: "<<best.throughput<<" images/s\nLatency: "<<best.latency<<" ms\n"
+                 <<"TIMING preparation_ms="<<best.preparation_ms<<" measured_ms="<<best.measured_ms
+                 <<" end_to_end_ms="<<best.end_to_end_ms<<" steady_workspace_growths="<<best.steady_workspace_growths
+                 <<" prepared_slots="<<best.prepared_slots<<'\n'
                  <<"RESULT status=PASS encoded="<<best.images<<" cpu_entropy=0 gpu_full_encode=1"
                  <<" download_payload="<<a.download<<" pinned_buffers=1 async_slots_per_state=2"
                  <<" calibration_trials="<<calibration_trials<<" encoded_bytes="<<best.bytes<<'\n';

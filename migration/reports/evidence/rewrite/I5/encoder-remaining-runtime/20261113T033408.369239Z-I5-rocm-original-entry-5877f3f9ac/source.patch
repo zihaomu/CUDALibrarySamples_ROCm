@@ -1,0 +1,15 @@
+diff --git a/rocm/common/image/jpeg_encoder_instances_v2.hpp b/rocm/common/image/jpeg_encoder_instances_v2.hpp
+index f86d6a809..33860b197 100644
+--- a/rocm/common/image/jpeg_encoder_instances_v2.hpp
++++ b/rocm/common/image/jpeg_encoder_instances_v2.hpp
+@@ -64,8 +64,8 @@ inline image_jpeg_instances::Image bmp(const fs::path& path) {
+     int64_t w=int32_t(le32(bytes,18)),signed_h=int32_t(le32(bytes,22));
+     int64_t h=signed_h<0?-signed_h:signed_h;
+     if(w<=0||h<=0||w>65535||h>65535)throw std::runtime_error("invalid BMP dimensions");
+-    size_t offset=le32(bytes,10),stride=(size_t(w)*3+3)&~size_t(3);
+-    if(offset<54||offset>bytes.size()||size_t(h)>(bytes.size()-offset)/stride)
++    size_t dib=le32(bytes,14),offset=le32(bytes,10),stride=(size_t(w)*3+3)&~size_t(3);
++    if(dib>bytes.size()-14||offset<14+dib||offset>bytes.size()||size_t(h)>(bytes.size()-offset)/stride)
+         throw std::runtime_error("truncated BMP pixels");
+     image_jpeg_instances::Image image{int(w),int(h),std::vector<unsigned char>(size_t(w)*h*3)};
+     for(int y=0;y<h;++y)for(int x=0;x<w;++x) {

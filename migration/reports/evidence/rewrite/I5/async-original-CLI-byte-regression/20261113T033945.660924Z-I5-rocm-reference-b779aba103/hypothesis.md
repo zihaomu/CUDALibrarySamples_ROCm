@@ -1,0 +1,1 @@
+Test rocm-reference for async-original-CLI-byte-regression, case single-input-repeats. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261113T033911.734921Z-I5-rocm-original-candidate-0978844a20.

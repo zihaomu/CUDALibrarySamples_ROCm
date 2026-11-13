@@ -1,0 +1,113 @@
+#!/usr/bin/env python3
+"""Freeze and execute remaining encoder scheduler/input/error contracts."""
+import argparse,hashlib,json,os,re,shutil
+from pathlib import Path
+import numpy as np
+from PIL import Image
+from experiment import ROOT,Experiment,digest,write
+from image_completion_progress import record
+
+PROFILE=ROOT/'migration/rewrite/image-encoder-runtime-profile.json'
+REPORT=ROOT/'migration/reports/image-encoder-runtime-runs.json'
+
+def freeze():
+    if PROFILE.exists():raise ValueError('runtime contract already frozen')
+    old=json.loads((ROOT/'migration/rewrite/image-encoder-instances-v2-profile.json').read_text())
+    directory=ROOT/'migration/fixtures/image-encoder-runtime';directory.mkdir(parents=True,exist_ok=True)
+    mixed=[]
+    for index,(name,width,height) in enumerate([('img1.bmp',1,1),('img2.bmp',513,511),('img10.bmp',19,17)]):
+        rgb=np.random.default_rng(15871+index).integers(0,256,(height,width,3),dtype=np.uint8)
+        path=directory/name;Image.fromarray(rgb).save(path,format='BMP')
+        mixed.append(dict(path=str(path.relative_to(ROOT)),sha256=digest(path),width=width,height=height,seed=15871+index,rgb_sha256=hashlib.sha256(rgb.tobytes()).hexdigest()))
+    cases=[
+        dict(id='n0-s0-j1',args=['-n','0','-s','0','-j','1'],count=3,write=True,input='old'),
+        dict(id='threads-exceed-states',args=['-n','1','-s','1','-j','4'],count=4,write=True,input='old',source_count=1),
+        dict(id='states-exceed-threads',args=['-n','1','-s','4','-j','1'],count=4,write=True,input='old',source_count=1),
+        dict(id='three-runs',args=['-r','3','-j','2'],count=3,write=True,input='old'),
+        dict(id='j0-hardware-concurrency',args=['-j','0'],count='CPU_THREADS',write=False,input='old'),
+        dict(id='gpu-and-unavailable-hardware',args=['-j','2','-b','gpu','hardware'],count=3,write=True,input='old'),
+        dict(id='mixed-size-slot-growth-reuse',args=['-j','1','-s','1','-n','17'],count=17,write=True,input='mixed'),
+        dict(id='single-large-repeated',args=['-j','1','-s','1','-n','19'],count=19,write=True,input='single'),
+        dict(id='truncated-BMP',args=['-j','1'],count=0,write=True,input='truncated',rc=1),
+        dict(id='DIB-length-beyond-file',args=['-j','1'],count=0,write=True,input='invalid-DIB',rc=1),
+        dict(id='zero-width-BMP',args=['-j','1'],count=0,write=True,input='zero-width',rc=1),
+        dict(id='invalid-numeric-CLI',args=['-j','invalid'],count=0,write=True,input='old',rc=1),
+        dict(id='empty-directory',args=['-j','1'],count=0,write=True,input='empty',rc=1),
+        dict(id='output-path-is-file',args=['-j','1'],count=0,write=True,input='old',rc=1,output_file=True),
+        dict(id='write-failure-after-GPU',args=['-j','2'],count=0,write=True,input='old',rc=1,output_obstruction=True),
+        dict(id='truncated-last-mixed-input',args=['-j','2','-n','7'],count=0,write=True,input='bad-last',rc=1),
+    ]
+    for c in cases:c.setdefault('rc',0)
+    e=Experiment('I5','encoder-remaining-runtime-contract','CPU-contract',sources=[__file__,ROOT/'migration/rewrite/image-encoder-instances-v2-profile.json',*[ROOT/x['path'] for x in mixed]])
+    value=dict(status='FROZEN',old_inputs=old['inputs'],mixed_inputs=mixed,cases=cases,
+        gates=dict(complete_output_set=True,independent_BMP_read_and_serial_GPU_byte_reference=True,
+            j0_matches_online_CPU_count=True,failed_batches_never_print_PASS=True),
+        notes=['Mid-batch errors may retain successfully written earlier JPEGs; no completed-batch claim is allowed. All partial products are recorded.',
+               'Malformed DIB length must be rejected before pixel interpretation.',
+               'Preallocation timing, held-out native equivalence and maximum dimensions remain separate gates.'])
+    write(e.path/'profile.json',value);value['evidence']=e.finish('OBSERVED');write(PROFILE,value)
+    record('IMG-01','冻结剩余16组线程/状态/重复/混合尺寸和错误合同；新增1x1、513x511、19x17固定seed BMP，覆盖j0及中途写失败、坏DIB/截断文件。',[str(PROFILE.relative_to(ROOT)),value['evidence']]);print(value['evidence'])
+
+def run():
+    from snapshot import capture
+    p=json.loads(PROFILE.read_text());build=json.loads((ROOT/'migration/reports/image-encoder-instances-v2-build.json').read_text())
+    reference=json.loads((ROOT/'migration/reports/image-encoder-pipeline-build.json').read_text())
+    for b in (build,reference):
+        if b['status']!='BUILT' or digest(ROOT/b['binary'])!=b['binary_sha256'] or any(digest(ROOT/n)!=h for n,h in b['dependencies'].items()):raise ValueError('stale executable/closure')
+    inputs=p['old_inputs']+p['mixed_inputs']
+    reports=[ROOT/'migration/reports/image-encoder-instances-v2-build.json',ROOT/'migration/reports/image-encoder-pipeline-build.json']
+    binaries=[dict(binary=b['binary'],sha256=b['binary_sha256'],build_report=str(path.relative_to(ROOT)),build_report_sha256=digest(path)) for b,path in zip((build,reference),reports)]
+    if any(digest(ROOT/x['path'])!=x['sha256'] for x in inputs):raise ValueError('frozen BMP drift')
+    rows=[]
+    for case in p['cases']:
+        e=Experiment('I5','encoder-remaining-runtime','rocm-original-entry',case=case['id'],sources=[__file__,PROFILE,*reports,*[ROOT/x['path'] for x in inputs],*[ROOT/n for n in build['dependencies']],*[ROOT/n for n in reference['dependencies']]],parent=build['experiment_id'])
+        write(e.path/'backend.observed.json',capture());directory=e.path/'inputs';directory.mkdir();out=e.path/'outputs'
+        specs=p['mixed_inputs'] if case['input']=='mixed' else [p['mixed_inputs'][1]] if case['input']=='single' else p['old_inputs']
+        if case['input']=='empty':specs=[]
+        if case['input'] in ('truncated','invalid-DIB','zero-width'):specs=specs[:1]
+        for spec in specs:shutil.copyfile(ROOT/spec['path'],directory/(ROOT/spec['path']).name)
+        if case['input'] in ('truncated','invalid-DIB','zero-width','bad-last'):
+            target=directory/(ROOT/specs[-1 if case['input']=='bad-last' else 0]['path']).name;data=bytearray(target.read_bytes())
+            if case['input'] in ('truncated','bad-last'):data=data[:-17]
+            elif case['input']=='invalid-DIB':data[14:18]=(0xfffffffd).to_bytes(4,'little')
+            else:data[18:22]=b'\0'*4
+            target.write_bytes(data)
+        if case.get('output_file'):out.write_text('intentional output obstruction\n')
+        else:
+            out.mkdir()
+            if case.get('output_obstruction'):(out/'0.jpg').mkdir()
+        args=[str(ROOT/build['binary']),'-i',str(directory),*case['args']]
+        if case['write']:args+=['-o',str(out)]
+        rc=e.command(args,'remaining-runtime-case',timeout=240)
+        checks=[dict(check='expected-exit',passed=rc==case['rc'])];products=[];metrics={}
+        try:
+            stdout=(e.path/'logs/0001-remaining-runtime-case.stdout.log').read_text();stderr=(e.path/'logs/0001-remaining-runtime-case.stderr.log').read_text()
+            files=sorted(x for x in out.glob('*.jpg') if x.is_file()) if out.is_dir() else []
+            if case['rc']:
+                checks.append(dict(check='failure-never-claims-complete-batch',passed='RESULT status=FAIL' in stderr and 'RESULT status=PASS' not in stdout))
+            else:
+                match=re.search(r'RESULT status=PASS encoded=(\d+)',stdout);threads=re.search(r'Num threads: (\d+)',stdout)
+                expected=max(3,os.cpu_count()) if case['count']=='CPU_THREADS' else case['count']
+                checks.append(dict(check='exact-complete-job-count',passed=match is not None and int(match[1])==expected))
+                if case['count']=='CPU_THREADS':checks.append(dict(check='j0-uses-actual-online-CPU-count',passed=threads is not None and int(threads[1])==os.cpu_count(),expected=os.cpu_count(),observed=int(threads[1]) if threads else None))
+                checks.append(dict(check='exact-output-file-set',passed={x.name for x in files}==({str(i)+'.jpg' for i in range(expected)} if case['write'] else set())))
+                refs={};active=specs[:case.get('source_count',len(specs))]
+                for spec in active if files else []:
+                    source=ROOT/spec['path'];raw=e.path/(source.name+'.rgb')
+                    with Image.open(source) as image:image=image.convert('RGB');width,height=image.size;raw.write_bytes(image.tobytes())
+                    destination=e.path/'reference'/source.name
+                    rr=e.command([str(ROOT/reference['binary']),str(raw),str(width),str(height),'80','2','0','0','1',str(destination)],'independent-BMP-serial-core-'+source.name)
+                    checks.append(dict(check='reference-success-'+source.name,passed=rr==0));refs[source.name]=destination/'serial-reference.jpg'
+                for path in files:
+                    source=(ROOT/active[int(path.stem)%len(active)]['path']).name
+                    checks.append(dict(check='complete-JPEG-exact-'+path.name,passed=path.read_bytes()==refs[source].read_bytes()))
+            products=[dict(name=x.name,bytes=x.stat().st_size,sha256=digest(x)) for x in files]
+        except Exception as error:checks.append(dict(check='validation-exception',passed=False,error=repr(error)))
+        checks.append(dict(check='commands-use-bound-candidate-and-reference-binaries',passed=e.commands[0]['argv'][0]==str(ROOT/build['binary']) and all(c['argv'][0]==str(ROOT/reference['binary']) for c in e.commands[1:])))
+        status='PASSED' if all(c['passed'] for c in checks) else 'FAILED';row=dict(case=case['id'],status=status,return_code=rc,checks=checks,products=products,binaries=binaries,experiment_id=e.id)
+        write(e.path/'result.json',row);row['evidence']=e.finish('EXPECTED_REJECTION' if status=='PASSED' and rc else 'PASSED' if status=='PASSED' else 'NUMERIC_MISMATCH',dict(status=status,checks=checks));rows.append(row);write(REPORT,rows)
+        record('IMG-01','扩展原入口 '+case['id']+'：'+status+'，实际产品 '+str(len(products))+'；异常/部分输出亦保留。',[row['evidence']]);print(case['id'],status,flush=True)
+    return int(any(r['status']!='PASSED' for r in rows))
+
+if __name__=='__main__':
+    parser=argparse.ArgumentParser();parser.add_argument('action',choices=['freeze','run']);args=parser.parse_args();raise SystemExit(globals()[args.action]())

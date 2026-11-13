@@ -1,0 +1,49 @@
+{
+  "status": "FROZEN",
+  "input": {
+    "path": "migration/fixtures/image-encoder-runtime/img2.bmp",
+    "sha256": "5a1d2794d9b805147d71dee5cf207d1c1c3b9abd9418c19be71d50cdb486fe9b",
+    "width": 513,
+    "height": 511,
+    "seed": 15872,
+    "rgb_sha256": "e81b586f2c38b7267445c4882e42f202f423ea9d0b7b7195c6ac19219d66cdbc"
+  },
+  "cases": [
+    {
+      "id": "prepared-standard",
+      "jobs": 19,
+      "runs": 1,
+      "quality": 80,
+      "sampling": 2,
+      "optimized": false,
+      "download": true
+    },
+    {
+      "id": "prepared-optimized-repeated",
+      "jobs": 7,
+      "runs": 2,
+      "quality": 90,
+      "sampling": 1,
+      "optimized": true,
+      "download": true
+    },
+    {
+      "id": "prepared-device-only",
+      "jobs": 19,
+      "runs": 1,
+      "quality": 80,
+      "sampling": 2,
+      "optimized": false,
+      "download": false
+    }
+  ],
+  "gates": [
+    "Two slots prepared before measured encode interval; preparation and complete end-to-end time reported separately.",
+    "Each slot uploads immutable RGB once per run; every requested job still executes the full GPU transform and entropy chain.",
+    "Zero workspace growth in measured interval for identical prepared input.",
+    "Exact output set and JPEG bytes versus the separate serial core process; independent Pillow BMP read.",
+    "Device-only mode returns no entropy payload, including preparation.",
+    "Trace on physical GPU1, all preparation plus measured image kernels accounted for."
+  ],
+  "scope": "Single-input preallocation, not full IMG-01 qualification or native throughput parity."
+}

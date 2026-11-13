@@ -1,0 +1,1 @@
+Test rocm-original-entry for encoder-remaining-runtime, case write-failure-after-GPU. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261113T030749.806455Z-I5-rocm-build-de99467a31.

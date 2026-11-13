@@ -1,0 +1,332 @@
+diff --git a/rocm/common/image/jpeg_encoder_instances_v2.hpp b/rocm/common/image/jpeg_encoder_instances_v2.hpp
+index f86d6a809..776287a71 100644
+--- a/rocm/common/image/jpeg_encoder_instances_v2.hpp
++++ b/rocm/common/image/jpeg_encoder_instances_v2.hpp
+@@ -64,8 +64,8 @@ inline image_jpeg_instances::Image bmp(const fs::path& path) {
+     int64_t w=int32_t(le32(bytes,18)),signed_h=int32_t(le32(bytes,22));
+     int64_t h=signed_h<0?-signed_h:signed_h;
+     if(w<=0||h<=0||w>65535||h>65535)throw std::runtime_error("invalid BMP dimensions");
+-    size_t offset=le32(bytes,10),stride=(size_t(w)*3+3)&~size_t(3);
+-    if(offset<54||offset>bytes.size()||size_t(h)>(bytes.size()-offset)/stride)
++    size_t dib=le32(bytes,14),offset=le32(bytes,10),stride=(size_t(w)*3+3)&~size_t(3);
++    if(dib>bytes.size()-14||offset<14+dib||offset>bytes.size()||size_t(h)>(bytes.size()-offset)/stride)
+         throw std::runtime_error("truncated BMP pixels");
+     image_jpeg_instances::Image image{int(w),int(h),std::vector<unsigned char>(size_t(w)*h*3)};
+     for(int y=0;y<h;++y)for(int x=0;x<w;++x) {
+@@ -74,22 +74,32 @@ inline image_jpeg_instances::Image bmp(const fs::path& path) {
+     }
+     return image;
+ }
+-struct Result {double throughput=0,latency=0;int images=0,threads=0,states=0;size_t bytes=0;};
++struct Result {
++    double throughput=0,latency=0;int images=0,threads=0,states=0;size_t bytes=0;
++    double preparation_ms=0,measured_ms=0,end_to_end_ms=0;
++    size_t steady_workspace_growths=0,prepared_slots=0;
++};
+ inline Result execute(const Args& a,const std::vector<fs::path>& input,int threads,bool write_output) {
++    auto total_start=std::chrono::steady_clock::now();
+     int states=std::max({1,a.states,threads}),images=std::max(a.images,states);
+     if(states>INT32_MAX/2)throw std::runtime_error("slot count overflow");
+     std::shared_ptr<image_jpeg_instances::Image> cached;
+     if(input.size()==1)cached=std::make_shared<image_jpeg_instances::Image>(bmp(input[0]));
+     std::atomic<int64_t> next{0};std::atomic<int> done{0};std::atomic<size_t> bytes{0};std::atomic<bool> cancelled{false};
+     std::mutex mutex;std::string failure;std::vector<std::thread> workers;
+-    auto start=std::chrono::steady_clock::now();
++    std::vector<std::vector<std::unique_ptr<image_jpeg_pipeline::Slot>>> resources(threads);
++    std::atomic<int> ready{0};std::atomic<bool> go{false};
+     auto worker=[&](int tid) {
+         try {
+             image_jpeg_encoder::check(hipSetDevice(0),"worker JPEG device");
+-            std::vector<std::unique_ptr<image_jpeg_pipeline::Slot>> slots;
+-            for(int64_t state=tid;state<states;state+=threads)for(int buffer=0;buffer<2;++buffer)
++            auto& slots=resources[tid];
++            for(int64_t state=tid;state<states&&!cancelled.load();state+=threads)for(int buffer=0;buffer<2;++buffer) {
+                 slots.push_back(std::make_unique<image_jpeg_pipeline::Slot>());
++                if(cached)slots.back()->prepare(cached->rgb,cached->w,cached->h,a.quality,a.sampling420?2:1,a.optimize,a.download);
++            }
+             std::vector<int> ids(slots.size(),-1);bool more=true;
++            ++ready;
++            while(!go.load()&&!cancelled.load())std::this_thread::yield();
+             while(more&&!cancelled.load()) {
+                 more=false;
+                 for(size_t slot=0;slot<slots.size();++slot) {
+@@ -97,9 +107,11 @@ inline Result execute(const Args& a,const std::vector<fs::path>& input,int threa
+                         int64_t job=next.fetch_add(1);
+                         if(job<images) {
+                             ids[slot]=job;
+-                            auto local=cached?image_jpeg_instances::Image{}:bmp(input[job%input.size()]);
+-                            const auto& picture=cached?*cached:local;
+-                            slots[slot]->start(picture.rgb,picture.w,picture.h,a.quality,a.sampling420?2:1,a.optimize,a.download);
++                            if(cached)slots[slot]->start_prepared();
++                            else {
++                                auto picture=bmp(input[job%input.size()]);
++                                slots[slot]->start(picture.rgb,picture.w,picture.h,a.quality,a.sampling420?2:1,a.optimize,a.download);
++                            }
+                         } else ids[slot]=-2;
+                     }
+                     if(ids[slot]>=0) {
+@@ -117,12 +129,21 @@ inline Result execute(const Args& a,const std::vector<fs::path>& input,int threa
+     };
+     try {for(int tid=0;tid<threads;++tid)workers.emplace_back(worker,tid);}
+     catch(...) {cancelled=true;for(auto& thread:workers)thread.join();throw;}
++    while(ready.load()<threads&&!cancelled.load())std::this_thread::yield();
++    const size_t prepared_growths=image_jpeg_pipeline::workspace_growths.load();
++    auto start=std::chrono::steady_clock::now();go=true;
+     for(auto& thread:workers)thread.join();
++    auto end=std::chrono::steady_clock::now();
++    const size_t steady_growths=image_jpeg_pipeline::workspace_growths.load()-prepared_growths;
++    resources.clear(); // Retire resources after the measured encode/write interval.
+     if(!failure.empty())throw std::runtime_error(failure);
+     if(done!=images)throw std::runtime_error("incomplete JPEG jobs");
+-    double ms=std::chrono::duration<double,std::milli>(std::chrono::steady_clock::now()-start).count();
++    double ms=std::chrono::duration<double,std::milli>(end-start).count();
+     if(ms<=0)throw std::runtime_error("invalid JPEG duration");
+-    return {images*1000.0/ms,ms/images,images,threads,states,bytes.load()};
++    return {images*1000.0/ms,ms/images,images,threads,states,bytes.load(),
++            std::chrono::duration<double,std::milli>(start-total_start).count(),ms,
++            std::chrono::duration<double,std::milli>(std::chrono::steady_clock::now()-total_start).count(),
++            steady_growths,cached?size_t(states)*2:0};
+ }
+ inline int run(int argc,const char*argv[]) {
+     if(argc==1||std::any_of(argv+1,argv+argc,[](const char* p){return std::string(p)=="-h";})) {
+@@ -152,6 +173,9 @@ inline int run(int argc,const char*argv[]) {
+         std::cout<<"Num hardware encode engines: 0\nEnabled backends: gpu\nQuality: "<<a.quality
+                  <<"\nNum threads: "<<best.threads<<"\nNum states: "<<best.states
+                  <<"\nThroughput: "<<best.throughput<<" images/s\nLatency: "<<best.latency<<" ms\n"
++                 <<"TIMING preparation_ms="<<best.preparation_ms<<" measured_ms="<<best.measured_ms
++                 <<" end_to_end_ms="<<best.end_to_end_ms<<" steady_workspace_growths="<<best.steady_workspace_growths
++                 <<" prepared_slots="<<best.prepared_slots<<'\n'
+                  <<"RESULT status=PASS encoded="<<best.images<<" cpu_entropy=0 gpu_full_encode=1"
+                  <<" download_payload="<<a.download<<" pinned_buffers=1 async_slots_per_state=2"
+                  <<" calibration_trials="<<calibration_trials<<" encoded_bytes="<<best.bytes<<'\n';
+diff --git a/rocm/common/image/jpeg_encoder_pipeline.hpp b/rocm/common/image/jpeg_encoder_pipeline.hpp
+index ec5048e21..fcfb9ce25 100644
+--- a/rocm/common/image/jpeg_encoder_pipeline.hpp
++++ b/rocm/common/image/jpeg_encoder_pipeline.hpp
+@@ -53,9 +53,9 @@ private:
+     jpeg_error_mgr jpeg_errors_{};
+     bool jpeg_live_ = false;
+     Phase phase_ = Phase::Idle;
+-    int width_=0,height_=0,sampling_=0,blocks_=0;
++    int width_=0,height_=0,sampling_=0,blocks_=0,quality_=0;
+     unsigned raw_bytes_=0,stuffed_bytes_=0;
+-    bool optimized_=false,download_=false;
++    bool optimized_=false,download_=false,prepared_=false;
+     std::vector<unsigned char> header_;
+     Buffer<unsigned char> rgb_,planes_[3],components_,bits_,packed_,stuffed_;
+     Buffer<short> coefficients_[3],scan_;
+@@ -122,8 +122,28 @@ public:
+     void start(const std::vector<unsigned char>& rgb,int width,int height,int quality,
+                int sampling,bool optimized,bool download) {
+         if(!idle())throw std::runtime_error("JPEG slot is still occupied");
++        prepared_=false;
++        submit(&rgb,width,height,quality,sampling,optimized,download);
++    }
++    // Preparation owns a private immutable device copy. A normal start invalidates
++    // it even when dimensions match, so changing host inputs cannot reuse old RGB.
++    void prepare(const std::vector<unsigned char>& rgb,int width,int height,int quality,
++                 int sampling,bool optimized,bool download) {
++        start(rgb,width,height,quality,sampling,optimized,download);
++        try {
++            while(!poll())check(hipEventSynchronize(event_),"wait JPEG preparation stage");
++            (void)finish();prepared_=true;
++        }catch(...) {hipStreamSynchronize(stream_);phase_=Phase::Failed;prepared_=false;throw;}
++    }
++    void start_prepared() {
++        if(!idle()||!prepared_)throw std::runtime_error("JPEG slot has no idle prepared input");
++        submit(nullptr,width_,height_,quality_,sampling_,optimized_,download_);
++    }
++private:
++    void submit(const std::vector<unsigned char>* rgb,int width,int height,int quality,
++                int sampling,bool optimized,bool download) {
+         if(width<=0||height<=0||width>65535||height>65535||quality<1||quality>100||
+-           (sampling!=1&&sampling!=2)||rgb.size()!=size_t(width)*height*3)
++           (sampling!=1&&sampling!=2)||(rgb&&rgb->size()!=size_t(width)*height*3))
+             throw std::runtime_error("invalid JPEG slot input");
+         const int mx=(width+sampling*8-1)/(sampling*8),my=(height+sampling*8-1)/(sampling*8);
+         const size_t blocks=size_t(mx)*my*(sampling==2?6:3);
+@@ -133,7 +153,7 @@ public:
+             throw std::runtime_error("JPEG slot exceeds current transform index capacity");
+         phase_=Phase::Preparing;
+         try {
+-        width_=width;height_=height;sampling_=sampling;blocks_=int(blocks);
++        width_=width;height_=height;sampling_=sampling;blocks_=int(blocks);quality_=quality;
+         optimized_=optimized;download_=download;
+         if(jpeg_live_)jpeg_destroy_compress(&jpeg_);
+         jpeg_={};jpeg_.err=jpeg_std_error(&jpeg_errors_);jpeg_create_compress(&jpeg_);jpeg_live_=true;
+@@ -141,12 +161,15 @@ public:
+         jpeg_set_defaults(&jpeg_);jpeg_set_quality(&jpeg_,quality,TRUE);
+         jpeg_.comp_info[0].h_samp_factor=sampling;jpeg_.comp_info[0].v_samp_factor=sampling;
+         for(int c=1;c<3;++c) {jpeg_.comp_info[c].h_samp_factor=1;jpeg_.comp_info[c].v_samp_factor=1;}
+-        rgb_.ensure(rgb.size());host_rgb_.ensure(rgb.size());std::memcpy(host_rgb_.get(),rgb.data(),rgb.size());
++        if(rgb) {
++            rgb_.ensure(rgb->size());host_rgb_.ensure(rgb->size());
++            std::memcpy(host_rgb_.get(),rgb->data(),rgb->size());
++            check(hipMemcpyAsync(rgb_.get(),host_rgb_.get(),rgb->size(),hipMemcpyHostToDevice,stream_),"upload pinned RGB");
++        }
+         host_cosine_.ensure(64);cosine_.ensure(64);host_quant_.ensure(3*64);
+         host_result_.ensure(1);result_.ensure(1);
+         for(int x=0;x<8;++x)for(int u=0;u<8;++u)
+             host_cosine_.get()[x*8+u]=std::cos(float((2*x+1)*u)*3.14159265358979323846f/16.0f);
+-        check(hipMemcpyAsync(rgb_.get(),host_rgb_.get(),rgb.size(),hipMemcpyHostToDevice,stream_),"upload pinned RGB");
+         check(hipMemcpyAsync(cosine_.get(),host_cosine_.get(),64*sizeof(float),hipMemcpyHostToDevice,stream_),"upload pinned cosine");
+         std::array<int,3> bx{},by{};
+         for(int c=0;c<3;++c) {
+@@ -174,12 +197,13 @@ public:
+             event(Phase::Histogram);
+         } else entropy();
+         } catch(...) {
+-            hipStreamSynchronize(stream_);phase_=Phase::Failed;throw;
++            hipStreamSynchronize(stream_);phase_=Phase::Failed;prepared_=false;throw;
+         }
+     }
++public:
+     bool poll() {
+         try {return advance();}
+-        catch(...) {hipStreamSynchronize(stream_);phase_=Phase::Failed;throw;}
++        catch(...) {hipStreamSynchronize(stream_);phase_=Phase::Failed;prepared_=false;throw;}
+     }
+ private:
+     bool advance() {
+diff --git a/tools/moat/qualify_image_encoder_instances_v2.py b/tools/moat/qualify_image_encoder_instances_v2.py
+index a7fdbf0b7..ec4d88f5b 100644
+--- a/tools/moat/qualify_image_encoder_instances_v2.py
++++ b/tools/moat/qualify_image_encoder_instances_v2.py
+@@ -19,10 +19,12 @@ def sealed(row,member='result.json'):
+     if frozen!={k:v for k,v in row.items() if k!='evidence'}:raise ValueError('report differs from sealed '+row['evidence'])
+     return row['evidence']
+ 
+-def coverage_checks(profile,comparison,pipeline,pipeline_trace,prefix,oversize):
++def coverage_checks(profile,comparison,pipeline,pipeline_trace,prefix,oversize,runtime,preallocation):
+     output_cases=[c for c in profile['cases'] if c['output']]
+     slot_cases=json.loads((ROOT/'migration/rewrite/image-encoder-pipeline-profile.json').read_text())['cases']
+     prefix_cases=json.loads((ROOT/'migration/rewrite/image-checked-prefix-profile.json').read_text())['cases']
++    runtime_cases=json.loads((ROOT/'migration/rewrite/image-encoder-runtime-profile.json').read_text())['cases']
++    prepared_cases=json.loads((ROOT/'migration/rewrite/image-encoder-preallocation-profile.json').read_text())['cases']
+     passed=lambda group:all(r['status']=='PASSED' and r['checks'] and all(c['passed'] for c in r['checks']) for r in group)
+     return [
+         dict(check='all33-original-entry-JPEG-products-byte-exact-vs-serial-core-independent-BMP',passed=
+@@ -34,7 +36,14 @@ def coverage_checks(profile,comparison,pipeline,pipeline_trace,prefix,oversize):
+             [r['case'] for r in pipeline_trace]==['511x509-standard','511x509-optimized','device-only-0','device-only-1'] and passed(pipeline+pipeline_trace)),
+         dict(check='sixteen-prefix-cases-and-two-oversize-files',passed=
+             [r['case'] for r in prefix]==[c['id'] for c in prefix_cases] and len(prefix_cases)==16 and
+-            [r['mode'] for r in oversize]==['stuff','bits'] and passed(prefix+oversize))]
++            [r['mode'] for r in oversize]==['stuff','bits'] and passed(prefix+oversize)),
++        dict(check='all-sixteen-runtime-contracts',passed=
++            [r['case'] for r in runtime]==[c['id'] for c in runtime_cases] and len(runtime_cases)==16 and passed(runtime)),
++        dict(check='three-preallocation-traces-and26-products',passed=
++            [r['case'] for r in preallocation]==[c['id'] for c in prepared_cases] and len(prepared_cases)==3 and passed(preallocation) and
++            all(len(r['products'])==(c['jobs'] if c['download'] else 0) and
++                {p['name'] for p in r['products']}==({str(i)+'.jpg' for i in range(c['jobs'])} if c['download'] else set())
++                for r,c in zip(preallocation,prepared_cases)))]
+ 
+ def qualify():
+     build=read('image-encoder-instances-v2-build.json');runs=read('image-encoder-instances-v2-runs.json')
+@@ -44,14 +53,16 @@ def qualify():
+     faults=read('image-encoder-pipeline-faults.json');native=read('image-completion-encoder-native-reference.json')
+     negatives=read('image-encoder-instances-v2-qualification-negatives.json')
+     native_runs=read('image-completion-encoder-native.json')
++    runtime=read('image-encoder-runtime-runs.json');preallocation=read('image-encoder-preallocation-runs.json')
++    lifecycle=read('image-encoder-prepared-lifecycle.json')
+     profile_path=ROOT/'migration/rewrite/image-encoder-instances-v2-profile.json';profile=json.loads(profile_path.read_text())
+-    refs=[sealed(build,'build.json'),sealed(faults),sealed(native,'reference.json'),sealed(negatives)]
++    refs=[sealed(build,'build.json'),sealed(faults),sealed(native,'reference.json'),sealed(negatives),sealed(lifecycle)]
+     native_build=ROOT/native_runs['build_evidence']
+     native_build_result=json.loads((native_build/'result.json').read_text())
+     if audit_check(native_build) or native_build_result!={k:v for k,v in native_runs.items() if k not in ('build_evidence','cases')}|{'cases':[]}:
+         raise ValueError('native build evidence/report mismatch')
+     refs.append(native_runs['build_evidence'])
+-    for group in [runs,trace,comparison,pipeline,pipeline_trace,prefix,oversize]:refs += [sealed(row) for row in group]
++    for group in [runs,trace,comparison,pipeline,pipeline_trace,prefix,oversize,runtime,preallocation]:refs += [sealed(row) for row in group]
+     refs += [sealed(row) for row in native_runs['cases']]
+     for ref in refs:
+         deps=json.loads((ROOT/ref/'source.json').read_text())['dependencies']
+@@ -65,27 +76,30 @@ def qualify():
+         dict(check='all-seven-changed-input-jobs-correctly-associated',passed=sum(c['check'].startswith('only-corresponding-input-jobs-change-') and c['passed'] for r in trace for c in r['checks'])==7),
+         dict(check='actual-entry-device-only-no-payload-transfer',passed=any(c['check']=='entry-device-only-downloads-metadata-only' and c['passed'] for r in trace for c in r['checks'])),
+         dict(check='five-inflight-faults',passed=faults['status']=='PASSED' and all(c['passed'] for c in faults['checks'])),
+-        dict(check='complete-coverage-control-and11-corruptions-rejected',passed=negatives['status']=='PASSED' and len(negatives['checks'])==12 and all(c['passed'] for c in negatives['checks'])),
++        dict(check='complete-coverage-control-and16-corruptions-rejected',passed=negatives['status']=='PASSED' and len(negatives['checks'])==17 and all(c['passed'] for c in negatives['checks'])),
++        dict(check='prepared-input-owner-and-invalidation',passed=lifecycle['status']=='PASSED' and len(lifecycle['checks'])==2 and all(c['passed'] for c in lifecycle['checks'])),
+         dict(check='native-original-seven-cases-and19-independent-decodes-restored',passed=native['status']=='PASSED' and native['product_count']==19 and len(native_runs['cases'])==7 and all(c['passed'] for c in native['checks']))]
+-    checks+=coverage_checks(profile,comparison,pipeline,pipeline_trace,prefix,oversize)
++    checks+=coverage_checks(profile,comparison,pipeline,pipeline_trace,prefix,oversize,runtime,preallocation)
+     if not all(c['passed'] for c in checks):raise ValueError([c for c in checks if not c['passed']])
+     case_ids=['IMG-01/'+r['case'] for r in runs]+['IMG-01/all33-JPEG-byte-exact']+['IMG-01/trace-'+r['case'] for r in trace]+['IMG-01/changed-input-replay']
++    case_ids+=['IMG-01/runtime-'+r['case'] for r in runtime]+['IMG-01/'+r['case'] for r in preallocation]+['IMG-01/prepared-input-lifecycle']
+     devices=json.loads((ROOT/trace[0]['evidence']/'backend.observed.json').read_text())['devices']
+     e=Experiment('I5',SAMPLE,'composite-subset-qualification',sources=[__file__,source,profile_path,
+-        ROOT/'migration/rewrite/image-encoder-pipeline-profile.json',ROOT/'migration/rewrite/image-checked-prefix-profile.json',*[ROOT/n for n in deps]])
++        ROOT/'migration/rewrite/image-encoder-pipeline-profile.json',ROOT/'migration/rewrite/image-checked-prefix-profile.json',
++        ROOT/'migration/rewrite/image-encoder-runtime-profile.json',ROOT/'migration/rewrite/image-encoder-preallocation-profile.json',*[ROOT/n for n in deps]])
+     q=dict(kind=KIND,status='PASSED',contract_status='PARTIAL',sample_id=SAMPLE,
+         implementation=str(source.relative_to(ROOT)),implementation_sha256=digest(source),source_commit=git('rev-parse','HEAD').strip(),
+         case_count=len(case_ids),case_ids=case_ids,checks=checks,devices=devices,dependencies=deps,
+         evidence_references=refs,rocm_evidence=trace[0]['evidence'],cuda_evidence=native_runs['cases'][0]['evidence'],
+         comparison_mode='ASYNC_GPU_JPEG_EXACT_SERIAL_REGRESSION_AND_NATIVE_BASELINE_OBSERVATION',
+-        remaining='Full held-out native/CPU pixel equivalence; j0/large mixed/error contracts; 64-bit transform indices; original preallocation and timing/performance; committed cold rebuild and final review.')
++        remaining='Full held-out native/CPU pixel equivalence; maximum-dimension/64-bit transform indices; nonprofiled latency/throughput distributions and peak memory; prefix dispatch measurements; committed cold rebuild and final review.')
+     write(e.path/'qualification.json',q);q['qualification_id']=e.id
+     q['evidence']=e.finish('PASSED',dict(status='PASSED',checks=checks));write(REPORT,q)
+-    record('IMG-01','正式入口20项子集资格封存：15 CLI、33产品、3真实多线程trace、变化输入及组件故障/传输证明；完整保留集/大索引/性能/冷构建未完成，保持PARTIAL。',[q['evidence']]);print(q['evidence'])
++    record('IMG-01','正式入口40项子集资格封存：原20项加16组线程/混合尺寸/错误合同、3预分配trace和固定输入生命周期；完整保留集/大索引/性能/冷构建未完成，保持PARTIAL。',[q['evidence']]);print(q['evidence'])
+ 
+ def publish():
+     q=json.loads(REPORT.read_text());proof=ROOT/q['evidence'];frozen=json.loads((proof/'qualification.json').read_text())
+-    if (q['kind']!=KIND or q['contract_status']!='PARTIAL' or q['case_count']!=20 or
++    if (q['kind']!=KIND or q['contract_status']!='PARTIAL' or q['case_count']!=40 or
+         {k:v for k,v in q.items() if k not in ('evidence','qualification_id')}!=frozen or
+         not anchored_seal(proof,publication(proof),qualification=True) or
+         any(not anchored_seal(ROOT/ref,publication(ROOT/ref)) for ref in q['evidence_references']) or
+@@ -94,13 +108,13 @@ def publish():
+     proposed=dict(sample,selected_validation=q)
+     checked=inspect(proposed)
+     if checked['status']!='PASSED':raise ValueError(checked['errors'])
+-    missing=['IMG-01/held-out-native-CPU-equivalence','IMG-01/j0-large-mixed-error-contracts','IMG-01/64bit-transform-indices',
+-             'IMG-01/preallocation-and-performance','IMG-10/committed-cold-rebuild-final-review']
++    missing=['IMG-01/held-out-native-CPU-equivalence','IMG-01/64bit-transform-indices',
++             'IMG-01/performance-distributions-peak-memory','IMG-01/prefix-dispatch-measurements','IMG-10/committed-cold-rebuild-final-review']
+     sample.update(status='PARTIAL',level='L4',reason_code='VALIDATED_I5_ASYNC_GPU_JPEG_INSTANCES_SUBSET',selected_validation=q,
+         actual_library='Project HIP baseline/optimized JPEG color, FDCT, Huffman, checked parallel prefix, pinned buffers and event-driven slots; CPU markers/DHT design',
+         backend_library='HIP async full baseline/optimized JPEG + CPU libjpeg-turbo DHT/header design',
+         equivalence='GPU_ASYNC_JPEG_WITH_BOUNDED_CPU_THREAD_CALIBRATION',required_cases=q['case_ids']+missing,passed_cases=q['case_ids'],
+-        reason='原始C++入口15组CLI、33件JPEG同输入逐字节回归、3组真实多线程trace与首图变化重放通过；pinned/device工作区复用、checked并行prefix、事件推进及设备模式仅回传元数据已验证。质量/n/r夹取与原始合同一致；自动线程标定为有界搜索变体。完整保留集、j0/大尺寸/错误组合、64位transform索引、预分配计时/性能和冷构建仍待完成，保持PARTIAL。',
++        reason='原20项子集及新增16组线程/状态/混合尺寸/错误合同通过；3组单图预分配trace证实每slot每run仅一次RGB上传、稳态零扩容及全部请求实际GPU编码，26件产品逐字节回归。固定输入所有权和重新准备通过，准备/编码/端到端计时分开记录。完整保留集、最大尺寸64位索引、无profiler性能分布/峰值内存、prefix路径阈值和冷构建待完成，保持PARTIAL。',
+         cuda_baseline='PASSED',cuda_baseline_scope='Unmodified original CMake/C++20; seven bounded native CLI cases,19 independent decoded products on physical5090 GPU1.',
+         cuda_baseline_reason='历史构建失败保留；使用原始CMake所需C++20重新构建并运行成功。',
+         cuda_comparison='BLOCKED',cuda_comparison_mode='NATIVE_BASELINE_RESTORED_FULL_EQUIVALENCE_PENDING',
+@@ -114,16 +128,18 @@ def publish():
+         if ref not in sample['evidence']:sample['evidence'].append(ref)
+     write(ROOT/'migration/samples.yaml',catalog)
+     write(ROOT/'migration/reports/image-encoder-instances-v2-publication.json',dict(status='PUBLISHED_PARTIAL',sample_id=SAMPLE,qualification=q['evidence']))
+-    record('IMG-01','已将新异步编码器20项当前子集资格发布到主表；原始CUDA基线恢复，完整等价/性能等欠项明示，图像整例计数仍13/26。',[q['evidence'],'migration/reports/image-encoder-instances-v2-publication.json'])
++    record('IMG-01','已将异步编码器40项当前子集资格发布到主表；线程/混合尺寸/错误合同和单图预分配证据补齐，图像整例计数仍13/26。',[q['evidence'],'migration/reports/image-encoder-instances-v2-publication.json'])
+     print('PUBLISHED_PARTIAL')
+ 
+ def negative():
+     profile=json.loads((ROOT/'migration/rewrite/image-encoder-instances-v2-profile.json').read_text())
+     names=['image-encoder-instances-v2-comparison.json','image-encoder-pipeline-runs.json',
+-           'image-encoder-pipeline-trace.json','image-checked-prefix-runs.json','image-checked-prefix-oversize.json']
++           'image-encoder-pipeline-trace.json','image-checked-prefix-runs.json','image-checked-prefix-oversize.json',
++           'image-encoder-runtime-runs.json','image-encoder-preallocation-runs.json']
+     groups=[read(n) for n in names]
+     e=Experiment('I5','async-encoder-qualification-coverage-negatives','CPU-negative',sources=[__file__,*[ROOT/'migration/reports'/n for n in names],
+-        ROOT/'migration/rewrite/image-encoder-instances-v2-profile.json',ROOT/'migration/rewrite/image-encoder-pipeline-profile.json',ROOT/'migration/rewrite/image-checked-prefix-profile.json'])
++        ROOT/'migration/rewrite/image-encoder-instances-v2-profile.json',ROOT/'migration/rewrite/image-encoder-pipeline-profile.json',ROOT/'migration/rewrite/image-checked-prefix-profile.json',
++        ROOT/'migration/rewrite/image-encoder-runtime-profile.json',ROOT/'migration/rewrite/image-encoder-preallocation-profile.json'])
+     checks=[dict(check='complete-original-coverage-accepted',passed=all(c['passed'] for c in coverage_checks(profile,*groups)))]
+     for index,name in enumerate(names):
+         for mutation in ('duplicate-sealed-case','missing-case'):
+@@ -133,9 +149,11 @@ def negative():
+             checks.append(dict(check=mutation+'-'+name,passed=not all(c['passed'] for c in coverage_checks(profile,*changed))))
+     changed=copy.deepcopy(groups);changed[0][0]['products'].pop()
+     checks.append(dict(check='missing-compared-JPEG-rejected',passed=not all(c['passed'] for c in coverage_checks(profile,*changed))))
++    changed=copy.deepcopy(groups);changed[-1][0]['products'].pop()
++    checks.append(dict(check='missing-prepared-JPEG-rejected',passed=not all(c['passed'] for c in coverage_checks(profile,*changed))))
+     status='PASSED' if all(c['passed'] for c in checks) else 'FAILED';row=dict(status=status,checks=checks)
+     write(e.path/'result.json',row);row['evidence']=e.finish('PASSED' if status=='PASSED' else 'VALIDATOR_GAP',dict(status=status,checks=checks));write(ROOT/'migration/reports/image-encoder-instances-v2-qualification-negatives.json',row)
+-    record('IMG-01','复审发现的重复已封存case覆盖漏洞已修复：完整冻结ID/逐case产品集合绑定；11项删减/重复反向检查 '+status+'。',[row['evidence']]);print(status)
++    record('IMG-01','完整冻结ID/逐case产品集合绑定扩展到运行与预分配：16项删减/重复反向检查 '+status+'。',[row['evidence']]);print(status)
+ 
+ if __name__=='__main__':
+     p=argparse.ArgumentParser();p.add_argument('action',choices=['qualify','publish','negative']);args=p.parse_args();globals()[args.action]()

@@ -1,0 +1,1 @@
+Test rocm-original-entry for encoder-remaining-runtime, case three-runs. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261113T033315.363651Z-I5-rocm-build-84cd74664a.

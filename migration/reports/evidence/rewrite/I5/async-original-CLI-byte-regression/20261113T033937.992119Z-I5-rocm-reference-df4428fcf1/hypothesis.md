@@ -1,0 +1,1 @@
+Test rocm-reference for async-original-CLI-byte-regression, case quality-clamp-high. Preserve the exact input and source identity. Process success is an observation; numerical and execution-contract checks must independently establish correctness. Parent attempt: 20261113T033900.079969Z-I5-rocm-original-candidate-217b83fb45.

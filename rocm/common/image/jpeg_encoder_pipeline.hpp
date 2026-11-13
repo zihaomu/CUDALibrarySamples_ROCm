@@ -53,9 +53,9 @@ private:
     jpeg_error_mgr jpeg_errors_{};
     bool jpeg_live_ = false;
     Phase phase_ = Phase::Idle;
-    int width_=0,height_=0,sampling_=0,blocks_=0;
+    int width_=0,height_=0,sampling_=0,blocks_=0,quality_=0;
     unsigned raw_bytes_=0,stuffed_bytes_=0;
-    bool optimized_=false,download_=false;
+    bool optimized_=false,download_=false,prepared_=false;
     std::vector<unsigned char> header_;
     Buffer<unsigned char> rgb_,planes_[3],components_,bits_,packed_,stuffed_;
     Buffer<short> coefficients_[3],scan_;
@@ -122,8 +122,28 @@ public:
     void start(const std::vector<unsigned char>& rgb,int width,int height,int quality,
                int sampling,bool optimized,bool download) {
         if(!idle())throw std::runtime_error("JPEG slot is still occupied");
+        prepared_=false;
+        submit(&rgb,width,height,quality,sampling,optimized,download);
+    }
+    // Preparation owns a private immutable device copy. A normal start invalidates
+    // it even when dimensions match, so changing host inputs cannot reuse old RGB.
+    void prepare(const std::vector<unsigned char>& rgb,int width,int height,int quality,
+                 int sampling,bool optimized,bool download) {
+        start(rgb,width,height,quality,sampling,optimized,download);
+        try {
+            while(!poll())check(hipEventSynchronize(event_),"wait JPEG preparation stage");
+            (void)finish();prepared_=true;
+        }catch(...) {hipStreamSynchronize(stream_);phase_=Phase::Failed;prepared_=false;throw;}
+    }
+    void start_prepared() {
+        if(!idle()||!prepared_)throw std::runtime_error("JPEG slot has no idle prepared input");
+        submit(nullptr,width_,height_,quality_,sampling_,optimized_,download_);
+    }
+private:
+    void submit(const std::vector<unsigned char>* rgb,int width,int height,int quality,
+                int sampling,bool optimized,bool download) {
         if(width<=0||height<=0||width>65535||height>65535||quality<1||quality>100||
-           (sampling!=1&&sampling!=2)||rgb.size()!=size_t(width)*height*3)
+           (sampling!=1&&sampling!=2)||(rgb&&rgb->size()!=size_t(width)*height*3))
             throw std::runtime_error("invalid JPEG slot input");
         const int mx=(width+sampling*8-1)/(sampling*8),my=(height+sampling*8-1)/(sampling*8);
         const size_t blocks=size_t(mx)*my*(sampling==2?6:3);
@@ -133,7 +153,7 @@ public:
             throw std::runtime_error("JPEG slot exceeds current transform index capacity");
         phase_=Phase::Preparing;
         try {
-        width_=width;height_=height;sampling_=sampling;blocks_=int(blocks);
+        width_=width;height_=height;sampling_=sampling;blocks_=int(blocks);quality_=quality;
         optimized_=optimized;download_=download;
         if(jpeg_live_)jpeg_destroy_compress(&jpeg_);
         jpeg_={};jpeg_.err=jpeg_std_error(&jpeg_errors_);jpeg_create_compress(&jpeg_);jpeg_live_=true;
@@ -141,12 +161,15 @@ public:
         jpeg_set_defaults(&jpeg_);jpeg_set_quality(&jpeg_,quality,TRUE);
         jpeg_.comp_info[0].h_samp_factor=sampling;jpeg_.comp_info[0].v_samp_factor=sampling;
         for(int c=1;c<3;++c) {jpeg_.comp_info[c].h_samp_factor=1;jpeg_.comp_info[c].v_samp_factor=1;}
-        rgb_.ensure(rgb.size());host_rgb_.ensure(rgb.size());std::memcpy(host_rgb_.get(),rgb.data(),rgb.size());
+        if(rgb) {
+            rgb_.ensure(rgb->size());host_rgb_.ensure(rgb->size());
+            std::memcpy(host_rgb_.get(),rgb->data(),rgb->size());
+            check(hipMemcpyAsync(rgb_.get(),host_rgb_.get(),rgb->size(),hipMemcpyHostToDevice,stream_),"upload pinned RGB");
+        }
         host_cosine_.ensure(64);cosine_.ensure(64);host_quant_.ensure(3*64);
         host_result_.ensure(1);result_.ensure(1);
         for(int x=0;x<8;++x)for(int u=0;u<8;++u)
             host_cosine_.get()[x*8+u]=std::cos(float((2*x+1)*u)*3.14159265358979323846f/16.0f);
-        check(hipMemcpyAsync(rgb_.get(),host_rgb_.get(),rgb.size(),hipMemcpyHostToDevice,stream_),"upload pinned RGB");
         check(hipMemcpyAsync(cosine_.get(),host_cosine_.get(),64*sizeof(float),hipMemcpyHostToDevice,stream_),"upload pinned cosine");
         std::array<int,3> bx{},by{};
         for(int c=0;c<3;++c) {
@@ -174,12 +197,13 @@ public:
             event(Phase::Histogram);
         } else entropy();
         } catch(...) {
-            hipStreamSynchronize(stream_);phase_=Phase::Failed;throw;
+            hipStreamSynchronize(stream_);phase_=Phase::Failed;prepared_=false;throw;
         }
     }
+public:
     bool poll() {
         try {return advance();}
-        catch(...) {hipStreamSynchronize(stream_);phase_=Phase::Failed;throw;}
+        catch(...) {hipStreamSynchronize(stream_);phase_=Phase::Failed;prepared_=false;throw;}
     }
 private:
     bool advance() {

@@ -1,0 +1,273 @@
+{
+  "status": "FROZEN",
+  "old_inputs": [
+    {
+      "path": "migration/fixtures/image-jpeg-encoder-instances/img1.bmp",
+      "sha256": "a2bd2bf9b84787cb5c84d75064efdb8010593152a124d198e686ae1f924d8894",
+      "width": 17,
+      "height": 19,
+      "source_rgb_sha256": "f52c456b38d60e7b59164b4a5226716c6907ba9ee7227b8df6ed14989440b386"
+    },
+    {
+      "path": "migration/fixtures/image-jpeg-encoder-instances/img2.bmp",
+      "sha256": "4c698078e2feaa76c4d9c1840deb49483cb977d758b3729b135fa06b8e7d51e8",
+      "width": 32,
+      "height": 24,
+      "source_rgb_sha256": "3dadf49dab9589c4e45b469d21cbf57052c03cba1c0364a49dc1ccd1a8747f80"
+    },
+    {
+      "path": "migration/fixtures/image-jpeg-encoder-instances/img10.bmp",
+      "sha256": "155f9b0c6f9d55991a7aa8a7f6e4f9daa7a1f683db27812c202a37e49eeb5f79",
+      "width": 63,
+      "height": 47,
+      "source_rgb_sha256": "75f1066dacafbe9bd6724d444976e2e52b1120ffd62ac5fa6ea431c7f483d038"
+    }
+  ],
+  "mixed_inputs": [
+    {
+      "path": "migration/fixtures/image-encoder-runtime/img1.bmp",
+      "sha256": "8cb3d00b6b04d28291aa888b35e7e4fd7caffbe478af6aa7e54022aefc9dbcb8",
+      "width": 1,
+      "height": 1,
+      "seed": 15871,
+      "rgb_sha256": "4f27979cba90c524ce19bfaa9d955c3a07193cb021bb3516f3e66ae37bfaeab3"
+    },
+    {
+      "path": "migration/fixtures/image-encoder-runtime/img2.bmp",
+      "sha256": "5a1d2794d9b805147d71dee5cf207d1c1c3b9abd9418c19be71d50cdb486fe9b",
+      "width": 513,
+      "height": 511,
+      "seed": 15872,
+      "rgb_sha256": "e81b586f2c38b7267445c4882e42f202f423ea9d0b7b7195c6ac19219d66cdbc"
+    },
+    {
+      "path": "migration/fixtures/image-encoder-runtime/img10.bmp",
+      "sha256": "bb2ed9e60a93e79a066b328b915b803cc985e56e6749316fb98c106e3d9f7b0b",
+      "width": 19,
+      "height": 17,
+      "seed": 15873,
+      "rgb_sha256": "e1f7722b9495f62529de7c5454eaa3282b30a1af3c8f0ca25c258930434246d1"
+    }
+  ],
+  "cases": [
+    {
+      "id": "n0-s0-j1",
+      "args": [
+        "-n",
+        "0",
+        "-s",
+        "0",
+        "-j",
+        "1"
+      ],
+      "count": 3,
+      "write": true,
+      "input": "old",
+      "rc": 0
+    },
+    {
+      "id": "threads-exceed-states",
+      "args": [
+        "-n",
+        "1",
+        "-s",
+        "1",
+        "-j",
+        "4"
+      ],
+      "count": 4,
+      "write": true,
+      "input": "old",
+      "source_count": 1,
+      "rc": 0
+    },
+    {
+      "id": "states-exceed-threads",
+      "args": [
+        "-n",
+        "1",
+        "-s",
+        "4",
+        "-j",
+        "1"
+      ],
+      "count": 4,
+      "write": true,
+      "input": "old",
+      "source_count": 1,
+      "rc": 0
+    },
+    {
+      "id": "three-runs",
+      "args": [
+        "-r",
+        "3",
+        "-j",
+        "2"
+      ],
+      "count": 3,
+      "write": true,
+      "input": "old",
+      "rc": 0
+    },
+    {
+      "id": "j0-hardware-concurrency",
+      "args": [
+        "-j",
+        "0"
+      ],
+      "count": "CPU_THREADS",
+      "write": false,
+      "input": "old",
+      "rc": 0
+    },
+    {
+      "id": "gpu-and-unavailable-hardware",
+      "args": [
+        "-j",
+        "2",
+        "-b",
+        "gpu",
+        "hardware"
+      ],
+      "count": 3,
+      "write": true,
+      "input": "old",
+      "rc": 0
+    },
+    {
+      "id": "mixed-size-slot-growth-reuse",
+      "args": [
+        "-j",
+        "1",
+        "-s",
+        "1",
+        "-n",
+        "17"
+      ],
+      "count": 17,
+      "write": true,
+      "input": "mixed",
+      "rc": 0
+    },
+    {
+      "id": "single-large-repeated",
+      "args": [
+        "-j",
+        "1",
+        "-s",
+        "1",
+        "-n",
+        "19"
+      ],
+      "count": 19,
+      "write": true,
+      "input": "single",
+      "rc": 0
+    },
+    {
+      "id": "truncated-BMP",
+      "args": [
+        "-j",
+        "1"
+      ],
+      "count": 0,
+      "write": true,
+      "input": "truncated",
+      "rc": 1
+    },
+    {
+      "id": "DIB-length-beyond-file",
+      "args": [
+        "-j",
+        "1"
+      ],
+      "count": 0,
+      "write": true,
+      "input": "invalid-DIB",
+      "rc": 1
+    },
+    {
+      "id": "zero-width-BMP",
+      "args": [
+        "-j",
+        "1"
+      ],
+      "count": 0,
+      "write": true,
+      "input": "zero-width",
+      "rc": 1
+    },
+    {
+      "id": "invalid-numeric-CLI",
+      "args": [
+        "-j",
+        "invalid"
+      ],
+      "count": 0,
+      "write": true,
+      "input": "old",
+      "rc": 1
+    },
+    {
+      "id": "empty-directory",
+      "args": [
+        "-j",
+        "1"
+      ],
+      "count": 0,
+      "write": true,
+      "input": "empty",
+      "rc": 1
+    },
+    {
+      "id": "output-path-is-file",
+      "args": [
+        "-j",
+        "1"
+      ],
+      "count": 0,
+      "write": true,
+      "input": "old",
+      "rc": 1,
+      "output_file": true
+    },
+    {
+      "id": "write-failure-after-GPU",
+      "args": [
+        "-j",
+        "2"
+      ],
+      "count": 0,
+      "write": true,
+      "input": "old",
+      "rc": 1,
+      "output_obstruction": true
+    },
+    {
+      "id": "truncated-last-mixed-input",
+      "args": [
+        "-j",
+        "2",
+        "-n",
+        "7"
+      ],
+      "count": 0,
+      "write": true,
+      "input": "bad-last",
+      "rc": 1
+    }
+  ],
+  "gates": {
+    "complete_output_set": true,
+    "independent_BMP_read_and_serial_GPU_byte_reference": true,
+    "j0_matches_online_CPU_count": true,
+    "failed_batches_never_print_PASS": true
+  },
+  "notes": [
+    "Mid-batch errors may retain successfully written earlier JPEGs; no completed-batch claim is allowed. All partial products are recorded.",
+    "Malformed DIB length must be rejected before pixel interpretation.",
+    "Preallocation timing, held-out native equivalence and maximum dimensions remain separate gates."
+  ],
+  "evidence": "migration/reports/evidence/rewrite/I5/encoder-remaining-runtime-contract/20261113T032925.043389Z-I5-CPU-contract-1d35c27820"
+}
