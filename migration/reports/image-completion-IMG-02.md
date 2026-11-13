@@ -77,3 +77,11 @@ NPP+ 12.4.0 在 `heldout-ramp-x`、`heldout-ramp-y`、`heldout-ramp-diagonal` �
 冷验证器同时核对目录边界、raw/归档 seal、实际命令与二进制、源码提交和完整唯一子实验集合。先前的路径类型失败以及缺少热/冷身份绑定的中间证明均保留历史，当前资格仅选择修订后的严格冷记录。
 
 最终资格反向控制已有 40 项通过：额外拒绝真实 JPEG review 被用于 watershed、同一真实控制报告替代多个控制套件、遗漏 label/compact/boundary 检查、改名 native 模式、重复 CPU 输入或重放产品等。当前代码复审与不可变资格签发完成后才发布支持数。
+
+## 当前发布结论
+
+**IMG-02 COMPLETED**。两个原始样例已发布为 `PASSED / COMPLETE / ALGORITHM_VARIANT`；NPP资格285项，NPP+资格281项，公共60输入矩阵与24解析诊断在各自资格中共享，不能相加成独立算子数。资格封存提交 `bc7bb06a1718169a66f3e47355e9ae2d6f9476d1`；当前冷源码提交 `a481437db1dc0c8897c5ebc1f3ff3fbc5ad80cca`。
+
+图像现为16/26整例通过、6部分、4未通过；全项目255 PASSED、21 PARTIAL、363 FAILED。详细资格见 [完整资格](image-watershed-completion-qualifications.json)，原生例外见 [冻结修订](../rewrite/image-watershed-native-reference-amendment.json)。GPU算法与文件产品范围已完成；性能未声称优于原生，未验架构不自动获得资格。
+
+复现顺序：用项目ROCm10.1 launcher运行 `image_watershed_completion_entries.py build/run`、`image_watershed_v2.py build`、`image_watershed_completion.py amd --mode <布局>`、`image_watershed_entry_runtime.py trace/replay/negative`、`image_watershed_v2_controls.py`；CPU参考使用 `build/image-cpu-venv/bin/python`，运行 `image_watershed_completion_reference.py --amended --mode <布局>`、`image_watershed_entry_reference.py`、`image_watershed_replay_reference.py`。原生两库用 `image_watershed_completion.py native [--plus]`；精确环境、命令、输入及SDK SHA在各不可变实验中。重新生成活动报告会改变其身份，必须重新验收其消费者并生成新资格，不能修改旧封存目录。

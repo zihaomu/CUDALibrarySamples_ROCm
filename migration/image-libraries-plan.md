@@ -4,7 +4,7 @@
 
 2026-11-13 后续设计：[剩余图像模块完整实现计划](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/image-completion-plan.md)依据当前 13/26 整例通过状态，将剩余工作细化为 IMG-00–IMG-10，列出13欠项、验收门槛和共享代码回归要求。该文档为后续计划，不新增支持数；下方启动基线和历史执行记录保留。
 
-截至 2026-11-13，本计划四模块 **13/26 整例通过、9 PARTIAL、4 FAILED**：NPP 8/9、NPP+ 5/6、nvJPEG 0/7、nvJPEG2000 0/4。I3 两个 watershed 已有完整 HIP 文件入口及独立 CPU 逐字节结果，但原生分割/边界语义差异显著，保持 PARTIAL；I4–I8 JPEG/JPEG2000 整例目标仍未完成。全项目为 252 PASSED、24 PARTIAL、363 FAILED。详细资格及失败原因见项目的 `migration/reports/image-libraries-progress.md` 和 `migration/reports/support-log-index.md`。
+截至 2026-11-13，本计划四模块 **16/26 整例通过、6 PARTIAL、4 FAILED**：NPP 9/9、NPP+ 6/6、nvJPEG 1/7、nvJPEG2000 0/4。I3 两个 watershed 已完成原入口与全GPU实现，按公开算法变体验收；marker分区差异及NPP+三个固定坡度的原生不一致保留详细记录。I4–I8 JPEG/JPEG2000 剩余整例目标仍未完成。全项目为 255 PASSED、21 PARTIAL、363 FAILED。详细资格及失败原因见项目的 `migration/reports/image-libraries-progress.md` 和 `migration/reports/support-log-index.md`。
 
 ## 1. 目标和“完整支持”的含义
 
@@ -241,7 +241,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | [NPP/findContour/findContour.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP/findContour/findContour.cpp) | PASSED | I2 | Project HIP equal-value 8-connected CCL + directed cell-edge loops + GPU ordering and geometry rasterization |
 | [NPP/houghLines/houghLines.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP/houghLines/houghLines.cpp) | PASSED | I3 | Project HIP C1 Canny plus GPU Hough votes and peak extraction |
 | [NPP/opencvBenchmark/opencvBenchmark.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP/opencvBenchmark/opencvBenchmark.cpp) | PASSED | I3 | Project HIP Gaussian/Canny/resize/RGB gray plus pinned OpenCV 4.12 CPU benchmark |
-| [NPP/watershedSegmentation/watershedSegmentation.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP/watershedSegmentation/watershedSegmentation.cpp) | PARTIAL | I3 | 项目 HIP 八邻域下降/标签与边界输出；原图与独立 CPU 逐字节通过，原生 NPP 分割/平台区和边界差异待修正；[实测与日志](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/reports/image-watershed.md) |
+| [NPP/watershedSegmentation/watershedSegmentation.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP/watershedSegmentation/watershedSegmentation.cpp) | PASSED | I3 | 项目 HIP 严格下降/有向根图标签、GPU压紧与完整边界输出；完整原入口、60输入四布局及固定提交冷验收通过；marker算法变体与三项NPP+原生差异明确保留；[实测与日志](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/reports/image-completion-IMG-02.md) |
 | [NPP/distanceTransform/distanceTransform.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP/distanceTransform/distanceTransform.cpp) | PASSED | I9（回归守护） | HIP exact separable Euclidean distance/Voronoi/integer truncation kernels |
 | [NPP/templateMatching/templateMatching.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP/templateMatching/templateMatching.cpp) | PASSED | I9（回归守护） | HIP NCC/full original CLI/RAW input/PGM annotation/HIP-event timing |
 | [NPP+/cannyEdgeDetectorPython/cannyEdgeDetector.py](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP%2B/cannyEdgeDetectorPython/cannyEdgeDetector.py) | PASSED | I1 | Project HIP Canny + ROCm Torch (C1 Sobel3/L2/local threshold) |
@@ -249,14 +249,14 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | [NPP+/distanceTransform/unsignedAndSignedDistanceTransformNPPPlus.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP%2B/distanceTransform/unsignedAndSignedDistanceTransformNPPPlus.cpp) | PASSED | I2 | Project HIP exact unsigned EDT + compact threshold-crossing signed site set + GPU FP64 search, deterministic Voronoi and visualization |
 | [NPP+/findContour/findContourNPPPlus.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP%2B/findContour/findContourNPPPlus.cpp) | PASSED | I2 | Project HIP equal-value 8-connected CCL + directed cell-edge loops + GPU ordering and geometry rasterization |
 | [NPP+/floodFill/floodFillVariousRegionTypesNPPPlus.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP%2B/floodFill/floodFillVariousRegionTypesNPPPlus.cpp) | PASSED | I3 | Project HIP fixed-seed RGB flood fill and shared GPU connectivity |
-| [NPP+/watershedSegmentation/watershedSegmentationNPPPlus.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP%2B/watershedSegmentation/watershedSegmentationNPPPlus.cpp) | PARTIAL | I3 | 项目 HIP 八邻域下降/标签与边界输出；原图与独立 CPU 逐字节通过，原生 NPP 分割/平台区和边界差异待修正；[实测与日志](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/reports/image-watershed.md) |
+| [NPP+/watershedSegmentation/watershedSegmentationNPPPlus.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/NPP%2B/watershedSegmentation/watershedSegmentationNPPPlus.cpp) | PASSED | I3 | 项目 HIP 严格下降/有向根图标签、GPU压紧与完整边界输出；完整原入口、60输入四布局及固定提交冷验收通过；marker算法变体与三项NPP+原生差异明确保留；[实测与日志](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/migration/reports/image-completion-IMG-02.md) |
 | [nvJPEG/nvJPEG-Decoder-Backend-ROI/nvJPEGROIDecode.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/nvJPEG/nvJPEG-Decoder-Backend-ROI/nvJPEGROIDecode.cpp) | PARTIAL | I4 | Probed rocJPEG/VCN + HIP baseline/progressive decoder and real framework |
 | [nvJPEG/nvJPEG-Decoder-MultipleInstances/nvJPEGDecMultipleInstances.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/nvJPEG/nvJPEG-Decoder-MultipleInstances/nvJPEGDecMultipleInstances.cpp) | PARTIAL | I4 | Probed rocJPEG/VCN + HIP baseline/progressive decoder and real framework |
 | [nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/nvJPEG/nvJPEG-Decoder/nvjpegDecoder.cpp) | PARTIAL | I4 | Probed rocJPEG/VCN + HIP baseline/progressive decoder and real framework |
 | [nvJPEG/nvJPEG-Decoder/tests/test_decoder.py](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/nvJPEG/nvJPEG-Decoder/tests/test_decoder.py) | PARTIAL | I4 | Probed rocJPEG/VCN + HIP baseline/progressive decoder and real framework |
 | [nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/nvJPEG/Image-Resize-WaterMark/imageResizeWatermark.cpp) | PARTIAL | I5 | HIP JPEG encoder + shared GPU resize/alpha; full multi-instance scheduling |
 | [nvJPEG/Image-Resize/imageResize.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/nvJPEG/Image-Resize/imageResize.cpp) | PARTIAL | I5 | HIP JPEG encoder + shared GPU resize/alpha; full multi-instance scheduling |
-| [nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp) | PARTIAL | I5 | HIP JPEG encoder + shared GPU resize/alpha; full multi-instance scheduling |
+| [nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/nvJPEG/nvJPEG-Encoder-MultipleInstances/nvJPEGEncMultipleInstances.cpp) | PASSED | I5 | Project HIP full baseline JPEG encoder, checked adaptive prefix, asynchronous pinned/device slots; CPU markers and optimized DHT design |
 | [nvJPEG2000/nvJPEG2000-Decoder-Pipelined/nvjpeg2k_dec_pipelined.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/nvJPEG2000/nvJPEG2000-Decoder-Pipelined/nvjpeg2k_dec_pipelined.cpp) | FAILED | I8 | Project HIP JPEG2000 MQ/HT codec + header/container orchestration |
 | [nvJPEG2000/nvJPEG2000-Decoder-Tile-Partial/nvjpeg2k_decode_tile_partial.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/nvJPEG2000/nvJPEG2000-Decoder-Tile-Partial/nvjpeg2k_decode_tile_partial.cpp) | FAILED | I8 | Project HIP JPEG2000 MQ/HT codec + header/container orchestration |
 | [nvJPEG2000/nvJPEG2000-Decoder/nvjpeg2k_decode.cpp](https://github.com/zihaomu/CUDALibrarySamples_ROCm/blob/rocm/nvJPEG2000/nvJPEG2000-Decoder/nvjpeg2k_decode.cpp) | FAILED | I8 | Project HIP JPEG2000 MQ/HT codec + header/container orchestration |
@@ -284,7 +284,7 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 
 ## 实时执行记录
 
-最近更新：2026-11-13T08:02:31.226180+00:00。26入口当前14通过/8部分/4失败；实验运行成功不会直接升级支持数。
+最近更新：2026-11-13T08:05:40.440447+00:00。26入口当前16通过/6部分/4失败；实验运行成功不会直接升级支持数。
 
 | 时间 | 阶段 | 事件 / 结果 | 证据 |
 | --- | --- | --- | --- |
@@ -4486,5 +4486,8 @@ AMD 固定现有 ROCm10.1.0 镜像（SHA见项目锁）、gfx1201、HIP7.16；�
 | 2026-11-13T08:01:05.939616+00:00 | I3 | IMG-02：完整资格/冷检出身份反向检查：PASSED；热运行替换、越界路径、错构建/二进制/提交、缺失或重复子实验及扩大原生例外均检查。 | `migration/reports/evidence/rewrite/I3/watershed-complete-publication-and-cold-binding-controls/20261113T080103.477954Z-I3-CPU-controls-3a20ddb4e6` |
 | 2026-11-13T08:02:24.306330+00:00 | I3 | IMG-02：包含路径修复经独立补充复审通过，维持Approve；40项控制绑定当前qualifier，6项实际编译依赖完整。重新签发资格，无需重复GPU计算。 | `migration/reports/evidence/rewrite/I3/watershed-completion-independent-final-review/20261113T080222.950631Z-I3-review-ffa56b1a43` |
 | 2026-11-13T08:02:31.226180+00:00 | I3 | IMG-02：两原入口完整Watershed资格已生成，待Git封存后发布；保留marker算法变体与三项NPP+原生差异，不标为原生全精确。 | `migration/reports/evidence/rewrite/I3/NPP_watershedSegmentation__watershedSegmentation.cpp/20261113T080228.227280Z-I3-complete-original-watershed-qualification-90bfdff64a`；`migration/reports/evidence/rewrite/I3/NPP__watershedSegmentation__watershedSegmentationNPPPlus.cpp/20261113T080229.885537Z-I3-complete-original-watershed-qualification-c5be57a736` |
+| 2026-11-13T08:03:15.472585+00:00 | I3 | IMG-02：两原始Watershed样例已由固定Git资格发布为整例通过；图像16/26。完整支持按声明算法变体成立，原生分区差异及三个NPP+坡度失败仍单独公开。 | `migration/reports/image-watershed-completion-qualifications.json` |
+| 2026-11-13T08:03:57.119465+00:00 | I0 | IMG-00：更新26入口当前资格、源码SHA、本地include反向依赖与算法欠项账本；当前{'PASSED': 16, 'PARTIAL': 6, 'FAILED': 4}。全部入口语义矩阵和保留验收集仍未完成，阶段保持IN_PROGRESS。 | `migration/reports/image-completion-inventory.json`；`migration/reports/image-completion-IMG-00.md`；`migration/reports/evidence/rewrite/I0/image-completion-26-source-dependency-gap-ledger/20261113T080355.771558Z-I0-CPU-contract-a22989efd1` |
+| 2026-11-13T08:05:40.440447+00:00 | I3 | IMG-02：两整例已发布：NPP9/9、NPP+6/6，图像16/26；算子表生成器补齐此前不存在的两个Watershed分组，避免新PASSED入口导致KeyError。首页/主表/算子表已重新生成，45项完整重写选择证明审计通过；全项目源码/日志检查继续。 | `migration/reports/image-watershed-completion-qualifications.json`；`migration/reports/operator-support.md`；`migration/reports/rewrite-selected-proof-audit.json` |
 
 <!-- IMAGE_EXECUTION:END -->

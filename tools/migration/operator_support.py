@@ -18,8 +18,8 @@ def operator_name(sample):
  if family=='cuFFTMp':return '多进程 slab C2C FFT'
  if family=='cuTENSORMg':return '多 GPU 张量 contraction'
  if family.startswith('MathDx/'):return {'introduction_example':'设备内 GEMM','simple_fft_block':'设备内 C2C FFT','potrf_block':'设备内 complex Cholesky','getrf_partial_pivot_block':'设备内 partial-pivot LU','posv_batched_block':'设备内 Cholesky 分解/求解','trsm_batched_block':'设备内三角求解'}[path.stem]
- if family=='NPP':return {'distanceTransform':'Euclidean 距离变换/Voronoi','templateMatching':'零均值 NCC','nppCanny':'三通道 Canny','batchedLabelMarkersAndCompression':'等值八连接 CCL 与标签压缩','findContour':'轮廓/闭环有序几何与重建','houghLines':'Hough 直线检测'}[path.parent.name]
- if family=='NPP+':return {'cannyEdgeDetectorPython':'单通道 Canny','batchedLabelMarkersAndCompression':'等值八连接 CCL 与标签压缩','findContour':'轮廓/闭环有序几何与重建','distanceTransform':'Unsigned EDT 与子像素 signed 距离/Voronoi','floodFill':'固定种子八连接区域填充'}[path.parent.name]
+ if family=='NPP':return {'distanceTransform':'Euclidean 距离变换/Voronoi','templateMatching':'零均值 NCC','nppCanny':'三通道 Canny','batchedLabelMarkersAndCompression':'等值八连接 CCL 与标签压缩','findContour':'轮廓/闭环有序几何与重建','houghLines':'Hough 直线检测','watershedSegmentation':'Watershed 分割/区域标签（有向根图变体）'}[path.parent.name]
+ if family=='NPP+':return {'cannyEdgeDetectorPython':'单通道 Canny','batchedLabelMarkersAndCompression':'等值八连接 CCL 与标签压缩','findContour':'轮廓/闭环有序几何与重建','distanceTransform':'Unsigned EDT 与子像素 signed 距离/Voronoi','floodFill':'固定种子八连接区域填充','watershedSegmentation':'Watershed 分割/压紧标签/边界模式（有向根图变体）'}[path.parent.name]
  if family=='cuBLASLt':return 'GEMM'
  if family=='cuSPARSELt':return '2:4 结构化稀疏 GEMM（含裁剪/压缩）'
  if family=='cuDSS' and 'matrix_helpers' in kind:return '稠密矩阵描述符管理' if 'dense_matrix' in kind else 'CSR 矩阵描述符管理'
@@ -90,6 +90,7 @@ def summarize(cat):
   operations=[{'name':name,'sample_ids':[s['id'] for s in rows],'sample_reports':['migration/sample-reports/'+s['source']+'.md' for s in rows],'source_profiles':len(rows)} for name,rows in sorted(groups.items())];counts=collections.Counter(s['status'] for s in samples);total_operators+=len(operations)
   scope=SCOPES.get(family,'尚无通过整例验收的算子族。')
   if family=='NPP' and 'Canny 边缘检测' in groups:scope='精确Euclidean距离/Voronoi/整数截断与完整NCC已通过；C3 Canny使用项目HIP经典8连接强种子滞后变体，C++/Python三PNG与10次原流程、22组CPU精确mask及native完整差异、stream/并发/错误/trace/冷重放和复审通过。原图比NPP少4328个弱边缘像素（IoU0.6323），不声明native mask逐点兼容；其它入口单列。'
+  if family in ('NPP','NPP+') and any(name.startswith('Watershed ') for name in groups):scope+=' Watershed两原入口完整GPU流程/22文件产品、60输入四布局与独立SCC、变化重放/错误/trace/固定提交冷构建通过；marker分区为明确算法变体。NPP图像模式60/60精确，NPP+57/60精确，三个锁定坡度保留NATIVE_MISMATCH及独立参考修订；无性能相等或跨平台承诺。'
   if family=='NPP' and 'Gaussian 5×5 滤波' in groups:scope+=' OpenCV benchmark原四算子（Gaussian、C1 Canny、半尺寸双线性缩放、RGB灰度）共享一个通过入口，六CLI和独立CPU全量像素、18运行合同、5090同版OpenCV原生统计、GPU trace、35反例与19子冷重放验收；Gaussian/Canny差异按项目算法变体记录，不宣称NPP逐像素或跨设备性能等价。'
   if family in {'NPP','NPP+'} and '等值八连接 CCL 与标签压缩' in groups:scope+=' 等值八连接CCL与GPU标签压缩覆盖所有值（含0）、两个真实C++入口、单图/异构batch及NPP+默认/条件编译模式；原生NPP/NPP+分区失败独立记录，项目按CPU正确分区验收。'
   if family in {'NPP','NPP+'} and '轮廓/闭环有序几何与重建' in groups:scope+=' 轮廓采用项目HIP有向像素单元边、GPU闭环排序及geometry驱动重建；保持原例三/四RAW、范围/bypass与有序诊断，22全量输入和15实际流程55文件验收。此表示非NPP专有packed ABI，原生分区差异与历史ABI1失败另存。'

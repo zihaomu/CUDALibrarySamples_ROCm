@@ -109,11 +109,11 @@ JPEG2000 先实现并核验码块与变换组件，再组成四个真实入口�
 
 ## 当前实施检查点
 
-更新时间：2026-11-13T08:02:31.226180+00:00。26入口当前14通过/8部分/4失败。
+更新时间：2026-11-13T08:05:40.440447+00:00。26入口当前16通过/6部分/4失败。
 
-I3：IMG-02：两原入口完整Watershed资格已生成，待Git封存后发布；保留marker算法变体与三项NPP+原生差异，不标为原生全精确。
+I3：IMG-02：两整例已发布：NPP9/9、NPP+6/6，图像16/26；算子表生成器补齐此前不存在的两个Watershed分组，避免新PASSED入口导致KeyError。首页/主表/算子表已重新生成，45项完整重写选择证明审计通过；全项目源码/日志检查继续。
 
-证据：`migration/reports/evidence/rewrite/I3/NPP_watershedSegmentation__watershedSegmentation.cpp/20261113T080228.227280Z-I3-complete-original-watershed-qualification-90bfdff64a`；`migration/reports/evidence/rewrite/I3/NPP__watershedSegmentation__watershedSegmentationNPPPlus.cpp/20261113T080229.885537Z-I3-complete-original-watershed-qualification-c5be57a736`
+证据：`migration/reports/image-watershed-completion-qualifications.json`；`migration/reports/operator-support.md`；`migration/reports/rewrite-selected-proof-audit.json`
 
 完整逐步事件见主计划和 `migration/reports/image-libraries-progress.md`。
 

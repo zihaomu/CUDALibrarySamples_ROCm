@@ -10,15 +10,15 @@
 
 交付目标是仓库 NPP、NPP+、nvJPEG、nvJPEG2000 的 **26 个原始样例入口**在锁定 AMD 平台完成所需功能，并通过功能等价验收。不是复刻四个 NVIDIA 商业 SDK 的全部 API，也不承诺 NVIDIA 专用硬件标识或压缩码流字节一致。
 
-| 模块 | 已整例通过 | PARTIAL | FAILED | 本轮新增整例目标 |
+| 模块 | 当前整例通过 | PARTIAL | FAILED | 后续整例目标 |
 | --- | ---: | ---: | ---: | ---: |
-| NPP | 8/9 | 1 | 0 | 1 |
-| NPP+ | 5/6 | 1 | 0 | 1 |
-| nvJPEG | 0/7 | 7 | 0 | 7 |
+| NPP | 9/9 | 0 | 0 | 0 |
+| NPP+ | 6/6 | 0 | 0 | 0 |
+| nvJPEG | 1/7 | 6 | 0 | 6 |
 | nvJPEG2000 | 0/4 | 0 | 4 | 4 |
-| 合计 | **13/26** | **9** | **4** | **13** |
+| 合计 | **16/26** | **6** | **4** | **10** |
 
-全项目基线为 252 PASSED、24 PARTIAL、363 FAILED，639 个入口、131 个已验收功能族。若这 13 项全部通过且既有资格没有撤回，项目条件目标为 **265 PASSED、15 PARTIAL、359 FAILED**；功能族数量按实际功能重新去重，不机械加 13。
+原始计划基线为252 PASSED、24 PARTIAL、363 FAILED。IMG-01–02完成后，当前全项目为255 PASSED、21 PARTIAL、363 FAILED，639个入口；余下10项均通过且既有资格没有撤回时，项目条件目标仍为 **265 PASSED、15 PARTIAL、359 FAILED**；功能族数量按实际功能重新去重，不机械加 13。
 
 当前 I1/I2 已在各自声明范围完成；I0/I3/I4/I5/I6 仍进行中，I7/I8/I9 尚未完成。必须准确区分下列成果和欠项：
 
@@ -100,9 +100,9 @@ OpenJPEG 参考当前固定为 v2.5.4 commit `6c4a29b00211eb0430fa0e5e890f1ce5c8
 ### IMG-02：修正 Watershed 算法语义
 
 - [x] 用18个小输入与6原图定位八邻域严格下降、行优先tie及灰度上/左边界模式；保留原生marker分区差异，独立复审接受明确的有向根图算法变体。新增36保留输入已冻结并执行；NPP+三个长坡度差异另以24解析坡度诊断，不将失败记为通过。
-- [x] 将严格下降森林/有向根图最小可达标签的GPU实现接入两原入口，保留GPU压紧及完整边界模式；独立CPU用SCC凝聚DAG求解。该路线替代原计划的分桶浸没，依据是旧浸没研究失败及当前原生语义证据。两原入口22产品、60输入四布局的独立CPU/原生对照已验，ROI/pitch/padding、逐区连通恒灰、空marker与分配失败通过；最终资格和冷构建尚未完成。
-- [ ] 标签编号可按预冻结映射规范化；分区和边界分别验证。对已有原图之外的保留输入使用预定门槛，不能见到结果后提高容差。
-- [ ] 重跑 NPP 5 原图/10 产品、NPP+ 3 原图/12 产品、全部输出模式及缺图/非法参数；覆盖真实 GPU trace、变化输入和固定提交重建。
+- [x] 将严格下降森林/有向根图最小可达标签的GPU实现接入两原入口，保留GPU压紧及完整边界模式；独立CPU用SCC凝聚DAG求解。该路线替代原计划的分桶浸没，依据是旧浸没研究失败及当前原生语义证据。两原入口22产品、60输入四布局的独立CPU/原生对照已验，ROI/pitch/padding、逐区连通恒灰、空marker与分配失败通过；最终资格与固定提交冷构建已完成。
+- [x] 按冻结有向根图合同验收marker分区，独立CPU精确；原生分区差异按ALGORITHM_VARIANT逐区公开，非仅编号重命名。60输入四布局、5图像模式通过；3个NPP+坡度按单独锁定ID/SHA/版本的修订处理，严格旧失败及NATIVE_MISMATCH保留，没有放大像素容差。
+- [x] NPP 5原图/10产品、NPP+ 3原图/12产品、全部输出模式及8次IO错误通过；真实GPU trace、变化输入独立CPU重算、18非法视图/9分配失败、21冷子实验/1642产品复现及最终独立复审完成。285/281项完整资格已封存发布。
 
 完成门槛：两原入口全部功能满足 EXACT 或已论证的 ALGORITHM_VARIANT 合同；71.71%/43.53% 的旧差异不能直接算作可接受。若新候选仍不满足，阶段保留未完成并记录差异定位与下一实验。
 
@@ -185,13 +185,13 @@ OpenJPEG 参考当前固定为 v2.5.4 commit `6c4a29b00211eb0430fa0e5e890f1ce5c8
 
 完成门槛：26/26 当前完整资格、全部必须 case 通过、无陈旧源码证明、无未封存实验；执行日志可从新检出重建。Linux/gfx1201/ROCm10.1 的图像范围完成不等于 639 入口全项目完成，也不自动签发 wave64、Windows 或未测平台。
 
-## 5. 十三个欠项与负责阶段
+## 5. 原始十三项的当前状态与负责阶段
 
 | 稳定 sample ID | 当前状态 | 核心依赖 | 最终验收阶段 |
 | --- | --- | --- | --- |
-| `nvJPEG/nvJPEG-Encoder-MultipleInstances::nvJPEGEncMultipleInstances.cpp` | PARTIAL | encoder/prefix/资源调度/native baseline | IMG-01 |
-| `NPP/watershedSegmentation::watershedSegmentation.cpp` | PARTIAL | 区域/平台/边界语义 | IMG-02 |
-| `NPP+/watershedSegmentation::watershedSegmentationNPPPlus.cpp` | PARTIAL | 区域/平台/边界语义 | IMG-02 |
+| `nvJPEG/nvJPEG-Encoder-MultipleInstances::nvJPEGEncMultipleInstances.cpp` | PASSED | encoder/prefix/资源调度/native baseline | IMG-01 |
+| `NPP/watershedSegmentation::watershedSegmentation.cpp` | PASSED | 区域/平台/边界语义 | IMG-02 |
+| `NPP+/watershedSegmentation::watershedSegmentationNPPPlus.cpp` | PASSED | 区域/平台/边界语义 | IMG-02 |
 | `nvJPEG/nvJPEG-Decoder::nvjpegDecoder.cpp` | PARTIAL | GPU entropy/完整文件入口 | IMG-03→04 |
 | `nvJPEG/nvJPEG-Decoder/tests::test_decoder.py` | PARTIAL | GPU entropy/Python真实调用 | IMG-03→04 |
 | `nvJPEG/nvJPEG-Decoder-Backend-ROI::nvJPEGROIDecode.cpp` | PARTIAL | 后端/ROI/解耦流水线 | IMG-03→04 |
@@ -288,7 +288,7 @@ tools/moat/selected_proofs.py
 | --- | --- | --- |
 | IMG-00 | IN_PROGRESS | 最新步骤和证据见下方实时记录 |
 | IMG-01 | COMPLETED | 最新步骤和证据见下方实时记录 |
-| IMG-02 | IN_PROGRESS | 最新步骤和证据见下方实时记录 |
+| IMG-02 | COMPLETED | 最新步骤和证据见下方实时记录 |
 | IMG-03 | PLANNED | 已有GPU像素阶段；下一步GPU entropy系数链 |
 | IMG-04 | PLANNED | 等待03与原backend/pipeline/调度补齐 |
 | IMG-05 | PLANNED | baseline已可运行；下一步progressive模式/源表metadata |
@@ -2715,5 +2715,8 @@ tools/moat/selected_proofs.py
 | 2026-11-13T08:01:05.902187+00:00 | IMG-02 | IN_PROGRESS | 完整资格/冷检出身份反向检查：PASSED；热运行替换、越界路径、错构建/二进制/提交、缺失或重复子实验及扩大原生例外均检查。 | `migration/reports/evidence/rewrite/I3/watershed-complete-publication-and-cold-binding-controls/20261113T080103.477954Z-I3-CPU-controls-3a20ddb4e6` |
 | 2026-11-13T08:02:24.257308+00:00 | IMG-02 | IN_PROGRESS | 包含路径修复经独立补充复审通过，维持Approve；40项控制绑定当前qualifier，6项实际编译依赖完整。重新签发资格，无需重复GPU计算。 | `migration/reports/evidence/rewrite/I3/watershed-completion-independent-final-review/20261113T080222.950631Z-I3-review-ffa56b1a43` |
 | 2026-11-13T08:02:31.175565+00:00 | IMG-02 | IN_PROGRESS | 两原入口完整Watershed资格已生成，待Git封存后发布；保留marker算法变体与三项NPP+原生差异，不标为原生全精确。 | `migration/reports/evidence/rewrite/I3/NPP_watershedSegmentation__watershedSegmentation.cpp/20261113T080228.227280Z-I3-complete-original-watershed-qualification-90bfdff64a`；`migration/reports/evidence/rewrite/I3/NPP__watershedSegmentation__watershedSegmentationNPPPlus.cpp/20261113T080229.885537Z-I3-complete-original-watershed-qualification-c5be57a736` |
+| 2026-11-13T08:03:15.441988+00:00 | IMG-02 | COMPLETED | 两原始Watershed样例已由固定Git资格发布为整例通过；图像16/26。完整支持按声明算法变体成立，原生分区差异及三个NPP+坡度失败仍单独公开。 | `migration/reports/image-watershed-completion-qualifications.json` |
+| 2026-11-13T08:03:57.083280+00:00 | IMG-00 | IN_PROGRESS | 更新26入口当前资格、源码SHA、本地include反向依赖与算法欠项账本；当前{'PASSED': 16, 'PARTIAL': 6, 'FAILED': 4}。全部入口语义矩阵和保留验收集仍未完成，阶段保持IN_PROGRESS。 | `migration/reports/image-completion-inventory.json`；`migration/reports/image-completion-IMG-00.md`；`migration/reports/evidence/rewrite/I0/image-completion-26-source-dependency-gap-ledger/20261113T080355.771558Z-I0-CPU-contract-a22989efd1` |
+| 2026-11-13T08:05:40.401326+00:00 | IMG-02 | COMPLETED | 两整例已发布：NPP9/9、NPP+6/6，图像16/26；算子表生成器补齐此前不存在的两个Watershed分组，避免新PASSED入口导致KeyError。首页/主表/算子表已重新生成，45项完整重写选择证明审计通过；全项目源码/日志检查继续。 | `migration/reports/image-watershed-completion-qualifications.json`；`migration/reports/operator-support.md`；`migration/reports/rewrite-selected-proof-audit.json` |
 
 <!-- IMAGE_COMPLETION:END -->

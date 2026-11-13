@@ -2,7 +2,7 @@
 
 [返回项目首页](../../README.md) · [构建与复现](../usage.md) · [机器可读记录](support-log-index.json)
 
-覆盖 **639 个样例入口**：253 PASSED、23 PARTIAL、363 FAILED、0 UNSUPPORTED、0 BLOCKED。全部 30 个模块逐项列出实现方式、范围/原因、AMD 日志、CUDA 日志与验收报告。数据直接来自 [逐例清单](../samples.yaml)，[JSON 索引](support-log-index.json) 另含全部历史证据路径、源码 SHA256、已通过/必需用例及恢复条件。
+覆盖 **639 个样例入口**：255 PASSED、21 PARTIAL、363 FAILED、0 UNSUPPORTED、0 BLOCKED。全部 30 个模块逐项列出实现方式、范围/原因、AMD 日志、CUDA 日志与验收报告。数据直接来自 [逐例清单](../samples.yaml)，[JSON 索引](support-log-index.json) 另含全部历史证据路径、源码 SHA256、已通过/必需用例及恢复条件。
 
 **查阅方式：** 先看状态和“支持范围/失败原因”，再看实际库与实现源码。AMD 栏优先链接与当前源码 hash 匹配的选定验收日志；未通过项链接实际尝试。`build.log` 是编译/链接记录，`run.log` 是程序输出，`<case>/run.log` 是对应输入的输出。命令与环境位于同目录的 `commands.json` 和 `*.environment.json`，从“证据目录”进入。缺少运行日志时会明确标注，不将编译/import 成功视作 GPU 通过。
 
@@ -20,7 +20,7 @@ JPEG2000 的已验 HIP MQ 算术解码与可逆变换组件、原图 CPU/CUDA �
 
 ## 已验收算子与验证范围
 
-**20 个模块已有整例通过，覆盖 132 个按模块去重的算子/功能族，对应 253 个通过的样例入口。**
+**20 个模块已有整例通过，覆盖 134 个按模块去重的算子/功能族，对应 255 个通过的样例入口。**
 
 计数按数学算子或原例核心功能归并；同模块的精度、尺寸、语言、batch、存储格式和算法变体不重复增加算子数。例如 cuRAND 是 4 种分布、36 个 generator/distribution profile；cuDSS simple 的 3 种语言入口算 1 个功能族。跨模块总数保留不同库接口的实现，GEMM 可分别出现在 cuBLAS 与 cuBLASLt。每个族至少有一个通过独立验收的样例，支持范围限于下表和逐例 required cases。
 
@@ -42,8 +42,8 @@ JPEG2000 的已验 HIP MQ 算术解码与可逆变换组件、原图 CPU/CUDA �
 | [MathDx/cuBLASDx](../../MathDx/cuBLASDx/README.md) | 1 | `设备内 GEMM` | 1 | HIP调用方kernel内协作GEMM三阶段、128点双FFT、32阶complex上三角Cholesky/shared LDA33；原生SDK25.6版本差异与兼容CUDA数学对照分开。RNG LEGACY逐位合同仍PARTIAL。 |
 | [MathDx/cuFFTDx](../../MathDx/cuFFTDx/README.md) | 1 | `设备内 C2C FFT` | 1 | HIP调用方kernel内协作128点双C2C FFT、ElementsPerThread=8/共32线程及扩展线程块；全部CPU频谱输出与兼容CUDA数学基线。 |
 | [MathDx/cuSolverDx](../../MathDx/cuSolverDx/README.md) | 4 | `设备内 Cholesky 分解/求解`、`设备内 complex Cholesky`、`设备内 partial-pivot LU`、`设备内三角求解` | 4 | HIP调用方kernel内complex Cholesky；MOAT新增complex FP32 48×32 pivot LU、complex FP64 32阶双batch POSV、FP64 right/lower 32×33 TRSM。原生MathDx26.06.1原例实际device输出、同字节HIP与独立CPU分别记录；只按已通过样例的登记范围统计。 |
-| [NPP](../../NPP/README.md) | 9 | `1/2 双线性缩放`、`Canny 边缘检测`、`Euclidean 距离变换/Voronoi`、`Gaussian 5×5 滤波`、`Hough 直线检测`、`RGB→灰度`、`等值八连接 CCL 与标签压缩`、`轮廓/闭环有序几何与重建`、`零均值 NCC` | 8 | 精确Euclidean距离/Voronoi/整数截断与完整NCC已通过；C3 Canny使用项目HIP经典8连接强种子滞后变体，C++/Python三PNG与10次原流程、22组CPU精确mask及native完整差异、stream/并发/错误/trace/冷重放和复审通过。原图比NPP少4328个弱边缘像素（IoU0.6323），不声明native mask逐点兼容；其它入口单列。 OpenCV benchmark原四算子（Gaussian、C1 Canny、半尺寸双线性缩放、RGB灰度）共享一个通过入口，六CLI和独立CPU全量像素、18运行合同、5090同版OpenCV原生统计、GPU trace、35反例与19子冷重放验收；Gaussian/Canny差异按项目算法变体记录，不宣称NPP逐像素或跨设备性能等价。 等值八连接CCL与GPU标签压缩覆盖所有值（含0）、两个真实C++入口、单图/异构batch及NPP+默认/条件编译模式；原生NPP/NPP+分区失败独立记录，项目按CPU正确分区验收。 轮廓采用项目HIP有向像素单元边、GPU闭环排序及geometry驱动重建；保持原例三/四RAW、范围/bypass与有序诊断，22全量输入和15实际流程55文件验收。此表示非NPP专有packed ABI，原生分区差异与历史ABI1失败另存。 Hough原例使用项目HIP Canny/180角投票/GPU峰提取，19完整CLI及逐字节PPM/逐峰CPU、19运行合同、45子冷检出及28变异通过；与5090原生默认图差10627 RGB像素、红线IoU0.23946，作为固定项目算法变体，不声明NPP逐位一致。 |
-| [NPP+](../../NPP+/README.md) | 5 | `Unsigned EDT 与子像素 signed 距离/Voronoi`、`单通道 Canny`、`固定种子八连接区域填充`、`等值八连接 CCL 与标签压缩`、`轮廓/闭环有序几何与重建` | 5 | 项目HIP C1 Sobel3/整数L2/NMS/局部阈值，ROCm Torch/C ABI；原例8分辨率、5次预热/1000测量和PNG/CSV，31组CPU精确mask及native API比较，stream/并发/非法span/trace与独立审查。native内部精确一致，3外圈差异按项目边界定义接受；无跨设备性能结论。其它入口单列。 等值八连接CCL与GPU标签压缩覆盖所有值（含0）、两个真实C++入口、单图/异构batch及NPP+默认/条件编译模式；原生NPP/NPP+分区失败独立记录，项目按CPU正确分区验收。 轮廓采用项目HIP有向像素单元边、GPU闭环排序及geometry驱动重建；保持原例三/四RAW、范围/bypass与有序诊断，22全量输入和15实际流程55文件验收。此表示非NPP专有packed ABI，原生分区差异与历史ABI1失败另存。 距离变换为项目HIP exact unsigned EDT与预固定的线性阈值交点signed点集距离；完整五图12RAW、30输入及确定性site/Voronoi、4流程48文件、运行/冷检出验收。signed与NPP+闭源算法差异明确单列，非vendor逐位一致；项目CPU/GPU30输入maxAbs=0。 Flood Fill为项目HIP固定seed八连接算法变体：五模式、两张完整原图、29输入、四个C++完整流程与20件RGB产品、72运行合同、18CLI、36子记录冷检出及独立CPU验收通过；与当前原生NPP+结果存在380/14/2948/2990/4959个RGB像素差异，旧padding失败保留历史证据，不声明vendor逐字节一致。 |
+| [NPP](../../NPP/README.md) | 10 | `1/2 双线性缩放`、`Canny 边缘检测`、`Euclidean 距离变换/Voronoi`、`Gaussian 5×5 滤波`、`Hough 直线检测`、`RGB→灰度`、`Watershed 分割/区域标签（有向根图变体）`、`等值八连接 CCL 与标签压缩`、`轮廓/闭环有序几何与重建`、`零均值 NCC` | 9 | 精确Euclidean距离/Voronoi/整数截断与完整NCC已通过；C3 Canny使用项目HIP经典8连接强种子滞后变体，C++/Python三PNG与10次原流程、22组CPU精确mask及native完整差异、stream/并发/错误/trace/冷重放和复审通过。原图比NPP少4328个弱边缘像素（IoU0.6323），不声明native mask逐点兼容；其它入口单列。 Watershed两原入口完整GPU流程/22文件产品、60输入四布局与独立SCC、变化重放/错误/trace/固定提交冷构建通过；marker分区为明确算法变体。NPP图像模式60/60精确，NPP+57/60精确，三个锁定坡度保留NATIVE_MISMATCH及独立参考修订；无性能相等或跨平台承诺。 OpenCV benchmark原四算子（Gaussian、C1 Canny、半尺寸双线性缩放、RGB灰度）共享一个通过入口，六CLI和独立CPU全量像素、18运行合同、5090同版OpenCV原生统计、GPU trace、35反例与19子冷重放验收；Gaussian/Canny差异按项目算法变体记录，不宣称NPP逐像素或跨设备性能等价。 等值八连接CCL与GPU标签压缩覆盖所有值（含0）、两个真实C++入口、单图/异构batch及NPP+默认/条件编译模式；原生NPP/NPP+分区失败独立记录，项目按CPU正确分区验收。 轮廓采用项目HIP有向像素单元边、GPU闭环排序及geometry驱动重建；保持原例三/四RAW、范围/bypass与有序诊断，22全量输入和15实际流程55文件验收。此表示非NPP专有packed ABI，原生分区差异与历史ABI1失败另存。 Hough原例使用项目HIP Canny/180角投票/GPU峰提取，19完整CLI及逐字节PPM/逐峰CPU、19运行合同、45子冷检出及28变异通过；与5090原生默认图差10627 RGB像素、红线IoU0.23946，作为固定项目算法变体，不声明NPP逐位一致。 |
+| [NPP+](../../NPP+/README.md) | 6 | `Unsigned EDT 与子像素 signed 距离/Voronoi`、`Watershed 分割/压紧标签/边界模式（有向根图变体）`、`单通道 Canny`、`固定种子八连接区域填充`、`等值八连接 CCL 与标签压缩`、`轮廓/闭环有序几何与重建` | 6 | 项目HIP C1 Sobel3/整数L2/NMS/局部阈值，ROCm Torch/C ABI；原例8分辨率、5次预热/1000测量和PNG/CSV，31组CPU精确mask及native API比较，stream/并发/非法span/trace与独立审查。native内部精确一致，3外圈差异按项目边界定义接受；无跨设备性能结论。其它入口单列。 Watershed两原入口完整GPU流程/22文件产品、60输入四布局与独立SCC、变化重放/错误/trace/固定提交冷构建通过；marker分区为明确算法变体。NPP图像模式60/60精确，NPP+57/60精确，三个锁定坡度保留NATIVE_MISMATCH及独立参考修订；无性能相等或跨平台承诺。 等值八连接CCL与GPU标签压缩覆盖所有值（含0）、两个真实C++入口、单图/异构batch及NPP+默认/条件编译模式；原生NPP/NPP+分区失败独立记录，项目按CPU正确分区验收。 轮廓采用项目HIP有向像素单元边、GPU闭环排序及geometry驱动重建；保持原例三/四RAW、范围/bypass与有序诊断，22全量输入和15实际流程55文件验收。此表示非NPP专有packed ABI，原生分区差异与历史ABI1失败另存。 距离变换为项目HIP exact unsigned EDT与预固定的线性阈值交点signed点集距离；完整五图12RAW、30输入及确定性site/Voronoi、4流程48文件、运行/冷检出验收。signed与NPP+闭源算法差异明确单列，非vendor逐位一致；项目CPU/GPU30输入maxAbs=0。 Flood Fill为项目HIP固定seed八连接算法变体：五模式、两张完整原图、29输入、四个C++完整流程与20件RGB产品、72运行合同、18CLI、36子记录冷检出及独立CPU验收通过；与当前原生NPP+结果存在380/14/2948/2990/4959个RGB像素差异，旧padding失败保留历史证据，不声明vendor逐字节一致。 |
 | [nvJPEG](../../nvJPEG/README.md) | 1 | `baseline JPEG 编码（标准/优化 Huffman、多实例）` | 1 | 多实例BMP→8-bit baseline JPEG：4:2:0/4:4:4、标准/优化Huffman、异步slot与预分配、原始CLI和错误语义。项目HIP完成像素变换与熵编码，CPU负责marker/DHT编排；240数学/CPU/native用例与固定提交冷构建通过。整数颜色/DC舍入为明确数学变体；AUTO/GPU映射AMD，强制NVIDIA硬件返回能力错误。其余解码/resize入口保持PARTIAL。 |
 | [nvCOMP](../../nvCOMP/README.md) | 3 | `CRC32`、`LZ4`、`Snappy` | 8 | hipCOMP LZ4/Snappy原生批处理；CPU↔GPU与hipCOMP↔nvCOMP双向互解、逐chunk status/实际长度、空/边界/损坏流；LZ4 native manager/factory +项目CRC32C及100 raw buffers。独立CRC32入口采用项目HIP IEEE/PKZIP算法，与zlib及真实nvCOMP逐chunk比较，空输入按原生语义拒绝；具体资格见逐例状态。R9 CRC32 benchmark保留CLI/默认16GiB/CSV/完整GPU搜索和最终重算；四个小输入同字节三方，默认各后端RNG独立CPU验收，性能及完整32GiB complete扫描未验收。完整NVBENCH框架仍单列PARTIAL。 |
 
@@ -64,7 +64,6 @@ JPEG2000 的已验 HIP MQ 算术解码与可逆变换组件、原图 CPU/CUDA �
 | FAILED | `BINDING_OR_FRONTEND_MIGRATION_REQUIRED` | 57 | 原始语言前端或 vendor 绑定尚未完成迁移。 |
 | FAILED | `BUILD_ERROR` | 306 | 当前移植稿的 API、类型、链接或算法实现未完成，实际构建失败。 |
 | PARTIAL | `INDEPENDENT_VALIDATION_PENDING` | 3 | 尚未完成对应独立数值及实际执行路径验收。 |
-| PARTIAL | `SEMANTIC_GAP` | 2 | 按该入口的失败日志和恢复条件处理。 |
 | PARTIAL | `VALIDATED_B12_B15_SUBSET` | 8 | 已有验收子集，原始 descriptor、低精度通信、序列或像素语义仍有缺口。 |
 | PARTIAL | `VALIDATED_B9_B11_SUBSET` | 3 | 已有验收子集，原例框架、调度或配置/查询语义仍有缺口。 |
 | PARTIAL | `VALIDATED_I4_PROGRESSIVE_SUBSET` | 4 | 按该入口的失败日志和恢复条件处理。 |
@@ -818,7 +817,7 @@ JPEG2000 的已验 HIP MQ 算术解码与可逆变换组件、原图 CPU/CUDA �
 | [nppCanny/npp_canny_simple.py](../sample-reports/NPP/nppCanny/npp_canny_simple.py.md) | PASSED / 30/30 | HIP C3 Sobel/NMS/GPU union-find hysteresis + OpenCV file IO/CPU comparisons + ROCm Torch / project HIP classical C3 Canny；ALGORITHM_VARIANT_C3_CLASSICAL_HYSTERESIS | [日志、范围、源码](support-log-index/NPP.md#sample-46f944149acb) |
 | [opencvBenchmark/opencvBenchmark.cpp](../sample-reports/NPP/opencvBenchmark/opencvBenchmark.cpp.md) | PASSED / 14/14 | Project HIP Gaussian/Canny/resize/RGB gray plus pinned OpenCV 4.12 CPU benchmark / project HIP image benchmark；DOCUMENTED_IMAGE_ALGORITHM_VARIANTS | [日志、范围、源码](support-log-index/NPP.md#sample-d17ea2c018b5) |
 | [templateMatching/templateMatching.cpp](../sample-reports/NPP/templateMatching/templateMatching.cpp.md) | PASSED / 9/9 | HIP NCC/full original CLI/RAW input/PGM annotation/HIP-event timing / project HIP kernels；生态库 + 项目 HIP 实现 | [日志、范围、源码](support-log-index/NPP.md#sample-7ecae8272f98) |
-| [watershedSegmentation/watershedSegmentation.cpp](../sample-reports/NPP/watershedSegmentation/watershedSegmentation.cpp.md) | PARTIAL / 3/6 | Project HIP eight-neighbor gradient descent and root-label compression / project HIP image watershed；ALGORITHM_VARIANT | [日志、范围、源码](support-log-index/NPP.md#sample-eb94340a73f3) |
+| [watershedSegmentation/watershedSegmentation.cpp](../sample-reports/NPP/watershedSegmentation/watershedSegmentation.cpp.md) | PASSED / 285/285 | Project HIP strict-descent watershed, directed terminal-root graph markers, GPU compact labels and grayscale boundary modes / Project HIP；ALGORITHM_VARIANT | [日志、范围、源码](support-log-index/NPP.md#sample-eb94340a73f3) |
 
 <a id="module-24"></a>
 
@@ -831,7 +830,7 @@ JPEG2000 的已验 HIP MQ 算术解码与可逆变换组件、原图 CPU/CUDA �
 | [distanceTransform/unsignedAndSignedDistanceTransformNPPPlus.cpp](../sample-reports/NPP+/distanceTransform/unsignedAndSignedDistanceTransformNPPPlus.cpp.md) | PASSED / 40/40 | Project HIP exact unsigned EDT + compact threshold-crossing signed site set + GPU FP64 search, deterministic Voronoi and visualization / project HIP distance transform；ALGORITHM_VARIANT_EXACT_PROJECT_TYPED_SDF | [日志、范围、源码](support-log-index/NPP+.md#sample-3305e6d9970b) |
 | [findContour/findContourNPPPlus.cpp](../sample-reports/NPP+/findContour/findContourNPPPlus.cpp.md) | PASSED / 31/31 | Project HIP equal-value 8-connected CCL + directed cell-edge loops + GPU ordering and geometry rasterization / project HIP contour geometry；ALGORITHM_VARIANT_EXACT_PROJECT_GEOMETRY | [日志、范围、源码](support-log-index/NPP+.md#sample-dbe80853dcbe) |
 | [floodFill/floodFillVariousRegionTypesNPPPlus.cpp](../sample-reports/NPP+/floodFill/floodFillVariousRegionTypesNPPPlus.cpp.md) | PASSED / 39/39 | Project HIP fixed-seed RGB flood fill and shared GPU connectivity / project HIP image flood fill；ALGORITHM_VARIANT_EXACT_PROJECT_FIXED_SEED_8_CONNECTED | [日志、范围、源码](support-log-index/NPP+.md#sample-8ababedf979d) |
-| [watershedSegmentation/watershedSegmentationNPPPlus.cpp](../sample-reports/NPP+/watershedSegmentation/watershedSegmentationNPPPlus.cpp.md) | PARTIAL / 4/6 | Project HIP eight-neighbor gradient descent and root-label compression / project HIP image watershed；ALGORITHM_VARIANT | [日志、范围、源码](support-log-index/NPP+.md#sample-cd89abdb2c1f) |
+| [watershedSegmentation/watershedSegmentationNPPPlus.cpp](../sample-reports/NPP+/watershedSegmentation/watershedSegmentationNPPPlus.cpp.md) | PASSED / 281/281 | Project HIP strict-descent watershed, directed terminal-root graph markers, GPU compact labels and grayscale boundary modes / Project HIP；ALGORITHM_VARIANT | [日志、范围、源码](support-log-index/NPP+.md#sample-cd89abdb2c1f) |
 
 <a id="module-25"></a>
 
